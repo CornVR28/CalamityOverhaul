@@ -70,8 +70,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
                 swarmTendrils.Add(new SwarmTendril {
                     BaseAngle = angle,
                     Length = 0f,
-                    MaxLength = Main.rand.NextFloat(0.4f, 0.85f),
-                    Width = Main.rand.NextFloat(8f, 25f),
+                    MaxLength = Main.rand.NextFloat(0.25f, 0.55f),
+                    Width = Main.rand.NextFloat(6f, 18f),
                     WavePhase = Main.rand.NextFloat(MathHelper.TwoPi),
                     WaveSpeed = Main.rand.NextFloat(1.5f, 3f),
                     WaveAmplitude = Main.rand.NextFloat(5f, 15f),
@@ -118,7 +118,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
             if (!Main.rand.NextBool(3)) return;
 
             float spawnAngle = SwarmCenterAngle + Main.rand.NextFloat(-0.8f, 0.8f);
-            float spawnDist = GalaxyRadius * (1.1f + Main.rand.NextFloat(0.3f));
+            float spawnDist = GalaxyRadius * (1.4f + Main.rand.NextFloat(0.4f));
             Vector2 spawnPos = new Vector2(MathF.Cos(spawnAngle), MathF.Sin(spawnAngle)) * spawnDist;
 
             Vector2 toCenter = -spawnPos;
@@ -154,88 +154,104 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
         }
 
         /// <summary>
-        /// 使用多层SoftGlow绘制虫群阴影团块，替代旋转矩形方块
+        /// 获取虫群中心位置（供触须和边缘光晕共用）
+        /// </summary>
+        private static void GetSwarmCenterAndRadius(Vector2 center, out Vector2 swarmCenter, out float massRadius) {
+            //虫群距银河系更远，留出空间
+            float swarmDistance = GalaxyRadius * MathHelper.Lerp(2.0f, 1.35f, swarmApproachProgress);
+            swarmCenter = center + new Vector2(MathF.Cos(SwarmCenterAngle), MathF.Sin(SwarmCenterAngle)) * swarmDistance;
+            massRadius = GalaxyRadius * MathHelper.Lerp(0.5f, 0.9f, swarmApproachProgress);
+        }
+
+        /// <summary>
+        /// 绘制虫群阴影团块：用较少、较小、半透明的SoftGlow层
+        /// 保持暗色核心但不遮挡红色光效
         /// </summary>
         private static void DrawSwarmShadowMass(SpriteBatch sb, Vector2 center, float alpha) {
             Texture2D softGlow = CWRAsset.SoftGlow?.Value;
             Texture2D pixel = VaultAsset.placeholder2.Value;
 
-            float swarmDistance = GalaxyRadius * MathHelper.Lerp(1.6f, 0.9f, swarmApproachProgress);
-            Vector2 swarmCenter = center + new Vector2(MathF.Cos(SwarmCenterAngle), MathF.Sin(SwarmCenterAngle)) * swarmDistance;
-            float massRadius = GalaxyRadius * MathHelper.Lerp(0.6f, 1.2f, swarmApproachProgress);
+            GetSwarmCenterAndRadius(center, out Vector2 swarmCenter, out float massRadius);
 
             if (softGlow != null) {
                 Vector2 glowOrigin = new(softGlow.Width * 0.5f, softGlow.Height * 0.5f);
-                Color shadowColor = new Color(3, 1, 4);
+                Color shadowColor = new Color(8, 3, 10);
 
-                //多层SoftGlow叠加形成不规则的有机暗色团块
-                int layers = 6;
-                for (int i = 0; i < layers; i++) {
-                    float t = i / (float)layers;
-                    float layerScale = massRadius * (0.018f - t * 0.005f);
-                    float layerAlpha = alpha * (0.55f - t * 0.05f);
+                //核心暗色团块：仅3层，缩小尺寸，降低不透明度
+                for (int i = 0; i < 3; i++) {
+                    float t = i / 3f;
+                    float layerScale = massRadius * (0.008f - t * 0.002f);
+                    float layerAlpha = alpha * (0.35f - t * 0.08f);
 
-                    //蠕动偏移：每层略微偏移位置
-                    float wobbleX = MathF.Sin(swarmPulseTimer * 1.5f + t * 4f) * 8f * (1f - t * 0.5f);
-                    float wobbleY = MathF.Cos(swarmPulseTimer * 1.8f + t * 3f) * 6f * (1f - t * 0.5f);
+                    float wobbleX = MathF.Sin(swarmPulseTimer * 1.5f + t * 4f) * 6f * (1f - t);
+                    float wobbleY = MathF.Cos(swarmPulseTimer * 1.8f + t * 3f) * 4f * (1f - t);
                     Vector2 layerCenter = swarmCenter + new Vector2(wobbleX, wobbleY);
 
                     sb.Draw(softGlow, layerCenter, null, shadowColor * layerAlpha, 0f,
                         glowOrigin, layerScale, SpriteEffects.None, 0f);
                 }
 
-                //在暗色团块边缘分布较小的SoftGlow模拟不规则触手状边缘
-                int edgeBlobs = 10;
+                //大面积暗红色/紫红色光晕覆盖在暗核之上，这是主要的视觉威胁感来源
+                Color redMass = new Color(100, 15, 25);
+                redMass.A = 0;
+                float redPulse = MathF.Sin(swarmPulseTimer * 2f) * 0.15f + 0.85f;
+                sb.Draw(softGlow, swarmCenter, null, redMass * (alpha * 0.4f * redPulse), 0f,
+                    glowOrigin, massRadius * 0.009f, SpriteEffects.None, 0f);
+
+                //外层更大的暗红色弥散光晕
+                Color outerRed = new Color(60, 8, 15);
+                outerRed.A = 0;
+                sb.Draw(softGlow, swarmCenter, null, outerRed * (alpha * 0.25f * redPulse), 0f,
+                    glowOrigin, massRadius * 0.014f, SpriteEffects.None, 0f);
+
+                //边缘脉动小光斑，暗红色
+                int edgeBlobs = 8;
                 for (int i = 0; i < edgeBlobs; i++) {
                     float angle = MathHelper.TwoPi * i / edgeBlobs + globalTimer * 0.15f;
                     float wobble = MathF.Sin(swarmPulseTimer * 2.5f + i * 1.3f) * 0.2f + 0.8f;
-                    float dist = massRadius * 0.4f * wobble;
+                    float dist = massRadius * 0.35f * wobble;
                     Vector2 blobPos = swarmCenter + new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * dist;
-                    float blobScale = massRadius * (0.006f + MathF.Sin(swarmPulseTimer + i) * 0.002f);
-                    float blobAlpha = alpha * 0.4f * wobble;
+                    float blobScale = massRadius * (0.003f + MathF.Sin(swarmPulseTimer + i) * 0.001f);
 
-                    sb.Draw(softGlow, blobPos, null, shadowColor * blobAlpha, 0f,
+                    Color blobColor = new Color(80, 10, 18);
+                    blobColor.A = 0;
+                    sb.Draw(softGlow, blobPos, null, blobColor * (alpha * 0.3f * wobble), 0f,
                         glowOrigin, blobScale, SpriteEffects.None, 0f);
                 }
-
-                //中心暗红色微光
-                Color innerGlow = new Color(40, 5, 10);
-                innerGlow.A = 0;
-                float innerPulse = MathF.Sin(swarmPulseTimer * 2f) * 0.2f + 0.8f;
-                sb.Draw(softGlow, swarmCenter, null, innerGlow * (alpha * 0.2f * innerPulse), 0f,
-                    glowOrigin, massRadius * 0.008f, SpriteEffects.None, 0f);
             } else {
-                //后备方案：使用小像素点阵模拟
                 if (pixel == null) return;
-                Color shadowColor = new Color(5, 2, 5);
-                int pointCount = 80;
+                GetSwarmCenterAndRadius(center, out _, out _);
+                Color shadowColor = new Color(15, 5, 10);
+                int pointCount = 50;
                 for (int i = 0; i < pointCount; i++) {
                     float angle = MathHelper.TwoPi * i / pointCount;
                     float wobble = MathF.Sin(swarmPulseTimer * 2f + i * 0.5f) * 0.15f + 0.85f;
-                    float dist = massRadius * 0.5f * wobble * Main.rand.NextFloat(0.3f, 1f);
+                    float dist = massRadius * 0.4f * wobble * Main.rand.NextFloat(0.3f, 1f);
                     Vector2 pos = swarmCenter + new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * dist;
-                    float ptSize = Main.rand.NextFloat(3f, 10f);
+                    float ptSize = Main.rand.NextFloat(2f, 6f);
                     sb.Draw(pixel, pos, new Rectangle(0, 0, 1, 1),
-                        shadowColor * (alpha * 0.5f), angle, new Vector2(0.5f),
+                        shadowColor * (alpha * 0.4f), angle, new Vector2(0.5f),
                         new Vector2(ptSize), SpriteEffects.None, 0f);
                 }
             }
         }
 
         private static void DrawSwarmTendril(SpriteBatch sb, Vector2 center, SwarmTendril tendril, float alpha) {
-            Texture2D pixel = VaultAsset.placeholder2.Value;
             Texture2D softGlow = CWRAsset.SoftGlow?.Value;
-            if (pixel == null) return;
+            Texture2D pixel = VaultAsset.placeholder2.Value;
             if (tendril.Length <= 0.01f) return;
 
-            float startDist = GalaxyRadius * 1.3f;
-            float endDist = GalaxyRadius * (1.3f - tendril.Length * 1.5f);
+            //触须从更远处开始，penetration更浅
+            float startDist = GalaxyRadius * 1.6f;
+            float endDist = GalaxyRadius * (1.6f - tendril.Length * 1.2f);
+            //确保触须末端不会深入银河系核心区域
+            endDist = MathF.Max(endDist, GalaxyRadius * 0.7f);
 
             Vector2 startPos = center + new Vector2(MathF.Cos(tendril.BaseAngle), MathF.Sin(tendril.BaseAngle)) * startDist;
             Vector2 endPos = center + new Vector2(MathF.Cos(tendril.BaseAngle), MathF.Sin(tendril.BaseAngle)) * endDist;
 
-            Color tendrilColor = new Color(12, 4, 10);
-            Color edgeColor = new Color(80, 15, 20);
+            Color tendrilColor = new Color(20, 6, 14);
+            Color edgeColor = new Color(140, 25, 35);
 
             for (int seg = 0; seg < tendril.SegmentCount; seg++) {
                 float t = seg / (float)tendril.SegmentCount;
@@ -248,21 +264,29 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
                 segPos += new Vector2(MathF.Cos(perpAngle), MathF.Sin(perpAngle)) * waveOffset;
 
                 float segWidth = tendril.Width * (1f - t * 0.7f);
-                float segAlpha = alpha * (1f - t * 0.1f);
+                float segAlpha = alpha * (0.9f - t * 0.3f);
 
-                //使用SoftGlow绘制触须段，更柔和
-                Vector2 glowOrigin = new(softGlow.Width * 0.5f, softGlow.Height * 0.5f);
-                float segScale = segWidth * 0.04f;
-                sb.Draw(softGlow, segPos, null, tendrilColor * segAlpha, 0f,
-                    glowOrigin, segScale, SpriteEffects.None, 0f);
+                if (softGlow != null) {
+                    Vector2 glowOrigin = new(softGlow.Width * 0.5f, softGlow.Height * 0.5f);
+                    float segScale = segWidth * 0.03f;
 
-                //暗红色边缘发光
-                Color glowC = edgeColor;
-                glowC.A = 0;
-                float glowPulse = MathF.Sin(swarmPulseTimer * 3f + t * 5f) * 0.3f + 0.5f;
-                sb.Draw(softGlow, segPos, null,
-                    glowC * (segAlpha * 0.25f * glowPulse), 0f,
-                    glowOrigin, segScale * 1.5f, SpriteEffects.None, 0f);
+                    //暗色触须核心
+                    sb.Draw(softGlow, segPos, null, tendrilColor * (segAlpha * 0.6f), 0f,
+                        glowOrigin, segScale, SpriteEffects.None, 0f);
+
+                    //红色边缘发光（更亮更明显）
+                    Color glowC = edgeColor;
+                    glowC.A = 0;
+                    float glowPulse = MathF.Sin(swarmPulseTimer * 3f + t * 5f) * 0.3f + 0.7f;
+                    sb.Draw(softGlow, segPos, null,
+                        glowC * (segAlpha * 0.45f * glowPulse), 0f,
+                        glowOrigin, segScale * 1.8f, SpriteEffects.None, 0f);
+                } else if (pixel != null) {
+                    float segAngle = tendril.BaseAngle + MathHelper.Pi;
+                    sb.Draw(pixel, segPos, new Rectangle(0, 0, 1, 1),
+                        tendrilColor * segAlpha, segAngle, new Vector2(0.5f),
+                        new Vector2(segWidth * 2f, segWidth * 0.5f), SpriteEffects.None, 0f);
+                }
             }
         }
 
@@ -292,25 +316,28 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
         }
 
         private static void DrawSwarmEdgeGlow(SpriteBatch sb, Vector2 center, float alpha) {
-            float swarmDistance = GalaxyRadius * MathHelper.Lerp(1.6f, 0.9f, swarmApproachProgress);
+            GetSwarmCenterAndRadius(center, out Vector2 swarmCenter, out float massRadius);
+            float swarmDistance = (swarmCenter - center).Length();
             float pulse = MathF.Sin(swarmPulseTimer * 2f) * 0.3f + 0.7f;
 
             Texture2D softGlow = CWRAsset.SoftGlow?.Value;
 
             if (softGlow != null) {
-                int glowCount = 10;
-                float arcSpread = MathHelper.ToRadians(90f);
+                int glowCount = 14;
+                float arcSpread = MathHelper.ToRadians(100f);
                 Vector2 glowOrigin = new(softGlow.Width * 0.5f, softGlow.Height * 0.5f);
 
                 for (int i = 0; i < glowCount; i++) {
                     float t = i / (float)glowCount;
                     float angle = SwarmCenterAngle - arcSpread / 2f + arcSpread * t;
-                    Vector2 glowPos = center + new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * (swarmDistance - 5f);
+                    //光晕位于虫群主体和银河系之间的前沿
+                    float glowDist = swarmDistance - massRadius * 0.3f;
+                    Vector2 glowPos = center + new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * glowDist;
 
-                    Color redGlow = new Color(180, 25, 35);
+                    Color redGlow = new Color(200, 30, 40);
                     redGlow.A = 0;
-                    float glowAlpha = alpha * 0.35f * pulse * MathF.Sin(t * MathHelper.Pi);
-                    float glowScale = 0.4f + MathF.Sin(swarmPulseTimer * 3f + t * 5f) * 0.08f;
+                    float glowAlpha = alpha * 0.5f * pulse * MathF.Sin(t * MathHelper.Pi);
+                    float glowScale = 0.45f + MathF.Sin(swarmPulseTimer * 3f + t * 5f) * 0.1f;
 
                     sb.Draw(softGlow, glowPos, null, redGlow * glowAlpha, 0f,
                         glowOrigin, glowScale, SpriteEffects.None, 0f);
@@ -319,17 +346,17 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
                 Texture2D pixel = VaultAsset.placeholder2.Value;
                 if (pixel == null) return;
                 int arcSegments = 20;
-                float arcSpread = MathHelper.ToRadians(80f);
+                float arcSpread = MathHelper.ToRadians(90f);
                 for (int i = 0; i < arcSegments; i++) {
                     float t = i / (float)arcSegments;
                     float angle = SwarmCenterAngle - arcSpread / 2f + arcSpread * t;
                     Vector2 arcPos = center + new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * (swarmDistance - 10f);
-                    Color glowColor = new Color(120, 20, 30);
+                    Color glowColor = new Color(150, 25, 35);
                     glowColor.A = 0;
-                    float arcAlpha = alpha * 0.5f * pulse * MathF.Sin(t * MathHelper.Pi);
+                    float arcAlpha = alpha * 0.6f * pulse * MathF.Sin(t * MathHelper.Pi);
                     sb.Draw(pixel, arcPos, new Rectangle(0, 0, 1, 1),
                         glowColor * arcAlpha, angle, new Vector2(0.5f),
-                        new Vector2(15f, 4f), SpriteEffects.None, 0f);
+                        new Vector2(18f, 5f), SpriteEffects.None, 0f);
                 }
             }
         }

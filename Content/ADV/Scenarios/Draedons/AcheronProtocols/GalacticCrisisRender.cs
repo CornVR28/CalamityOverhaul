@@ -47,9 +47,12 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
         private static float globalTimer;
 
         //面板参数
-        private const float PanelWidth = 620f;
-        private const float PanelHeight = 580f;
+        private const float BasePanelWidth = 620f;
+        private const float BasePanelHeight = 580f;
+        private const float ExpandedPanelWidth = 780f;
+        private const float ExpandedPanelHeight = 680f;
         private const int BorderThickness = 3;
+        private static float panelExpandProgress;
 
         //信号干扰
         private static float glitchIntensity;
@@ -72,6 +75,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
             glitchIntensity = 0f;
             glitchTimer = 0f;
             glitchFrameSkip = 0;
+            panelExpandProgress = 0f;
 
             InitGalaxy();
             InitSwarm();
@@ -133,6 +137,12 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
             phaseTimer += 1f;
             UpdatePhase();
             UpdateGlitch();
+
+            //面板在虫群出现后平滑扩大
+            float expandTarget = (currentPhase >= AnimPhase.SwarmApproach && currentPhase != AnimPhase.FadeOut) ? 1f : 0f;
+            panelExpandProgress += (expandTarget - panelExpandProgress) * 0.04f;
+            panelExpandProgress = MathHelper.Clamp(panelExpandProgress, 0f, 1f);
+
             UpdateGalaxyLogic();
             UpdateSwarmLogic();
             UpdateExtinctionLogic();
@@ -185,9 +195,12 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
         #region 绘制调度
 
         private static Rectangle GetPanelRect() {
-            int x = (int)(Main.screenWidth * 0.5f - PanelWidth * 0.5f);
-            int y = (int)(Main.screenHeight * 0.32f - PanelHeight * 0.5f);
-            return new Rectangle(x, y, (int)PanelWidth, (int)PanelHeight);
+            float ease = CWRUtils.EaseOutCubic(panelExpandProgress);
+            float w = MathHelper.Lerp(BasePanelWidth, ExpandedPanelWidth, ease);
+            float h = MathHelper.Lerp(BasePanelHeight, ExpandedPanelHeight, ease);
+            int x = (int)(Main.screenWidth * 0.5f - w * 0.5f);
+            int y = (int)(Main.screenHeight * 0.32f - h * 0.5f);
+            return new Rectangle(x, y, (int)w, (int)h);
         }
 
         private static Vector2 GetMapCenter() {
