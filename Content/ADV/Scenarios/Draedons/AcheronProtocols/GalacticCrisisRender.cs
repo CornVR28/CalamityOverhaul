@@ -28,6 +28,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
             SwarmApproach,
             ExtinctionProtocol,
             Idle,
+            KortoZoom,
+            KortoPlanetView,
             FadeOut,
         }
 
@@ -80,6 +82,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
             InitGalaxy();
             InitSwarm();
             InitExtinction();
+            InitKorto();
         }
 
         internal static void SetPhase(AnimPhase phase) {
@@ -104,6 +107,16 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
                         Volume = 0.6f, Pitch = -0.3f, MaxInstances = 1
                     });
                     break;
+                case AnimPhase.KortoZoom:
+                    SoundEngine.PlaySound(SoundID.DD2_EtherianPortalDryadTouch with {
+                        Volume = 0.4f, Pitch = 0.3f, MaxInstances = 1
+                    });
+                    break;
+                case AnimPhase.KortoPlanetView:
+                    SoundEngine.PlaySound(SoundID.DD2_EtherianPortalDryadTouch with {
+                        Volume = 0.3f, Pitch = 0.5f, MaxInstances = 1
+                    });
+                    break;
             }
         }
 
@@ -119,6 +132,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
             currentPhase = AnimPhase.None;
             CleanupGalaxy();
             CleanupSwarm();
+            CleanupKorto();
         }
 
         #endregion
@@ -138,7 +152,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
             UpdatePhase();
             UpdateGlitch();
 
-            //面板在虫群出现后平滑扩大
+            //面板在虫群出现后或科尔托阶段平滑扩大
             float expandTarget = (currentPhase >= AnimPhase.SwarmApproach && currentPhase != AnimPhase.FadeOut) ? 1f : 0f;
             panelExpandProgress += (expandTarget - panelExpandProgress) * 0.04f;
             panelExpandProgress = MathHelper.Clamp(panelExpandProgress, 0f, 1f);
@@ -176,6 +190,12 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
                     break;
                 case AnimPhase.Idle:
                     UpdateIdlePhase();
+                    break;
+                case AnimPhase.KortoZoom:
+                    UpdateKortoZoomPhase();
+                    break;
+                case AnimPhase.KortoPlanetView:
+                    UpdateKortoPlanetViewPhase();
                     break;
             }
         }
@@ -222,20 +242,39 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
             DrawPanelBackground(sb, panelRect, alpha);
             DrawPanelBorder(sb, panelRect, alpha);
 
-            if (galaxyRevealProgress > 0.01f) {
-                DrawGalaxy(sb, center, alpha);
+            //科尔托行星视图阶段：完全替换银河系绘制
+            if (currentPhase == AnimPhase.KortoPlanetView && kortoPlanetTransition > 0.99f) {
+                DrawKortoPlanetView(sb, center, alpha);
             }
-
-            if (swarmApproachProgress > 0.01f || currentPhase == AnimPhase.Idle) {
-                DrawSwarm(sb, center, alpha);
+            //科尔托缩放阶段：使用缩放版银河系绘制
+            else if (currentPhase == AnimPhase.KortoZoom || (currentPhase == AnimPhase.KortoPlanetView && kortoPlanetTransition <= 0.99f)) {
+                //银河系淡出（行星视图过渡中）
+                float galaxyFade = currentPhase == AnimPhase.KortoPlanetView ? 1f - kortoPlanetTransition : 1f;
+                if (galaxyFade > 0.01f) {
+                    DrawKortoZoomGalaxy(sb, center, alpha * galaxyFade);
+                }
+                //行星视图淡入
+                if (currentPhase == AnimPhase.KortoPlanetView && kortoPlanetTransition > 0.01f) {
+                    DrawKortoPlanetView(sb, center, alpha);
+                }
             }
+            //正常银河系绘制
+            else {
+                if (galaxyRevealProgress > 0.01f) {
+                    DrawGalaxy(sb, center, alpha);
+                }
 
-            if (extinctionProgress > 0.01f) {
-                DrawExtinctionOverlay(sb, center, alpha);
-            }
+                if (swarmApproachProgress > 0.01f || currentPhase == AnimPhase.Idle) {
+                    DrawSwarm(sb, center, alpha);
+                }
 
-            if (galaxyRevealProgress > 0.5f) {
-                DrawTerraMarker(sb, center, alpha);
+                if (extinctionProgress > 0.01f) {
+                    DrawExtinctionOverlay(sb, center, alpha);
+                }
+
+                if (galaxyRevealProgress > 0.5f) {
+                    DrawTerraMarker(sb, center, alpha);
+                }
             }
 
             DrawScanLineEffect(sb, panelRect, alpha);
@@ -312,7 +351,11 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
             sb.Draw(pixel, new Rectangle(headerRect.X, headerRect.Bottom, headerRect.Width, 2), techColor * (alpha * 0.5f));
             sb.Draw(pixel, new Rectangle(headerRect.X, headerRect.Bottom + 3, headerRect.Width, 1), techColor * (alpha * 0.2f));
 
-            string title = "◢ GALACTIC STRATEGIC MAP ◣";
+            string title = currentPhase switch {
+                AnimPhase.KortoZoom => "◢ STELLAR NAVIGATION ◣",
+                AnimPhase.KortoPlanetView => "◢ KORTO SYSTEM OVERVIEW ◣",
+                _ => "◢ GALACTIC STRATEGIC MAP ◣"
+            };
             var font = FontAssets.MouseText.Value;
             Vector2 titleSize = font.MeasureString(title) * 0.45f;
             Vector2 titlePos = new(

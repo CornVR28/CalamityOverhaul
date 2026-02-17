@@ -225,8 +225,16 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
                 Add(DraedonName.Value + red, RebuttalLine5.Value);
 
                 //阶段三：科尔托星系任务简报
-                Add(DraedonName.Value, MissionBrief1.Value);
-                Add(DraedonName.Value, MissionBrief2.Value);
+                //提及科尔托时重新激活星图，银河系开始放大聚焦到科尔托星系
+                Add(DraedonName.Value, MissionBrief1.Value, onStart: () => {
+                    GalacticCrisisRender.Activate();
+                    GalacticCrisisRender.ForceGalaxyRevealed();
+                    GalacticCrisisRender.SetPhase(GalacticCrisisRender.AnimPhase.KortoZoom);
+                });
+                //提到第三行星时切换为行星链正视图
+                Add(DraedonName.Value, MissionBrief2.Value, onStart: () => {
+                    GalacticCrisisRender.SetPhase(GalacticCrisisRender.AnimPhase.KortoPlanetView);
+                });
                 Add(DraedonName.Value + red, MissionBrief3.Value);
                 Add(DraedonName.Value + red, MissionBrief4.Value);
 

@@ -137,6 +137,13 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
             phaseProgress = galaxyRevealProgress;
         }
 
+        /// <summary>
+        /// 强制将银河系设为已完全展示状态，用于从非初始阶段重新激活渲染器时
+        /// </summary>
+        internal static void ForceGalaxyRevealed() {
+            galaxyRevealProgress = 1f;
+        }
+
         #endregion
 
         #region 绘制
