@@ -236,7 +236,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
                 ? extinctionProgress / 0.3f
                 : 1f;
             float textAlpha = alpha * flash * textFade;
-            string warningText = "◢ EXTINCTION PROTOCOL ACTIVE ◣";
+            string warningText = ExtinctionProtocolWarning.Value;
             var font = FontAssets.MouseText.Value;
             Vector2 textSize = font.MeasureString(warningText) * 0.55f;
             Vector2 textPos = new(

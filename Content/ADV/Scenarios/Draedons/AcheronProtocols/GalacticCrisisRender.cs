@@ -1,11 +1,12 @@
 ﻿using InnoVault.UIHandles;
 using Microsoft.Xna.Framework.Graphics;
 using System;
-using System.Collections.Generic;
 using Terraria;
 using Terraria.Audio;
 using Terraria.GameContent;
 using Terraria.ID;
+using Terraria.Localization;
+using Terraria.ModLoader;
 
 namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
 {
@@ -14,10 +15,57 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
     /// 负责生命周期管理、阶段控制和绘制调度
     /// 具体的银河系/虫群/灭绝令/面板绘制逻辑分布在各partial文件中
     /// </summary>
-    internal partial class GalacticCrisisRender : UIHandle
+    internal partial class GalacticCrisisRender : UIHandle, ILocalizedModType
     {
+        public string LocalizationCategory => "UI";
         public override bool Active => active || fadeProgress > 0.01f;
         public override float RenderPriority => 0.88f;
+
+        #region 本地化文本
+
+        //面板标题
+        public static LocalizedText HeaderStellarNavigation { get; private set; }
+        public static LocalizedText HeaderKortoSystemOverview { get; private set; }
+        public static LocalizedText HeaderGalacticStrategicMap { get; private set; }
+
+        //银河系标记
+        public static LocalizedText MarkerTerra { get; private set; }
+
+        //灭绝令
+        public static LocalizedText ExtinctionProtocolWarning { get; private set; }
+
+        //科尔托标记
+        public static LocalizedText KortoSystemLabel { get; private set; }
+        public static LocalizedText KortoTargetLocked { get; private set; }
+        public static LocalizedText KortoStarLabel { get; private set; }
+        public static LocalizedText KortoIIILabel { get; private set; }
+        public static LocalizedText KortoPrimaryObjective { get; private set; }
+        public static LocalizedText KortoClassTerrestrial { get; private set; }
+        public static LocalizedText KortoThreatCritical { get; private set; }
+        public static LocalizedText KortoPlanetCountInfo { get; private set; }
+        public static LocalizedText KortoStatusCompromised { get; private set; }
+
+        #endregion
+
+        public override void SetStaticDefaults() {
+            HeaderStellarNavigation = this.GetLocalization(nameof(HeaderStellarNavigation), () => "◢ STELLAR NAVIGATION ◣");
+            HeaderKortoSystemOverview = this.GetLocalization(nameof(HeaderKortoSystemOverview), () => "◢ KORTO SYSTEM OVERVIEW ◣");
+            HeaderGalacticStrategicMap = this.GetLocalization(nameof(HeaderGalacticStrategicMap), () => "◢ GALACTIC STRATEGIC MAP ◣");
+
+            MarkerTerra = this.GetLocalization(nameof(MarkerTerra), () => "TERRA");
+
+            ExtinctionProtocolWarning = this.GetLocalization(nameof(ExtinctionProtocolWarning), () => "◢ EXTINCTION PROTOCOL ACTIVE ◣");
+
+            KortoSystemLabel = this.GetLocalization(nameof(KortoSystemLabel), () => "KORTO SYSTEM");
+            KortoTargetLocked = this.GetLocalization(nameof(KortoTargetLocked), () => "◢ TARGET LOCKED ◣");
+            KortoStarLabel = this.GetLocalization(nameof(KortoStarLabel), () => "KORTO");
+            KortoIIILabel = this.GetLocalization(nameof(KortoIIILabel), () => "KORTO-III");
+            KortoPrimaryObjective = this.GetLocalization(nameof(KortoPrimaryObjective), () => "◢ PRIMARY OBJECTIVE ◣");
+            KortoClassTerrestrial = this.GetLocalization(nameof(KortoClassTerrestrial), () => "CLASS: TERRESTRIAL");
+            KortoThreatCritical = this.GetLocalization(nameof(KortoThreatCritical), () => "THREAT: CRITICAL");
+            KortoPlanetCountInfo = this.GetLocalization(nameof(KortoPlanetCountInfo), () => "KORTO SYSTEM \u2014 6 PLANETS");
+            KortoStatusCompromised = this.GetLocalization(nameof(KortoStatusCompromised), () => "STATUS: COMPROMISED");
+        }
 
         #region 动画阶段定义
 
@@ -370,9 +418,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
             sb.Draw(pixel, new Rectangle(headerRect.X, headerRect.Bottom + 3, headerRect.Width, 1), techColor * (alpha * 0.2f));
 
             string title = currentPhase switch {
-                AnimPhase.KortoZoom => "◢ STELLAR NAVIGATION ◣",
-                AnimPhase.KortoPlanetView => "◢ KORTO SYSTEM OVERVIEW ◣",
-                _ => "◢ GALACTIC STRATEGIC MAP ◣"
+                AnimPhase.KortoZoom => HeaderStellarNavigation.Value,
+                AnimPhase.KortoPlanetView => HeaderKortoSystemOverview.Value,
+                _ => HeaderGalacticStrategicMap.Value
             };
             var font = FontAssets.MouseText.Value;
             Vector2 titleSize = font.MeasureString(title) * 0.45f;

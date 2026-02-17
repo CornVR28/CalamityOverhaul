@@ -1,4 +1,4 @@
-﻿ItemFilterUI: {
+ItemFilterUI: {
 	HintText: ЛКМ, чтобы добавить предмет
 	HintText2: ЛКМ, чтобы удалить предмет
 	CloseHint: "[ESC] или [ПКМ], чтобы закрыть"
@@ -349,3 +349,20 @@ OverhaulSettingsUI: {
 }
 
 OverhaulSettingsButton.OverhaulSettingsButtonText: Настройки Overhaul
+
+GalacticCrisisRender: {
+	// HeaderStellarNavigation: ◢ STELLAR NAVIGATION ◣
+	// HeaderKortoSystemOverview: ◢ KORTO SYSTEM OVERVIEW ◣
+	// HeaderGalacticStrategicMap: ◢ GALACTIC STRATEGIC MAP ◣
+	// MarkerTerra: TERRA
+	// ExtinctionProtocolWarning: ◢ EXTINCTION PROTOCOL ACTIVE ◣
+	// KortoSystemLabel: KORTO SYSTEM
+	// KortoTargetLocked: ◢ TARGET LOCKED ◣
+	// KortoStarLabel: KORTO
+	// KortoIIILabel: KORTO-III
+	// KortoPrimaryObjective: ◢ PRIMARY OBJECTIVE ◣
+	// KortoClassTerrestrial: CLASS: TERRESTRIAL
+	// KortoThreatCritical: THREAT: CRITICAL
+	// KortoPlanetCountInfo: KORTO SYSTEM — 6 PLANETS
+	// KortoStatusCompromised: STATUS: COMPROMISED
+}

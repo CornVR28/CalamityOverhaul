@@ -349,3 +349,20 @@ OverhaulSettingsUI: {
 }
 
 OverhaulSettingsButton.OverhaulSettingsButtonText: 大修设置
+
+GalacticCrisisRender: {
+	HeaderStellarNavigation: ◢ 星际导航 ◣
+	HeaderKortoSystemOverview: ◢ 科尔托星系概览 ◣
+	HeaderGalacticStrategicMap: ◢ 银河战略地图 ◣
+	MarkerTerra: 泰拉
+	ExtinctionProtocolWarning: ◢ 灭绝协议已激活 ◣
+	KortoSystemLabel: 科尔托星系
+	KortoTargetLocked: ◢ 目标锁定 ◣
+	KortoStarLabel: 科尔托
+	KortoIIILabel: 科尔托-III
+	KortoPrimaryObjective: ◢ 首要目标 ◣
+	KortoClassTerrestrial: 类型：类地行星
+	KortoThreatCritical: 威胁：危急
+	KortoPlanetCountInfo: 科尔托星系 — 6颗行星
+	KortoStatusCompromised: 状态：已沦陷
+}

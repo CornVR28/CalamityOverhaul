@@ -351,7 +351,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
             //标注文字"TERRA"（闪烁阶段不绘制以减少杂乱）
             if (!terraExtinctionMarked || terraExtinctionStage < 2) {
                 float textAlpha = alpha * 0.7f;
-                Utils.DrawBorderString(sb, "TERRA", terraPos + new Vector2(12, -10),
+                Utils.DrawBorderString(sb, MarkerTerra.Value, terraPos + new Vector2(12, -10),
                     terraColor * textAlpha, 0.45f);
             }
         }

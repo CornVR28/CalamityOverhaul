@@ -259,9 +259,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
 
             //标注文字
             Color textColor = markerColor * alpha;
-            Utils.DrawBorderString(sb, "KORTO SYSTEM", kortoPos + new Vector2(frameSize + 6, -8),
+            Utils.DrawBorderString(sb, KortoSystemLabel.Value, kortoPos + new Vector2(frameSize + 6, -8),
                 textColor, 0.42f);
-            Utils.DrawBorderString(sb, "◢ TARGET LOCKED ◣", kortoPos + new Vector2(frameSize + 6, 6),
+            Utils.DrawBorderString(sb, KortoTargetLocked.Value, kortoPos + new Vector2(frameSize + 6, 6),
                 new Color(255, 100, 60) * (alpha * pulse), 0.32f);
         }
 
@@ -357,7 +357,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
 
             //标注文字
             Color labelColor = new Color(255, 200, 120) * (alpha * 0.6f);
-            Utils.DrawBorderString(sb, "KORTO", pos + new Vector2(-15, 22), labelColor, 0.35f);
+            Utils.DrawBorderString(sb, KortoStarLabel.Value, pos + new Vector2(-15, 22), labelColor, 0.35f);
         }
 
         private static void DrawKortoPlanet(SpriteBatch sb, Vector2 pos, int index, bool isTarget, float alpha) {
@@ -606,14 +606,14 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
 
             //名称标注
             Color targetTextColor = new Color(255, 80, 40) * (alpha * targetPulse);
-            Utils.DrawBorderString(sb, "KORTO-III", pos + new Vector2(-26, -radius - 26),
+            Utils.DrawBorderString(sb, KortoIIILabel.Value, pos + new Vector2(-26, -radius - 26),
                 targetTextColor, 0.5f);
 
             //副标题
             float subtitleAlpha = alpha * MathF.Max(0f, (kortoPlanetViewProgress - 0.4f) * 2.5f);
             if (subtitleAlpha > 0.01f) {
                 Color subColor = new Color(255, 200, 60) * subtitleAlpha;
-                Utils.DrawBorderString(sb, "◢ PRIMARY OBJECTIVE ◣", pos + new Vector2(-58, radius + 16),
+                Utils.DrawBorderString(sb, KortoPrimaryObjective.Value, pos + new Vector2(-58, radius + 16),
                     subColor, 0.38f);
             }
 
@@ -622,9 +622,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
             if (dataAlpha > 0.01f) {
                 Color dataColor = new Color(180, 200, 220) * dataAlpha;
                 float dataY = radius + 34;
-                Utils.DrawBorderString(sb, "CLASS: TERRESTRIAL", pos + new Vector2(-48, dataY),
+                Utils.DrawBorderString(sb, KortoClassTerrestrial.Value, pos + new Vector2(-48, dataY),
                     dataColor * 0.7f, 0.3f);
-                Utils.DrawBorderString(sb, "THREAT: CRITICAL", pos + new Vector2(-44, dataY + 14),
+                Utils.DrawBorderString(sb, KortoThreatCritical.Value, pos + new Vector2(-44, dataY + 14),
                     new Color(255, 100, 60) * dataAlpha * 0.8f, 0.3f);
             }
         }
@@ -710,7 +710,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
             //副标题区域
             float infoY = panelRect.Y + 42f;
             Color infoColor = techColor * (alpha * 0.7f);
-            Utils.DrawBorderString(sb, "KORTO SYSTEM — 6 PLANETS", new Vector2(panelRect.X + 12, infoY),
+            Utils.DrawBorderString(sb, KortoPlanetCountInfo.Value, new Vector2(panelRect.X + 12, infoY),
                 infoColor, 0.38f);
 
             //分隔线
@@ -719,7 +719,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
                 new Vector2(panelRect.Width - 12, 1f), SpriteEffects.None, 0f);
 
             //右侧状态信息
-            string statusText = "STATUS: COMPROMISED";
+            string statusText = KortoStatusCompromised.Value;
             Color statusColor = new Color(255, 80, 40) * (alpha * 0.8f);
             var font = FontAssets.MouseText.Value;
             Vector2 statusSize = font.MeasureString(statusText) * 0.35f;
