@@ -66,6 +66,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
 
         /// <summary>
         /// 灭绝令波纹扫过恒星时标记它们
+        /// 泰拉也在清理名单中，波纹到达其径向距离时一并标记
         /// </summary>
         private static void MarkStarsForExtinction() {
             float waveNormalized = extinctionWaveRadius / GalaxyRadius;
@@ -73,17 +74,28 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
                 if (star.ExtinctionMarked) continue;
 
                 float starOuterDistance = 1f - star.RadialDistance;
-                if (starOuterDistance < waveNormalized && star.RadialDistance > 0.12f) {
+                if (starOuterDistance < waveNormalized) {
                     star.ExtinctionMarked = true;
                     star.ExtinctionLerp = 0f;
                     star.ExtinctionStage = 0;
                     star.ExtinctionStageTimer = 0f;
                 }
             }
+
+            //泰拉也会被灭绝令波纹标记
+            if (!terraExtinctionMarked) {
+                float terraOuterDistance = 1f - TerraRadialDistance;
+                if (terraOuterDistance < waveNormalized) {
+                    terraExtinctionMarked = true;
+                    terraExtinctionLerp = 0f;
+                    terraExtinctionStage = 0;
+                    terraExtinctionStageTimer = 0f;
+                }
+            }
         }
 
         /// <summary>
-        /// 更新所有被标记恒星的三阶段毁灭动画
+        /// 更新所有被标记恒星和泰拉的三阶段毁灭动画
         /// </summary>
         private static void UpdateExtinctionStarAnimations() {
             float dt = 0.016f;
@@ -94,7 +106,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
 
                 switch (star.ExtinctionStage) {
                     case 0:
-                        //阶段0：变红（ExtinctionLerp从0到1）
                         star.ExtinctionLerp = MathF.Min(star.ExtinctionStageTimer / ExtinctionReddenDuration, 1f);
                         if (star.ExtinctionLerp >= 1f) {
                             star.ExtinctionStage = 1;
@@ -102,17 +113,39 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
                         }
                         break;
                     case 1:
-                        //阶段1：猛烈闪烁
                         if (star.ExtinctionStageTimer >= ExtinctionFlashDuration) {
                             star.ExtinctionStage = 2;
                             star.ExtinctionStageTimer = 0f;
                         }
                         break;
                     case 2:
-                        //阶段2：缩小消失，timer持续累加直到达到持续时间
-                        //绘制代码通过GetExtinctionFadeProgress()获取归一化的0~1进度
                         if (star.ExtinctionStageTimer > ExtinctionFadeDuration) {
                             star.ExtinctionStageTimer = ExtinctionFadeDuration;
+                        }
+                        break;
+                }
+            }
+
+            //泰拉的灭绝令动画（与恒星相同的三阶段）
+            if (terraExtinctionMarked) {
+                terraExtinctionStageTimer += dt;
+                switch (terraExtinctionStage) {
+                    case 0:
+                        terraExtinctionLerp = MathF.Min(terraExtinctionStageTimer / ExtinctionReddenDuration, 1f);
+                        if (terraExtinctionLerp >= 1f) {
+                            terraExtinctionStage = 1;
+                            terraExtinctionStageTimer = 0f;
+                        }
+                        break;
+                    case 1:
+                        if (terraExtinctionStageTimer >= ExtinctionFlashDuration) {
+                            terraExtinctionStage = 2;
+                            terraExtinctionStageTimer = 0f;
+                        }
+                        break;
+                    case 2:
+                        if (terraExtinctionStageTimer > ExtinctionFadeDuration) {
+                            terraExtinctionStageTimer = ExtinctionFadeDuration;
                         }
                         break;
                 }

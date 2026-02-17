@@ -21,6 +21,16 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
         private static float galaxyRevealProgress;
         private static float terraBlinkTimer;
 
+        //泰拉在旋臂上的位置参数
+        private const float TerraRadialDistance = 0.45f;
+        private const int TerraArmIndex = 2;
+        private const float TerraAngleOffset = 0.15f;
+        //泰拉的灭绝令状态
+        private static bool terraExtinctionMarked;
+        private static float terraExtinctionLerp;
+        private static int terraExtinctionStage;
+        private static float terraExtinctionStageTimer;
+
         private class GalaxyStar
         {
             public float ArmAngle;
@@ -53,6 +63,10 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
             galaxyRotation = 0f;
             galaxyRevealProgress = 0f;
             terraBlinkTimer = 0f;
+            terraExtinctionMarked = false;
+            terraExtinctionLerp = 0f;
+            terraExtinctionStage = 0;
+            terraExtinctionStageTimer = 0f;
             GenerateGalaxy();
         }
 
@@ -101,6 +115,17 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
         #endregion
 
         #region 逻辑更新
+
+        /// <summary>
+        /// 计算泰拉在旋臂上的屏幕坐标，使用与GalaxyStar.GetPosition相同的螺旋公式
+        /// </summary>
+        private static Vector2 GetTerraPosition(Vector2 center) {
+            float r = TerraRadialDistance * GalaxyRadius;
+            float spiralTightness = 2.8f;
+            float armAngle = MathHelper.TwoPi * TerraArmIndex / GalaxyArmCount;
+            float angle = armAngle + TerraAngleOffset + spiralTightness * MathF.Log(MathF.Max(TerraRadialDistance, 0.05f)) + galaxyRotation;
+            return center + new Vector2(MathF.Cos(angle) * r, MathF.Sin(angle) * r);
+        }
 
         private static void UpdateGalaxyLogic() {
             galaxyRotation += 0.0008f;
@@ -241,61 +266,87 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
             Texture2D pixel = VaultAsset.placeholder2.Value;
             if (pixel == null) return;
 
-            Vector2 terraPos = center + new Vector2(3f, 2f);
+            //泰拉已被灭绝令完全摧毁，不再绘制
+            if (terraExtinctionMarked && terraExtinctionStage >= 2 && terraExtinctionStageTimer >= ExtinctionFadeDuration) {
+                return;
+            }
+
+            //泰拉在旋臂上跟随银河系旋转
+            Vector2 terraPos = GetTerraPosition(center);
             float blink = MathF.Sin(terraBlinkTimer) * 0.3f + 0.7f;
             float markerAlpha = alpha * blink;
 
-            bool inDanger = extinctionProgress > 0.5f;
-            Color terraColor = inDanger
-                ? Color.Lerp(new Color(100, 255, 120), new Color(255, 60, 40),
-                    MathF.Sin(extinctionFlashTimer * 2f) * 0.5f + 0.5f)
-                : new Color(100, 255, 120);
+            Color terraColor = new Color(100, 255, 120);
+            float drawScale = 1f;
+
+            //灭绝令对泰拉的三阶段效果
+            if (terraExtinctionMarked) {
+                switch (terraExtinctionStage) {
+                    case 0:
+                        terraColor = Color.Lerp(new Color(100, 255, 120), new Color(255, 60, 40), terraExtinctionLerp);
+                        break;
+                    case 1:
+                        terraColor = new Color(255, 60, 40);
+                        float violentFlash = MathF.Abs(MathF.Sin(terraExtinctionStageTimer * 30f));
+                        markerAlpha *= 1.5f + violentFlash * 2f;
+                        drawScale = 1f + violentFlash * 0.6f;
+                        break;
+                    case 2:
+                        float fadeT = MathF.Min(terraExtinctionStageTimer / ExtinctionFadeDuration, 1f);
+                        terraColor = Color.Lerp(new Color(255, 60, 40), new Color(80, 20, 15), fadeT);
+                        drawScale = 1f - CWRUtils.EaseInCubic(fadeT);
+                        markerAlpha *= drawScale;
+                        if (drawScale < 0.05f) return;
+                        break;
+                }
+            } else if (extinctionProgress > 0.3f) {
+                //波纹逼近但未被标记时，变色警告
+                terraColor = Color.Lerp(new Color(100, 255, 120), new Color(255, 60, 40),
+                    MathF.Sin(extinctionFlashTimer * 2f) * 0.5f + 0.5f);
+            }
 
             Texture2D softGlow = CWRAsset.SoftGlow?.Value;
 
             if (softGlow != null) {
                 Vector2 glowOrigin = new(softGlow.Width * 0.5f, softGlow.Height * 0.5f);
 
+                //外层呼吸光环
                 float ringPulse = (MathF.Sin(terraBlinkTimer * 0.7f) + 1f) * 0.5f;
                 Color ringGlow = terraColor;
                 ringGlow.A = 0;
-                float ringScale = 0.22f + ringPulse * 0.12f;
+                float ringScale = (0.22f + ringPulse * 0.12f) * drawScale;
                 sb.Draw(softGlow, terraPos, null,
                     ringGlow * (markerAlpha * 0.3f * (1f - ringPulse * 0.3f)),
                     0f, glowOrigin, ringScale, SpriteEffects.None, 0f);
 
+                //内核亮点
                 Color coreGlow = terraColor;
                 coreGlow.A = 0;
                 sb.Draw(softGlow, terraPos, null,
                     coreGlow * (markerAlpha * 0.7f),
-                    0f, glowOrigin, 0.08f, SpriteEffects.None, 0f);
+                    0f, glowOrigin, 0.08f * drawScale, SpriteEffects.None, 0f);
 
-                if (inDanger) {
+                //灭绝令闪烁阶段叠加红色大光斑
+                if (terraExtinctionMarked && terraExtinctionStage == 1) {
                     float dangerPulse = MathF.Sin(extinctionFlashTimer * 3f) * 0.4f + 0.6f;
                     Color dangerGlow = new Color(255, 40, 20);
                     dangerGlow.A = 0;
                     sb.Draw(softGlow, terraPos, null,
-                        dangerGlow * (alpha * 0.25f * dangerPulse),
-                        0f, glowOrigin, 0.35f, SpriteEffects.None, 0f);
+                        dangerGlow * (alpha * 0.4f * dangerPulse),
+                        0f, glowOrigin, 0.4f * drawScale, SpriteEffects.None, 0f);
                 }
             } else {
                 sb.Draw(pixel, terraPos, new Rectangle(0, 0, 1, 1),
                     terraColor * markerAlpha, 0f, new Vector2(0.5f),
-                    new Vector2(4f), SpriteEffects.None, 0f);
-
-                if (inDanger) {
-                    Color dangerColor = new Color(255, 60, 40);
-                    dangerColor.A = 0;
-                    float dangerAlpha = alpha * MathF.Sin(extinctionFlashTimer * 2f) * 0.5f + 0.5f;
-                    sb.Draw(pixel, terraPos, new Rectangle(0, 0, 1, 1),
-                        dangerColor * dangerAlpha, 0f, new Vector2(0.5f),
-                        new Vector2(8f), SpriteEffects.None, 0f);
-                }
+                    new Vector2(4f * drawScale), SpriteEffects.None, 0f);
             }
 
-            float textAlpha = alpha * 0.7f;
-            Utils.DrawBorderString(sb, "TERRA", terraPos + new Vector2(12, -10),
-                terraColor * textAlpha, 0.45f);
+            //标注文字"TERRA"（闪烁阶段不绘制以减少杂乱）
+            if (!terraExtinctionMarked || terraExtinctionStage < 2) {
+                float textAlpha = alpha * 0.7f;
+                Utils.DrawBorderString(sb, "TERRA", terraPos + new Vector2(12, -10),
+                    terraColor * textAlpha, 0.45f);
+            }
         }
 
         #endregion

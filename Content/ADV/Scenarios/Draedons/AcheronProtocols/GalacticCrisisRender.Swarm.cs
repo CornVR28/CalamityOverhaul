@@ -157,10 +157,10 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
         /// 获取虫群中心位置（供触须和边缘光晕共用）
         /// </summary>
         private static void GetSwarmCenterAndRadius(Vector2 center, out Vector2 swarmCenter, out float massRadius) {
-            //虫群距银河系更远，留出空间
-            float swarmDistance = GalaxyRadius * MathHelper.Lerp(2.0f, 1.35f, swarmApproachProgress);
+            //虫群从远处逼近，但核心始终在面板内可见
+            float swarmDistance = GalaxyRadius * MathHelper.Lerp(1.8f, 1.2f, swarmApproachProgress);
             swarmCenter = center + new Vector2(MathF.Cos(SwarmCenterAngle), MathF.Sin(SwarmCenterAngle)) * swarmDistance;
-            massRadius = GalaxyRadius * MathHelper.Lerp(0.5f, 0.9f, swarmApproachProgress);
+            massRadius = GalaxyRadius * MathHelper.Lerp(0.5f, 0.85f, swarmApproachProgress);
         }
 
         /// <summary>
@@ -175,47 +175,54 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
 
             if (softGlow != null) {
                 Vector2 glowOrigin = new(softGlow.Width * 0.5f, softGlow.Height * 0.5f);
-                Color shadowColor = new Color(8, 3, 10);
 
-                //核心暗色团块：仅3层，缩小尺寸，降低不透明度
-                for (int i = 0; i < 3; i++) {
-                    float t = i / 3f;
-                    float layerScale = massRadius * (0.008f - t * 0.002f);
-                    float layerAlpha = alpha * (0.35f - t * 0.08f);
+                //暗色核心团块：7层大面积SoftGlow叠加，半透明以保留红色可见
+                //使用暗紫红色而非纯黑，让暗色本身也带有威胁感
+                Color shadowCore = new Color(10, 3, 8);
+                shadowCore.A = 0;
+                for (int i = 0; i < 7; i++) {
+                    float t = i / 7f;
+                    float layerScale = massRadius * (0.016f - t * 0.004f);
+                    //每层透明度较低，但7层叠加后中心区域足够黑暗，边缘自然渐隐
+                    float layerAlpha = alpha * (0.2f - t * 0.015f);
 
-                    float wobbleX = MathF.Sin(swarmPulseTimer * 1.5f + t * 4f) * 6f * (1f - t);
-                    float wobbleY = MathF.Cos(swarmPulseTimer * 1.8f + t * 3f) * 4f * (1f - t);
+                    float wobbleX = MathF.Sin(swarmPulseTimer * 1.5f + t * 4f) * 8f * (1f - t * 0.5f);
+                    float wobbleY = MathF.Cos(swarmPulseTimer * 1.8f + t * 3f) * 6f * (1f - t * 0.5f);
                     Vector2 layerCenter = swarmCenter + new Vector2(wobbleX, wobbleY);
 
-                    sb.Draw(softGlow, layerCenter, null, shadowColor * layerAlpha, 0f,
+                    sb.Draw(softGlow, layerCenter, null, shadowCore * layerAlpha, 0f,
                         glowOrigin, layerScale, SpriteEffects.None, 0f);
                 }
 
-                //大面积暗红色/紫红色光晕覆盖在暗核之上，这是主要的视觉威胁感来源
-                Color redMass = new Color(100, 15, 25);
-                redMass.A = 0;
+                //大面积暗红色光晕覆盖在暗核之上，视觉威胁感的主要来源
                 float redPulse = MathF.Sin(swarmPulseTimer * 2f) * 0.15f + 0.85f;
-                sb.Draw(softGlow, swarmCenter, null, redMass * (alpha * 0.4f * redPulse), 0f,
-                    glowOrigin, massRadius * 0.009f, SpriteEffects.None, 0f);
+
+                Color redMass = new Color(120, 18, 30);
+                redMass.A = 0;
+                sb.Draw(softGlow, swarmCenter, null, redMass * (alpha * 0.45f * redPulse), 0f,
+                    glowOrigin, massRadius * 0.012f, SpriteEffects.None, 0f);
 
                 //外层更大的暗红色弥散光晕
-                Color outerRed = new Color(60, 8, 15);
+                Color outerRed = new Color(70, 10, 18);
                 outerRed.A = 0;
-                sb.Draw(softGlow, swarmCenter, null, outerRed * (alpha * 0.25f * redPulse), 0f,
-                    glowOrigin, massRadius * 0.014f, SpriteEffects.None, 0f);
+                sb.Draw(softGlow, swarmCenter, null, outerRed * (alpha * 0.3f * redPulse), 0f,
+                    glowOrigin, massRadius * 0.018f, SpriteEffects.None, 0f);
 
-                //边缘脉动小光斑，暗红色
-                int edgeBlobs = 8;
+                //边缘不规则蠕动光斑，增加体积感和有机感
+                int edgeBlobs = 12;
                 for (int i = 0; i < edgeBlobs; i++) {
-                    float angle = MathHelper.TwoPi * i / edgeBlobs + globalTimer * 0.15f;
-                    float wobble = MathF.Sin(swarmPulseTimer * 2.5f + i * 1.3f) * 0.2f + 0.8f;
-                    float dist = massRadius * 0.35f * wobble;
+                    float angle = MathHelper.TwoPi * i / edgeBlobs + globalTimer * 0.12f;
+                    float wobble = MathF.Sin(swarmPulseTimer * 2.5f + i * 1.3f) * 0.25f + 0.75f;
+                    float dist = massRadius * (0.3f + wobble * 0.15f);
                     Vector2 blobPos = swarmCenter + new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * dist;
-                    float blobScale = massRadius * (0.003f + MathF.Sin(swarmPulseTimer + i) * 0.001f);
+                    float blobScale = massRadius * (0.005f + MathF.Sin(swarmPulseTimer + i) * 0.002f);
 
-                    Color blobColor = new Color(80, 10, 18);
-                    blobColor.A = 0;
-                    sb.Draw(softGlow, blobPos, null, blobColor * (alpha * 0.3f * wobble), 0f,
+                    //交替暗色和暗红色光斑，丰富层次
+                    Color blobColor = i % 2 == 0
+                        ? new Color(12, 4, 8) { A = 0 }
+                        : new Color(90, 12, 20) { A = 0 };
+                    float blobAlpha = alpha * (0.25f + wobble * 0.1f);
+                    sb.Draw(softGlow, blobPos, null, blobColor * blobAlpha, 0f,
                         glowOrigin, blobScale, SpriteEffects.None, 0f);
                 }
             } else {

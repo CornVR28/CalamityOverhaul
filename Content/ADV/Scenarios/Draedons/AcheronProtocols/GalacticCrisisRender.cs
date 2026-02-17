@@ -49,8 +49,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
         //面板参数
         private const float BasePanelWidth = 620f;
         private const float BasePanelHeight = 580f;
-        private const float ExpandedPanelWidth = 780f;
-        private const float ExpandedPanelHeight = 680f;
+        private const float ExpandedPanelWidth = 860f;
+        private const float ExpandedPanelHeight = 740f;
         private const int BorderThickness = 3;
         private static float panelExpandProgress;
 
