@@ -1,6 +1,7 @@
 ﻿using CalamityOverhaul.Content;
 using CalamityOverhaul.Content.ADV;
 using CalamityOverhaul.Content.ADV.Scenarios;
+using CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols;
 using CalamityOverhaul.Content.ADV.Scenarios.SupCal.End.EternalBlazingNows;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
@@ -69,6 +70,8 @@ namespace CalamityOverhaul
         }
 
         public override bool? UseItem(Player player) {
+            ScenarioManager.Reset<GalacticCrisis>();
+            ScenarioManager.Start<GalacticCrisis>();
             return true;
         }
     }

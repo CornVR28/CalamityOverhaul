@@ -1,0 +1,222 @@
+﻿using CalamityOverhaul.Content.ADV.ADVChoices;
+using CalamityOverhaul.Content.ADV.DialogueBoxs;
+using CalamityOverhaul.Content.ADV.DialogueBoxs.Styles;
+using System;
+using Terraria.Localization;
+using Terraria.ModLoader;
+
+namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
+{
+    /// <summary>
+    /// 银河危机剧情场景
+    /// 嘉登向玩家展示虫族入侵的星图，提出大筛选协议（灭绝令），
+    /// 玩家拒绝后，嘉登提出备用方案：前往科尔托星系执行斩首任务，
+    /// 并揭示先遣战术人形失联的情报
+    /// </summary>
+    internal class GalacticCrisis : ADVScenarioBase, ILocalizedModType
+    {
+        //角色名称
+        public static LocalizedText DraedonName { get; private set; }
+
+        //阶段一：危机与灭绝令
+        public static LocalizedText CrisisIntro1 { get; private set; }
+        public static LocalizedText CrisisIntro2 { get; private set; }
+        public static LocalizedText CrisisIntro3 { get; private set; }
+        public static LocalizedText CrisisIntro4 { get; private set; }
+        public static LocalizedText CrisisIntro5 { get; private set; }
+        public static LocalizedText CrisisIntro6 { get; private set; }
+        public static LocalizedText CrisisIntro7 { get; private set; }
+        public static LocalizedText CrisisIntro8 { get; private set; }
+
+        //玩家选择
+        public static LocalizedText ChoiceRefuse { get; private set; }
+        public static LocalizedText ChoiceSilence { get; private set; }
+
+        //阶段二：意料之中的转折
+        public static LocalizedText RebuttalLine1 { get; private set; }
+        public static LocalizedText RebuttalLine2 { get; private set; }
+        public static LocalizedText RebuttalLine3 { get; private set; }
+        public static LocalizedText RebuttalLine4 { get; private set; }
+        public static LocalizedText RebuttalLine5 { get; private set; }
+
+        //阶段三：科尔托星系任务简报
+        public static LocalizedText MissionBrief1 { get; private set; }
+        public static LocalizedText MissionBrief2 { get; private set; }
+        public static LocalizedText MissionBrief3 { get; private set; }
+        public static LocalizedText MissionBrief4 { get; private set; }
+
+        //战术人形登场
+        public static LocalizedText AndroidReveal1 { get; private set; }
+        public static LocalizedText AndroidReveal2 { get; private set; }
+        public static LocalizedText AndroidReveal3 { get; private set; }
+        public static LocalizedText AndroidReveal4 { get; private set; }
+        public static LocalizedText MissionObjective { get; private set; }
+        public static LocalizedText MissionObjectiveDark { get; private set; }
+        public static LocalizedText FinalSendOff { get; private set; }
+
+        //设置场景默认使用嘉登科技风格
+        protected override Func<DialogueBoxBase> DefaultDialogueStyle => () => DraedonDialogueBox.Instance;
+
+        //嘉登的表情变体，通过空格后缀区分不同立绘
+        private const string red = " ";
+        private const string alt = " " + " ";
+
+        public override void SetStaticDefaults() {
+            DraedonName = this.GetLocalization(nameof(DraedonName), () => "嘉登");
+
+            //阶段一：危机与灭绝令（展示星图投影，巨大的阴影笼罩）
+            CrisisIntro1 = this.GetLocalization(nameof(CrisisIntro1),
+                () => "既然量子网络已经重新连接，有些东西必须让你亲眼确认");
+            CrisisIntro2 = this.GetLocalization(nameof(CrisisIntro2),
+                () => "抬头看，这并非简单的星云，而是那是正在吞噬银河旋臂的\"阴影\"");
+            CrisisIntro3 = this.GetLocalization(nameof(CrisisIntro3),
+                () => "它们是星际生态的终结者，无尽的虫群为了阻挡这股洪流，我已经消耗了数以十万计的星流泰坦");
+            CrisisIntro4 = this.GetLocalization(nameof(CrisisIntro4),
+                () => "但数据表明，这是一场必输的消耗战它们不需要补给，因为它们吞噬一切；而我们的资源终将耗尽");
+            CrisisIntro5 = this.GetLocalization(nameof(CrisisIntro5),
+                () => "因此，我制定了唯一胜率超过0%的方案——\"大筛选协议\"");
+            CrisisIntro6 = this.GetLocalization(nameof(CrisisIntro6),
+                () => "我将引爆银河系外环至中环带所有宜居星球的地核");
+            CrisisIntro7 = this.GetLocalization(nameof(CrisisIntro7),
+                () => "将这数万光年的区域化作毫无生物质的死域，迫使虫群因能量损耗过大而转向临近的仙女座星系");
+            CrisisIntro8 = this.GetLocalization(nameof(CrisisIntro8),
+                () => "泰拉也在清理名单之中但这不要紧，我会为你提供一艘星际飞船，你的本质不应在这里熄灭");
+
+            //玩家选择拒绝/寻找其他方法
+            ChoiceRefuse = this.GetLocalization(nameof(ChoiceRefuse),
+                () => "一定有别的办法");
+            ChoiceSilence = this.GetLocalization(nameof(ChoiceSilence),
+                () => "......(沉默并握紧武器)");
+
+            //阶段二：意料之中的转折
+            RebuttalLine1 = this.GetLocalization(nameof(RebuttalLine1),
+                () => "……这就对了");
+            RebuttalLine2 = this.GetLocalization(nameof(RebuttalLine2),
+                () => "我的逻辑模型预测你有99.4%的概率会接受撤离，但我更期待那0.6%的\"非理性\"变量");
+            RebuttalLine3 = this.GetLocalization(nameof(RebuttalLine3),
+                () => "你拒绝了生存的捷径，选择了那条几乎必死的荆棘之路这正是我所观察到的\"特异点\"性质");
+            RebuttalLine4 = this.GetLocalization(nameof(RebuttalLine4),
+                () => "既然如此，我有一个备用方案（Plan B），一个由于成功率过低而被我搁置的战术行动");
+            RebuttalLine5 = this.GetLocalization(nameof(RebuttalLine5),
+                () => "如果无法通过焦土战略饿死它们，那就必须执行\"外科手术式\"的打击");
+
+            //阶段三：科尔托星系与战术人形登场
+            MissionBrief1 = this.GetLocalization(nameof(MissionBrief1),
+                () => "目标是科尔托（Corto）星系那里已经沦陷，但虫群并未将其彻底消化");
+            MissionBrief2 = this.GetLocalization(nameof(MissionBrief2),
+                () => "侦测显示，那里的一颗行星地核中正在生成高纯度的星流矿脉");
+            MissionBrief3 = this.GetLocalization(nameof(MissionBrief3),
+                () => "决不能让虫群得到它一旦它们进化出利用星流能量的能力，整个银河系将再无宁日");
+            MissionBrief4 = this.GetLocalization(nameof(MissionBrief4),
+                () => "你的任务很简单：突破虫海，抵达地核，引爆矿脉，彻底摧毁那颗星球");
+
+            //战术人形登场（展示机娘立绘的关键节点）
+            AndroidReveal1 = this.GetLocalization(nameof(AndroidReveal1),
+                () => "在你之前，我已经派遣了一组先遣队前往执行此任务");
+            AndroidReveal2 = this.GetLocalization(nameof(AndroidReveal2),
+                () => "她们是基于我的最新技术构建的自律型战术人形，代号 [机娘A名字] 与 [机娘B名字]");
+            AndroidReveal3 = this.GetLocalization(nameof(AndroidReveal3),
+                () => "她们拥有远超旧式机甲的机动性与逻辑处理能力，但在科尔托III号星降落后不久，我便失去了与她们的量子纠缠信号");
+            AndroidReveal4 = this.GetLocalization(nameof(AndroidReveal4),
+                () => "最后的遥测数据显示她们仍有生命体征反应，但处于极度危险之中");
+            MissionObjective = this.GetLocalization(nameof(MissionObjective),
+                () => "前往科尔托星系确认那两台机体的状况——如果她们还能战斗，就协助她们完成任务；如果不能……");
+            MissionObjectiveDark = this.GetLocalization(nameof(MissionObjectiveDark),
+                () => "至少带回她们的核心数据我不希望我的杰作毫无意义地成为虫子的口粮");
+            FinalSendOff = this.GetLocalization(nameof(FinalSendOff),
+                () => "坐标已输入去吧，向我展示你能否再次超越我的计算");
+        }
+
+        protected override void OnScenarioStart() {
+            DraedonEffect.IsActive = true;
+            DraedonEffect.Send();
+        }
+
+        protected override void OnScenarioComplete() {
+            DraedonEffect.IsActive = false;
+            DraedonEffect.Send();
+        }
+
+        protected override void Build() {
+            //注册嘉登立绘
+            DialogueBoxBase.RegisterPortrait(DraedonName.Value, ADVAsset.Draedon2ADV, silhouette: false);
+            DialogueBoxBase.RegisterPortrait(DraedonName.Value + red, ADVAsset.Draedon2RedADV, silhouette: false);
+            DialogueBoxBase.RegisterPortrait(DraedonName.Value + alt, ADVAsset.DraedonADV, silhouette: false);
+
+            //阶段一：危机与灭绝令
+            Add(DraedonName.Value, CrisisIntro1.Value);
+            Add(DraedonName.Value, CrisisIntro2.Value);
+            Add(DraedonName.Value, CrisisIntro3.Value);
+            Add(DraedonName.Value, CrisisIntro4.Value);
+            Add(DraedonName.Value + red, CrisisIntro5.Value);
+            Add(DraedonName.Value + red, CrisisIntro6.Value);
+            Add(DraedonName.Value + red, CrisisIntro7.Value);
+
+            //玩家选择：拒绝灭绝令
+            //无论选择哪个选项，都会进入转折阶段，两个选项在叙事上等价
+            AddWithChoices(DraedonName.Value, CrisisIntro8.Value, [
+                new Choice(ChoiceRefuse.Value, OnPlayerRefused),
+                new Choice(ChoiceSilence.Value, OnPlayerRefused)
+            ], choiceBoxStyle: ADVChoiceBox.ChoiceBoxStyle.Draedon);
+        }
+
+        /// <summary>
+        /// 玩家拒绝灭绝令后，启动转折与任务简报场景
+        /// </summary>
+        private void OnPlayerRefused() {
+            Complete();
+            ScenarioManager.Reset<GalacticCrisis_Rebuttal>();
+            ScenarioManager.Start<GalacticCrisis_Rebuttal>();
+        }
+
+        /// <summary>
+        /// 阶段二和阶段三：转折、任务简报与战术人形登场
+        /// 作为独立子场景处理，避免在选择回调后继续向已完成的场景添加对话
+        /// </summary>
+        private class GalacticCrisis_Rebuttal : ADVScenarioBase
+        {
+            public override string Key => nameof(GalacticCrisis_Rebuttal);
+            protected override Func<DialogueBoxBase> DefaultDialogueStyle => () => DraedonDialogueBox.Instance;
+
+            protected override void OnScenarioStart() {
+                DraedonEffect.IsActive = true;
+                DraedonEffect.Send();
+            }
+
+            protected override void OnScenarioComplete() {
+                DraedonEffect.IsActive = false;
+                DraedonEffect.Send();
+            }
+
+            protected override void Build() {
+                //注册嘉登立绘
+                DialogueBoxBase.RegisterPortrait(DraedonName.Value, ADVAsset.Draedon2ADV, silhouette: false);
+                DialogueBoxBase.RegisterPortrait(DraedonName.Value + red, ADVAsset.Draedon2RedADV, silhouette: false);
+                DialogueBoxBase.RegisterPortrait(DraedonName.Value + alt, ADVAsset.DraedonADV, silhouette: false);
+
+                //阶段二：嘉登的转折（意料之中的反应）
+                Add(DraedonName.Value + alt, RebuttalLine1.Value);
+                Add(DraedonName.Value, RebuttalLine2.Value);
+                Add(DraedonName.Value, RebuttalLine3.Value);
+                Add(DraedonName.Value, RebuttalLine4.Value);
+                Add(DraedonName.Value + red, RebuttalLine5.Value);
+
+                //阶段三：科尔托星系任务简报
+                Add(DraedonName.Value, MissionBrief1.Value);
+                Add(DraedonName.Value, MissionBrief2.Value);
+                Add(DraedonName.Value + red, MissionBrief3.Value);
+                Add(DraedonName.Value + red, MissionBrief4.Value);
+
+                //战术人形登场
+                Add(DraedonName.Value, AndroidReveal1.Value);
+                //TODO: 这里将来需要注册机娘A和机娘B的立绘，并在AndroidReveal2处切换展示
+                Add(DraedonName.Value, AndroidReveal2.Value);
+                Add(DraedonName.Value, AndroidReveal3.Value);
+                Add(DraedonName.Value, AndroidReveal4.Value);
+                Add(DraedonName.Value, MissionObjective.Value);
+                Add(DraedonName.Value + red, MissionObjectiveDark.Value);
+                Add(DraedonName.Value + red, FinalSendOff.Value);
+            }
+        }
+    }
+}
