@@ -279,18 +279,18 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
             Rectangle panelRect = GetPanelRect();
 
             //行星视图中心偏左（恒星位置）
-            Vector2 starPos = new(panelRect.X + panelRect.Width * 0.15f, center.Y);
+            Vector2 starPos = new(panelRect.X + panelRect.Width * 0.08f, center.Y);
 
             //绘制恒星
             DrawKortoStar(sb, starPos, viewAlpha);
 
             //绘制行星链（水平分布，从左到右距离递增）
-            float planetSpacing = (panelRect.Width * 0.75f) / (KortoPlanetCount + 1);
+            float planetSpacing = (panelRect.Width * 0.85f) / (KortoPlanetCount + 1);
 
             for (int i = 0; i < KortoPlanetCount; i++) {
                 float planetX = starPos.X + planetSpacing * (i + 1);
                 //每颗行星有轻微垂直波动
-                float yOffset = MathF.Sin(kortoPlanetOrbitTimer * (1.5f - i * 0.15f) + i * 1.7f) * (8f + i * 2f);
+                float yOffset = MathF.Sin(kortoPlanetOrbitTimer * (1.5f - i * 0.15f) + i * 1.7f) * (12f + i * 3f);
                 Vector2 planetPos = new(planetX, center.Y + yOffset);
 
                 bool isTarget = (i == 2); //第三行星（index 2）
@@ -312,111 +312,336 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
                 Vector2 glowOrigin = new(softGlow.Width * 0.5f, softGlow.Height * 0.5f);
                 float pulse = MathF.Sin(globalTimer * 1.2f) * 0.1f + 0.9f;
 
+                //最外层柔和弥散光晕
+                Color diffuseGlow = new Color(255, 180, 80);
+                diffuseGlow.A = 0;
+                sb.Draw(softGlow, pos, null, diffuseGlow * (alpha * 0.15f), 0f,
+                    glowOrigin, 1.2f, SpriteEffects.None, 0f);
+
                 //外层光晕
                 Color outerGlow = new Color(255, 200, 120);
                 outerGlow.A = 0;
                 sb.Draw(softGlow, pos, null, outerGlow * (alpha * 0.35f * pulse), 0f,
                     glowOrigin, 0.6f, SpriteEffects.None, 0f);
 
+                //中层暖光
+                Color midGlow = new Color(255, 230, 170);
+                midGlow.A = 0;
+                sb.Draw(softGlow, pos, null, midGlow * (alpha * 0.55f * pulse), 0f,
+                    glowOrigin, 0.25f, SpriteEffects.None, 0f);
+
                 //核心
-                Color coreGlow = new Color(255, 240, 200);
+                Color coreGlow = new Color(255, 245, 220);
                 coreGlow.A = 0;
-                sb.Draw(softGlow, pos, null, coreGlow * (alpha * 0.8f), 0f,
-                    glowOrigin, 0.15f, SpriteEffects.None, 0f);
+                sb.Draw(softGlow, pos, null, coreGlow * (alpha * 0.85f), 0f,
+                    glowOrigin, 0.1f, SpriteEffects.None, 0f);
 
                 //亮点
-                sb.Draw(softGlow, pos, null, Color.White * (alpha * 0.5f), 0f,
-                    glowOrigin, 0.05f, SpriteEffects.None, 0f);
+                sb.Draw(softGlow, pos, null, Color.White * (alpha * 0.6f), 0f,
+                    glowOrigin, 0.04f, SpriteEffects.None, 0f);
+
+                //光芒十字射线
+                Color rayColor = new Color(255, 220, 140);
+                rayColor.A = 0;
+                float rayAlpha = alpha * 0.15f * pulse;
+                for (int i = 0; i < 4; i++) {
+                    float angle = i * MathHelper.PiOver2 + globalTimer * 0.1f;
+                    sb.Draw(softGlow, pos, null, rayColor * rayAlpha, angle,
+                        glowOrigin, new Vector2(0.8f, 0.03f), SpriteEffects.None, 0f);
+                }
             } else if (pixel != null) {
-                sb.Draw(pixel, pos, new Rectangle(0, 0, 1, 1),
-                    KortoStarColor * alpha, 0f, new Vector2(0.5f),
-                    new Vector2(12f), SpriteEffects.None, 0f);
+                //像素回退：绘制恒星圆
+                DrawFilledCirclePixel(sb, pixel, pos, 10f, KortoStarColor * alpha);
+                DrawFilledCirclePixel(sb, pixel, pos, 7f, new Color(255, 240, 200) * alpha);
             }
+
+            //标注文字
+            Color labelColor = new Color(255, 200, 120) * (alpha * 0.6f);
+            Utils.DrawBorderString(sb, "KORTO", pos + new Vector2(-15, 22), labelColor, 0.35f);
         }
 
         private static void DrawKortoPlanet(SpriteBatch sb, Vector2 pos, int index, bool isTarget, float alpha) {
             Texture2D softGlow = CWRAsset.SoftGlow?.Value;
             Texture2D pixel = VaultAsset.placeholder2.Value;
+            if (pixel == null) return;
 
-            //每颗行星的尺寸和颜色
-            float[] planetSizes = [3f, 4.5f, 6f, 8f, 5f, 3.5f];
+            //行星基础参数
+            float[] planetRadii = [8f, 12f, 18f, 28f, 15f, 9f];
             Color[] planetColors = [
-                new Color(180, 160, 140),  //I: 岩石行星
-                new Color(200, 180, 150),  //II: 沙漠行星
-                new Color(100, 160, 200),  //III: 目标行星（蓝绿色，类地）
-                new Color(220, 180, 120),  //IV: 气态巨行星
-                new Color(160, 140, 180),  //V: 冰巨行星
-                new Color(140, 130, 150),  //VI: 矮行星
+                new Color(180, 160, 140),  //I: 水星型岩石行星
+                new Color(210, 185, 130),  //II: 沙漠行星
+                new Color(80, 145, 190),   //III: 目标类地行星
+                new Color(220, 190, 130),  //IV: 气态巨行星
+                new Color(140, 155, 190),  //V: 冰巨行星
+                new Color(150, 140, 140),  //VI: 矮行星
             ];
+            //行星暗面颜色（朝恒星背面）
+            Color[] shadowColors = [
+                new Color(60, 50, 45),
+                new Color(80, 65, 40),
+                new Color(25, 50, 70),
+                new Color(90, 70, 45),
+                new Color(50, 55, 70),
+                new Color(55, 50, 50),
+            ];
+            //大气层颜色
+            Color[] atmosColors = [
+                Color.Transparent,
+                new Color(220, 180, 100),
+                new Color(100, 180, 255),
+                new Color(255, 210, 130),
+                new Color(150, 180, 220),
+                Color.Transparent,
+            ];
+            //自转速度
+            float[] rotSpeeds = [0.8f, 0.5f, 0.6f, 0.3f, 0.35f, 0.7f];
 
-            float size = planetSizes[index];
+            float radius = planetRadii[index];
             Color baseColor = planetColors[index];
+            Color shadowColor = shadowColors[index];
+            Color atmosColor = atmosColors[index];
+            float rotSpeed = rotSpeeds[index];
+            float selfRotation = kortoPlanetOrbitTimer * rotSpeed + index * 2.3f;
 
+            //=== 绘制行星本体（像素逼近圆）===
+            DrawPlanetSphere(sb, pixel, pos, radius, baseColor, shadowColor, selfRotation, alpha, index);
+
+            //=== 大气层光晕 ===
+            if (softGlow != null && atmosColor != Color.Transparent) {
+                Vector2 glowOrigin = new(softGlow.Width * 0.5f, softGlow.Height * 0.5f);
+                Color atmos = atmosColor;
+                atmos.A = 0;
+                float atmosScale = radius * 0.028f;
+                float atmosPulse = MathF.Sin(globalTimer * 1.5f + index * 0.8f) * 0.1f + 0.9f;
+                sb.Draw(softGlow, pos, null, atmos * (alpha * 0.2f * atmosPulse), 0f,
+                    glowOrigin, atmosScale, SpriteEffects.None, 0f);
+            }
+
+            //=== 气态巨行星环系统（仅IV号行星）===
+            if (index == 3) {
+                DrawPlanetRing(sb, pixel, pos, radius, alpha);
+            }
+
+            //=== 目标行星特殊标记 ===
             if (isTarget) {
-                //第三行星特殊处理：危险标记
-                float targetPulse = MathF.Sin(kortoTargetBlinkTimer) * 0.3f + 0.7f;
-
-                //红色警告光环
-                if (softGlow != null) {
-                    Vector2 glowOrigin = new(softGlow.Width * 0.5f, softGlow.Height * 0.5f);
-
-                    //外圈危险光环
-                    Color dangerGlow = new Color(255, 60, 30);
-                    dangerGlow.A = 0;
-                    float ringScale = 0.2f + MathF.Sin(kortoTargetBlinkTimer * 0.8f) * 0.05f;
-                    sb.Draw(softGlow, pos, null, dangerGlow * (alpha * 0.35f * targetPulse), 0f,
-                        glowOrigin, ringScale, SpriteEffects.None, 0f);
-
-                    //行星本体光晕
-                    Color planetGlow = baseColor;
-                    planetGlow.A = 0;
-                    sb.Draw(softGlow, pos, null, planetGlow * (alpha * 0.5f), 0f,
-                        glowOrigin, size * 0.02f, SpriteEffects.None, 0f);
-                }
-
-                //行星像素点
-                if (pixel != null) {
-                    sb.Draw(pixel, pos, new Rectangle(0, 0, 1, 1),
-                        baseColor * (alpha * 0.9f), 0f, new Vector2(0.5f),
-                        new Vector2(size), SpriteEffects.None, 0f);
-                }
-
-                //瞄准框
-                DrawTargetReticle(sb, pos, alpha * targetPulse);
-
-                //文字标注
-                Color targetTextColor = new Color(255, 80, 40) * (alpha * targetPulse);
-                Utils.DrawBorderString(sb, "KORTO-III", pos + new Vector2(-20, -size - 22),
-                    targetTextColor, 0.45f);
-
-                //副标题
-                float subtitleAlpha = alpha * MathF.Max(0f, (kortoPlanetViewProgress - 0.4f) * 2.5f);
-                if (subtitleAlpha > 0.01f) {
-                    Color subColor = new Color(255, 200, 60) * subtitleAlpha;
-                    Utils.DrawBorderString(sb, "◢ PRIMARY OBJECTIVE ◣", pos + new Vector2(-45, size + 10),
-                        subColor, 0.35f);
-                }
+                DrawTargetPlanetEffects(sb, pos, radius, alpha);
             } else {
-                //普通行星
-                if (softGlow != null) {
-                    Vector2 glowOrigin = new(softGlow.Width * 0.5f, softGlow.Height * 0.5f);
-                    Color planetGlow = baseColor;
-                    planetGlow.A = 0;
-                    sb.Draw(softGlow, pos, null, planetGlow * (alpha * 0.3f), 0f,
-                        glowOrigin, size * 0.015f, SpriteEffects.None, 0f);
-                }
-
-                if (pixel != null) {
-                    sb.Draw(pixel, pos, new Rectangle(0, 0, 1, 1),
-                        baseColor * (alpha * 0.7f), 0f, new Vector2(0.5f),
-                        new Vector2(size), SpriteEffects.None, 0f);
-                }
-
-                //编号标注
-                string label = (index + 1).ToString();
+                //普通行星编号（罗马数字）
+                string[] romanNumerals = ["I", "II", "III", "IV", "V", "VI"];
+                string label = romanNumerals[index];
                 Color labelColor = new Color(150, 180, 220) * (alpha * 0.5f);
-                Utils.DrawBorderString(sb, label, pos + new Vector2(-3, -size - 14),
-                    labelColor, 0.35f);
+                Vector2 labelSize = Terraria.GameContent.FontAssets.MouseText.Value.MeasureString(label) * 0.32f;
+                Utils.DrawBorderString(sb, label, pos + new Vector2(-labelSize.X * 0.5f, -radius - 14),
+                    labelColor, 0.32f);
+            }
+        }
+
+        /// <summary>
+        /// 用像素逼近绘制行星球体，包含：明暗面、明暗分界线、表面细节纹理
+        /// </summary>
+        private static void DrawPlanetSphere(SpriteBatch sb, Texture2D pixel, Vector2 center,
+            float radius, Color lightColor, Color darkColor, float selfRotation, float alpha, int planetIndex) {
+            //光源方向（从左侧恒星照射）
+            Vector2 lightDir = new(-1f, -0.3f);
+            if (lightDir != Vector2.Zero) lightDir = Vector2.Normalize(lightDir);
+
+            int r = (int)MathF.Ceiling(radius);
+
+            for (int y = -r; y <= r; y++) {
+                for (int x = -r; x <= r; x++) {
+                    float dist = MathF.Sqrt(x * x + y * y);
+                    if (dist > radius) continue;
+
+                    //球面法线
+                    float nx = x / radius;
+                    float ny = y / radius;
+                    float nz = MathF.Sqrt(MathF.Max(0f, 1f - nx * nx - ny * ny));
+
+                    //光照计算（Lambert漫反射）
+                    float ndotl = -(lightDir.X * nx + lightDir.Y * ny) * 0.5f + nz * 0.5f;
+                    ndotl = MathHelper.Clamp(ndotl, 0f, 1f);
+
+                    //明暗分界线（terminator）加宽渐变
+                    float terminatorSharpness = 0.35f;
+                    float shade = MathHelper.Clamp((ndotl - 0.3f) / terminatorSharpness, 0f, 1f);
+
+                    Color pixelColor = Color.Lerp(darkColor, lightColor, shade);
+
+                    //表面细节纹理（基于球面UV + 自转偏移）
+                    float u = MathF.Atan2(ny, nx + nz * 0.3f) + selfRotation;
+                    float v = ny;
+
+                    float surfaceNoise = GetSurfaceNoise(u, v, planetIndex);
+                    pixelColor = Color.Lerp(pixelColor, pixelColor * (0.7f + surfaceNoise * 0.6f), 0.5f);
+
+                    //边缘大气散射（limb darkening / brightening）
+                    float edgeFactor = 1f - nz;
+                    float limbDarken = MathF.Pow(edgeFactor, 2f) * 0.3f;
+                    pixelColor = Color.Lerp(pixelColor, darkColor, limbDarken);
+
+                    //高光斑点（朝光面边缘）
+                    if (ndotl > 0.7f && edgeFactor > 0.4f && edgeFactor < 0.8f) {
+                        float specular = (ndotl - 0.7f) / 0.3f * (edgeFactor - 0.4f) / 0.4f;
+                        pixelColor = Color.Lerp(pixelColor, Color.White, specular * 0.15f);
+                    }
+
+                    sb.Draw(pixel, center + new Vector2(x, y), new Rectangle(0, 0, 1, 1),
+                        pixelColor * alpha, 0f, new Vector2(0.5f), 1f, SpriteEffects.None, 0f);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 生成行星表面伪噪声纹理（不使用Random，纯数学确定性）
+        /// </summary>
+        private static float GetSurfaceNoise(float u, float v, int planetIndex) {
+            //基于行星索引给不同的纹理特征
+            float freq1 = 3f + planetIndex * 0.7f;
+            float freq2 = 7f + planetIndex * 1.3f;
+
+            float noise = MathF.Sin(u * freq1 + v * 2f) * 0.3f
+                        + MathF.Sin(u * freq2 - v * 3f + 1.5f) * 0.2f
+                        + MathF.Cos(u * 5f + v * freq1) * 0.15f;
+
+            //气态巨行星：水平条带纹理
+            if (planetIndex == 3) {
+                float bands = MathF.Sin(v * 12f) * 0.35f + MathF.Sin(v * 25f + u * 2f) * 0.15f;
+                noise = bands;
+            }
+            //冰巨行星：较柔和的条带
+            if (planetIndex == 4) {
+                float bands = MathF.Sin(v * 8f) * 0.25f + MathF.Cos(v * 15f + u) * 0.1f;
+                noise = bands;
+            }
+            //类地行星（目标）：大陆纹理
+            if (planetIndex == 2) {
+                float continent = MathF.Sin(u * 3f + 0.5f) * MathF.Cos(v * 4f + 1f);
+                continent = MathHelper.Clamp(continent, -0.5f, 0.5f);
+                noise = continent * 0.4f + MathF.Sin(u * 8f + v * 6f) * 0.1f;
+            }
+
+            return MathHelper.Clamp(noise * 0.5f + 0.5f, 0f, 1f);
+        }
+
+        /// <summary>
+        /// 绘制气态巨行星的环系统
+        /// </summary>
+        private static void DrawPlanetRing(SpriteBatch sb, Texture2D pixel, Vector2 center, float planetRadius, float alpha) {
+            float innerR = planetRadius * 1.4f;
+            float outerR = planetRadius * 2.2f;
+            Color ringColor1 = new Color(200, 180, 140);
+            Color ringColor2 = new Color(170, 150, 110);
+            Color ringGap = new Color(100, 85, 65);
+
+            //环的倾斜（用y缩放模拟倾角）
+            float tilt = 0.3f;
+            int segments = 60;
+
+            for (int i = 0; i < segments; i++) {
+                float angle = MathHelper.TwoPi * i / segments;
+                float nextAngle = MathHelper.TwoPi * (i + 1) / segments;
+
+                //只绘制行星后面和前面的环段（跳过被行星遮挡的部分）
+                float sinA = MathF.Sin(angle);
+
+                //多层环
+                for (int ring = 0; ring < 3; ring++) {
+                    float rInner = innerR + (outerR - innerR) * ring / 3f;
+                    float rOuter = innerR + (outerR - innerR) * (ring + 1) / 3f;
+                    float rMid = (rInner + rOuter) * 0.5f;
+
+                    Vector2 p1 = center + new Vector2(MathF.Cos(angle) * rMid, MathF.Sin(angle) * rMid * tilt);
+                    Vector2 p2 = center + new Vector2(MathF.Cos(nextAngle) * rMid, MathF.Sin(nextAngle) * rMid * tilt);
+
+                    //被行星遮挡的部分降低透明度
+                    float occlude = 1f;
+                    if (sinA > -0.2f && sinA < 0.2f) {
+                        float absX = MathF.Abs(MathF.Cos(angle) * rMid);
+                        if (absX < planetRadius * 0.9f) {
+                            occlude = 0.15f;
+                        }
+                    }
+                    //行星前面的环段（sin > 0）半透明
+                    if (sinA > 0) {
+                        occlude *= 0.6f;
+                    }
+
+                    Color rColor = ring == 1 ? ringGap : (ring == 0 ? ringColor1 : ringColor2);
+                    float ringAlpha = alpha * 0.5f * occlude * (ring == 1 ? 0.4f : 0.7f);
+
+                    Vector2 diff = p2 - p1;
+                    float len = diff.Length();
+                    if (len < 0.5f) continue;
+                    float segAngle = MathF.Atan2(diff.Y, diff.X);
+                    float thickness = (rOuter - rInner) * tilt * 0.4f;
+
+                    sb.Draw(pixel, p1, new Rectangle(0, 0, 1, 1),
+                        rColor * ringAlpha, segAngle, Vector2.Zero,
+                        new Vector2(len, MathF.Max(thickness, 0.8f)), SpriteEffects.None, 0f);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 目标行星（III号）的特殊标记效果
+        /// </summary>
+        private static void DrawTargetPlanetEffects(SpriteBatch sb, Vector2 pos, float radius, float alpha) {
+            Texture2D softGlow = CWRAsset.SoftGlow?.Value;
+            float targetPulse = MathF.Sin(kortoTargetBlinkTimer) * 0.3f + 0.7f;
+
+            //红色警告光环
+            if (softGlow != null) {
+                Vector2 glowOrigin = new(softGlow.Width * 0.5f, softGlow.Height * 0.5f);
+
+                //外圈脉动危险光环
+                Color dangerGlow = new Color(255, 60, 30);
+                dangerGlow.A = 0;
+                float ringScale = radius * 0.035f + MathF.Sin(kortoTargetBlinkTimer * 0.8f) * radius * 0.006f;
+                sb.Draw(softGlow, pos, null, dangerGlow * (alpha * 0.3f * targetPulse), 0f,
+                    glowOrigin, ringScale, SpriteEffects.None, 0f);
+            }
+
+            //瞄准框
+            DrawTargetReticle(sb, pos, alpha * targetPulse);
+
+            //名称标注
+            Color targetTextColor = new Color(255, 80, 40) * (alpha * targetPulse);
+            Utils.DrawBorderString(sb, "KORTO-III", pos + new Vector2(-26, -radius - 26),
+                targetTextColor, 0.5f);
+
+            //副标题
+            float subtitleAlpha = alpha * MathF.Max(0f, (kortoPlanetViewProgress - 0.4f) * 2.5f);
+            if (subtitleAlpha > 0.01f) {
+                Color subColor = new Color(255, 200, 60) * subtitleAlpha;
+                Utils.DrawBorderString(sb, "◢ PRIMARY OBJECTIVE ◣", pos + new Vector2(-58, radius + 16),
+                    subColor, 0.38f);
+            }
+
+            //行星数据标签（逐步显示）
+            float dataAlpha = alpha * MathF.Max(0f, (kortoPlanetViewProgress - 0.6f) * 2.5f);
+            if (dataAlpha > 0.01f) {
+                Color dataColor = new Color(180, 200, 220) * dataAlpha;
+                float dataY = radius + 34;
+                Utils.DrawBorderString(sb, "CLASS: TERRESTRIAL", pos + new Vector2(-48, dataY),
+                    dataColor * 0.7f, 0.3f);
+                Utils.DrawBorderString(sb, "THREAT: CRITICAL", pos + new Vector2(-44, dataY + 14),
+                    new Color(255, 100, 60) * dataAlpha * 0.8f, 0.3f);
+            }
+        }
+
+        /// <summary>
+        /// 用像素逼近绘制实心圆（辅助方法，用于像素回退模式）
+        /// </summary>
+        private static void DrawFilledCirclePixel(SpriteBatch sb, Texture2D pixel, Vector2 center, float radius, Color color) {
+            int r = (int)MathF.Ceiling(radius);
+            for (int y = -r; y <= r; y++) {
+                //计算该行的水平范围
+                float halfWidth = MathF.Sqrt(radius * radius - y * y);
+                int x1 = (int)MathF.Floor(-halfWidth);
+                int x2 = (int)MathF.Ceiling(halfWidth);
+                //用一条线段绘制整行
+                sb.Draw(pixel, center + new Vector2(x1, y), new Rectangle(0, 0, 1, 1),
+                    color, 0f, Vector2.Zero, new Vector2(x2 - x1, 1f), SpriteEffects.None, 0f);
             }
         }
 
@@ -428,8 +653,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
             if (pixel == null) return;
 
             Color reticleColor = new Color(255, 70, 40) * (alpha * 0.8f);
-            float reticleSize = 16f + MathF.Sin(kortoTargetBlinkTimer * 1.5f) * 2f;
-            float gap = 5f;
+            float reticleSize = 26f + MathF.Sin(kortoTargetBlinkTimer * 1.5f) * 3f;
+            float gap = 8f;
             float lineLen = reticleSize - gap;
 
             //上

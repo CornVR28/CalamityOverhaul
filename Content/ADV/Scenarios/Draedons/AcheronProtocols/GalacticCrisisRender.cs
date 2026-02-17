@@ -53,8 +53,12 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
         private const float BasePanelHeight = 580f;
         private const float ExpandedPanelWidth = 860f;
         private const float ExpandedPanelHeight = 740f;
+        //科尔托行星视图的超宽面板尺寸
+        private const float KortoPanelWidth = 1100f;
+        private const float KortoPanelHeight = 480f;
         private const int BorderThickness = 3;
         private static float panelExpandProgress;
+        private static float kortoPanelExpandProgress;
 
         //信号干扰
         private static float glitchIntensity;
@@ -78,6 +82,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
             glitchTimer = 0f;
             glitchFrameSkip = 0;
             panelExpandProgress = 0f;
+            kortoPanelExpandProgress = 0f;
 
             InitGalaxy();
             InitSwarm();
@@ -157,6 +162,11 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
             panelExpandProgress += (expandTarget - panelExpandProgress) * 0.04f;
             panelExpandProgress = MathHelper.Clamp(panelExpandProgress, 0f, 1f);
 
+            //科尔托行星视图阶段面板进一步变宽变矮
+            float kortoExpandTarget = (currentPhase == AnimPhase.KortoPlanetView && currentPhase != AnimPhase.FadeOut) ? 1f : 0f;
+            kortoPanelExpandProgress += (kortoExpandTarget - kortoPanelExpandProgress) * 0.035f;
+            kortoPanelExpandProgress = MathHelper.Clamp(kortoPanelExpandProgress, 0f, 1f);
+
             UpdateGalaxyLogic();
             UpdateSwarmLogic();
             UpdateExtinctionLogic();
@@ -218,6 +228,14 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
             float ease = CWRUtils.EaseOutCubic(panelExpandProgress);
             float w = MathHelper.Lerp(BasePanelWidth, ExpandedPanelWidth, ease);
             float h = MathHelper.Lerp(BasePanelHeight, ExpandedPanelHeight, ease);
+
+            //科尔托行星视图：从扩展尺寸进一步变宽变矮
+            if (kortoPanelExpandProgress > 0.01f) {
+                float kortoEase = CWRUtils.EaseInOutCubic(kortoPanelExpandProgress);
+                w = MathHelper.Lerp(w, KortoPanelWidth, kortoEase);
+                h = MathHelper.Lerp(h, KortoPanelHeight, kortoEase);
+            }
+
             int x = (int)(Main.screenWidth * 0.5f - w * 0.5f);
             int y = (int)(Main.screenHeight * 0.32f - h * 0.5f);
             return new Rectangle(x, y, (int)w, (int)h);
