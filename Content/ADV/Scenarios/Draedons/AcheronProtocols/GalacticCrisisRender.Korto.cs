@@ -349,7 +349,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
                     sb.Draw(softGlow, pos, null, rayColor * rayAlpha, angle,
                         glowOrigin, new Vector2(0.8f, 0.03f), SpriteEffects.None, 0f);
                 }
-            } else if (pixel != null) {
+            }
+            else if (pixel != null) {
                 //像素回退：绘制恒星圆
                 DrawFilledCirclePixel(sb, pixel, pos, 10f, KortoStarColor * alpha);
                 DrawFilledCirclePixel(sb, pixel, pos, 7f, new Color(255, 240, 200) * alpha);
@@ -425,7 +426,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
             //=== 目标行星特殊标记 ===
             if (isTarget) {
                 DrawTargetPlanetEffects(sb, pos, radius, alpha);
-            } else {
+            }
+            else {
                 //普通行星编号（罗马数字）
                 string[] romanNumerals = ["I", "II", "III", "IV", "V", "VI"];
                 string label = romanNumerals[index];

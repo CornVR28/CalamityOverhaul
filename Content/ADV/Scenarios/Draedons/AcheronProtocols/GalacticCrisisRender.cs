@@ -147,27 +147,37 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
             switch (phase) {
                 case AnimPhase.GalaxyReveal:
                     SoundEngine.PlaySound(SoundID.DD2_EtherianPortalSpawnEnemy with {
-                        Volume = 0.5f, Pitch = 0.4f, MaxInstances = 1
+                        Volume = 0.5f,
+                        Pitch = 0.4f,
+                        MaxInstances = 1
                     });
                     break;
                 case AnimPhase.SwarmApproach:
                     SoundEngine.PlaySound(SoundID.Zombie105 with {
-                        Volume = 0.3f, Pitch = -0.6f, MaxInstances = 1
+                        Volume = 0.3f,
+                        Pitch = -0.6f,
+                        MaxInstances = 1
                     });
                     break;
                 case AnimPhase.ExtinctionProtocol:
                     SoundEngine.PlaySound(SoundID.Item117 with {
-                        Volume = 0.6f, Pitch = -0.3f, MaxInstances = 1
+                        Volume = 0.6f,
+                        Pitch = -0.3f,
+                        MaxInstances = 1
                     });
                     break;
                 case AnimPhase.KortoZoom:
                     SoundEngine.PlaySound(SoundID.DD2_EtherianPortalDryadTouch with {
-                        Volume = 0.4f, Pitch = 0.3f, MaxInstances = 1
+                        Volume = 0.4f,
+                        Pitch = 0.3f,
+                        MaxInstances = 1
                     });
                     break;
                 case AnimPhase.KortoPlanetView:
                     SoundEngine.PlaySound(SoundID.DD2_EtherianPortalDryadTouch with {
-                        Volume = 0.3f, Pitch = 0.5f, MaxInstances = 1
+                        Volume = 0.3f,
+                        Pitch = 0.5f,
+                        MaxInstances = 1
                     });
                     break;
             }

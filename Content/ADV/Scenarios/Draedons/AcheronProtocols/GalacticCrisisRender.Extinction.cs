@@ -196,7 +196,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
                     Vector2 origin = new(softGlow.Width * 0.5f, softGlow.Height * 0.5f);
                     sb.Draw(softGlow, pos, null, waveColor * waveAlpha, 0f,
                         origin, 0.18f, SpriteEffects.None, 0f);
-                } else if (pixel != null) {
+                }
+                else if (pixel != null) {
                     Color dotColor = new Color(255, 50, 30) * (alpha * 0.3f * wavePulse);
                     dotColor.A = 0;
                     sb.Draw(pixel, pos, new Rectangle(0, 0, 1, 1),

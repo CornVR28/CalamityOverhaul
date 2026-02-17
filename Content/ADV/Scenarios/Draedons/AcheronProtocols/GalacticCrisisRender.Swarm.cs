@@ -225,7 +225,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
                     sb.Draw(softGlow, blobPos, null, blobColor * blobAlpha, 0f,
                         glowOrigin, blobScale, SpriteEffects.None, 0f);
                 }
-            } else {
+            }
+            else {
                 if (pixel == null) return;
                 GetSwarmCenterAndRadius(center, out _, out _);
                 Color shadowColor = new Color(15, 5, 10);
@@ -288,7 +289,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
                     sb.Draw(softGlow, segPos, null,
                         glowC * (segAlpha * 0.45f * glowPulse), 0f,
                         glowOrigin, segScale * 1.8f, SpriteEffects.None, 0f);
-                } else if (pixel != null) {
+                }
+                else if (pixel != null) {
                     float segAngle = tendril.BaseAngle + MathHelper.Pi;
                     sb.Draw(pixel, segPos, new Rectangle(0, 0, 1, 1),
                         tendrilColor * segAlpha, segAngle, new Vector2(0.5f),
@@ -313,7 +315,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
                     Vector2 glowOrigin = new(softGlow.Width * 0.5f, softGlow.Height * 0.5f);
                     sb.Draw(softGlow, screenPos, null, particleColor * particleAlpha, 0f,
                         glowOrigin, p.Size * 0.04f, SpriteEffects.None, 0f);
-                } else if (pixel != null) {
+                }
+                else if (pixel != null) {
                     Color particleColor = new Color(60, 10, 20) * particleAlpha;
                     sb.Draw(pixel, screenPos, new Rectangle(0, 0, 1, 1),
                         particleColor, globalTimer + p.Life * 0.1f, new Vector2(0.5f),
@@ -349,7 +352,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
                     sb.Draw(softGlow, glowPos, null, redGlow * glowAlpha, 0f,
                         glowOrigin, glowScale, SpriteEffects.None, 0f);
                 }
-            } else {
+            }
+            else {
                 Texture2D pixel = VaultAsset.placeholder2.Value;
                 if (pixel == null) return;
                 int arcSegments = 20;

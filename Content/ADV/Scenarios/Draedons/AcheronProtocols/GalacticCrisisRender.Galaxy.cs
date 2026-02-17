@@ -246,7 +246,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
                     sb.Draw(softGlow, center, null, layerColor * layerAlpha, 0f,
                         glowOrigin, layerScale, SpriteEffects.None, 0f);
                 }
-            } else {
+            }
+            else {
                 Texture2D pixel = VaultAsset.placeholder2.Value;
                 if (pixel == null) return;
                 Color coreColor = new Color(255, 240, 200);
@@ -306,7 +307,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
                         if (drawScale < 0.05f) return;
                         break;
                 }
-            } else if (extinctionProgress > 0.3f) {
+            }
+            else if (extinctionProgress > 0.3f) {
                 //波纹逼近但未被标记时，变色警告
                 terraColor = Color.Lerp(new Color(100, 255, 120), new Color(255, 60, 40),
                     MathF.Sin(extinctionFlashTimer * 2f) * 0.5f + 0.5f);
@@ -342,7 +344,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
                         dangerGlow * (alpha * 0.4f * dangerPulse),
                         0f, glowOrigin, 0.4f * drawScale, SpriteEffects.None, 0f);
                 }
-            } else {
+            }
+            else {
                 sb.Draw(pixel, terraPos, new Rectangle(0, 0, 1, 1),
                     terraColor * markerAlpha, 0f, new Vector2(0.5f),
                     new Vector2(4f * drawScale), SpriteEffects.None, 0f);
