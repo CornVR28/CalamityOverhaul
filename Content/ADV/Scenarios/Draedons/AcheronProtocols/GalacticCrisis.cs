@@ -130,11 +130,14 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
         protected override void OnScenarioStart() {
             DraedonEffect.IsActive = true;
             DraedonEffect.Send();
+            //启动星图渲染器
+            GalacticCrisisRender.Activate();
         }
 
         protected override void OnScenarioComplete() {
             DraedonEffect.IsActive = false;
             DraedonEffect.Send();
+            GalacticCrisisRender.Deactivate();
         }
 
         protected override void Build() {
@@ -144,12 +147,22 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
             DialogueBoxBase.RegisterPortrait(DraedonName.Value + alt, ADVAsset.DraedonADV, silhouette: false);
 
             //阶段一：危机与灭绝令
-            Add(DraedonName.Value, CrisisIntro1.Value);
-            Add(DraedonName.Value, CrisisIntro2.Value);
+            //第一句台词开始时启动银河系展现动画
+            Add(DraedonName.Value, CrisisIntro1.Value, onStart: () => {
+                GalacticCrisisRender.SetPhase(GalacticCrisisRender.AnimPhase.GalaxyReveal);
+            });
+            //第二句提到"阴影"时触发虫群逼近动画
+            Add(DraedonName.Value, CrisisIntro2.Value, onStart: () => {
+                GalacticCrisisRender.SetPhase(GalacticCrisisRender.AnimPhase.SwarmApproach);
+            });
             Add(DraedonName.Value, CrisisIntro3.Value);
             Add(DraedonName.Value, CrisisIntro4.Value);
+            //第五句提到灭绝方案时切换为红色立绘
             Add(DraedonName.Value + red, CrisisIntro5.Value);
-            Add(DraedonName.Value + red, CrisisIntro6.Value);
+            //第六句"引爆地核"时触发灭绝令覆盖动画
+            Add(DraedonName.Value + red, CrisisIntro6.Value, onStart: () => {
+                GalacticCrisisRender.SetPhase(GalacticCrisisRender.AnimPhase.ExtinctionProtocol);
+            });
             Add(DraedonName.Value + red, CrisisIntro7.Value);
 
             //玩家选择：拒绝灭绝令
@@ -157,7 +170,10 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
             AddWithChoices(DraedonName.Value, CrisisIntro8.Value, [
                 new Choice(ChoiceRefuse.Value, OnPlayerRefused),
                 new Choice(ChoiceSilence.Value, OnPlayerRefused)
-            ], choiceBoxStyle: ADVChoiceBox.ChoiceBoxStyle.Draedon);
+            ], onStart: () => {
+                //选择阶段星图进入闲置
+                GalacticCrisisRender.SetPhase(GalacticCrisisRender.AnimPhase.Idle);
+            }, choiceBoxStyle: ADVChoiceBox.ChoiceBoxStyle.Draedon);
         }
 
         /// <summary>
@@ -181,11 +197,14 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
             protected override void OnScenarioStart() {
                 DraedonEffect.IsActive = true;
                 DraedonEffect.Send();
+                //转折阶段星图淡出，焦点回到嘉登
+                GalacticCrisisRender.Deactivate();
             }
 
             protected override void OnScenarioComplete() {
                 DraedonEffect.IsActive = false;
                 DraedonEffect.Send();
+                GalacticCrisisRender.ForceCleanup();
             }
 
             protected override void Build() {
