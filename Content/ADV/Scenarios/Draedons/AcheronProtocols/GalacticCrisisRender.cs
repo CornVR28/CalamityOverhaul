@@ -1,5 +1,6 @@
 ﻿using InnoVault.UIHandles;
 using Microsoft.Xna.Framework.Graphics;
+using ReLogic.Content;
 using System;
 using System.Collections.Generic;
 using Terraria;
@@ -56,11 +57,16 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
         private static float scanLineProgress;
         private static float globalTimer;
 
+        //面板参数
+        private const float PanelWidth = 620f;
+        private const float PanelHeight = 580f;
+        private const int BorderThickness = 3;
+
         //银河系参数
-        private const int StarCount = 600;//恒星粒子数量
+        private const int StarCount = 800;//恒星粒子数量
         private const int GalaxyArmCount = 4;//旋臂数量
-        private const float GalaxyRadius = 180f;//银河系半径(像素)
-        private const float GalaxyCoreRadius = 25f;//银核半径
+        private const float GalaxyRadius = 240f;//银河系半径(像素)
+        private const float GalaxyCoreRadius = 30f;//银核半径
         private static readonly List<GalaxyStar> galaxyStars = [];
         private static float galaxyRotation;//银河系整体缓慢旋转角度
         private static float galaxyRevealProgress;//银河系展现进度
@@ -76,6 +82,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
         //灭绝令参数
         private static float extinctionProgress;//灭绝令覆盖进度
         private static float extinctionFlashTimer;//红色警告闪烁计时
+        private static bool extinctionStarsMarked;//恒星是否已经开始标记
+        private static float extinctionWaveRadius;//灭绝令红色波纹的当前半径
 
         //信号干扰(Glitch)参数
         private static float glitchIntensity;//全局干扰强度
@@ -98,6 +106,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
             public float BrightnessPhase;//亮度闪烁相位
             public float Size;//大小
             public Color BaseColor;//基础颜色
+            public bool ExtinctionMarked;//是否被灭绝令标记
+            public float ExtinctionLerp;//灭绝令变红的插值进度0~1
 
             public Vector2 GetPosition(float rotation, float radius) {
                 //对数螺旋公式：angle = baseAngle + k * ln(r)
@@ -160,6 +170,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
             swarmPulseTimer = 0f;
             extinctionProgress = 0f;
             extinctionFlashTimer = 0f;
+            extinctionStarsMarked = false;
+            extinctionWaveRadius = 0f;
             glitchIntensity = 0f;
             glitchTimer = 0f;
             glitchFrameSkip = 0;
@@ -369,6 +381,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
                     if (extinctionProgress < 0.3f) {
                         glitchIntensity = MathHelper.Lerp(0.3f, 0.1f, extinctionProgress / 0.3f);
                     }
+                    //灭绝令波纹从外环向内扩展，标记途经的恒星
+                    extinctionWaveRadius = GalaxyRadius * CWRUtils.EaseOutCubic(extinctionProgress) * 0.9f;
+                    UpdateExtinctionStarMarking();
                     break;
 
                 case AnimPhase.Idle:
@@ -428,15 +443,48 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
             }
         }
 
+        /// <summary>
+        /// 灭绝令波纹扫过恒星时将其标记为红色
+        /// 波纹从银河系外环向核心推进，途经的恒星依次变红
+        /// </summary>
+        private static void UpdateExtinctionStarMarking() {
+            float waveNormalized = extinctionWaveRadius / GalaxyRadius;
+            foreach (var star in galaxyStars) {
+                //已经标记的恒星继续推进变红插值
+                if (star.ExtinctionMarked) {
+                    star.ExtinctionLerp = MathF.Min(star.ExtinctionLerp + 0.04f, 1f);
+                    continue;
+                }
+                //波纹从外向内，外侧恒星先被标记
+                //恒星的径向距离越大越先被标记
+                float starOuterDistance = 1f - star.RadialDistance;
+                if (starOuterDistance < waveNormalized && star.RadialDistance > 0.12f) {
+                    //核心区域(泰拉附近)的恒星不被标记
+                    star.ExtinctionMarked = true;
+                    star.ExtinctionLerp = 0f;
+                }
+            }
+        }
+
         #endregion
 
         #region 绘制
 
         /// <summary>
+        /// 获取面板矩形区域
+        /// </summary>
+        private static Rectangle GetPanelRect() {
+            int x = (int)(Main.screenWidth * 0.5f - PanelWidth * 0.5f);
+            int y = (int)(Main.screenHeight * 0.32f - PanelHeight * 0.5f);
+            return new Rectangle(x, y, (int)PanelWidth, (int)PanelHeight);
+        }
+
+        /// <summary>
         /// 获取星图中心的屏幕坐标
         /// </summary>
         private static Vector2 GetMapCenter() {
-            return new Vector2(Main.screenWidth * 0.5f, Main.screenHeight * 0.38f);
+            Rectangle panel = GetPanelRect();
+            return new Vector2(panel.X + panel.Width * 0.5f, panel.Y + panel.Height * 0.5f);
         }
 
         public override void Draw(SpriteBatch sb) {
@@ -449,9 +497,11 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
             alpha *= flicker;
 
             Vector2 center = GetMapCenter();
+            Rectangle panelRect = GetPanelRect();
 
-            //绘制背景暗色遮罩（让星图更清晰）
-            DrawBackgroundDim(sb, center, alpha);
+            //绘制厚实的面板底板和边框
+            DrawPanelBackground(sb, panelRect, alpha);
+            DrawPanelBorder(sb, panelRect, alpha);
 
             //绘制银河系
             if (galaxyRevealProgress > 0.01f) {
@@ -473,48 +523,118 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
                 DrawTerraMarker(sb, center, alpha);
             }
 
-            //绘制全息边框
-            DrawHologramFrame(sb, center, alpha);
-
-            //绘制扫描线
-            DrawScanLineEffect(sb, center, alpha);
+            //绘制扫描线（在边框内）
+            DrawScanLineEffect(sb, panelRect, alpha);
 
             //绘制干扰噪点
             if (glitchIntensity > 0.02f) {
-                DrawGlitchNoise(sb, center, alpha);
+                DrawGlitchNoise(sb, panelRect, alpha);
             }
+
+            //最顶层绘制面板标题
+            DrawPanelHeader(sb, panelRect, alpha);
         }
 
         #endregion
 
-        #region 背景遮罩
+        #region 面板背景和边框
 
-        private static void DrawBackgroundDim(SpriteBatch sb, Vector2 center, float alpha) {
+        /// <summary>
+        /// 绘制厚实的不透明面板底板
+        /// </summary>
+        private static void DrawPanelBackground(SpriteBatch sb, Rectangle rect, float alpha) {
             Texture2D pixel = VaultAsset.placeholder2.Value;
             if (pixel == null) return;
 
-            float radius = GalaxyRadius + 80f;
-            //画一个圆形暗域，不用纯矩形
-            int segments = 40;
-            for (int i = 0; i < segments; i++) {
-                float t = i / (float)segments;
-                float innerR = radius * t;
-                float outerR = radius * (t + 1f / segments);
-                float dimAlpha = alpha * 0.4f * (1f - t * 0.5f);
+            //主背景：深色不透明，避免游戏内容透出
+            sb.Draw(pixel, rect, new Rectangle(0, 0, 1, 1), new Color(6, 8, 16) * (alpha * 0.92f));
 
-                int ringSegments = 32;
-                for (int j = 0; j < ringSegments; j++) {
-                    float angle = MathHelper.TwoPi * j / ringSegments;
-                    float nextAngle = MathHelper.TwoPi * (j + 1) / ringSegments;
+            //内层渐变增加深度感
+            Rectangle innerRect = new(rect.X + 4, rect.Y + 4, rect.Width - 8, rect.Height - 8);
+            sb.Draw(pixel, innerRect, new Rectangle(0, 0, 1, 1), new Color(10, 14, 25) * (alpha * 0.6f));
 
-                    Vector2 p = center + new Vector2(MathF.Cos(angle) * innerR, MathF.Sin(angle) * innerR);
-                    float size = (outerR - innerR) + 2f;
+            //底部微弱的渐变高光
+            Rectangle bottomGlow = new(rect.X + 6, rect.Bottom - 40, rect.Width - 12, 36);
+            sb.Draw(pixel, bottomGlow, new Rectangle(0, 0, 1, 1), new Color(20, 35, 55) * (alpha * 0.25f));
+        }
 
-                    sb.Draw(pixel, p, new Rectangle(0, 0, 1, 1),
-                        new Color(5, 5, 15) * dimAlpha, angle, Vector2.Zero,
-                        new Vector2(size, size), SpriteEffects.None, 0f);
-                }
+        /// <summary>
+        /// 绘制科技感的厚实边框
+        /// </summary>
+        private static void DrawPanelBorder(SpriteBatch sb, Rectangle rect, float alpha) {
+            Texture2D pixel = VaultAsset.placeholder2.Value;
+            if (pixel == null) return;
+
+            Color techColor = new Color(60, 160, 220);
+            float pulse = MathF.Sin(hologramFlicker * 2f) * 0.15f + 0.85f;
+            Color borderColor = techColor * (alpha * 0.85f * pulse);
+            Color borderDim = techColor * (alpha * 0.5f);
+
+            //外层粗边框
+            sb.Draw(pixel, new Rectangle(rect.X - 1, rect.Y - 1, rect.Width + 2, BorderThickness), borderColor);
+            sb.Draw(pixel, new Rectangle(rect.X - 1, rect.Bottom - BorderThickness + 1, rect.Width + 2, BorderThickness), borderColor * 0.8f);
+            sb.Draw(pixel, new Rectangle(rect.X - 1, rect.Y - 1, BorderThickness, rect.Height + 2), borderColor * 0.9f);
+            sb.Draw(pixel, new Rectangle(rect.Right - BorderThickness + 1, rect.Y - 1, BorderThickness, rect.Height + 2), borderColor * 0.9f);
+
+            //内层细边框（双层效果）
+            sb.Draw(pixel, new Rectangle(rect.X + 4, rect.Y + 4, rect.Width - 8, 1), borderDim);
+            sb.Draw(pixel, new Rectangle(rect.X + 4, rect.Bottom - 5, rect.Width - 8, 1), borderDim * 0.7f);
+            sb.Draw(pixel, new Rectangle(rect.X + 4, rect.Y + 4, 1, rect.Height - 8), borderDim * 0.8f);
+            sb.Draw(pixel, new Rectangle(rect.Right - 5, rect.Y + 4, 1, rect.Height - 8), borderDim * 0.8f);
+
+            //四角装饰（增大的L形科技角标）
+            float cornerSize = 20f;
+            Color cornerColor = new Color(80, 200, 255) * (alpha * 0.7f);
+            DrawCornerDecor(sb, new Vector2(rect.X + 8, rect.Y + 8), cornerColor, cornerSize, -MathHelper.PiOver2);
+            DrawCornerDecor(sb, new Vector2(rect.Right - 8, rect.Y + 8), cornerColor, cornerSize, 0f);
+            DrawCornerDecor(sb, new Vector2(rect.X + 8, rect.Bottom - 8), cornerColor, cornerSize, MathHelper.Pi);
+            DrawCornerDecor(sb, new Vector2(rect.Right - 8, rect.Bottom - 8), cornerColor, cornerSize, MathHelper.PiOver2);
+
+            //角落内侧辅助装饰线
+            Color auxColor = techColor * (alpha * 0.3f);
+            sb.Draw(pixel, new Rectangle(rect.X + 8, rect.Y + 8, 30, 1), auxColor);
+            sb.Draw(pixel, new Rectangle(rect.X + 8, rect.Y + 8, 1, 30), auxColor);
+            sb.Draw(pixel, new Rectangle(rect.Right - 38, rect.Y + 8, 30, 1), auxColor);
+            sb.Draw(pixel, new Rectangle(rect.Right - 9, rect.Y + 8, 1, 30), auxColor);
+            sb.Draw(pixel, new Rectangle(rect.X + 8, rect.Bottom - 9, 30, 1), auxColor);
+            sb.Draw(pixel, new Rectangle(rect.X + 8, rect.Bottom - 38, 1, 30), auxColor);
+            sb.Draw(pixel, new Rectangle(rect.Right - 38, rect.Bottom - 9, 30, 1), auxColor);
+            sb.Draw(pixel, new Rectangle(rect.Right - 9, rect.Bottom - 38, 1, 30), auxColor);
+        }
+
+        /// <summary>
+        /// 绘制面板顶部标题栏
+        /// </summary>
+        private static void DrawPanelHeader(SpriteBatch sb, Rectangle rect, float alpha) {
+            Texture2D pixel = VaultAsset.placeholder2.Value;
+            if (pixel == null) return;
+
+            Color techColor = new Color(60, 160, 220);
+
+            //标题栏背景
+            Rectangle headerRect = new(rect.X + 5, rect.Y + 5, rect.Width - 10, 28);
+            sb.Draw(pixel, headerRect, new Rectangle(0, 0, 1, 1), new Color(12, 22, 38) * (alpha * 0.8f));
+
+            //标题栏底线
+            sb.Draw(pixel, new Rectangle(headerRect.X, headerRect.Bottom, headerRect.Width, 2), techColor * (alpha * 0.5f));
+            sb.Draw(pixel, new Rectangle(headerRect.X, headerRect.Bottom + 3, headerRect.Width, 1), techColor * (alpha * 0.2f));
+
+            //标题文本
+            string title = "◢ GALACTIC STRATEGIC MAP ◣";
+            var font = FontAssets.MouseText.Value;
+            Vector2 titleSize = font.MeasureString(title) * 0.45f;
+            Vector2 titlePos = new(
+                headerRect.X + (headerRect.Width - titleSize.X) * 0.5f,
+                headerRect.Y + (headerRect.Height - titleSize.Y) * 0.5f
+            );
+
+            //标题发光
+            for (int i = 0; i < 4; i++) {
+                float angle = MathHelper.TwoPi * i / 4f;
+                Vector2 offset = new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * 1f;
+                Utils.DrawBorderString(sb, title, titlePos + offset, techColor * (alpha * 0.4f), 0.45f);
             }
+            Utils.DrawBorderString(sb, title, titlePos, Color.White * alpha, 0.45f);
         }
 
         #endregion
@@ -531,6 +651,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
             //绘制银核发光
             DrawGalaxyCore(sb, center, galaxyAlpha);
 
+            Texture2D softGlow = CWRAsset.SoftGlow?.Value;
+
             //绘制恒星
             foreach (var star in galaxyStars) {
                 //根据径向距离决定是否可见（从核心向外渐次展现）
@@ -543,15 +665,31 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
                 float flicker = MathF.Sin(globalTimer * 2f + star.BrightnessPhase) * 0.2f + 0.8f;
                 float finalBrightness = star.Brightness * flicker * galaxyAlpha;
 
-                Color starColor = star.BaseColor * finalBrightness;
+                //灭绝令变红：被标记的恒星颜色从原色渐变到红色并脉动
+                Color starColor = star.BaseColor;
+                if (star.ExtinctionMarked && star.ExtinctionLerp > 0.01f) {
+                    float redPulse = MathF.Sin(extinctionFlashTimer * 3f + star.BrightnessPhase) * 0.25f + 0.75f;
+                    Color extinctionRed = new Color(255, 50, 30);
+                    starColor = Color.Lerp(starColor, extinctionRed, star.ExtinctionLerp * redPulse);
+                    //被标记的恒星略微增大以强调
+                    finalBrightness *= MathHelper.Lerp(1f, 1.3f, star.ExtinctionLerp);
+                }
+                starColor *= finalBrightness;
 
                 //绘制恒星光点
                 float size = star.Size;
                 sb.Draw(pixel, screenPos, new Rectangle(0, 0, 1, 1),
                     starColor, 0f, new Vector2(0.5f), new Vector2(size), SpriteEffects.None, 0f);
 
-                //较亮的恒星加一层柔和的光晕
-                if (star.Brightness > 0.7f) {
+                //较亮的恒星用SoftGlow绘制柔和光晕
+                if (star.Brightness > 0.6f && softGlow != null) {
+                    Color glowColor = starColor * 0.25f;
+                    glowColor.A = 0;
+                    float glowScale = size * 0.12f;
+                    sb.Draw(softGlow, screenPos, null,
+                        glowColor, 0f, new Vector2(softGlow.Width * 0.5f, softGlow.Height * 0.5f),
+                        glowScale, SpriteEffects.None, 0f);
+                } else if (star.Brightness > 0.7f) {
                     Color glowColor = starColor * 0.3f;
                     glowColor.A = 0;
                     sb.Draw(pixel, screenPos, new Rectangle(0, 0, 1, 1),
@@ -561,30 +699,45 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
         }
 
         private static void DrawGalaxyCore(SpriteBatch sb, Vector2 center, float alpha) {
-            Texture2D pixel = VaultAsset.placeholder2.Value;
-            if (pixel == null) return;
+            Texture2D softGlow = CWRAsset.SoftGlow?.Value;
 
-            //多层叠加模拟银核发光
-            Color coreColor = new Color(255, 240, 200);
-            for (int i = 5; i >= 0; i--) {
-                float layerRadius = GalaxyCoreRadius * (0.3f + i * 0.3f);
-                float layerAlpha = alpha * (0.4f - i * 0.05f);
+            //使用SoftGlow绘制银核发光
+            if (softGlow != null) {
+                Color coreColor = new Color(255, 240, 200);
+                Vector2 glowOrigin = new(softGlow.Width * 0.5f, softGlow.Height * 0.5f);
 
-                //脉动效果
-                float pulse = MathF.Sin(globalTimer * 1.5f + i * 0.5f) * 0.1f + 0.9f;
-                layerAlpha *= pulse;
+                for (int i = 4; i >= 0; i--) {
+                    float layerScale = GalaxyCoreRadius * (0.02f + i * 0.015f);
+                    float layerAlpha = alpha * (0.35f - i * 0.05f);
+                    float pulse = MathF.Sin(globalTimer * 1.5f + i * 0.5f) * 0.12f + 0.88f;
+                    layerAlpha *= pulse;
 
-                Color layerColor = Color.Lerp(coreColor, new Color(180, 200, 255), i * 0.15f);
-                layerColor.A = 0;
+                    Color layerColor = Color.Lerp(coreColor, new Color(180, 210, 255), i * 0.2f);
+                    layerColor.A = 0;
 
-                //用多个小矩形近似圆形
-                int circleSegments = 16;
-                for (int j = 0; j < circleSegments; j++) {
-                    float angle = MathHelper.TwoPi * j / circleSegments;
-                    Vector2 offset = new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * layerRadius * 0.5f;
-                    sb.Draw(pixel, center + offset, new Rectangle(0, 0, 1, 1),
-                        layerColor * layerAlpha, angle, new Vector2(0.5f),
-                        new Vector2(layerRadius * 0.8f, layerRadius * 0.3f), SpriteEffects.None, 0f);
+                    sb.Draw(softGlow, center, null, layerColor * layerAlpha, 0f,
+                        glowOrigin, layerScale, SpriteEffects.None, 0f);
+                }
+            } else {
+                //后备方案：像素矩形近似
+                Texture2D pixel = VaultAsset.placeholder2.Value;
+                if (pixel == null) return;
+                Color coreColor = new Color(255, 240, 200);
+                for (int i = 5; i >= 0; i--) {
+                    float layerRadius = GalaxyCoreRadius * (0.3f + i * 0.3f);
+                    float layerAlpha = alpha * (0.4f - i * 0.05f);
+                    float pulse = MathF.Sin(globalTimer * 1.5f + i * 0.5f) * 0.1f + 0.9f;
+                    layerAlpha *= pulse;
+                    Color layerColor = Color.Lerp(coreColor, new Color(180, 200, 255), i * 0.15f);
+                    layerColor.A = 0;
+                    int circleSegments = 16;
+                    for (int j = 0; j < circleSegments; j++) {
+                        float angle = MathHelper.TwoPi * j / circleSegments;
+                        Vector2 offset = new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * layerRadius * 0.5f;
+                        sb.Draw(pixel, center + offset, new Rectangle(0, 0, 1, 1),
+                            layerColor * layerAlpha, angle, new Vector2(0.5f),
+                            new Vector2(layerRadius * 0.8f, layerRadius * 0.3f), SpriteEffects.None, 0f);
+                    }
                 }
             }
         }
@@ -717,29 +870,48 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
         }
 
         private static void DrawSwarmEdgeGlow(SpriteBatch sb, Vector2 center, float alpha) {
-            Texture2D pixel = VaultAsset.placeholder2.Value;
-            if (pixel == null) return;
-
             float swarmCenterAngle = -MathHelper.PiOver4;
             float swarmDistance = GalaxyRadius * MathHelper.Lerp(1.6f, 0.9f, swarmApproachProgress);
-
-            //在虫群前沿绘制暗红色脉动弧线
-            int arcSegments = 20;
-            float arcSpread = MathHelper.ToRadians(80f);
             float pulse = MathF.Sin(swarmPulseTimer * 2f) * 0.3f + 0.7f;
 
-            for (int i = 0; i < arcSegments; i++) {
-                float t = i / (float)arcSegments;
-                float angle = swarmCenterAngle - arcSpread / 2f + arcSpread * t;
-                Vector2 arcPos = center + new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * (swarmDistance - 10f);
+            Texture2D softGlow = CWRAsset.SoftGlow?.Value;
 
-                Color glowColor = new Color(120, 20, 30);
-                glowColor.A = 0;
-                float arcAlpha = alpha * 0.5f * pulse * MathF.Sin(t * MathHelper.Pi);
+            //使用SoftGlow在虫群前沿绘制暗红色脉动光斑
+            if (softGlow != null) {
+                int glowCount = 8;
+                float arcSpread = MathHelper.ToRadians(80f);
+                Vector2 glowOrigin = new(softGlow.Width * 0.5f, softGlow.Height * 0.5f);
 
-                sb.Draw(pixel, arcPos, new Rectangle(0, 0, 1, 1),
-                    glowColor * arcAlpha, angle, new Vector2(0.5f),
-                    new Vector2(15f, 4f), SpriteEffects.None, 0f);
+                for (int i = 0; i < glowCount; i++) {
+                    float t = i / (float)glowCount;
+                    float angle = swarmCenterAngle - arcSpread / 2f + arcSpread * t;
+                    Vector2 glowPos = center + new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * (swarmDistance - 5f);
+
+                    Color redGlow = new Color(180, 25, 35);
+                    redGlow.A = 0;
+                    float glowAlpha = alpha * 0.35f * pulse * MathF.Sin(t * MathHelper.Pi);
+                    float glowScale = 0.4f + MathF.Sin(swarmPulseTimer * 3f + t * 5f) * 0.08f;
+
+                    sb.Draw(softGlow, glowPos, null, redGlow * glowAlpha, 0f,
+                        glowOrigin, glowScale, SpriteEffects.None, 0f);
+                }
+            } else {
+                //后备方案
+                Texture2D pixel = VaultAsset.placeholder2.Value;
+                if (pixel == null) return;
+                int arcSegments = 20;
+                float arcSpread = MathHelper.ToRadians(80f);
+                for (int i = 0; i < arcSegments; i++) {
+                    float t = i / (float)arcSegments;
+                    float angle = swarmCenterAngle - arcSpread / 2f + arcSpread * t;
+                    Vector2 arcPos = center + new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * (swarmDistance - 10f);
+                    Color glowColor = new Color(120, 20, 30);
+                    glowColor.A = 0;
+                    float arcAlpha = alpha * 0.5f * pulse * MathF.Sin(t * MathHelper.Pi);
+                    sb.Draw(pixel, arcPos, new Rectangle(0, 0, 1, 1),
+                        glowColor * arcAlpha, angle, new Vector2(0.5f),
+                        new Vector2(15f, 4f), SpriteEffects.None, 0f);
+                }
             }
         }
 
@@ -751,55 +923,65 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
             Texture2D pixel = VaultAsset.placeholder2.Value;
             if (pixel == null) return;
 
-            float eased = CWRUtils.EaseOutCubic(extinctionProgress);
-            //灭绝令从外环向内覆盖
-            float coverRadius = GalaxyRadius * eased * 0.85f;
-
-            //红色/灰色死域覆盖
-            Color deathColor = new Color(80, 20, 15);
-            Color flashColor = new Color(200, 50, 30);
             float flash = MathF.Sin(extinctionFlashTimer) * 0.3f + 0.7f;
 
-            //从外到内的覆盖环
-            int rings = 12;
-            for (int i = 0; i < rings; i++) {
-                float ringT = i / (float)rings;
-                float ringRadius = GalaxyRadius * (1f - ringT * eased);
+            //绘制灭绝令扩展波纹（从外环向内的红色脉冲圆环）
+            if (extinctionWaveRadius > 5f) {
+                Texture2D softGlow = CWRAsset.SoftGlow?.Value;
+                float waveRingRadius = GalaxyRadius - extinctionWaveRadius;
+                if (waveRingRadius > 0f && waveRingRadius < GalaxyRadius) {
+                    //波纹前沿用SoftGlow绘制脉动光点
+                    int wavePoints = 24;
+                    float wavePulse = MathF.Sin(extinctionFlashTimer * 4f) * 0.3f + 0.7f;
+                    for (int i = 0; i < wavePoints; i++) {
+                        float angle = MathHelper.TwoPi * i / wavePoints;
+                        Vector2 pos = center + new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * waveRingRadius;
 
-                if (ringRadius > GalaxyRadius || ringRadius < GalaxyRadius - coverRadius) continue;
-
-                float ringAlpha = alpha * 0.35f * flash;
-
-                int segments = 24;
-                for (int j = 0; j < segments; j++) {
-                    float angle = MathHelper.TwoPi * j / segments;
-                    Vector2 pos = center + new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * ringRadius;
-
-                    Color c = Color.Lerp(deathColor, flashColor, ringT * flash);
-                    c.A = 0;
-
-                    sb.Draw(pixel, pos, new Rectangle(0, 0, 1, 1),
-                        c * ringAlpha, angle, new Vector2(0.5f),
-                        new Vector2(18f, 5f), SpriteEffects.None, 0f);
+                        if (softGlow != null) {
+                            Color waveColor = new Color(255, 40, 20);
+                            waveColor.A = 0;
+                            float waveAlpha = alpha * 0.2f * wavePulse;
+                            Vector2 origin = new(softGlow.Width * 0.5f, softGlow.Height * 0.5f);
+                            sb.Draw(softGlow, pos, null, waveColor * waveAlpha, 0f,
+                                origin, 0.2f, SpriteEffects.None, 0f);
+                        } else {
+                            Color dotColor = new Color(255, 50, 30) * (alpha * 0.3f * wavePulse);
+                            dotColor.A = 0;
+                            sb.Draw(pixel, pos, new Rectangle(0, 0, 1, 1),
+                                dotColor, angle, new Vector2(0.5f),
+                                new Vector2(8f, 3f), SpriteEffects.None, 0f);
+                        }
+                    }
                 }
             }
 
-            //灭绝令文本闪烁(仅在初期阶段)
-            if (extinctionProgress < 0.5f && extinctionProgress > 0.05f) {
-                float textAlpha = alpha * flash * MathF.Sin(extinctionProgress / 0.5f * MathHelper.Pi);
+            //灭绝令警告文本（持续显示在面板底部区域）
+            if (extinctionProgress > 0.05f) {
+                Rectangle panelRect = GetPanelRect();
+                float textFade = extinctionProgress < 0.3f
+                    ? extinctionProgress / 0.3f
+                    : 1f;
+                float textAlpha = alpha * flash * textFade;
                 string warningText = "◢ EXTINCTION PROTOCOL ACTIVE ◣";
                 var font = FontAssets.MouseText.Value;
-                Vector2 textSize = font.MeasureString(warningText) * 0.6f;
-                Vector2 textPos = center + new Vector2(-textSize.X * 0.5f, GalaxyRadius + 30f);
+                Vector2 textSize = font.MeasureString(warningText) * 0.55f;
+                Vector2 textPos = new(
+                    panelRect.X + (panelRect.Width - textSize.X) * 0.5f,
+                    panelRect.Bottom - 30f
+                );
+
+                //红色警告背景条
+                Rectangle warnBg = new(panelRect.X + 6, panelRect.Bottom - 36, panelRect.Width - 12, 26);
+                sb.Draw(pixel, warnBg, new Rectangle(0, 0, 1, 1), new Color(80, 10, 10) * (textAlpha * 0.5f));
 
                 //发光底色
                 for (int g = 0; g < 4; g++) {
                     float gAngle = MathHelper.TwoPi * g / 4f;
-                    Vector2 gOffset = new Vector2(MathF.Cos(gAngle), MathF.Sin(gAngle)) * 1.5f;
+                    Vector2 gOffset = new Vector2(MathF.Cos(gAngle), MathF.Sin(gAngle)) * 1.2f;
                     Utils.DrawBorderString(sb, warningText, textPos + gOffset,
-                        new Color(200, 50, 30) * (textAlpha * 0.5f), 0.6f);
+                        new Color(200, 50, 30) * (textAlpha * 0.4f), 0.55f);
                 }
-                Utils.DrawBorderString(sb, warningText, textPos, Color.White * textAlpha, 0.6f);
+                Utils.DrawBorderString(sb, warningText, textPos, Color.White * textAlpha, 0.55f);
             }
         }
 
@@ -812,127 +994,121 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
             if (pixel == null) return;
 
             //泰拉位于银河系中心附近
-            Vector2 terraPos = center + new Vector2(3f, 2f);//轻微偏移
+            Vector2 terraPos = center + new Vector2(3f, 2f);
             float blink = MathF.Sin(terraBlinkTimer) * 0.3f + 0.7f;
             float markerAlpha = alpha * blink;
 
-            //绿色标记点
-            Color terraColor = new Color(100, 255, 120);
+            //根据灭绝令状态决定颜色
+            bool inDanger = extinctionProgress > 0.5f;
+            Color terraColor = inDanger
+                ? Color.Lerp(new Color(100, 255, 120), new Color(255, 60, 40),
+                    MathF.Sin(extinctionFlashTimer * 2f) * 0.5f + 0.5f)
+                : new Color(100, 255, 120);
 
-            //闪烁的点
-            sb.Draw(pixel, terraPos, new Rectangle(0, 0, 1, 1),
-                terraColor * markerAlpha, 0f, new Vector2(0.5f),
-                new Vector2(4f), SpriteEffects.None, 0f);
+            Texture2D softGlow = CWRAsset.SoftGlow?.Value;
 
-            //光环
-            Color ringColor = terraColor;
-            ringColor.A = 0;
-            float ringPulse = (MathF.Sin(terraBlinkTimer * 0.7f) + 1f) * 0.5f;
-            float ringRadius = 8f + ringPulse * 6f;
+            //使用SoftGlow绘制泰拉标记光斑
+            if (softGlow != null) {
+                Vector2 glowOrigin = new(softGlow.Width * 0.5f, softGlow.Height * 0.5f);
 
-            int segments = 16;
-            for (int i = 0; i < segments; i++) {
-                float angle = MathHelper.TwoPi * i / segments;
-                Vector2 pos = terraPos + new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * ringRadius;
-                sb.Draw(pixel, pos, new Rectangle(0, 0, 1, 1),
-                    ringColor * (markerAlpha * 0.5f * (1f - ringPulse * 0.5f)),
-                    angle, new Vector2(0.5f), new Vector2(5f, 1.5f), SpriteEffects.None, 0f);
-            }
+                //外层呼吸光环
+                float ringPulse = (MathF.Sin(terraBlinkTimer * 0.7f) + 1f) * 0.5f;
+                Color ringGlow = terraColor;
+                ringGlow.A = 0;
+                float ringScale = 0.22f + ringPulse * 0.12f;
+                sb.Draw(softGlow, terraPos, null,
+                    ringGlow * (markerAlpha * 0.3f * (1f - ringPulse * 0.3f)),
+                    0f, glowOrigin, ringScale, SpriteEffects.None, 0f);
 
-            //如果灭绝令激活，泰拉标记变红
-            if (extinctionProgress > 0.5f) {
-                float dangerAlpha = alpha * MathF.Sin(extinctionFlashTimer * 2f) * 0.5f + 0.5f;
-                Color dangerColor = new Color(255, 60, 40);
-                dangerColor.A = 0;
+                //内核亮点
+                Color coreGlow = terraColor;
+                coreGlow.A = 0;
+                sb.Draw(softGlow, terraPos, null,
+                    coreGlow * (markerAlpha * 0.7f),
+                    0f, glowOrigin, 0.08f, SpriteEffects.None, 0f);
 
+                //灭绝令危险时叠加红色大光斑
+                if (inDanger) {
+                    float dangerPulse = MathF.Sin(extinctionFlashTimer * 3f) * 0.4f + 0.6f;
+                    Color dangerGlow = new Color(255, 40, 20);
+                    dangerGlow.A = 0;
+                    sb.Draw(softGlow, terraPos, null,
+                        dangerGlow * (alpha * 0.25f * dangerPulse),
+                        0f, glowOrigin, 0.35f, SpriteEffects.None, 0f);
+                }
+            } else {
+                //后备方案
                 sb.Draw(pixel, terraPos, new Rectangle(0, 0, 1, 1),
-                    dangerColor * dangerAlpha, 0f, new Vector2(0.5f),
-                    new Vector2(8f), SpriteEffects.None, 0f);
+                    terraColor * markerAlpha, 0f, new Vector2(0.5f),
+                    new Vector2(4f), SpriteEffects.None, 0f);
+
+                if (inDanger) {
+                    Color dangerColor = new Color(255, 60, 40);
+                    dangerColor.A = 0;
+                    float dangerAlpha = alpha * MathF.Sin(extinctionFlashTimer * 2f) * 0.5f + 0.5f;
+                    sb.Draw(pixel, terraPos, new Rectangle(0, 0, 1, 1),
+                        dangerColor * dangerAlpha, 0f, new Vector2(0.5f),
+                        new Vector2(8f), SpriteEffects.None, 0f);
+                }
             }
 
             //标注文字"TERRA"
             float textAlpha = alpha * 0.7f;
-            Utils.DrawBorderString(sb, "TERRA", terraPos + new Vector2(10, -8),
-                terraColor * textAlpha, 0.4f);
+            Utils.DrawBorderString(sb, "TERRA", terraPos + new Vector2(12, -10),
+                terraColor * textAlpha, 0.45f);
         }
 
         #endregion
 
-        #region 全息边框
-
-        private static void DrawHologramFrame(SpriteBatch sb, Vector2 center, float alpha) {
-            Texture2D pixel = VaultAsset.placeholder2.Value;
-            if (pixel == null) return;
-
-            float frameSize = GalaxyRadius + 40f;
-            Rectangle frameRect = new(
-                (int)(center.X - frameSize),
-                (int)(center.Y - frameSize),
-                (int)(frameSize * 2f),
-                (int)(frameSize * 2f)
-            );
-
-            Color techColor = new Color(60, 160, 220) * (alpha * 0.5f);
-
-            //绘制四边淡蓝色线
-            int thickness = 2;
-            sb.Draw(pixel, new Rectangle(frameRect.X, frameRect.Y, frameRect.Width, thickness), techColor);
-            sb.Draw(pixel, new Rectangle(frameRect.X, frameRect.Bottom - thickness, frameRect.Width, thickness), techColor * 0.7f);
-            sb.Draw(pixel, new Rectangle(frameRect.X, frameRect.Y, thickness, frameRect.Height), techColor * 0.85f);
-            sb.Draw(pixel, new Rectangle(frameRect.Right - thickness, frameRect.Y, thickness, frameRect.Height), techColor * 0.85f);
-
-            //四角装饰
-            float cornerSize = 15f;
-            Color cornerColor = new Color(80, 200, 255) * (alpha * 0.6f);
-            DrawCornerDecor(sb, new Vector2(frameRect.X + 6, frameRect.Y + 6), cornerColor, cornerSize, -MathHelper.PiOver2);
-            DrawCornerDecor(sb, new Vector2(frameRect.Right - 6, frameRect.Y + 6), cornerColor, cornerSize, 0f);
-            DrawCornerDecor(sb, new Vector2(frameRect.X + 6, frameRect.Bottom - 6), cornerColor, cornerSize, MathHelper.Pi);
-            DrawCornerDecor(sb, new Vector2(frameRect.Right - 6, frameRect.Bottom - 6), cornerColor, cornerSize, MathHelper.PiOver2);
-        }
+        #region 角落装饰
 
         private static void DrawCornerDecor(SpriteBatch sb, Vector2 pos, Color color, float size, float rotation) {
             Texture2D pixel = VaultAsset.placeholder2.Value;
             if (pixel == null) return;
 
+            //主L形线
             sb.Draw(pixel, pos, new Rectangle(0, 0, 1, 1), color, rotation,
                 new Vector2(0.5f), new Vector2(size, size * 0.2f), SpriteEffects.None, 0f);
             sb.Draw(pixel, pos, new Rectangle(0, 0, 1, 1), color * 0.7f, rotation + MathHelper.PiOver2,
                 new Vector2(0.5f), new Vector2(size, size * 0.2f), SpriteEffects.None, 0f);
+
+            //内侧次级短线
+            sb.Draw(pixel, pos, new Rectangle(0, 0, 1, 1), color * 0.4f, rotation,
+                new Vector2(0.5f), new Vector2(size * 0.5f, size * 0.12f), SpriteEffects.None, 0f);
         }
 
         #endregion
 
         #region 扫描线和干扰
 
-        private static void DrawScanLineEffect(SpriteBatch sb, Vector2 center, float alpha) {
+        private static void DrawScanLineEffect(SpriteBatch sb, Rectangle panelRect, float alpha) {
             Texture2D pixel = VaultAsset.placeholder2.Value;
             if (pixel == null) return;
 
-            float frameSize = GalaxyRadius + 40f;
-            float scanY = center.Y - frameSize + scanLineProgress * frameSize * 2f;
+            //主扫描线在面板范围内移动
+            float scanY = panelRect.Y + 38f + scanLineProgress * (panelRect.Height - 42f);
 
-            Color scanColor = new Color(60, 180, 255) * (alpha * 0.25f);
-            sb.Draw(pixel, new Vector2(center.X - frameSize, scanY), new Rectangle(0, 0, 1, 1),
-                scanColor, 0f, Vector2.Zero, new Vector2(frameSize * 2f, 2f), SpriteEffects.None, 0f);
+            Color scanColor = new Color(60, 180, 255) * (alpha * 0.2f);
+            sb.Draw(pixel, new Vector2(panelRect.X + 6, scanY), new Rectangle(0, 0, 1, 1),
+                scanColor, 0f, Vector2.Zero, new Vector2(panelRect.Width - 12, 2f), SpriteEffects.None, 0f);
 
             //辅助扫描线
             float scan2 = (scanLineProgress + 0.5f) % 1f;
-            float scan2Y = center.Y - frameSize + scan2 * frameSize * 2f;
-            sb.Draw(pixel, new Vector2(center.X - frameSize, scan2Y), new Rectangle(0, 0, 1, 1),
-                scanColor * 0.4f, 0f, Vector2.Zero, new Vector2(frameSize * 2f, 1f), SpriteEffects.None, 0f);
+            float scan2Y = panelRect.Y + 38f + scan2 * (panelRect.Height - 42f);
+            sb.Draw(pixel, new Vector2(panelRect.X + 6, scan2Y), new Rectangle(0, 0, 1, 1),
+                scanColor * 0.4f, 0f, Vector2.Zero, new Vector2(panelRect.Width - 12, 1f), SpriteEffects.None, 0f);
         }
 
-        private static void DrawGlitchNoise(SpriteBatch sb, Vector2 center, float alpha) {
+        private static void DrawGlitchNoise(SpriteBatch sb, Rectangle panelRect, float alpha) {
             Texture2D pixel = VaultAsset.placeholder2.Value;
             if (pixel == null) return;
 
-            float frameSize = GalaxyRadius + 40f;
-            int noiseCount = (int)(glitchIntensity * 40f);
+            int noiseCount = (int)(glitchIntensity * 50f);
 
             for (int i = 0; i < noiseCount; i++) {
-                float x = center.X - frameSize + Main.rand.NextFloat(frameSize * 2f);
-                float y = center.Y - frameSize + Main.rand.NextFloat(frameSize * 2f);
-                float w = Main.rand.NextFloat(5f, 40f);
+                float x = panelRect.X + Main.rand.NextFloat(panelRect.Width);
+                float y = panelRect.Y + Main.rand.NextFloat(panelRect.Height);
+                float w = Main.rand.NextFloat(5f, 50f);
                 float h = Main.rand.NextFloat(1f, 3f);
 
                 Color noiseColor = Main.rand.NextBool()
