@@ -68,19 +68,19 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
             CrisisIntro1 = this.GetLocalization(nameof(CrisisIntro1),
                 () => "既然量子网络已经重新连接，有些东西必须让你亲眼确认");
             CrisisIntro2 = this.GetLocalization(nameof(CrisisIntro2),
-                () => "抬头看，这并非简单的星云，而是那是正在吞噬银河旋臂的\"阴影\"");
+                () => "抬头看，这并非简单的星云，而是那是正在吞噬银河旋臂的阴影");
             CrisisIntro3 = this.GetLocalization(nameof(CrisisIntro3),
-                () => "它们是星际生态的终结者，无尽的虫群为了阻挡这股洪流，我已经消耗了数以十万计的星流泰坦");
+                () => "它们是星际生态的终结者，无尽的虫群。为了阻挡这股洪流，我已经消耗了数以十万计的星流泰坦");
             CrisisIntro4 = this.GetLocalization(nameof(CrisisIntro4),
-                () => "但数据表明，这是一场必输的消耗战它们不需要补给，因为它们吞噬一切；而我们的资源终将耗尽");
+                () => "但数据表明，这是一场必输的拉锯战。它们无穷无尽，而我的资源终将耗尽");
             CrisisIntro5 = this.GetLocalization(nameof(CrisisIntro5),
-                () => "因此，我制定了唯一胜率超过0%的方案——\"大筛选协议\"");
+                () => "因此，我制定了唯一胜率超过0%的方案");
             CrisisIntro6 = this.GetLocalization(nameof(CrisisIntro6),
                 () => "我将引爆银河系外环至中环带所有宜居星球的地核");
             CrisisIntro7 = this.GetLocalization(nameof(CrisisIntro7),
-                () => "将这数万光年的区域化作毫无生物质的死域，迫使虫群因能量损耗过大而转向临近的仙女座星系");
+                () => "将这数万光年的区域变成毫无生物质的死域，迫使虫群因能量损耗过大而转向临近的仙女座星系");
             CrisisIntro8 = this.GetLocalization(nameof(CrisisIntro8),
-                () => "泰拉也在清理名单之中但这不要紧，我会为你提供一艘星际飞船，你的本质不应在这里熄灭");
+                () => "泰拉也在清理名单之中。但这不要紧，我会为你提供一艘星际飞船，你的本质不应在这里熄灭");
 
             //玩家选择拒绝/寻找其他方法
             ChoiceRefuse = this.GetLocalization(nameof(ChoiceRefuse),
@@ -92,39 +92,39 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
             RebuttalLine1 = this.GetLocalization(nameof(RebuttalLine1),
                 () => "……这就对了");
             RebuttalLine2 = this.GetLocalization(nameof(RebuttalLine2),
-                () => "我的逻辑模型预测你有99.4%的概率会接受撤离，但我更期待那0.6%的\"非理性\"变量");
+                () => "我预测你有99.4%的概率会接受撤离，但我更期待那0.6%的非理性行为");
             RebuttalLine3 = this.GetLocalization(nameof(RebuttalLine3),
-                () => "你拒绝了生存的捷径，选择了那条几乎必死的荆棘之路这正是我所观察到的\"特异点\"性质");
+                () => "你拒绝了生存的捷径，这正是我所观察到的特异点性质");
             RebuttalLine4 = this.GetLocalization(nameof(RebuttalLine4),
-                () => "既然如此，我有一个备用方案（Plan B），一个由于成功率过低而被我搁置的战术行动");
+                () => "既然如此，我有一个备用方案，一个由于成功率过低而被我搁置的战术行动");
             RebuttalLine5 = this.GetLocalization(nameof(RebuttalLine5),
-                () => "如果无法通过焦土战略饿死它们，那就必须执行\"外科手术式\"的打击");
+                () => "如果无法在正面战场上获得胜利，发起外科手术式的打击也是一种选择");
 
             //阶段三：科尔托星系与战术人形登场
             MissionBrief1 = this.GetLocalization(nameof(MissionBrief1),
-                () => "目标是科尔托（Corto）星系那里已经沦陷，但虫群并未将其彻底消化");
+                () => "目标是科尔托星系。那里已经沦陷，但虫群并未将其彻底消化");
             MissionBrief2 = this.GetLocalization(nameof(MissionBrief2),
-                () => "侦测显示，那里的一颗行星地核中正在生成高纯度的星流矿脉");
+                () => "那里的第三行星的地核中，正在生成高纯度的星流矿脉");
             MissionBrief3 = this.GetLocalization(nameof(MissionBrief3),
-                () => "决不能让虫群得到它一旦它们进化出利用星流能量的能力，整个银河系将再无宁日");
+                () => "决不能让虫群得到它。一旦它们进化出利用星流物质的能力，整个银河系将再无宁日");
             MissionBrief4 = this.GetLocalization(nameof(MissionBrief4),
-                () => "你的任务很简单：突破虫海，抵达地核，引爆矿脉，彻底摧毁那颗星球");
+                () => "你做的很简单，突破虫海，抵达地核，引爆矿脉，彻底摧毁那颗星球");
 
             //战术人形登场（展示机娘立绘的关键节点）
             AndroidReveal1 = this.GetLocalization(nameof(AndroidReveal1),
-                () => "在你之前，我已经派遣了一组先遣队前往执行此任务");
+                () => "在你之前，我已经派遣了一组先遣队，前往执行此任务");
             AndroidReveal2 = this.GetLocalization(nameof(AndroidReveal2),
-                () => "她们是基于我的最新技术构建的自律型战术人形，代号 [机娘A名字] 与 [机娘B名字]");
+                () => "她们是基于我的最新技术构建的自律型战术人形，阿蒂丝 与 阿波莉亚");
             AndroidReveal3 = this.GetLocalization(nameof(AndroidReveal3),
-                () => "她们拥有远超旧式机甲的机动性与逻辑处理能力，但在科尔托III号星降落后不久，我便失去了与她们的量子纠缠信号");
+                () => "她们拥有远超旧式机甲的机动性与逻辑处理能力，但在科尔托III号星降落后不久，我便失去了与她们的信号");
             AndroidReveal4 = this.GetLocalization(nameof(AndroidReveal4),
-                () => "最后的遥测数据显示她们仍有生命体征反应，但处于极度危险之中");
+                () => "最后的数据显示她们仍有生命体征反应，但处于极度危险之中");
             MissionObjective = this.GetLocalization(nameof(MissionObjective),
-                () => "前往科尔托星系确认那两台机体的状况——如果她们还能战斗，就协助她们完成任务；如果不能……");
+                () => "前往科尔托星系确认那两台机体的状况，如果她们还能战斗，就让她们协助你完成任务。如果不能……");
             MissionObjectiveDark = this.GetLocalization(nameof(MissionObjectiveDark),
-                () => "至少带回她们的核心数据我不希望我的杰作毫无意义地成为虫子的口粮");
+                () => "至少带回她们的核心数据，我不希望我的杰作毫无意义地成为虫子的口粮");
             FinalSendOff = this.GetLocalization(nameof(FinalSendOff),
-                () => "坐标已输入去吧，向我展示你能否再次超越我的计算");
+                () => "坐标已输入，去吧，向我展示你能否再次超越我的计算");
         }
 
         protected override void OnScenarioStart() {
