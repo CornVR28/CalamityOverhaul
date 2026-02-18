@@ -20,8 +20,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
         //两人立绘的独立动画状态
         private static float artisRevealProgress;
         private static float apolaRevealProgress;
-        private static float artisPortraitFloat;
-        private static float apolaPortraitFloat;
 
         //信号丢失闪烁
         private static float signalLostBlinkTimer;
@@ -36,8 +34,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
             androidDataScrollTimer = 0f;
             artisRevealProgress = 0f;
             apolaRevealProgress = 0f;
-            artisPortraitFloat = 0f;
-            apolaPortraitFloat = 0f;
             signalLostBlinkTimer = 0f;
         }
 
@@ -65,17 +61,13 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
             androidRevealProgress = MathF.Min(androidRevealProgress + 0.015f, 1f);
             phaseProgress = androidRevealProgress;
 
-            //阿蒂丝先出现，阿波拉稍后出现
+            //阿波拉先出现，阿蒂丝稍后出现
             if (androidRevealProgress > 0.1f) {
-                artisRevealProgress = MathF.Min(artisRevealProgress + 0.025f, 1f);
-            }
-            if (androidRevealProgress > 0.3f) {
                 apolaRevealProgress = MathF.Min(apolaRevealProgress + 0.025f, 1f);
             }
-
-            //立绘浮动
-            artisPortraitFloat += 0.03f;
-            apolaPortraitFloat += 0.025f;
+            if (androidRevealProgress > 0.3f) {
+                artisRevealProgress = MathF.Min(artisRevealProgress + 0.025f, 1f);
+            }
 
             //轻微信号干扰
             glitchIntensity = MathHelper.Lerp(0.01f, 0.05f, androidRevealProgress);
@@ -89,118 +81,66 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
             float revealAlpha = alpha * CWRUtils.EaseOutCubic(androidRevealProgress);
 
             //面板内部区域（留出标题栏和边框）
-            int margin = 40;
+            int marginH = 40;
+            int marginV = 40;
             Rectangle contentRect = new(
-                panelRect.X + margin,
-                panelRect.Y + margin,
-                panelRect.Width - margin * 2,
-                panelRect.Height - margin * 2
+                panelRect.X + marginH,
+                panelRect.Y + marginV,
+                panelRect.Width - marginH * 2,
+                panelRect.Height - marginV * 2
             );
 
-            //中间分割线位置
-            float dividerX = panelRect.X + panelRect.Width * 0.5f;
+            //双生子共用外框
+            DrawTwinOuterFrame(sb, contentRect, revealAlpha);
 
-            //绘制中央分割线
-            DrawProfileDivider(sb, dividerX, contentRect, revealAlpha);
+            //立绘区域占据上方大部分空间
+            int portraitZoneHeight = (int)(contentRect.Height * 0.68f);
+            //两人的间距很小，凸显双生子的关系
+            int gap = 4;
+            int halfWidth = (contentRect.Width - gap) / 2;
 
-            //左侧：阿蒂丝
-            Rectangle leftPanel = new(contentRect.X, contentRect.Y, contentRect.Width / 2 - 10, contentRect.Height);
-            DrawAndroidCard(sb, leftPanel, ADVAsset.Artis, AndroidArtisName.Value,
-                artisRevealProgress, artisPortraitFloat, revealAlpha, true);
+            //左侧：阿波拉（Apola）
+            Rectangle leftPortraitRect = new(contentRect.X, contentRect.Y, halfWidth, portraitZoneHeight);
+            DrawAndroidCard(sb, leftPortraitRect, ADVAsset.Apola, AndroidApolaName.Value,
+                apolaRevealProgress, revealAlpha, true);
 
-            //右侧：阿波拉
-            Rectangle rightPanel = new((int)dividerX + 10, contentRect.Y, contentRect.Width / 2 - 10, contentRect.Height);
-            DrawAndroidCard(sb, rightPanel, ADVAsset.Apola, AndroidApolaName.Value,
-                apolaRevealProgress, apolaPortraitFloat, revealAlpha, false);
+            //右侧：阿蒂丝（Artis）
+            Rectangle rightPortraitRect = new(contentRect.X + halfWidth + gap, contentRect.Y, halfWidth, portraitZoneHeight);
+            DrawAndroidCard(sb, rightPortraitRect, ADVAsset.Artis, AndroidArtisName.Value,
+                artisRevealProgress, revealAlpha, false);
+
+            //中间的细分割线（仅在立绘区域，非常细淡，暗示两者的联系而非分割）
+            DrawTwinDivider(sb, contentRect.X + halfWidth + gap / 2f, contentRect, portraitZoneHeight, revealAlpha);
+
+            //底部共享信息区域
+            Rectangle infoRect = new(contentRect.X, contentRect.Y + portraitZoneHeight + 6, contentRect.Width, contentRect.Height - portraitZoneHeight - 6);
+            DrawTwinInfoPanel(sb, infoRect, revealAlpha);
         }
 
         /// <summary>
-        /// 绘制中央分割线
+        /// 绘制双生子共用外框（强调两人是一个整体）
         /// </summary>
-        private static void DrawProfileDivider(SpriteBatch sb, float x, Rectangle contentRect, float alpha) {
+        private static void DrawTwinOuterFrame(SpriteBatch sb, Rectangle rect, float alpha) {
             Texture2D pixel = VaultAsset.placeholder2.Value;
             if (pixel == null) return;
 
-            Color techColor = new Color(60, 160, 220);
-            float pulse = MathF.Sin(hologramFlicker * 2f) * 0.15f + 0.85f;
-
-            //主分割线
-            float lineHeight = contentRect.Height * CWRUtils.EaseOutCubic(androidRevealProgress);
-            float lineY = contentRect.Y + (contentRect.Height - lineHeight) * 0.5f;
-
-            sb.Draw(pixel, new Vector2(x, lineY), new Rectangle(0, 0, 1, 1),
-                techColor * (alpha * 0.6f * pulse), 0f, Vector2.Zero,
-                new Vector2(2f, lineHeight), SpriteEffects.None, 0f);
-
-            //分割线上的装饰节点
-            int nodeCount = 5;
-            for (int i = 0; i < nodeCount; i++) {
-                float t = i / (float)(nodeCount - 1);
-                float nodeY = lineY + lineHeight * t;
-                float nodeSize = 4f + MathF.Sin(hologramFlicker + t * 3f) * 1f;
-
-                sb.Draw(pixel, new Vector2(x - nodeSize / 2f, nodeY - nodeSize / 2f),
-                    new Rectangle(0, 0, 1, 1),
-                    techColor * (alpha * 0.8f * pulse), 0f, Vector2.Zero,
-                    new Vector2(nodeSize), SpriteEffects.None, 0f);
-            }
-        }
-
-        /// <summary>
-        /// 绘制单个战术人形卡片（立绘+信息）
-        /// </summary>
-        private static void DrawAndroidCard(SpriteBatch sb, Rectangle area, Texture2D portrait,
-            string name, float revealProgress, float floatTimer, float alpha, bool isLeft) {
-            if (revealProgress <= 0.01f) return;
-
-            float cardAlpha = alpha * CWRUtils.EaseOutCubic(revealProgress);
-            Texture2D pixel = VaultAsset.placeholder2.Value;
-            Color techColor = new Color(60, 160, 220);
-
-            //立绘区域（上方大部分空间）
-            int portraitHeight = (int)(area.Height * 0.65f);
-            Rectangle portraitRect = new(area.X, area.Y, area.Width, portraitHeight);
-
-            //绘制立绘背景框
-            DrawPortraitFrame(sb, portraitRect, cardAlpha, revealProgress);
-
-            //绘制立绘
-            if (portrait != null) {
-                DrawAndroidPortrait(sb, portrait, portraitRect, cardAlpha, revealProgress, floatTimer);
-            }
-
-            //绘制信息区域（立绘下方）
-            Rectangle infoRect = new(area.X, area.Y + portraitHeight + 8, area.Width, area.Height - portraitHeight - 8);
-            DrawAndroidInfo(sb, infoRect, name, cardAlpha, revealProgress, isLeft);
-        }
-
-        /// <summary>
-        /// 绘制立绘背景框（科技风格边框）
-        /// </summary>
-        private static void DrawPortraitFrame(SpriteBatch sb, Rectangle rect, float alpha, float reveal) {
-            Texture2D pixel = VaultAsset.placeholder2.Value;
-            if (pixel == null) return;
-
-            Color frameColor = new Color(40, 120, 180);
+            Color frameColor = new Color(50, 140, 200);
             float pulse = MathF.Sin(hologramFlicker * 2f) * 0.1f + 0.9f;
-            Color borderColor = frameColor * (alpha * 0.5f * pulse);
+            Color borderColor = frameColor * (alpha * 0.35f * pulse);
 
-            //半透明背景
-            Color bgColor = new Color(8, 14, 28) * (alpha * 0.5f);
-            sb.Draw(pixel, rect, new Rectangle(0, 0, 1, 1), bgColor);
-
-            //边框线
-            float lineWidth = rect.Width * CWRUtils.EaseOutCubic(reveal);
+            //展开动画
+            float reveal = CWRUtils.EaseOutCubic(androidRevealProgress);
+            float lineWidth = rect.Width * reveal;
             float lineX = rect.X + (rect.Width - lineWidth) * 0.5f;
+            float lineHeight = rect.Height * reveal;
+            float lineY = rect.Y + (rect.Height - lineHeight) * 0.5f;
+
             //上边
             sb.Draw(pixel, new Vector2(lineX, rect.Y), new Rectangle(0, 0, 1, 1),
                 borderColor, 0f, Vector2.Zero, new Vector2(lineWidth, 1f), SpriteEffects.None, 0f);
             //下边
             sb.Draw(pixel, new Vector2(lineX, rect.Bottom - 1), new Rectangle(0, 0, 1, 1),
                 borderColor, 0f, Vector2.Zero, new Vector2(lineWidth, 1f), SpriteEffects.None, 0f);
-
-            float lineHeight = rect.Height * CWRUtils.EaseOutCubic(reveal);
-            float lineY = rect.Y + (rect.Height - lineHeight) * 0.5f;
             //左边
             sb.Draw(pixel, new Vector2(rect.X, lineY), new Rectangle(0, 0, 1, 1),
                 borderColor, 0f, Vector2.Zero, new Vector2(1f, lineHeight), SpriteEffects.None, 0f);
@@ -209,8 +149,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
                 borderColor, 0f, Vector2.Zero, new Vector2(1f, lineHeight), SpriteEffects.None, 0f);
 
             //角落装饰
-            float cornerLen = 12f;
-            Color cornerColor = new Color(80, 200, 255) * (alpha * 0.6f * pulse);
+            float cornerLen = 16f;
+            Color cornerColor = new Color(80, 200, 255) * (alpha * 0.5f * pulse);
             //左上
             sb.Draw(pixel, new Vector2(rect.X, rect.Y), new Rectangle(0, 0, 1, 1),
                 cornerColor, 0f, Vector2.Zero, new Vector2(cornerLen, 2f), SpriteEffects.None, 0f);
@@ -234,38 +174,84 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
         }
 
         /// <summary>
-        /// 绘制战术人形立绘（带全息投影效果）
+        /// 绘制双生子之间极淡的分割线（暗示联系而非分割）
+        /// </summary>
+        private static void DrawTwinDivider(SpriteBatch sb, float x, Rectangle contentRect, int portraitZoneHeight, float alpha) {
+            Texture2D pixel = VaultAsset.placeholder2.Value;
+            if (pixel == null) return;
+
+            Color divColor = new Color(60, 160, 220);
+            float pulse = MathF.Sin(hologramFlicker * 2.5f) * 0.15f + 0.85f;
+
+            //非常细淡的虚线
+            float reveal = CWRUtils.EaseOutCubic(androidRevealProgress);
+            float lineH = portraitZoneHeight * reveal;
+            float lineY = contentRect.Y + (portraitZoneHeight - lineH) * 0.5f;
+
+            int segments = 12;
+            float segHeight = lineH / (segments * 2f);
+            for (int i = 0; i < segments; i++) {
+                float sy = lineY + i * segHeight * 2f;
+                sb.Draw(pixel, new Vector2(x, sy), new Rectangle(0, 0, 1, 1),
+                    divColor * (alpha * 0.2f * pulse), 0f, Vector2.Zero,
+                    new Vector2(1f, segHeight), SpriteEffects.None, 0f);
+            }
+        }
+
+        /// <summary>
+        /// 绘制单个战术人形卡片（立绘占满整个区域，全身展示）
+        /// </summary>
+        private static void DrawAndroidCard(SpriteBatch sb, Rectangle area, Texture2D portrait,
+            string name, float revealProgress, float alpha, bool isLeft) {
+            if (revealProgress <= 0.01f) return;
+
+            float cardAlpha = alpha * CWRUtils.EaseOutCubic(revealProgress);
+
+            //半透明背景
+            Texture2D pixel = VaultAsset.placeholder2.Value;
+            if (pixel != null) {
+                Color bgColor = new Color(6, 10, 20) * (cardAlpha * 0.4f);
+                sb.Draw(pixel, area, new Rectangle(0, 0, 1, 1), bgColor);
+            }
+
+            //绘制立绘（全身，填满整个区域）
+            if (portrait != null) {
+                DrawAndroidPortrait(sb, portrait, area, cardAlpha, revealProgress, isLeft);
+            }
+        }
+
+        /// <summary>
+        /// 绘制战术人形立绘（全身展示，无浮动，带全息投影效果）
         /// </summary>
         private static void DrawAndroidPortrait(SpriteBatch sb, Texture2D portrait, Rectangle rect,
-            float alpha, float reveal, float floatTimer) {
+            float alpha, float reveal, bool isLeft) {
             if (portrait == null) return;
 
-            //计算绘制尺寸，保持纵横比并填充框架
+            //计算绘制尺寸：保持纵横比，确保全身完整显示在框内
             float texAspect = portrait.Width / (float)portrait.Height;
             float rectAspect = rect.Width / (float)rect.Height;
 
             int drawWidth, drawHeight;
             if (texAspect > rectAspect) {
-                //纹理更宽，以高度为基准
-                drawHeight = (int)(rect.Height * 0.9f);
-                drawWidth = (int)(drawHeight * texAspect);
-            }
-            else {
-                //纹理更高，以宽度为基准
-                drawWidth = (int)(rect.Width * 0.85f);
+                //纹理更宽，以宽度为约束
+                drawWidth = rect.Width;
                 drawHeight = (int)(drawWidth / texAspect);
             }
+            else {
+                //纹理更高，以高度为约束
+                drawHeight = rect.Height;
+                drawWidth = (int)(drawHeight * texAspect);
+            }
 
-            //居中绘制 + 浮动偏移
-            float floatY = MathF.Sin(floatTimer) * 3f;
+            //水平居中，垂直底部对齐（脚踩底边）
             Vector2 drawPos = new(
                 rect.X + (rect.Width - drawWidth) * 0.5f,
-                rect.Y + (rect.Height - drawHeight) * 0.5f + floatY
+                rect.Bottom - drawHeight
             );
 
-            //出场动画：从下方滑入
-            float slideOffset = (1f - CWRUtils.EaseOutCubic(reveal)) * 40f;
-            drawPos.Y += slideOffset;
+            //出场动画：从侧方滑入（左侧角色从左滑入，右侧从右滑入）
+            float slideOffset = (1f - CWRUtils.EaseOutCubic(reveal)) * 50f;
+            drawPos.X += isLeft ? -slideOffset : slideOffset;
 
             float portraitAlpha = alpha * MathHelper.Clamp(reveal * 2f, 0f, 1f);
 
@@ -274,27 +260,25 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
             //全息投影底色光晕
             Texture2D softGlow = CWRAsset.SoftGlow?.Value;
             if (softGlow != null) {
-                Vector2 glowCenter = new(rect.X + rect.Width * 0.5f, rect.Y + rect.Height * 0.5f + floatY);
+                Vector2 glowCenter = new(rect.X + rect.Width * 0.5f, rect.Y + rect.Height * 0.5f);
                 Vector2 glowOrigin = new(softGlow.Width * 0.5f, softGlow.Height * 0.5f);
-                Color glowColor = new Color(40, 120, 200, 0) * (portraitAlpha * 0.15f);
-                float glowScale = MathF.Max(drawWidth, drawHeight) / (float)softGlow.Width * 2.5f;
+                Color glowColor = new Color(40, 120, 200, 0) * (portraitAlpha * 0.12f);
+                float glowScale = MathF.Max(drawWidth, drawHeight) / (float)softGlow.Width * 2.2f;
                 sb.Draw(softGlow, glowCenter, null, glowColor, 0f, glowOrigin, glowScale, SpriteEffects.None, 0f);
             }
 
-            //主立绘
-            Color mainColor = Color.White * portraitAlpha;
             //轻微全息投影色调
             Color holoTint = new Color(200, 230, 255) * portraitAlpha;
             sb.Draw(portrait, destRect, null, holoTint, 0f, Vector2.Zero, SpriteEffects.None, 0f);
 
             //全息扫描线覆盖效果
-            DrawHoloScanOverlay(sb, rect, portraitAlpha, floatY);
+            DrawHoloScanOverlay(sb, rect, portraitAlpha);
         }
 
         /// <summary>
         /// 绘制全息扫描线覆盖在立绘上
         /// </summary>
-        private static void DrawHoloScanOverlay(SpriteBatch sb, Rectangle rect, float alpha, float floatY) {
+        private static void DrawHoloScanOverlay(SpriteBatch sb, Rectangle rect, float alpha) {
             Texture2D pixel = VaultAsset.placeholder2.Value;
             if (pixel == null) return;
 
@@ -313,53 +297,77 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
         }
 
         /// <summary>
-        /// 绘制战术人形信息面板
+        /// 绘制双生子共享信息面板（底部，左右各一列信息）
         /// </summary>
-        private static void DrawAndroidInfo(SpriteBatch sb, Rectangle rect, string name,
-            float alpha, float reveal, bool isLeft) {
+        private static void DrawTwinInfoPanel(SpriteBatch sb, Rectangle rect, float alpha) {
             Texture2D pixel = VaultAsset.placeholder2.Value;
             if (pixel == null) return;
 
             var font = FontAssets.MouseText.Value;
             Color techColor = new Color(60, 160, 220);
             Color dimTech = new Color(40, 100, 160);
-            float pulse = MathF.Sin(hologramFlicker * 2f) * 0.1f + 0.9f;
+
+            float textAlpha = alpha * MathHelper.Clamp((androidRevealProgress - 0.3f) * 2.5f, 0f, 1f);
+            if (textAlpha <= 0.01f) return;
 
             //信息区域背景
-            Color infoBg = new Color(6, 12, 22) * (alpha * 0.6f);
+            Color infoBg = new Color(6, 12, 22) * (textAlpha * 0.5f);
             sb.Draw(pixel, rect, new Rectangle(0, 0, 1, 1), infoBg);
 
             //上方分隔线
             sb.Draw(pixel, new Vector2(rect.X, rect.Y), new Rectangle(0, 0, 1, 1),
-                techColor * (alpha * 0.4f), 0f, Vector2.Zero,
+                techColor * (textAlpha * 0.4f), 0f, Vector2.Zero,
                 new Vector2(rect.Width, 1f), SpriteEffects.None, 0f);
 
-            float textAlpha = alpha * MathHelper.Clamp((reveal - 0.3f) * 3f, 0f, 1f);
-            if (textAlpha <= 0.01f) return;
+            int halfWidth = rect.Width / 2;
+            float lineSpacing = 20f;
 
+            //===== 左侧：阿波拉信息 =====
+            float leftX = rect.X + 12f;
             float lineY = rect.Y + 8f;
-            float lineSpacing = 22f;
 
-            //代号标签
-            DrawInfoLabel(sb, font, AndroidCodename.Value, name,
-                new Vector2(rect.X + 10f, lineY), techColor, textAlpha, 0.5f);
+            float apolaTextAlpha = textAlpha * MathHelper.Clamp(apolaRevealProgress * 2f, 0f, 1f);
+            DrawInfoLabel(sb, font, AndroidCodename.Value, AndroidApolaName.Value,
+                new Vector2(leftX, lineY), techColor, apolaTextAlpha, 0.48f);
             lineY += lineSpacing;
 
-            //类型标签
             DrawInfoLine(sb, font, AndroidClassLabel.Value,
-                new Vector2(rect.X + 10f, lineY), dimTech, textAlpha * 0.8f, 0.42f);
+                new Vector2(leftX, lineY), dimTech, apolaTextAlpha * 0.8f, 0.4f);
             lineY += lineSpacing;
 
-            //状态标签（带闪烁警告效果）
+            //状态（闪烁警告）
             float statusBlink = MathF.Sin(signalLostBlinkTimer) * 0.5f + 0.5f;
             Color statusColor = Color.Lerp(new Color(200, 60, 40), new Color(255, 100, 60), statusBlink);
-
             DrawInfoLabel(sb, font, AndroidStatusLabel.Value, AndroidStatusLost.Value,
-                new Vector2(rect.X + 10f, lineY), statusColor, textAlpha, 0.5f);
+                new Vector2(leftX, lineY), statusColor, apolaTextAlpha, 0.48f);
             lineY += lineSpacing;
 
-            //信号丢失指示条（动态）
-            DrawSignalLostBar(sb, new Rectangle(rect.X + 10, (int)lineY, rect.Width - 20, 6), textAlpha);
+            DrawSignalLostBar(sb, new Rectangle((int)leftX, (int)lineY, halfWidth - 24, 5), apolaTextAlpha);
+
+            //===== 右侧：阿蒂丝信息 =====
+            float rightX = rect.X + halfWidth + 12f;
+            lineY = rect.Y + 8f;
+
+            float artisTextAlpha = textAlpha * MathHelper.Clamp(artisRevealProgress * 2f, 0f, 1f);
+            DrawInfoLabel(sb, font, AndroidCodename.Value, AndroidArtisName.Value,
+                new Vector2(rightX, lineY), techColor, artisTextAlpha, 0.48f);
+            lineY += lineSpacing;
+
+            DrawInfoLine(sb, font, AndroidClassLabel.Value,
+                new Vector2(rightX, lineY), dimTech, artisTextAlpha * 0.8f, 0.4f);
+            lineY += lineSpacing;
+
+            DrawInfoLabel(sb, font, AndroidStatusLabel.Value, AndroidStatusLost.Value,
+                new Vector2(rightX, lineY), statusColor, artisTextAlpha, 0.48f);
+            lineY += lineSpacing;
+
+            DrawSignalLostBar(sb, new Rectangle((int)rightX, (int)lineY, halfWidth - 24, 5), artisTextAlpha);
+
+            //中间细线分隔左右信息
+            float divPulse = MathF.Sin(hologramFlicker * 2.5f) * 0.1f + 0.9f;
+            sb.Draw(pixel, new Vector2(rect.X + halfWidth, rect.Y + 4), new Rectangle(0, 0, 1, 1),
+                techColor * (textAlpha * 0.2f * divPulse), 0f, Vector2.Zero,
+                new Vector2(1f, rect.Height - 8), SpriteEffects.None, 0f);
         }
 
         /// <summary>
