@@ -5,7 +5,7 @@ using System;
 using Terraria.Localization;
 using Terraria.ModLoader;
 
-namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
+namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.GalacticCrisises
 {
     /// <summary>
     /// 银河危机剧情场景
