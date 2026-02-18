@@ -318,6 +318,19 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
             DrawPanelBackground(sb, panelRect, alpha);
             DrawPanelBorder(sb, panelRect, alpha);
 
+            //开启剪裁，防止虫群/银河系等内容溢出面板边界
+            int clipMargin = 4;
+            Rectangle clipRect = new(panelRect.X + clipMargin, panelRect.Y + clipMargin,
+                panelRect.Width - clipMargin * 2, panelRect.Height - clipMargin * 2);
+            Rectangle origScissorRect = sb.GraphicsDevice.ScissorRectangle;
+            RasterizerState scissorRaster = new() { ScissorTestEnable = true };
+
+            sb.End();
+            Rectangle safeClipRect = Rectangle.Intersect(clipRect, sb.GraphicsDevice.Viewport.Bounds);
+            sb.GraphicsDevice.ScissorRectangle = VaultUtils.GetClippingRectangle(sb, safeClipRect);
+            sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp,
+                DepthStencilState.None, scissorRaster, null, Main.UIScaleMatrix);
+
             //科尔托行星视图阶段：完全替换银河系绘制
             if (currentPhase == AnimPhase.KortoPlanetView && kortoPlanetTransition > 0.99f) {
                 DrawKortoPlanetView(sb, center, alpha);
@@ -352,6 +365,12 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
                     DrawTerraMarker(sb, center, alpha);
                 }
             }
+
+            //结束剪裁，恢复原始状态
+            sb.End();
+            sb.GraphicsDevice.ScissorRectangle = origScissorRect;
+            sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp,
+                DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.UIScaleMatrix);
 
             DrawScanLineEffect(sb, panelRect, alpha);
 
