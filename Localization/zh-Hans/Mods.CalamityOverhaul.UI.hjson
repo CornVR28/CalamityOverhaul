@@ -1,4 +1,4 @@
-﻿ItemFilterUI: {
+ItemFilterUI: {
 	HintText: 左键点击可添加项目
 	HintText2: 左键点击可移除项目
 	CloseHint: "[ESC]键或[右键点击]可关闭"
@@ -365,4 +365,11 @@ GalacticCrisisRender: {
 	KortoThreatCritical: 威胁：危急
 	KortoPlanetCountInfo: 科尔托星系 — 6颗行星
 	KortoStatusCompromised: 状态：已沦陷
+	// HeaderAndroidProfile: ◢ TACTICAL ANDROID DOSSIER ◣
+	// AndroidArtisName: ARTIS
+	// AndroidApolaName: APOLA
+	// AndroidCodename: CODENAME
+	// AndroidClassLabel: CLASS: TACTICAL ANDROID
+	// AndroidStatusLabel: STATUS
+	// AndroidStatusLost: SIGNAL LOST
 }

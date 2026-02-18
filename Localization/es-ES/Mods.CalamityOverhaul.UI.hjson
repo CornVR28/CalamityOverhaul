@@ -365,4 +365,11 @@ GalacticCrisisRender: {
 	// KortoThreatCritical: THREAT: CRITICAL
 	// KortoPlanetCountInfo: KORTO SYSTEM — 6 PLANETS
 	// KortoStatusCompromised: STATUS: COMPROMISED
+	// HeaderAndroidProfile: ◢ TACTICAL ANDROID DOSSIER ◣
+	// AndroidArtisName: ARTIS
+	// AndroidApolaName: APOLA
+	// AndroidCodename: CODENAME
+	// AndroidClassLabel: CLASS: TACTICAL ANDROID
+	// AndroidStatusLabel: STATUS
+	// AndroidStatusLost: SIGNAL LOST
 }

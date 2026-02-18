@@ -239,8 +239,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
                 Add(DraedonName.Value + red, MissionBrief5.Value);
 
                 //战术人形登场
-                Add(DraedonName.Value, AndroidReveal1.Value);
-                //TODO: 这里将来需要注册机娘A和机娘B的立绘，并在AndroidReveal2处切换展示
+                Add(DraedonName.Value, AndroidReveal1.Value, onStart: () => {
+                    GalacticCrisisRender.SetPhase(GalacticCrisisRender.AnimPhase.AndroidProfile);
+                });
                 Add(DraedonName.Value, AndroidReveal2.Value);
                 Add(DraedonName.Value, AndroidReveal3.Value);
                 Add(DraedonName.Value, AndroidReveal4.Value);

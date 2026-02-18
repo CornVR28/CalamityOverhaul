@@ -57,6 +57,10 @@ namespace CalamityOverhaul.Content.ADV
         public static Texture2D Draedon2RedADV = null;
         [VaultLoaden(CWRConstant.ADV + "Draedon/Tzeentch")]
         public static Texture2D Tzeentch = null;
+        [VaultLoaden(CWRConstant.ADV + "Draedon/")]
+        public static Texture2D Apola = null;
+        [VaultLoaden(CWRConstant.ADV + "Draedon/")]
+        public static Texture2D Artis = null;
         [VaultLoaden(CWRConstant.ADV)]
         public static Texture2D FUJI = null;
         [VaultLoaden(CWRConstant.ADV + "Abysse/")]

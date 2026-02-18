@@ -34,6 +34,15 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
         //灭绝令
         public static LocalizedText ExtinctionProtocolWarning { get; private set; }
 
+        //战术人形档案
+        public static LocalizedText HeaderAndroidProfile { get; private set; }
+        public static LocalizedText AndroidArtisName { get; private set; }
+        public static LocalizedText AndroidApolaName { get; private set; }
+        public static LocalizedText AndroidCodename { get; private set; }
+        public static LocalizedText AndroidClassLabel { get; private set; }
+        public static LocalizedText AndroidStatusLabel { get; private set; }
+        public static LocalizedText AndroidStatusLost { get; private set; }
+
         //科尔托标记
         public static LocalizedText KortoSystemLabel { get; private set; }
         public static LocalizedText KortoTargetLocked { get; private set; }
@@ -53,6 +62,14 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
             HeaderGalacticStrategicMap = this.GetLocalization(nameof(HeaderGalacticStrategicMap), () => "◢ GALACTIC STRATEGIC MAP ◣");
 
             MarkerTerra = this.GetLocalization(nameof(MarkerTerra), () => "TERRA");
+
+            HeaderAndroidProfile = this.GetLocalization(nameof(HeaderAndroidProfile), () => "◢ TACTICAL ANDROID DOSSIER ◣");
+            AndroidArtisName = this.GetLocalization(nameof(AndroidArtisName), () => "ARTIS");
+            AndroidApolaName = this.GetLocalization(nameof(AndroidApolaName), () => "APOLA");
+            AndroidCodename = this.GetLocalization(nameof(AndroidCodename), () => "CODENAME");
+            AndroidClassLabel = this.GetLocalization(nameof(AndroidClassLabel), () => "CLASS: TACTICAL ANDROID");
+            AndroidStatusLabel = this.GetLocalization(nameof(AndroidStatusLabel), () => "STATUS");
+            AndroidStatusLost = this.GetLocalization(nameof(AndroidStatusLost), () => "SIGNAL LOST");
 
             ExtinctionProtocolWarning = this.GetLocalization(nameof(ExtinctionProtocolWarning), () => "◢ EXTINCTION PROTOCOL ACTIVE ◣");
 
@@ -78,6 +95,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
             Idle,
             KortoZoom,
             KortoPlanetView,
+            AndroidProfile,
             FadeOut,
         }
 
@@ -104,9 +122,13 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
         //科尔托行星视图的超宽面板尺寸
         private const float KortoPanelWidth = 1100f;
         private const float KortoPanelHeight = 480f;
+        //战术人形信息展示面板尺寸
+        private const float AndroidPanelWidth = 900f;
+        private const float AndroidPanelHeight = 620f;
         private const int BorderThickness = 3;
         private static float panelExpandProgress;
         private static float kortoPanelExpandProgress;
+        private static float androidPanelExpandProgress;
 
         //信号干扰
         private static float glitchIntensity;
@@ -131,11 +153,13 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
             glitchFrameSkip = 0;
             panelExpandProgress = 0f;
             kortoPanelExpandProgress = 0f;
+            androidPanelExpandProgress = 0f;
 
             InitGalaxy();
             InitSwarm();
             InitExtinction();
             InitKorto();
+            InitAndroid();
         }
 
         internal static void SetPhase(AnimPhase phase) {
@@ -180,6 +204,13 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
                         MaxInstances = 1
                     });
                     break;
+                case AnimPhase.AndroidProfile:
+                    SoundEngine.PlaySound(SoundID.DD2_EtherianPortalDryadTouch with {
+                        Volume = 0.4f,
+                        Pitch = 0.1f,
+                        MaxInstances = 1
+                    });
+                    break;
             }
         }
 
@@ -196,6 +227,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
             CleanupGalaxy();
             CleanupSwarm();
             CleanupKorto();
+            CleanupAndroid();
         }
 
         #endregion
@@ -225,9 +257,15 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
             kortoPanelExpandProgress += (kortoExpandTarget - kortoPanelExpandProgress) * 0.035f;
             kortoPanelExpandProgress = MathHelper.Clamp(kortoPanelExpandProgress, 0f, 1f);
 
+            //战术人形档案阶段面板尺寸过渡
+            float androidExpandTarget = (currentPhase == AnimPhase.AndroidProfile && currentPhase != AnimPhase.FadeOut) ? 1f : 0f;
+            androidPanelExpandProgress += (androidExpandTarget - androidPanelExpandProgress) * 0.04f;
+            androidPanelExpandProgress = MathHelper.Clamp(androidPanelExpandProgress, 0f, 1f);
+
             UpdateGalaxyLogic();
             UpdateSwarmLogic();
             UpdateExtinctionLogic();
+            UpdateAndroidLogic();
 
             //整体淡入淡出
             if (active && currentPhase != AnimPhase.FadeOut) {
@@ -265,6 +303,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
                 case AnimPhase.KortoPlanetView:
                     UpdateKortoPlanetViewPhase();
                     break;
+                case AnimPhase.AndroidProfile:
+                    UpdateAndroidProfilePhase();
+                    break;
             }
         }
 
@@ -292,6 +333,13 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
                 float kortoEase = CWRUtils.EaseInOutCubic(kortoPanelExpandProgress);
                 w = MathHelper.Lerp(w, KortoPanelWidth, kortoEase);
                 h = MathHelper.Lerp(h, KortoPanelHeight, kortoEase);
+            }
+
+            //战术人形档案：独立面板尺寸
+            if (androidPanelExpandProgress > 0.01f) {
+                float androidEase = CWRUtils.EaseInOutCubic(androidPanelExpandProgress);
+                w = MathHelper.Lerp(w, AndroidPanelWidth, androidEase);
+                h = MathHelper.Lerp(h, AndroidPanelHeight, androidEase);
             }
 
             int x = (int)(Main.screenWidth * 0.5f - w * 0.5f);
@@ -331,8 +379,12 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
             sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp,
                 DepthStencilState.None, scissorRaster, null, Main.UIScaleMatrix);
 
+            //战术人形档案阶段
+            if (currentPhase == AnimPhase.AndroidProfile) {
+                DrawAndroidProfile(sb, center, panelRect, alpha);
+            }
             //科尔托行星视图阶段：完全替换银河系绘制
-            if (currentPhase == AnimPhase.KortoPlanetView && kortoPlanetTransition > 0.99f) {
+            else if (currentPhase == AnimPhase.KortoPlanetView && kortoPlanetTransition > 0.99f) {
                 DrawKortoPlanetView(sb, center, alpha);
             }
             //科尔托缩放阶段：使用缩放版银河系绘制
@@ -449,6 +501,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
             string title = currentPhase switch {
                 AnimPhase.KortoZoom => HeaderStellarNavigation.Value,
                 AnimPhase.KortoPlanetView => HeaderKortoSystemOverview.Value,
+                AnimPhase.AndroidProfile => HeaderAndroidProfile.Value,
                 _ => HeaderGalacticStrategicMap.Value
             };
             var font = FontAssets.MouseText.Value;
