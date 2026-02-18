@@ -2,6 +2,7 @@
 using CalamityOverhaul.Content.ADV.DialogueBoxs;
 using CalamityOverhaul.Content.ADV.DialogueBoxs.Styles;
 using System;
+using Terraria;
 using Terraria.Localization;
 using Terraria.ModLoader;
 
@@ -247,7 +248,18 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Galac
                 Add(DraedonName.Value, AndroidReveal4.Value);
                 Add(DraedonName.Value, MissionObjective.Value);
                 Add(DraedonName.Value + red, MissionObjectiveDark.Value);
-                Add(DraedonName.Value + red, FinalSendOff.Value);
+                Add(DraedonName.Value + red, FinalSendOff.Value, onStart: () => {
+                    //最后一句台词时，在玩家前方生成亚空间传送门
+                    Player player = Main.LocalPlayer;
+                    Vector2 portalPos = player.Center + new Vector2(player.direction * 300f, -60f);
+                    Projectile.NewProjectile(
+                        player.GetSource_FromThis(),
+                        portalPos,
+                        Vector2.Zero,
+                        ModContent.ProjectileType<SubspacePortal>(),
+                        0, 0f, player.whoAmI
+                    );
+                });
             }
         }
     }
