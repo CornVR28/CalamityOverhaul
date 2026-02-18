@@ -38,13 +38,13 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
         public static LocalizedText RebuttalLine2 { get; private set; }
         public static LocalizedText RebuttalLine3 { get; private set; }
         public static LocalizedText RebuttalLine4 { get; private set; }
-        public static LocalizedText RebuttalLine5 { get; private set; }
 
         //阶段三：科尔托星系任务简报
         public static LocalizedText MissionBrief1 { get; private set; }
         public static LocalizedText MissionBrief2 { get; private set; }
         public static LocalizedText MissionBrief3 { get; private set; }
         public static LocalizedText MissionBrief4 { get; private set; }
+        public static LocalizedText MissionBrief5 { get; private set; }
 
         //战术人形登场
         public static LocalizedText AndroidReveal1 { get; private set; }
@@ -69,11 +69,11 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
             CrisisIntro1 = this.GetLocalization(nameof(CrisisIntro1),
                 () => "既然量子网络已经重新连接，有些东西必须让你亲眼确认");
             CrisisIntro2 = this.GetLocalization(nameof(CrisisIntro2),
-                () => "抬头看，这并非简单的星云，那是正在吞噬银河旋臂的阴影");
+                () => "这是正在吞噬银河旋臂的阴影");
             CrisisIntro3 = this.GetLocalization(nameof(CrisisIntro3),
-                () => "它们是星际生态的终结者，虫族。为了阻挡这股洪流，我已经消耗了数以十万计的星流泰坦");
+                () => "它们是星际生态的终结者，虫族。为了阻挡，我已经消耗了数以十万计的星流泰坦");
             CrisisIntro4 = this.GetLocalization(nameof(CrisisIntro4),
-                () => "从十三起启示录级战争的数据表明，这是一场必输的拉锯战。它们无穷无尽，而我的资源终将耗尽");
+                () => "数据表明，这是一场必输的拉锯战。它们无穷无尽，而我的资源终将耗尽");
             CrisisIntro5 = this.GetLocalization(nameof(CrisisIntro5),
                 () => "因此，我制定了唯一胜率超过0%的方案");
             CrisisIntro6 = this.GetLocalization(nameof(CrisisIntro6),
@@ -99,9 +99,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
             RebuttalLine3 = this.GetLocalization(nameof(RebuttalLine3),
                 () => "你拒绝了生存的捷径，这正是我所观察到的特异点性质");
             RebuttalLine4 = this.GetLocalization(nameof(RebuttalLine4),
-                () => "既然如此，我有一个备用方案，一个由于成功率过低而被我搁置的战术行动");
-            RebuttalLine5 = this.GetLocalization(nameof(RebuttalLine5),
-                () => "如果无法在正面战场上获得胜利，发起外科手术式的打击也是一种选择");
+                () => "既然如此，我有一个备用方案，一个由于成功率过低而被我搁置的行动");
 
             //阶段三：科尔托星系与战术人形登场
             MissionBrief1 = this.GetLocalization(nameof(MissionBrief1),
@@ -112,14 +110,16 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
                 () => "决不能让虫族得到它。一旦它们进化出利用星流物质的能力，众神也足以被它们撕碎");
             MissionBrief4 = this.GetLocalization(nameof(MissionBrief4),
                 () => "你做的很简单，突破虫海，抵达地核，引爆矿脉，彻底摧毁那颗星球");
+            MissionBrief5 = this.GetLocalization(nameof(MissionBrief5),
+                () => "如果这次行动顺利，将证明个体在与虫族的战争中可以起到决定性作用，我将以你为核心制作一套新的战略");
 
             //战术人形登场（展示机娘立绘的关键节点）
             AndroidReveal1 = this.GetLocalization(nameof(AndroidReveal1),
                 () => "在你之前，我已经派遣了一组先遣队，前往执行此任务");
             AndroidReveal2 = this.GetLocalization(nameof(AndroidReveal2),
-                () => "她们是基于我的最新技术构建的自律型战术人形，阿蒂丝 与 阿波莉亚");
+                () => "她们是基于我的最新技术构建的战术人形，阿蒂丝 与 阿波拉");
             AndroidReveal3 = this.GetLocalization(nameof(AndroidReveal3),
-                () => "她们拥有远超旧式机甲的机动性与逻辑处理能力，但在科尔托III号星降落后不久，我便失去了她们的信号");
+                () => "她们的能力远超旧式机甲，但在科尔托III号星降落后不久，我便失去了她们的信号");
             AndroidReveal4 = this.GetLocalization(nameof(AndroidReveal4),
                 () => "最后的数据显示她们仍有生命体征反应，但处于极度危险之中");
             MissionObjective = this.GetLocalization(nameof(MissionObjective),
@@ -222,7 +222,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
                 Add(DraedonName.Value, RebuttalLine2.Value);
                 Add(DraedonName.Value, RebuttalLine3.Value);
                 Add(DraedonName.Value, RebuttalLine4.Value);
-                Add(DraedonName.Value + red, RebuttalLine5.Value);
 
                 //阶段三：科尔托星系任务简报
                 //提及科尔托时重新激活星图，银河系开始放大聚焦到科尔托星系
@@ -237,6 +236,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
                 });
                 Add(DraedonName.Value + red, MissionBrief3.Value);
                 Add(DraedonName.Value + red, MissionBrief4.Value);
+                Add(DraedonName.Value + red, MissionBrief5.Value);
 
                 //战术人形登场
                 Add(DraedonName.Value, AndroidReveal1.Value);
