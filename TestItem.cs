@@ -68,17 +68,16 @@ namespace CalamityOverhaul
         }
 
         public override bool? UseItem(Player player) {
-            //ScenarioManager.Reset<GalacticCrisis>();
-            //ScenarioManager.Start<GalacticCrisis>();
-            Player player = Main.LocalPlayer;
-            Vector2 portalPos = player.Center + new Vector2(player.direction * 300f, -60f);
-            Projectile.NewProjectile(
-                player.GetSource_FromThis(),
-                portalPos,
-                Vector2.Zero,
-                ModContent.ProjectileType<SubspacePortal>(),
-                0, 0f, player.whoAmI
-            );
+            ScenarioManager.Reset<GalacticCrisis>();
+            ScenarioManager.Start<GalacticCrisis>();
+            //Vector2 portalPos = player.Center + new Vector2(player.direction * 300f, -60f);
+            //Projectile.NewProjectile(
+            //    player.GetSource_FromThis(),
+            //    portalPos,
+            //    Vector2.Zero,
+            //    ModContent.ProjectileType<SubspacePortal>(),
+            //    0, 0f, player.whoAmI
+            //);
             return true;
         }
     }
