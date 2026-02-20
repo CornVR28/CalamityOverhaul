@@ -248,6 +248,17 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
 
             // 地面残留效果
             SpawnGroundResidual(TargetPosition);
+
+            // 触发天空闪光效果：根据与玩家的距离计算闪光强度
+            Player player = Main.LocalPlayer;
+            if (player != null && player.active) {
+                float dist = Vector2.Distance(TargetPosition, player.Center);
+                //1200像素内为最强闪光，3000像素外无闪光
+                float flashStrength = MathHelper.Clamp(1f - (dist - 1200f) / 1800f, 0f, 1f);
+                if (flashStrength > 0.05f) {
+                    MachineWorldSky.TriggerLightningFlash(TargetPosition, flashStrength);
+                }
+            }
         }
 
         /// <summary>

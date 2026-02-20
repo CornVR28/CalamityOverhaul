@@ -29,6 +29,11 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         private bool active;
         private float intensity;
 
+        //闪电闪光系统
+        private static float lightningFlashIntensity;
+        private static float lightningFlashDecay;
+        private static Vector2 lightningFlashScreenPos;
+
         //残骸纹理名列表
         private static readonly string[] ExoGoreNames = [
             "Apollo1", "Apollo2", "Apollo3", "Apollo4", "Apollo5",
@@ -66,6 +71,17 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         private int riftCooldown;
         //地平线光效
         private float horizonGlowPhase;
+
+        /// <summary>
+        /// 触发闪电闪光效果，由MachineTesla在OnStrike时调用
+        /// </summary>
+        /// <param name="worldPosition">闪电击中的世界坐标</param>
+        /// <param name="flashStrength">闪光强度(0-1)</param>
+        internal static void TriggerLightningFlash(Vector2 worldPosition, float flashStrength) {
+            lightningFlashIntensity = MathHelper.Clamp(flashStrength, 0f, 1f);
+            lightningFlashDecay = 0f;
+            lightningFlashScreenPos = worldPosition - Main.screenPosition;
+        }
 
         void ICWRLoader.LoadData() {
             if (VaultUtils.isServer)
@@ -162,6 +178,14 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
             pulseTimer += 0.016f;
             horizonGlowPhase += 0.008f;
 
+            //更新闪电闪光衰减
+            if (lightningFlashIntensity > 0.01f) {
+                lightningFlashDecay += 0.04f;
+                lightningFlashIntensity *= 0.92f;
+                if (lightningFlashIntensity < 0.01f)
+                    lightningFlashIntensity = 0f;
+            }
+
             //更新残骸
             if (farDebris != null) {
                 foreach (ref var d in farDebris.AsSpan())
@@ -218,6 +242,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
                 DrawSporeParticles(spriteBatch);
                 DrawNearDebris(spriteBatch);
                 DrawSubspaceRift(spriteBatch);
+                DrawLightningFlash(spriteBatch);
             }
         }
 
@@ -226,9 +251,14 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         /// </summary>
         private void DrawVoidBackground(SpriteBatch sb) {
             Texture2D px = VaultAsset.placeholder2.Value;
-            //深邃暗底色，略带深蓝紫调
+            //深邃暗底色，略带深蓝紫调，闪电时提亮
+            float flashLift = lightningFlashIntensity * 0.15f;
+            Color baseVoid = new Color(
+                (int)(8 + 30 * flashLift),
+                (int)(6 + 35 * flashLift),
+                (int)(14 + 50 * flashLift));
             sb.Draw(px, new Rectangle(0, 0, Main.screenWidth, Main.screenHeight),
-                new Color(8, 6, 14) * intensity);
+                baseVoid * intensity);
 
             //暗紫红孢子云，在边缘和角落更浓
             float cloudPulse = MathF.Sin(pulseTimer * 0.3f) * 0.3f + 0.7f;
@@ -286,8 +316,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         /// </summary>
         private void DrawFarDebris(SpriteBatch sb) {
             if (farDebris == null) return;
+            float flashBoost = lightningFlashIntensity * 0.3f;
             foreach (ref var d in farDebris.AsSpan()) {
-                DrawDebrisEntity(sb, ref d, intensity * 0.6f, true);
+                DrawDebrisEntity(sb, ref d, intensity * (0.6f + flashBoost), true);
             }
         }
 
@@ -296,8 +327,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         /// </summary>
         private void DrawMidDebris(SpriteBatch sb) {
             if (midDebris == null) return;
+            float flashBoost = lightningFlashIntensity * 0.35f;
             foreach (ref var d in midDebris.AsSpan()) {
-                DrawDebrisEntity(sb, ref d, intensity * 0.75f, true);
+                DrawDebrisEntity(sb, ref d, intensity * (0.75f + flashBoost), true);
             }
         }
 
@@ -306,8 +338,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         /// </summary>
         private void DrawNearDebris(SpriteBatch sb) {
             if (nearDebris == null) return;
+            float flashBoost = lightningFlashIntensity * 0.4f;
             foreach (ref var d in nearDebris.AsSpan()) {
-                DrawDebrisEntity(sb, ref d, intensity * 0.9f, false);
+                DrawDebrisEntity(sb, ref d, intensity * (0.9f + flashBoost), false);
 
                 //偶尔在残骸缝隙中绘制能量阵痛光效
                 if (d.EnergyPulsePhase > 0) {
@@ -337,9 +370,12 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
             Vector2 origin = tex.Size() * 0.5f;
             SpriteEffects fx = d.FlipH ? SpriteEffects.FlipHorizontally : SpriteEffects.None;
 
-            //边缘高饱和冷色轮廓线（rim lighting）
-            Color rimColor = new Color(70, 140, 230) * (alpha * 0.6f);
-            float rimOffset = 2f;
+            //边缘高饱和冷色轮廓线（rim lighting），闪电时更亮更宽
+            float flashRim = lightningFlashIntensity;
+            Color rimBase = new Color(70, 140, 230);
+            Color rimFlash = new Color(130, 220, 255);
+            Color rimColor = Color.Lerp(rimBase, rimFlash, flashRim) * (alpha * (0.6f + flashRim * 0.5f));
+            float rimOffset = 2f + flashRim * 1.5f;
             for (int i = 0; i < 4; i++) {
                 float angle = MathHelper.PiOver2 * i;
                 Vector2 off = new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * rimOffset;
@@ -356,8 +392,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         /// </summary>
         private void DrawMetalShards(SpriteBatch sb) {
             Texture2D px = VaultAsset.placeholder2.Value;
+            float flashBoost = 1f + lightningFlashIntensity * 2f;
             foreach (ref var p in metalShards.AsSpan()) {
-                Color c = p.Color * (intensity * p.Alpha * 1.2f);
+                Color c = p.Color * (intensity * p.Alpha * 1.2f * flashBoost);
                 sb.Draw(px, p.Position, new Rectangle(0, 0, 1, 1), c, p.Rotation,
                     new Vector2(0.5f), new Vector2(p.Size * 1.8f, p.Size * 0.5f), SpriteEffects.None, 0f);
             }
@@ -371,8 +408,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
                 return;
             Texture2D glow = CWRAsset.SoftGlow.Value;
 
+            float flashBoost = 1f + lightningFlashIntensity * 1.5f;
             foreach (ref var p in sporeParticles.AsSpan()) {
-                Color c = p.Color with { A = 0 } * (intensity * p.Alpha * 0.9f);
+                Color c = p.Color with { A = 0 } * (intensity * p.Alpha * 0.9f * flashBoost);
                 sb.Draw(glow, p.Position, null, c, 0f, glow.Size() * 0.5f, p.Size * 0.06f, SpriteEffects.None, 0f);
             }
         }
@@ -410,9 +448,12 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
 
             int horizonY = (int)(Main.screenHeight * 0.92f);
 
-            //地平线后方橙红火光（星流矿脉余温）
+            //地平线后方橙红火光（星流矿脉余温），闪电时混入冷色电光
             float glowPulse = MathF.Sin(horizonGlowPhase) * 0.3f + 0.7f;
-            Color fireColor = new Color(120, 40, 10) * (intensity * 0.45f * glowPulse);
+            float flashFactor = lightningFlashIntensity;
+            Color fireBase = new Color(120, 40, 10);
+            Color fireFlash = new Color(80, 140, 200);
+            Color fireColor = Color.Lerp(fireBase, fireFlash, flashFactor * 0.6f) * (intensity * (0.45f + flashFactor * 0.35f) * glowPulse);
 
             //渐变火光带（更宽更亮）
             for (int dy = 0; dy < 60; dy++) {
@@ -457,6 +498,30 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
             sb.Draw(glow, center, null, color with { A = 0 }, 0f, glow.Size() * 0.5f, scale, SpriteEffects.None, 0f);
         }
 
+        /// <summary>
+        /// 闪电闪光叠加层：全屏冷色闪光 + 闪电源点辉光
+        /// </summary>
+        private void DrawLightningFlash(SpriteBatch sb) {
+            if (lightningFlashIntensity <= 0.01f)
+                return;
+
+            Texture2D px = VaultAsset.placeholder2.Value;
+            float flash = lightningFlashIntensity;
+
+            //全屏冷色闪光叠加
+            Color flashColor = new Color(60, 100, 140) * (flash * intensity * 0.35f);
+            sb.Draw(px, new Rectangle(0, 0, Main.screenWidth, Main.screenHeight),
+                flashColor);
+
+            //闪电源点附近的强烈辉光
+            Vector2 flashPos = lightningFlashScreenPos;
+            if (flashPos.X > -500 && flashPos.X < Main.screenWidth + 500
+                && flashPos.Y > -500 && flashPos.Y < Main.screenHeight + 500) {
+                DrawSoftGlow(sb, flashPos, new Color(120, 200, 255) * (flash * intensity * 0.6f), 200f * flash);
+                DrawSoftGlow(sb, flashPos, new Color(200, 230, 255) * (flash * intensity * 0.4f), 100f * flash);
+            }
+        }
+
         #endregion
 
         public override Color OnTileColor(Color inColor) {
@@ -467,7 +532,18 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
                     (int)(inColor.G * 0.45f),
                     (int)(inColor.B * 0.6f),
                     inColor.A);
-                return Color.Lerp(inColor, tinted, intensity * 0.7f);
+                Color result = Color.Lerp(inColor, tinted, intensity * 0.7f);
+
+                //闪电闪光时提亮方块颜色
+                if (lightningFlashIntensity > 0.01f) {
+                    Color flashTint = new Color(
+                        (int)Math.Min(255, result.R + 80 * lightningFlashIntensity),
+                        (int)Math.Min(255, result.G + 100 * lightningFlashIntensity),
+                        (int)Math.Min(255, result.B + 120 * lightningFlashIntensity),
+                        result.A);
+                    result = Color.Lerp(result, flashTint, lightningFlashIntensity * 0.6f);
+                }
+                return result;
             }
             return inColor;
         }
