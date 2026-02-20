@@ -192,7 +192,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
                 riftCooldown--;
                 if (riftCooldown <= 0) {
                     currentRift = SubspaceRift.CreateRandom();
-                    riftCooldown = Main.rand.Next(900, 2400);
+                    riftCooldown = Main.rand.Next(90, 240);
                 }
             }
         }
@@ -212,12 +212,12 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
                 DrawVoidBackground(spriteBatch);
                 DrawDustClouds(spriteBatch);
                 DrawFarDebris(spriteBatch);
+                DrawHorizonGlow(spriteBatch);
                 DrawMidDebris(spriteBatch);
                 DrawMetalShards(spriteBatch);
                 DrawSporeParticles(spriteBatch);
                 DrawNearDebris(spriteBatch);
                 DrawSubspaceRift(spriteBatch);
-                DrawHorizonGlow(spriteBatch);
             }
         }
 
@@ -226,25 +226,34 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         /// </summary>
         private void DrawVoidBackground(SpriteBatch sb) {
             Texture2D px = VaultAsset.placeholder2.Value;
-            //窒息黑底色 #020205
+            //深邃暗底色，略带深蓝紫调
             sb.Draw(px, new Rectangle(0, 0, Main.screenWidth, Main.screenHeight),
-                new Color(2, 2, 5) * intensity);
+                new Color(8, 6, 14) * intensity);
 
             //暗紫红孢子云，在边缘和角落更浓
             float cloudPulse = MathF.Sin(pulseTimer * 0.3f) * 0.3f + 0.7f;
 
             //左下角尘埃
             DrawSoftGlow(sb, new Vector2(Main.screenWidth * 0.1f, Main.screenHeight * 0.85f),
-                new Color(26, 5, 16) * (intensity * 0.15f * cloudPulse), 400f);
+                new Color(40, 10, 25) * (intensity * 0.35f * cloudPulse), 450f);
 
             //右上角尘埃
             DrawSoftGlow(sb, new Vector2(Main.screenWidth * 0.9f, Main.screenHeight * 0.15f),
-                new Color(26, 5, 16) * (intensity * 0.1f * cloudPulse), 350f);
+                new Color(40, 10, 25) * (intensity * 0.25f * cloudPulse), 400f);
 
             //中心偏右的微弱尘埃
             float drift = MathF.Sin(pulseTimer * 0.15f) * 50f;
             DrawSoftGlow(sb, new Vector2(Main.screenWidth * 0.65f + drift, Main.screenHeight * 0.5f),
-                new Color(20, 3, 12) * (intensity * 0.08f), 500f);
+                new Color(30, 8, 20) * (intensity * 0.2f), 550f);
+
+            //上方冷色星云辉光
+            DrawSoftGlow(sb, new Vector2(Main.screenWidth * 0.4f, Main.screenHeight * 0.12f),
+                new Color(15, 20, 45) * (intensity * 0.2f * cloudPulse), 500f);
+
+            //中心左侧深蓝辉光
+            float drift2 = MathF.Sin(pulseTimer * 0.1f + 1f) * 40f;
+            DrawSoftGlow(sb, new Vector2(Main.screenWidth * 0.25f + drift2, Main.screenHeight * 0.45f),
+                new Color(12, 18, 40) * (intensity * 0.15f), 400f);
         }
 
         /// <summary>
@@ -262,9 +271,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
                 float x = Main.screenWidth * (0.2f + i * 0.2f) + MathF.Sin(phase) * 80f;
                 float y = Main.screenHeight * (0.3f + MathF.Sin(phase * 0.7f + i) * 0.2f);
                 float scale = 2.5f + MathF.Sin(phase * 0.4f) * 0.5f;
-                float alpha = intensity * 0.04f * (MathF.Sin(phase * 0.3f) * 0.5f + 0.5f);
+                float alpha = intensity * 0.14f * (MathF.Sin(phase * 0.3f) * 0.4f + 0.6f);
 
-                Color fogColor = Color.Lerp(new Color(10, 3, 15), new Color(5, 8, 18), MathF.Sin(phase) * 0.5f + 0.5f);
+                Color fogColor = Color.Lerp(new Color(18, 8, 28), new Color(10, 16, 35), MathF.Sin(phase) * 0.5f + 0.5f);
 
                 sb.Draw(fogTex, new Vector2(x, y), null,
                     fogColor * alpha, phase * 0.1f,
@@ -278,7 +287,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         private void DrawFarDebris(SpriteBatch sb) {
             if (farDebris == null) return;
             foreach (ref var d in farDebris.AsSpan()) {
-                DrawDebrisEntity(sb, ref d, intensity * 0.35f, true);
+                DrawDebrisEntity(sb, ref d, intensity * 0.6f, true);
             }
         }
 
@@ -288,7 +297,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         private void DrawMidDebris(SpriteBatch sb) {
             if (midDebris == null) return;
             foreach (ref var d in midDebris.AsSpan()) {
-                DrawDebrisEntity(sb, ref d, intensity * 0.55f, true);
+                DrawDebrisEntity(sb, ref d, intensity * 0.75f, true);
             }
         }
 
@@ -298,17 +307,17 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         private void DrawNearDebris(SpriteBatch sb) {
             if (nearDebris == null) return;
             foreach (ref var d in nearDebris.AsSpan()) {
-                DrawDebrisEntity(sb, ref d, intensity * 0.75f, false);
+                DrawDebrisEntity(sb, ref d, intensity * 0.9f, false);
 
                 //偶尔在残骸缝隙中绘制能量阵痛光效
                 if (d.EnergyPulsePhase > 0) {
                     float pulse = MathF.Sin(d.EnergyPulsePhase * MathF.PI);
                     //深蓝星流脉冲与病态黄绿交替
                     Color pulseColor = MathF.Sin(d.EnergyPulsePhase * 3f) > 0
-                        ? new Color(20, 50, 160) * (pulse * intensity * 0.4f)
-                        : new Color(140, 160, 30) * (pulse * intensity * 0.25f);
+                        ? new Color(40, 80, 220) * (pulse * intensity * 0.7f)
+                        : new Color(180, 200, 50) * (pulse * intensity * 0.5f);
 
-                    DrawSoftGlow(sb, d.ScreenPosition, pulseColor, d.Scale * 30f);
+                    DrawSoftGlow(sb, d.ScreenPosition, pulseColor, d.Scale * 45f);
                 }
             }
         }
@@ -329,8 +338,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
             SpriteEffects fx = d.FlipH ? SpriteEffects.FlipHorizontally : SpriteEffects.None;
 
             //边缘高饱和冷色轮廓线（rim lighting）
-            Color rimColor = new Color(60, 120, 200) * (alpha * 0.35f);
-            float rimOffset = 1.5f;
+            Color rimColor = new Color(70, 140, 230) * (alpha * 0.6f);
+            float rimOffset = 2f;
             for (int i = 0; i < 4; i++) {
                 float angle = MathHelper.PiOver2 * i;
                 Vector2 off = new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * rimOffset;
@@ -348,9 +357,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         private void DrawMetalShards(SpriteBatch sb) {
             Texture2D px = VaultAsset.placeholder2.Value;
             foreach (ref var p in metalShards.AsSpan()) {
-                Color c = p.Color * (intensity * p.Alpha * 0.7f);
+                Color c = p.Color * (intensity * p.Alpha * 1.2f);
                 sb.Draw(px, p.Position, new Rectangle(0, 0, 1, 1), c, p.Rotation,
-                    new Vector2(0.5f), new Vector2(p.Size * 1.5f, p.Size * 0.4f), SpriteEffects.None, 0f);
+                    new Vector2(0.5f), new Vector2(p.Size * 1.8f, p.Size * 0.5f), SpriteEffects.None, 0f);
             }
         }
 
@@ -363,8 +372,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
             Texture2D glow = CWRAsset.SoftGlow.Value;
 
             foreach (ref var p in sporeParticles.AsSpan()) {
-                Color c = p.Color with { A = 0 } * (intensity * p.Alpha * 0.5f);
-                sb.Draw(glow, p.Position, null, c, 0f, glow.Size() * 0.5f, p.Size * 0.04f, SpriteEffects.None, 0f);
+                Color c = p.Color with { A = 0 } * (intensity * p.Alpha * 0.9f);
+                sb.Draw(glow, p.Position, null, c, 0f, glow.Size() * 0.5f, p.Size * 0.06f, SpriteEffects.None, 0f);
             }
         }
 
@@ -374,7 +383,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         private void DrawSubspaceRift(SpriteBatch sb) {
             if (currentRift == null) return;
 
-            Texture2D px = VaultAsset.placeholder2.Value;
+            Texture2D px = CWRAsset.SoftGlow.Value;
             float life = currentRift.LifeProgress;
             float fade = MathF.Sin(life * MathF.PI);
 
@@ -385,12 +394,12 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
             float len = diff.Length();
             float rot = diff.ToRotation();
 
-            Color riftColor = Color.White * (fade * intensity * 0.6f);
+            Color riftColor = Color.White * (fade * intensity * 0.85f);
             sb.Draw(px, start, new Rectangle(0, 0, 1, 1), riftColor, rot,
-                new Vector2(0, 0.5f), new Vector2(len * fade, 1.5f), SpriteEffects.None, 0f);
+                new Vector2(0, 0.5f), new Vector2(len * fade, 2f), SpriteEffects.None, 0f);
 
-            //微弱的辉光
-            DrawSoftGlow(sb, (start + end) * 0.5f, new Color(180, 200, 255) * (fade * intensity * 0.12f), len * 0.3f);
+            //辉光
+            DrawSoftGlow(sb, (start + end) * 0.5f, new Color(180, 200, 255) * (fade * intensity * 0.3f), len * 0.4f);
         }
 
         /// <summary>
@@ -401,15 +410,23 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
 
             int horizonY = (int)(Main.screenHeight * 0.92f);
 
-            //地平线后方暗淡橙红火光（星流矿脉余温）
+            //地平线后方橙红火光（星流矿脉余温）
             float glowPulse = MathF.Sin(horizonGlowPhase) * 0.3f + 0.7f;
-            Color fireColor = new Color(80, 25, 5) * (intensity * 0.2f * glowPulse);
+            Color fireColor = new Color(120, 40, 10) * (intensity * 0.45f * glowPulse);
 
-            //渐变火光带
-            for (int dy = 0; dy < 40; dy++) {
-                float grad = 1f - dy / 40f;
+            //渐变火光带（更宽更亮）
+            for (int dy = 0; dy < 60; dy++) {
+                float grad = 1f - dy / 60f;
                 sb.Draw(px, new Rectangle(0, horizonY + dy, Main.screenWidth, 1),
                     fireColor * (grad * grad));
+            }
+
+            //火光上方微弱的暖色渐变（增加层次）
+            Color upperGlow = new Color(60, 20, 8) * (intensity * 0.15f * glowPulse);
+            for (int dy = 0; dy < 40; dy++) {
+                float grad = 1f - dy / 40f;
+                sb.Draw(px, new Rectangle(0, horizonY - 40 + dy, Main.screenWidth, 1),
+                    upperGlow * (grad * grad * grad));
             }
 
             //锯齿状机械森林剪影
@@ -424,7 +441,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
                 if (i % 13 == 5) h += 15 + Math.Abs(seed >> 12) % 10;
 
                 int x = i * 8;
-                Color silColor = new Color(3, 3, 6) * intensity;
+                Color silColor = new Color(5, 5, 10) * intensity;
                 sb.Draw(px, new Rectangle(x, horizonY - h, 8, h + 20), silColor);
             }
         }
@@ -503,10 +520,10 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
 
                 //暗淡的灰色调，层越远越暗
                 float brightness = layer switch {
-                    DebrisLayer.Far => Main.rand.NextFloat(0.15f, 0.3f),
-                    DebrisLayer.Mid => Main.rand.NextFloat(0.25f, 0.45f),
-                    DebrisLayer.Near => Main.rand.NextFloat(0.35f, 0.6f),
-                    _ => 0.3f
+                    DebrisLayer.Far => Main.rand.NextFloat(0.3f, 0.5f),
+                    DebrisLayer.Mid => Main.rand.NextFloat(0.4f, 0.65f),
+                    DebrisLayer.Near => Main.rand.NextFloat(0.5f, 0.8f),
+                    _ => 0.45f
                 };
                 d.Tint = new Color(brightness, brightness * 0.95f, brightness * 1.1f);
 

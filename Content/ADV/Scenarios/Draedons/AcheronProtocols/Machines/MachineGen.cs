@@ -59,9 +59,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
             //沿实际地表放置机械装饰
             PlaceSurfaceDecorations(worldWidth, worldHeight, surfaceHeightMap);
 
-            //生成地下机械矿脉
-            GenerateOreVeins(worldWidth, worldHeight, surfaceY);
-
             //将地表线和岩石层推到世界最底部，防止游戏渲染地下背景墙
             Main.worldSurface = worldHeight - 2;
             Main.rockLayer = worldHeight - 1;
@@ -392,113 +389,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
 
                 int decoType = decoTypes[WorldGen.genRand.Next(decoTypes.Length)];
                 WorldGen.PlaceTile(x, decoY, decoType, mute: true);
-            }
-        }
-
-        /// <summary>
-        /// 生成地下机械矿脉网络
-        /// </summary>
-        private static void GenerateOreVeins(int worldWidth, int worldHeight, int surfaceY) {
-            int oreVeinWidth = 120;
-            int oreVeinHeight = 100;
-            int horizontalSpacing = 160;
-            int verticalSpacing = 160;
-            int marginX = oreVeinWidth / 2 + SafePadding;
-            int marginY = oreVeinHeight / 2 + SafePadding;
-            int verticalLimit = worldHeight / 6 * 5;
-            int num1 = 0;
-
-            while (num1 < verticalLimit) {
-                int layerY = surfaceY + 100 + num1;
-                if (layerY >= worldHeight - marginY)
-                    break;
-
-                int numVeins = Math.Max(0, (worldWidth - marginX * 2) / horizontalSpacing);
-                for (int i = 0; i < numVeins; i++) {
-                    int baseX = marginX + i * horizontalSpacing;
-                    int offsetX = WorldGen.genRand.Next(-20, 20);
-                    int offsetY = WorldGen.genRand.Next(-30, 30);
-                    int centerX = Math.Clamp(baseX + offsetX, marginX, worldWidth - marginX);
-                    int centerY = Math.Clamp(layerY + offsetY, marginY, worldHeight - marginY);
-
-                    GenerateMechanicalOreVein(centerX, centerY, width: oreVeinWidth, height: oreVeinHeight, corridorSpacing: 16);
-                }
-
-                num1 += verticalSpacing + WorldGen.genRand.Next(0, 60);
-            }
-        }
-
-        /// <summary>
-        /// 生成机械风格矿脉结构，模拟工业化矿区。
-        /// 矩形区块内部以走廊分隔形成矿室，填充机械矿石方块。
-        /// </summary>
-        internal static void GenerateMechanicalOreVein(int centerX, int centerY,
-            int width = 60, int height = 30, int corridorSpacing = 6) {
-            int oreType = TileID.IronBrick;
-            int[] mechTiles = [TileID.AdamantiteBeam, TileID.Cog, TileID.LihzahrdBrick];
-            int halfW = width / 2;
-            int halfH = height / 2;
-
-            //构造矩形矿脉区块
-            for (int x = -halfW; x <= halfW; x++) {
-                for (int y = -halfH; y <= halfH; y++) {
-                    int px = centerX + x;
-                    int py = centerY + y;
-                    if (!InWorldSafe(px, py))
-                        continue;
-
-                    float distRatio = MathF.Abs(x) / (float)halfW + MathF.Abs(y) / (float)halfH;
-                    float edgeChance = MathHelper.Clamp(distRatio - 0.8f, 0f, 1f);
-
-                    int tileType = WorldGen.genRand.NextFloat() < 1f - edgeChance
-                        ? oreType
-                        : mechTiles[WorldGen.genRand.Next(mechTiles.Length)];
-                    WorldGen.PlaceTile(px, py, tileType, mute: true, forced: true);
-                }
-            }
-
-            //横纵向走廊网络
-            for (int x = -halfW; x <= halfW; x++) {
-                if (x % corridorSpacing != 0)
-                    continue;
-                for (int y = -halfH; y <= halfH; y++) {
-                    int px = centerX + x;
-                    int py = centerY + y;
-                    if (InWorldSafe(px, py)) {
-                        WorldGen.KillTile(px, py, noItem: true);
-                    }
-                }
-            }
-
-            for (int y = -halfH; y <= halfH; y++) {
-                if (y % corridorSpacing != 0)
-                    continue;
-                for (int x = -halfW; x <= halfW; x++) {
-                    int px = centerX + x;
-                    int py = centerY + y;
-                    if (InWorldSafe(px, py)) {
-                        WorldGen.KillTile(px, py, noItem: true);
-                    }
-                }
-            }
-
-            //四个角落接线井结构
-            int nodeSize = 2;
-            for (int dx = -1; dx <= 1; dx += 2) {
-                for (int dy = -1; dy <= 1; dy += 2) {
-                    int nx = centerX + dx * (halfW - 4);
-                    int ny = centerY + dy * (halfH - 4);
-
-                    for (int i = -nodeSize; i <= nodeSize; i++) {
-                        for (int j = -nodeSize; j <= nodeSize; j++) {
-                            int px = nx + i;
-                            int py = ny + j;
-                            if (InWorldSafe(px, py)) {
-                                WorldGen.KillTile(px, py, noItem: true);
-                            }
-                        }
-                    }
-                }
             }
         }
     }
