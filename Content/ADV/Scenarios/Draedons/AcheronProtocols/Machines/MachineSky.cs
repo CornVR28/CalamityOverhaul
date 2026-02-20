@@ -201,12 +201,14 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
 
         #region 绘制
 
+        public override float GetCloudAlpha() => 1f - intensity;
+
         public override void Draw(SpriteBatch spriteBatch, float minDepth, float maxDepth) {
             if (intensity <= 0.01f || exoGoreAssets == null)
                 return;
 
-            //只在最远景深度绘制（天空替换）
-            if (maxDepth >= float.MaxValue && minDepth < float.MaxValue) {
+            //在最远景深度绘制完整天空替换
+            if (maxDepth >= 0 && minDepth < 0) {
                 DrawVoidBackground(spriteBatch);
                 DrawDustClouds(spriteBatch);
                 DrawFarDebris(spriteBatch);
