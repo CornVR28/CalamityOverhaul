@@ -6,6 +6,11 @@ Biomes: {
 		DisplayName: 钨钢暴乱
 		TownNPCDialogueName: 钨钢生物群系
 	}
+
+	MachineBiome: {
+		// DisplayName: Machine Biome
+		// TownNPCDialogueName: the Machine Biome
+	}
 }
 
 # For Language Pack Creators:

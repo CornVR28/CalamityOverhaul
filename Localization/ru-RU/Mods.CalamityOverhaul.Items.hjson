@@ -1,4 +1,4 @@
-﻿ElementWhip: {
+ElementWhip: {
 	DisplayName: Элементальный хлыст
 	Tooltip:
 		'''
@@ -1585,4 +1585,9 @@ Thrower: {
 Elysium: {
 	DisplayName: Элизиум
 	Tooltip: ""
+}
+
+MechanizedWood: {
+	// DisplayName: Mechanized Wood
+	// Tooltip: ""
 }

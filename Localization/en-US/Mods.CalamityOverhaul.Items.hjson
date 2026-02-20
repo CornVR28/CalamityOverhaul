@@ -1,4 +1,4 @@
-﻿ElementWhip: {
+ElementWhip: {
 	DisplayName: Element Whip
 	Tooltip: A Whip infused with the energy of the Moon and the Elements.
 }
@@ -1580,5 +1580,10 @@ Thrower: {
 
 Elysium: {
 	DisplayName: Elysium
+	Tooltip: ""
+}
+
+MechanizedWood: {
+	DisplayName: Mechanized Wood
 	Tooltip: ""
 }

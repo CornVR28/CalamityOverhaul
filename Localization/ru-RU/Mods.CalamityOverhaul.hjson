@@ -6,6 +6,11 @@ Biomes: {
 		DisplayName: Вольфрамовый стальной бунт
 		TownNPCDialogueName: Вольфрамовая стальная биологическая система
 	}
+
+	MachineBiome: {
+		// DisplayName: Machine Biome
+		// TownNPCDialogueName: the Machine Biome
+	}
 }
 
 # For Language Pack Creators:

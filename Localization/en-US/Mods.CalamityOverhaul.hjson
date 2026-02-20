@@ -1,10 +1,15 @@
-﻿EndlessDamageClassTextContent.EndlessDamageClass.DisplayName: Endless Damage
+EndlessDamageClassTextContent.EndlessDamageClass.DisplayName: Endless Damage
 Tools.RecipesLoseText: You can't just make this thing
 
 Biomes: {
 	TungstenBiome: {
 		DisplayName: Tungsten Biome
 		TownNPCDialogueName: the Tungsten Biome
+	}
+
+	MachineBiome: {
+		DisplayName: Machine Biome
+		TownNPCDialogueName: the Machine Biome
 	}
 }
 

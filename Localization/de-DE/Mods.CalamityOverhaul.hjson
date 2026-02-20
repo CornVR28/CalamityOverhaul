@@ -6,6 +6,11 @@ Biomes: {
 		DisplayName: Mr. welling
 		TownNPCDialogueName: Mr. poelieliter
 	}
+
+	MachineBiome: {
+		// DisplayName: Machine Biome
+		// TownNPCDialogueName: the Machine Biome
+	}
 }
 
 # For Language Pack Creators:

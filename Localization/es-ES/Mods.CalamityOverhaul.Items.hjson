@@ -1573,3 +1573,8 @@ Elysium: {
 	// DisplayName: Elysium
 	// Tooltip: ""
 }
+
+MechanizedWood: {
+	// DisplayName: Mechanized Wood
+	// Tooltip: ""
+}

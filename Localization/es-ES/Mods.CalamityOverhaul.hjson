@@ -6,6 +6,11 @@ Biomes: {
 		DisplayName: Rebelión de Tungsteno
 		TownNPCDialogueName: Bioma de Tungsteno
 	}
+
+	MachineBiome: {
+		// DisplayName: Machine Biome
+		// TownNPCDialogueName: the Machine Biome
+	}
 }
 
 # For Language Pack Creators:

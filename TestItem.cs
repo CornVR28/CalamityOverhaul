@@ -1,5 +1,6 @@
 ﻿using CalamityOverhaul.Content.ADV.Scenarios;
 using CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.GalacticCrisises;
+using CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machines;
 using CalamityOverhaul.Content.ADV.Scenarios.SupCal.End.EternalBlazingNows;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
@@ -68,16 +69,9 @@ namespace CalamityOverhaul
         }
 
         public override bool? UseItem(Player player) {
-            ScenarioManager.Reset<GalacticCrisis>();
-            ScenarioManager.Start<GalacticCrisis>();
-            //Vector2 portalPos = player.Center + new Vector2(player.direction * 300f, -60f);
-            //Projectile.NewProjectile(
-            //    player.GetSource_FromThis(),
-            //    portalPos,
-            //    Vector2.Zero,
-            //    ModContent.ProjectileType<SubspacePortal>(),
-            //    0, 0f, player.whoAmI
-            //);
+            //ScenarioManager.Reset<GalacticCrisis>();
+            //ScenarioManager.Start<GalacticCrisis>();
+            MachineWorld.Enter();
             return true;
         }
     }

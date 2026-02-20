@@ -1,4 +1,4 @@
-﻿ElementWhip: {
+ElementWhip: {
 	DisplayName: 元素长鞭
 	Tooltip:
 		'''
@@ -1561,4 +1561,9 @@ Thrower: {
 Elysium: {
 	DisplayName: 天国极乐
 	Tooltip: ""
+}
+
+MechanizedWood: {
+	// DisplayName: Mechanized Wood
+	// Tooltip: ""
 }
