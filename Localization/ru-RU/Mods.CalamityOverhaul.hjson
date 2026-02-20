@@ -42,3 +42,5 @@ Resurrections: {
 		RetainValueFormat: Значение Возрождения: {0}%
 	}
 }
+
+// Debug.TransitionSceneBtn: "[DEBUG] TransitionScene"

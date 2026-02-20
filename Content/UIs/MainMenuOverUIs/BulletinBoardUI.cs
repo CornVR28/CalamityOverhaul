@@ -10,6 +10,10 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.GameContent;
 using Terraria.ID;
+#if DEBUG
+using CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machines;
+using Terraria.Localization;
+#endif
 
 namespace CalamityOverhaul.Content.UIs.MainMenuOverUIs
 {
@@ -68,6 +72,11 @@ namespace CalamityOverhaul.Content.UIs.MainMenuOverUIs
             BulletinBoardElement overhaulSettingsButtonBoard = new BulletinBoardElement()
                 .Setproperty(OverhaulSettingsButton.OverhaulSettingsButtonText, OverhaulSettingsButton.OnOpen, disabledFunc: () => Main.menuMode == 888);
             bulletinBoardElements.Add(overhaulSettingsButtonBoard);
+#if DEBUG
+            BulletinBoardElement transitionSceneBoard = new BulletinBoardElement()
+                .Setproperty(Language.GetOrRegister("Mods.CalamityOverhaul.Debug.TransitionSceneBtn", () => "[DEBUG] TransitionScene"), () => TransitionScene.Show());
+            bulletinBoardElements.Add(transitionSceneBoard);
+#endif
         }
         public override void UnLoad() {
             Font = null;

@@ -110,6 +110,12 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
 
         #endregion
 
+#if DEBUG
+        private Rectangle debugCloseButtonRect;
+        private bool debugCloseHovering;
+        private float debugCloseHoverAnim;
+#endif
+
         public override void SetStaticDefaults() {
             LoadingText = this.GetLocalization(nameof(LoadingText), () => "数据链接中");
             InitializingText = this.GetLocalization(nameof(InitializingText), () => "正在初始化协议");
@@ -264,6 +270,17 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
 
             //更新提示文字
             UpdateHintText();
+
+#if DEBUG
+            //调试关闭按钮
+            int btnW = 80, btnH = 28;
+            debugCloseButtonRect = new Rectangle(Main.screenWidth - btnW - 16, 16, btnW, btnH);
+            debugCloseHovering = debugCloseButtonRect.Contains(Main.mouseX, Main.mouseY);
+            debugCloseHoverAnim = MathHelper.Lerp(debugCloseHoverAnim, debugCloseHovering ? 1f : 0f, 0.15f);
+            if (debugCloseHovering && Main.mouseLeft && Main.mouseLeftRelease) {
+                Hide();
+            }
+#endif
         }
 
         private void UpdateParticles() {
@@ -499,6 +516,18 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
 
             //顶部和底部边框线
             DrawEdgeBorders(spriteBatch, pixel, sw, sh, alpha);
+
+#if DEBUG
+            //调试关闭按钮
+            Color dbgBg = Color.Lerp(new Color(20, 40, 60), new Color(40, 80, 120), debugCloseHoverAnim) * (alpha * 0.9f);
+            spriteBatch.Draw(pixel, debugCloseButtonRect, new Rectangle(0, 0, 1, 1), dbgBg);
+            DrawRectBorder(spriteBatch, pixel, debugCloseButtonRect, new Color(80, 200, 255) * (alpha * (0.5f + debugCloseHoverAnim * 0.3f)), 1);
+            Vector2 dbgTextSize = FontAssets.MouseText.Value.MeasureString("[X] Close") * 0.7f;
+            Vector2 dbgTextPos = new(debugCloseButtonRect.X + (debugCloseButtonRect.Width - dbgTextSize.X) / 2f,
+                debugCloseButtonRect.Y + (debugCloseButtonRect.Height - dbgTextSize.Y) / 2f);
+            Utils.DrawBorderString(spriteBatch, "[X] Close", dbgTextPos,
+                Color.Lerp(new Color(150, 200, 230), new Color(220, 240, 255), debugCloseHoverAnim) * alpha, 0.7f);
+#endif
         }
 
         private void DrawBackground(SpriteBatch sb, Texture2D pixel, int sw, int sh, float alpha) {

@@ -42,3 +42,5 @@ Resurrections: {
 		// RetainValueFormat: Resurgence Value: {0}%
 	}
 }
+
+// Debug.TransitionSceneBtn: "[DEBUG] TransitionScene"
