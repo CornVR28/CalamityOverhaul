@@ -373,3 +373,18 @@ GalacticCrisisRender: {
 	// AndroidStatusLabel: STATUS
 	// AndroidStatusLost: SIGNAL LOST
 }
+
+TransitionScene: {
+	// LoadingText: 数据链接中
+	// InitializingText: 正在初始化协议
+	// Hint0: 不要问为什么杀异形，而是要问为何不杀
+	// Hint1: 阿切隆协议是嘉登最高级别的应急方案之一
+	// Hint2: 战术人形无所畏惧，因为恐惧本身就是他们的武器
+	// Hint3: 嘉登的机械造物已经超越了现实的极限
+	// Hint4: 没有大到无法接受的牺牲，没有小到可以原谅的背叛
+	// Hint5: 任何足够先进的技术，皆与魔法无异
+	// Hint6: 灾厄之中蕴藏着超越一切的可能性
+	// Hint7: 嘉登从不做无意义的事，每一步都是精密计算的结果
+	// Hint8: 数据即是力量，知识即是武装
+	// Hint9: 机械不会背叛，但操控机械的人或许会
+}
