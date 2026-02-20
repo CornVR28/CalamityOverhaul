@@ -373,13 +373,6 @@ namespace CalamityOverhaul
         [CWRJITEnabled]
         private static bool GetNPCIsAnEnemyInner(NPC npc) => npc.IsAnEnemy();
 
-        public static void SetPlayerWarbannerOfTheSun(this Player player, bool value) {
-            if (!Has) return;
-            SetPlayerWarbannerOfTheSunInner(player, value);
-        }
-        [CWRJITEnabled]
-        private static void SetPlayerWarbannerOfTheSunInner(Player player, bool value) => player.Calamity().WarbanneroftheRighteous = value;
-
         public static bool GetPlayerBladeArmEnchant(this Player player) => Has && GetPlayerBladeArmEnchantInner(player);
         [CWRJITEnabled]
         private static bool GetPlayerBladeArmEnchantInner(Player player) => player.Calamity().bladeArmEnchant;
@@ -637,16 +630,6 @@ namespace CalamityOverhaul
         [CWRJITEnabled]
         private static bool GetSpiritOriginInner(Player player) => player.Calamity().spiritOrigin;
 
-        public static void Spawn_PristineFury_Effect(Vector2 spawnPos, Vector2 vel) {
-            if (!Has) return;
-            Spawn_PristineFury_EffectInner(spawnPos, vel);
-        }
-        [CWRJITEnabled]
-        private static void Spawn_PristineFury_EffectInner(Vector2 spawnPos, Vector2 vel) {
-            CritSpark spark = new(spawnPos, vel, Main.rand.NextBool() ? Color.DarkOrange : Color.OrangeRed, Color.OrangeRed, 0.9f, 18, 2f, 1.9f);
-            GeneralParticleHandler.SpawnParticle(spark);
-        }
-
         public static void SetProjCGP(int proj) {
             if (!Has) return;
             SetProjCGPInner(proj);
@@ -684,15 +667,6 @@ namespace CalamityOverhaul
         [CWRJITEnabled]
         private static void SetDownedBoomerDukeInner(bool value) => DownedBossSystem.downedBoomerDuke = value;
 
-        public static bool GetSupCalPermafrost(NPC npc) => Has && GetSupCalPermafrostInner(npc);
-        [CWRJITEnabled]
-        private static bool GetSupCalPermafrostInner(NPC npc) {
-            if (npc.ModNPC is SupremeCalamitas supCal) {
-                return supCal.permafrost;
-            }
-            return false;
-        }
-
         public static SoundStyle GetSound(this string path) {
             if (ModContent.HasAsset(path)) {
                 return new SoundStyle(path);
@@ -703,17 +677,6 @@ namespace CalamityOverhaul
         public static bool GetDownedThanatos() => Has && GetDownedThanatosInner();
         [CWRJITEnabled]
         private static bool GetDownedThanatosInner() => DownedBossSystem.downedThanatos;
-
-        public static void SetSupCalPermafrost(NPC npc, bool value) {
-            if (!Has) return;
-            SetSupCalPermafrostInner(npc, value);
-        }
-        [CWRJITEnabled]
-        private static void SetSupCalPermafrostInner(NPC npc, bool value) {
-            if (npc.ModNPC is SupremeCalamitas supCal) {
-                supCal.permafrost = value;
-            }
-        }
 
         public static int GetSupCalGiveUpCounter(NPC npc) => Has ? GetSupCalGiveUpCounterInner(npc) : 0;
         [CWRJITEnabled]
@@ -776,10 +739,6 @@ namespace CalamityOverhaul
         public static bool GetEarlyHardmodeProgressionReworkBool() => Has && GetEarlyHardmodeProgressionReworkBoolInner();
         [CWRJITEnabled]
         private static bool GetEarlyHardmodeProgressionReworkBoolInner() => CalamityServerConfig.Instance.EarlyHardmodeProgressionRework;
-
-        public static bool GetAfterimages() => Has && GetAfterimagesInner();
-        [CWRJITEnabled]
-        private static bool GetAfterimagesInner() => CalamityClientConfig.Instance.Afterimages;
 
         public static int GetProjectileDamage(NPC npc, int projType) {
             int num = npc.defDamage / 2;//暂时使用这个，原来的方法在某些情况下会返回1或者0
@@ -981,10 +940,6 @@ namespace CalamityOverhaul
         }
         [CWRJITEnabled]
         private static LocalizedText ConstructRecipeConditionInner(int tier, out Func<bool> condition) => ArsenalTierGatedRecipe.ConstructRecipeCondition(tier, out condition);
-
-        public static IList<Type> GetTEBaseTurretTypes() => Has ? GetTEBaseTurretTypesInner() : null;
-        [CWRJITEnabled]
-        public static IList<Type> GetTEBaseTurretTypesInner() => VaultUtils.GetDerivedTypes<TEBaseTurret>();
 
         public static void DrawStarTrail(Projectile projectile, Color outer, Color inner, float auraHeight = 10f) {
             if (!Has) return;

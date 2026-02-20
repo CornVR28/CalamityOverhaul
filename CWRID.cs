@@ -13,24 +13,19 @@ namespace CalamityOverhaul
         #region 物品ID引用
         public static int Item_SHPC => Get();
         public static int Item_HalibutCannon => Get();
-        public static int Item_SpeedBlaster => Get();
         public static int Item_AcidGun => Get();
         public static int Item_AirSpinner => Get();
-        public static int Item_ForbiddenOathblade => Get();
-        public static int Item_EutrophicScimitar => Get();
         public static int Item_PlasmaRifle => Get();
         public static int Item_NanoPurge => Get();
         public static int Item_EidolicWail => Get();
         public static int Item_Cryophobia => Get();
         public static int Item_Effervescence => Get();
-        public static int Item_SuperradiantSlaughterer => Get();
         public static int Item_DraedonPowerCell => Get();
         public static int Item_AquaticScourgeBag => Get();
         public static int Item_AerialiteBar => Get();
         public static int Item_DeliciousMeat => Get();
         public static int Item_Heresy => Get();
         public static int Item_DevilsDevastation => Get();
-        public static int Item_LunarKunai => Get();
         public static int Item_UnholyEssence => Get();
         public static int Item_YharonSoulFragment => Get();
         public static int Item_BurntSienna => Get();
@@ -63,9 +58,6 @@ namespace CalamityOverhaul
         public static int Item_LoreCynosure => Get();
         public static int Item_BloodOrb => Get();
         public static int Item_Terminus => Get();
-        public static int Item_LoreAwakening => Get();
-        public static int Item_SquirrelSquireStaff => Get();
-        public static int Item_ThrowingBrick => Get();
         public static int Item_Brimlish => Get();
         public static int Item_WaveSkipper => Get();
         public static int Item_TerrorBlade => Get();
@@ -98,25 +90,19 @@ namespace CalamityOverhaul
         public static int Item_GrandGuardian => Get();
         public static int Item_SomaPrime => Get();
         public static int Item_Infinity => Get();
-        public static int Item_PlagueKeeper => Get();
-        public static int Item_Hellkite => Get();
         public static int Item_Contagion => Get();
         public static int Item_PlagueCellCanister => Get();
         public static int Item_PlaguebringerCarapace => Get();
         public static int Item_InfectedArmorPlating => Get();
         public static int Item_PlaguebringerVisor => Get();
         public static int Item_PlaguebringerPistons => Get();
-        public static int Item_Lazhar => Get();
         public static int Item_ScoriaBar => Get();
         public static int Item_BlightedGel => Get();
         public static int Item_MidasPrime => Get();
         public static int Item_CrackshotColt => Get();
-        public static int Item_HolyCollider => Get();
-        public static int Item_CelestialClaymore => Get();
         public static int Item_DivineGeode => Get();
         public static int Item_StormRuler => Get();
         public static int Item_StormlionMandible => Get();
-        public static int Item_HellionFlowerSpear => Get();
         public static int Item_Pandemic => Get();
         public static int Item_SulphurousGrabber => Get();
         public static int Item_TheSyringe => Get();
@@ -134,7 +120,6 @@ namespace CalamityOverhaul
         public static int Item_MysteriousCircuitry => Get();
         public static int Item_EncryptedSchematicHell => Get();
         public static int Item_LuxorsGift => Get();
-        public static int Item_WarbanneroftheRighteous => Get();
         public static int Item_EternalBlizzard => Get();
         public static int Item_Arbalest => Get();
         public static int Item_AshesofCalamity => Get();
@@ -161,7 +146,6 @@ namespace CalamityOverhaul
         public static int Item_Kingsbane => Get();
         public static int Item_ShadowspecBar => Get();
         public static int Item_EndothermicEnergy => Get();
-        public static int Item_YharonBag => Get();
         public static int Item_EnergyCore => Get();
         public static int Item_SuspiciousScrap => Get();
         public static int Item_WulfrumMetalScrap => Get();
@@ -223,7 +207,6 @@ namespace CalamityOverhaul
         public static int NPC_DesertScourgeHead => Get();
         public static int NPC_AquaticScourgeHead => Get();
         public static int NPC_OldDuke => Get();
-        public static int NPC_Androomba => Get();
         public static int NPC_ScornEater => Get();
         public static int NPC_StormWeaverHead => Get();
         public static int NPC_StormWeaverBody => Get();
@@ -255,9 +238,7 @@ namespace CalamityOverhaul
         public static int NPC_DesertNuisanceHead => Get();
         public static int NPC_DesertNuisanceBody => Get();
         public static int NPC_DesertNuisanceTail => Get();
-        public static int NPC_DesertNuisanceHeadYoung => Get();
         public static int NPC_DesertNuisanceBodyYoung => Get();
-        public static int NPC_DesertNuisanceTailYoung => Get();
         public static int NPC_AstrumDeusHead => Get();
         public static int NPC_AstrumDeusBody => Get();
         public static int NPC_AstrumDeusTail => Get();
@@ -267,7 +248,6 @@ namespace CalamityOverhaul
         public static int NPC_EidolonWyrmBody => Get();
         public static int NPC_EidolonWyrmBodyAlt => Get();
         public static int NPC_EidolonWyrmTail => Get();
-        public static int NPC_AstrumAureus => Get();
         public static int NPC_RavagerBody => Get();
         public static int NPC_RavagerClawLeft => Get();
         public static int NPC_RavagerClawRight => Get();
@@ -277,19 +257,15 @@ namespace CalamityOverhaul
         #endregion
         #region 弹幕ID引用
         public static int Proj_ArcZap => Get();
-        public static int Proj_DNA => Get();
         public static int Proj_ChickenRocket => Get();
         public static int Proj_SeashineSwordProj => Get();
         public static int Proj_EldritchTentacle => Get();
-        public static int Proj_DrataliornusExoArrow => Get();
         public static int Proj_Valaricicle => Get();
         public static int Proj_Valaricicle2 => Get();
         public static int Proj_GelWave => Get();
         public static int Proj_VirulentWave => Get();
         public static int Proj_SandBlade => Get();
         public static int Proj_StormBeam => Get();
-        public static int Proj_ForbiddenOathbladeProjectile => Get();
-        public static int Proj_EutrophicScimitarProj => Get();
         public static int Proj_PlasmaRifleShot => Get();
         public static int Item_DragonRage => Get();
         public static int Proj_SepticSkewerHarpoon => Get();
@@ -309,9 +285,6 @@ namespace CalamityOverhaul
         public static int Proj_ScorchedEarthRocket => Get();
         public static int Proj_BrinyTyphoonBubble => Get();
         public static int Proj_CosmicDischargeFlail => Get();
-        public static int Proj_CatastropheClaymoreSparkle => Get();
-        public static int Proj_DestroyerCursedLaser => Get();
-        public static int Proj_DestroyerElectricLaser => Get();
         public static int Proj_AngelicBeam => Get();
         public static int Proj_AstralRound => Get();
         public static int Proj_AstrealArrow => Get();
@@ -343,18 +316,15 @@ namespace CalamityOverhaul
         public static int Proj_AtaraxiaMain => Get();
         public static int Proj_AtaraxiaSide => Get();
         public static int Proj_BrimstoneBoom => Get();
-        public static int Proj_AftershockRock => Get();
         public static int Proj_UniversalGenesisStar => Get();
         public static int Proj_UniversalGenesisStarcaller => Get();
         public static int Proj_UltimaBolt => Get();
         public static int Proj_UltimaRay => Get();
         public static int Proj_UltimaSpark => Get();
         public static int Proj_TheStormLightningShot => Get();
-        public static int Proj_TelluricGlareArrow => Get();
         public static int Proj_AcidRocket => Get();
         public static int Proj_StormSurgeTornado => Get();
         public static int Proj_SputterCometBig => Get();
-        public static int Proj_PlasmaBlast => Get();
         public static int Proj_AstralStar => Get();
         public static int Proj_SpykerProj => Get();
         public static int Proj_LostSoulFriendly => Get();
@@ -364,8 +334,6 @@ namespace CalamityOverhaul
         public static int Proj_ArcherfishShot => Get();
         public static int Proj_FishronRPG => Get();
         public static int Proj_ImpactRound => Get();
-        public static int Proj_PristineSecondary => Get();
-        public static int Proj_PristineFire => Get();
         public static int Proj_PlanarRipperBolt => Get();
         public static int Proj_PlagueTaintedDrone => Get();
         public static int Proj_PlagueTaintedProjectile => Get();
@@ -395,7 +363,6 @@ namespace CalamityOverhaul
         public static int Proj_CorrodedShell => Get();
         public static int Proj_RealmRavagerBullet => Get();
         public static int Proj_CorinthPrimeAirburstGrenade => Get();
-        public static int Proj_SmallCoral => Get();
         public static int Proj_LeafArrow => Get();
         public static int Proj_BrimstoneBolt => Get();
         public static int Proj_ClamorRifleProj => Get();
@@ -404,7 +371,6 @@ namespace CalamityOverhaul
         public static int Proj_FlurrystormIceChunk => Get();
         public static int Proj_SquirrelSquireAcorn => Get();
         public static int Proj_DracoBeam => Get();
-        public static int Proj_EarthProj => Get();
         public static int Proj_FossilShard => Get();
         public static int Proj_GalacticaComet => Get();
         public static int Proj_ThornBase => Get();
@@ -415,24 +381,17 @@ namespace CalamityOverhaul
         public static int Proj_VolcanicFireball => Get();
         public static int Proj_VolcanicFireballLarge => Get();
         public static int Proj_TerratomereSwordBeam => Get();
-        public static int Proj_ExcelsusMain => Get();
-        public static int Proj_ExcelsusBlue => Get();
-        public static int Proj_ExcelsusPink => Get();
-        public static int Proj_MirrorBlast => Get();
         public static int Proj_StormRulerProj => Get();
         public static int Proj_StarnightBeam => Get();
         public static int Proj_PrismaticWave => Get();
         public static int Proj_RSSolarFlare => Get();
-        public static int Proj_ReaverHealOrb => Get();
         public static int Proj_BloodBall => Get();
         public static int Proj_GhastlySoulLarge => Get();
         public static int Proj_GhastlySoulMedium => Get();
         public static int Proj_GhastlySoulSmall => Get();
         public static int Proj_UltimusCleaverDust => Get();
         public static int Proj_CausticEdgeProjectile => Get();
-        public static int Proj_PrismaticBeam => Get();
         public static int Proj_TerratomereSlashCreator => Get();
-        public static int Proj_Voidragon => Get();
         public static int Proj_TorrentialArrow => Get();
         public static int Proj_HallowPointRoundProj => Get();
         public static int Proj_Aquashard => Get();
@@ -445,11 +404,7 @@ namespace CalamityOverhaul
         public static int Proj_SwordsplosionGreen => Get();
         public static int Proj_SwordsplosionPurple => Get();
         public static int Proj_SwordsplosionRed => Get();
-        public static int Proj_GalaxyBlast => Get();
-        public static int Proj_GalaxyBlastType2 => Get();
-        public static int Proj_GalaxyBlastType3 => Get();
         public static int Proj_SCalRitualDrama => Get();
-        public static int Proj_VoidFieldGenerator => Get();
         public static int Proj_FireShotBuffer => Get();
         public static int Proj_IceShotBuffer => Get();
         public static int Proj_DraedonLaserBuffer => Get();
@@ -502,7 +457,6 @@ namespace CalamityOverhaul
         public static int Buff_ElementalMix => Get();
         public static int Buff_VulnerabilityHex => Get();
         public static int Buff_MarkedforDeath => Get();
-        public static int Buff_BrutalCarnage => Get();
         public static int Buff_ArmorCrunch => Get();
         public static int Buff_GodSlayerInferno => Get();
         public static int Buff_Shadowflame => Get();
@@ -517,7 +471,6 @@ namespace CalamityOverhaul
         #endregion
         #region 粒子效果ID引用
         public static int Dust_AstralOrange => Get();
-        public static int Dust_AstralBlue => Get();
         public readonly static int Dust_SulphurousSeaAcid = 75;
         public readonly static int Dust_Brimstone = 235;//灾厄使用夺命杖的粒子作为硫磺火焰粒子，因为这个比较特殊，就不通过反射加载了，直接写上readonly
         #endregion
