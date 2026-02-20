@@ -87,8 +87,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         private int currentHintIndex;
         private float hintFadeProgress;
         private float hintDisplayTimer;
-        private const float HintDisplayDuration = 300f;
-        private const float HintFadeDuration = 40f;
+        private const float HintDisplayDuration = 200f;
+        private const float HintFadeDuration = 25f;
         private enum HintState { FadeIn, Display, FadeOut }
         private HintState hintState = HintState.FadeIn;
 
@@ -96,8 +96,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
 
         #region 进度条布局
 
-        private const float ProgressBarWidth = 500f;
-        private const float ProgressBarHeight = 6f;
+        private const float ProgressBarWidth = 650f;
+        private const float ProgressBarHeight = 10f;
         private const float ProgressBarY = 0.72f;
 
         #endregion
@@ -822,15 +822,15 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
 
             //进度百分比文字
             string percentText = $"{(int)(currentProgress * 100)}%";
-            Vector2 percentSize = FontAssets.MouseText.Value.MeasureString(percentText) * 0.8f;
+            Vector2 percentSize = FontAssets.MouseText.Value.MeasureString(percentText) * 0.95f;
             Vector2 percentPos = new(barX + ProgressBarWidth + 16, barY + ProgressBarHeight * 0.5f - percentSize.Y * 0.5f);
             Color percentColor = Color.Lerp(new Color(100, 180, 230), new Color(150, 240, 255), MathF.Sin(globalTime * 2f) * 0.5f + 0.5f);
-            Utils.DrawBorderString(sb, percentText, percentPos, percentColor * alpha, 0.8f);
+            Utils.DrawBorderString(sb, percentText, percentPos, percentColor * alpha, 0.95f);
 
             //小刻度标记
             for (int i = 1; i < 10; i++) {
                 float markX = barX + ProgressBarWidth * i / 10f;
-                float markHeight = (i == 5) ? 5f : 3f;
+                float markHeight = (i == 5) ? 7f : 4f;
                 Color markColor = new Color(50, 140, 220) * (alpha * 0.4f);
                 sb.Draw(pixel, new Rectangle((int)markX, (int)(barY + ProgressBarHeight + 2), 1, (int)markHeight),
                     new Rectangle(0, 0, 1, 1), markColor);
@@ -846,29 +846,29 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
             int dots = ((int)(globalTime * 4f)) % 4;
             statusText += new string('.', dots);
 
-            Vector2 statusSize = FontAssets.MouseText.Value.MeasureString(statusText) * 0.85f;
-            Vector2 statusPos = new((sw - statusSize.X) * 0.5f, barY - 30f);
+            Vector2 statusSize = FontAssets.MouseText.Value.MeasureString(statusText) * 1f;
+            Vector2 statusPos = new((sw - statusSize.X) * 0.5f, barY - 38f);
 
             //文字光晕
             Color glowColor = new Color(60, 180, 255) * (alpha * 0.2f);
             for (int i = 0; i < 4; i++) {
                 float angle = MathHelper.TwoPi * i / 4f + globalTime;
                 Vector2 off = angle.ToRotationVector2() * 2f;
-                Utils.DrawBorderString(sb, statusText, statusPos + off, glowColor, 0.85f);
+                Utils.DrawBorderString(sb, statusText, statusPos + off, glowColor, 1f);
             }
 
             Color textColor = new Color(180, 220, 255) * alpha;
-            Utils.DrawBorderString(sb, statusText, statusPos, textColor, 0.85f);
+            Utils.DrawBorderString(sb, statusText, statusPos, textColor, 1f);
 
             //附加初始化文字
             if (currentProgress < 0.5f) {
                 string initText = InitializingText.Value;
                 int initDots = ((int)(globalTime * 3f)) % 4;
                 initText += new string('.', initDots);
-                Vector2 initSize = FontAssets.MouseText.Value.MeasureString(initText) * 0.65f;
-                Vector2 initPos = new((sw - initSize.X) * 0.5f, barY + 18f);
+                Vector2 initSize = FontAssets.MouseText.Value.MeasureString(initText) * 0.8f;
+                Vector2 initPos = new((sw - initSize.X) * 0.5f, barY + 24f);
                 Color initColor = new Color(80, 160, 220) * (alpha * 0.5f * (1f - currentProgress * 2f));
-                Utils.DrawBorderString(sb, initText, initPos, initColor, 0.65f);
+                Utils.DrawBorderString(sb, initText, initPos, initColor, 0.8f);
             }
         }
 
@@ -881,25 +881,25 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
             //引号装饰
             string displayText = $"「{hint}」";
 
-            Vector2 textSize = FontAssets.MouseText.Value.MeasureString(displayText) * 0.75f;
-            Vector2 textPos = new((sw - textSize.X) * 0.5f, sh - 60f);
+            Vector2 textSize = FontAssets.MouseText.Value.MeasureString(displayText) * 0.9f;
+            Vector2 textPos = new((sw - textSize.X) * 0.5f, sh - 75f);
 
             //文字发光底层
             Color glowColor = new Color(40, 120, 180) * (hintAlpha * 0.15f);
             for (int i = 0; i < 4; i++) {
                 float angle = MathHelper.TwoPi * i / 4f;
                 Vector2 off = angle.ToRotationVector2() * 1.5f;
-                Utils.DrawBorderString(sb, displayText, textPos + off, glowColor, 0.75f);
+                Utils.DrawBorderString(sb, displayText, textPos + off, glowColor, 0.9f);
             }
 
             //主文字（淡蓝灰色，带轻微闪烁）
             float textFlicker = 0.9f + MathF.Sin(globalTime * 5f) * 0.1f;
             Color hintColor = new Color(140, 180, 210) * (hintAlpha * textFlicker);
-            Utils.DrawBorderString(sb, displayText, textPos, hintColor, 0.75f);
+            Utils.DrawBorderString(sb, displayText, textPos, hintColor, 0.9f);
 
             //提示文字下方的短横线装饰
             float lineWidth = textSize.X * 0.3f;
-            Vector2 lineCenter = new(sw * 0.5f, sh - 40f);
+            Vector2 lineCenter = new(sw * 0.5f, sh - 50f);
             DrawLine(sb, VaultAsset.placeholder2.Value,
                 lineCenter - new Vector2(lineWidth * 0.5f, 0),
                 lineCenter + new Vector2(lineWidth * 0.5f, 0),
