@@ -40,12 +40,10 @@ namespace CalamityOverhaul
         RequestOldDukeCampsiteData,
         HandleOldDukeCampsiteDataServer,
         HandleOldDukeCampsiteDataClient,
-        SpwanOldDukeWannaToFight,
         StartCampsiteFindMeScenario,
         ResurrectionRate,
         DespawnDestroyer,
         MachineEffect,
-        DeathTrackingNPCKill,
     }
 
     public static class CWRNetWork
@@ -83,9 +81,6 @@ namespace CalamityOverhaul
             else if (type == CWRMessageType.HandleOldDukeCampsiteDataClient) {
                 OldDukeCampsite.HandleOldDukeCampsiteDataClient(reader, whoAmI);
             }
-            else if (type == CWRMessageType.SpwanOldDukeWannaToFight) {
-                ModifyOldDuke.SpwanOldDukeByWannaToFightNetWork(reader, whoAmI);
-            }
             else if (type == CWRMessageType.OldDukeCampsiteDecorationsSync) {
                 OldDukeCampsiteDecoration.ReceiveDecorationsSync(reader);
             }
@@ -97,9 +92,6 @@ namespace CalamityOverhaul
             }
             else if (type == CWRMessageType.DespawnDestroyer) {
                 DestroyerHeadAI.HandleDespawn();
-            }
-            else if (type == CWRMessageType.DeathTrackingNPCKill) {
-                DeathTrackingNPC.HandleKillSync(reader, whoAmI);
             }
 
             ModifyCrabulon.NetHandle(type, reader, whoAmI);
