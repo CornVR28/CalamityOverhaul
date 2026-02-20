@@ -31,8 +31,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
             //先生成一个正常的原版世界作为基底，然后在上面进行机械风格替换
             try {
                 WorldGen.GenerateWorld(Main.ActiveWorldFileData.Seed);
-            }
-            catch {
+            } catch {
                 //原版生成中某些非关键步骤可能抛出异常，忽略后继续机械化改造
             }
 

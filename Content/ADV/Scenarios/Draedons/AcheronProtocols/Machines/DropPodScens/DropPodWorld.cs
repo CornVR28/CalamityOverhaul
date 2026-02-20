@@ -1,7 +1,6 @@
 ﻿using SubworldLibrary;
 using System.Collections.Generic;
 using Terraria;
-using Terraria.ModLoader;
 using Terraria.WorldBuilding;
 
 namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machines.DropPodScens

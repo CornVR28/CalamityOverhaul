@@ -28,7 +28,7 @@ namespace CalamityOverhaul.Content.UIs.MainMenuOverUIs
         public override void Update() {
             UIHitBox = trueDrawPos.GetRectangle(TextSize);
             hoverInMainPage = UIHitBox.Intersects(MousePosition.GetRectangle(1));
-            
+
             if (hoverInMainPage && keyLeftPressState == KeyPressState.Pressed && BulletinBoardUI.SafeStart) {
                 if (Disabled) {
                     SoundEngine.PlaySound(SoundID.Unlock);

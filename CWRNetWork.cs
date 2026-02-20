@@ -1,6 +1,5 @@
 ﻿using CalamityOverhaul.Content;
 using CalamityOverhaul.Content.ADV;
-using CalamityOverhaul.Content.ADV.Common;
 using CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes;
 using CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Campsites;
 using CalamityOverhaul.Content.ADV.Scenarios.Draedons;
