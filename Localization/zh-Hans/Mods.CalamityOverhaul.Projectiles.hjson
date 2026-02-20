@@ -1,4 +1,4 @@
-﻿MurasamaHeld.DisplayName: 分子斩切
+MurasamaHeld.DisplayName: 分子斩切
 MuraTriggerDash.DisplayName: 分子斩切
 MuraBreakerSlash.DisplayName: 升龙半月
 MuraExecutionCut.DisplayName: 次元斩·终
@@ -440,3 +440,4 @@ SingularityBlackHole.DisplayName: 奇点黑洞
 SupernovaExplosion.DisplayName: 超新星爆发
 StarfuryFallingStar.DisplayName: 星怒落星
 SpawnOldDukeWannaToFight.DisplayName: 生成老公爵切磋
+// MachineTesla.DisplayName: Machine Tesla

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Terraria;
 using Terraria.DataStructures;
+using Terraria.ModLoader;
 using Terraria.WorldBuilding;
 
 namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machines
@@ -61,6 +62,40 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
             TileEntity.UpdateEnd();
             for (int i = 0; i < 10; i++) {
                 Liquid.UpdateLiquid();
+            }
+
+            SpawnTeslaEffect();
+        }
+
+        private static void SpawnTeslaEffect() {
+            if (!Main.rand.NextBool(68)) {
+                return;
+            }
+
+            Player player = Main.LocalPlayer;
+            if (player == null || !player.active || player.dead) {
+                return;
+            }
+
+            Vector2 spawnPos = player.Center + new Vector2(
+                Main.rand.Next(-900, 900),
+                Main.rand.Next(-1200, -800));
+
+            Vector2 velocity = new Vector2(0, 8);
+
+            int projType = ModContent.ProjectileType<MachineTesla>();
+            int proj = Projectile.NewProjectile(
+                new EntitySource_WorldEvent(),
+                spawnPos,
+                velocity,
+                projType,
+                80,
+                2,
+                Main.myPlayer);
+
+            if (proj >= 0 && proj < Main.maxProjectiles
+                && Main.projectile[proj].ModProjectile is MachineTesla tesla) {
+                tesla.TargetPosition = MachineTesla.FindHighestSolidInAreaBelow(spawnPos, 50, 800);
             }
         }
 
