@@ -11,6 +11,11 @@ Biomes: {
 		DisplayName: Machine Biome
 		TownNPCDialogueName: the Machine Biome
 	}
+
+	DropPodBiome: {
+		DisplayName: Drop Pod Biome
+		TownNPCDialogueName: the Drop Pod Biome
+	}
 }
 
 # For Language Pack Creators:
