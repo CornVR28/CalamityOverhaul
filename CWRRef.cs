@@ -417,22 +417,6 @@ namespace CalamityOverhaul
                 _ => CWRID.Proj_SwordsplosionBlue,
             };
         }
-        public static int GetRandomProjectileType2() {
-            return Main.rand.Next(6) switch {
-                1 => CWRID.Proj_GalaxyBlast,
-                2 => CWRID.Proj_GalaxyBlastType2,
-                3 => CWRID.Proj_GalaxyBlastType3,
-                _ => CWRID.Proj_GalaxyBlast,
-            };
-        }
-        public static int GetProjectileTypeByIndex(int index) {
-            return index switch {
-                0 => CWRID.Proj_GalaxyBlast,
-                1 => CWRID.Proj_GalaxyBlastType2,
-                2 => CWRID.Proj_GalaxyBlastType3,
-                _ => CWRID.Proj_GalaxyBlast,
-            };
-        }
         public static void UpdateRogueStealth(Player player) {
             if (!Has) return;
             UpdateRogueStealthInner(player);
