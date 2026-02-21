@@ -105,8 +105,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
             UpdateFlameTrailPoints();
 
             //生成冲击波环（再入灼烧达到一定强度后开始产生）
-            if (reentryHeat > 0.15f && dropTimer % Math.Max(8, (int)(30 * (1f - reentryHeat * 0.7f))) == 0
-                && shockwaveRings.Count < MaxShockwaveRings) {
+            if (reentryHeat > 0.15f && dropTimer % Math.Max(8, (int)(30 * (1f - reentryHeat * 0.7f))) == 0) {
                 SpawnShockwaveRing();
             }
 
@@ -163,14 +162,17 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
             float podHalfHeight = podTex != null ? podTex.Height * 0.5f : 40f;
 
             //环生成在仓头前方，略有随机偏移
-            Vector2 ringCenter = Center + new Vector2(0, podHalfHeight - Main.rand.NextFloat(0, 15f));
+            Vector2 ringCenter = Center + new Vector2(0, podHalfHeight + 80);
 
             shockwaveRings.Add(new ShockwaveRing {
                 WorldCenter = ringCenter,
+                Velocity = new Vector2(
+                    Main.rand.NextFloat(-0.3f, 0.3f),
+                    -2.5f - reentryHeat * 2f - Main.rand.NextFloat(-0.5f, 0.5f)),
                 Life = 0,
-                MaxLife = Main.rand.Next(25, 45),
-                MaxRadius = 50f + reentryHeat * 60f + Main.rand.NextFloat(-10f, 10f),
-                Thickness = 0.08f + Main.rand.NextFloat(0, 0.04f),
+                MaxLife = 60,
+                MaxRadius = 50f + reentryHeat * 160f,
+                Thickness = 0.08f,
                 Intensity = 0.4f + reentryHeat * 0.6f
             });
         }
@@ -432,6 +434,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         {
             /// <summary>环中心的世界坐标</summary>
             public Vector2 WorldCenter;
+            /// <summary>每帧移动速度（世界坐标）</summary>
+            public Vector2 Velocity;
             /// <summary>当前生命帧</summary>
             public int Life;
             /// <summary>最大生命帧</summary>
@@ -446,6 +450,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
 
             public void Update() {
                 Life++;
+                WorldCenter += Velocity;
+                Velocity *= 0.97f;
             }
         }
     }
