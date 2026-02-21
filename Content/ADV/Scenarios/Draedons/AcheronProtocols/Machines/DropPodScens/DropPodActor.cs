@@ -1,4 +1,6 @@
-﻿using InnoVault.Actors;
+﻿using CalamityOverhaul.Common;
+using InnoVault.Actors;
+using InnoVault.Trails;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
@@ -30,6 +32,13 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         /// 尾焰粒子列表
         /// </summary>
         private readonly List<TrailParticle> trailParticles = [];
+
+        /// <summary>
+        /// 尾焰Trail路径点，从空降仓底部向下延伸
+        /// </summary>
+        private const int FlameTrailPointCount = 24;
+        private readonly Vector2[] flameTrailPoints = new Vector2[FlameTrailPointCount];
+        private Trail flameTrail;
 
         //常量
         private const int MaxTrailParticles = 60;
@@ -88,8 +97,39 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
                 }
             }
 
+            //更新尾焰Trail路径点
+            UpdateFlameTrailPoints();
+
             //同步dropTimer给DropPodDrawSystem的屏幕特效使用
             DropPodDrawSystem.SyncDropTimer(dropTimer, reentryHeat);
+        }
+
+        /// <summary>
+        /// 更新尾焰路径点，从空降仓底部向下延伸，加入横向湍流扰动
+        /// </summary>
+        private void UpdateFlameTrailPoints() {
+            Vector2 podBottom = Center + new Vector2(0, Height * 0.5f);
+
+            //火焰向下延伸的总长度，随时间逐渐增长
+            float flameLength = MathHelper.Clamp(dropTimer / 60f, 0.3f, 1f) * 280f;
+
+            for (int i = 0; i < FlameTrailPointCount; i++) {
+                float t = i / (float)(FlameTrailPointCount - 1);
+
+                //基础纵向位置
+                float y = podBottom.Y + t * flameLength;
+
+                //横向湍流：越远离仓体扰动越大
+                float turbulenceScale = t * t * 18f;
+                float turbulenceX = MathF.Sin(dropTimer * 0.12f + t * 7f) * turbulenceScale
+                    + MathF.Sin(dropTimer * 0.07f + t * 13f) * turbulenceScale * 0.5f;
+
+                //火焰底端轻微展开
+                float spread = MathF.Sin(t * MathHelper.Pi) * 6f;
+                turbulenceX += MathF.Sin(dropTimer * 0.05f + i) * spread;
+
+                flameTrailPoints[i] = new Vector2(podBottom.X + turbulenceX, y);
+            }
         }
 
         private void SpawnTrailParticle() {
@@ -128,6 +168,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
             //绘制再入灼烧光效（在空降仓后面）
             DrawReentryHeatEffect(spriteBatch, drawCenter);
 
+            //绘制尾焰Trail（在粒子和仓体之前，作为主火焰效果）
+            DrawFlameTrail(spriteBatch);
+
             //绘制尾焰粒子
             DrawTrailParticles(spriteBatch);
 
@@ -135,6 +178,95 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
             DrawDropPod(spriteBatch, drawCenter);
 
             return false;
+        }
+
+        /// <summary>
+        /// 使用Trail和自定义着色器绘制尾焰效果
+        /// </summary>
+        private void DrawFlameTrail(SpriteBatch spriteBatch) {
+            if (dropTimer < 10) return;
+
+            //暂停SpriteBatch以切换到顶点绘制模式
+            spriteBatch.End();
+
+            //初始化或更新Trail
+            flameTrail ??= new Trail(flameTrailPoints,
+                GetFlameTrailWidth, GetFlameTrailColor);
+            flameTrail.TrailPositions = flameTrailPoints;
+
+            GraphicsDevice device = Main.graphics.GraphicsDevice;
+
+            //加载着色器和噪声纹理
+            if (EffectLoader.DropPodFlame != null && EffectLoader.DropPodFlame.IsLoaded) {
+                Effect effect = EffectLoader.DropPodFlame.Value;
+                Trail.CalculateRenderingMatrices(out Matrix view, out Matrix projection);
+                effect.Parameters["uWorldViewProjection"].SetValue(view * projection);
+                effect.Parameters["globalTime"].SetValue((float)Main.timeForVisualEffects * 0.02f);
+                effect.Parameters["heatIntensity"].SetValue(reentryHeat);
+
+                //使用噪声纹理
+                if (CWRAsset.Fire != null && !CWRAsset.Fire.IsDisposed) {
+                    device.Textures[1] = CWRAsset.Extra_193.Value;
+                    device.SamplerStates[1] = SamplerState.LinearWrap;
+                }
+
+                device.BlendState = BlendState.Additive;
+                flameTrail.DrawTrail(effect);
+
+                //二次叠加绘制，增强火焰亮度
+                flameTrail.DrawTrail(effect);
+                device.BlendState = BlendState.AlphaBlend;
+            }
+
+            //恢复SpriteBatch
+            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointWrap,
+                DepthStencilState.None, RasterizerState.CullNone, null, Main.GameViewMatrix.TransformationMatrix);
+        }
+
+        /// <summary>
+        /// 尾焰Trail宽度函数：根部宽、末端窄，呈火焰锥形
+        /// </summary>
+        private float GetFlameTrailWidth(float progress) {
+            //progress: 0=起点(仓底), 1=末端
+            float intensityFactor = MathHelper.Clamp(dropTimer / 120f, 0.3f, 1f);
+
+            //火焰根部宽，末端快速收窄
+            float baseWidth = 28f + reentryHeat * 12f;
+            float taper = 1f - MathF.Pow(progress, 0.6f);
+
+            //添加脉动感
+            float pulse = 1f + MathF.Sin(dropTimer * 0.15f + progress * 4f) * 0.08f;
+
+            return baseWidth * taper * intensityFactor * pulse;
+        }
+
+        /// <summary>
+        /// 尾焰Trail颜色函数：根部白黄，中段橙色，末端暗红渐隐
+        /// </summary>
+        private Color GetFlameTrailColor(Vector2 texCoords) {
+            float progress = texCoords.X; //沿火焰长度方向
+            float intensityFactor = MathHelper.Clamp(dropTimer / 120f, 0.3f, 1f);
+
+            //三段颜色渐变
+            Color coreColor = new Color(255, 240, 200);   //白黄核心
+            Color midColor = new Color(255, 140, 40);     //橙色中段
+            Color tipColor = new Color(180, 40, 10);      //暗红末端
+
+            Color result;
+            if (progress < 0.3f) {
+                result = Color.Lerp(coreColor, midColor, progress / 0.3f);
+            }
+            else {
+                result = Color.Lerp(midColor, tipColor, (progress - 0.3f) / 0.7f);
+            }
+
+            //末端透明度衰减
+            float alpha = (1f - MathF.Pow(progress, 1.5f)) * intensityFactor;
+
+            //再入灼烧时整体更亮
+            float heatBoost = 1f + reentryHeat * 0.5f;
+
+            return result * alpha * heatBoost;
         }
 
         private void DrawDropPod(SpriteBatch sb, Vector2 drawCenter) {
