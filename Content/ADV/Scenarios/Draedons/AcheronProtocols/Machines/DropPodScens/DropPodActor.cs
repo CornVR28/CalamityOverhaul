@@ -125,23 +125,34 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         /// <summary>
         /// 更新尾焰路径点，从火焰末端到仓底喷口，笔直向下喷射
         /// Trail约定：[0]=末尾(火焰远端)，[Length-1]=起点(喷口)
+        /// 火焰从喷口逐渐向远端生长，未生长到的点钉在喷口位置
         /// </summary>
         private void UpdateFlameTrailPoints() {
             Vector2 podBottom = Center - new Vector2(0, 860) + shakeOffset;
 
-            //火焰向下延伸的总长度，随时间逐渐增长
-            float flameLength = MathHelper.Clamp(dropTimer / 60f, 0.3f, 1f) * 880f;
+            //火焰的最终完整长度
+            float fullFlameLength = 880f;
+
+            //当前火焰实际长度——从0逐渐增长到完整长度
+            float growProgress = MathHelper.Clamp(dropTimer / 60f, 0f, 1f);
+            float currentFlameLength = growProgress * fullFlameLength;
 
             for (int i = 0; i < FlameTrailPointCount; i++) {
-                //反转：i=0对应火焰最远端，i=max对应喷口
+                //[Length-1]=喷口(t=0), [0]=火焰远端(t=1)
                 float t = 1f - i / (float)(FlameTrailPointCount - 1);
 
-                //基础纵向位置——笔直向下
-                float y = podBottom.Y + t * flameLength;
+                //这个点应该距离喷口多远
+                float targetDist = t * fullFlameLength;
 
-                //末端极轻微的热扰动（仅在远离喷口的位置），模拟热气扩散而非蛇形扭动
-                float disturbance = t * t * 2f;
-                float jitterX = MathF.Sin(dropTimer * 0.2f + t * 20f) * disturbance;
+                //如果火焰还没生长到这个点的位置，就钉在当前火焰末端
+                float actualDist = MathF.Min(targetDist, currentFlameLength);
+
+                float y = podBottom.Y + actualDist;
+
+                //末端极轻微的热扰动（仅在远离喷口的位置）
+                float normalizedDist = actualDist / fullFlameLength;
+                float disturbance = normalizedDist * normalizedDist * 2f;
+                float jitterX = MathF.Sin(dropTimer * 0.2f + normalizedDist * 20f) * disturbance;
 
                 flameTrailPoints[i] = new Vector2(podBottom.X + jitterX, y);
             }
