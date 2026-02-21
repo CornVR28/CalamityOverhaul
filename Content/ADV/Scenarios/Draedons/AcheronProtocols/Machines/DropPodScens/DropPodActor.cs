@@ -65,8 +65,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         private int debrisSpawnTimer;
 
         public override void OnSpawn(params object[] args) {
-            Width = 40;
-            Height = 80;
+            Width = 240;
+            Height = 280;
             DrawExtendMode = 600;
             DrawLayer = ActorDrawLayer.Default;
             dropTimer = 0;
@@ -141,9 +141,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
                 SpawnShockwaveRing();
             }
 
-            //更新冲击波环
+            //更新冲击波环——环的X轴跟随仓体当前位置，避免左右移动时环滞留
             for (int i = shockwaveRings.Count - 1; i >= 0; i--) {
-                shockwaveRings[i].Update();
+                shockwaveRings[i].Update(Center.X);
                 if (shockwaveRings[i].IsDead) {
                     shockwaveRings.RemoveAt(i);
                 }
@@ -154,7 +154,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         }
 
         /// <summary>
-        /// 更新尾焰路径点，从火焰末端到仓底喷口，笔直向下喷射
+        /// 更新尾焰路径点，从火焰末端到仓底喷口
+        /// 喷口（根部）始终固定在仓底中心，火焰远端随倾斜角度逐渐偏转
         /// Trail约定：[0]=末尾(火焰远端)，[Length-1]=起点(喷口)
         /// 火焰从喷口逐渐向远端生长，未生长到的点钉在喷口位置
         /// </summary>
@@ -168,6 +169,10 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
             float growProgress = MathHelper.Clamp(dropTimer / 60f, 0f, 1f);
             float currentFlameLength = growProgress * fullFlameLength;
 
+            //倾斜偏转的最大水平偏移量——火焰末端的最大X偏移
+            //tiltAngle > 0 仓体右倾，火焰末端应向左偏（X负方向）
+            float maxTiltOffsetX = -MathF.Sin(tiltAngle) * fullFlameLength * 0f;
+
             for (int i = 0; i < FlameTrailPointCount; i++) {
                 //[Length-1]=喷口(t=0), [0]=火焰远端(t=1)
                 float t = 1f - i / (float)(FlameTrailPointCount - 1);
@@ -178,14 +183,18 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
                 //如果火焰还没生长到这个点的位置，就钉在当前火焰末端
                 float actualDist = MathF.Min(targetDist, currentFlameLength);
 
+                //Y方向：始终笔直向下
                 float y = podBottom.Y + actualDist;
 
-                //末端极轻微的热扰动（仅在远离喷口的位置）
+                //X方向：根部(t=0)无偏移，远端(t=1)偏移最大，用二次曲线使过渡更自然
                 float normalizedDist = actualDist / fullFlameLength;
+                float tiltOffsetX = maxTiltOffsetX * normalizedDist * normalizedDist;
+
+                //末端极轻微的热扰动（仅在远离喷口的位置）
                 float disturbance = normalizedDist * normalizedDist * 2f;
                 float jitterX = MathF.Sin(dropTimer * 0.2f + normalizedDist * 20f) * disturbance;
 
-                flameTrailPoints[i] = new Vector2(podBottom.X + jitterX, y);
+                flameTrailPoints[i] = new Vector2(podBottom.X + tiltOffsetX + jitterX, y);
             }
         }
 
@@ -194,10 +203,12 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
             float podHalfHeight = podTex != null ? podTex.Height * 0.5f : 40f;
 
             //环生成在仓头前方，略有随机偏移
-            Vector2 ringCenter = Center + new Vector2(0, podHalfHeight + 80);
+            float yOffset = podHalfHeight + 80;
+            Vector2 ringCenter = Center + new Vector2(0, yOffset);
 
             shockwaveRings.Add(new ShockwaveRing {
                 WorldCenter = ringCenter,
+                YOffset = yOffset,
                 Velocity = new Vector2(
                     Main.rand.NextFloat(-0.3f, 0.3f),
                     -2.5f - reentryHeat * 2f - Main.rand.NextFloat(-0.5f, 0.5f)),
@@ -482,6 +493,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         {
             /// <summary>环中心的世界坐标</summary>
             public Vector2 WorldCenter;
+            /// <summary>环相对于仓体中心的Y偏移，用于在跟随X的同时保持Y独立运动</summary>
+            public float YOffset;
             /// <summary>每帧移动速度（世界坐标）</summary>
             public Vector2 Velocity;
             /// <summary>当前生命帧</summary>
@@ -496,10 +509,17 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
             public float Intensity;
             public bool IsDead => Life >= MaxLife;
 
-            public void Update() {
+            /// <summary>
+            /// 更新环的位置——X轴跟随仓体当前位置，Y轴按自身速度独立运动
+            /// </summary>
+            public void Update(float podCenterX) {
                 Life++;
-                WorldCenter += Velocity;
-                Velocity *= 0.97f;
+                //X轴平滑跟随仓体位置，避免左右移动时环滞留
+                WorldCenter.X = MathHelper.Lerp(WorldCenter.X, podCenterX, 0.15f);
+                //Y轴按自身速度运动
+                WorldCenter.Y += Velocity.Y;
+                Velocity.X *= 0.97f;
+                Velocity.Y *= 0.97f;
             }
         }
     }
