@@ -163,7 +163,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
             float podHalfHeight = podTex != null ? podTex.Height * 0.5f : 40f;
 
             //环生成在仓头前方，略有随机偏移
-            Vector2 ringCenter = Center + new Vector2(0, podHalfHeight + Main.rand.NextFloat(0, 15f));
+            Vector2 ringCenter = Center + new Vector2(0, podHalfHeight - Main.rand.NextFloat(0, 15f));
 
             shockwaveRings.Add(new ShockwaveRing {
                 WorldCenter = ringCenter,
