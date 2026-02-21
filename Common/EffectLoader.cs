@@ -26,6 +26,7 @@ namespace CalamityOverhaul.Common
         public static Asset<Effect> FlattenedDisk { get; set; }
         public static Asset<Effect> GammaRayBeam { get; set; }
         public static Asset<Effect> DropPodFlame { get; set; }
+        public static Asset<Effect> DropPodShockwave { get; set; }
         public override float Weight => 1.2f;
         public override void EndCaptureDraw(SpriteBatch spriteBatch, GraphicsDevice graphicsDevice, RenderTarget2D screenSwap) {
             DrawPrimitiveProjectile();

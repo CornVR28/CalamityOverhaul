@@ -40,8 +40,14 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         private readonly Vector2[] flameTrailPoints = new Vector2[FlameTrailPointCount];
         private Trail flameTrail;
 
+        /// <summary>
+        /// 冲击波环列表——环绕仓头的大气压缩波
+        /// </summary>
+        private readonly List<ShockwaveRing> shockwaveRings = [];
+
         //常量
         private const int MaxTrailParticles = 60;
+        private const int MaxShockwaveRings = 6;
         private const float ShakeIntensityBase = 1.5f;
         private const float ShakeIntensityMax = 4f;
 
@@ -98,6 +104,20 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
             //更新尾焰Trail路径点
             UpdateFlameTrailPoints();
 
+            //生成冲击波环（再入灼烧达到一定强度后开始产生）
+            if (reentryHeat > 0.15f && dropTimer % Math.Max(8, (int)(30 * (1f - reentryHeat * 0.7f))) == 0
+                && shockwaveRings.Count < MaxShockwaveRings) {
+                SpawnShockwaveRing();
+            }
+
+            //更新冲击波环
+            for (int i = shockwaveRings.Count - 1; i >= 0; i--) {
+                shockwaveRings[i].Update();
+                if (shockwaveRings[i].IsDead) {
+                    shockwaveRings.RemoveAt(i);
+                }
+            }
+
             //同步dropTimer给DropPodDrawSystem的屏幕特效使用
             DropPodDrawSystem.SyncDropTimer(dropTimer, reentryHeat);
         }
@@ -125,6 +145,23 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
 
                 flameTrailPoints[i] = new Vector2(podBottom.X + jitterX, y);
             }
+        }
+
+        private void SpawnShockwaveRing() {
+            Texture2D podTex = DropPod.DropPodAsset?.Value;
+            float podHalfHeight = podTex != null ? podTex.Height * 0.5f : 40f;
+
+            //环生成在仓头前方，略有随机偏移
+            Vector2 ringCenter = Center + new Vector2(0, podHalfHeight + Main.rand.NextFloat(0, 15f));
+
+            shockwaveRings.Add(new ShockwaveRing {
+                WorldCenter = ringCenter,
+                Life = 0,
+                MaxLife = Main.rand.Next(25, 45),
+                MaxRadius = 50f + reentryHeat * 60f + Main.rand.NextFloat(-10f, 10f),
+                Thickness = 0.08f + Main.rand.NextFloat(0, 0.04f),
+                Intensity = 0.4f + reentryHeat * 0.6f
+            });
         }
 
         private void SpawnTrailParticle() {
@@ -162,6 +199,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
 
             //绘制再入灼烧光效（在空降仓后面）
             DrawReentryHeatEffect(spriteBatch, drawCenter);
+
+            //绘制冲击波环（在仓体后面，营造大气压缩效果）
+            DrawShockwaveRings(spriteBatch);
 
             //绘制尾焰Trail（在粒子和仓体之前，作为主火焰效果）
             DrawFlameTrail(spriteBatch);
@@ -251,6 +291,56 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
             return result * alpha * heatBoost;
         }
 
+        /// <summary>
+        /// 绘制大气再入冲击波环——从仓头向外扩散的压缩气流环
+        /// 使用着色器渲染，带噪声扰动的环形效果
+        /// </summary>
+        private void DrawShockwaveRings(SpriteBatch spriteBatch) {
+            if (shockwaveRings.Count == 0) return;
+            if (CWRAsset.Placeholder_White == null || CWRAsset.Placeholder_White.IsDisposed) return;
+            if (EffectLoader.DropPodShockwave == null || !EffectLoader.DropPodShockwave.IsLoaded) return;
+
+            Texture2D canvas = CWRAsset.Placeholder_White.Value;
+
+            spriteBatch.End();
+            spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive, SamplerState.LinearWrap,
+                DepthStencilState.None, RasterizerState.CullNone, null, Main.GameViewMatrix.TransformationMatrix);
+
+            foreach (var ring in shockwaveRings) {
+                float progress = (float)ring.Life / ring.MaxLife;
+                float currentRadius = ring.MaxRadius * MathHelper.SmoothStep(0.2f, 1f, progress);
+                float alpha = MathF.Sin(progress * MathHelper.Pi) * ring.Intensity;
+
+                Vector2 drawPos = ring.WorldCenter - Main.screenPosition + shakeOffset;
+
+                //透视压缩比——横向宽、纵向窄，模拟从正上方俯视的水平环
+                const float perspectiveSquish = 0.45f;
+
+                Effect effect = EffectLoader.DropPodShockwave.Value;
+                effect.Parameters["globalTime"].SetValue((float)Main.timeForVisualEffects * 0.015f);
+                effect.Parameters["shockwaveIntensity"].SetValue(alpha);
+                effect.Parameters["ringRadius"].SetValue(MathHelper.Lerp(0.3f, 0.85f, progress));
+                effect.Parameters["ringThickness"].SetValue(ring.Thickness * (1f + (1f - progress) * 0.5f));
+                effect.Parameters["squishY"].SetValue(perspectiveSquish);
+                effect.Parameters["uNoise"].SetValue(CWRAsset.Extra_193.Value);
+                effect.CurrentTechnique.Passes[0].Apply();
+
+                //非等比缩放：X方向完整半径，Y方向压缩产生透视椭圆
+                float drawSize = currentRadius * 2f;
+                Vector2 drawScale = new Vector2(drawSize, drawSize * perspectiveSquish);
+                Color ringColor = Color.Lerp(
+                    new Color(180, 210, 255),
+                    new Color(255, 200, 150),
+                    reentryHeat * 0.6f) * alpha;
+                spriteBatch.Draw(canvas, drawPos, null, ringColor,
+                    0f, canvas.Size() * 0.5f, drawScale, SpriteEffects.None, 0f);
+            }
+
+            spriteBatch.End();
+            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointWrap,
+                DepthStencilState.None, RasterizerState.CullNone, null, Main.GameViewMatrix.TransformationMatrix);
+        }
+
         private void DrawDropPod(SpriteBatch sb, Vector2 drawCenter) {
             Texture2D podTex = DropPod.DropPodAsset.Value;
             Vector2 origin = podTex.Size() * 0.5f;
@@ -321,6 +411,30 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
                 Position += Velocity;
                 Velocity *= 0.96f;
                 Velocity.X += Main.rand.NextFloat(-0.3f, 0.3f);
+            }
+        }
+
+        /// <summary>
+        /// 冲击波环数据——模拟大气再入时仓头前方的弓形激波
+        /// </summary>
+        private class ShockwaveRing
+        {
+            /// <summary>环中心的世界坐标</summary>
+            public Vector2 WorldCenter;
+            /// <summary>当前生命帧</summary>
+            public int Life;
+            /// <summary>最大生命帧</summary>
+            public int MaxLife;
+            /// <summary>完全展开时的半径（像素）</summary>
+            public float MaxRadius;
+            /// <summary>环的厚度比例 0~1</summary>
+            public float Thickness;
+            /// <summary>亮度强度</summary>
+            public float Intensity;
+            public bool IsDead => Life >= MaxLife;
+
+            public void Update() {
+                Life++;
             }
         }
     }
