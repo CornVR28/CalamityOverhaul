@@ -9,6 +9,25 @@ using Terraria.ModLoader;
 
 namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machines
 {
+    internal class TransitionSceneDebug : UIHandle
+    {
+        public override LayersModeEnum LayersMode => LayersModeEnum.Mod_MenuLoad;
+        public override float RenderPriority => 2;
+        public override void Update() {
+            var current = Main.keyState;
+            var previous = Main.oldKeyState;
+            if (current.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.D1)
+                && !previous.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.D1)) {
+                if (TransitionScene.IsShowing) {
+                    TransitionScene.Hide();
+                }
+                else {
+                    TransitionScene.Show();
+                }
+            }
+        }
+    }
+
     /// <summary>
     /// 科幻风格过渡加载界面，灵感来自星际战士2的加载画面
     /// 全屏覆盖，带进度条、动态粒子、电路脉冲、数据流和底部滚动提示文字
