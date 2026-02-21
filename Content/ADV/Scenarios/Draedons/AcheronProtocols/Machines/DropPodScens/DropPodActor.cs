@@ -51,6 +51,19 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         private const float ShakeIntensityBase = 1.5f;
         private const float ShakeIntensityMax = 4f;
 
+        /// <summary>
+        /// 玩家控制的水平偏移（屏幕像素）
+        /// </summary>
+        private float horizontalOffset;
+        /// <summary>
+        /// 空降仓倾斜角度
+        /// </summary>
+        private float tiltAngle;
+        /// <summary>
+        /// 残骸生成计时器
+        /// </summary>
+        private int debrisSpawnTimer;
+
         public override void OnSpawn(params object[] args) {
             Width = 40;
             Height = 80;
@@ -59,6 +72,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
             dropTimer = 0;
             reentryHeat = 0f;
             shakeOffset = Vector2.Zero;
+            horizontalOffset = 0f;
+            tiltAngle = 0f;
+            debrisSpawnTimer = 0;
         }
 
         public override void AI() {
@@ -76,16 +92,32 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
                 Main.rand.NextFloat(-shakeIntensity, shakeIntensity),
                 Main.rand.NextFloat(-shakeIntensity, shakeIntensity));
 
-            //微幅摇摆旋转
-            Rotation = 0;
+            //微幅摇摆旋转——叠加玩家操控的倾斜
+            Rotation = tiltAngle;
 
             //再入灼烧强度随时间增加
             reentryHeat = MathHelper.Clamp(dropTimer / 480f, 0f, 1f);
 
-            //锁定在玩家位置（世界坐标中心）
+            //读取玩家的水平偏移和倾斜角度
             Player player = Main.LocalPlayer;
+            if (player != null && player.active && player.TryGetOverride<DropPodPlayer>(out var dpPlayer)) {
+                horizontalOffset = dpPlayer.HorizontalOffset;
+                tiltAngle = dpPlayer.TiltAngle;
+            }
+
+            //锁定在玩家位置 + 水平偏移（世界坐标中心）
             if (player != null && player.active) {
-                Position = player.Center - Size / 2f;
+                Position = player.Center - Size / 2f + new Vector2(horizontalOffset, 0);
+            }
+
+            //生成残骸障碍物（dropTimer超过一定帧数后开始，随时间加快）
+            if (dropTimer > 180) {
+                debrisSpawnTimer++;
+                int spawnInterval = Math.Max(40, 180 - (int)(reentryHeat * 120));
+                if (debrisSpawnTimer >= spawnInterval) {
+                    debrisSpawnTimer = 0;
+                    SpawnDebris();
+                }
             }
 
             //生成尾焰粒子（世界坐标）
@@ -175,6 +207,22 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
                 Thickness = 0.08f,
                 Intensity = 0.4f + reentryHeat * 0.6f
             });
+        }
+
+        /// <summary>
+        /// 获取空降仓的屏幕中心位置（用于碰撞检测）
+        /// </summary>
+        internal Vector2 GetPodScreenCenter() => Center - Main.screenPosition + shakeOffset;
+
+        /// <summary>
+        /// 生成一个残骸障碍物Actor
+        /// </summary>
+        private void SpawnDebris() {
+            //在屏幕宽度范围内随机选择一个 X 位置
+            float debrisX = Main.rand.NextFloat(-Main.screenWidth * 0.4f, Main.screenWidth * 0.4f);
+            //转换为世界坐标
+            Vector2 spawnWorldPos = Center + new Vector2(debrisX, Main.screenHeight * 0.6f);
+            ActorLoader.NewActor<DropPodDebrisActor>(spawnWorldPos, Vector2.Zero);
         }
 
         private void SpawnTrailParticle() {

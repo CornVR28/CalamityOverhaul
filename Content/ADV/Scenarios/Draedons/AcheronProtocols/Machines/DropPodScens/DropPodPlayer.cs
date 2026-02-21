@@ -21,17 +21,59 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         /// 坠落累计计时器
         /// </summary>
         public int DropTimer;
+        /// <summary>
+        /// 空降仓水平偏移量（屏幕像素），由玩家方向键控制
+        /// </summary>
+        public float HorizontalOffset;
+        /// <summary>
+        /// 空降仓倾斜角度，随水平移动产生
+        /// </summary>
+        public float TiltAngle;
+
+        private const float MoveSpeed = 4.5f;
+        private const float MaxOffset = 280f;
+        private const float TiltMax = 0.12f;
+        private const float Deceleration = 0.92f;
+        private const float TiltLerp = 0.1f;
+
+        private float moveVelocity;
+
         public override void PostUpdate() {
             if (!DropPodWorld.Active) {
                 if (DropPodActive) {
                     DropPodActive = false;
                     DropTimer = 0;
+                    HorizontalOffset = 0f;
+                    TiltAngle = 0f;
+                    moveVelocity = 0f;
                 }
                 return;
             }
 
             DropPodActive = true;
             DropTimer++;
+
+            //读取左右方向键输入
+            bool moveLeft = Player.controlLeft;
+            bool moveRight = Player.controlRight;
+
+            if (moveLeft && !moveRight) {
+                moveVelocity -= MoveSpeed * 0.3f;
+            }
+            else if (moveRight && !moveLeft) {
+                moveVelocity += MoveSpeed * 0.3f;
+            }
+            else {
+                moveVelocity *= Deceleration;
+            }
+
+            moveVelocity = MathHelper.Clamp(moveVelocity, -MoveSpeed, MoveSpeed);
+            HorizontalOffset += moveVelocity;
+            HorizontalOffset = MathHelper.Clamp(HorizontalOffset, -MaxOffset, MaxOffset);
+
+            //根据移动速度计算倾斜角度
+            float targetTilt = (moveVelocity / MoveSpeed) * TiltMax;
+            TiltAngle = MathHelper.Lerp(TiltAngle, targetTilt, TiltLerp);
 
             //锁定玩家位置在世界中央，无重力
             Player.position = new Vector2(
