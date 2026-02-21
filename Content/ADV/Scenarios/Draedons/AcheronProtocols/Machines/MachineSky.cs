@@ -517,8 +517,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
             Vector2 flashPos = lightningFlashScreenPos;
             if (flashPos.X > -500 && flashPos.X < Main.screenWidth + 500
                 && flashPos.Y > -500 && flashPos.Y < Main.screenHeight + 500) {
-                DrawSoftGlow(sb, flashPos, new Color(120, 200, 255) * (flash * intensity * 0.6f), 200f * flash);
-                DrawSoftGlow(sb, flashPos, new Color(200, 230, 255) * (flash * intensity * 0.4f), 100f * flash);
+                DrawSoftGlow(sb, flashPos, new Color(120, 200, 255) * (flash * intensity * 0.6f), 100f * flash);
+                DrawSoftGlow(sb, flashPos, new Color(200, 230, 255) * (flash * intensity * 0.4f), 60f * flash);
             }
         }
 

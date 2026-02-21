@@ -367,17 +367,51 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
             public int layer;
         }
 
+        /// <summary>
+        /// 最大电弧跳跃距离（穿越空气格数），模拟电弧可以跨越小段空气
+        /// </summary>
+        private const int MaxArcJumpDistance = 3;
+        /// <summary>
+        /// 初始种子搜索半径，在落点附近播种多个起始节点保证扩散覆盖
+        /// </summary>
+        private const int SeedSearchRadius = 4;
+        /// <summary>
+        /// 前N层不进行随机淘汰，保证初始扩散稳定
+        /// </summary>
+        private const int GuaranteedSpreadLayers = 5;
+
         public static void GenerateConductiveDischarge(Point startTile, int maxNodes = 480, int maxRadius = 48) {
             if (!WorldGen.InWorld(startTile.X, startTile.Y)) return;
 
-            // 寻找最近的实心方块作为起始点，避免起始坐标在空气中导致扩散完全失败
-            Point actualStart = FindNearestSolidTile(startTile, 6);
-            if (actualStart.X == -1) return; // 附近没有实心方块
-
             Queue<ConductionNode> q = new Queue<ConductionNode>();
             Dictionary<Point, ConductionNode> accepted = new Dictionary<Point, ConductionNode>();
-            q.Enqueue(new ConductionNode { pos = actualStart, intensity = 1f, layer = 0 });
-            accepted[actualStart] = new ConductionNode { pos = actualStart, intensity = 1f, layer = 0 };
+
+            // 在落点附近搜索所有实心方块作为初始种子，解决尖塔尖端只有单点的问题
+            int seedCount = 0;
+            for (int dy = -1; dy <= SeedSearchRadius; dy++) {
+                for (int dx = -SeedSearchRadius; dx <= SeedSearchRadius; dx++) {
+                    int nx = startTile.X + dx;
+                    int ny = startTile.Y + dy;
+                    if (!WorldGen.InWorld(nx, ny)) continue;
+                    Tile t = Framing.GetTileSafely(nx, ny);
+                    if (!t.HasTile || !Main.tileSolid[t.TileType] || Main.tileSolidTop[t.TileType]) continue;
+
+                    Point sp = new Point(nx, ny);
+                    if (accepted.ContainsKey(sp)) continue;
+
+                    // 距离越远初始强度越低
+                    float dist = MathF.Sqrt(dx * dx + dy * dy);
+                    float seedIntensity = MathHelper.Clamp(1f - dist * 0.12f, 0.5f, 1f);
+                    ConductionNode seed = new ConductionNode { pos = sp, intensity = seedIntensity, layer = 0 };
+                    accepted[sp] = seed;
+                    q.Enqueue(seed);
+                    seedCount++;
+                }
+            }
+
+            // 如果附近连一个实心方块都没有，放弃
+            if (seedCount == 0) return;
+
             int processed = 0;
 
             Point[] dirs = [
@@ -394,8 +428,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
                 if (!tile.HasTile || !Main.tileSolid[tile.TileType] || Main.tileSolidTop[tile.TileType])
                     continue;
 
-                if (Math.Abs(node.pos.X - actualStart.X) > maxRadius ||
-                    Math.Abs(node.pos.Y - actualStart.Y) > maxRadius)
+                if (Math.Abs(node.pos.X - startTile.X) > maxRadius ||
+                    Math.Abs(node.pos.Y - startTile.Y) > maxRadius)
                     continue;
 
                 Vector2 center = new Vector2(node.pos.X * 16 + 8, node.pos.Y * 16 + 8);
@@ -413,69 +447,63 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
                 if (node.intensity < 0.06f) continue;
 
                 for (int i = 0; i < dirs.Length; i++) {
-                    Point np = new Point(node.pos.X + dirs[i].X, node.pos.Y + dirs[i].Y);
+                    // 尝试直接邻居，若为空气则电弧跳跃搜索更远的实心方块
+                    Point dir = dirs[i];
+                    Point np = new Point(node.pos.X + dir.X, node.pos.Y + dir.Y);
+                    int jumpSteps = 1;
+
+                    if (WorldGen.InWorld(np.X, np.Y) && !accepted.ContainsKey(np)) {
+                        Tile ntile = Framing.GetTileSafely(np.X, np.Y);
+                        if (!ntile.HasTile || !Main.tileSolid[ntile.TileType] || Main.tileSolidTop[ntile.TileType]) {
+                            // 邻居是空气，尝试电弧跳跃：沿同方向继续探测
+                            Point jumpTarget = np;
+                            bool found = false;
+                            for (int j = 2; j <= MaxArcJumpDistance; j++) {
+                                jumpTarget = new Point(node.pos.X + dir.X * j, node.pos.Y + dir.Y * j);
+                                if (!WorldGen.InWorld(jumpTarget.X, jumpTarget.Y) || accepted.ContainsKey(jumpTarget)) break;
+                                Tile jt = Framing.GetTileSafely(jumpTarget.X, jumpTarget.Y);
+                                if (jt.HasTile && Main.tileSolid[jt.TileType] && !Main.tileSolidTop[jt.TileType]) {
+                                    np = jumpTarget;
+                                    jumpSteps = j;
+                                    found = true;
+                                    break;
+                                }
+                            }
+                            if (!found) continue;
+                        }
+                    }
+
                     if (!WorldGen.InWorld(np.X, np.Y) || accepted.ContainsKey(np)) continue;
 
-                    Tile ntile = Framing.GetTileSafely(np.X, np.Y);
-                    if (!ntile.HasTile || !Main.tileSolid[ntile.TileType] || Main.tileSolidTop[ntile.TileType])
+                    Tile finalTile = Framing.GetTileSafely(np.X, np.Y);
+                    if (!finalTile.HasTile || !Main.tileSolid[finalTile.TileType] || Main.tileSolidTop[finalTile.TileType])
                         continue;
 
-                    float cond = GetConductivity(ntile.TileType);
+                    float cond = GetConductivity(finalTile.TileType);
                     float nextIntensity = node.intensity * (0.88f + 0.10f * cond);
 
-                    if (Math.Abs(dirs[i].X) == 2) nextIntensity *= 0.85f;
-                    if (dirs[i].Y < 0) nextIntensity *= 0.80f;
+                    // 跳跃越远衰减越大
+                    if (jumpSteps > 1) nextIntensity *= MathF.Pow(0.78f, jumpSteps - 1);
+                    if (Math.Abs(dir.X) == 2) nextIntensity *= 0.85f;
+                    if (dir.Y < 0) nextIntensity *= 0.80f;
 
-                    float surviveChance = 0.55f * cond + 0.45f;
-                    if (Main.rand.NextFloat() > surviveChance || nextIntensity < 0.04f) continue;
+                    // 前几层保证扩散，不随机淘汰
+                    if (node.layer >= GuaranteedSpreadLayers) {
+                        float surviveChance = 0.55f * cond + 0.45f;
+                        if (Main.rand.NextFloat() > surviveChance) continue;
+                    }
+
+                    if (nextIntensity < 0.04f) continue;
 
                     ConductionNode next = new ConductionNode {
                         pos = np,
                         intensity = nextIntensity,
-                        layer = node.layer + 1
+                        layer = node.layer + jumpSteps
                     };
                     accepted[np] = next;
                     q.Enqueue(next);
                 }
             }
-        }
-
-        /// <summary>
-        /// 从给定坐标出发，向下和周围搜索最近的实心方块
-        /// </summary>
-        private static Point FindNearestSolidTile(Point origin, int searchRange) {
-            // 优先检查原始位置
-            if (WorldGen.InWorld(origin.X, origin.Y)) {
-                Tile t = Framing.GetTileSafely(origin.X, origin.Y);
-                if (t.HasTile && Main.tileSolid[t.TileType] && !Main.tileSolidTop[t.TileType])
-                    return origin;
-            }
-
-            // 优先向下搜索（闪电击中地面，落点通常在地表上方1-2格空气中）
-            for (int dy = 1; dy <= searchRange; dy++) {
-                int y = origin.Y + dy;
-                if (!WorldGen.InWorld(origin.X, y)) break;
-                Tile t = Framing.GetTileSafely(origin.X, y);
-                if (t.HasTile && Main.tileSolid[t.TileType] && !Main.tileSolidTop[t.TileType])
-                    return new Point(origin.X, y);
-            }
-
-            // 扩展搜索周围区域
-            for (int r = 1; r <= searchRange; r++) {
-                for (int dx = -r; dx <= r; dx++) {
-                    for (int dy = -r; dy <= r; dy++) {
-                        if (dx == 0 && dy > 0) continue; // 已经搜索过正下方
-                        int nx = origin.X + dx;
-                        int ny = origin.Y + dy;
-                        if (!WorldGen.InWorld(nx, ny)) continue;
-                        Tile t = Framing.GetTileSafely(nx, ny);
-                        if (t.HasTile && Main.tileSolid[t.TileType] && !Main.tileSolidTop[t.TileType])
-                            return new Point(nx, ny);
-                    }
-                }
-            }
-
-            return new Point(-1, -1);
         }
 
         private void SpawnGroundResidual(Vector2 center) {
