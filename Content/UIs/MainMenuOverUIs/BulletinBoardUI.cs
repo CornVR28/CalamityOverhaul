@@ -72,11 +72,6 @@ namespace CalamityOverhaul.Content.UIs.MainMenuOverUIs
             BulletinBoardElement overhaulSettingsButtonBoard = new BulletinBoardElement()
                 .Setproperty(OverhaulSettingsButton.OverhaulSettingsButtonText, OverhaulSettingsButton.OnOpen, disabledFunc: () => Main.menuMode == 888);
             bulletinBoardElements.Add(overhaulSettingsButtonBoard);
-#if DEBUG
-            BulletinBoardElement transitionSceneBoard = new BulletinBoardElement()
-                .Setproperty(Language.GetOrRegister("Mods.CalamityOverhaul.Debug.TransitionSceneBtn", () => "[DEBUG] TransitionScene"), () => TransitionScene.Show());
-            bulletinBoardElements.Add(transitionSceneBoard);
-#endif
         }
         public override void UnLoad() {
             Font = null;
