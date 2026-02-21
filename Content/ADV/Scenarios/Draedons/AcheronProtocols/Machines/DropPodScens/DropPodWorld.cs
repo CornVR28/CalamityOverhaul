@@ -39,7 +39,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         }
 
         public override void OnEnter() {
-            
+
         }
 
         public override void OnExit() {

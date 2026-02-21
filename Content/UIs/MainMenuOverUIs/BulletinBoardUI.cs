@@ -11,8 +11,6 @@ using Terraria.Audio;
 using Terraria.GameContent;
 using Terraria.ID;
 #if DEBUG
-using CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machines;
-using Terraria.Localization;
 #endif
 
 namespace CalamityOverhaul.Content.UIs.MainMenuOverUIs
