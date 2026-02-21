@@ -1,4 +1,5 @@
-﻿using SubworldLibrary;
+﻿using InnoVault.Actors;
+using SubworldLibrary;
 using System.Collections.Generic;
 using Terraria;
 using Terraria.WorldBuilding;
@@ -38,7 +39,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         }
 
         public override void OnEnter() {
-
+            
         }
 
         public override void OnExit() {
@@ -46,8 +47,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         }
 
         public override void OnLoad() {
-            Main.dayTime = false;
-            Main.time = Main.nightLength - 2000;
+            Main.dayTime = true;
+            Main.time = Main.dayLength / 2;
             //将地表线和岩石层推到世界底部，完全隐藏地下背景
             Main.worldSurface = Main.maxTilesY - 2;
             Main.rockLayer = Main.maxTilesY - 1;
@@ -55,8 +56,12 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
 
         public override void Update() {
             //保持夜晚状态
-            Main.dayTime = false;
-            Main.time = Main.nightLength - 2000;
+            Main.dayTime = true;
+            Main.time = Main.dayLength / 2;
+
+            if (ActorLoader.GetActiveActors<DropPodActor>().Count == 0) {
+                ActorLoader.NewActor<DropPodActor>(Main.LocalPlayer.Center, Vector2.Zero);
+            }
         }
 
         public override float GetGravity(Entity entity) {

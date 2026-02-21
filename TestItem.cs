@@ -1,6 +1,8 @@
 ﻿using CalamityOverhaul.Content.ADV.Scenarios;
+using CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machines;
 using CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machines.DropPodScens;
 using CalamityOverhaul.Content.ADV.Scenarios.SupCal.End.EternalBlazingNows;
+using InnoVault.Actors;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.ID;
@@ -70,8 +72,9 @@ namespace CalamityOverhaul
         public override bool? UseItem(Player player) {
             //ScenarioManager.Reset<GalacticCrisis>();
             //ScenarioManager.Start<GalacticCrisis>();
-            //MachineWorld.Enter();
-            DropPodWorld.Enter();
+            MachineWorld.Enter();
+            //DropPodWorld.Enter();
+            //ActorLoader.NewActor<DropPodActor>(player.Center, Vector2.Zero);
             return true;
         }
     }
