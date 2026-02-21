@@ -203,8 +203,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
                 float angle = Main.rand.NextFloat(MathHelper.TwoPi);
                 float speed = Main.rand.NextFloat(3f, 12f);
                 Vector2 sparkVel = angle.ToRotationVector2() * speed;
-                //火花偏向于向外扩散
-                sparkVel.Y -= Main.rand.NextFloat(2f, 5f);
+
+                sparkVel.Y -= Main.rand.NextFloat(2f, 6f);
 
                 Color sparkColor = Color.Lerp(
                     new Color(255, 220, 100),
@@ -309,7 +309,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
                 float lifeRatio = (float)spark.Life / spark.MaxLife;
                 float alpha = spark.Alpha * (1f - lifeRatio * lifeRatio);
                 Color c = spark.Color * alpha;
-                float scale = spark.Scale * (1f - lifeRatio * 0.5f) * 0.03f;
+                float scale = spark.Scale * (1f - lifeRatio * 0.5f) * 0.06f;
                 Vector2 drawPos = spark.Position - Main.screenPosition;
 
                 //火花拉伸——沿速度方向
@@ -336,7 +336,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
                 Life++;
                 Position += Velocity;
                 Velocity *= 0.94f;
-                Velocity.Y += 0.15f; //轻微重力
+                Velocity.Y -= 0.65f;
                 Velocity.X += Main.rand.NextFloat(-0.2f, 0.2f);
             }
         }

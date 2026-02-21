@@ -31,7 +31,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         public float TiltAngle;
 
         private const float MoveSpeed = 4.5f;
-        private const float MaxOffset = 280f;
+        private const float MaxOffset = 680f;
         private const float TiltMax = 0.12f;
         private const float Deceleration = 0.92f;
         private const float TiltLerp = 0.1f;

@@ -34,7 +34,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         private readonly List<TrailParticle> trailParticles = [];
 
         /// <summary>
-        /// 尾焰Trail路径点，从空降仓底部向下延伸
+        /// 尾焰Trail路径点，从空降仓顶部向上延伸
         /// </summary>
         private const int FlameTrailPointCount = 24;
         private readonly Vector2[] flameTrailPoints = new Vector2[FlameTrailPointCount];
@@ -111,9 +111,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
             }
 
             //生成残骸障碍物（dropTimer超过一定帧数后开始，随时间加快）
-            if (dropTimer > 180) {
+            if (dropTimer > 120) {
                 debrisSpawnTimer++;
-                int spawnInterval = Math.Max(40, 180 - (int)(reentryHeat * 120));
+                int spawnInterval = Math.Max(40, 120 - (int)(reentryHeat * 120));
                 if (debrisSpawnTimer >= spawnInterval) {
                     debrisSpawnTimer = 0;
                     SpawnDebris();
@@ -154,28 +154,28 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         }
 
         /// <summary>
-        /// 更新尾焰路径点，从火焰末端到仓底喷口
-        /// 喷口（根部）始终固定在仓底中心，火焰远端随倾斜角度逐渐偏转
-        /// Trail约定：[0]=末尾(火焰远端)，[Length-1]=起点(喷口)
-        /// 火焰从喷口逐渐向远端生长，未生长到的点钉在喷口位置
+        /// 更新尾焰路径点——火焰从仓体顶部喷口向上(-Y)延伸
+        /// 喷口（根部）固定在仓顶中心，火焰远端随倾斜角度逐渐偏转
+        /// Trail约定：[0]=起点(喷口/根部)，[Length-1]=末尾(火焰远端)
+        /// 这样 GetFlameTrailWidth/Color 中 progress=0 对应根部（宽/亮），progress=1 对应远端（窄/暗）
         /// </summary>
         private void UpdateFlameTrailPoints() {
-            Vector2 podBottom = Center - new Vector2(0, 860) + shakeOffset;
+            //喷口位置：仓体中心上方（仓体顶部）
+            Vector2 nozzle = Center + shakeOffset;
 
             //火焰的最终完整长度
-            float fullFlameLength = 880f;
+            float fullFlameLength = 680f;
 
             //当前火焰实际长度——从0逐渐增长到完整长度
             float growProgress = MathHelper.Clamp(dropTimer / 60f, 0f, 1f);
             float currentFlameLength = growProgress * fullFlameLength;
 
-            //倾斜偏转的最大水平偏移量——火焰末端的最大X偏移
-            //tiltAngle > 0 仓体右倾，火焰末端应向左偏（X负方向）
-            float maxTiltOffsetX = -MathF.Sin(tiltAngle) * fullFlameLength * 0f;
+            //倾斜偏转：tiltAngle > 0 仓体右倾，火焰末端向左偏（X负方向）
+            float maxTiltOffsetX = -MathF.Sin(tiltAngle) * fullFlameLength * 1.5f;
 
             for (int i = 0; i < FlameTrailPointCount; i++) {
-                //[Length-1]=喷口(t=0), [0]=火焰远端(t=1)
-                float t = 1f - i / (float)(FlameTrailPointCount - 1);
+                //[0]=喷口(t=0), [Length-1]=火焰远端(t=1)
+                float t = i / (float)(FlameTrailPointCount - 1);
 
                 //这个点应该距离喷口多远
                 float targetDist = t * fullFlameLength;
@@ -183,18 +183,18 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
                 //如果火焰还没生长到这个点的位置，就钉在当前火焰末端
                 float actualDist = MathF.Min(targetDist, currentFlameLength);
 
-                //Y方向：始终笔直向下
-                float y = podBottom.Y + actualDist;
+                //Y方向：从喷口向上延伸（-Y）
+                float y = nozzle.Y - actualDist;
 
-                //X方向：根部(t=0)无偏移，远端(t=1)偏移最大，用二次曲线使过渡更自然
+                //X方向：根部(t=0)无偏移，远端(t=1)偏移最大，二次曲线过渡
                 float normalizedDist = actualDist / fullFlameLength;
                 float tiltOffsetX = maxTiltOffsetX * normalizedDist * normalizedDist;
 
-                //末端极轻微的热扰动（仅在远离喷口的位置）
+                //末端轻微热扰动（仅在远离喷口的位置）
                 float disturbance = normalizedDist * normalizedDist * 2f;
                 float jitterX = MathF.Sin(dropTimer * 0.2f + normalizedDist * 20f) * disturbance;
 
-                flameTrailPoints[i] = new Vector2(podBottom.X + tiltOffsetX + jitterX, y);
+                flameTrailPoints[i] = new Vector2(nozzle.X + tiltOffsetX + jitterX, y);
             }
         }
 
@@ -230,7 +230,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         /// </summary>
         private void SpawnDebris() {
             //在屏幕宽度范围内随机选择一个 X 位置
-            float debrisX = Main.rand.NextFloat(-Main.screenWidth * 0.4f, Main.screenWidth * 0.4f);
+            float debrisX = Main.rand.NextFloat(-Main.screenWidth * 0.3f, Main.screenWidth * 0.3f);
             //转换为世界坐标
             Vector2 spawnWorldPos = Center + new Vector2(debrisX, Main.screenHeight * 0.6f);
             ActorLoader.NewActor<DropPodDebrisActor>(spawnWorldPos, Vector2.Zero);
@@ -239,14 +239,16 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         private void SpawnTrailParticle() {
             if (trailParticles.Count >= MaxTrailParticles) return;
 
-            //从空降仓底部向下喷射（世界坐标）
+            //从空降仓顶部向上喷射（世界坐标）
+            Texture2D podTex = DropPod.DropPodAsset?.Value;
+            float nozzleOffsetY = podTex != null ? podTex.Height * 0.45f : 120f;
             Vector2 spawnPos = Center + new Vector2(
                 Main.rand.NextFloat(-20, 20),
-                Height * 0.5f + Main.rand.NextFloat(0, 15));
+                -nozzleOffsetY - Main.rand.NextFloat(0, 15));
 
             Vector2 velocity = new Vector2(
                 Main.rand.NextFloat(-1.5f, 1.5f),
-                Main.rand.NextFloat(3f, 8f));
+                Main.rand.NextFloat(-8f, -3f));
 
             Color baseColor = Color.Lerp(
                 new Color(255, 200, 100),
@@ -321,7 +323,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         /// 尾焰Trail宽度函数：根部宽、末端窄，呈火焰锥形
         /// </summary>
         private float GetFlameTrailWidth(float progress) {
-            //progress: 0=起点(仓底), 1=末端
+            //progress: 0=喷口(根部), 1=火焰远端
             float intensityFactor = MathHelper.Clamp(dropTimer / 120f, 0.3f, 1f);
 
             //火焰根部宽，末端快速收窄
