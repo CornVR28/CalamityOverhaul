@@ -44,8 +44,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         private const int MaxTrailParticles = 60;
         private const float ShakeIntensityBase = 1.5f;
         private const float ShakeIntensityMax = 4f;
-        private const float RotationSwaySpeed = 0.015f;
-        private const float RotationSwayMax = 0.06f;
 
         public override void OnSpawn(params object[] args) {
             Width = 40;
@@ -73,7 +71,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
                 Main.rand.NextFloat(-shakeIntensity, shakeIntensity));
 
             //微幅摇摆旋转
-            Rotation = MathF.Sin(dropTimer * RotationSwaySpeed) * RotationSwayMax;
+            Rotation = 0;
 
             //再入灼烧强度随时间增加
             reentryHeat = MathHelper.Clamp(dropTimer / 480f, 0f, 1f);
@@ -105,30 +103,27 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         }
 
         /// <summary>
-        /// 更新尾焰路径点，从空降仓底部向下延伸，加入横向湍流扰动
+        /// 更新尾焰路径点，从火焰末端到仓底喷口，笔直向下喷射
+        /// Trail约定：[0]=末尾(火焰远端)，[Length-1]=起点(喷口)
         /// </summary>
         private void UpdateFlameTrailPoints() {
-            Vector2 podBottom = Center + new Vector2(0, Height * 0.5f);
+            Vector2 podBottom = Center - new Vector2(0, 860) + shakeOffset;
 
             //火焰向下延伸的总长度，随时间逐渐增长
-            float flameLength = MathHelper.Clamp(dropTimer / 60f, 0.3f, 1f) * 280f;
+            float flameLength = MathHelper.Clamp(dropTimer / 60f, 0.3f, 1f) * 880f;
 
             for (int i = 0; i < FlameTrailPointCount; i++) {
-                float t = i / (float)(FlameTrailPointCount - 1);
+                //反转：i=0对应火焰最远端，i=max对应喷口
+                float t = 1f - i / (float)(FlameTrailPointCount - 1);
 
-                //基础纵向位置
+                //基础纵向位置——笔直向下
                 float y = podBottom.Y + t * flameLength;
 
-                //横向湍流：越远离仓体扰动越大
-                float turbulenceScale = t * t * 18f;
-                float turbulenceX = MathF.Sin(dropTimer * 0.12f + t * 7f) * turbulenceScale
-                    + MathF.Sin(dropTimer * 0.07f + t * 13f) * turbulenceScale * 0.5f;
+                //末端极轻微的热扰动（仅在远离喷口的位置），模拟热气扩散而非蛇形扭动
+                float disturbance = t * t * 2f;
+                float jitterX = MathF.Sin(dropTimer * 0.2f + t * 20f) * disturbance;
 
-                //火焰底端轻微展开
-                float spread = MathF.Sin(t * MathHelper.Pi) * 6f;
-                turbulenceX += MathF.Sin(dropTimer * 0.05f + i) * spread;
-
-                flameTrailPoints[i] = new Vector2(podBottom.X + turbulenceX, y);
+                flameTrailPoints[i] = new Vector2(podBottom.X + jitterX, y);
             }
         }
 
@@ -185,40 +180,27 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         /// </summary>
         private void DrawFlameTrail(SpriteBatch spriteBatch) {
             if (dropTimer < 10) return;
-
-            //暂停SpriteBatch以切换到顶点绘制模式
-            spriteBatch.End();
+            if (EffectLoader.DropPodFlame == null || !EffectLoader.DropPodFlame.IsLoaded) return;
 
             //初始化或更新Trail
-            flameTrail ??= new Trail(flameTrailPoints,
-                GetFlameTrailWidth, GetFlameTrailColor);
+            flameTrail ??= new Trail(flameTrailPoints, GetFlameTrailWidth, GetFlameTrailColor);
             flameTrail.TrailPositions = flameTrailPoints;
 
-            GraphicsDevice device = Main.graphics.GraphicsDevice;
+            //切换到顶点绘制模式——与BaseSwing.DrawSlashTrail、DestroyerRenderHelper一致的模式
+            spriteBatch.End();
 
-            //加载着色器和噪声纹理
-            if (EffectLoader.DropPodFlame != null && EffectLoader.DropPodFlame.IsLoaded) {
-                Effect effect = EffectLoader.DropPodFlame.Value;
-                Trail.CalculateRenderingMatrices(out Matrix view, out Matrix projection);
-                effect.Parameters["uWorldViewProjection"].SetValue(view * projection);
-                effect.Parameters["globalTime"].SetValue((float)Main.timeForVisualEffects * 0.02f);
-                effect.Parameters["heatIntensity"].SetValue(reentryHeat);
+            Effect effect = EffectLoader.DropPodFlame.Value;
+            effect.Parameters["transformMatrix"].SetValue(VaultUtils.GetTransfromMatrix());
+            effect.Parameters["globalTime"].SetValue((float)Main.timeForVisualEffects * 0.02f);
+            effect.Parameters["heatIntensity"].SetValue(reentryHeat);
+            effect.Parameters["uNoise"].SetValue(CWRAsset.Extra_193.Value);
 
-                //使用噪声纹理
-                if (CWRAsset.Fire != null && !CWRAsset.Fire.IsDisposed) {
-                    device.Textures[1] = CWRAsset.Extra_193.Value;
-                    device.SamplerStates[1] = SamplerState.LinearWrap;
-                }
+            Main.graphics.GraphicsDevice.BlendState = BlendState.Additive;
+            flameTrail.DrawTrail(effect);
+            flameTrail.DrawTrail(effect);
+            Main.graphics.GraphicsDevice.BlendState = BlendState.AlphaBlend;
 
-                device.BlendState = BlendState.Additive;
-                flameTrail.DrawTrail(effect);
-
-                //二次叠加绘制，增强火焰亮度
-                flameTrail.DrawTrail(effect);
-                device.BlendState = BlendState.AlphaBlend;
-            }
-
-            //恢复SpriteBatch
+            //恢复SpriteBatch——与项目中其他End/Begin对保持一致
             spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointWrap,
                 DepthStencilState.None, RasterizerState.CullNone, null, Main.GameViewMatrix.TransformationMatrix);
         }
