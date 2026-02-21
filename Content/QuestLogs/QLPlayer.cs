@@ -1,6 +1,7 @@
 ﻿using CalamityOverhaul.Common;
 using CalamityOverhaul.Content.QuestLogs.Core;
 using CalamityOverhaul.Content.QuestLogs.QLNodes;
+using CalamityOverhaul.OtherMods.SubWorld;
 using InnoVault.GameSystem;
 using System;
 using System.Collections.Generic;
@@ -94,12 +95,15 @@ namespace CalamityOverhaul.Content.QuestLogs
         public override void OnEnterWorld() {
             string currentWorldFullName = SaveWorld.WorldFullName;
 
+            //子世界切换不视为跨世界，避免频繁弹出确认窗口
+            bool isSubWorld = SubWorldRef.AnyActiveSubWorld();
+
             //每次进入世界都重置跳过标记，确保每次进入都会提醒
             //只有当用户在本次会话中选择跳过后才会设置DontCheckQuestInWorld
             //这样下次进入世界时会重新询问
 
             //检测是否进入了不同的世界
-            if (!string.IsNullOrEmpty(LastWorldFullName) && LastWorldFullName != currentWorldFullName) {
+            if (!isSubWorld && !string.IsNullOrEmpty(LastWorldFullName) && LastWorldFullName != currentWorldFullName) {
                 //进入了不同的世界，重置跳过标记并弹出确认窗口
                 DontCheckQuestInWorld = string.Empty;
                 QuestWorldConfirmUI.RequestConfirm(Main.worldName, LastWorldFullName);

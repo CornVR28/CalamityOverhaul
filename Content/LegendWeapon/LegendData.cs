@@ -1,5 +1,6 @@
 ﻿using CalamityOverhaul.Common;
 using CalamityOverhaul.Content.LegendWeapon.MurasamaLegend;
+using CalamityOverhaul.OtherMods.SubWorld;
 using InnoVault.GameSystem;
 using System.IO;
 using Terraria;
@@ -173,6 +174,10 @@ namespace CalamityOverhaul.Content.LegendWeapon
         /// </summary>
         /// <returns>如果需要跨世界确认返回true</returns>
         public bool NeedCrossWorldConfirm() {
+            //子世界切换不视为跨世界，避免频繁弹出确认窗口
+            if (SubWorldRef.AnyActiveSubWorld()) {
+                return false;
+            }
             return UpgradeWorldFullName != string.Empty && UpgradeWorldFullName != SaveWorld.WorldFullName;
         }
 

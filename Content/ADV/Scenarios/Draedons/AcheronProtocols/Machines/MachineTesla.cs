@@ -370,16 +370,21 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         public static void GenerateConductiveDischarge(Point startTile, int maxNodes = 480, int maxRadius = 48) {
             if (!WorldGen.InWorld(startTile.X, startTile.Y)) return;
 
+            // 寻找最近的实心方块作为起始点，避免起始坐标在空气中导致扩散完全失败
+            Point actualStart = FindNearestSolidTile(startTile, 6);
+            if (actualStart.X == -1) return; // 附近没有实心方块
+
             Queue<ConductionNode> q = new Queue<ConductionNode>();
             Dictionary<Point, ConductionNode> accepted = new Dictionary<Point, ConductionNode>();
-            q.Enqueue(new ConductionNode { pos = startTile, intensity = 1f, layer = 0 });
-            accepted[startTile] = new ConductionNode { pos = startTile, intensity = 1f, layer = 0 };
+            q.Enqueue(new ConductionNode { pos = actualStart, intensity = 1f, layer = 0 });
+            accepted[actualStart] = new ConductionNode { pos = actualStart, intensity = 1f, layer = 0 };
             int processed = 0;
 
-            Point[] dirs = new Point[] {
+            Point[] dirs = [
                 new Point(1,0), new Point(-1,0), new Point(0,1), new Point(0,-1),
-                new Point(2,0), new Point(-2,0), new Point(1,1), new Point(-1,1)
-            };
+                new Point(2,0), new Point(-2,0), new Point(1,1), new Point(-1,1),
+                new Point(1,-1), new Point(-1,-1)
+            ];
 
             int currentTick = (int)Main.GameUpdateCount;
             while (q.Count > 0 && processed < maxNodes) {
@@ -389,8 +394,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
                 if (!tile.HasTile || !Main.tileSolid[tile.TileType] || Main.tileSolidTop[tile.TileType])
                     continue;
 
-                if (Math.Abs(node.pos.X - startTile.X) > maxRadius ||
-                    Math.Abs(node.pos.Y - startTile.Y) > Math.Min(maxRadius / 2, 32))
+                if (Math.Abs(node.pos.X - actualStart.X) > maxRadius ||
+                    Math.Abs(node.pos.Y - actualStart.Y) > maxRadius)
                     continue;
 
                 Vector2 center = new Vector2(node.pos.X * 16 + 8, node.pos.Y * 16 + 8);
@@ -405,7 +410,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
                     intensity = node.intensity
                 });
 
-                if (node.intensity < 0.12f) continue;
+                if (node.intensity < 0.06f) continue;
 
                 for (int i = 0; i < dirs.Length; i++) {
                     Point np = new Point(node.pos.X + dirs[i].X, node.pos.Y + dirs[i].Y);
@@ -416,13 +421,13 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
                         continue;
 
                     float cond = GetConductivity(ntile.TileType);
-                    float nextIntensity = node.intensity * (0.82f + 0.12f * cond);
+                    float nextIntensity = node.intensity * (0.88f + 0.10f * cond);
 
-                    if (Math.Abs(dirs[i].X) == 2) nextIntensity *= 0.78f;
-                    if (dirs[i].Y < 0) nextIntensity *= 0.65f;
+                    if (Math.Abs(dirs[i].X) == 2) nextIntensity *= 0.85f;
+                    if (dirs[i].Y < 0) nextIntensity *= 0.80f;
 
-                    float surviveChance = 0.75f * cond + 0.25f;
-                    if (Main.rand.NextFloat() > surviveChance || nextIntensity < 0.08f) continue;
+                    float surviveChance = 0.55f * cond + 0.45f;
+                    if (Main.rand.NextFloat() > surviveChance || nextIntensity < 0.04f) continue;
 
                     ConductionNode next = new ConductionNode {
                         pos = np,
@@ -433,6 +438,44 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
                     q.Enqueue(next);
                 }
             }
+        }
+
+        /// <summary>
+        /// 从给定坐标出发，向下和周围搜索最近的实心方块
+        /// </summary>
+        private static Point FindNearestSolidTile(Point origin, int searchRange) {
+            // 优先检查原始位置
+            if (WorldGen.InWorld(origin.X, origin.Y)) {
+                Tile t = Framing.GetTileSafely(origin.X, origin.Y);
+                if (t.HasTile && Main.tileSolid[t.TileType] && !Main.tileSolidTop[t.TileType])
+                    return origin;
+            }
+
+            // 优先向下搜索（闪电击中地面，落点通常在地表上方1-2格空气中）
+            for (int dy = 1; dy <= searchRange; dy++) {
+                int y = origin.Y + dy;
+                if (!WorldGen.InWorld(origin.X, y)) break;
+                Tile t = Framing.GetTileSafely(origin.X, y);
+                if (t.HasTile && Main.tileSolid[t.TileType] && !Main.tileSolidTop[t.TileType])
+                    return new Point(origin.X, y);
+            }
+
+            // 扩展搜索周围区域
+            for (int r = 1; r <= searchRange; r++) {
+                for (int dx = -r; dx <= r; dx++) {
+                    for (int dy = -r; dy <= r; dy++) {
+                        if (dx == 0 && dy > 0) continue; // 已经搜索过正下方
+                        int nx = origin.X + dx;
+                        int ny = origin.Y + dy;
+                        if (!WorldGen.InWorld(nx, ny)) continue;
+                        Tile t = Framing.GetTileSafely(nx, ny);
+                        if (t.HasTile && Main.tileSolid[t.TileType] && !Main.tileSolidTop[t.TileType])
+                            return new Point(nx, ny);
+                    }
+                }
+            }
+
+            return new Point(-1, -1);
         }
 
         private void SpawnGroundResidual(Vector2 center) {
