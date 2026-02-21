@@ -13,6 +13,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
     {
         public override LayersModeEnum LayersMode => LayersModeEnum.Mod_MenuLoad;
         public override float RenderPriority => 2;
+        public override bool Active => true;
         public override void Update() {
             var current = Main.keyState;
             var previous = Main.oldKeyState;
