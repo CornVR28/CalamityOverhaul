@@ -898,6 +898,14 @@ namespace CalamityOverhaul.Content.ADV.DialogueBoxs
             RegisterPortrait(speaker, texture, baseColor, silhouette ?? false);
             SetPortraitStyle(speaker, baseColor, silhouette);
         }
+
+        /// <summary>
+        /// 尝试获取已注册的立绘数据（供外部系统如来电UI使用）
+        /// </summary>
+        public static bool TryGetPortrait(string key, out PortraitData portraitData) {
+            return portraits.TryGetValue(key, out portraitData);
+        }
+
         public virtual void EnqueueDialogue(string speaker, string content, Action onFinish = null, Action onStart = null) {
             queue.Enqueue(new DialogueSegment {
                 Speaker = speaker,
