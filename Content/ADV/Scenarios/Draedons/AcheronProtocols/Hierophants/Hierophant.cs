@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using Terraria;
 using Terraria.Audio;
+using Terraria.DataStructures;
 using Terraria.GameContent.Bestiary;
 using Terraria.GameContent.ItemDropRules;
 using Terraria.Graphics.CameraModifiers;
@@ -61,16 +62,16 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Hiero
 
                 NoMoveTime--;
                 float distToMove = 100f * NPC.scale;
-                var machine = (Hierophant)NPC.ModNPC;
+                var boss = (Hierophant)NPC.ModNPC;
 
-                if (machine.Jumping) {
+                if (boss.Jumping) {
                     _onTileFlag = false;
                     TargetPos = NPC.Center + new Vector2(Offset.X * 0.2f, 200f) * NPC.scale;
                     MoveSpeed = Distance(TargetPos, StandPoint) * 0.2f;
                     return false;
                 }
 
-                float bodyRot = machine.Direction > 0 ? NPC.rotation : (NPC.rotation + MathHelper.Pi);
+                float bodyRot = boss.Direction > 0 ? NPC.rotation : (NPC.rotation + MathHelper.Pi);
                 Vector2 idealPos = NPC.Center + NPC.velocity * 16f + (Offset * NPC.scale).RotatedBy(bodyRot);
                 float dist = Distance(StandPoint, idealPos);
 
@@ -90,7 +91,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Hiero
 
             public Vector2 FindStandPoint(Vector2 center, float maxOffset, float maxTry = 64) {
                 _onTileFlag = false;
-                var machine = (Hierophant)NPC.ModNPC;
+                var boss = (Hierophant)NPC.ModNPC;
 
                 for (int i = 0; i < (int)maxTry; i++) {
                     Vector2 pos = RandomPointInCircle(maxTry) + center;
@@ -108,11 +109,14 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Hiero
                     }
                 }
 
-                float rot = machine.Direction > 0 ? NPC.rotation : (NPC.rotation + MathHelper.Pi);
+                float rot = boss.Direction > 0 ? NPC.rotation : (NPC.rotation + MathHelper.Pi);
                 return NPC.Center + new Vector2(Offset.X, 200f).RotatedBy(rot);
             }
         }
 
+        /// <summary>
+        /// 双节臂结构，第一段(上臂)连接身体，第二段(前臂/刃)连接武器末端
+        /// </summary>
         public class HierophantArm
         {
             public float Seg1RotVelocity;
@@ -123,13 +127,16 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Hiero
             public Vector2 Offset;
             public NPC Npc;
 
-            public Vector2 TopPos => Seg1End + Seg2Rot.ToRotationVector2() * 60f * Npc.scale;
+            /// <summary>
+            /// 镰刀刃尖的世界坐标
+            /// </summary>
+            public Vector2 BladeEnd => Seg1End + Seg2Rot.ToRotationVector2() * 60f * Npc.scale;
 
             public Vector2 Seg1End {
                 get {
-                    var machine = (Hierophant)Npc.ModNPC;
-                    float rot = machine.Direction > 0 ? Npc.rotation : (Npc.rotation + MathHelper.Pi);
-                    return Npc.Center + (Offset * new Vector2(machine.Direction, 1f) * Npc.scale).RotatedBy(rot)
+                    var boss = (Hierophant)Npc.ModNPC;
+                    float rot = boss.Direction > 0 ? Npc.rotation : (Npc.rotation + MathHelper.Pi);
+                    return Npc.Center + (Offset * new Vector2(boss.Direction, 1f) * Npc.scale).RotatedBy(rot)
                            + Seg1Rot.ToRotationVector2() * Seg1Length;
                 }
             }
@@ -143,9 +150,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Hiero
             }
 
             public void PointAt(Vector2 pos) {
-                var machine = (Hierophant)Npc.ModNPC;
-                float rot = machine.Direction > 0 ? Npc.rotation : (Npc.rotation + MathHelper.Pi);
-                Vector2 basePos = Npc.Center + (Offset * new Vector2(machine.Direction, 1f)).RotatedBy(rot);
+                var boss = (Hierophant)Npc.ModNPC;
+                float rot = boss.Direction > 0 ? Npc.rotation : (Npc.rotation + MathHelper.Pi);
+                Vector2 basePos = Npc.Center + (Offset * new Vector2(boss.Direction, 1f)).RotatedBy(rot);
 
                 Seg1Rot = RotateTowardsAngle(Seg1Rot, (pos - basePos).ToRotation(), 0.06f, false);
 
@@ -157,6 +164,18 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Hiero
                 }
 
                 Seg2Rot = RotateTowardsAngle(Seg2Rot, (pos - Seg1End).ToRotation(), 0.06f, false);
+            }
+
+            /// <summary>
+            /// 快速挥动：以高速旋转角速度驱动 Seg2 朝目标方向横扫
+            /// </summary>
+            public void SwingTowards(Vector2 target, float angularSpeed) {
+                var boss = (Hierophant)Npc.ModNPC;
+                float rot = boss.Direction > 0 ? Npc.rotation : (Npc.rotation + MathHelper.Pi);
+                Vector2 basePos = Npc.Center + (Offset * new Vector2(boss.Direction, 1f)).RotatedBy(rot);
+
+                Seg1Rot = RotateTowardsAngle(Seg1Rot, (target - basePos).ToRotation(), 0.12f, false);
+                Seg2Rot = RotateTowardsAngle(Seg2Rot, (target - Seg1End).ToRotation(), angularSpeed);
             }
 
             public void Update() {
@@ -179,11 +198,33 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Hiero
 
         #endregion
 
+        #region Enums
+
+        private enum SlashState : byte
+        {
+            Idle,
+            LeftSlash,
+            RightSlash,
+            CrossSlash,
+            SlamDown
+        }
+
+        #endregion
+
+        #region Constants
+
+        private const float SlashBladeRadius = 110f;
+        private const int SlashDuration = 30;
+        private const int CrossSlashDuration = 36;
+        private const int SlamDuration = 24;
+
+        #endregion
+
         #region Fields
 
         public List<HierophantLeg> Legs;
-        public HierophantArm Cannon;
-        public HierophantArm Harpoon;
+        public HierophantArm LeftScythe;
+        public HierophantArm RightScythe;
         public int Direction = 1;
         public int DeathCounter = 240;
         public bool Defeated;
@@ -191,29 +232,12 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Hiero
         public bool JumpFlag;
         public bool BossActivated = true;
         public int JumpCooldown;
-        public int JumpAndShootTimer;
-        public int CannonUpAttackTimer;
-        public float TeslaCooldown = 120f;
-        public float TeslaUpCooldown;
-        public float HarpoonCharge;
-        public float HarpoonCooldown = 120f;
-        public int HarpoonNpcIndex = -1;
+
         private int _despawnCounter;
-
-        #endregion
-
-        #region Properties
-
-        public bool IsHarpoonOnLauncher {
-            get {
-                NPC harpoonNpc = HarpoonNpcIndex.ToNPC();
-                return harpoonNpc?.ModNPC is HierophantHarpoon h && h.OnLauncher;
-            }
-        }
-
-        public Vector2 HarpoonTipPos =>
-            Harpoon.Seg1End + Harpoon.Seg2Rot.ToRotationVector2() * 150f * NPC.scale
-            + new Vector2(0f, 10f * Direction).RotatedBy(Harpoon.Seg2Rot) * NPC.scale;
+        private SlashState _slashState = SlashState.Idle;
+        private int _slashTimer;
+        private float _slashCooldown = 60f;
+        private bool _slamDamageDealt;
 
         #endregion
 
@@ -310,8 +334,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Hiero
                 new HierophantLeg(NPC, new Vector2(-140, 120), 1f),
                 new HierophantLeg(NPC, new Vector2(140, 120), 1f),
             ];
-            Cannon = new HierophantArm(NPC, new Vector2(-80, -32), 76f, MathHelper.PiOver2, MathHelper.PiOver2);
-            Harpoon = new HierophantArm(NPC, new Vector2(60, -18), 66f, MathHelper.PiOver2, MathHelper.PiOver2);
+            LeftScythe = new HierophantArm(NPC, new Vector2(-80, -32), 76f, MathHelper.PiOver2, MathHelper.PiOver2);
+            RightScythe = new HierophantArm(NPC, new Vector2(60, -18), 66f, MathHelper.PiOver2, MathHelper.PiOver2);
         }
 
         public static bool CanStandOn(Vector2 pos) => !IsAir(pos, true);
@@ -324,18 +348,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Hiero
             NPC.chaseable = NPC.boss;
             JumpCooldown--;
             EnsureSegments();
-            Cannon.Update();
-            Harpoon.Update();
-
-            if (HarpoonNpcIndex == -1 && Main.netMode != NetmodeID.MultiplayerClient) {
-                HarpoonNpcIndex = NPC.NewNPC(NPC.GetSource_FromAI(), 0, 0, ModContent.NPCType<HierophantHarpoon>(), 0, NPC.whoAmI);
-                NPC harpoonNpc = HarpoonNpcIndex.ToNPC();
-                if (harpoonNpc != null) {
-                    harpoonNpc.Center = HarpoonTipPos;
-                    harpoonNpc.netSpam = 9;
-                    harpoonNpc.netUpdate = true;
-                }
-            }
+            LeftScythe.Update();
+            RightScythe.Update();
 
             foreach (var leg in Legs) {
                 if (leg.Update()) {
@@ -400,14 +414,10 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Hiero
             NPC.netUpdate = true;
             if (NPC.netSpam >= 10) NPC.netSpam = 9;
 
-            int decrement = 1;
-            if (Main.zenithWorld) decrement = 1;
-            DeathCounter -= decrement;
-
+            DeathCounter--;
             NPC.velocity *= 0f;
             Jumping = false;
-            CannonUpAttackTimer = -1;
-            JumpAndShootTimer = -1;
+            _slashState = SlashState.Idle;
 
             if (!Main.dedServ && Main.GameUpdateCount % 2 == 0) {
                 AddCameraShake(NPC.Center, 5f);
@@ -475,97 +485,194 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Hiero
             if (Main.getGoodWorld) enrage *= 1.1f;
             if (Main.zenithWorld) enrage *= 1.15f;
 
-            float distToPlayer = Distance(player.Center, NPC.Center);
-
-            UpdateCannonAI(player, enrage, distToPlayer);
-            UpdateHarpoonAI(player, enrage);
-            UpdateTeslaAttacks(player, enrage);
+            UpdateSlashAI(player, enrage);
             UpdateMovement(player, enrage);
             UpdateDirection();
-            UpdatePullLogic();
         }
 
-        private void UpdateCannonAI(Player player, float enrage, float distToPlayer) {
-            if (CannonUpAttackTimer-- > 0) {
-                Cannon.PointAt(player.Center + new Vector2(0f, -800f));
-                if (CannonUpAttackTimer < 140) {
-                    TeslaUpCooldown -= enrage;
-                    if (TeslaUpCooldown <= 0f) {
-                        TeslaUpCooldown = 12f;
-                        ShootTeslaBall(Cannon.TopPos, Cannon.Seg2Rot.ToRotationVector2().RotatedByRandom(0.6f) * 5f);
-                        SoundEngine.PlaySound(SoundID.Item93, Cannon.TopPos);
-                        Cannon.Seg1RotVelocity = 0.06f * Direction;
-                    }
-                }
-            }
-            else if (JumpAndShootTimer-- > 0) {
-                Cannon.PointAt(player.Center + new Vector2(0f, -30f));
-                TeslaUpCooldown -= enrage;
-                if (TeslaUpCooldown <= 0f) {
-                    TeslaUpCooldown = 12f;
-                    ShootTeslaBall(Cannon.TopPos, Cannon.Seg2Rot.ToRotationVector2().RotatedByRandom(0.12f) * 5f);
-                    SoundEngine.PlaySound(SoundID.Item93, Cannon.TopPos);
-                }
-            }
-            else {
-                float yOffset = distToPlayer > 500f ? -(((distToPlayer - 500f) * 0.02f) * ((distToPlayer - 500f) * 0.02f)) : 0f;
-                Cannon.PointAt(player.Center + new Vector2(0f, -14f + yOffset));
+        private void UpdateSlashAI(Player player, float enrage) {
+            float distToPlayer = Distance(player.Center, NPC.Center);
+
+            if (_slashState != SlashState.Idle) {
+                RunActiveSlash(player, enrage);
+                return;
             }
 
-            if (!Jumping) JumpAndShootTimer = -1;
-        }
+            // 空闲时双臂缓慢追踪玩家
+            LeftScythe.PointAt(player.Center + new Vector2(-40f, -20f));
+            RightScythe.PointAt(player.Center + new Vector2(40f, -20f));
 
-        private void UpdateHarpoonAI(Player player, float enrage) {
-            if (HarpoonCharge <= 0.8f && IsHarpoonOnLauncher) {
-                Harpoon.PointAt(player.Center);
+            _slashCooldown -= enrage;
+            if (_slashCooldown > 0f) return;
+
+            // 选择攻击模式
+            if (distToPlayer < 300f * NPC.scale) {
+                // 近距离：交叉斩
+                _slashState = SlashState.CrossSlash;
+                _slashTimer = CrossSlashDuration;
+                _slashCooldown = 120f;
+                SoundEngine.PlaySound(SoundID.Item71, NPC.Center);
             }
-            else if (!IsHarpoonOnLauncher) {
-                NPC harpoonNpc = HarpoonNpcIndex.ToNPC();
-                if (harpoonNpc != null) {
-                    Harpoon.PointAt(harpoonNpc.Center);
-                }
+            else if (distToPlayer < 500f * NPC.scale) {
+                // 中距离：交替单刀斩
+                _slashState = Main.rand.NextBool() ? SlashState.LeftSlash : SlashState.RightSlash;
+                _slashTimer = SlashDuration;
+                _slashCooldown = 80f;
+                SoundEngine.PlaySound(SoundID.Item71, NPC.Center);
             }
-
-            if (IsHarpoonOnLauncher) HarpoonCooldown -= enrage;
-
-            if (HarpoonCooldown <= 0f) {
-                HarpoonCharge += 0.01f * enrage;
-                if (HarpoonCharge >= 1f) {
-                    HarpoonCharge = 0f;
-                    HarpoonCooldown = 160f;
-                    NPC harpoonNpc = HarpoonNpcIndex.ToNPC();
-                    if (harpoonNpc?.ModNPC is HierophantHarpoon hp) {
-                        hp.BackTimer = 40;
-                        hp.OnLauncher = false;
-                        harpoonNpc.velocity = Harpoon.Seg2Rot.ToRotationVector2() * 36f * NPC.scale;
-                        Harpoon.Seg1RotVelocity = 0.3f * Direction;
-                        SoundEngine.PlaySound(SoundID.Item10, NPC.Center);
-                    }
-                }
-            }
-        }
-
-        private void UpdateTeslaAttacks(Player player, float enrage) {
-            TeslaCooldown -= enrage;
-            if (TeslaCooldown > 0f) return;
-
-            if (Main.rand.NextBool(8)) {
-                TeslaCooldown = 360f;
-                CannonUpAttackTimer = 200;
-            }
-            else if (Main.rand.NextBool(8) && !Jumping && IsHarpoonOnLauncher) {
+            else if (!Jumping && JumpCooldown <= -200) {
+                // 远距离：跳跃 + 落地砸击
                 Jumping = true;
-                NPC.velocity = new Vector2(12f * Math.Sign(player.Center.X - NPC.Center.X) / NPC.scale, -24f) * NPC.scale;
-                JumpCooldown = 200;
-                JumpAndShootTimer = 200;
-                TeslaCooldown = 360f;
+                NPC.velocity = new Vector2(
+                    12f * Math.Sign(player.Center.X - NPC.Center.X) / NPC.scale, -22f) * NPC.scale;
+                JumpCooldown = 180;
+                _slashState = SlashState.SlamDown;
+                _slashTimer = SlamDuration;
+                _slashCooldown = 140f;
+                _slamDamageDealt = false;
+                SoundEngine.PlaySound(SoundID.Item73, NPC.Center);
             }
             else {
-                TeslaCooldown = 160f;
-                ShootTeslaBall(Cannon.TopPos, Cannon.Seg2Rot.ToRotationVector2().RotatedByRandom(0.1f) * 6f);
-                SoundEngine.PlaySound(SoundID.Item93, Cannon.TopPos);
-                Cannon.Seg1RotVelocity = 0.2f * Direction;
+                // 无法攻击时缩短冷却
+                _slashCooldown = 20f;
             }
+        }
+
+        private void RunActiveSlash(Player player, float enrage) {
+            _slashTimer--;
+            float progress = 1f - (float)_slashTimer / GetSlashMaxDuration();
+
+            switch (_slashState) {
+                case SlashState.LeftSlash:
+                    RunSingleSlash(LeftScythe, player, progress, enrage, -1);
+                    RightScythe.PointAt(player.Center + new Vector2(40f, -20f));
+                    break;
+
+                case SlashState.RightSlash:
+                    RunSingleSlash(RightScythe, player, progress, enrage, 1);
+                    LeftScythe.PointAt(player.Center + new Vector2(-40f, -20f));
+                    break;
+
+                case SlashState.CrossSlash:
+                    RunSingleSlash(LeftScythe, player, progress, enrage, -1);
+                    RunSingleSlash(RightScythe, player, progress, enrage, 1);
+                    break;
+
+                case SlashState.SlamDown:
+                    RunSlamSlash(player, progress, enrage);
+                    break;
+            }
+
+            if (_slashTimer <= 0) {
+                _slashState = SlashState.Idle;
+                // 连招：交叉斩后快速追加一次单斩
+                if (progress >= 1f && _slashState == SlashState.Idle
+                    && Distance(player.Center, NPC.Center) < 400f * NPC.scale
+                    && Main.rand.NextBool(3)) {
+                    _slashState = Main.rand.NextBool() ? SlashState.LeftSlash : SlashState.RightSlash;
+                    _slashTimer = (int)(SlashDuration * 0.7f);
+                    _slashCooldown = 60f;
+                    SoundEngine.PlaySound(SoundID.Item71 with { Pitch = 0.3f }, NPC.Center);
+                }
+            }
+        }
+
+        private void RunSingleSlash(HierophantArm arm, Player player, float progress, float enrage, int side) {
+            // 挥刀弧线：先抬起(0~0.3)，然后猛烈劈下(0.3~0.8)，回收(0.8~1.0)
+            float bladeRange = SlashBladeRadius * NPC.scale;
+
+            if (progress < 0.3f) {
+                // 蓄力举起
+                float raise = progress / 0.3f;
+                Vector2 raiseTarget = NPC.Center + new Vector2(side * 60f, -120f * raise) * NPC.scale;
+                arm.SwingTowards(raiseTarget, 0.15f);
+            }
+            else if (progress < 0.8f) {
+                // 劈砍弧线
+                float swing = (progress - 0.3f) / 0.5f;
+                float arcAngle = MathHelper.Lerp(-MathHelper.PiOver4 * side, MathHelper.PiOver2 * side, swing);
+                Vector2 swingTarget = player.Center + new Vector2(MathF.Cos(arcAngle), MathF.Sin(arcAngle)) * bladeRange * 0.4f;
+                arm.SwingTowards(swingTarget, 0.3f);
+
+                // 伤害判定：刃端碰撞
+                if (Distance(arm.BladeEnd, player.Center) < bladeRange) {
+                    TrySlashDamage(player, arm.BladeEnd, enrage);
+                }
+
+                // 挥刀拖尾粒子
+                if (!Main.dedServ && Main.GameUpdateCount % 2 == 0) {
+                    Dust d = Dust.NewDustPerfect(arm.BladeEnd, DustID.Wraith,
+                        (arm.BladeEnd - NPC.Center).SafeNormalize().RotatedByRandom(0.5f) * 4f,
+                        Alpha: 120, Scale: 1.5f * NPC.scale);
+                    d.noGravity = true;
+                }
+            }
+            else {
+                // 回收
+                arm.PointAt(NPC.Center + new Vector2(side * 50f, 30f) * NPC.scale);
+            }
+        }
+
+        private void RunSlamSlash(Player player, float progress, float enrage) {
+            if (progress < 0.5f) {
+                // 空中双臂张开
+                float spread = progress / 0.5f;
+                LeftScythe.SwingTowards(NPC.Center + new Vector2(-100f * spread, -80f) * NPC.scale, 0.15f);
+                RightScythe.SwingTowards(NPC.Center + new Vector2(100f * spread, -80f) * NPC.scale, 0.15f);
+            }
+            else {
+                // 落地后双臂向下猛砸
+                float slam = (progress - 0.5f) / 0.5f;
+                Vector2 groundPoint = NPC.Center + new Vector2(0f, 120f) * NPC.scale;
+                LeftScythe.SwingTowards(groundPoint + new Vector2(-30f, 0f) * NPC.scale, 0.25f);
+                RightScythe.SwingTowards(groundPoint + new Vector2(30f, 0f) * NPC.scale, 0.25f);
+
+                // 落地砸击伤害 + 震波
+                if (!_slamDamageDealt && !Jumping) {
+                    _slamDamageDealt = true;
+                    AddCameraShake(NPC.Center, 20f);
+                    SoundEngine.PlaySound(SoundID.Item14, NPC.Center);
+
+                    // 生成地面尘埃震波
+                    if (!Main.dedServ) {
+                        for (int i = 0; i < 30; i++) {
+                            Vector2 dustVel = new Vector2(Main.rand.NextFloat(-12f, 12f), Main.rand.NextFloat(-6f, -1f));
+                            Dust d = Dust.NewDustPerfect(NPC.Bottom + new Vector2(Main.rand.NextFloat(-80f, 80f) * NPC.scale, 0f),
+                                DustID.Smoke, dustVel, Alpha: 100, Scale: Main.rand.NextFloat(2f, 4f) * NPC.scale);
+                            d.noGravity = true;
+                        }
+                        for (int i = 0; i < 16; i++) {
+                            Dust d2 = Dust.NewDustPerfect(NPC.Bottom + new Vector2(Main.rand.NextFloat(-60f, 60f) * NPC.scale, 0f),
+                                DustID.Electric, new Vector2(Main.rand.NextFloat(-4f, 4f), Main.rand.NextFloat(-8f, -2f)),
+                                Scale: Main.rand.NextFloat(1f, 2.5f));
+                            d2.noGravity = true;
+                        }
+                    }
+
+                    // 范围伤害判定
+                    float slamRadius = 160f * NPC.scale;
+                    foreach (Player p in Main.ActivePlayers) {
+                        if (Distance(p.Center, NPC.Bottom) < slamRadius) {
+                            TrySlashDamage(p, NPC.Bottom, enrage);
+                        }
+                    }
+                }
+            }
+        }
+
+        private void TrySlashDamage(Player player, Vector2 hitPos, float enrage) {
+            if (player.immune || player.immuneTime > 0) return;
+
+            int dmg = (int)(NPC.damage * 1.5f * enrage);
+            player.Hurt(PlayerDeathReason.ByNPC(NPC.whoAmI), dmg, Math.Sign(hitPos.X - player.Center.X));
+        }
+
+        private int GetSlashMaxDuration() {
+            return _slashState switch {
+                SlashState.CrossSlash => CrossSlashDuration,
+                SlashState.SlamDown => SlamDuration,
+                _ => SlashDuration,
+            };
         }
 
         private void UpdateMovement(Player player, float enrage) {
@@ -584,23 +691,20 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Hiero
             }
 
             bool grounded = onTileCount >= 3;
-            if (grounded) {
-                if (JumpFlag) {
-                    JumpFlag = false;
-                    if (NPC.velocity.Y > 0f) NPC.velocity.Y = 0f;
-                }
+            if (grounded && JumpFlag) {
+                JumpFlag = false;
+                if (NPC.velocity.Y > 0f) NPC.velocity.Y = 0f;
             }
 
             if (grounded || CheckSolidTile(NPC.getRect())) {
-                if (IsHarpoonOnLauncher && player.Center.Y + 200f * NPC.scale < NPC.Center.Y) {
-                    if (JumpCooldown <= -260) {
-                        Jumping = true;
-                        NPC.velocity = new Vector2(
-                            0.01f * (player.Center.X - NPC.Center.X) / NPC.scale,
-                            MathF.Max((player.Center.Y - NPC.Center.Y) / NPC.scale * 0.08f, -30f)
-                        ) * NPC.scale;
-                        JumpCooldown = 160;
-                    }
+                // 玩家在上方时跳跃
+                if (player.Center.Y + 200f * NPC.scale < NPC.Center.Y && JumpCooldown <= -260) {
+                    Jumping = true;
+                    NPC.velocity = new Vector2(
+                        0.01f * (player.Center.X - NPC.Center.X) / NPC.scale,
+                        MathF.Max((player.Center.Y - NPC.Center.Y) / NPC.scale * 0.08f, -30f)
+                    ) * NPC.scale;
+                    JumpCooldown = 160;
                 }
 
                 float yOffset = -90f * NPC.scale;
@@ -615,7 +719,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Hiero
                 if (yDist < 14f * NPC.scale) { vFactor = 0f; NPC.velocity.Y *= 0.8f; }
                 vFactor *= NPC.scale;
 
-                if (IsHarpoonOnLauncher && MathF.Abs(yOffset + player.Center.Y - NPC.Center.Y) > 20f * NPC.scale) {
+                if (MathF.Abs(yOffset + player.Center.Y - NPC.Center.Y) > 20f * NPC.scale) {
                     if (player.Center.Y + yOffset > NPC.Center.Y) {
                         NPC.velocity.Y += 0.4f * enrage * vFactor;
                     }
@@ -638,8 +742,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Hiero
                 if (NPC.velocity.Y > 12f) NPC.velocity.Y = 12f;
             }
 
-            if (IsHarpoonOnLauncher && Distance(NPC.Center, player.Center) > 100f * NPC.scale) {
-                NPC.velocity.X += Math.Sign(player.Center.X - NPC.Center.X) * 0.1f * enrage * NPC.scale;
+            // 近战Boss更积极地追踪玩家
+            if (Distance(NPC.Center, player.Center) > 80f * NPC.scale) {
+                NPC.velocity.X += Math.Sign(player.Center.X - NPC.Center.X) * 0.15f * enrage * NPC.scale;
             }
         }
 
@@ -651,14 +756,14 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Hiero
 
             bool grounded = onTileCount > 2;
 
-            if (JumpAndShootTimer <= 96 && NPC.ai[2] <= 0f) {
-                if (((NPC.velocity.Y > 0f && JumpAndShootTimer <= 0) || NPC.Center.Y < player.Center.Y) && grounded) {
+            if (_slashState != SlashState.SlamDown || _slashTimer <= 0) {
+                if (((NPC.velocity.Y > 0f) || NPC.Center.Y < player.Center.Y) && grounded) {
                     Jumping = false;
                     NPC.velocity *= 0f;
                 }
 
                 if (JumpCooldown < 20
-                    || (NPC.velocity.Y > 0f && CheckSolidTile(NPC.getRect()) && JumpAndShootTimer <= 0)
+                    || (NPC.velocity.Y > 0f && CheckSolidTile(NPC.getRect()))
                     || NPC.velocity.Y > 2f) {
                     Jumping = false;
                     NPC.velocity *= 0f;
@@ -679,22 +784,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Hiero
             }
         }
 
-        private void UpdatePullLogic() {
-            if (NPC.ai[2]-- > 0f) {
-                NPC harpoonNpc = HarpoonNpcIndex.ToNPC();
-                if (harpoonNpc != null) {
-                    NPC.velocity = (harpoonNpc.Center - NPC.Center).SafeNormalize() * 40f;
-                }
-            }
-        }
-
-        private void ShootTeslaBall(Vector2 pos, Vector2 velocity) {
-            if (Main.netMode == NetmodeID.MultiplayerClient) return;
-            int baseDamage = (int)(NPC.damage / 6.2f);
-            Projectile.NewProjectile(NPC.GetSource_FromAI(), pos, velocity,
-                ProjectileID.Electrosphere, baseDamage, 4f, Main.myPlayer);
-        }
-
         #endregion
 
         #region Networking
@@ -702,20 +791,17 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Hiero
         public override void SendExtraAI(BinaryWriter writer) {
             EnsureSegments();
             writer.Write(NPC.boss);
-            writer.Write(CannonUpAttackTimer);
-            Cannon.NetSend(writer);
-            Harpoon.NetSend(writer);
-            writer.Write(HarpoonNpcIndex);
+            LeftScythe.NetSend(writer);
+            RightScythe.NetSend(writer);
             writer.Write(Legs.Count > 0);
             if (Legs.Count > 0) {
                 foreach (var leg in Legs) leg.NetSend(writer);
             }
             writer.Write(JumpCooldown);
             writer.Write(Jumping);
-            writer.Write(TeslaCooldown);
-            writer.Write(HarpoonCooldown);
-            writer.Write(JumpAndShootTimer);
-            writer.Write(CannonUpAttackTimer);
+            writer.Write(_slashCooldown);
+            writer.Write((byte)_slashState);
+            writer.Write(_slashTimer);
             writer.Write(Defeated);
             writer.Write(DeathCounter);
         }
@@ -723,15 +809,11 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Hiero
         public override void ReceiveExtraAI(BinaryReader reader) {
             EnsureSegments();
             NPC.boss = reader.ReadBoolean();
-            CannonUpAttackTimer = reader.ReadInt32();
-            Cannon.NetReceive(reader);
-            Harpoon.NetReceive(reader);
-            HarpoonNpcIndex = reader.ReadInt32();
+            LeftScythe.NetReceive(reader);
+            RightScythe.NetReceive(reader);
 
             if (reader.ReadBoolean()) {
-                if (Legs.Count > 0) {
-                    foreach (var leg in Legs) leg.NetReceive(reader);
-                }
+                foreach (var leg in Legs) leg.NetReceive(reader);
             }
             else {
                 for (int i = 0; i < 4; i++) {
@@ -741,10 +823,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Hiero
 
             JumpCooldown = reader.ReadInt32();
             Jumping = reader.ReadBoolean();
-            TeslaCooldown = reader.ReadSingle();
-            HarpoonCooldown = reader.ReadSingle();
-            JumpAndShootTimer = reader.ReadInt32();
-            CannonUpAttackTimer = reader.ReadInt32();
+            _slashCooldown = reader.ReadSingle();
+            _slashState = (SlashState)reader.ReadByte();
+            _slashTimer = reader.ReadInt32();
             Defeated = reader.ReadBoolean();
             DeathCounter = reader.ReadInt32();
         }
@@ -753,18 +834,20 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Hiero
 
         #region Drawing
 
+        private const string TexBasePath = "CalamityOverhaul/Content/ADV/Scenarios/Draedons/AcheronProtocols/Hierophants/";
+
         public override bool PreDraw(SpriteBatch spriteBatch, Vector2 screenPos, Color drawColor) {
             if (Legs == null) return false;
 
             if (Main.zenithWorld) drawColor = Main.DiscoColor;
 
             Texture2D body = NPC.GetNpcTexture();
-            Texture2D legTex1 = RequestTex("CalamityOverhaul/Content/ADV/Scenarios/Draedons/AcheronProtocols/Hierophants/Leg1");
-            Texture2D legTex2 = RequestTex("CalamityOverhaul/Content/ADV/Scenarios/Draedons/AcheronProtocols/Hierophants/Leg2");
-            Texture2D footTex = RequestTex("CalamityOverhaul/Content/ADV/Scenarios/Draedons/AcheronProtocols/Hierophants/Foot");
+            Texture2D legTex1 = RequestTex(TexBasePath + "Leg1");
+            Texture2D legTex2 = RequestTex(TexBasePath + "Leg2");
+            Texture2D footTex = RequestTex(TexBasePath + "Foot");
 
             DrawLegs(drawColor, legTex1, legTex2, footTex);
-            DrawArms(spriteBatch, screenPos, drawColor, body);
+            DrawScytheArms(screenPos, drawColor, body);
 
             return false;
         }
@@ -795,59 +878,58 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Hiero
             }
         }
 
-        private void DrawArms(SpriteBatch spriteBatch, Vector2 screenPos, Color drawColor, Texture2D body) {
-            string basePath = "CalamityOverhaul/Content/ADV/Scenarios/Draedons/AcheronProtocols/Hierophants/";
-            Texture2D cannonConnect = RequestTex(basePath + "CannonConnect");
-            Texture2D cannonTex = RequestTex(basePath + "Cannon");
-            Texture2D harpoonArm = RequestTex(basePath + "HarpoonArm");
-            Texture2D harpoonLauncher = RequestTex(basePath + "HarpoonLauncher");
-            Texture2D harpoonTex = RequestTex(basePath + "Harpoon");
-            Texture2D harpoonOutline = RequestTex(basePath + "HarpoonOutline");
-            Texture2D shoulder = RequestTex(basePath + "Shoulder");
+        private void DrawScytheArms(Vector2 screenPos, Color drawColor, Texture2D body) {
+            Texture2D armTex = RequestTex(TexBasePath + "CannonConnect");
+            Texture2D bladeTex = RequestTex(TexBasePath + "Cannon");
+            Texture2D shoulder = RequestTex(TexBasePath + "Shoulder");
 
             float bodyRot = Direction > 0 ? NPC.rotation : (NPC.rotation + MathHelper.Pi);
             SpriteEffects dirFlip = Direction > 0 ? SpriteEffects.None : SpriteEffects.FlipVertically;
+            SpriteEffects bodyFlip = Direction < 0 ? SpriteEffects.FlipVertically : SpriteEffects.None;
 
-            // Harpoon arm
-            Vector2 harpoonBase = (Harpoon.Offset * new Vector2(Direction, 1f) * NPC.scale).RotatedBy(bodyRot) + NPC.Center;
-            Main.EntitySpriteDraw(harpoonArm, harpoonBase - Main.screenPosition, null, drawColor,
-                Harpoon.Seg1Rot, new Vector2(6, harpoonArm.Height / 2f), NPC.scale, SpriteEffects.None);
+            // 层级 1（最后方）：右镰刀臂 — 绘制在身体后面
+            DrawSingleScythe(RightScythe, armTex, bladeTex, drawColor, bodyRot, dirFlip, true);
 
-            // Harpoon projectile on launcher
-            if (HarpoonNpcIndex < 0 || IsHarpoonOnLauncher) {
-                Vector2 harpoonDrawPos = Harpoon.Seg1End + Harpoon.Seg2Rot.ToRotationVector2() * 150f * NPC.scale
-                    + new Vector2(0f, 10f * Direction).RotatedBy(Harpoon.Seg2Rot) * NPC.scale;
-
-                for (float r = 0; r <= 360; r += 60) {
-                    Main.EntitySpriteDraw(harpoonOutline,
-                        MathHelper.ToRadians(r).ToRotationVector2() * 2f + harpoonDrawPos - Main.screenPosition,
-                        null, Color.OrangeRed * HarpoonCharge, Harpoon.Seg2Rot,
-                        new Vector2(70, harpoonTex.Height / 2f), NPC.scale, dirFlip);
-                }
-
-                Main.EntitySpriteDraw(harpoonTex, harpoonDrawPos - Main.screenPosition, null, drawColor,
-                    Harpoon.Seg2Rot, new Vector2(70, harpoonTex.Height / 2f), NPC.scale, dirFlip);
-            }
-
-            Main.EntitySpriteDraw(harpoonLauncher, Harpoon.Seg1End - Main.screenPosition, null, drawColor,
-                Harpoon.Seg2Rot, new Vector2(6, harpoonLauncher.Height / 2f), NPC.scale, dirFlip);
-
-            // Body
+            // 层级 2：身体
             Main.EntitySpriteDraw(body, NPC.Center - screenPos, null, drawColor,
-                NPC.rotation, body.Size() / 2f, NPC.scale,
-                Direction < 0 ? SpriteEffects.FlipVertically : SpriteEffects.None);
+                NPC.rotation, body.Size() / 2f, NPC.scale, bodyFlip);
 
-            // Cannon
-            Vector2 cannonBase = (Cannon.Offset * new Vector2(Direction, 1f) * NPC.scale).RotatedBy(bodyRot) + NPC.Center;
-            Main.EntitySpriteDraw(cannonConnect, cannonBase - Main.screenPosition, null, drawColor,
-                Cannon.Seg1Rot, new Vector2(6, cannonConnect.Height / 2f), NPC.scale, SpriteEffects.None);
-            Main.EntitySpriteDraw(cannonTex, Cannon.Seg1End - Main.screenPosition, null, drawColor,
-                Cannon.Seg2Rot, new Vector2(6, cannonTex.Height / 2f), NPC.scale, dirFlip);
-
-            // Shoulder
+            // 层级 3：肩甲（覆盖在身体之上）
             Main.EntitySpriteDraw(shoulder, NPC.Center - screenPos, null, drawColor,
-                NPC.rotation, shoulder.Size() / 2f, NPC.scale,
-                Direction < 0 ? SpriteEffects.FlipVertically : SpriteEffects.None);
+                NPC.rotation, shoulder.Size() / 2f, NPC.scale, bodyFlip);
+
+            // 层级 4（最前方）：左镰刀臂 — 绘制在身体前面
+            DrawSingleScythe(LeftScythe, armTex, bladeTex, drawColor, bodyRot, dirFlip, false);
+        }
+
+        private void DrawSingleScythe(HierophantArm arm, Texture2D armTex, Texture2D bladeTex,
+            Color drawColor, float bodyRot, SpriteEffects dirFlip, bool flipBlade) {
+            // 上臂段
+            Vector2 armBase = (arm.Offset * new Vector2(Direction, 1f) * NPC.scale).RotatedBy(bodyRot) + NPC.Center;
+            Main.EntitySpriteDraw(armTex, armBase - Main.screenPosition, null, drawColor,
+                arm.Seg1Rot, new Vector2(6, armTex.Height / 2f), NPC.scale, SpriteEffects.None);
+
+            // 镰刀刃
+            SpriteEffects bladeFlip = flipBlade
+                ? (dirFlip == SpriteEffects.None ? SpriteEffects.FlipVertically : SpriteEffects.None)
+                : dirFlip;
+            Main.EntitySpriteDraw(bladeTex, arm.Seg1End - Main.screenPosition, null, drawColor,
+                arm.Seg2Rot, new Vector2(6, bladeTex.Height / 2f), NPC.scale, bladeFlip);
+
+            // 挥刀时绘制拖影
+            if (_slashState != SlashState.Idle) {
+                float slashProgress = 1f - (float)_slashTimer / GetSlashMaxDuration();
+                if (slashProgress is > 0.3f and < 0.8f) {
+                    Color trailColor = Color.OrangeRed * 0.4f;
+                    for (int i = 1; i <= 3; i++) {
+                        float offset = i * 0.08f;
+                        Main.EntitySpriteDraw(bladeTex, arm.Seg1End - Main.screenPosition, null,
+                            trailColor * (1f - i * 0.25f),
+                            arm.Seg2Rot - offset * Direction,
+                            new Vector2(6, bladeTex.Height / 2f), NPC.scale, bladeFlip);
+                    }
+                }
+            }
         }
 
         #endregion

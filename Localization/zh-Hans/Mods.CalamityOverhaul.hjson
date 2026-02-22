@@ -42,3 +42,5 @@ Resurrections: {
 		RetainValueFormat: 复苏值: {0}%
 	}
 }
+
+// NPCs.Hierophant.DisplayName: Hierophant

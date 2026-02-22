@@ -938,3 +938,9 @@ GalacticCrisis: {
 	// MissionObjectiveDark: 至少带回她们的核心数据，我不希望我的杰作毫无意义地成为虫子的口粮
 	// FinalSendOff: 坐标已输入，去吧，向我展示你能否再次超越我的计算
 }
+
+ApolliaDialogueScenario: {
+	// Rolename: 阿波利娅
+	// Line1: ……系统自检完毕，生物特征锁定。你就是刚刚从空降仓里弹出来的那位？
+	// Line2: 嘉登博士让我在这里等你。看起来一切都在他的计划之中——除了你的着陆姿势
+}

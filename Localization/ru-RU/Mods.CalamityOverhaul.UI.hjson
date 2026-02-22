@@ -388,3 +388,8 @@ TransitionScene: {
 	// Hint8: 数据即是力量，知识即是武装
 	// Hint9: 机械不会背叛，但操控机械的人或许会
 }
+
+StarStreamDialogueBox: {
+	// ContinueHint: 继续
+	// FastHint: 加速
+}
