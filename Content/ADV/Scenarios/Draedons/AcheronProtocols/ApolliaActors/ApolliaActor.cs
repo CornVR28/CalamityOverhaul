@@ -439,7 +439,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
             }
 
             //主体绘制
-            spriteBatch.Draw(tex, drawPos, sourceRect, bodyColor, 0f, origin, 0.7f, fx, 0f);
+            spriteBatch.Draw(tex, drawPos, sourceRect, bodyColor, 0f, origin, 0.7f, fx, 0f);//70%缩放，因为这个角色比较大了，缩放一下才不显得大只
 
             return false;
         }
