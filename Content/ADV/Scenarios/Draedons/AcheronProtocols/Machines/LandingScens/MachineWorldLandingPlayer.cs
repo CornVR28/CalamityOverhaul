@@ -34,19 +34,29 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         public bool ClickedThisFrame;
 
         /// <summary>
-        /// 弹出动画总时长
+        /// 脱离物块阶段每帧上升的像素速度
         /// </summary>
-        private const int EjectDuration = 60;
+        private const float EscapeSpeed = 8f;
 
         /// <summary>
-        /// 弹出速度
+        /// 脱离物块阶段的最大持续帧数（安全上限，避免无限循环）
         /// </summary>
-        private Vector2 ejectVelocity;
+        private const int MaxEscapeFrames = 300;
 
         /// <summary>
-        /// 弹出起始位置
+        /// 脱出后的弹射恢复帧数
         /// </summary>
-        private Vector2 ejectStartPos;
+        private const int LaunchDuration = 30;
+
+        /// <summary>
+        /// 是否已经脱离物块进入空中
+        /// </summary>
+        private bool hasReachedOpenAir;
+
+        /// <summary>
+        /// 弹出水平偏移
+        /// </summary>
+        private float ejectHorizontalOffset;
 
         public override void PostUpdate() {
             if (!MachineWorld.Active) {
@@ -54,17 +64,15 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
                     LandingActive = false;
                     EjectAnimating = false;
                     EjectTimer = 0;
+                    hasReachedOpenAir = false;
                 }
                 return;
             }
 
             if (LandingActive && !EjectAnimating) {
-                //在清除控制之前捕获点击状态
                 ClickedThisFrame = Player.controlUseItem;
-                //锁定玩家位置和速度，禁止移动
                 Player.velocity = Vector2.Zero;
                 Player.fallStart = (int)(Player.position.Y / 16f);
-                //禁止玩家操作
                 Player.controlLeft = false;
                 Player.controlRight = false;
                 Player.controlUp = false;
@@ -79,30 +87,42 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
             if (EjectAnimating) {
                 EjectTimer++;
 
-                float progress = (float)EjectTimer / EjectDuration;
-                float easedProgress = CWRUtils.EaseOutCubic(progress);
-
-                //弹出阶段：玩家从空降仓位置向上弹射
-                if (EjectTimer <= EjectDuration / 2) {
-                    //上升阶段
-                    float upProgress = (float)EjectTimer / (EjectDuration / 2f);
-                    float easedUp = CWRUtils.EaseOutCubic(upProgress);
-                    Player.position = ejectStartPos + ejectVelocity * easedUp * 0.5f;
-                    Player.velocity = ejectVelocity * (1f - easedUp * 0.8f);
+                if (!hasReachedOpenAir) {
+                    //阶段1：脱离物块——持续向上移动直到玩家位于空中
+                    Player.position.Y -= EscapeSpeed;
+                    Player.velocity = Vector2.Zero;
                     Player.fallStart = (int)(Player.position.Y / 16f);
-                }
-                else {
-                    //恢复阶段：让物理引擎接管
-                    float fadeProgress = (float)(EjectTimer - EjectDuration / 2) / (EjectDuration / 2f);
-                    if (fadeProgress < 0.3f) {
+                    //禁止物理引擎干扰
+                    Player.controlLeft = false;
+                    Player.controlRight = false;
+                    Player.controlUp = false;
+                    Player.controlDown = false;
+                    Player.controlJump = false;
+                    Player.controlUseItem = false;
+
+                    //检测玩家当前位置是否已经脱离实心物块
+                    bool inSolid = Collision.SolidCollision(Player.position, Player.width, Player.height);
+                    if (!inSolid || EjectTimer >= MaxEscapeFrames) {
+                        hasReachedOpenAir = true;
+                        EjectTimer = 0;
+                        //给予向上的弹射速度
+                        Player.velocity = new Vector2(ejectHorizontalOffset, -10f);
                         Player.fallStart = (int)(Player.position.Y / 16f);
                     }
                 }
+                else {
+                    //阶段2：弹射恢复——让物理引擎逐渐接管
+                    float progress = (float)EjectTimer / LaunchDuration;
+                    if (progress < 0.5f) {
+                        Player.fallStart = (int)(Player.position.Y / 16f);
+                    }
 
-                if (EjectTimer >= EjectDuration) {
-                    EjectAnimating = false;
-                    LandingActive = false;
-                    EjectTimer = 0;
+                    if (EjectTimer >= LaunchDuration) {
+                        EjectAnimating = false;
+                        LandingActive = false;
+                        EjectTimer = 0;
+                        hasReachedOpenAir = false;
+                    }
                 }
             }
         }
@@ -115,13 +135,10 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
 
             EjectAnimating = true;
             EjectTimer = 0;
-            //将玩家移动到空降仓中心位置（避免被物块阻挡）
+            hasReachedOpenAir = false;
+            //将玩家移动到空降仓中心位置
             Player.position = podCenter - Player.Size / 2f;
-            ejectStartPos = Player.position;
-            //向上弹射，带轻微随机水平偏移
-            ejectVelocity = new Vector2(
-                Main.rand.NextFloat(-3f, 3f),
-                -14f);
+            ejectHorizontalOffset = Main.rand.NextFloat(-3f, 3f);
         }
 
         /// <summary>
