@@ -101,7 +101,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
 
             //左侧：阿波拉（Apola）
             Rectangle leftPortraitRect = new(contentRect.X, contentRect.Y, halfWidth, portraitZoneHeight);
-            DrawAndroidCard(sb, leftPortraitRect, ADVAsset.Apola, AndroidApolaName.Value,
+            DrawAndroidCard(sb, leftPortraitRect, ADVAsset.Apollia, AndroidApolaName.Value,
                 apolaRevealProgress, revealAlpha, true);
 
             //右侧：阿蒂丝（Artis）
