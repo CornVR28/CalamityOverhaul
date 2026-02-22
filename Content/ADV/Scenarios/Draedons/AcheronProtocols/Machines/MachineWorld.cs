@@ -1,4 +1,7 @@
-﻿using SubworldLibrary;
+﻿using CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machines.LandingScens;
+using InnoVault.Actors;
+using InnoVault.GameSystem;
+using SubworldLibrary;
 using System.Collections.Generic;
 using Terraria;
 using Terraria.DataStructures;
@@ -17,6 +20,17 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         public override int Height => 1200;
 
         public static bool Active => SubworldSystem.IsActive<MachineWorld>();
+
+        /// <summary>
+        /// 着陆演出是否已完成（玩家已从空降仓弹出）
+        /// 用于避免每次Update都重复生成着陆Actor
+        /// </summary>
+        private static bool landingCompleted;
+
+        /// <summary>
+        /// 着陆演出初始化是否已执行
+        /// </summary>
+        private static bool landingInitialized;
 
         public override List<GenPass> Tasks => [new MachineGen()];
 
@@ -37,7 +51,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         }
 
         public override void OnEnter() {
-
+            //重置着陆演出状态
+            landingCompleted = false;
+            landingInitialized = false;
         }
 
         public override void OnExit() {
@@ -67,7 +83,49 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
                 Liquid.UpdateLiquid();
             }
 
-            SpawnTeslaEffect();
+            //初始化着陆演出
+            InitializeLandingScene();
+
+            //着陆完成后才开始特斯拉效果（避免着陆阶段干扰）
+            if (landingCompleted) {
+                SpawnTeslaEffect();
+            }
+        }
+
+        /// <summary>
+        /// 初始化着陆演出——在玩家首次进入世界时生成坠毁的空降仓
+        /// </summary>
+        private static void InitializeLandingScene() {
+            if (landingInitialized) {
+                //检查着陆是否已完成（玩家已弹出）
+                if (!landingCompleted) {
+                    Player player = Main.LocalPlayer;
+                    if (player != null && player.active
+                        && player.TryGetOverride<MachineWorldLandingPlayer>(out var landingPlayer)) {
+                        if (!landingPlayer.LandingActive) {
+                            landingCompleted = true;
+                        }
+                    }
+                }
+                return;
+            }
+
+            Player localPlayer = Main.LocalPlayer;
+            if (localPlayer == null || !localPlayer.active) return;
+
+            landingInitialized = true;
+
+            //设置玩家着陆状态
+            if (localPlayer.TryGetOverride<MachineWorldLandingPlayer>(out var lp)) {
+                lp.LandingActive = true;
+            }
+
+            //在玩家出生点生成坠毁的空降仓Actor
+            Vector2 spawnPos = localPlayer.Center;
+            ActorLoader.NewActor<MachineWorldLandingActor>(spawnPos, Vector2.Zero);
+
+            //激活屏幕特效
+            MachineWorldLandingDrawSystem.Activate();
         }
 
         private static void SpawnTeslaEffect() {
