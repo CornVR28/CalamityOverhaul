@@ -87,6 +87,11 @@ namespace CalamityOverhaul.Content.ADV.IncomingCalls
         protected bool finishedCurrent;
         protected int autoAdvanceTimer;
 
+        /// <summary>
+        /// 根据当前台词内容动态计算的通话面板高度
+        /// </summary>
+        private float computedSpeakingHeight;
+
         #endregion
 
         #region 可重写参数
@@ -109,9 +114,24 @@ namespace CalamityOverhaul.Content.ADV.IncomingCalls
         protected virtual float SpeakingPanelWidth => 380f;
 
         /// <summary>
-        /// 通话阶段面板高度
+        /// 通话阶段面板最大高度
         /// </summary>
         protected virtual float SpeakingPanelHeight => 200f;
+
+        /// <summary>
+        /// 通话阶段面板最小高度
+        /// </summary>
+        protected virtual float SpeakingPanelMinHeight => 100f;
+
+        /// <summary>
+        /// 通话面板头部区域高度（头像顶部边距 + 名称 + 分割线 + 间距）
+        /// </summary>
+        protected virtual float SpeakingHeaderHeight => 50f;
+
+        /// <summary>
+        /// 通话面板底部区域高度（提示文字 + 底部边距）
+        /// </summary>
+        protected virtual float SpeakingFooterHeight => 30f;
 
         /// <summary>
         /// 面板距离屏幕左侧的边距
@@ -209,6 +229,7 @@ namespace CalamityOverhaul.Content.ADV.IncomingCalls
             typeTimer = 0;
             finishedCurrent = false;
             autoAdvanceTimer = 0;
+            computedSpeakingHeight = SpeakingPanelHeight;
             OnCallStarted();
         }
 
@@ -509,9 +530,14 @@ namespace CalamityOverhaul.Content.ADV.IncomingCalls
             //过滤空行
             List<string> valid = [];
             foreach (var line in wrappedLines) {
-                if (!string.IsNullOrEmpty(line)) valid.Add(line);
+                if (!string.IsNullOrEmpty(line)) valid.Add(line.TrimEnd('-', ' '));
             }
             wrappedLines = [.. valid];
+
+            //根据有效行数动态计算面板高度
+            float textHeight = valid.Count * LineSpacing;
+            float totalHeight = SpeakingHeaderHeight + textHeight + SpeakingFooterHeight;
+            computedSpeakingHeight = Math.Clamp(totalHeight, SpeakingPanelMinHeight, SpeakingPanelHeight);
         }
 
         #endregion
@@ -526,7 +552,7 @@ namespace CalamityOverhaul.Content.ADV.IncomingCalls
             }
             else {
                 w = MathHelper.Lerp(RingingPanelWidth, SpeakingPanelWidth, expandProgress);
-                h = MathHelper.Lerp(RingingPanelHeight, SpeakingPanelHeight, expandProgress);
+                h = MathHelper.Lerp(RingingPanelHeight, computedSpeakingHeight, expandProgress);
             }
 
             float offscreenX = -w - 10f;
