@@ -63,6 +63,11 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         /// </summary>
         private int debrisSpawnTimer;
 
+        /// <summary>
+        /// 是否已触发嘉登来电
+        /// </summary>
+        private bool incomingCallTriggered;
+
         public override void OnSpawn(params object[] args) {
             Width = 240;
             Height = 280;
@@ -74,6 +79,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
             horizontalOffset = 0f;
             tiltAngle = 0f;
             debrisSpawnTimer = 0;
+            incomingCallTriggered = false;
         }
 
         public override void AI() {
@@ -146,6 +152,12 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
                 if (shockwaveRings[i].IsDead) {
                     shockwaveRings.RemoveAt(i);
                 }
+            }
+
+            //在坠落初期触发嘉登来电
+            if (!incomingCallTriggered && dropTimer == 60) {
+                incomingCallTriggered = true;
+                DropPodCallScenario.Instance.Start();
             }
 
             //同步dropTimer给DropPodDrawSystem的屏幕特效使用
