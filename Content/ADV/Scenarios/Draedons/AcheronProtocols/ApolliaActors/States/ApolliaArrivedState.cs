@@ -6,12 +6,15 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
     /// <summary>
     /// 到达状态——阿波利娅站在玩家面前
     /// 保持1.5x缩放和运镜（后续对话场景需要），
-    /// 若玩家远离则重新进入行走状态
+    /// 触发对话场景，若玩家远离则重新进入行走状态
     /// </summary>
     internal class ApolliaArrivedState : IApolliaState
     {
         /// <summary>玩家离阿波利娅超过此距离时重新进入行走</summary>
         private const float ReWalkDistance = 120f;
+
+        /// <summary>是否已触发过对话场景</summary>
+        private bool dialogueTriggered;
 
         public void Enter(ApolliaActor actor) {
             actor.FrameIndex = 0;
@@ -20,6 +23,13 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
             actor.Camera.TargetZoom = 1.5f;
             actor.Camera.ZoomLerpSpeed = 0.02f;
             actor.Camera.PositionLerpSpeed = 0.04f;
+
+            //触发对话场景
+            if (!dialogueTriggered) {
+                dialogueTriggered = true;
+                ScenarioManager.Reset<ApolliaDialogueScenario>();
+                ScenarioManager.Start<ApolliaDialogueScenario>();
+            }
         }
 
         public IApolliaState Update(ApolliaActor actor) {
