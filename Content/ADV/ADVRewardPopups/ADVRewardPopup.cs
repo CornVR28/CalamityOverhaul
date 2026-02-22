@@ -28,7 +28,8 @@ namespace CalamityOverhaul.Content.ADV.ADVRewardPopups
             Ocean,      //海洋风格（默认）
             Brimstone,  //硫磺火风格
             Draedon,    //嘉登科技风格
-            Sulfsea     //硫磺海风格
+            Sulfsea,    //硫磺海风格
+            StarStream  //星流风格
         }
 
         public class RewardEntry
@@ -97,6 +98,7 @@ namespace CalamityOverhaul.Content.ADV.ADVRewardPopups
             inst.styleInstances[RewardStyle.Brimstone] = new BrimstoneRewardStyle();
             inst.styleInstances[RewardStyle.Draedon] = new DraedonRewardStyle();
             inst.styleInstances[RewardStyle.Sulfsea] = new SulfseaRewardStyle();
+            inst.styleInstances[RewardStyle.StarStream] = new StarStreamRewardStyle();
             inst.currentStyle = inst.styleInstances[RewardStyle.Ocean];
         }
 
@@ -385,6 +387,12 @@ namespace CalamityOverhaul.Content.ADV.ADVRewardPopups
                     }
                     else if (particle is DraedonDataPRT data) {
                         data.Draw(spriteBatch, alpha * 0.75f);
+                    }
+                    else if (particle is StarStreamPRT starStream) {
+                        starStream.Draw(spriteBatch, alpha * 0.8f);
+                    }
+                    else if (particle is StarDustPRT starDust) {
+                        starDust.Draw(spriteBatch, alpha * 0.7f);
                     }
                 }
             }
