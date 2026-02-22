@@ -1,4 +1,5 @@
 ﻿using CalamityOverhaul.Content.ADV.Scenarios;
+using CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.GalacticCrisises;
 using CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machines;
 using CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machines.DropPodScens;
 using CalamityOverhaul.Content.ADV.Scenarios.SupCal.End.EternalBlazingNows;
@@ -71,7 +72,7 @@ namespace CalamityOverhaul
         public override bool? UseItem(Player player) {
             //ScenarioManager.Reset<GalacticCrisis>();
             //ScenarioManager.Start<GalacticCrisis>();
-            MachineWorld.Enter();
+            //MachineWorld.Enter();
             //DropPodWorld.Enter();
             //ActorLoader.NewActor<DropPodActor>(player.Center, Vector2.Zero);
             return true;
