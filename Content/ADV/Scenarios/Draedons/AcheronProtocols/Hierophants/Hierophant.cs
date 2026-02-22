@@ -136,11 +136,18 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Hiero
         private void EnsureSegments() {
             if (Legs != null) return;
 
+            // 6 条腿，3 对，交替分组实现蛛形步态
+            // 前腿向前伸展，中腿最宽，后腿向后
             Legs = [
-                new HierophantLeg(NPC, new Vector2(-200, 240), 0.8f),
-                new HierophantLeg(NPC, new Vector2(200, 240), 0.8f),
-                new HierophantLeg(NPC, new Vector2(-280, 240), 1f),
-                new HierophantLeg(NPC, new Vector2(280, 240), 1f),
+                // 前腿（组 0）——略短，向前偏
+                new HierophantLeg(NPC, new Vector2(-180, 160), 0.75f, 0.9f, group: 0),
+                new HierophantLeg(NPC, new Vector2(180, 160),  0.75f, 0.9f, group: 0),
+                // 中腿（组 1）——最大最宽
+                new HierophantLeg(NPC, new Vector2(-300, 220), 1f, 1.1f, group: 1),
+                new HierophantLeg(NPC, new Vector2(300, 220),  1f, 1.1f, group: 1),
+                // 后腿（组 2）——向后偏
+                new HierophantLeg(NPC, new Vector2(-240, 300), 0.85f, 1f, group: 2),
+                new HierophantLeg(NPC, new Vector2(240, 300),  0.85f, 1f, group: 2),
             ];
             LeftScythe = new HierophantArm(NPC, new Vector2(-160, -64), 152f, MathHelper.PiOver2, MathHelper.PiOver2);
             RightScythe = new HierophantArm(NPC, new Vector2(120, -36), 132f, MathHelper.PiOver2, MathHelper.PiOver2);
@@ -187,11 +194,37 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Hiero
         }
 
         private void UpdateLegs() {
+            // 检测是否有任何组正在迈步中
+            bool anyGroupStepping = false;
             foreach (var leg in Legs) {
-                if (leg.Update()) {
+                if (leg.LiftProgress > 0f && leg.LiftProgress < 1f) {
+                    anyGroupStepping = true;
+                    break;
+                }
+            }
+
+            foreach (var leg in Legs) {
+                bool initiated = leg.Update();
+
+                // 落地震动——巨物感的关键
+                if (leg.JustLanded && !Main.dedServ) {
+                    HierophantEffects.CameraShake(leg.StandPoint, 4f);
+                    // 落地尘埃
+                    for (int i = 0; i < 6; i++) {
+                        Dust d = Dust.NewDustPerfect(
+                            leg.StandPoint + new Vector2(Main.rand.NextFloat(-20f, 20f), 0f),
+                            Terraria.ID.DustID.Smoke,
+                            new Vector2(Main.rand.NextFloat(-3f, 3f), Main.rand.NextFloat(-4f, -1f)),
+                            Alpha: 120, Scale: Main.rand.NextFloat(1.5f, 3f) * NPC.scale);
+                        d.noGravity = true;
+                    }
+                }
+
+                if (initiated) {
+                    // 交替步态：同组腿一起迈步，其他组延迟
                     foreach (var otherLeg in Legs) {
-                        if (Math.Sign(otherLeg.Offset.X) == Math.Sign(leg.Offset.X) && otherLeg.NoMoveTime < 8) {
-                            otherLeg.NoMoveTime = 8;
+                        if (otherLeg.Group != leg.Group && otherLeg.NoMoveTime < 14) {
+                            otherLeg.NoMoveTime = 14;
                         }
                     }
                 }
@@ -200,10 +233,10 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Hiero
 
         private void ApplyPhysics() {
             if (Jumping) {
-                NPC.velocity.Y += 0.4f * NPC.scale;
+                NPC.velocity.Y += 0.35f * NPC.scale;
             }
             else if (_state is not DeathState) {
-                NPC.velocity *= 0.97f;
+                NPC.velocity *= 0.96f;
             }
         }
 
@@ -270,7 +303,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Hiero
                 foreach (var leg in Legs) leg.NetReceive(reader);
             }
             else {
-                for (int i = 0; i < 4; i++) {
+                for (int i = 0; i < 6; i++) {
                     new HierophantLeg(NPC, Vector2.Zero).NetReceive(reader);
                 }
             }

@@ -244,60 +244,64 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Hiero
                 if (leg.OnTile) onTileCount++;
             }
 
-            bool grounded = onTileCount >= 3;
+            bool grounded = onTileCount >= 4;
             if (grounded && boss.JumpFlag) {
                 boss.JumpFlag = false;
                 if (npc.velocity.Y > 0f) npc.velocity.Y = 0f;
             }
 
             if (grounded || CheckSolidTile(npc.getRect())) {
-                if (player.Center.Y + 200f * npc.scale < npc.Center.Y && boss.JumpCooldown <= -260) {
+                if (player.Center.Y + 300f * npc.scale < npc.Center.Y && boss.JumpCooldown <= -360) {
                     boss.Jumping = true;
                     npc.velocity = new Vector2(
-                        0.01f * (player.Center.X - npc.Center.X) / npc.scale,
-                        MathF.Max((player.Center.Y - npc.Center.Y) / npc.scale * 0.08f, -30f)
+                        0.008f * (player.Center.X - npc.Center.X) / npc.scale,
+                        MathF.Max((player.Center.Y - npc.Center.Y) / npc.scale * 0.06f, -24f)
                     ) * npc.scale;
-                    boss.JumpCooldown = 160;
+                    boss.JumpCooldown = 240;
                 }
 
-                float yOffset = -90f * npc.scale;
-                if (npc.Center.Y - yOffset + 90f * npc.scale * npc.scale > player.Center.Y) {
-                    if (npc.velocity.Y > 2f * npc.scale) npc.velocity.Y = 2f * npc.scale;
-                    if (npc.velocity.Y > 0f) npc.velocity.Y *= 0.84f;
+                float yOffset = -160f * npc.scale;
+                if (npc.Center.Y - yOffset + 160f * npc.scale * npc.scale > player.Center.Y) {
+                    if (npc.velocity.Y > 1.5f * npc.scale) npc.velocity.Y = 1.5f * npc.scale;
+                    if (npc.velocity.Y > 0f) npc.velocity.Y *= 0.88f;
                 }
 
-                float vFactor = 0.2f;
+                float vFactor = 0.15f;
                 float yDist = MathF.Abs(npc.Center.Y + yOffset - player.Center.Y);
-                if (yDist > 150f * npc.scale) vFactor = 1f;
-                if (yDist < 14f * npc.scale) { vFactor = 0f; npc.velocity.Y *= 0.8f; }
+                if (yDist > 200f * npc.scale) vFactor = 0.8f;
+                if (yDist < 20f * npc.scale) { vFactor = 0f; npc.velocity.Y *= 0.85f; }
                 vFactor *= npc.scale;
 
-                if (MathF.Abs(yOffset + player.Center.Y - npc.Center.Y) > 20f * npc.scale) {
+                if (MathF.Abs(yOffset + player.Center.Y - npc.Center.Y) > 30f * npc.scale) {
                     if (player.Center.Y + yOffset > npc.Center.Y) {
-                        npc.velocity.Y += 0.4f * enrage * vFactor;
+                        npc.velocity.Y += 0.3f * enrage * vFactor;
                     }
                     else {
                         bool canGoUp = true, mustGoDown = false;
                         foreach (var leg in boss.Legs) {
-                            if (leg.OnTile && leg.StandPoint.Y > npc.Center.Y + 110f * npc.scale) canGoUp = false;
-                            if (leg.OnTile && leg.StandPoint.Y > npc.Center.Y + 130f * npc.scale) mustGoDown = true;
+                            if (leg.OnTile && leg.StandPoint.Y > npc.Center.Y + 180f * npc.scale) canGoUp = false;
+                            if (leg.OnTile && leg.StandPoint.Y > npc.Center.Y + 220f * npc.scale) mustGoDown = true;
                         }
 
                         if (canGoUp || CheckSolidTile(npc.getRect()))
-                            npc.velocity.Y -= 0.6f * enrage * vFactor;
+                            npc.velocity.Y -= 0.45f * enrage * vFactor;
                         else if (mustGoDown)
-                            npc.velocity.Y += 2f * enrage * vFactor;
+                            npc.velocity.Y += 1.5f * enrage * vFactor;
                     }
                 }
             }
             else {
-                npc.velocity.Y += 0.42f;
-                if (npc.velocity.Y > 12f) npc.velocity.Y = 12f;
+                npc.velocity.Y += 0.35f;
+                if (npc.velocity.Y > 10f) npc.velocity.Y = 10f;
             }
 
-            if (Distance(npc.Center, player.Center) > 80f * npc.scale) {
-                npc.velocity.X += Math.Sign(player.Center.X - npc.Center.X) * 0.15f * enrage * npc.scale;
+            // 巨物感：水平加速更慢但更稳定
+            if (Distance(npc.Center, player.Center) > 120f * npc.scale) {
+                npc.velocity.X += Math.Sign(player.Center.X - npc.Center.X) * 0.1f * enrage * npc.scale;
             }
+            // 限制最大水平速度以体现重量感
+            float maxHSpeed = 4f * npc.scale * enrage;
+            npc.velocity.X = MathHelper.Clamp(npc.velocity.X, -maxHSpeed, maxHSpeed);
         }
 
         private static void UpdateJumpMovement(Hierophant boss, Player player) {
@@ -307,7 +311,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Hiero
                 if (leg.OnTile) onTileCount++;
             }
 
-            bool grounded = onTileCount > 2;
+            bool grounded = onTileCount > 3;
             var ctrl = boss.CombatController;
 
             if (ctrl.CurrentSlash != SlashPhase.SlamDown || ctrl.SlashTimer <= 0) {
