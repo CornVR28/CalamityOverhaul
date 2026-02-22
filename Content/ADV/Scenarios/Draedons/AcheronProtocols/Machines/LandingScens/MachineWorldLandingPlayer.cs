@@ -115,6 +115,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
 
             EjectAnimating = true;
             EjectTimer = 0;
+            //将玩家移动到空降仓中心位置（避免被物块阻挡）
+            Player.position = podCenter - Player.Size / 2f;
             ejectStartPos = Player.position;
             //向上弹射，带轻微随机水平偏移
             ejectVelocity = new Vector2(

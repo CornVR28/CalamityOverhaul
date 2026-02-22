@@ -1,8 +1,5 @@
-﻿using InnoVault.GameSystem;
-using Microsoft.Xna.Framework.Graphics;
-using System;
+﻿using Microsoft.Xna.Framework.Graphics;
 using Terraria;
-using Terraria.GameContent;
 using Terraria.ModLoader;
 
 namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machines.LandingScens
@@ -137,48 +134,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
                 Texture2D pixel = CWRAsset.Placeholder_White.Value;
                 Color ejectColor = new Color(200, 220, 255) * ejectFlash;
                 spriteBatch.Draw(pixel, new Rectangle(0, 0, sw, sh), ejectColor);
-            }
-
-            //边缘暗角效果——在着陆阶段给画面加上暗角
-            DrawVignette(spriteBatch, sw, sh);
-        }
-
-        /// <summary>
-        /// 绘制暗角效果——使用SoftGlow纹理在四角叠加暗色
-        /// </summary>
-        private static void DrawVignette(SpriteBatch sb, int sw, int sh) {
-            if (!isActive) return;
-            if (CWRAsset.SoftGlow == null || CWRAsset.SoftGlow.IsDisposed) return;
-
-            //仅在着陆活跃期间显示暗角
-            Player player = Main.LocalPlayer;
-            if (player == null || !player.active) return;
-            if (!player.TryGetOverride<MachineWorldLandingPlayer>(out var landingPlayer)) return;
-            if (!landingPlayer.LandingActive) return;
-
-            float vignetteAlpha = 0.3f;
-            if (landingPlayer.EjectAnimating) {
-                vignetteAlpha *= 1f - (float)landingPlayer.EjectTimer / 60f;
-            }
-
-            if (vignetteAlpha < 0.01f) return;
-
-            //用大面积的暗色SoftGlow覆盖四角
-            Texture2D glow = CWRAsset.SoftGlow.Value;
-            Color darkColor = Color.Black * vignetteAlpha;
-            float cornerScale = MathF.Max(sw, sh) * 0.015f;
-
-            //四个角的暗角
-            Vector2[] corners = [
-                new(0, 0),
-                new(sw, 0),
-                new(0, sh),
-                new(sw, sh)
-            ];
-
-            foreach (var corner in corners) {
-                sb.Draw(glow, corner, null, darkColor,
-                    0f, glow.Size() * 0.5f, cornerScale, SpriteEffects.None, 0f);
             }
         }
 

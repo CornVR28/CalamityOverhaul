@@ -71,10 +71,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         private float doorOpenAngle;
         private bool playerEjected;
 
-        //完成阶段渐隐
-        private float fadeOutAlpha;
-        private const int FadeOutDuration = 120;
-
         #endregion
 
         public override void OnSpawn(params object[] args) {
@@ -98,7 +94,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
             ejectProgress = 0f;
             doorOpenAngle = 0f;
             playerEjected = false;
-            fadeOutAlpha = 1f;
 
             //初始撞击音效
             SoundEngine.PlaySound(SoundID.Item14 with {
@@ -134,10 +129,10 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
                     break;
             }
 
-            //持续效果——烟雾和火花
+            //持续效果——烟雾和火花（Done阶段仍然更新以排空剩余粒子）
+            UpdateSmokeParticles();
+            UpdateSparkParticles();
             if (phase != LandingPhase.Done) {
-                UpdateSmokeParticles();
-                UpdateSparkParticles();
                 UpdateCreakSound();
             }
 
@@ -300,19 +295,12 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         }
 
         private void UpdateDone() {
-            //渐隐消散
-            fadeOutAlpha = MathHelper.Clamp(1f - (float)phaseTimer / FadeOutDuration, 0f, 1f);
-
-            //继续冒少量烟
-            if (phaseTimer % 15 == 0 && smokeParticles.Count < 20) {
+            //空降仓保持在原地，偶尔冒少量烟
+            if (phaseTimer % 30 == 0 && smokeParticles.Count < 10) {
                 SpawnIdleSmoke();
             }
 
             shakeOffset = Vector2.Zero;
-
-            if (phaseTimer >= FadeOutDuration) {
-                ActorLoader.KillActor(WhoAmI);
-            }
         }
 
         #endregion
@@ -453,59 +441,58 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         public override bool PreDraw(SpriteBatch spriteBatch, ref Color drawColor) {
             if (DropPodScens.DropPod.DropPodAsset == null || !DropPodScens.DropPod.DropPodAsset.IsLoaded) return false;
 
-            float masterAlpha = phase == LandingPhase.Done ? fadeOutAlpha : 1f;
             Vector2 drawCenter = Center - Main.screenPosition + shakeOffset;
 
             //绘制地面撞击痕迹
-            DrawCraterEffect(spriteBatch, drawCenter, masterAlpha);
+            DrawCraterEffect(spriteBatch, drawCenter);
 
             //绘制烟雾（在仓体后面）
-            DrawSmokeParticles(spriteBatch, masterAlpha);
+            DrawSmokeParticles(spriteBatch);
 
             //绘制残余灼烧辉光
-            DrawHeatGlow(spriteBatch, drawCenter, masterAlpha);
+            DrawHeatGlow(spriteBatch, drawCenter);
 
             //绘制空降仓主体
-            DrawCrashedPod(spriteBatch, drawCenter, masterAlpha);
+            DrawCrashedPod(spriteBatch, drawCenter);
 
             //绘制裂缝发光效果
-            DrawCrackGlow(spriteBatch, drawCenter, masterAlpha);
+            DrawCrackGlow(spriteBatch, drawCenter);
 
             //绘制火花
-            DrawSparkParticles(spriteBatch, masterAlpha);
+            DrawSparkParticles(spriteBatch);
 
             //绘制撞击闪光
             if (impactFlashAlpha > 0.01f) {
-                DrawImpactFlash(spriteBatch, drawCenter, masterAlpha);
+                DrawImpactFlash(spriteBatch, drawCenter);
             }
 
             //绘制弹出效果
             if (phase == LandingPhase.Eject) {
-                DrawEjectEffect(spriteBatch, drawCenter, masterAlpha);
+                DrawEjectEffect(spriteBatch, drawCenter);
             }
 
             //绘制操作提示
             if (hintVisible && hintAlpha > 0.01f) {
-                DrawHintText(spriteBatch, drawCenter, masterAlpha);
+                DrawHintText(spriteBatch, drawCenter);
             }
 
             return false;
         }
 
-        private void DrawCraterEffect(SpriteBatch sb, Vector2 drawCenter, float masterAlpha) {
+        private void DrawCraterEffect(SpriteBatch sb, Vector2 drawCenter) {
             if (CWRAsset.SoftGlow == null || CWRAsset.SoftGlow.IsDisposed) return;
 
             Texture2D glow = CWRAsset.SoftGlow.Value;
             Vector2 craterPos = drawCenter + new Vector2(0, 100);
 
             //暗色撞击坑阴影
-            Color craterColor = new Color(20, 18, 15) * 0.4f * masterAlpha;
+            Color craterColor = new Color(20, 18, 15) * 0.4f;
             float craterScale = 160f / (glow.Width * 0.5f);
             sb.Draw(glow, craterPos, null, craterColor with { A = 0 }, 0f,
                 glow.Size() * 0.5f, new Vector2(craterScale * 2f, craterScale * 0.5f), SpriteEffects.None, 0f);
         }
 
-        private void DrawHeatGlow(SpriteBatch sb, Vector2 drawCenter, float masterAlpha) {
+        private void DrawHeatGlow(SpriteBatch sb, Vector2 drawCenter) {
             if (CWRAsset.SoftGlow == null || CWRAsset.SoftGlow.IsDisposed) return;
             if (heatGlow < 0.05f) return;
 
@@ -513,36 +500,36 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
 
             //橙红灼烧环绕光
             float pulse = MathF.Sin(phaseTimer * 0.06f) * 0.15f + 0.85f;
-            Color heatColor = new Color(255, 120, 40) * (heatGlow * 0.3f * pulse * masterAlpha);
+            Color heatColor = new Color(255, 120, 40) * (heatGlow * 0.3f * pulse);
             float scale = 120f / (glow.Width * 0.5f);
             sb.Draw(glow, drawCenter, null, heatColor with { A = 0 }, 0f,
                 glow.Size() * 0.5f, scale, SpriteEffects.None, 0f);
 
             //仓顶灼烧点
             Vector2 topPos = drawCenter - new Vector2(0, 80);
-            Color topHeatColor = new Color(255, 180, 80) * (heatGlow * 0.4f * pulse * masterAlpha);
+            Color topHeatColor = new Color(255, 180, 80) * (heatGlow * 0.4f * pulse);
             float topScale = 60f / (glow.Width * 0.5f);
             sb.Draw(glow, topPos, null, topHeatColor with { A = 0 }, 0f,
                 glow.Size() * 0.5f, topScale, SpriteEffects.None, 0f);
         }
 
-        private void DrawCrashedPod(SpriteBatch sb, Vector2 drawCenter, float masterAlpha) {
+        private void DrawCrashedPod(SpriteBatch sb, Vector2 drawCenter) {
             Texture2D podTex = DropPodScens.DropPod.DropPodAsset.Value;
             Vector2 origin = podTex.Size() * 0.5f;
 
             //外层光晕——冷色调，坠毁后偏暗
             float glowPulse = MathF.Sin(phaseTimer * 0.03f) * 0.1f + 0.9f;
-            Color ambientGlow = new Color(40, 60, 100) * (0.2f * glowPulse * masterAlpha);
+            Color ambientGlow = new Color(40, 60, 100) * (0.2f * glowPulse);
             DrawSoftGlow(sb, drawCenter, ambientGlow, 90f);
 
             //主体绘制——带倾斜
-            Color podColor = Color.White * masterAlpha;
+            Color podColor = Color.White;
             //坠毁后颜色略微偏暗偏橙（烧焦感）
-            podColor = Color.Lerp(podColor, new Color(200, 180, 160) * masterAlpha, heatGlow * 0.3f);
+            podColor = Color.Lerp(podColor, new Color(200, 180, 160), heatGlow * 0.3f);
             sb.Draw(podTex, drawCenter, null, podColor, podTilt, origin, 1f, SpriteEffects.None, 0f);
         }
 
-        private void DrawCrackGlow(SpriteBatch sb, Vector2 drawCenter, float masterAlpha) {
+        private void DrawCrackGlow(SpriteBatch sb, Vector2 drawCenter) {
             if (CWRAsset.SoftGlow == null || CWRAsset.SoftGlow.IsDisposed) return;
             if (crackEmission < 0.05f) return;
 
@@ -550,7 +537,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
 
             //在仓体上模拟裂缝发光——几个不同位置的小光点
             float flicker = MathF.Sin(phaseTimer * 0.12f) * 0.3f + 0.7f;
-            Color crackColor = new Color(255, 100, 30) * (crackEmission * 0.5f * flicker * masterAlpha);
+            Color crackColor = new Color(255, 100, 30) * (crackEmission * 0.5f * flicker);
             float crackScale = 15f / (glow.Width * 0.5f);
 
             Vector2[] crackPositions = [
@@ -566,7 +553,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
             }
         }
 
-        private void DrawSmokeParticles(SpriteBatch sb, float masterAlpha) {
+        private void DrawSmokeParticles(SpriteBatch sb) {
             if (CWRAsset.SoftGlow == null || CWRAsset.SoftGlow.IsDisposed) return;
 
             Texture2D glow = CWRAsset.SoftGlow.Value;
@@ -574,7 +561,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
             foreach (var p in smokeParticles) {
                 float lifeRatio = (float)p.Life / p.MaxLife;
                 //烟雾先浓后淡
-                float alpha = p.Alpha * MathF.Sin(lifeRatio * MathHelper.Pi) * masterAlpha;
+                float alpha = p.Alpha * MathF.Sin(lifeRatio * MathHelper.Pi);
                 Color c = p.Color * alpha;
                 float scale = p.Scale * (1f + lifeRatio * 1.5f) * 0.05f;
                 Vector2 drawPos = p.Position - Main.screenPosition;
@@ -583,14 +570,14 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
             }
         }
 
-        private void DrawSparkParticles(SpriteBatch sb, float masterAlpha) {
+        private void DrawSparkParticles(SpriteBatch sb) {
             if (CWRAsset.SoftGlow == null || CWRAsset.SoftGlow.IsDisposed) return;
 
             Texture2D glow = CWRAsset.SoftGlow.Value;
 
             foreach (var p in sparkParticles) {
                 float lifeRatio = (float)p.Life / p.MaxLife;
-                float alpha = p.Alpha * (1f - lifeRatio * lifeRatio) * masterAlpha;
+                float alpha = p.Alpha * (1f - lifeRatio * lifeRatio);
                 Color c = p.Color * alpha;
                 float scale = p.Scale * (1f - lifeRatio * 0.5f) * 0.03f;
                 Vector2 drawPos = p.Position - Main.screenPosition;
@@ -601,31 +588,31 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
             }
         }
 
-        private void DrawImpactFlash(SpriteBatch sb, Vector2 drawCenter, float masterAlpha) {
+        private void DrawImpactFlash(SpriteBatch sb, Vector2 drawCenter) {
             if (CWRAsset.SoftGlow == null || CWRAsset.SoftGlow.IsDisposed) return;
 
             Texture2D glow = CWRAsset.SoftGlow.Value;
 
             //白色中心闪光
-            Color flashColor = Color.White * (impactFlashAlpha * 0.8f * masterAlpha);
+            Color flashColor = Color.White * (impactFlashAlpha * 0.8f);
             float flashScale = 200f / (glow.Width * 0.5f) * (1f + impactFlashAlpha * 0.5f);
             sb.Draw(glow, drawCenter, null, flashColor with { A = 0 }, 0f,
                 glow.Size() * 0.5f, flashScale, SpriteEffects.None, 0f);
 
             //橙色外圈
-            Color outerColor = new Color(255, 150, 50) * (impactFlashAlpha * 0.5f * masterAlpha);
+            Color outerColor = new Color(255, 150, 50) * (impactFlashAlpha * 0.5f);
             float outerScale = flashScale * 1.5f;
             sb.Draw(glow, drawCenter, null, outerColor with { A = 0 }, 0f,
                 glow.Size() * 0.5f, outerScale, SpriteEffects.None, 0f);
         }
 
-        private void DrawEjectEffect(SpriteBatch sb, Vector2 drawCenter, float masterAlpha) {
+        private void DrawEjectEffect(SpriteBatch sb, Vector2 drawCenter) {
             if (CWRAsset.SoftGlow == null || CWRAsset.SoftGlow.IsDisposed) return;
 
             Texture2D glow = CWRAsset.SoftGlow.Value;
 
             //舱门打开时的蒸汽光效
-            float ejectGlow = MathF.Sin(ejectProgress * MathHelper.Pi) * masterAlpha;
+            float ejectGlow = MathF.Sin(ejectProgress * MathHelper.Pi);
             Color steamColor = new Color(200, 220, 255) * (ejectGlow * 0.6f);
             Vector2 doorPos = drawCenter - new Vector2(0, 80);
             float steamScale = 80f / (glow.Width * 0.5f) * (1f + ejectProgress);
@@ -633,23 +620,21 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
                 glow.Size() * 0.5f, steamScale, SpriteEffects.None, 0f);
         }
 
-        private void DrawHintText(SpriteBatch sb, Vector2 drawCenter, float masterAlpha) {
+        private void DrawHintText(SpriteBatch sb, Vector2 drawCenter) {
             //在仓体上方显示"按下左键弹出"提示
             string hintText = "[ 按下左键弹出 ]";
             var font = Terraria.GameContent.FontAssets.MouseText.Value;
             Vector2 textSize = font.MeasureString(hintText);
             Vector2 textPos = drawCenter - new Vector2(textSize.X * 0.5f, 180);
 
-            float finalAlpha = hintAlpha * masterAlpha;
-
             //发光背景
-            Color glowColor = new Color(80, 150, 255) * (finalAlpha * 0.3f);
+            Color glowColor = new Color(80, 150, 255) * (hintAlpha * 0.3f);
             DrawSoftGlow(sb, textPos + textSize * 0.5f, glowColor, 60f);
 
             //描边文字
-            Color shadowColor = Color.Black * (finalAlpha * 0.8f);
+            Color shadowColor = Color.Black * (hintAlpha * 0.8f);
             Color textColor = Color.Lerp(new Color(180, 220, 255), new Color(100, 180, 255),
-                MathF.Sin(phaseTimer * 0.08f) * 0.5f + 0.5f) * finalAlpha;
+                MathF.Sin(phaseTimer * 0.08f) * 0.5f + 0.5f) * hintAlpha;
 
             //四方向描边
             for (int dx = -1; dx <= 1; dx++) {
