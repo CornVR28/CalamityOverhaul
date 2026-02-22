@@ -74,8 +74,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
             SkyManager.Instance[Name] = this;
 
             Filters.Scene[Name] = new Filter(new ScreenShaderData("FilterMiniTower")
-                .UseColor(0.02f, 0.02f, 0.05f)
-                .UseOpacity(0.7f), EffectPriority.VeryHigh);
+                .UseColor(0.06f, 0.06f, 0.12f)
+                .UseOpacity(0.4f), EffectPriority.VeryHigh);
 
             //加载ExoGore纹理
             exoGoreAssets = new Asset<Texture2D>[ExoGoreNames.Length];
@@ -390,13 +390,13 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
 
         public override Color OnTileColor(Color inColor) {
             if (intensity > 0.1f) {
-                //太空中极暗
+                //太空冷色调但保持可见度
                 Color tinted = new Color(
-                    (int)(inColor.R * 0.2f),
-                    (int)(inColor.G * 0.25f),
-                    (int)(inColor.B * 0.4f),
+                    (int)(inColor.R * 0.45f),
+                    (int)(inColor.G * 0.5f),
+                    (int)(inColor.B * 0.7f),
                     inColor.A);
-                return Color.Lerp(inColor, tinted, intensity * 0.8f);
+                return Color.Lerp(inColor, tinted, intensity * 0.6f);
             }
             return inColor;
         }

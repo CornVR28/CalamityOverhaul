@@ -75,6 +75,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         private readonly List<SparkParticle> sparks = [];
         private const int MaxSparks = 40;
 
+        //能量脉冲计时器
+        private float pulseTimer;
+
         public override void OnSpawn(params object[] args) {
             Width = 20;
             Height = 20;
@@ -94,8 +97,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
             textureIndex = exoGoreAssets != null ? Main.rand.Next(exoGoreAssets.Length) : 0;
             flipH = Main.rand.NextBool();
 
-            float brightness = Main.rand.NextFloat(0.4f, 0.7f);
-            debrisTint = new Color(brightness * 0.9f, brightness * 0.95f, brightness * 1.1f);
+            float brightness = Main.rand.NextFloat(0.7f, 0.9f);
+            debrisTint = new Color(brightness, brightness * 0.95f, brightness * 1.05f);
+            pulseTimer = Main.rand.NextFloat(MathHelper.TwoPi);
         }
 
         public override void AI() {
@@ -115,6 +119,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
                     UpdateDone();
                     break;
             }
+
+            pulseTimer += 0.08f;
 
             //更新火花粒子
             for (int i = sparks.Count - 1; i >= 0; i--) {
@@ -279,24 +285,78 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
             Vector2 drawPos = Center - Main.screenPosition;
             SpriteEffects fx = flipH ? SpriteEffects.FlipHorizontally : SpriteEffects.None;
 
-            //冷色边缘光（rim light）
-            Color rimColor = new Color(60, 120, 200) * 0.5f;
-            float rimOffset = 1.5f;
+            float pulse = MathF.Sin(pulseTimer) * 0.3f + 0.7f;
+
+            //能量光璀——温暖的橙红色脉冲光晕，让残骸在漆黑太空中突出
+            if (CWRAsset.SoftGlow != null && !CWRAsset.SoftGlow.IsDisposed) {
+                Texture2D glow = CWRAsset.SoftGlow.Value;
+                float glowRadius = MathF.Max(tex.Width, tex.Height) * debrisScale * 0.7f;
+                float glowScale = glowRadius / (glow.Width * 0.5f);
+                Color glowColor = new Color(255, 120, 40) * (0.35f * pulse);
+                sb.Draw(glow, drawPos, null, glowColor with { A = 0 }, 0f,
+                    glow.Size() * 0.5f, glowScale, SpriteEffects.None, 0f);
+            }
+
+            //暖色边缘光（rim light）——橙红色，与背景的冷蓝色形成对比
+            float rimPulse = 0.6f + pulse * 0.4f;
+            Color rimColor = new Color(255, 100, 30) * (0.7f * rimPulse);
+            float rimOffset = 2.5f;
             for (int i = 0; i < 4; i++) {
                 float angle = MathHelper.PiOver2 * i;
                 Vector2 off = new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * rimOffset;
                 sb.Draw(tex, drawPos + off, null, rimColor, debrisRotation, origin, debrisScale, fx, 0f);
             }
 
-            //主体
+            //主体——全亮度绘制
             sb.Draw(tex, drawPos, null, Color.White, debrisRotation, origin, debrisScale, fx, 0f);
 
-            //运动模糊拖影（向下方向，因为残骸向上飞，拖影在下方）
-            for (int t = 1; t <= 3; t++) {
+            //科技感订位括号标记——四角的L形括号
+            DrawTargetBrackets(sb, drawPos, tex, pulse);
+
+            //运动模糊拖影——温暖色调，与背景残骸的冷色拖影区分
+            for (int t = 1; t <= 4; t++) {
                 Vector2 trailPos = drawPos + new Vector2(0, flySpeed * t * 2f);
-                float trailAlpha = 1f - t / 4f;
-                sb.Draw(tex, trailPos, null, debrisTint * (trailAlpha * 0.2f), debrisRotation, origin, debrisScale, fx, 0f);
+                float trailAlpha = 1f - t / 5f;
+                Color trailColor = Color.Lerp(debrisTint, new Color(255, 140, 50), 0.3f) * (trailAlpha * 0.25f);
+                sb.Draw(tex, trailPos, null, trailColor, debrisRotation, origin, debrisScale, fx, 0f);
             }
+        }
+
+        /// <summary>
+        /// 绘制科技感的订位括号标记——四角的L形括号
+        /// </summary>
+        private void DrawTargetBrackets(SpriteBatch sb, Vector2 drawPos, Texture2D tex, float pulse) {
+            Texture2D px = VaultAsset.placeholder2.Value;
+
+            float halfW = tex.Width * debrisScale * 0.5f + 8f;
+            float halfH = tex.Height * debrisScale * 0.5f + 8f;
+            float bracketLen = MathF.Min(halfW, halfH) * 0.4f;
+            float bracketThickness = 2f;
+            Color bracketColor = new Color(255, 160, 60) * (0.7f * pulse);
+
+            //左上角
+            sb.Draw(px, drawPos + new Vector2(-halfW, -halfH), new Rectangle(0, 0, 1, 1), bracketColor,
+                0f, Vector2.Zero, new Vector2(bracketLen, bracketThickness), SpriteEffects.None, 0f);
+            sb.Draw(px, drawPos + new Vector2(-halfW, -halfH), new Rectangle(0, 0, 1, 1), bracketColor,
+                0f, Vector2.Zero, new Vector2(bracketThickness, bracketLen), SpriteEffects.None, 0f);
+
+            //右上角
+            sb.Draw(px, drawPos + new Vector2(halfW - bracketLen, -halfH), new Rectangle(0, 0, 1, 1), bracketColor,
+                0f, Vector2.Zero, new Vector2(bracketLen, bracketThickness), SpriteEffects.None, 0f);
+            sb.Draw(px, drawPos + new Vector2(halfW - bracketThickness, -halfH), new Rectangle(0, 0, 1, 1), bracketColor,
+                0f, Vector2.Zero, new Vector2(bracketThickness, bracketLen), SpriteEffects.None, 0f);
+
+            //左下角
+            sb.Draw(px, drawPos + new Vector2(-halfW, halfH - bracketThickness), new Rectangle(0, 0, 1, 1), bracketColor,
+                0f, Vector2.Zero, new Vector2(bracketLen, bracketThickness), SpriteEffects.None, 0f);
+            sb.Draw(px, drawPos + new Vector2(-halfW, halfH - bracketLen), new Rectangle(0, 0, 1, 1), bracketColor,
+                0f, Vector2.Zero, new Vector2(bracketThickness, bracketLen), SpriteEffects.None, 0f);
+
+            //右下角
+            sb.Draw(px, drawPos + new Vector2(halfW - bracketLen, halfH - bracketThickness), new Rectangle(0, 0, 1, 1), bracketColor,
+                0f, Vector2.Zero, new Vector2(bracketLen, bracketThickness), SpriteEffects.None, 0f);
+            sb.Draw(px, drawPos + new Vector2(halfW - bracketThickness, halfH - bracketLen), new Rectangle(0, 0, 1, 1), bracketColor,
+                0f, Vector2.Zero, new Vector2(bracketThickness, bracketLen), SpriteEffects.None, 0f);
         }
 
         private void DrawSparks(SpriteBatch sb) {
