@@ -47,7 +47,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
 
         //常量
         private const int MaxTrailParticles = 60;
-        private const int MaxShockwaveRings = 6;
         private const float ShakeIntensityBase = 1.5f;
         private const float ShakeIntensityMax = 4f;
 
