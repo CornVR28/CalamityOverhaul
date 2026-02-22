@@ -12,6 +12,7 @@ using CalamityOverhaul.Content.RemakeItems;
 using CalamityOverhaul.Content.UIs.OverhaulTheBible;
 using CalamityOverhaul.OtherMods.HighFPSSupport;
 using CalamityOverhaul.OtherMods.ImproveGame;
+using CalamityOverhaul.OtherMods.SubWorld;
 using InnoVault.GameSystem;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -337,7 +338,11 @@ namespace CalamityOverhaul.Content
             }
         }
 
-        public override void OnEnterWorld() {
+        private void Information() {
+            if (SubWorldRef.AnyActiveSubWorld()) {
+                return;//如果玩家处于子世界中，则不显示兼容性提示
+            }
+
             if (!VaultHook.CheckHookStatus(out int num)) {
                 string hookDownText1 = $"{num} " + CWRLocText.GetTextValue("Error_1");
                 VaultUtils.Text(hookDownText1, Color.Red);
@@ -358,6 +363,10 @@ namespace CalamityOverhaul.Content
                 string text = CWRItemOverride.ByID.Count + CWRLocText.GetTextValue("OnEnterWorld_TextContent");
                 SpwanTextProj.New(Player, () => VaultUtils.Text(text, Color.GreenYellow), 240);
             }
+        }
+
+        public override void OnEnterWorld() {
+            Information();
 
             if (OverhaulTheBibleUI.Instance != null) {
                 OverhaulTheBibleUI.Instance.Active = false;

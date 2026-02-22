@@ -1,5 +1,4 @@
-﻿using CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.ApolliaActors;
-using CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machines.LandingScens;
+﻿using CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machines.LandingScens;
 using InnoVault.Actors;
 using InnoVault.GameSystem;
 using SubworldLibrary;
@@ -26,27 +25,12 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         /// 着陆演出是否已完成（玩家已从空降仓弹出）
         /// 用于避免每次Update都重复生成着陆Actor
         /// </summary>
-        private static bool landingCompleted;
+        public static bool landingCompleted;
 
         /// <summary>
         /// 着陆演出初始化是否已执行
         /// </summary>
-        private static bool landingInitialized;
-
-        /// <summary>
-        /// 阿波利娅出场延迟计时器（着陆完成后开始倒计时）
-        /// </summary>
-        private static int apolliaSpawnDelay;
-
-        /// <summary>
-        /// 阿波利娅是否已经生成
-        /// </summary>
-        private static bool apolliaSpawned;
-
-        /// <summary>
-        /// 着陆完成时玩家的位置，用于确定阿波利娅降落点
-        /// </summary>
-        private static Vector2 landingPodCenter;
+        public static bool landingInitialized;
 
         public override List<GenPass> Tasks => [new MachineGen()];
 
@@ -70,13 +54,10 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
             //重置着陆演出状态
             landingCompleted = false;
             landingInitialized = false;
-            apolliaSpawnDelay = 0;
-            apolliaSpawned = false;
-            landingPodCenter = Vector2.Zero;
         }
 
         public override void OnExit() {
-            base.OnExit();
+
         }
 
         public override void OnLoad() {
@@ -105,18 +86,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
             //初始化着陆演出
             InitializeLandingScene();
 
-            //着陆完成后触发阿波利娅出场
-            if (landingCompleted && !apolliaSpawned) {
-                apolliaSpawnDelay++;
-                //约2秒后（120帧）生成阿波利娅
-                if (apolliaSpawnDelay >= 120) {
-                    SpawnApollia();
-                    apolliaSpawned = true;
-                }
-            }
-
             //着陆完成后才开始特斯拉效果（避免着陆阶段干扰）
-            if (landingCompleted && apolliaSpawned) {
+            if (landingCompleted) {
                 SpawnTeslaEffect();
             }
         }
@@ -133,7 +104,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
                         && player.TryGetOverride<MachineWorldLandingPlayer>(out var landingPlayer)) {
                         if (!landingPlayer.LandingActive) {
                             landingCompleted = true;
-                            landingPodCenter = player.Center;
                         }
                     }
                 }
@@ -156,17 +126,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
 
             //激活屏幕特效
             MachineWorldLandingDrawSystem.Activate();
-        }
-
-        /// <summary>
-        /// 生成阿波利娅Actor并触发着陆演出
-        /// </summary>
-        private static void SpawnApollia() {
-            int index = ActorLoader.NewActor<ApolliaActor>(Vector2.Zero, Vector2.Zero);
-            if (index >= 0 && index < ActorLoader.MaxActorCount
-                && ActorLoader.Actors[index] is ApolliaActor apollia) {
-                apollia.StartLandingCutscene(landingPodCenter);
-            }
         }
 
         private static void SpawnTeslaEffect() {
