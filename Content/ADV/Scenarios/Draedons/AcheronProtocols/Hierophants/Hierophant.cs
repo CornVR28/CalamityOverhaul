@@ -194,37 +194,41 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Hiero
         }
 
         private void UpdateLegs() {
-            // 检测是否有任何组正在迈步中
-            bool anyGroupStepping = false;
+            // 检测哪些组正在迈步中
+            int steppingGroup = -1;
             foreach (var leg in Legs) {
-                if (leg.LiftProgress > 0f && leg.LiftProgress < 1f) {
-                    anyGroupStepping = true;
+                if (leg.IsMoving) {
+                    steppingGroup = leg.Group;
                     break;
                 }
             }
 
             foreach (var leg in Legs) {
+                // 如果有其他组正在迈步，阻止本组发起新步
+                if (steppingGroup >= 0 && steppingGroup != leg.Group && !leg.IsMoving) {
+                    if (leg.NoMoveTime < 6) leg.NoMoveTime = 6;
+                }
+
                 bool initiated = leg.Update();
 
                 // 落地震动——巨物感的关键
                 if (leg.JustLanded && !Main.dedServ) {
-                    HierophantEffects.CameraShake(leg.StandPoint, 4f);
-                    // 落地尘埃
-                    for (int i = 0; i < 6; i++) {
+                    HierophantEffects.CameraShake(leg.StandPoint, 3.5f);
+                    for (int i = 0; i < 5; i++) {
                         Dust d = Dust.NewDustPerfect(
-                            leg.StandPoint + new Vector2(Main.rand.NextFloat(-20f, 20f), 0f),
+                            leg.StandPoint + new Vector2(Main.rand.NextFloat(-16f, 16f), 0f),
                             Terraria.ID.DustID.Smoke,
-                            new Vector2(Main.rand.NextFloat(-3f, 3f), Main.rand.NextFloat(-4f, -1f)),
-                            Alpha: 120, Scale: Main.rand.NextFloat(1.5f, 3f) * NPC.scale);
+                            new Vector2(Main.rand.NextFloat(-2.5f, 2.5f), Main.rand.NextFloat(-3f, -1f)),
+                            Alpha: 120, Scale: Main.rand.NextFloat(1.5f, 2.5f) * NPC.scale);
                         d.noGravity = true;
                     }
                 }
 
                 if (initiated) {
-                    // 交替步态：同组腿一起迈步，其他组延迟
+                    // 本组迈步时，强制延迟其他组
                     foreach (var otherLeg in Legs) {
-                        if (otherLeg.Group != leg.Group && otherLeg.NoMoveTime < 14) {
-                            otherLeg.NoMoveTime = 14;
+                        if (otherLeg.Group != leg.Group && otherLeg.NoMoveTime < 16) {
+                            otherLeg.NoMoveTime = 16;
                         }
                     }
                 }
