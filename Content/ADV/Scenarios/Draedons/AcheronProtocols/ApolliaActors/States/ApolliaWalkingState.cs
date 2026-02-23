@@ -1,5 +1,4 @@
 ﻿using System;
-using System;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
@@ -9,8 +8,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
     /// <summary>
     /// 行走状态——根据指令驱动阿波利娅的移动行为：
     /// Follow：跟随玩家；Hold：到达后切换到空闲。
-    /// 距离远时自动加速到奔跑，接近时减速。
-    /// 遇到墙壁或深坑时自动切换到飞行状态越过障碍
+    /// 默认模式下距离远时自动加速到奔跑，接近时减速；遇到障碍时飞行越过。
+    /// walkOnly 模式下全程普通行走速度，不加速奔跑且不触发飞行（用于初次降落靠近等过场）
     /// </summary>
     internal class ApolliaWalkingState : IApolliaState
     {
@@ -21,14 +20,24 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
         private const int WalkFrameIntervalSlow = 6;
         private const int WalkFrameIntervalFast = 3;
         private const int TotalFrames = 11;
+        /// <summary>进入行走后需要在地面行走多少帧才开始检测障碍，防止着陆后立刻再次飞行</summary>
+        private const int PostLandingGrace = 15;
 
+        private readonly bool walkOnly;
         private float currentSpeed;
         private int frameCounter;
         private int stepSoundTimer;
+        private int groundFrames;
+
+        /// <param name="walkOnly">为 true 时全程普通行走速度，不会加速奔跑</param>
+        public ApolliaWalkingState(bool walkOnly = false) {
+            this.walkOnly = walkOnly;
+        }
 
         public void Enter(ApolliaActor actor) {
             frameCounter = 0;
             stepSoundTimer = 0;
+            groundFrames = 0;
             currentSpeed = WalkSpeed;
             actor.FrameIndex = 1;
             actor.UseJumpTexture = false;
@@ -48,18 +57,33 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
                 return ResolveArrivedState(actor);
             }
 
-            //障碍检测——遇墙或深坑时飞行越过
-            if (actor.OnGround && (actor.IsWallAhead(dir) || actor.IsGapAhead(dir))) {
-                return new ApolliaFlyingState(moveTarget);
+            //障碍检测——walkOnly 模式（过场行走）完全跳过，不触发飞行
+            //正常模式需要在地面行走足够帧数后才触发，防止着陆后立刻再次起飞
+            if (!walkOnly) {
+                if (actor.OnGround) {
+                    groundFrames++;
+                }
+                if (groundFrames > PostLandingGrace && actor.OnGround
+                    && (actor.IsWallAhead(dir) || actor.IsGapAhead(dir))) {
+                    return new ApolliaFlyingState(moveTarget);
+                }
             }
 
-            //速度曲线：距离远时奔跑，接近时慢走
-            float speedFactor = MathHelper.Clamp((distX - ArrivalDistance) / (SprintDistance - ArrivalDistance), 0f, 1f);
-            float targetSpeed = MathHelper.Lerp(WalkSpeed, RunSpeed, speedFactor);
+            //速度曲线：walkOnly 模式始终慢走，否则远距离奔跑、接近时减速
+            float targetSpeed;
+            float speedRatio;
+            if (walkOnly) {
+                targetSpeed = WalkSpeed;
+                speedRatio = 0f;
+            }
+            else {
+                float speedFactor = MathHelper.Clamp((distX - ArrivalDistance) / (SprintDistance - ArrivalDistance), 0f, 1f);
+                targetSpeed = MathHelper.Lerp(WalkSpeed, RunSpeed, speedFactor);
+                speedRatio = (targetSpeed - WalkSpeed) / (RunSpeed - WalkSpeed);
+            }
             currentSpeed = MathHelper.Lerp(currentSpeed, targetSpeed, 0.08f);
 
             //动画帧速度跟随移动速度
-            float speedRatio = (currentSpeed - WalkSpeed) / (RunSpeed - WalkSpeed);
             int frameInterval = (int)MathHelper.Lerp(WalkFrameIntervalSlow, WalkFrameIntervalFast, speedRatio);
             frameInterval = Math.Max(frameInterval, WalkFrameIntervalFast);
 

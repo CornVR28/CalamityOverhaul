@@ -275,6 +275,27 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
         #region 物理辅助——供状态类调用
 
         /// <summary>
+        /// 探测角色脚下到最近实心地面的像素距离。
+        /// 返回值 ≥ 0 表示找到地面（距离像素），-1 表示在扫描范围内未找到
+        /// </summary>
+        /// <param name="maxTiles">向下扫描的最大格数</param>
+        internal float ProbeGroundDistance(int maxTiles = 8) {
+            int tileX = (int)(Center.X / 16f);
+            int footTileY = (int)((Position.Y + Height) / 16f);
+
+            for (int y = footTileY; y < footTileY + maxTiles; y++) {
+                if (!WorldGen.InWorld(tileX, y)) break;
+                Tile tile = Framing.GetTileSafely(tileX, y);
+                if (tile.HasTile && Main.tileSolid[tile.TileType]) {
+                    float groundWorldY = y * 16f;
+                    return groundWorldY - (Position.Y + Height);
+                }
+            }
+
+            return -1f;
+        }
+
+        /// <summary>
         /// 将角色吸附到脚下最近的实心地面上，并更新 <see cref="OnGround"/> 状态
         /// </summary>
         internal void SnapToGround() {
