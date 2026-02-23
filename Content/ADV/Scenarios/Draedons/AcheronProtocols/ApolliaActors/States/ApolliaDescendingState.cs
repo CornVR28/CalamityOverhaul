@@ -71,7 +71,11 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
                 actor.GlowIntensity = 0.8f;
                 actor.DescendAlpha = 1f;
 
-                return new ApolliaWalkingState();
+                //着陆后根据指令决定下一状态
+                return actor.CurrentCommand switch {
+                    HeroCommand.Hold or HeroCommand.Defensive => new ApolliaIdleState(),
+                    _ => new ApolliaWalkingState(),
+                };
             }
 
             return null;

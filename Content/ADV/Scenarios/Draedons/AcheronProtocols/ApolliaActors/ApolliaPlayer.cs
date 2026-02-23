@@ -122,9 +122,12 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
         internal void ActivateHeroPanel() {
             HeroPanelActivated = true;
 
-            //平滑关闭运镜
+            //平滑关闭运镜，结束演出阶段
             ApolliaActor actor = GetApolliaActor();
-            actor?.Camera.Stop();
+            if (actor != null) {
+                actor.InCutscene = false;
+                actor.Camera.Stop();
+            }
 
             if (ApolliaHeroPanelUI.Instance != null) {
                 ApolliaHeroPanelUI.Instance.Unlocked = true;

@@ -54,6 +54,26 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
         /// <summary>帧纹理的单帧高度</summary>
         internal int FrameHeight { get; private set; }
 
+        /// <summary>速度向量——供状态类进行物理运动</summary>
+        internal Vector2 Velocity;
+
+        /// <summary>角色是否站在实心地面上</summary>
+        internal bool OnGround;
+
+        /// <summary>是否使用跳跃/飞行单帧纹理进行绘制</summary>
+        internal bool UseJumpTexture;
+
+        /// <summary>是否处于初始演出阶段（着陆→行走→到达对话），状态类据此决定是否驱动运镜</summary>
+        internal bool InCutscene;
+
+        #endregion
+
+        #region 指令访问
+
+        /// <summary>读取英雄面板上的当前指令</summary>
+        internal HeroCommand CurrentCommand =>
+            ApolliaHeroPanelUI.Instance?.HeroData?.CurrentCommand ?? HeroCommand.Follow;
+
         #endregion
 
         public override void OnSpawn(params object[] args) {
@@ -66,6 +86,10 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
             WalkDirection = 1;
             DescendAlpha = 0f;
             GlowIntensity = 0f;
+            Velocity = Vector2.Zero;
+            OnGround = false;
+            UseJumpTexture = false;
+            InCutscene = false;
             Camera.Reset();
 
             if (ADVAsset.ApolliaActor != null) {
@@ -79,6 +103,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
         /// </summary>
         internal void StartLandingCutscene(Vector2 landingPodCenter) {
             if (CurrentState != null) return;
+
+            InCutscene = true;
 
             float offsetX = 200f;
             Vector2 rawTarget = new Vector2(landingPodCenter.X + offsetX, landingPodCenter.Y);
@@ -111,7 +137,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
         #region 物理辅助——供状态类调用
 
         /// <summary>
-        /// 将角色吸附到脚下最近的实心地面上
+        /// 将角色吸附到脚下最近的实心地面上，并更新 <see cref="OnGround"/> 状态
         /// </summary>
         internal void SnapToGround() {
             int tileX = (int)(Center.X / 16f);
@@ -122,14 +148,62 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
                 Tile tile = Framing.GetTileSafely(tileX, y);
                 if (tile.HasTile && Main.tileSolid[tile.TileType]) {
                     float groundY = y * 16f - Height;
-                    Position.Y = Position.Y < groundY
-                        ? MathHelper.Lerp(Position.Y, groundY, 0.3f)
-                        : groundY;
+                    if (Position.Y < groundY) {
+                        Position.Y = MathHelper.Lerp(Position.Y, groundY, 0.3f);
+                        OnGround = Math.Abs(Position.Y - groundY) < 2f;
+                    }
+                    else {
+                        Position.Y = groundY;
+                        OnGround = true;
+                    }
                     return;
                 }
             }
 
+            OnGround = false;
             Position.Y += 4f;
+        }
+
+        /// <summary>
+        /// 检测角色前方是否有实心墙壁阻挡 (检测碰撞体前方2格高度)
+        /// </summary>
+        internal bool IsWallAhead(int direction) {
+            int checkX = (int)((Center.X + direction * (Width * 0.5f + 8f)) / 16f);
+            int footY = (int)((Position.Y + Height - 4f) / 16f);
+
+            for (int y = footY; y >= footY - 2; y--) {
+                if (!WorldGen.InWorld(checkX, y)) continue;
+                Tile tile = Framing.GetTileSafely(checkX, y);
+                if (tile.HasTile && Main.tileSolid[tile.TileType] && !Main.tileSolidTop[tile.TileType]) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// 检测角色前方脚下是否存在深坑 (超过6格没有地面)
+        /// </summary>
+        internal bool IsGapAhead(int direction) {
+            int checkX = (int)((Center.X + direction * (Width * 0.5f + 16f)) / 16f);
+            int footY = (int)((Position.Y + Height) / 16f);
+
+            for (int y = footY; y < footY + 6; y++) {
+                if (!WorldGen.InWorld(checkX, y)) return true;
+                Tile tile = Framing.GetTileSafely(checkX, y);
+                if (tile.HasTile && Main.tileSolid[tile.TileType]) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// 应用重力和速度到位置，用于非吸附式的物理运动
+        /// </summary>
+        internal void ApplyGravity(float gravity = 0.4f, float maxFallSpeed = 12f) {
+            Velocity.Y = Math.Min(Velocity.Y + gravity, maxFallSpeed);
+            Position += Velocity;
         }
 
         internal static Vector2 FindGroundPosition(Vector2 startPos) {
@@ -153,6 +227,24 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
 
         public override bool PreDraw(SpriteBatch spriteBatch, ref Color drawColor) {
             if (CurrentState == null) return false;
+
+            SpriteEffects fx = WalkDirection < 0 ? SpriteEffects.FlipHorizontally : SpriteEffects.None;
+            float alpha = DescendAlpha < 1f && CurrentState is ApolliaDescendingState ? DescendAlpha : 1f;
+            Color bodyColor = Lighting.GetColor((int)(Center.X / 16), (int)(Center.Y / 16)) * alpha;
+            Vector2 drawPos = new Vector2(Center.X, Position.Y + Height) - Main.screenPosition;
+
+            //选择纹理：飞行/跳跃时使用单帧Jump纹理，否则使用行走帧图
+            if (UseJumpTexture && ADVAsset.ApolliaActor_Jump != null) {
+                Texture2D jumpTex = ADVAsset.ApolliaActor_Jump;
+                Vector2 jumpOrigin = new Vector2(jumpTex.Width * 0.5f, jumpTex.Height);
+
+                //辉光
+                DrawGlow(spriteBatch, drawPos, alpha);
+
+                spriteBatch.Draw(jumpTex, drawPos, null, bodyColor, 0f, jumpOrigin, 0.7f, fx, 0f);
+                return false;
+            }
+
             if (ADVAsset.ApolliaActor == null) return false;
 
             Texture2D tex = ADVAsset.ApolliaActor;
@@ -161,21 +253,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
             int clampedFrame = Math.Clamp(FrameIndex, 0, TotalFrames - 1);
             Rectangle sourceRect = new Rectangle(0, clampedFrame * FrameHeight, FrameWidth, FrameHeight);
             Vector2 origin = new Vector2(FrameWidth * 0.5f, FrameHeight);
-            Vector2 drawPos = new Vector2(Center.X, Position.Y + Height) - Main.screenPosition;
-
-            SpriteEffects fx = WalkDirection < 0 ? SpriteEffects.FlipHorizontally : SpriteEffects.None;
-
-            float alpha = DescendAlpha < 1f && CurrentState is ApolliaDescendingState ? DescendAlpha : 1f;
-            Color bodyColor = Lighting.GetColor((int)(Center.X / 16), (int)(Center.Y / 16)) * alpha;
 
             //辉光效果
-            if (GlowIntensity > 0.02f && CWRAsset.SoftGlow != null && !CWRAsset.SoftGlow.IsDisposed) {
-                Texture2D glow = CWRAsset.SoftGlow.Value;
-                Color glowColor = new Color(80, 160, 255) * (GlowIntensity * alpha);
-                float glowScale = 80f / (glow.Width * 0.5f);
-                spriteBatch.Draw(glow, drawPos - new Vector2(0, FrameHeight * 0.4f), null,
-                    glowColor with { A = 0 }, 0f, glow.Size() * 0.5f, glowScale, SpriteEffects.None, 0f);
-            }
+            DrawGlow(spriteBatch, drawPos, alpha);
 
             //降落阶段电弧边缘光
             if (CurrentState is ApolliaDescendingState && DescendAlpha > 0.3f) {
@@ -191,6 +271,16 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
             spriteBatch.Draw(tex, drawPos, sourceRect, bodyColor, 0f, origin, 0.7f, fx, 0f);
 
             return false;
+        }
+
+        private void DrawGlow(SpriteBatch spriteBatch, Vector2 drawPos, float alpha) {
+            if (GlowIntensity > 0.02f && CWRAsset.SoftGlow != null && !CWRAsset.SoftGlow.IsDisposed) {
+                Texture2D glow = CWRAsset.SoftGlow.Value;
+                Color glowColor = new Color(80, 160, 255) * (GlowIntensity * alpha);
+                float glowScale = 80f / (glow.Width * 0.5f);
+                spriteBatch.Draw(glow, drawPos - new Vector2(0, FrameHeight * 0.4f), null,
+                    glowColor with { A = 0 }, 0f, glow.Size() * 0.5f, glowScale, SpriteEffects.None, 0f);
+            }
         }
 
         #endregion

@@ -1,4 +1,5 @@
 ﻿using System;
+using System;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
@@ -6,7 +7,9 @@ using Terraria.ID;
 namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.ApolliaActors.States
 {
     /// <summary>
-    /// 行走状态——阿波利娅走向玩家，运镜逐渐放大
+    /// 行走状态——根据指令驱动阿波利娅的移动行为：
+    /// Follow：跟随玩家；Aggressive：接近最近敌人；Hold/Defensive：走向驻守点后切换到空闲
+    /// 遇到墙壁或深坑时自动切换到飞行状态越过障碍
     /// </summary>
     internal class ApolliaWalkingState : IApolliaState
     {
@@ -15,29 +18,49 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
         private const int WalkFrameInterval = 6;
         private const int TotalFrames = 11;
 
+        /// <summary>可选的移动目标点（Hold/Defensive用）</summary>
+        private readonly Vector2? targetPosition;
+
         private int frameCounter;
-        private int timer;
+        private int stepSoundTimer;
+
+        public ApolliaWalkingState() { }
+
+        /// <summary>走向指定目标点</summary>
+        public ApolliaWalkingState(Vector2 target) {
+            targetPosition = target;
+        }
 
         public void Enter(ApolliaActor actor) {
-            timer = 0;
             frameCounter = 0;
+            stepSoundTimer = 0;
             actor.FrameIndex = 1;
+            actor.UseJumpTexture = false;
 
-            //运镜过渡到跟踪模式
-            actor.Camera.PositionLerpSpeed = 0.025f;
+            if (actor.InCutscene) {
+                actor.Camera.PositionLerpSpeed = 0.025f;
+            }
         }
 
         public IApolliaState Update(ApolliaActor actor) {
-            timer++;
+            stepSoundTimer++;
 
-            Player player = Main.LocalPlayer;
-            if (player == null || !player.active) return null;
-
-            Vector2 playerCenter = player.Center;
-            float distToPlayer = Math.Abs(actor.Center.X - playerCenter.X);
-            int dir = Math.Sign(playerCenter.X - actor.Center.X);
+            //确定移动目标
+            Vector2 moveTarget = ResolveTarget(actor);
+            float distX = Math.Abs(actor.Center.X - moveTarget.X);
+            int dir = Math.Sign(moveTarget.X - actor.Center.X);
             if (dir == 0) dir = -1;
             actor.WalkDirection = dir;
+
+            //到达判定
+            if (distX <= ArrivalDistance) {
+                return ResolveArrivedState(actor);
+            }
+
+            //障碍检测——遇墙或深坑时飞行越过
+            if (actor.OnGround && (actor.IsWallAhead(dir) || actor.IsGapAhead(dir))) {
+                return new ApolliaFlyingState(moveTarget);
+            }
 
             //行走动画帧(帧1~10)
             frameCounter++;
@@ -55,23 +78,23 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
             //地面吸附
             actor.SnapToGround();
 
-            //运镜：跟踪两者中点，距离越近越放大
-            Vector2 midPoint = (actor.Center + playerCenter) * 0.5f;
-            actor.Camera.FocusTarget = midPoint;
+            //演出运镜：跟踪两者中点，距离越近越放大
+            if (actor.InCutscene) {
+                Player player = Main.LocalPlayer;
+                if (player != null && player.active) {
+                    Vector2 midPoint = (actor.Center + player.Center) * 0.5f;
+                    actor.Camera.FocusTarget = midPoint;
 
-            float zoomFactor = MathHelper.Clamp(1f - (distToPlayer - ArrivalDistance) / 400f, 0f, 1f);
-            float eased = zoomFactor < 0.5f ? 2f * zoomFactor * zoomFactor
-                : 1f - MathF.Pow(-2f * zoomFactor + 2f, 2f) / 2f;
-            actor.Camera.TargetZoom = MathHelper.Lerp(1f, 1.5f, eased);
-            actor.Camera.ZoomLerpSpeed = 0.015f;
-
-            //到达
-            if (distToPlayer <= ArrivalDistance) {
-                return new ApolliaArrivedState();
+                    float zoomFactor = MathHelper.Clamp(1f - (distX - ArrivalDistance) / 400f, 0f, 1f);
+                    float eased = zoomFactor < 0.5f ? 2f * zoomFactor * zoomFactor
+                        : 1f - MathF.Pow(-2f * zoomFactor + 2f, 2f) / 2f;
+                    actor.Camera.TargetZoom = MathHelper.Lerp(1f, 1.5f, eased);
+                    actor.Camera.ZoomLerpSpeed = 0.015f;
+                }
             }
 
             //脚步声
-            if (timer % 20 == 0) {
+            if (stepSoundTimer % 20 == 0) {
                 SoundEngine.PlaySound(SoundID.Run with { Volume = 0.3f, Pitch = 0.4f }, actor.Center);
             }
 
@@ -79,5 +102,38 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
         }
 
         public void Exit(ApolliaActor actor) { }
+
+        private Vector2 ResolveTarget(ApolliaActor actor) {
+            if (targetPosition.HasValue) {
+                return targetPosition.Value;
+            }
+
+            return actor.CurrentCommand switch {
+                HeroCommand.Aggressive => FindNearestEnemyCenter(actor) ?? Main.LocalPlayer.Center,
+                _ => Main.LocalPlayer.Center,
+            };
+        }
+
+        private static IApolliaState ResolveArrivedState(ApolliaActor actor) {
+            return actor.CurrentCommand switch {
+                HeroCommand.Hold or HeroCommand.Defensive => new ApolliaIdleState(),
+                _ => new ApolliaArrivedState(),
+            };
+        }
+
+        private static Vector2? FindNearestEnemyCenter(ApolliaActor actor) {
+            float closest = float.MaxValue;
+            Vector2? result = null;
+            for (int i = 0; i < Main.maxNPCs; i++) {
+                NPC npc = Main.npc[i];
+                if (!npc.active || npc.friendly || npc.dontTakeDamage) continue;
+                float dist = Vector2.DistanceSquared(actor.Center, npc.Center);
+                if (dist < closest) {
+                    closest = dist;
+                    result = npc.Center;
+                }
+            }
+            return result;
+        }
     }
 }
