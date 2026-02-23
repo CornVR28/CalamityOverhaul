@@ -5,7 +5,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
 {
     /// <summary>
     /// 到达状态——阿波利娅站在玩家面前
-    /// 保持1.5x缩放和运镜（后续对话场景需要），
     /// 若玩家远离则重新进入行走状态
     /// </summary>
     internal class ApolliaArrivedState : IApolliaState
