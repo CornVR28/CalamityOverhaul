@@ -16,8 +16,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
         public void Enter(ApolliaActor actor) {
             actor.FrameIndex = 0;
 
-            //运镜聚焦在两者中点偏上，保持1.5x缩放
-            actor.Camera.TargetZoom = 1.5f;
+            //运镜聚焦在两者中点偏上，保持2x缩放
+            actor.Camera.TargetZoom = 2f;
             actor.Camera.ZoomLerpSpeed = 0.02f;
             actor.Camera.PositionLerpSpeed = 0.04f;
         }

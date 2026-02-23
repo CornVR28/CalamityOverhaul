@@ -33,6 +33,13 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
         private Vector2 smoothedScreenPos;
         private bool initialized;
 
+        //震动状态
+        private Vector2 shakeDirection;
+        private float shakeIntensity;
+        private float shakeDecay;
+        private int shakeDuration;
+        private int shakeTimer;
+
         /// <summary>
         /// 启动运镜
         /// </summary>
@@ -61,6 +68,29 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
             currentZoom = 1f;
             TargetZoom = 1f;
             initialized = false;
+            shakeTimer = 0;
+        }
+
+        /// <summary>
+        /// 触发屏幕震动——在运镜锁定期间替代原版 PunchCameraModifier
+        /// </summary>
+        /// <param name="direction">震动方向（会自动归一化），传入 Zero 则随机方向</param>
+        /// <param name="intensity">初始偏移像素强度</param>
+        /// <param name="decay">每帧衰减系数 (0~1)，越小衰减越快</param>
+        /// <param name="duration">持续帧数</param>
+        public void Shake(Vector2 direction, float intensity, float decay = 0.9f, int duration = 20) {
+            if (direction == Vector2.Zero) {
+                float angle = Main.rand.NextFloat(MathHelper.TwoPi);
+                direction = angle.ToRotationVector2();
+            }
+            else {
+                direction.Normalize();
+            }
+            shakeDirection = direction;
+            shakeIntensity = intensity;
+            shakeDecay = MathHelper.Clamp(decay, 0f, 0.99f);
+            shakeDuration = duration;
+            shakeTimer = 0;
         }
 
         /// <summary>
@@ -94,6 +124,17 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
             //平滑插值
             smoothedScreenPos = Vector2.Lerp(smoothedScreenPos, desiredScreenPos, PositionLerpSpeed);
             Main.screenPosition = smoothedScreenPos;
+
+            //叠加震动偏移
+            if (shakeTimer < shakeDuration && shakeIntensity > 0.5f) {
+                float progress = shakeTimer / (float)shakeDuration;
+                float currentIntensity = shakeIntensity * MathF.Pow(shakeDecay, shakeTimer) * (1f - progress);
+                float sign = (shakeTimer % 2 == 0) ? 1f : -1f;
+                float rotJitter = Main.rand.NextFloat(-0.3f, 0.3f);
+                Vector2 offset = shakeDirection.RotatedBy(rotJitter) * currentIntensity * sign;
+                Main.screenPosition += offset;
+                shakeTimer++;
+            }
 
             //锁定玩家操作
             if (LockPlayerControls) {

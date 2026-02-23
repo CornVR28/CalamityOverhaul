@@ -3,7 +3,6 @@ using CalamityOverhaul.Content.ADV.DialogueBoxs;
 using CalamityOverhaul.Content.ADV.DialogueBoxs.Styles;
 using System;
 using Terraria;
-using Terraria.Graphics.CameraModifiers;
 using Terraria.Localization;
 using Terraria.ModLoader;
 
@@ -100,9 +99,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
         }
 
         private static void ShakeScreen() {
-            PunchCameraModifier modifier = new PunchCameraModifier(Main.LocalPlayer.Center
-                , (Main.rand.NextFloat() * ((float)Math.PI * 2f)).ToRotationVector2(), 30f, 6f, 20, 1000f, "ApolliaDialogueScenario");
-            Main.instance.CameraModifiers.Add(modifier);
+            if (Main.LocalPlayer?.TryGetModPlayer(out ApolliaPlayer ap) != true) return;
+            ap.GetApolliaActor()?.Camera.Shake(Vector2.Zero, 30f, 0.88f, 20);
         }
 
         /// <summary>
