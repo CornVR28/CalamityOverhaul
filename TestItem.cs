@@ -3,6 +3,7 @@ using CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.ApolliaAc
 using CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.GalacticCrisises;
 using CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machines;
 using CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machines.DropPodScens;
+using CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machines.Gargoyles;
 using CalamityOverhaul.Content.ADV.Scenarios.SupCal.End.EternalBlazingNows;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
@@ -73,8 +74,9 @@ namespace CalamityOverhaul
         public override bool? UseItem(Player player) {
             //ScenarioManager.Reset<ApolliaDialogueScenario>();
             //ScenarioManager.Start<ApolliaDialogueScenario>();
-            MachineWorld.Enter();
+            //MachineWorld.Enter();
             //DropPodWorld.Enter();
+            GargoyleSwarmPlayer.StartCutscene();
             //ActorLoader.NewActor<DropPodActor>(player.Center, Vector2.Zero);
             return true;
         }
