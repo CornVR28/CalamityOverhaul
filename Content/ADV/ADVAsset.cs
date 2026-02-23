@@ -64,6 +64,8 @@ namespace CalamityOverhaul.Content.ADV
         [VaultLoaden(CWRConstant.ADV + "Draedon/")]
         public static Texture2D ApolliaActor = null;
         [VaultLoaden(CWRConstant.ADV + "Draedon/")]
+        public static Texture2D ApolliaActor_Jump = null;
+        [VaultLoaden(CWRConstant.ADV + "Draedon/")]
         public static Texture2D Artis = null;
         [VaultLoaden(CWRConstant.ADV)]
         public static Texture2D FUJI = null;
