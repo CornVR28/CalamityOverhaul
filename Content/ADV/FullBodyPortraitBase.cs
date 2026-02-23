@@ -168,7 +168,7 @@ namespace CalamityOverhaul.Content.ADV
         /// <param name="spriteBatch">精灵批次</param>
         /// <param name="dialogueAlpha">对话框当前透明度</param>
         public virtual void Draw(SpriteBatch spriteBatch, float dialogueAlpha) {
-            if (!Active || CurrentFade <= 0.01f) return;
+            if (!Active) return;
             OnDraw(spriteBatch, MathHelper.Clamp(dialogueAlpha * CurrentFade, 0f, 1f));
         }
 

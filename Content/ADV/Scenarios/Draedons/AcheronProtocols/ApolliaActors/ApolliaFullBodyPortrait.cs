@@ -10,7 +10,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
     {
         public override string PortraitKey => "ApolliaFullBody";
 
-        protected override float FadeInDuration => 90f;
+        protected override float FadeInDuration => 20f;
 
         protected override void OnInitialize() {
             scale = 1f;
