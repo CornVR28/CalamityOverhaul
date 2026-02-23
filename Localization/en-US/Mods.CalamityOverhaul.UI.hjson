@@ -396,3 +396,15 @@ StarStreamDialogueBox: {
 	ContinueHint: 继续
 	FastHint: 加速
 }
+
+ApolliaHeroPanelUI: {
+	TitleText: 阿波利娅
+	HPLabel: 生命值
+	DamageLabel: 伤害
+	DefenseLabel: 防御
+	CommandLabel: 作战指令
+	CmdFollow: 跟随
+	CmdHold: 驻守
+	CmdAggressive: 进攻
+	CmdDefensive: 防御
+}

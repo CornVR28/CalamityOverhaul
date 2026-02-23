@@ -1,8 +1,11 @@
 ﻿using CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.ApolliaActors.States;
+using CalamityOverhaul.Common;
 using CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machines;
 using InnoVault.Actors;
+using InnoVault.Trails;
 using Microsoft.Xna.Framework.Graphics;
 using System;
+using System.Collections.Generic;
 using Terraria;
 
 namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.ApolliaActors
@@ -62,6 +65,21 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
 
         /// <summary>是否使用跳跃/飞行单帧纹理进行绘制</summary>
         internal bool UseJumpTexture;
+
+        #endregion
+
+        #region 尾焰系统
+
+        /// <summary>尾焰Trail是否激活——由飞行状态Enter/Exit控制</summary>
+        internal bool JetTrailActive;
+
+        private const int JetTrailPointCount = 16;
+        private readonly Vector2[] jetTrailPoints = new Vector2[JetTrailPointCount];
+        private Trail jetTrail;
+        private int jetTimer;
+
+        private const int MaxJetParticles = 30;
+        private readonly List<JetTrailParticle> jetParticles = [];
 
         #endregion
 
@@ -126,6 +144,132 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
             if (GlowIntensity > 0.01f) {
                 GlowIntensity *= 0.96f;
             }
+
+            //尾焰系统更新
+            if (JetTrailActive) {
+                jetTimer++;
+                UpdateJetTrailPoints();
+            }
+
+            for (int i = jetParticles.Count - 1; i >= 0; i--) {
+                jetParticles[i].Life++;
+                jetParticles[i].Position += jetParticles[i].Velocity;
+                jetParticles[i].Velocity *= 0.94f;
+                jetParticles[i].Velocity.X += Main.rand.NextFloat(-0.15f, 0.15f);
+                if (jetParticles[i].Life >= jetParticles[i].MaxLife) {
+                    jetParticles.RemoveAt(i);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 在角色脚下生成一个尾焰粒子——由飞行状态每帧调用
+        /// </summary>
+        internal void SpawnJetParticle() {
+            if (VaultUtils.isServer || jetParticles.Count >= MaxJetParticles) return;
+
+            Vector2 footPos = new(Center.X + Main.rand.NextFloat(-6, 6), Position.Y + Height);
+            Vector2 vel = new(
+                -WalkDirection * Main.rand.NextFloat(0.5f, 1.5f) + Main.rand.NextFloat(-0.3f, 0.3f),
+                Main.rand.NextFloat(1f, 3f));
+
+            jetParticles.Add(new JetTrailParticle {
+                Position = footPos,
+                Velocity = vel,
+                Color = Color.Lerp(new Color(120, 200, 255), new Color(80, 140, 220), Main.rand.NextFloat()),
+                Alpha = Main.rand.NextFloat(0.5f, 0.85f),
+                Scale = Main.rand.NextFloat(1.5f, 3.5f),
+                Life = 0,
+                MaxLife = Main.rand.Next(15, 35)
+            });
+        }
+
+        /// <summary>
+        /// 停止尾焰并清除所有粒子——飞行状态退出时调用
+        /// </summary>
+        internal void StopJetTrail() {
+            JetTrailActive = false;
+            jetTimer = 0;
+            jetTrail = null;
+            jetParticles.Clear();
+        }
+
+        /// <summary>
+        /// 更新尾焰Trail路径点——从脚底向下后方延伸，模拟喷射推进器尾焰。
+        /// [0]=喷口(脚底), [Length-1]=火焰远端
+        /// </summary>
+        private void UpdateJetTrailPoints() {
+            Vector2 nozzle = new(Center.X, Position.Y + Height / 2);
+
+            float fullLength = 120f;
+            float growProgress = MathHelper.Clamp(jetTimer / 15f, 0f, 1f);
+            float currentLength = growProgress * fullLength;
+
+            float trailAngleX = -WalkDirection * 0.6f;
+
+            for (int i = 0; i < JetTrailPointCount; i++) {
+                float t = i / (float)(JetTrailPointCount - 1);
+                float dist = MathF.Min(t * fullLength, currentLength);
+                float normalizedDist = dist / fullLength;
+
+                float y = nozzle.Y + dist;
+                float offsetX = trailAngleX * dist * normalizedDist;
+
+                float jitter = normalizedDist * normalizedDist * 1.5f;
+                float jitterX = MathF.Sin(jetTimer * 0.25f + normalizedDist * 15f) * jitter;
+
+                jetTrailPoints[i] = new Vector2(nozzle.X + offsetX + jitterX, y);
+            }
+        }
+
+        /// <summary>
+        /// 使用DropPodFlame着色器绘制尾焰Trail
+        /// </summary>
+        private void DrawJetFlameTrail(SpriteBatch spriteBatch) {
+            if (jetTimer < 3) return;
+            if (EffectLoader.DropPodFlame == null || !EffectLoader.DropPodFlame.IsLoaded) return;
+
+            jetTrail ??= new Trail(jetTrailPoints, GetJetTrailWidth, GetJetTrailColor);
+            jetTrail.TrailPositions = jetTrailPoints;
+
+            spriteBatch.End();
+
+            Effect effect = EffectLoader.DropPodFlame.Value;
+            effect.Parameters["transformMatrix"].SetValue(VaultUtils.GetTransfromMatrix());
+            effect.Parameters["globalTime"].SetValue((float)Main.timeForVisualEffects * 0.025f);
+            effect.Parameters["heatIntensity"].SetValue(MathHelper.Clamp(jetTimer / 30f, 0.3f, 0.8f));
+            effect.Parameters["uNoise"].SetValue(CWRAsset.Extra_193.Value);
+
+            Main.graphics.GraphicsDevice.BlendState = BlendState.Additive;
+            jetTrail.DrawTrail(effect);
+            Main.graphics.GraphicsDevice.BlendState = BlendState.AlphaBlend;
+
+            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointWrap,
+                DepthStencilState.None, RasterizerState.CullNone, null, Main.GameViewMatrix.TransformationMatrix);
+        }
+
+        private float GetJetTrailWidth(float progress) {
+            float intensityFactor = MathHelper.Clamp(jetTimer / 20f, 0.2f, 1f);
+            float baseWidth = 10f;
+            float taper = 1f - MathF.Pow(progress, 0.5f);
+            float pulse = 1f + MathF.Sin(jetTimer * 0.2f + progress * 5f) * 0.12f;
+            return baseWidth * taper * intensityFactor * pulse;
+        }
+
+        private Color GetJetTrailColor(Vector2 texCoords) {
+            float progress = texCoords.X;
+            float intensityFactor = MathHelper.Clamp(jetTimer / 20f, 0.2f, 1f);
+
+            Color coreColor = new(220, 240, 255);
+            Color midColor = new(80, 170, 240);
+            Color tipColor = new(40, 80, 180);
+
+            Color result = progress < 0.35f
+                ? Color.Lerp(coreColor, midColor, progress / 0.35f)
+                : Color.Lerp(midColor, tipColor, (progress - 0.35f) / 0.65f);
+
+            float alpha = (1f - MathF.Pow(progress, 1.5f)) * intensityFactor;
+            return result * alpha;
         }
 
         #region 物理辅助——供状态类调用
@@ -232,6 +376,14 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
                 Texture2D jumpTex = ADVAsset.ApolliaActor_Jump;
                 Vector2 jumpOrigin = new Vector2(jumpTex.Width * 0.5f, jumpTex.Height);
 
+                //尾焰Trail（着色器绘制，在最后面）
+                if (JetTrailActive) {
+                    DrawJetFlameTrail(spriteBatch);
+                }
+
+                //尾焰粒子
+                DrawJetParticles(spriteBatch);
+
                 //辉光
                 DrawGlow(spriteBatch, drawPos, alpha);
 
@@ -277,6 +429,39 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
             }
         }
 
+        private void DrawJetParticles(SpriteBatch spriteBatch) {
+            if (jetParticles.Count == 0) return;
+            if (CWRAsset.SoftGlow == null || CWRAsset.SoftGlow.IsDisposed) return;
+
+            Texture2D glow = CWRAsset.SoftGlow.Value;
+            Vector2 glowOrigin = glow.Size() * 0.5f;
+
+            foreach (var p in jetParticles) {
+                float lifeRatio = (float)p.Life / p.MaxLife;
+                float fadeAlpha = p.Alpha * (1f - lifeRatio * lifeRatio);
+                float scale = p.Scale * (1f + lifeRatio * 0.3f) * 0.03f;
+                Vector2 screenPos = p.Position - Main.screenPosition;
+
+                Color c = p.Color * fadeAlpha;
+                spriteBatch.Draw(glow, screenPos, null, c with { A = 0 }, 0f, glowOrigin, scale, SpriteEffects.None, 0f);
+
+                //内层白热核心
+                Color core = Color.White * (fadeAlpha * 0.4f * (1f - lifeRatio));
+                spriteBatch.Draw(glow, screenPos, null, core with { A = 0 }, 0f, glowOrigin, scale * 0.4f, SpriteEffects.None, 0f);
+            }
+        }
+
         #endregion
+
+        private class JetTrailParticle
+        {
+            public Vector2 Position;
+            public Vector2 Velocity;
+            public Color Color;
+            public float Alpha;
+            public float Scale;
+            public int Life;
+            public int MaxLife;
+        }
     }
 }

@@ -31,6 +31,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
             actor.UseJumpTexture = true;
             actor.OnGround = false;
             actor.Velocity = new Vector2(0, LiftSpeed);
+            actor.JetTrailActive = true;
 
             SoundEngine.PlaySound(SoundID.Item24 with { Volume = 0.4f, Pitch = 0.3f }, actor.Center);
         }
@@ -41,6 +42,12 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
             int dir = Math.Sign(moveTarget.X - actor.Center.X);
             if (dir == 0) dir = actor.WalkDirection;
             actor.WalkDirection = dir;
+
+            //尾焰粒子
+            actor.SpawnJetParticle();
+            if (Main.rand.NextBool(2)) {
+                actor.SpawnJetParticle();
+            }
 
             //水平飞行
             actor.Position.X += FlySpeed * dir;
@@ -85,6 +92,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
         public void Exit(ApolliaActor actor) {
             actor.UseJumpTexture = false;
             actor.Velocity = Vector2.Zero;
+            actor.StopJetTrail();
         }
 
         private static IApolliaState LandAndTransition(ApolliaActor actor) {
@@ -103,7 +111,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
 
             //根据指令继续行走或切换到空闲
             return actor.CurrentCommand switch {
-                HeroCommand.Hold or HeroCommand.Defensive => new ApolliaIdleState(),
+                HeroCommand.Hold => new ApolliaIdleState(),
                 _ => new ApolliaWalkingState(),
             };
         }
