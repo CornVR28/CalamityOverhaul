@@ -13,7 +13,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
     /// </summary>
     internal class GargoyleActor : Actor
     {
-        [VaultLoaden(CWRConstant.ADV + "Draedon/Draedon")]
+        [VaultLoaden(CWRConstant.ADV + "Draedon/Gargoyle")]
         public static Texture2D Gargoyle;
 
         #region 鸟群状态字段
@@ -112,7 +112,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
             }
 
             //主体
-            spriteBatch.Draw(tex, drawPos, null, bodyColor, Rotation, origin, scaleVec, fx, 0f);
+            spriteBatch.Draw(tex, drawPos, null, Color.White, Rotation, origin, scaleVec, fx, 0f);
 
             return false;
         }
