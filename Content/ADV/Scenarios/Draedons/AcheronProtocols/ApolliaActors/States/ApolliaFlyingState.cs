@@ -1,4 +1,5 @@
 ﻿using System;
+using System;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
@@ -7,7 +8,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
 {
     /// <summary>
     /// 飞行状态——阿波利娅跳跃/飞行越过障碍物或深坑，使用单帧Jump纹理。
-    /// 到达目标上空或脚下重新检测到地面后着陆并切换回行走
+    /// 水平方向在起飞时锁定，避免穿越目标时来回抖动。
+    /// 着陆需要最小滞空时间和下降速度，避免碰到物块边缘时反复起降
     /// </summary>
     internal class ApolliaFlyingState : IApolliaState
     {
@@ -15,10 +17,13 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
         private const float LiftSpeed = -3f;
         private const float MaxFlyHeight = 240f;
         private const int MaxFlyDuration = 180;
+        private const int MinAirTime = 25;
+        private const float MinLandingFallSpeed = 1f;
 
         private readonly Vector2 moveTarget;
         private float startY;
         private int timer;
+        private int flyDir;
 
         /// <param name="target">飞行要趋近的世界坐标目标点</param>
         public ApolliaFlyingState(Vector2 target) {
@@ -33,15 +38,20 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
             actor.Velocity = new Vector2(0, LiftSpeed);
             actor.JetTrailActive = true;
 
+            //起飞时锁定水平方向，避免穿越目标时来回拍打
+            flyDir = Math.Sign(moveTarget.X - actor.Center.X);
+            if (flyDir == 0) flyDir = actor.WalkDirection;
+
+            actor.WalkDirection = flyDir;
+
             SoundEngine.PlaySound(SoundID.Item24 with { Volume = 0.4f, Pitch = 0.3f }, actor.Center);
         }
 
         public IApolliaState Update(ApolliaActor actor) {
             timer++;
 
-            int dir = Math.Sign(moveTarget.X - actor.Center.X);
-            if (dir == 0) dir = actor.WalkDirection;
-            actor.WalkDirection = dir;
+            //方向始终使用起飞时锁定的方向
+            actor.WalkDirection = flyDir;
 
             //尾焰粒子
             actor.SpawnJetParticle();
@@ -50,36 +60,25 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
             }
 
             //水平飞行
-            actor.Position.X += FlySpeed * dir;
+            actor.Position.X += FlySpeed * flyDir;
 
             //垂直：先升后降
             if (actor.Position.Y > startY - MaxFlyHeight && timer < MaxFlyDuration / 2) {
-                //上升阶段
                 actor.Velocity.Y = MathHelper.Lerp(actor.Velocity.Y, LiftSpeed, 0.1f);
             }
             else {
-                //下降阶段——应用重力
                 actor.Velocity.Y = Math.Min(actor.Velocity.Y + 0.3f, 8f);
             }
 
             actor.Position.Y += actor.Velocity.Y;
 
-            //着陆检测——脚下有地面且正在下降
-            if (actor.Velocity.Y > 0) {
-                actor.SnapToGround();
-                if (actor.OnGround) {
-                    return LandAndTransition(actor);
-                }
-            }
-
-            //超时保护
+            //超时强制着陆
             if (timer >= MaxFlyDuration) {
                 return LandAndTransition(actor);
             }
 
-            //水平到达目标附近且脚下有地面
-            float distX = Math.Abs(actor.Center.X - moveTarget.X);
-            if (distX < 40f && actor.Velocity.Y > 0) {
+            //着陆检测——必须同时满足：最小滞空时间、正在下降且速度足够
+            if (timer >= MinAirTime && actor.Velocity.Y >= MinLandingFallSpeed) {
                 actor.SnapToGround();
                 if (actor.OnGround) {
                     return LandAndTransition(actor);
@@ -96,7 +95,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
         }
 
         private static IApolliaState LandAndTransition(ApolliaActor actor) {
-            //着陆粒子
             if (!VaultUtils.isServer) {
                 for (int i = 0; i < 4; i++) {
                     Vector2 vel = new(Main.rand.NextFloat(-1.5f, 1.5f), Main.rand.NextFloat(-2f, -0.5f));
@@ -109,7 +107,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
 
             SoundEngine.PlaySound(SoundID.Run with { Volume = 0.25f, Pitch = 0.2f }, actor.Center);
 
-            //根据指令继续行走或切换到空闲
             return actor.CurrentCommand switch {
                 HeroCommand.Hold => new ApolliaIdleState(),
                 _ => new ApolliaWalkingState(),
