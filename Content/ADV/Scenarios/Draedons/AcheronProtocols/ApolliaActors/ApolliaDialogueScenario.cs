@@ -2,6 +2,8 @@
 using CalamityOverhaul.Content.ADV.DialogueBoxs;
 using CalamityOverhaul.Content.ADV.DialogueBoxs.Styles;
 using System;
+using Terraria;
+using Terraria.Graphics.CameraModifiers;
 using Terraria.Localization;
 using Terraria.ModLoader;
 
@@ -86,11 +88,20 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
             protected override void Build() {
                 string speaker = Rolename.Value;
                 Add(speaker, Line4.Value, onStart: ChipReadRender.Activate);
-                Add(speaker, Line5.Value, onStart: ChipReadRender.Deactivate);
+                Add(speaker, Line5.Value, onStart: () => {
+                    ChipReadRender.Deactivate();
+                    ShakeScreen();
+                });
                 Add(speaker, Line6.Value);
                 Add(speaker, Line7.Value);
                 Add(speaker, Line8.Value);
             }
+        }
+
+        private static void ShakeScreen() {
+            PunchCameraModifier modifier = new PunchCameraModifier(Main.LocalPlayer.Center
+                , (Main.rand.NextFloat() * ((float)Math.PI * 2f)).ToRotationVector2(), 30f, 6f, 20, 1000f, "ApolliaDialogueScenario");
+            Main.instance.CameraModifiers.Add(modifier);
         }
 
         /// <summary>
@@ -109,7 +120,10 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
                 Add(speaker, C2_R1.Value);
                 Add(speaker, C2_R2.Value);
                 Add(speaker, Line4.Value, onStart: ChipReadRender.Activate);
-                Add(speaker, Line5.Value, onStart: ChipReadRender.Deactivate);
+                Add(speaker, Line5.Value, onStart: () => {
+                    ChipReadRender.Deactivate();
+                    ShakeScreen();
+                });
                 Add(speaker, Line6.Value);
                 Add(speaker, Line7.Value);
                 Add(speaker, Line8.Value);

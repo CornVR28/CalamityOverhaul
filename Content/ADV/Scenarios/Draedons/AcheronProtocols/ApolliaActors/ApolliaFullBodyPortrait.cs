@@ -27,11 +27,13 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
                 return;
             }
 
+            int offsetY = 100;
+            Rectangle rectangle = new Rectangle(0, 0, portrait.Width, portrait.Height - offsetY);
             position = OwnerDialogue.GetPanelRect().Top()
-                + new Vector2(0, -portrait.Height + 120) * scale;
+                + new Vector2(0, -portrait.Height + 120 + offsetY) * scale;
 
             Color color = drawColor * alpha;
-            spriteBatch.Draw(portrait, position, null, color, rotation, Vector2.Zero, scale, SpriteEffects.None, 0f);
+            spriteBatch.Draw(portrait, position, rectangle, color, rotation, Vector2.Zero, scale, SpriteEffects.None, 0f);
         }
     }
 }
