@@ -25,18 +25,20 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         private const int PanUpStart = 0;
         /// <summary>摄像机上摇完成的帧</summary>
         private const int PanUpEnd = 80;
-        /// <summary>石像鬼生成帧（在上摇过程中提前生成，飞入镜头时恰好可见）</summary>
-        private const int SpawnFrame = 30;
+        /// <summary>虫群开始分批生成的帧</summary>
+        private const int SpawnStart = 30;
+        /// <summary>虫群停止生成的帧</summary>
+        private const int SpawnEnd = 220;
         /// <summary>虫群主体飞越开始帧</summary>
         private const int SwarmActiveStart = 80;
         /// <summary>虫群主体飞越结束帧</summary>
-        private const int SwarmActiveEnd = 380;
+        private const int SwarmActiveEnd = 560;
         /// <summary>摄像机开始下摇的帧</summary>
-        private const int PanDownStart = 360;
+        private const int PanDownStart = 500;
         /// <summary>摄像机下摇完成的帧</summary>
-        private const int PanDownEnd = 460;
+        private const int PanDownEnd = 600;
         /// <summary>整个过场结束帧</summary>
-        private const int CutsceneEndFrame = 500;
+        private const int CutsceneEndFrame = 640;
 
         #endregion
 
@@ -44,16 +46,16 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
 
         /// <summary>摄像机上摇距离（像素）</summary>
         private const float PanDistance = 500f;
-        /// <summary>虫群生成数量</summary>
-        private const int SwarmCount = 300;
+        /// <summary>虫群总生成数量</summary>
+        private const int SwarmCount = 3000;
         /// <summary>虫群整体飞越方向基础速度（负=向左）</summary>
-        private const float SwarmBaseSpeed = -4.5f;
-        /// <summary>虫群飞行弧线最大高度偏移</summary>
-        private const float ArcHeight = 80f;
+        private const float SwarmBaseSpeed = -5.5f;
+        /// <summary>流道垂直分布总高度</summary>
+        private const float StreamSpread = 350f;
         /// <summary>缩放：飞越期间略微拉远以展示更多天空</summary>
         private const float CrossingZoom = 0.85f;
         /// <summary>摄像机水平跟踪比例（0=不跟, 1=完全跟随集群重心）</summary>
-        private const float HorizontalTrackRatio = 0.1f;
+        private const float HorizontalTrackRatio = 0.05f;
 
         #endregion
 
@@ -64,9 +66,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         private static Vector2 cutsceneOrigin;
         private static Vector2 cameraOffset;
         private static float currentZoom;
-
-        /// <summary>当前鸟群全局航路点——由 <see cref="GargoyleActor"/> 的鸟群算法读取</summary>
-        internal static Vector2 CurrentWaypoint { get; private set; }
+        private static int totalSpawned;
 
         /// <summary>过场演出是否正在进行</summary>
         internal static bool IsActive => cutsceneActive;
@@ -83,10 +83,13 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
 
             cutsceneActive = true;
             timer = 0;
+            totalSpawned = 0;
             cutsceneOrigin = Main.LocalPlayer.Center;
             cameraOffset = Vector2.Zero;
             currentZoom = 1f;
-            CurrentWaypoint = cutsceneOrigin - new Vector2(0, PanDistance);
+
+            float skyY = cutsceneOrigin.Y - PanDistance;
+            GargoyleBoids.InitializeStreams(skyY, StreamSpread);
         }
 
         /// <summary>
@@ -95,8 +98,10 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         internal static void StopCutscene() {
             cutsceneActive = false;
             timer = 0;
+            totalSpawned = 0;
             cameraOffset = Vector2.Zero;
             currentZoom = 1f;
+            GargoyleBoids.Reset();
             KillAllGargoyles();
         }
 
@@ -116,15 +121,18 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
             timer++;
 
             UpdateCamera();
-            UpdateWaypoint();
 
-            //生成虫群
-            if (timer == SpawnFrame) {
-                SpawnSwarm();
+            //分批生成虫群——持续从右侧涌入，形成流动的河流效果
+            if (timer >= SpawnStart && timer <= SpawnEnd) {
+                int spawnFrames = SpawnEnd - SpawnStart;
+                int elapsed = timer - SpawnStart;
+                int targetTotal = (int)((float)(elapsed + 1) / spawnFrames * SwarmCount);
+                int batch = Math.Min(targetTotal - totalSpawned, SwarmCount - totalSpawned);
+                if (batch > 0) SpawnBatch(batch);
             }
 
-            //清理飞出画面远处的个体
-            if (timer > SwarmActiveEnd) {
+            //持续清理飞出屏幕左侧的个体
+            if (timer > SwarmActiveStart) {
                 PruneOffscreenGargoyles();
             }
 
@@ -195,54 +203,27 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
 
         #endregion
 
-        #region 航路点
+        #region 虫群分批生成
 
-        private void UpdateWaypoint() {
-            if (timer < SpawnFrame) return;
-
-            float screenWidth = Main.screenWidth;
+        private void SpawnBatch(int count) {
+            float screenW = Main.screenWidth;
             float skyY = cutsceneOrigin.Y - PanDistance;
+            //生成点在屏幕右边缘外侧
+            float spawnX = cutsceneOrigin.X + screenW * 0.5f + 200f;
 
-            //航路点从画面右侧向左侧平移
-            float progress = MathHelper.Clamp(
-                (float)(timer - SpawnFrame) / (SwarmActiveEnd - SpawnFrame), 0f, 1f);
+            for (int i = 0; i < count; i++) {
+                float xScatter = Main.rand.NextFloat(-80f, 80f);
+                float yScatter = Main.rand.NextFloat(-60f, 60f);
 
-            float waypointX = cutsceneOrigin.X + screenWidth * 0.8f * (1f - 2f * progress);
-
-            //弧线——中段略高，两端略低，制造波浪感
-            float arc = MathF.Sin(progress * MathF.PI) * ArcHeight;
-
-            //大尺度缓慢起伏
-            float undulation = MathF.Sin(timer * 0.015f) * 35f;
-
-            CurrentWaypoint = new Vector2(waypointX, skyY - arc + undulation);
-        }
-
-        #endregion
-
-        #region 虫群生成
-
-        private void SpawnSwarm() {
-            float screenWidth = Main.screenWidth;
-            float skyY = cutsceneOrigin.Y - PanDistance;
-            float spawnCenterX = cutsceneOrigin.X + screenWidth * 0.5f + 300f;
-
-            for (int i = 0; i < SwarmCount; i++) {
-                //在生成区域内散布——椭圆分布，前端密后端疏
-                float angle = Main.rand.NextFloat(MathHelper.TwoPi);
-                float radiusX = Main.rand.NextFloat(50f, 350f);
-                float radiusY = Main.rand.NextFloat(30f, 180f);
-
-                Vector2 spawnPos = new(
-                    spawnCenterX + MathF.Cos(angle) * radiusX,
-                    skyY + MathF.Sin(angle) * radiusY);
+                Vector2 spawnPos = new(spawnX + xScatter, skyY + yScatter);
 
                 //初始速度：向左飞行，带随机偏差
                 Vector2 spawnVel = new(
-                    SwarmBaseSpeed + Main.rand.NextFloat(-1f, 0.5f),
-                    Main.rand.NextFloat(-0.8f, 0.8f));
+                    SwarmBaseSpeed + Main.rand.NextFloat(-1.0f, 0.5f),
+                    Main.rand.NextFloat(-0.4f, 0.4f));
 
                 ActorLoader.NewActor<GargoyleActor>(spawnPos, spawnVel);
+                totalSpawned++;
             }
         }
 
@@ -258,13 +239,12 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         }
 
         private static void PruneOffscreenGargoyles() {
-            float margin = Main.screenWidth + 800f;
-            float cameraLeft = Main.screenPosition.X - margin;
-            float cameraRight = Main.screenPosition.X + Main.screenWidth + margin;
+            //只清除已飞过屏幕左侧远处的个体——确保不会在屏幕内突然消失
+            float leftKill = Main.screenPosition.X - 600f;
 
             List<GargoyleActor> gargoyles = ActorLoader.GetActiveActors<GargoyleActor>();
             foreach (GargoyleActor g in gargoyles) {
-                if (g.Position.X < cameraLeft || g.Position.X > cameraRight) {
+                if (g.Position.X < leftKill) {
                     ActorLoader.KillActor(g.WhoAmI, false);
                 }
             }

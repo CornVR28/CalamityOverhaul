@@ -74,9 +74,9 @@ namespace CalamityOverhaul
         public override bool? UseItem(Player player) {
             //ScenarioManager.Reset<ApolliaDialogueScenario>();
             //ScenarioManager.Start<ApolliaDialogueScenario>();
-            //MachineWorld.Enter();
+            MachineWorld.Enter();
             //DropPodWorld.Enter();
-            GargoyleSwarmPlayer.StartCutscene();
+            //GargoyleSwarmPlayer.StartCutscene();
             //ActorLoader.NewActor<DropPodActor>(player.Center, Vector2.Zero);
             return true;
         }

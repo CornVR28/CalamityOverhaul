@@ -30,7 +30,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         /// <summary>翅膀拍打速度（每帧弧度增量）</summary>
         internal float WingSpeed;
 
-        /// <summary>分组索引 (0~2)，同组个体更倾向聚拢</summary>
+        /// <summary>流道索引 (0~7)，决定个体沿哪条蛀蜒路径飞行</summary>
         internal int SwarmGroup;
 
         #endregion
@@ -47,7 +47,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
             DepthScale = Main.rand.NextFloat(0.35f, 1.15f);
             WingPhase = Main.rand.NextFloat(MathHelper.TwoPi);
             WingSpeed = Main.rand.NextFloat(0.12f, 0.22f);
-            SwarmGroup = Main.rand.Next(3);
+            SwarmGroup = Main.rand.Next(GargoyleBoids.NumStreams);
 
             BoidVelocity = Velocity;
         }
@@ -62,7 +62,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
             if (Main.GameUpdateCount != lastBoidsFrame) {
                 lastBoidsFrame = Main.GameUpdateCount;
                 var flock = ActorLoader.GetActiveActors<GargoyleActor>();
-                GargoyleBoids.UpdateFlock(flock, GargoyleSwarmPlayer.CurrentWaypoint);
+                GargoyleBoids.UpdateFlock(flock);
             }
 
             //翅膀动画
