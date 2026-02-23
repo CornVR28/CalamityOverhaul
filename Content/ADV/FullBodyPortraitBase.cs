@@ -45,7 +45,10 @@ namespace CalamityOverhaul.Content.ADV
         /// </summary>
         public bool BlockDialogueClose { get; set; }
 
-        protected DialogueBoxBase ownerDialogue;
+        /// <summary>
+        /// 拥有该立绘的对话框（可能为 null，表示未绑定或已解绑）
+        /// </summary>
+        public DialogueBoxBase OwnerDialogue;
         protected Vector2 position;
         protected float scale = 1f;
         protected float rotation;
@@ -86,7 +89,7 @@ namespace CalamityOverhaul.Content.ADV
         /// 初始化立绘
         /// </summary>
         public virtual void Initialize(DialogueBoxBase dialogue) {
-            ownerDialogue = dialogue;
+            OwnerDialogue = dialogue;
             Active = true;
             CurrentFade = 0f;
             timer = 0;
@@ -125,7 +128,7 @@ namespace CalamityOverhaul.Content.ADV
             switch (currentPhase) {
                 case PerformancePhase.FadeIn:
                     //等待对话框展开完毕再开始淡入计时
-                    if (ownerDialogue != null && ownerDialogue.showProgress < 1f) break;
+                    if (OwnerDialogue != null && OwnerDialogue.showProgress < 1f) break;
                     phaseProgress++;
                     if (phaseProgress >= FadeInDuration) {
                         CurrentFade = 1f;
@@ -195,6 +198,16 @@ namespace CalamityOverhaul.Content.ADV
         /// </summary>
         protected void EnterCustomPhase() {
             currentPhase = PerformancePhase.Custom;
+            phaseProgress = 0f;
+        }
+
+        /// <summary>
+        /// 跳过淡入，直接进入 Hold 阶段并完全显示
+        /// 适用于子场景中立绘已经在前一个场景显示过，不需要重新淡入的情况
+        /// </summary>
+        public void SkipFadeIn() {
+            CurrentFade = 1f;
+            currentPhase = PerformancePhase.Hold;
             phaseProgress = 0f;
         }
 

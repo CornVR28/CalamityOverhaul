@@ -245,7 +245,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.End.EternalBlazingNows
                 return;
             }
 
-            position = ownerDialogue.GetPanelRect().Top() + new Vector2(-currentPortrait.Width + 60, -currentPortrait.Height + 80) * scale;
+            position = OwnerDialogue.GetPanelRect().Top() + new Vector2(-currentPortrait.Width + 60, -currentPortrait.Height + 80) * scale;
             Vector2 portraitSize = currentPortrait.Size() * scale;
 
             //立绘切换时的混合绘制

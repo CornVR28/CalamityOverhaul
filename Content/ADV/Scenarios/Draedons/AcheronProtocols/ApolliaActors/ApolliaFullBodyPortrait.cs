@@ -27,7 +27,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
                 return;
             }
 
-            position = ownerDialogue.GetPanelRect().Top()
+            position = OwnerDialogue.GetPanelRect().Top()
                 + new Vector2(0, -portrait.Height + 120) * scale;
 
             Color color = drawColor * alpha;
