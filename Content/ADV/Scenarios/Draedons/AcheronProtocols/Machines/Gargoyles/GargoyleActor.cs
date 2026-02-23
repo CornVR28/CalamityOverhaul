@@ -33,6 +33,13 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         /// <summary>流道索引 (0~7)，决定个体沿哪条蛀蜒路径飞行</summary>
         internal int SwarmGroup;
 
+        /// <summary>个体游走相位——每个石像鬼独立的圆形游走力相位</summary>
+        internal float WanderPhase;
+        /// <summary>游走速度——每帧相位增量，随机化让每个个体轨迹不同</summary>
+        internal float WanderSpeed;
+        /// <summary>游走力幅度——随机化制造差异</summary>
+        internal float WanderStrength;
+
         #endregion
 
         private static uint lastBoidsFrame;
@@ -48,6 +55,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
             WingPhase = Main.rand.NextFloat(MathHelper.TwoPi);
             WingSpeed = Main.rand.NextFloat(0.12f, 0.22f);
             SwarmGroup = Main.rand.Next(GargoyleBoids.NumStreams);
+            WanderPhase = Main.rand.NextFloat(MathHelper.TwoPi);
+            WanderSpeed = Main.rand.NextFloat(0.03f, 0.09f);
+            WanderStrength = Main.rand.NextFloat(0.6f, 1.4f);
 
             BoidVelocity = Velocity;
         }
@@ -69,6 +79,12 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
             WingPhase += WingSpeed;
             if (WingPhase > MathHelper.TwoPi) {
                 WingPhase -= MathHelper.TwoPi;
+            }
+
+            //个体游走相位推进
+            WanderPhase += WanderSpeed;
+            if (WanderPhase > MathHelper.TwoPi) {
+                WanderPhase -= MathHelper.TwoPi;
             }
 
             //将鸟群速度写入 Actor.Velocity（ActorLoader 会自动执行 Position += Velocity）

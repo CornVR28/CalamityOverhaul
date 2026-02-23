@@ -1,4 +1,4 @@
-using InnoVault.Actors;
+﻿using InnoVault.Actors;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
@@ -139,7 +139,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
             //演出结束：下摇完成后，等待所有石像鬼飞出屏幕再收场
             if (timer >= PanDownEnd) {
                 List<GargoyleActor> remaining = ActorLoader.GetActiveActors<GargoyleActor>();
-                if (remaining.Count == 0 || timer >= CutsceneHardLimit) {
+                if (remaining.Count < 10 || timer >= CutsceneHardLimit) {
                     StopCutscene();
                     return;
                 }

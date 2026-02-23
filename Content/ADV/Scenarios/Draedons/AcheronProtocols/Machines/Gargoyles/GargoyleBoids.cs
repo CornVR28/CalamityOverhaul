@@ -6,11 +6,13 @@ using Terraria;
 namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machines.Gargoyles
 {
     /// <summary>
-    /// 流线型鸟群算法——使用空间网格加速的 Boids 变体。
+    /// 湍流鸟群算法——使用空间网格加速的 Boids 变体。
     /// <para>
     /// 核心设计：<br/>
     /// · 去除凝聚力(Cohesion)，只保留分离+对齐，避免虫群挤成一团<br/>
-    /// · 引入"流道(Stream)"概念——每个个体沿指定正弦波路径飞行，形成游龙般的蜿蜒队列<br/>
+    /// · 流道使用3层叠加波+时间演化，路径复杂不可预测<br/>
+    /// · 每个个体拥有独立的圆形游走力，制造个体间的差异化轨迹<br/>
+    /// · 基于位置的湍流场，让虫群局部翻腾起伏<br/>
     /// · 使用空间哈希网格将 O(n²) 邻域搜索降至近 O(n)，支撑 3000+ 个体<br/>
     /// </para>
     /// </summary>
@@ -18,14 +20,19 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
     {
         #region 流道配置
 
-        /// <summary>流道数量——虫群被分成这么多条蜿蜒路径</summary>
+        /// <summary>流道数量</summary>
         internal const int NumStreams = 8;
 
-        private static float[] streamAmplitude;
-        private static float[] streamFrequency;
-        private static float[] streamPhase;
+        //每条流道3个叠加波层(octave)的参数
+        private const int Octaves = 3;
+        private static float[,] octaveAmplitude;  // [stream, octave]
+        private static float[,] octaveFrequency;
+        private static float[,] octavePhase;
         private static float[] streamBaseY;
+        //时间演化——流道路径随时间缓慢漂移
+        private static float[,] octaveTimeDrift;   // [stream, octave] 时间相位漂移速率
         private static bool initialized;
+        private static int globalTick;
 
         #endregion
 
@@ -37,28 +44,27 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
 
         #endregion
 
-        #region Boids 参数（流线型，反聚团）
+        #region Boids 参数
 
-        /// <summary>保护距离——在此范围内产生排斥力</summary>
         private const float ProtectedRange = 24f;
-        /// <summary>分离权重</summary>
         private const float SeparationWeight = 0.08f;
 
-        /// <summary>视觉感知半径——在此范围内参与对齐计算</summary>
         private const float VisualRange = 120f;
-        /// <summary>对齐权重——趋向邻居平均航向</summary>
-        private const float AlignmentWeight = 0.08f;
+        private const float AlignmentWeight = 0.07f;
 
-        // ※ 不设凝聚权重(Cohesion) —— 这是避免"挤成一团"的关键 ※
+        /// <summary>流道Y跟踪权重——降低以允许更多自由翻腾</summary>
+        private const float StreamYWeight = 0.015f;
 
-        /// <summary>流道Y跟踪权重——将个体拉回所属流道的正弦波路径</summary>
-        private const float StreamYWeight = 0.025f;
-        /// <summary>随机噪声幅度——微扰动制造有机运动感</summary>
-        private const float NoiseAmount = 0.08f;
+        /// <summary>个体游走力权重——驱动每个个体独立的圆形游走</summary>
+        private const float WanderWeight = 0.35f;
 
-        /// <summary>最低飞行速度</summary>
+        /// <summary>湍流场权重——基于位置的伪卷曲噪声力</summary>
+        private const float TurbulenceWeight = 0.2f;
+
+        /// <summary>随机噪声幅度</summary>
+        private const float NoiseAmount = 0.12f;
+
         private const float MinSpeed = 9f;
-        /// <summary>最高飞行速度</summary>
         private const float MaxSpeed = 18f;
 
         #endregion
@@ -67,55 +73,88 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
 
         #region 初始化 / 重置
 
-        /// <summary>
-        /// 初始化流道参数——在过场开始时调用一次
-        /// </summary>
-        /// <param name="skyY">天空基准Y坐标（摄像机上摇目标位置）</param>
-        /// <param name="spreadHeight">流道垂直分布总高度</param>
         internal static void InitializeStreams(float skyY, float spreadHeight) {
-            streamAmplitude = new float[NumStreams];
-            streamFrequency = new float[NumStreams];
-            streamPhase = new float[NumStreams];
+            octaveAmplitude = new float[NumStreams, Octaves];
+            octaveFrequency = new float[NumStreams, Octaves];
+            octavePhase = new float[NumStreams, Octaves];
+            octaveTimeDrift = new float[NumStreams, Octaves];
             streamBaseY = new float[NumStreams];
 
             for (int i = 0; i < NumStreams; i++) {
-                streamAmplitude[i] = 35f + Main.rand.NextFloat(80f);
-                streamFrequency[i] = 0.001f + Main.rand.NextFloat(0.0025f);
-                streamPhase[i] = Main.rand.NextFloat(MathHelper.TwoPi);
                 float norm = (i + 0.5f) / NumStreams;
                 streamBaseY[i] = skyY - spreadHeight * 0.5f + spreadHeight * norm;
+
+                //3层叠加波：低频大振幅 → 高频小振幅（类似分形地形）
+                for (int o = 0; o < Octaves; o++) {
+                    float octaveScale = 1f / (1 + o);  // 1.0, 0.5, 0.33
+                    octaveAmplitude[i, o] = (40f + Main.rand.NextFloat(60f)) * octaveScale;
+                    octaveFrequency[i, o] = (0.001f + Main.rand.NextFloat(0.002f)) * (1 + o * 1.5f);
+                    octavePhase[i, o] = Main.rand.NextFloat(MathHelper.TwoPi);
+                    octaveTimeDrift[i, o] = Main.rand.NextFloat(0.005f, 0.02f)
+                        * (Main.rand.NextBool() ? 1f : -1f);
+                }
             }
 
+            globalTick = 0;
             initialized = true;
         }
 
         /// <summary>
-        /// 获取指定流道在给定X坐标处的目标Y值
+        /// 获取指定流道在给定X坐标处的目标Y值——3层叠加波+时间演化
         /// </summary>
         internal static float GetStreamTargetY(int streamIndex, float x) {
             if (!initialized) return 0f;
             int idx = streamIndex % NumStreams;
-            return streamBaseY[idx]
-                + streamAmplitude[idx] * MathF.Sin(streamFrequency[idx] * x + streamPhase[idx]);
+
+            float y = streamBaseY[idx];
+            for (int o = 0; o < Octaves; o++) {
+                float timeShift = globalTick * octaveTimeDrift[idx, o];
+                y += octaveAmplitude[idx, o]
+                    * MathF.Sin(octaveFrequency[idx, o] * x + octavePhase[idx, o] + timeShift);
+            }
+            return y;
         }
 
-        /// <summary>重置所有状态</summary>
         internal static void Reset() {
             initialized = false;
+            globalTick = 0;
             ReturnGridLists();
+        }
+
+        #endregion
+
+        #region 湍流场
+
+        /// <summary>
+        /// 基于位置的伪卷曲噪声——产生无散度的湍流力场，
+        /// 让虫群局部产生涡旋翻腾效果
+        /// </summary>
+        private static Vector2 GetTurbulence(float x, float y) {
+            //用多频率正弦叠加模拟卷曲噪声的旋转特性
+            float s1 = MathF.Sin(x * 0.0037f + y * 0.0051f);
+            float s2 = MathF.Sin(x * 0.0071f - y * 0.0043f + 1.7f);
+            float s3 = MathF.Cos(x * 0.0023f + y * 0.0067f - 0.9f);
+            float s4 = MathF.Sin(y * 0.0089f + x * 0.0031f + 2.3f);
+
+            //时间演化——湍流场缓慢变化
+            float timeWave = MathF.Sin(globalTick * 0.008f) * 0.5f;
+
+            //卷曲方向：∂/∂y 作为 X 分量，-∂/∂x 作为 Y 分量（近似旋度）
+            return new Vector2(
+                (s1 + s2 * 0.5f + timeWave) * TurbulenceWeight,
+                (s3 + s4 * 0.5f - timeWave) * TurbulenceWeight
+            );
         }
 
         #endregion
 
         #region 每帧集群更新
 
-        /// <summary>
-        /// 每帧调用一次——为整个集群计算新的速度向量
-        /// </summary>
         internal static void UpdateFlock(List<GargoyleActor> flock) {
             int count = flock.Count;
             if (count == 0) return;
 
+            globalTick++;
             BuildGrid(flock, count);
 
             if (newVelocities.Length < count)
@@ -133,7 +172,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
                 Vector2 alignSum = Vector2.Zero;
                 int neighbors = 0;
 
-                //── 仅查询相邻9个网格——近O(1)邻域搜索 ──
+                //── 空间网格邻域搜索 ──
                 int cx = (int)MathF.Floor(pos.X / CellSize);
                 int cy = (int)MathF.Floor(pos.Y / CellSize);
 
@@ -151,14 +190,12 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
                             float ddy = other.Position.Y - pos.Y;
                             float distSq = ddx * ddx + ddy * ddy;
 
-                            //分离：太近则排斥，归一化方向
                             if (distSq < protectedSq && distSq > 0.001f) {
                                 float invDist = 1f / MathF.Sqrt(distSq);
                                 separation.X -= ddx * invDist;
                                 separation.Y -= ddy * invDist;
                             }
 
-                            //对齐：视觉范围内累加邻居速度
                             if (distSq < visualSq) {
                                 alignSum += other.BoidVelocity;
                                 neighbors++;
@@ -174,15 +211,25 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
                     steer += (alignSum / neighbors - vel) * AlignmentWeight;
                 }
 
-                //流道跟踪——将个体拉回所属正弦波路径
+                //流道跟踪——多层叠加波路径，柔性回拉
                 if (initialized) {
                     float targetY = GetStreamTargetY(self.SwarmGroup, pos.X);
                     float yError = targetY - pos.Y;
-                    float pull = StreamYWeight * MathHelper.Clamp(MathF.Abs(yError) / 100f, 0.3f, 2f);
+                    float pull = StreamYWeight * MathHelper.Clamp(MathF.Abs(yError) / 120f, 0.2f, 1.5f);
                     steer.Y += yError * pull;
                 }
 
-                //微噪声——有机运动感
+                //个体独立游走力——每个石像鬼沿自己的圆形路径施加侧向力
+                float wanderX = MathF.Cos(self.WanderPhase) * WanderWeight * self.WanderStrength;
+                float wanderY = MathF.Sin(self.WanderPhase) * WanderWeight * self.WanderStrength;
+                steer.X += wanderX;
+                steer.Y += wanderY;
+
+                //位置湍流场——局部涡旋翻腾
+                Vector2 turb = GetTurbulence(pos.X, pos.Y);
+                steer += turb;
+
+                //随机噪声
                 steer.X += (Main.rand.NextFloat() - 0.5f) * NoiseAmount * 2f;
                 steer.Y += (Main.rand.NextFloat() - 0.5f) * NoiseAmount * 2f;
 
