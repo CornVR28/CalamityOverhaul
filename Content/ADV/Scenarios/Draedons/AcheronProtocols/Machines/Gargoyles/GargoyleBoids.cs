@@ -40,26 +40,26 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         #region Boids 参数（流线型，反聚团）
 
         /// <summary>保护距离——在此范围内产生排斥力</summary>
-        private const float ProtectedRange = 22f;
+        private const float ProtectedRange = 24f;
         /// <summary>分离权重</summary>
-        private const float SeparationWeight = 0.07f;
+        private const float SeparationWeight = 0.08f;
 
         /// <summary>视觉感知半径——在此范围内参与对齐计算</summary>
-        private const float VisualRange = 90f;
+        private const float VisualRange = 120f;
         /// <summary>对齐权重——趋向邻居平均航向</summary>
-        private const float AlignmentWeight = 0.06f;
+        private const float AlignmentWeight = 0.08f;
 
         // ※ 不设凝聚权重(Cohesion) —— 这是避免"挤成一团"的关键 ※
 
         /// <summary>流道Y跟踪权重——将个体拉回所属流道的正弦波路径</summary>
-        private const float StreamYWeight = 0.018f;
+        private const float StreamYWeight = 0.025f;
         /// <summary>随机噪声幅度——微扰动制造有机运动感</summary>
-        private const float NoiseAmount = 0.05f;
+        private const float NoiseAmount = 0.08f;
 
         /// <summary>最低飞行速度</summary>
-        private const float MinSpeed = 3.5f;
+        private const float MinSpeed = 9f;
         /// <summary>最高飞行速度</summary>
-        private const float MaxSpeed = 7.0f;
+        private const float MaxSpeed = 18f;
 
         #endregion
 
@@ -79,8 +79,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
             streamBaseY = new float[NumStreams];
 
             for (int i = 0; i < NumStreams; i++) {
-                streamAmplitude[i] = 30f + Main.rand.NextFloat(70f);
-                streamFrequency[i] = 0.0015f + Main.rand.NextFloat(0.003f);
+                streamAmplitude[i] = 35f + Main.rand.NextFloat(80f);
+                streamFrequency[i] = 0.001f + Main.rand.NextFloat(0.0025f);
                 streamPhase[i] = Main.rand.NextFloat(MathHelper.TwoPi);
                 float norm = (i + 0.5f) / NumStreams;
                 streamBaseY[i] = skyY - spreadHeight * 0.5f + spreadHeight * norm;

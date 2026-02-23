@@ -27,18 +27,18 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         private const int PanUpEnd = 80;
         /// <summary>虫群开始分批生成的帧</summary>
         private const int SpawnStart = 30;
-        /// <summary>虫群停止生成的帧</summary>
-        private const int SpawnEnd = 220;
+        /// <summary>虫群停止生成的帧——长窗口让虫群绵延不断</summary>
+        private const int SpawnEnd = 480;
         /// <summary>虫群主体飞越开始帧</summary>
         private const int SwarmActiveStart = 80;
         /// <summary>虫群主体飞越结束帧</summary>
-        private const int SwarmActiveEnd = 560;
+        private const int SwarmActiveEnd = 950;
         /// <summary>摄像机开始下摇的帧</summary>
-        private const int PanDownStart = 500;
+        private const int PanDownStart = 720;
         /// <summary>摄像机下摇完成的帧</summary>
-        private const int PanDownEnd = 600;
-        /// <summary>整个过场结束帧</summary>
-        private const int CutsceneEndFrame = 640;
+        private const int PanDownEnd = 820;
+        /// <summary>安全上限——防止无限等待</summary>
+        private const int CutsceneHardLimit = 1200;
 
         #endregion
 
@@ -49,9 +49,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         /// <summary>虫群总生成数量</summary>
         private const int SwarmCount = 3000;
         /// <summary>虫群整体飞越方向基础速度（负=向左）</summary>
-        private const float SwarmBaseSpeed = -5.5f;
+        private const float SwarmBaseSpeed = -13f;
         /// <summary>流道垂直分布总高度</summary>
-        private const float StreamSpread = 350f;
+        private const float StreamSpread = 400f;
         /// <summary>缩放：飞越期间略微拉远以展示更多天空</summary>
         private const float CrossingZoom = 0.85f;
         /// <summary>摄像机水平跟踪比例（0=不跟, 1=完全跟随集群重心）</summary>
@@ -136,10 +136,13 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
                 PruneOffscreenGargoyles();
             }
 
-            //演出结束
-            if (timer >= CutsceneEndFrame) {
-                StopCutscene();
-                return;
+            //演出结束：下摇完成后，等待所有石像鬼飞出屏幕再收场
+            if (timer >= PanDownEnd) {
+                List<GargoyleActor> remaining = ActorLoader.GetActiveActors<GargoyleActor>();
+                if (remaining.Count == 0 || timer >= CutsceneHardLimit) {
+                    StopCutscene();
+                    return;
+                }
             }
 
             //锁定玩家操作
@@ -209,18 +212,18 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
             float screenW = Main.screenWidth;
             float skyY = cutsceneOrigin.Y - PanDistance;
             //生成点在屏幕右边缘外侧
-            float spawnX = cutsceneOrigin.X + screenW * 0.5f + 200f;
+            float spawnX = cutsceneOrigin.X + screenW * 0.5f + 300f;
 
             for (int i = 0; i < count; i++) {
-                float xScatter = Main.rand.NextFloat(-80f, 80f);
-                float yScatter = Main.rand.NextFloat(-60f, 60f);
+                float xScatter = Main.rand.NextFloat(-120f, 120f);
+                float yScatter = Main.rand.NextFloat(-80f, 80f);
 
                 Vector2 spawnPos = new(spawnX + xScatter, skyY + yScatter);
 
-                //初始速度：向左飞行，带随机偏差
+                //初始速度：高速向左飞行，带随机偏差
                 Vector2 spawnVel = new(
-                    SwarmBaseSpeed + Main.rand.NextFloat(-1.0f, 0.5f),
-                    Main.rand.NextFloat(-0.4f, 0.4f));
+                    SwarmBaseSpeed + Main.rand.NextFloat(-2f, 1f),
+                    Main.rand.NextFloat(-0.6f, 0.6f));
 
                 ActorLoader.NewActor<GargoyleActor>(spawnPos, spawnVel);
                 totalSpawned++;
@@ -239,8 +242,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         }
 
         private static void PruneOffscreenGargoyles() {
-            //只清除已飞过屏幕左侧远处的个体——确保不会在屏幕内突然消失
-            float leftKill = Main.screenPosition.X - 600f;
+            //只清除已飞过屏幕左侧远处的个体——确保玩家绝对看不到消失
+            float leftKill = Main.screenPosition.X - 1000f;
 
             List<GargoyleActor> gargoyles = ActorLoader.GetActiveActors<GargoyleActor>();
             foreach (GargoyleActor g in gargoyles) {
