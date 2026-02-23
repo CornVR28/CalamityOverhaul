@@ -1,4 +1,5 @@
-﻿using CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machines;
+﻿using CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.ApolliaActors.States;
+using CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machines;
 using CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machines.LandingScens;
 using InnoVault.Actors;
 using Terraria;
@@ -27,6 +28,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
 
         /// <summary>当前场景中的阿波利娅Actor引用（弱引用方式通过索引）</summary>
         private int apolliaActorIndex = -1;
+
+        /// <summary>是否已触发过阿波利娅到达后的对话场景</summary>
+        private bool dialogueTriggered;
 
         public override void PostUpdate() {
             if (!Player.Alives()) {
@@ -61,6 +65,17 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
                 if (spawnDelay >= 120) {
                     SpawnApollia();
                     spawned = true;
+                }
+                return;
+            }
+
+            //阶段3：阿波利娅到达玩家面前后触发对话场景
+            if (!dialogueTriggered) {
+                ApolliaActor actor = GetApolliaActor();
+                if (actor?.CurrentState is ApolliaArrivedState) {
+                    dialogueTriggered = true;
+                    ScenarioManager.Reset<ApolliaDialogueScenario>();
+                    ScenarioManager.Start<ApolliaDialogueScenario>();
                 }
             }
         }
@@ -97,6 +112,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
             spawnDelay = 0;
             spawned = false;
             ejectDetected = false;
+            dialogueTriggered = false;
             landingPodCenter = Vector2.Zero;
             apolliaActorIndex = -1;
         }
