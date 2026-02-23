@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.ApolliaActors.States;
+using System;
 using Terraria;
 
 namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.ApolliaActors
@@ -6,7 +7,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
     /// <summary>
     /// 可复用的演出运镜系统
     /// 通过 <see cref="ApolliaPlayer.ModifyScreenPosition"/> 驱动屏幕位置和缩放，
-    /// 不在AI帧中直接修改 Main.screenPosition，避免与引擎的摄像机流程冲突
+    /// 不在AI帧中直接修改 Main.screenPosition，避免与引擎的摄像机流程冲突。
+    /// 运镜参数由 <see cref="UpdateFocus"/> 根据Actor当前状态自动推导，状态类无需感知Camera
     /// </summary>
     internal class CutsceneCamera
     {
@@ -91,6 +93,43 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
             shakeDecay = MathHelper.Clamp(decay, 0f, 0.99f);
             shakeDuration = duration;
             shakeTimer = 0;
+        }
+
+        /// <summary>
+        /// 根据Actor当前状态自动推导运镜参数——在 <see cref="Apply"/> 之前每帧调用。
+        /// 运镜逻辑集中在此处，状态类完全不感知Camera
+        /// </summary>
+        public void UpdateFocus(ApolliaActor actor, Player player) {
+            if (!Active || player == null || !player.active) return;
+
+            switch (actor.CurrentState) {
+                case ApolliaDescendingState:
+                    FocusTarget = actor.Center;
+                    break;
+
+                case ApolliaWalkingState: {
+                    PositionLerpSpeed = 0.025f;
+                    Vector2 midPoint = (actor.Center + player.Center) * 0.5f;
+                    FocusTarget = midPoint;
+
+                    float distX = Math.Abs(actor.Center.X - player.Center.X);
+                    float zoomFactor = MathHelper.Clamp(1f - (distX - 60f) / 400f, 0f, 1f);
+                    float eased = zoomFactor < 0.5f
+                        ? 2f * zoomFactor * zoomFactor
+                        : 1f - MathF.Pow(-2f * zoomFactor + 2f, 2f) / 2f;
+                    TargetZoom = MathHelper.Lerp(1f, 1.5f, eased);
+                    ZoomLerpSpeed = 0.015f;
+                    break;
+                }
+
+                case ApolliaArrivedState: {
+                    TargetZoom = 2f;
+                    ZoomLerpSpeed = 0.02f;
+                    PositionLerpSpeed = 0.04f;
+                    FocusTarget = (actor.Center + player.Center) * 0.5f + new Vector2(0, -20);
+                    break;
+                }
+            }
         }
 
         /// <summary>

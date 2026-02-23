@@ -28,7 +28,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
             actor.DescendAlpha = 0f;
             actor.GlowIntensity = 0f;
 
-            //启动运镜——跟踪降落点
+            //启动运镜——参数由 CutsceneCamera.UpdateFocus 每帧自动推导
             actor.Camera.Start(targetPos, posLerp: 0.03f, zoom: 1f, zoomLerp: 0.02f);
         }
 
@@ -50,9 +50,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
                 dust.noGravity = true;
                 dust.velocity *= 0.4f;
             }
-
-            //运镜跟踪
-            actor.Camera.FocusTarget = actor.Center;
 
             if (progress >= 1f) {
                 //着陆效果

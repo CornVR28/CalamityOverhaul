@@ -1,5 +1,4 @@
 ﻿using System;
-using System;
 using Terraria;
 
 namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.ApolliaActors.States
@@ -17,12 +16,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
         public void Enter(ApolliaActor actor) {
             actor.FrameIndex = 0;
             actor.UseJumpTexture = false;
-
-            if (actor.InCutscene) {
-                actor.Camera.TargetZoom = 2f;
-                actor.Camera.ZoomLerpSpeed = 0.02f;
-                actor.Camera.PositionLerpSpeed = 0.04f;
-            }
         }
 
         public IApolliaState Update(ApolliaActor actor) {
@@ -36,12 +29,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
 
             //地面吸附
             actor.SnapToGround();
-
-            //演出运镜：焦点在两者中点偏上
-            if (actor.InCutscene) {
-                Vector2 midPoint = (actor.Center + player.Center) * 0.5f + new Vector2(0, -20);
-                actor.Camera.FocusTarget = midPoint;
-            }
 
             switch (actor.CurrentCommand) {
                 case HeroCommand.Hold:

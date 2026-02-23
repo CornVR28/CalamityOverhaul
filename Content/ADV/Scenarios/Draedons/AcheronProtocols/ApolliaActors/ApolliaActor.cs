@@ -63,9 +63,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
         /// <summary>是否使用跳跃/飞行单帧纹理进行绘制</summary>
         internal bool UseJumpTexture;
 
-        /// <summary>是否处于初始演出阶段（着陆→行走→到达对话），状态类据此决定是否驱动运镜</summary>
-        internal bool InCutscene;
-
         #endregion
 
         #region 指令访问
@@ -89,7 +86,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
             Velocity = Vector2.Zero;
             OnGround = false;
             UseJumpTexture = false;
-            InCutscene = false;
             Camera.Reset();
 
             if (ADVAsset.ApolliaActor != null) {
@@ -103,8 +99,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
         /// </summary>
         internal void StartLandingCutscene(Vector2 landingPodCenter) {
             if (CurrentState != null) return;
-
-            InCutscene = true;
 
             float offsetX = 200f;
             Vector2 rawTarget = new Vector2(landingPodCenter.X + offsetX, landingPodCenter.Y);

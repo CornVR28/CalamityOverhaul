@@ -1,5 +1,4 @@
 ﻿using System;
-using System;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
@@ -36,10 +35,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
             stepSoundTimer = 0;
             actor.FrameIndex = 1;
             actor.UseJumpTexture = false;
-
-            if (actor.InCutscene) {
-                actor.Camera.PositionLerpSpeed = 0.025f;
-            }
         }
 
         public IApolliaState Update(ApolliaActor actor) {
@@ -77,21 +72,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
 
             //地面吸附
             actor.SnapToGround();
-
-            //演出运镜：跟踪两者中点，距离越近越放大
-            if (actor.InCutscene) {
-                Player player = Main.LocalPlayer;
-                if (player != null && player.active) {
-                    Vector2 midPoint = (actor.Center + player.Center) * 0.5f;
-                    actor.Camera.FocusTarget = midPoint;
-
-                    float zoomFactor = MathHelper.Clamp(1f - (distX - ArrivalDistance) / 400f, 0f, 1f);
-                    float eased = zoomFactor < 0.5f ? 2f * zoomFactor * zoomFactor
-                        : 1f - MathF.Pow(-2f * zoomFactor + 2f, 2f) / 2f;
-                    actor.Camera.TargetZoom = MathHelper.Lerp(1f, 1.5f, eased);
-                    actor.Camera.ZoomLerpSpeed = 0.015f;
-                }
-            }
 
             //脚步声
             if (stepSoundTimer % 20 == 0) {

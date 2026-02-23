@@ -89,9 +89,12 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
         }
 
         public override void ModifyScreenPosition() {
-            //驱动运镜系统
             ApolliaActor actor = GetApolliaActor();
-            actor?.Camera.Apply();
+            if (actor == null) return;
+
+            //运镜参数由Camera自身根据Actor状态推导
+            actor.Camera.UpdateFocus(actor, Player);
+            actor.Camera.Apply();
         }
 
         private void SpawnApollia() {
@@ -122,12 +125,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
         internal void ActivateHeroPanel() {
             HeroPanelActivated = true;
 
-            //平滑关闭运镜，结束演出阶段
+            //平滑关闭运镜
             ApolliaActor actor = GetApolliaActor();
-            if (actor != null) {
-                actor.InCutscene = false;
-                actor.Camera.Stop();
-            }
+            actor?.Camera.Stop();
 
             if (ApolliaHeroPanelUI.Instance != null) {
                 ApolliaHeroPanelUI.Instance.Unlocked = true;

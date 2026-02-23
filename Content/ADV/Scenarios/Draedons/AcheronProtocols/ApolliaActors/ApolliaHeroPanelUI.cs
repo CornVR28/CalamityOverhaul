@@ -26,7 +26,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
         private const float PanelHeight = 500f;
         private const float IconSize = 46f;
         private const float IconMarginLeft = 12f;
-        private const float IconMarginTop = 200f;
+        private const float IconMarginTop = 260f;
         private const float PortraitAreaHeight = 185f;
         private const float HPBarHeight = 16f;
         private const float CommandBtnHeight = 30f;
