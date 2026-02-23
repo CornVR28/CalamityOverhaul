@@ -26,8 +26,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.End.EternalBlazingNows
         //立绘切换持续时间(帧)
         private const float PortraitTransitionDuration = 30f;
 
-        protected override float FadeSpeed => 0.05f;
-
         #endregion
 
         #region 状态
@@ -76,11 +74,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.End.EternalBlazingNows
             portraitTransitionProgress = 0f;
         }
 
-        protected override void OnStartPerformance() {
-            SetBlockAdvance(false);
-        }
-
-        protected override void OnEndPerformance() {
+        public override void EndPerformance() {
             //触发燃烧消失演出
             if (currentPhase != PerformancePhase.Custom) {
                 StartBurningDissolve();
@@ -89,17 +83,18 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.End.EternalBlazingNows
 
         protected override void OnDeactivate() {
             fireParticles.Clear();
-            SetBlockAdvance(false);
-            SetBlockClose(false);
+            BlockDialogueAdvance = false;
+            BlockDialogueClose = false;
         }
 
         #endregion
 
         #region 对话联动
 
-        protected override void OnDialogueAdvanceInternal(int index) {
+        public override void OnDialogueAdvance() {
+            base.OnDialogueAdvance();
             //到达指定对话句数时切换到微笑立绘
-            if (index >= SmilePortraitDialogueIndex && !useSmilePortrait) {
+            if (dialogueIndex >= SmilePortraitDialogueIndex && !useSmilePortrait) {
                 useSmilePortrait = true;
                 portraitTransitionProgress = 0f;
                 StartBurningDissolve();
@@ -118,8 +113,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.End.EternalBlazingNows
             burnProgress = 0f;
             burnHeight = 0f;
             fireParticles.Clear();
-            SetBlockAdvance(true);
-            SetBlockClose(true);
+            BlockDialogueAdvance = true;
+            BlockDialogueClose = true;
         }
 
         protected override void OnCustomPhaseUpdate() {
@@ -153,7 +148,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.End.EternalBlazingNows
             UpdateFireParticles();
 
             //整体透明度：立绘在燃烧过程中逐渐消失
-            TargetFade = 1f - CWRUtils.EaseInCubic(t * 0.8f);
+            CurrentFade = 1f - CWRUtils.EaseInCubic(t * 0.8f);
         }
 
         /// <summary>
