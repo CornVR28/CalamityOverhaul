@@ -32,6 +32,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
         /// <summary>是否已触发过阿波利娅到达后的对话场景</summary>
         private bool dialogueTriggered;
 
+        /// <summary>英雄面板是否已激活</summary>
+        internal bool HeroPanelActivated;
+
         public override void PostUpdate() {
             if (!Player.Alives()) {
                 return;
@@ -78,6 +81,11 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
                     ScenarioManager.Start<ApolliaDialogueScenario>();
                 }
             }
+
+            //阶段4：英雄面板同步
+            if (HeroPanelActivated && ApolliaHeroPanelUI.Instance != null) {
+                ApolliaHeroPanelUI.Instance.Unlocked = true;
+            }
         }
 
         public override void ModifyScreenPosition() {
@@ -108,13 +116,28 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
             return null;
         }
 
+        /// <summary>
+        /// 激活英雄面板——在对话场景完成时调用
+        /// </summary>
+        internal void ActivateHeroPanel() {
+            HeroPanelActivated = true;
+            if (ApolliaHeroPanelUI.Instance != null) {
+                ApolliaHeroPanelUI.Instance.Unlocked = true;
+            }
+        }
+
         private void ResetState() {
             spawnDelay = 0;
             spawned = false;
             ejectDetected = false;
             dialogueTriggered = false;
+            HeroPanelActivated = false;
             landingPodCenter = Vector2.Zero;
             apolliaActorIndex = -1;
+
+            if (ApolliaHeroPanelUI.Instance != null) {
+                ApolliaHeroPanelUI.Instance.Unlocked = false;
+            }
         }
     }
 }

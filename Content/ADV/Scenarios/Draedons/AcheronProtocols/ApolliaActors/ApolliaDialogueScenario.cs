@@ -96,6 +96,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
                 Add(speaker, Line7.Value);
                 Add(speaker, Line8.Value);
             }
+            protected override void OnScenarioComplete() => ActivateHeroPanel();
         }
 
         private static void ShakeScreen() {
@@ -127,6 +128,13 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
                 Add(speaker, Line6.Value);
                 Add(speaker, Line7.Value);
                 Add(speaker, Line8.Value);
+            }
+            protected override void OnScenarioComplete() => ActivateHeroPanel();
+        }
+
+        private static void ActivateHeroPanel() {
+            if (Main.LocalPlayer?.TryGetModPlayer(out ApolliaPlayer ap) == true) {
+                ap.ActivateHeroPanel();
             }
         }
     }
