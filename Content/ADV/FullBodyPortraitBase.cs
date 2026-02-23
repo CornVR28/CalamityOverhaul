@@ -1,8 +1,6 @@
 ﻿using CalamityOverhaul.Content.ADV.DialogueBoxs;
-using CalamityOverhaul.Content.ADV.DialogueBoxs;
 using Microsoft.Xna.Framework.Graphics;
 using System;
-using Terraria;
 
 namespace CalamityOverhaul.Content.ADV
 {
