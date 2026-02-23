@@ -255,7 +255,9 @@ namespace CalamityOverhaul.Content.ADV
                         TransitionToPhase(PerformancePhase.Hold);
                     }
                     else {
-                        TargetFade = phaseProgress / FadeInDuration;
+                        float t = phaseProgress / FadeInDuration;
+                        CurrentFade = t * t * (3f - 2f * t);
+                        TargetFade = CurrentFade;
                     }
                     break;
 
@@ -265,7 +267,9 @@ namespace CalamityOverhaul.Content.ADV
 
                 case PerformancePhase.FadeOut:
                     phaseProgress++;
-                    TargetFade = Math.Max(0f, 1f - phaseProgress / FadeOutDuration);
+                    float fadeOut = Math.Max(0f, 1f - phaseProgress / FadeOutDuration);
+                    CurrentFade = fadeOut * fadeOut * (3f - 2f * fadeOut);
+                    TargetFade = CurrentFade;
                     break;
 
                 case PerformancePhase.Custom:
