@@ -6,16 +6,16 @@
     internal class ApolliaHeroData
     {
         /// <summary>当前生命值</summary>
-        public float HP { get; set; } = 1000f;
+        public float HP { get; set; } = 8200000f;
 
         /// <summary>最大生命值</summary>
-        public float MaxHP { get; set; } = 1000f;
+        public float MaxHP { get; set; } = 8200000f;
 
         /// <summary>基础伤害</summary>
-        public float BaseDamage { get; set; } = 45f;
+        public float BaseDamage { get; set; } = 2200f;
 
         /// <summary>防御力</summary>
-        public float Defense { get; set; } = 20f;
+        public float Defense { get; set; } = 180f;
 
         /// <summary>当前指令模式</summary>
         public HeroCommand CurrentCommand { get; set; } = HeroCommand.Follow;
