@@ -88,7 +88,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
             Texture2D tex = Gargoyle;
             Vector2 drawPos = Center - Main.screenPosition;
             float baseScale = 0.35f * DepthScale;
-
+            float drawRot = Rotation - MathHelper.Pi;
             //翅膀拍打——Y轴缩放脉动
             float wingPulse = MathF.Sin(WingPhase);
             Vector2 scaleVec = new(baseScale, baseScale * (1f + wingPulse * 0.18f));
@@ -107,12 +107,12 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
                 for (int t = 2; t >= 1; t--) {
                     float trailAlpha = 0.08f / t;
                     spriteBatch.Draw(tex, drawPos - trailStep * t, null,
-                        bodyColor * trailAlpha, Rotation, origin, scaleVec, fx, 0f);
+                        bodyColor * trailAlpha, drawRot, origin, scaleVec, fx, 0f);
                 }
             }
 
             //主体
-            spriteBatch.Draw(tex, drawPos, null, Color.White, Rotation, origin, scaleVec, fx, 0f);
+            spriteBatch.Draw(tex, drawPos, null, bodyColor, drawRot, origin, scaleVec, fx, 0f);
 
             return false;
         }

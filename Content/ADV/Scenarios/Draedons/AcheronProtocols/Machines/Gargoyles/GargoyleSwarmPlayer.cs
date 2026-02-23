@@ -47,7 +47,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         /// <summary>虫群生成数量</summary>
         private const int SwarmCount = 300;
         /// <summary>虫群整体飞越方向基础速度（负=向左）</summary>
-        private const float SwarmBaseSpeed = -3.5f;
+        private const float SwarmBaseSpeed = -4.5f;
         /// <summary>虫群飞行弧线最大高度偏移</summary>
         private const float ArcHeight = 80f;
         /// <summary>缩放：飞越期间略微拉远以展示更多天空</summary>
@@ -225,7 +225,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         private void SpawnSwarm() {
             float screenWidth = Main.screenWidth;
             float skyY = cutsceneOrigin.Y - PanDistance;
-            float spawnCenterX = cutsceneOrigin.X + screenWidth + 400f;
+            float spawnCenterX = cutsceneOrigin.X + screenWidth * 0.5f + 300f;
 
             for (int i = 0; i < SwarmCount; i++) {
                 //在生成区域内散布——椭圆分布，前端密后端疏
