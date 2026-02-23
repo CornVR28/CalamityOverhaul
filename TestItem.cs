@@ -1,4 +1,5 @@
 ﻿using CalamityOverhaul.Content.ADV.Scenarios;
+using CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.ApolliaActors;
 using CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.GalacticCrisises;
 using CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machines;
 using CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machines.DropPodScens;
@@ -70,9 +71,9 @@ namespace CalamityOverhaul
         }
 
         public override bool? UseItem(Player player) {
-            //ScenarioManager.Reset<GalacticCrisis>();
-            //ScenarioManager.Start<GalacticCrisis>();
-            //MachineWorld.Enter();
+            //ScenarioManager.Reset<ApolliaDialogueScenario>();
+            //ScenarioManager.Start<ApolliaDialogueScenario>();
+            MachineWorld.Enter();
             //DropPodWorld.Enter();
             //ActorLoader.NewActor<DropPodActor>(player.Center, Vector2.Zero);
             return true;

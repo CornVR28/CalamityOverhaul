@@ -14,11 +14,11 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
         protected override float FadeSpeed => 0.06f;
 
         protected override void OnInitialize() {
-            scale = 1.2f;
+            scale = 1f;
         }
 
         protected override void OnUpdate() {
-            scale = 1.2f;
+            scale = 1f;
             drawColor = Color.White;
         }
 
@@ -29,7 +29,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
             }
 
             position = ownerDialogue.GetPanelRect().Top()
-                + new Vector2(-portrait.Width + 60, -portrait.Height + 80) * scale;
+                + new Vector2(0, -portrait.Height + 120) * scale;
 
             Color color = drawColor * alpha;
             spriteBatch.Draw(portrait, position, null, color, rotation, Vector2.Zero, scale, SpriteEffects.None, 0f);
