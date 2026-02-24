@@ -146,19 +146,17 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
                 //渐黑进度：80 帧内平滑插值到全黑
                 float fadeProg = MathHelper.Clamp(landingTimer / 80f, 0f, 1f);
                 DropPodDrawSystem.SyncLandingFade(MathHelper.SmoothStep(0f, 1f, fadeProg));
-
-                //仍同步 dropTimer 供其他屏幕特效使用
-                DropPodDrawSystem.SyncDropTimer(dropTimer, reentryHeat);
-                return;
             }
             // ──────────────────────────────────────────────────────────────────────
 
-            //震动效果——随时间加剧（模拟大气再入的颠簸）
-            float shakeProgress = MathHelper.Clamp(dropTimer / 600f, 0f, 1f);
-            float shakeIntensity = MathHelper.Lerp(ShakeIntensityBase, ShakeIntensityMax, shakeProgress);
-            shakeOffset = new Vector2(
-                Main.rand.NextFloat(-shakeIntensity, shakeIntensity),
-                Main.rand.NextFloat(-shakeIntensity, shakeIntensity));
+            //震动效果——坠入阶段已在上方置零，正常阶段随时间加剧
+            if (!landingPhaseActive) {
+                float shakeProgress = MathHelper.Clamp(dropTimer / 600f, 0f, 1f);
+                float shakeIntensity = MathHelper.Lerp(ShakeIntensityBase, ShakeIntensityMax, shakeProgress);
+                shakeOffset = new Vector2(
+                    Main.rand.NextFloat(-shakeIntensity, shakeIntensity),
+                    Main.rand.NextFloat(-shakeIntensity, shakeIntensity));
+            }
 
             //微幅摇摆旋转——叠加玩家操控的倾斜
             Rotation = tiltAngle;
@@ -173,27 +171,28 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
                 tiltAngle = dpPlayer.TiltAngle;
             }
 
-            //锁定在玩家位置 + 水平偏移（世界坐标中心）
-            if (player != null && player.active) {
+            //正常阶段才锁定在玩家位置——坠入阶段 Position 已由上方的速度驱动，不能再被锁回去
+            if (!landingPhaseActive && player != null && player.active) {
                 Position = player.Center - Size / 2f + new Vector2(horizontalOffset, 0);
             }
 
-            //生成残骸障碍物（dropTimer超过一定帧数后开始，随时间加快）
-            if (dropTimer > 120) {
-                debrisSpawnTimer++;
-                int spawnInterval = Math.Max(40, 120 - (int)(reentryHeat * 120));
-                if (debrisSpawnTimer >= spawnInterval) {
-                    debrisSpawnTimer = 0;
-                    SpawnDebris();
+            //生成残骸和新粒子——坠入阶段停止生成
+            if (!landingPhaseActive) {
+                if (dropTimer > 120) {
+                    debrisSpawnTimer++;
+                    int spawnInterval = Math.Max(40, 120 - (int)(reentryHeat * 120));
+                    if (debrisSpawnTimer >= spawnInterval) {
+                        debrisSpawnTimer = 0;
+                        SpawnDebris();
+                    }
+                }
+
+                if (dropTimer > 30 && Main.rand.NextBool(2)) {
+                    SpawnTrailParticle();
                 }
             }
 
-            //生成尾焰粒子（世界坐标）
-            if (dropTimer > 30 && Main.rand.NextBool(2)) {
-                SpawnTrailParticle();
-            }
-
-            //更新尾焰粒子
+            //更新尾焰粒子——始终更新，使坠入时已有粒子继续运动直至消失
             for (int i = trailParticles.Count - 1; i >= 0; i--) {
                 trailParticles[i].Update();
                 if (trailParticles[i].IsDead) {
@@ -201,15 +200,17 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
                 }
             }
 
-            //更新尾焰Trail路径点
+            //更新尾焰Trail路径点——始终更新，使火焰跟随仓体下移
             UpdateFlameTrailPoints();
 
-            //生成冲击波环（再入灼烧达到一定强度后开始产生）
-            if (reentryHeat > 0.15f && dropTimer % Math.Max(8, (int)(30 * (1f - reentryHeat * 0.7f))) == 0) {
-                SpawnShockwaveRing();
+            if (!landingPhaseActive) {
+                //生成冲击波环（再入灼烧达到一定强度后开始产生）
+                if (reentryHeat > 0.15f && dropTimer % Math.Max(8, (int)(30 * (1f - reentryHeat * 0.7f))) == 0) {
+                    SpawnShockwaveRing();
+                }
             }
 
-            //更新冲击波环——环的X轴跟随仓体当前位置，避免左右移动时环滞留
+            //更新冲击波环——始终更新，坠入时已有的环继续跟随仓体下移
             for (int i = shockwaveRings.Count - 1; i >= 0; i--) {
                 shockwaveRings[i].Update(Center.X);
                 if (shockwaveRings[i].IsDead) {
