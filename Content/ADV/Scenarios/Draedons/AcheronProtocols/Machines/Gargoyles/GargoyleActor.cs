@@ -36,6 +36,15 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         /// <summary>个体噪声种子——用于湍流场差异化采样，每个个体唯一</summary>
         internal float NoiseSeed;
 
+        /// <summary>当前序列帧索引 (0~3)</summary>
+        internal int AnimFrame;
+
+        /// <summary>序列帧计时器（每 <see cref="AnimFrameInterval"/> 帧切换一帧）</summary>
+        private int animTimer;
+
+        /// <summary>序列帧切换间隔（游戏帧数）</summary>
+        private const int AnimFrameInterval = 6;
+
         #endregion
 
         private static uint lastBoidsFrame;
@@ -54,6 +63,10 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
             NoiseSeed = Main.rand.NextFloat(0f, 100f);
 
             BoidVelocity = Velocity;
+
+            //随机初始帧与计时器，避免所有个体动画同步
+            AnimFrame = Main.rand.Next(4);
+            animTimer = Main.rand.Next(AnimFrameInterval);
         }
 
         public override void AI() {
@@ -73,6 +86,13 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
             WingPhase += WingSpeed;
             if (WingPhase > MathHelper.TwoPi) {
                 WingPhase -= MathHelper.TwoPi;
+            }
+
+            //序列帧动画
+            animTimer++;
+            if (animTimer >= AnimFrameInterval) {
+                animTimer = 0;
+                AnimFrame = (AnimFrame + 1) % 4;
             }
 
             //将鸟群速度写入 Actor.Velocity（ActorLoader 会自动执行 Position += Velocity）
@@ -103,20 +123,22 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
             Color bodyColor = new Color(brightness, brightness, brightness * 1.05f) * 0.9f;
 
             SpriteEffects fx = BoidVelocity.X < 0 ? SpriteEffects.FlipHorizontally : SpriteEffects.None;
-            Vector2 origin = new(tex.Width * 0.5f, tex.Height * 0.5f);
+            int frameHeight = tex.Height / 4;
+            Rectangle sourceRect = new Rectangle(0, AnimFrame * frameHeight, tex.Width, frameHeight);
+            Vector2 origin = new(tex.Width * 0.5f, frameHeight * 0.5f);
 
             //近处个体绘制运动拖影，增强速度感
             if (DepthScale > 0.6f) {
                 Vector2 trailStep = BoidVelocity * 1.5f;
                 for (int t = 2; t >= 1; t--) {
                     float trailAlpha = 0.08f / t;
-                    spriteBatch.Draw(tex, drawPos - trailStep * t, null,
+                    spriteBatch.Draw(tex, drawPos - trailStep * t, sourceRect,
                         bodyColor * trailAlpha, drawRot, origin, scaleVec, fx, 0f);
                 }
             }
 
             //主体
-            spriteBatch.Draw(tex, drawPos, null, bodyColor, drawRot, origin, scaleVec, fx, 0f);
+            spriteBatch.Draw(tex, drawPos, sourceRect, bodyColor, drawRot, origin, scaleVec, fx, 0f);
 
             return false;
         }
