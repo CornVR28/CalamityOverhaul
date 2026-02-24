@@ -343,7 +343,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
             }
 
             int x = (int)(Main.screenWidth * 0.5f - w * 0.5f);
-            int y = (int)(Main.screenHeight * 0.32f - h * 0.5f);
+            //顶部紧贴屏幕上方，留8px边距
+            int y = 8;
             return new Rectangle(x, y, (int)w, (int)h);
         }
 
@@ -354,10 +355,10 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
 
         public override void Draw(SpriteBatch sb) {
             if (fadeProgress <= 0.01f) return;
-            if (glitchFrameSkip > 0 && Main.rand.NextBool(3)) return;
+            //不整帧跳过，改由glitchIntensity影响噪声强度而非可见性
 
             float alpha = fadeProgress;
-            float flicker = MathF.Sin(hologramFlicker * 1.5f) * 0.08f + 0.92f;
+            float flicker = MathF.Sin(hologramFlicker * 1.5f) * 0.04f + 0.96f;
             alpha *= flicker;
 
             Vector2 center = GetMapCenter();
@@ -653,32 +654,32 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
             int contentTop = panelRect.Y + 38;
             int contentH = panelRect.Height - 42;
 
-            //主扫描线带拖影（5层，亮度依次递减）
+            //主扫描线（3层轻拖影，透明度降低避免喧宾夺主）
             float scanY = contentTop + scanLineProgress * contentH;
-            for (int i = 0; i <= 4; i++) {
-                float iy = scanY + i * 1.5f;
+            for (int i = 0; i <= 2; i++) {
+                float iy = scanY + i * 2f;
                 if (iy < contentTop || iy > contentTop + contentH) continue;
-                float fade = 1f - i * 0.22f;
-                Color scanColor = new Color(60, 180, 255) * (alpha * 0.22f * fade);
+                float fade = 1f - i * 0.38f;
+                Color scanColor = new Color(60, 180, 255) * (alpha * 0.10f * fade);
                 sb.Draw(pixel, new Vector2(panelRect.X + 6, iy), new Rectangle(0, 0, 1, 1),
                     scanColor, 0f, Vector2.Zero,
                     new Vector2(panelRect.Width - 12, i == 0 ? 2f : 1f), SpriteEffects.None, 0f);
             }
 
-            //第二条扫描线（偏移半个周期，颜色偏青绿，与主线有色彩对比）
+            //第二条辅助扫描线（青绿，极淡）
             float scan2Progress = (scanLineProgress + 0.5f) % 1f;
             float scan2Y = contentTop + scan2Progress * contentH;
             sb.Draw(pixel, new Vector2(panelRect.X + 6, scan2Y), new Rectangle(0, 0, 1, 1),
-                new Color(0, 200, 180) * (alpha * 0.1f), 0f, Vector2.Zero,
+                new Color(0, 200, 180) * (alpha * 0.045f), 0f, Vector2.Zero,
                 new Vector2(panelRect.Width - 12, 1f), SpriteEffects.None, 0f);
 
-            //内容区域水平网格线（间距38px，超低透明度，增加终端屏幕感）
-            int gridSpacing = 38;
+            //内容区水平网格线（间距50px，透明度进一步降低）
+            int gridSpacing = 50;
             int gridCount = contentH / gridSpacing;
             for (int i = 0; i <= gridCount; i++) {
                 int gy = contentTop + i * gridSpacing;
                 sb.Draw(pixel, new Rectangle(panelRect.X + 6, gy, panelRect.Width - 12, 1),
-                    new Rectangle(0, 0, 1, 1), new Color(28, 75, 115) * (alpha * 0.065f));
+                    new Rectangle(0, 0, 1, 1), new Color(28, 75, 115) * (alpha * 0.032f));
             }
         }
 
