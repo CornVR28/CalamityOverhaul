@@ -6,15 +6,30 @@ using System.Collections.Generic;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.Localization;
+using Terraria.ModLoader;
 
 namespace CalamityOverhaul.Content.ADV.IncomingCalls.Styles
 {
     /// <summary>
     /// 嘉登科技风格来电——L形角括号边框、均衡器动画、扰码打字、通话时长显示
     /// </summary>
-    internal class DraedonIncomingCall : IncomingCallBase
+    internal class DraedonIncomingCall : IncomingCallBase, ILocalizedModType
     {
+        public string LocalizationCategory => "UI";
         public static DraedonIncomingCall Instance => UIHandleLoader.GetUIHandleOfType<DraedonIncomingCall>();
+
+        #region 本地化文本
+
+        public static LocalizedText IncomingLabel { get; private set; }
+        public static LocalizedText AnswerHint { get; private set; }
+        public static LocalizedText ConnectingLabel { get; private set; }
+        public static LocalizedText EndLabel { get; private set; }
+        public static LocalizedText NextLabel { get; private set; }
+        public static LocalizedText TimerLabel { get; private set; }
+        public static LocalizedText UnknownCaller { get; private set; }
+        public static LocalizedText ChannelPrefix { get; private set; }
+
+        #endregion
 
         #region 动画参数
 
@@ -57,9 +72,6 @@ namespace CalamityOverhaul.Content.ADV.IncomingCalls.Styles
         protected override int TypeInterval => 2;
         protected override int AutoHangUpDelay => 120;
 
-        private static string TUI(string key) =>
-            Language.GetTextValue($"Mods.CalamityOverhaul.UI.IncomingCall.{key}");
-
         #endregion
 
         #region 生命周期
@@ -90,7 +102,8 @@ namespace CalamityOverhaul.Content.ADV.IncomingCalls.Styles
         #region 字符覆写（扰码效果）
 
         protected override char? GetCharOverride(int globalCharIndex) {
-            if (globalCharIndex >= visibleCharCount - ScrambleDepth
+            if (!finishedCurrent
+                && globalCharIndex >= visibleCharCount - ScrambleDepth
                 && globalCharIndex < visibleCharCount) {
                 int seed = (int)(circuitPulseTimer * 137f) + globalCharIndex * 31;
                 return ScramblePool[Math.Abs(seed) % ScramblePool.Length];
@@ -191,7 +204,7 @@ namespace CalamityOverhaul.Content.ADV.IncomingCalls.Styles
 
             // ── 来电标题栏 ────────────────────────────────
             float titleBlink = MathF.Sin(answerBtnPulse * 2.4f) * 0.4f + 0.6f;
-            Utils.DrawBorderString(sb, TUI("IncomingLabel"),
+            Utils.DrawBorderString(sb, IncomingLabel.Value,
                 new Vector2(rect.X + 12f, rect.Y + 8f),
                 new Color(0, 220, 255) * (fa * titleBlink), 0.78f);
 
@@ -209,11 +222,11 @@ namespace CalamityOverhaul.Content.ADV.IncomingCalls.Styles
             // ── 来电者名称与提示 ────────────────────────────
             float textX = rect.X + 14f + portraitDrawSize + 16f;
             float nameY = rect.Y + 34f;
-            Utils.DrawBorderString(sb, callerName ?? TUI("UnknownCaller"),
+            Utils.DrawBorderString(sb, callerName ?? UnknownCaller.Value,
                 new Vector2(textX, nameY), new Color(80, 220, 255) * fa, NameScale);
 
             float hintBlink = MathF.Sin(answerBtnPulse * 1.8f) * 0.45f + 0.55f;
-            Utils.DrawBorderString(sb, TUI("AnswerHint"),
+            Utils.DrawBorderString(sb, AnswerHint.Value,
                 new Vector2(textX, nameY + 28f),
                 new Color(100, 200, 255) * (fa * 0.72f * hintBlink), 0.68f);
 
@@ -228,7 +241,7 @@ namespace CalamityOverhaul.Content.ADV.IncomingCalls.Styles
             Rectangle barRect = new(rect.X + 8, rect.Bottom - barH - 6, rect.Width - 16, barH);
             sb.Draw(px, barRect, new Rectangle(0, 0, 1, 1), new Color(0, 60, 100) * (alpha * 0.6f * pulse));
             DrawRectBorder(sb, barRect, 1, new Color(0, 200, 255) * (alpha * 0.65f * pulse));
-            string answerText = $"[ {TUI("AnswerHint")} ]";
+            string answerText = $"[ {AnswerHint.Value} ]";
             Vector2 textSize = FontAssets.MouseText.Value.MeasureString(answerText) * 0.65f;
             Utils.DrawBorderString(sb, answerText,
                 new Vector2(barRect.X + (barRect.Width - textSize.X) / 2f,
@@ -276,8 +289,8 @@ namespace CalamityOverhaul.Content.ADV.IncomingCalls.Styles
             // ── 名称与频道标识 ────────────────────────────────
             float nameX = rect.X + 14f + portraitDrawSize + 14f;
             float nameY = rect.Y + 14f;
-            string speakerName = current?.Speaker ?? callerName ?? TUI("UnknownCaller");
-            string channelSuffix = $" #{TUI("ChannelPrefix")}-01";
+            string speakerName = current?.Speaker ?? callerName ?? UnknownCaller.Value;
+            string channelSuffix = $" #{ChannelPrefix.Value}-01";
             Color nameColor = new Color(80, 220, 255) * (fa * contentAlpha);
             Utils.DrawBorderString(sb, speakerName, new Vector2(nameX, nameY), nameColor, NameScale);
             Utils.DrawBorderString(sb, channelSuffix,
@@ -308,7 +321,7 @@ namespace CalamityOverhaul.Content.ADV.IncomingCalls.Styles
 
             // "连接中..." 动画文字
             int dots = (int)(connectingTimer / (MathHelper.TwoPi / 4f)) % 4;
-            string connectText = TUI("ConnectingLabel") + new string('.', dots);
+            string connectText = ConnectingLabel.Value + new string('.', dots);
             Vector2 textSize = FontAssets.MouseText.Value.MeasureString(connectText) * 0.88f;
             Vector2 textPos = new(rect.X + (rect.Width - textSize.X) / 2f,
                                    rect.Y + (rect.Height - textSize.Y) / 2f - 12f);
@@ -342,7 +355,7 @@ namespace CalamityOverhaul.Content.ADV.IncomingCalls.Styles
             if (finishedCurrent && current != null) {
                 float hintBlink = MathF.Sin(answerBtnPulse * 2.5f) * 0.45f + 0.55f;
                 bool isLast = queue.Count == 0;
-                string hint = isLast ? $"■ {TUI("EndLabel")}" : $"▶ {TUI("NextLabel")}";
+                string hint = isLast ? $"■ {EndLabel.Value}" : $"▶ {NextLabel.Value}";
                 Color hintColor = isLast
                     ? new Color(255, 80, 80) * (fa * contentAlpha * hintBlink)
                     : new Color(80, 200, 255) * (fa * contentAlpha * hintBlink);
@@ -599,7 +612,7 @@ namespace CalamityOverhaul.Content.ADV.IncomingCalls.Styles
         /// </summary>
         private void DrawCallTimer(SpriteBatch sb, Rectangle rect, float alpha) {
             int totalSec = callDurationFrames / 60;
-            string timerText = $"{TUI("TimerLabel")} {totalSec / 60:00}:{totalSec % 60:00}";
+            string timerText = $"{TimerLabel.Value} {totalSec / 60:00}:{totalSec % 60:00}";
             Color c = new Color(60, 180, 220) * (alpha * 0.6f);
             Vector2 textSize = FontAssets.MouseText.Value.MeasureString(timerText) * 0.62f;
             Utils.DrawBorderString(sb, timerText,

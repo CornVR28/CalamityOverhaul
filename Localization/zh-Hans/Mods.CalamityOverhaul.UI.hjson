@@ -406,7 +406,7 @@ ApolliaHeroPanelUI: {
 	// CmdDefensive: 防御
 }
 
-IncomingCall: {
+DraedonIncomingCall: {
 	IncomingLabel: 来电通讯
 	AnswerHint: 点击接听
 	ConnectingLabel: 连接中
