@@ -1,6 +1,7 @@
 ﻿using CalamityOverhaul.Content.ADV.DialogueBoxs;
 using CalamityOverhaul.Content.ADV.DialogueBoxs.Styles;
 using System;
+using Terraria;
 using Terraria.Localization;
 using Terraria.ModLoader;
 
@@ -34,6 +35,12 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
             string speaker = FirstMetApollia.Rolename.Value;
             Add(speaker, Line1.Value);
             Add(speaker, Line2.Value);
+        }
+
+        protected override void OnScenarioComplete() {
+            if (Main.LocalPlayer?.TryGetModPlayer(out ApolliaPlayer ap) == true) {
+                ap.StartLeadToFortress();
+            }
         }
     }
 }

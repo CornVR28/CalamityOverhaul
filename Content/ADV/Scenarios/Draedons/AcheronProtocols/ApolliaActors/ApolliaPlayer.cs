@@ -146,6 +146,14 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
         }
 
         /// <summary>
+        /// 启动引路行为——阿波利娅开始向右引导玩家前往要塞
+        /// </summary>
+        internal void StartLeadToFortress() {
+            ApolliaActor actor = GetApolliaActor();
+            actor?.TransitionTo(new ApolliaLeadRightState());
+        }
+
+        /// <summary>
         /// 激活英雄面板——在对话场景完成时调用
         /// </summary>
         internal void ActivateHeroPanel() {

@@ -35,13 +35,20 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
         private float requiredHeight;
         private float obstacleEndX;
 
+        /// <summary>
+        /// 着陆后的状态工厂。若为 null，则使用默认逻辑（Follow→Walking，Hold→Idle）
+        /// </summary>
+        private readonly Func<ApolliaActor, IApolliaState> onLand;
+
         private enum Phase { Ascend, Cruise, Descend, Landing }
         private Phase phase;
         private float landingGroundY;
 
         /// <param name="target">飞行要趋近的世界坐标目标点</param>
-        public ApolliaFlyingState(Vector2 target) {
+        /// <param name="onLand">着陆后要切换的状态工厂；传 null 时使用默认行为</param>
+        public ApolliaFlyingState(Vector2 target, Func<ApolliaActor, IApolliaState> onLand = null) {
             moveTarget = target;
+            this.onLand = onLand;
         }
 
         public void Enter(ApolliaActor actor) {
@@ -258,7 +265,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
 
         #region 着陆效果
 
-        private static IApolliaState LandAndTransition(ApolliaActor actor) {
+        private IApolliaState LandAndTransition(ApolliaActor actor) {
             if (!VaultUtils.isServer) {
                 for (int i = 0; i < 4; i++) {
                     Vector2 vel = new(Main.rand.NextFloat(-1.5f, 1.5f), Main.rand.NextFloat(-2f, -0.5f));
@@ -270,6 +277,10 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
             }
 
             SoundEngine.PlaySound(SoundID.Run with { Volume = 0.25f, Pitch = 0.2f }, actor.Center);
+
+            if (onLand != null) {
+                return onLand(actor);
+            }
 
             return actor.CurrentCommand switch {
                 HeroCommand.Hold => new ApolliaIdleState(),
