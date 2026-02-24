@@ -1,6 +1,5 @@
 ﻿using CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machines.LandingScens;
 using InnoVault.Actors;
-using InnoVault.GameSystem;
 using SubworldLibrary;
 using System.Collections.Generic;
 using Terraria;
@@ -122,6 +121,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
 
             //在玩家出生点生成坠毁的空降仓Actor
             Vector2 spawnPos = localPlayer.Center;
+            spawnPos.Y -= 80;//稍微抬高一些，避免生成时和玩家重叠导致卡住
             ActorLoader.NewActor<MachineWorldLandingActor>(spawnPos, Vector2.Zero);
 
             //激活屏幕特效
