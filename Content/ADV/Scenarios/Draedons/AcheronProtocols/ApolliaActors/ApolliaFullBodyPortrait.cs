@@ -12,6 +12,16 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
 
         protected override float FadeInDuration => 20f;
 
+        internal Face currentFace = Face.None;
+        internal enum Face
+        {
+            None,
+            Calmnessl,
+            Feel,
+            Rage,
+            Worry,
+        }
+
         protected override void OnInitialize() {
             scale = 1f;
         }
@@ -34,6 +44,25 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
 
             Color color = drawColor * alpha;
             spriteBatch.Draw(portrait, position, rectangle, color, rotation, Vector2.Zero, scale, SpriteEffects.None, 0f);
+            position.X += 148;
+
+            if (currentFace is Face.None) {
+                return;
+            }
+
+            Texture2D faceTexture = currentFace switch {
+                Face.Calmnessl => ADVAsset.Apollia_Calmnessl,
+                Face.Feel => ADVAsset.Apollia_Feel,
+                Face.Rage => ADVAsset.Apollia_Rage,
+                Face.Worry => ADVAsset.Apollia_Worry,
+                _ => null
+            };
+
+            if (faceTexture is null) {
+                return;
+            }
+
+            spriteBatch.Draw(faceTexture, position, null, color, rotation, Vector2.Zero, scale, SpriteEffects.None, 0f);
         }
     }
 }

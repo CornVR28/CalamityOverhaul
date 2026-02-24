@@ -51,12 +51,18 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
             StarStreamDialogueBox.Instance?.ShowFullBodyPortrait<ApolliaFullBodyPortrait>();
         }
 
+        protected static void SetPortraitFace(ApolliaFullBodyPortrait.Face face) {
+            if (StarStreamDialogueBox.Instance?.GetActiveFullBodyPortrait() is ApolliaFullBodyPortrait fullbody) {
+                fullbody.currentFace = face;
+            }
+        }
+
         protected override void Build() {
             string speaker = Rolename.Value;
             DialogueBoxBase.RegisterPortrait(speaker, texture: null);
             DialogueBoxBase.SetPortraitStyle(speaker, silhouette: true);
 
-            Add(speaker, Line1.Value);
+            Add(speaker, Line1.Value, onStart: () => SetPortraitFace(ApolliaFullBodyPortrait.Face.Calmnessl));
             Add(speaker, Line2.Value);
 
             AddWithChoices(speaker, Line3.Value, [
@@ -88,11 +94,12 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
                 string speaker = Rolename.Value;
                 Add(speaker, Line4.Value, onStart: ChipReadRender.Activate);
                 Add(speaker, Line5.Value, onStart: () => {
+                    SetPortraitFace(ApolliaFullBodyPortrait.Face.Rage);
                     ChipReadRender.Deactivate();
                     ShakeScreen();
                 });
                 Add(speaker, Line6.Value);
-                Add(speaker, Line7.Value);
+                Add(speaker, Line7.Value, onStart: () => SetPortraitFace(ApolliaFullBodyPortrait.Face.Calmnessl));
                 Add(speaker, Line8.Value);
             }
             protected override void OnScenarioComplete() => ActivateHeroPanel();
@@ -116,15 +123,16 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
             }
             protected override void Build() {
                 string speaker = Rolename.Value;
-                Add(speaker, C2_R1.Value);
+                Add(speaker, C2_R1.Value, onStart: () => SetPortraitFace(ApolliaFullBodyPortrait.Face.Worry));
                 Add(speaker, C2_R2.Value);
                 Add(speaker, Line4.Value, onStart: ChipReadRender.Activate);
                 Add(speaker, Line5.Value, onStart: () => {
+                    SetPortraitFace(ApolliaFullBodyPortrait.Face.Rage);
                     ChipReadRender.Deactivate();
                     ShakeScreen();
                 });
                 Add(speaker, Line6.Value);
-                Add(speaker, Line7.Value);
+                Add(speaker, Line7.Value, onStart: () => SetPortraitFace(ApolliaFullBodyPortrait.Face.Calmnessl));
                 Add(speaker, Line8.Value);
             }
             protected override void OnScenarioComplete() => ActivateHeroPanel();
