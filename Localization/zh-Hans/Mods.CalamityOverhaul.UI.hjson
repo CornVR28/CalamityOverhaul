@@ -405,3 +405,14 @@ ApolliaHeroPanelUI: {
 	// CmdAggressive: 进攻
 	// CmdDefensive: 防御
 }
+
+IncomingCall: {
+	IncomingLabel: 来电通讯
+	AnswerHint: 点击接听
+	ConnectingLabel: 连接中
+	EndLabel: 结束
+	NextLabel: 继续
+	TimerLabel: 时长
+	UnknownCaller: 未知
+	ChannelPrefix: CH
+}

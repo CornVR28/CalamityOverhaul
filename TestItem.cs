@@ -75,14 +75,14 @@ namespace CalamityOverhaul
             //ScenarioManager.Reset<ApolliaDialogueScenario>();
             //ScenarioManager.Start<ApolliaDialogueScenario>();
             //MachineWorld.Enter();
-            //DropPodWorld.Enter();
+            DropPodWorld.Enter();
             //ActorLoader.NewActor<DropPodActor>(player.Center, Vector2.Zero);
-            if (player.altFunctionUse == 0) {
-                MachineWorld.Enter();
-            }
-            else {
-                GargoyleSwarmPlayer.StartCutscene();
-            }
+            //if (player.altFunctionUse == 0) {
+            //    MachineWorld.Enter();
+            //}
+            //else {
+            //    GargoyleSwarmPlayer.StartCutscene();
+            //}
             return true;
         }
     }

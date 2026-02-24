@@ -88,6 +88,11 @@ namespace CalamityOverhaul.Content.ADV.IncomingCalls
         protected int autoAdvanceTimer;
 
         /// <summary>
+        /// 通话计时（帧），从 Connecting 进入 Speaking 后逐帧累计
+        /// </summary>
+        protected int callDurationFrames;
+
+        /// <summary>
         /// 根据当前台词内容动态计算的通话面板高度
         /// </summary>
         private float computedSpeakingHeight;
@@ -223,6 +228,7 @@ namespace CalamityOverhaul.Content.ADV.IncomingCalls
             ringPulseSpawnTimer = 0;
             ringTimeoutCounter = 0;
             hangUpDelayCounter = 0;
+            callDurationFrames = 0;
             current = null;
             wrappedLines = null;
             visibleCharCount = 0;
@@ -398,6 +404,7 @@ namespace CalamityOverhaul.Content.ADV.IncomingCalls
         }
 
         private void UpdateSpeaking() {
+            callDurationFrames++;
             contentFade = MathHelper.Lerp(contentFade, 1f, 0.1f);
 
             //打字机
@@ -613,7 +620,7 @@ namespace CalamityOverhaul.Content.ADV.IncomingCalls
         }
 
         /// <summary>
-        /// 辅助：绘制打字机文本
+        /// 辅助：绘制打字机文本（支持字符覆写，用于扰码/故障字形等效果）
         /// </summary>
         protected void DrawTypedText(SpriteBatch spriteBatch, Vector2 startPos, float alpha, Color textColor) {
             if (wrappedLines == null || wrappedLines.Length == 0) return;
@@ -630,13 +637,26 @@ namespace CalamityOverhaul.Content.ADV.IncomingCalls
                 int lineVisible = Math.Clamp(visibleCharCount - lineStart, 0, line.Length);
                 if (lineVisible <= 0) break;
 
-                string visibleText = line[..lineVisible];
+                //逐字符覆写（扰码/故障字形效果）
+                char[] chars = line[..lineVisible].ToCharArray();
+                for (int c = 0; c < chars.Length; c++) {
+                    char? ov = GetCharOverride(lineStart + c);
+                    if (ov.HasValue) chars[c] = ov.Value;
+                }
+                string visibleText = new string(chars);
+
                 Vector2 pos = startPos + new Vector2(0, i * LineSpacing);
                 pos = ApplyTextLineOffset(pos, i);
 
                 Utils.DrawBorderString(spriteBatch, visibleText, pos, textColor * alpha, TextScale);
             }
         }
+
+        /// <summary>
+        /// 可重写：为指定全局字符索引返回覆写字符（返回 null 则显示原始字符）
+        /// 用于实现扰码/故障字形等打字特效
+        /// </summary>
+        protected virtual char? GetCharOverride(int globalCharIndex) => null;
 
         /// <summary>
         /// 可重写：文本行偏移
