@@ -29,6 +29,17 @@ namespace CalamityOverhaul.Content.ADV.IncomingCalls.Styles
         public static LocalizedText UnknownCaller { get; private set; }
         public static LocalizedText ChannelPrefix { get; private set; }
 
+        public override void SetStaticDefaults() {
+            IncomingLabel = this.GetLocalization(nameof(IncomingLabel), () => "来电");
+            AnswerHint = this.GetLocalization(nameof(AnswerHint), () => "[Z] 接听");
+            ConnectingLabel = this.GetLocalization(nameof(ConnectingLabel), () => "连接中...");
+            EndLabel = this.GetLocalization(nameof(EndLabel), () => "通话结束");
+            NextLabel = this.GetLocalization(nameof(NextLabel), () => "[Z] 继续");
+            TimerLabel = this.GetLocalization(nameof(TimerLabel), () => "通话时长");
+            UnknownCaller = this.GetLocalization(nameof(UnknownCaller), () => "未知来电");
+            ChannelPrefix = this.GetLocalization(nameof(ChannelPrefix), () => "CH.");
+        }
+
         #endregion
 
         #region 动画参数
