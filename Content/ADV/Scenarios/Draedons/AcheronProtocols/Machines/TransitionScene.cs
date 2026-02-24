@@ -47,6 +47,22 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         public static LocalizedText InitializingText { get; private set; }
         public static LocalizedText[] HintTexts { get; private set; }
 
+        //通信日志终端消息（循环滚动显示）
+        private static readonly string[] TerminalMessages = [
+            "> SYS BOOT    [OK]",
+            "> NET INIT    [OK]",
+            "> PROTOCOL    LINK",
+            "> ENCRYPT     [OK]",
+            "> DATA SYNC  [RUN]",
+            "> CORE AUTH    ..",
+            "> NODES : 1024",
+            "> BANDWIDTH  MAX",
+            "> CACHE    CLEAR",
+            "> ACHERON ACTIVE",
+            "> WARMACHINE [OK]",
+            "> SCAN FIELD  [ON]",
+        ];
+
         #endregion
 
         #region 状态控制
@@ -86,6 +102,15 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         private float hologramFlicker;
         private float progressGlowPhase;
         private float warningPulse;
+        private float glitchTimer;
+
+        #endregion
+
+        #region 均衡器可视化
+
+        private readonly float[] eqBars = new float[14];
+        private readonly float[] eqTargets = new float[14];
+        private int eqUpdateTimer;
 
         #endregion
 
@@ -217,6 +242,10 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
             aquilaRotation = 0f;
             outerRingRotation = 0f;
             innerRingRotation = 0f;
+            glitchTimer = 0f;
+            eqUpdateTimer = 0;
+            System.Array.Clear(eqBars, 0, eqBars.Length);
+            System.Array.Clear(eqTargets, 0, eqTargets.Length);
         }
 
         public override void Update() {
@@ -225,7 +254,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
 
             //淡入淡出
             if (isFadingIn) {
-                fadeAlpha += 0.04f;
+                fadeAlpha = 1f;
                 if (fadeAlpha >= 1f) {
                     fadeAlpha = 1f;
                     isFadingIn = false;
@@ -233,7 +262,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
             }
 
             if (isFadingOut) {
-                fadeAlpha -= 0.03f;
+                fadeAlpha = 0;
                 if (fadeAlpha <= 0f) {
                     fadeAlpha = 0f;
                     isFadingOut = false;
@@ -260,6 +289,10 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
             if (hexGridPhase > MathHelper.TwoPi) hexGridPhase -= MathHelper.TwoPi;
             if (hologramFlicker > MathHelper.TwoPi) hologramFlicker -= MathHelper.TwoPi;
 
+            //故障效果计时器
+            glitchTimer += 0.15f;
+            if (glitchTimer > MathHelper.TwoPi) glitchTimer -= MathHelper.TwoPi;
+
             //装饰元素旋转
             aquilaRotation += 0.002f;
             outerRingRotation += 0.008f;
@@ -281,6 +314,16 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
 
             //更新粒子
             UpdateParticles();
+
+            //更新均衡器条
+            eqUpdateTimer++;
+            if (eqUpdateTimer >= 8) {
+                eqUpdateTimer = 0;
+                for (int i = 0; i < eqTargets.Length; i++)
+                    eqTargets[i] = Main.rand?.NextFloat(0.12f, 1f) ?? 0.5f;
+            }
+            for (int i = 0; i < eqBars.Length; i++)
+                eqBars[i] = MathHelper.Lerp(eqBars[i], eqTargets[i], 0.2f);
 
             //更新提示文字
             UpdateHintText();
@@ -473,6 +516,18 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
 
         #region 绘制
 
+        //顶部标题栏高度
+        private const float HeaderBarH = 44f;
+        //底部状态栏高度
+        private const float FooterBarH = 56f;
+        //左右侧面板宽度比例
+        private const float SidePanelRatio = 0.21f;
+
+        //系统状态标签（左侧面板）
+        private static readonly string[] StatusLabels = ["SYS CORE", "NET LINK", "ENCRYPT", "AUTH MOD", "DATA SYNC"];
+        //对应状态类型：0=ONLINE 1=ACTIVE 2=LOADING 3=STANDBY
+        private static readonly int[] StatusTypes = [0, 0, 1, 2, 3];
+
         public override void Draw(SpriteBatch spriteBatch) {
             if (fadeAlpha <= 0.001f) return;
 
@@ -481,79 +536,103 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
             int sh = Main.screenHeight;
             Texture2D pixel = VaultAsset.placeholder2.Value;
 
-            //全屏深色背景
-            DrawBackground(spriteBatch, pixel, sw, sh, alpha);
+            //不透明实色底层（整个加载界面的基础背景）
+            DrawSolidBackground(spriteBatch, pixel, sw, sh, alpha);
 
-            //六边形网格闪烁
+            //背景六边形静态点阵纹理
+            DrawBackgroundDotGrid(spriteBatch, pixel, sw, sh, alpha);
+
+            //动态六边形网格高亮单元
             DrawHexCells(spriteBatch, pixel, alpha);
 
-            //电路节点
+            //电路节点与分支脉冲
             DrawCircuitNodes(spriteBatch, pixel, alpha);
 
-            //数据流线条
+            //穿越屏幕的数据流线条
             DrawDataStreams(spriteBatch, pixel, alpha);
 
-            //扫描线
-            DrawScanLines(spriteBatch, pixel, sw, sh, alpha);
+            //滚动扫描线
+            DrawScanLine(spriteBatch, pixel, sw, sh, alpha);
 
-            //中心装饰图案（类鹰徽/齿轮环）
+            //顶部标题栏（最后绘制保证不被遮挡）
+            DrawTopHeader(spriteBatch, pixel, sw, sh, alpha);
+
+            //底部状态栏
+            DrawBottomBar(spriteBatch, pixel, sw, sh, alpha);
+
+            //左侧系统状态面板
+            DrawLeftPanel(spriteBatch, pixel, sw, sh, alpha);
+
+            //右侧通信日志面板
+            DrawRightPanel(spriteBatch, pixel, sw, sh, alpha);
+
+            //中心徽章
             DrawCenterEmblem(spriteBatch, pixel, sw, sh, alpha);
 
             //粒子
             DrawParticles(spriteBatch, pixel, alpha);
 
-            //进度条
-            DrawProgressBar(spriteBatch, pixel, sw, sh, alpha);
+            //进度条区域（综合布局）
+            DrawProgressArea(spriteBatch, pixel, sw, sh, alpha);
 
             //加载状态文字
             DrawLoadingText(spriteBatch, sw, sh, alpha);
 
-            //底部提示文字
+            //底部提示文字（位于底栏内）
             DrawHintText(spriteBatch, sw, sh, alpha);
 
-            //全息闪烁叠加
+            //全息叠加与故障条
             DrawHologramOverlay(spriteBatch, pixel, sw, sh, alpha);
 
-            //四角装饰
-            DrawCornerDecorations(spriteBatch, pixel, sw, sh, alpha);
+            //全屏L形角括号（最后叠加，保持清晰）
+            DrawCornerBrackets(spriteBatch, pixel, sw, sh, alpha);
 
-            //顶部和底部边框线
-            DrawEdgeBorders(spriteBatch, pixel, sw, sh, alpha);
+            //全屏边框线
+            DrawFrameBorders(spriteBatch, pixel, sw, sh, alpha);
         }
 
-        private void DrawBackground(SpriteBatch sb, Texture2D pixel, int sw, int sh, float alpha) {
-            //渐变背景：从深蓝黑到稍亮的深蓝
-            int segments = 40;
-            for (int i = 0; i < segments; i++) {
-                float t = i / (float)segments;
+        private void DrawSolidBackground(SpriteBatch sb, Texture2D pixel, int sw, int sh, float alpha) {
+            //最底层纯色填充，保证背景完全不透明（外层淡入淡出由fadeAlpha控制）
+            sb.Draw(pixel, new Rectangle(0, 0, sw, sh), new Rectangle(0, 0, 1, 1), new Color(3, 5, 12) * alpha);
+
+            //竖向分区微弱脉动渐变叠加（制造空间深度感）
+            int segs = 6;
+            for (int i = 0; i < segs; i++) {
+                float t = i / (float)segs;
                 int y1 = (int)(t * sh);
-                int y2 = (int)((i + 1f) / segments * sh);
-
-                Color top = new Color(4, 6, 14);
-                Color mid = new Color(8, 14, 28);
-                Color bottom = new Color(5, 8, 18);
-
-                Color c;
-                if (t < 0.5f) {
-                    c = Color.Lerp(top, mid, t * 2f);
-                }
-                else {
-                    c = Color.Lerp(mid, bottom, (t - 0.5f) * 2f);
-                }
-
-                //加入微弱的脉动
-                float pulse = MathF.Sin(circuitPulseTimer * 0.5f + t * 2f) * 0.5f + 0.5f;
-                c = Color.Lerp(c, new Color(10, 20, 40), pulse * 0.08f);
-
-                sb.Draw(pixel, new Rectangle(0, y1, sw, Math.Max(1, y2 - y1)), new Rectangle(0, 0, 1, 1), c * alpha);
+                int y2 = (int)((i + 1f) / segs * sh);
+                float pulse = MathF.Sin(circuitPulseTimer * 0.4f + t * 1.8f) * 0.5f + 0.5f;
+                sb.Draw(pixel, new Rectangle(0, y1, sw, Math.Max(1, y2 - y1)), new Rectangle(0, 0, 1, 1),
+                    new Color(6, 12, 28) * (alpha * 0.2f * pulse));
             }
 
-            //极暗的横向噪波条纹
-            for (int i = 0; i < sh; i += 4) {
-                float noise = MathF.Sin(i * 0.5f + globalTime * 3f) * 0.5f + 0.5f;
-                if (noise > 0.7f) {
-                    sb.Draw(pixel, new Rectangle(0, i, sw, 1), new Rectangle(0, 0, 1, 1),
-                        new Color(20, 40, 70) * (alpha * 0.03f * noise));
+            //CRT横向细条纹（固定间距，强化科技质感）
+            for (int y = 0; y < sh; y += 3) {
+                sb.Draw(pixel, new Rectangle(0, y, sw, 1), new Rectangle(0, 0, 1, 1), Color.Black * (alpha * 0.055f));
+            }
+
+            //偶发故障横条（通过glitchTimer驱动）
+            float g = MathF.Sin(glitchTimer * 2.7f);
+            if (g > 0.93f) {
+                float gy = (MathF.Sin(glitchTimer * 141f) * 0.5f + 0.5f) * sh;
+                int gh = (int)((g - 0.93f) / 0.07f * 5f) + 1;
+                sb.Draw(pixel, new Rectangle(0, (int)gy, sw, gh), new Rectangle(0, 0, 1, 1),
+                    new Color(40, 160, 255) * (alpha * 0.07f));
+            }
+        }
+
+        private void DrawBackgroundDotGrid(SpriteBatch sb, Texture2D pixel, int sw, int sh, float alpha) {
+            //极低亮度的静态六边形点阵，提供背景纹理感
+            float cellW = 28f, cellH = 24f;
+            int cols = (int)(sw / cellW) + 2;
+            int rows = (int)(sh / cellH) + 2;
+            Color dotColor = new Color(18, 50, 105) * (alpha * 0.16f);
+            for (int row = 0; row < rows; row++) {
+                for (int col = 0; col < cols; col++) {
+                    float ox = (row % 2 == 0) ? 0f : cellW * 0.5f;
+                    float px = col * cellW + ox;
+                    float py = row * cellH;
+                    sb.Draw(pixel, new Rectangle((int)px, (int)py, 1, 1), new Rectangle(0, 0, 1, 1), dotColor);
                 }
             }
         }
@@ -642,31 +721,25 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
             }
         }
 
-        private void DrawScanLines(SpriteBatch sb, Texture2D pixel, int sw, int sh, float alpha) {
-            //主扫描线
-            float scanY = sh * 0.5f + MathF.Sin(scanLineTimer) * sh * 0.4f;
-            for (int i = -3; i <= 3; i++) {
+        private void DrawScanLine(SpriteBatch sb, Texture2D pixel, int sw, int sh, float alpha) {
+            //主扫描线从上到下滚动，带向上拖影
+            float scanY = sh * 0.5f + MathF.Sin(scanLineTimer) * sh * 0.46f;
+            for (int i = -4; i <= 4; i++) {
                 float y = scanY + i * 2.5f;
                 if (y < 0 || y > sh) continue;
-                float intensity = 1f - Math.Abs(i) / 4f;
-                Color scanColor = new Color(60, 180, 255) * (alpha * 0.08f * intensity);
-                sb.Draw(pixel, new Rectangle(0, (int)y, sw, 2), new Rectangle(0, 0, 1, 1), scanColor);
+                float intensity = 1f - Math.Abs(i) / 5f;
+                sb.Draw(pixel, new Rectangle(0, (int)y, sw, 2), new Rectangle(0, 0, 1, 1),
+                    new Color(50, 160, 240) * (alpha * 0.055f * intensity));
             }
 
-            //次级扫描线（从右到左）
-            float scanX = sw * (1f - ((scanLineTimer * 0.3f) % 1f));
+            //次级扫描线（方向相反，更暗）
+            float scanY2 = sh * ((scanLineTimer * 0.27f) % 1f);
             for (int i = -2; i <= 2; i++) {
-                float x = scanX + i * 2f;
-                if (x < 0 || x > sw) continue;
+                float y = scanY2 + i * 2f;
+                if (y < 0 || y > sh) continue;
                 float intensity = 1f - Math.Abs(i) / 3f;
-                Color scanColor = new Color(40, 140, 200) * (alpha * 0.04f * intensity);
-                sb.Draw(pixel, new Rectangle((int)x, 0, 2, sh), new Rectangle(0, 0, 1, 1), scanColor);
-            }
-
-            //CRT 栅格线
-            for (int y = 0; y < sh; y += 3) {
-                sb.Draw(pixel, new Rectangle(0, y, sw, 1), new Rectangle(0, 0, 1, 1),
-                    Color.Black * (alpha * 0.06f));
+                sb.Draw(pixel, new Rectangle(0, (int)y, sw, 1), new Rectangle(0, 0, 1, 1),
+                    new Color(30, 100, 180) * (alpha * 0.028f * intensity));
             }
         }
 
@@ -773,59 +846,61 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
             }
         }
 
-        private void DrawProgressBar(SpriteBatch sb, Texture2D pixel, int sw, int sh, float alpha) {
+        private void DrawProgressArea(SpriteBatch sb, Texture2D pixel, int sw, int sh, float alpha) {
             float barY = sh * ProgressBarY;
             float barX = (sw - ProgressBarWidth) * 0.5f;
 
-            //进度条外框
+            //进度区域外框背景（略大于进度条，增加视觉分量）
+            Rectangle areaRect = new((int)(barX - 16), (int)(barY - 22), (int)(ProgressBarWidth + 32), (int)(ProgressBarHeight + 44));
+            sb.Draw(pixel, areaRect, new Rectangle(0, 0, 1, 1), new Color(3, 7, 16) * (alpha * 0.72f));
+            DrawBracketBorder(sb, pixel, areaRect, alpha * 0.55f);
+
+            //进度条外框线
             Rectangle outerRect = new((int)(barX - 3), (int)(barY - 3), (int)(ProgressBarWidth + 6), (int)(ProgressBarHeight + 6));
-            Color borderColor = new Color(50, 140, 220) * (alpha * 0.6f);
-            DrawRectBorder(sb, pixel, outerRect, borderColor, 1);
+            DrawRectBorder(sb, pixel, outerRect, new Color(30, 95, 195) * (alpha * 0.52f), 1);
 
-            //进度条背景轨道
+            //轨道背景
             Rectangle trackRect = new((int)barX, (int)barY, (int)ProgressBarWidth, (int)ProgressBarHeight);
-            sb.Draw(pixel, trackRect, new Rectangle(0, 0, 1, 1), new Color(10, 20, 35) * (alpha * 0.9f));
+            sb.Draw(pixel, trackRect, new Rectangle(0, 0, 1, 1), new Color(7, 16, 33) * (alpha * 0.96f));
 
-            //进度条填充（渐变）
+            //进度填充（逐像素渐变+流光）
             int fillWidth = (int)(ProgressBarWidth * currentProgress);
             if (fillWidth > 0) {
                 for (int i = 0; i < fillWidth; i++) {
                     float t = i / ProgressBarWidth;
-                    Color fillColor = Color.Lerp(new Color(30, 100, 200), new Color(80, 220, 255), t);
-
-                    //流光叠加
+                    Color fillColor = Color.Lerp(new Color(20, 90, 190), new Color(65, 205, 255), t);
                     float shimmer = MathF.Sin(progressGlowPhase - t * 8f) * 0.5f + 0.5f;
-                    fillColor = Color.Lerp(fillColor, new Color(150, 240, 255), shimmer * 0.3f);
-
+                    fillColor = Color.Lerp(fillColor, new Color(135, 232, 255), shimmer * 0.26f);
                     sb.Draw(pixel, new Rectangle((int)barX + i, (int)barY, 1, (int)ProgressBarHeight),
-                        new Rectangle(0, 0, 1, 1), fillColor * (alpha * 0.9f));
+                        new Rectangle(0, 0, 1, 1), fillColor * (alpha * 0.92f));
                 }
 
-                //进度头部发光
-                Vector2 headPos = new(barX + fillWidth, barY + ProgressBarHeight * 0.5f);
+                //进度头部发光点
                 if (CWRAsset.SoftGlow?.IsLoaded ?? false) {
                     Texture2D glow = CWRAsset.SoftGlow.Value;
                     float glowPulse = MathF.Sin(progressGlowPhase * 2f) * 0.5f + 0.5f;
-                    Color glowColor = new Color(100, 220, 255, 0) * (alpha * (0.4f + glowPulse * 0.4f));
-                    sb.Draw(glow, headPos, null, glowColor, 0f, glow.Size() / 2f, 0.25f, SpriteEffects.None, 0f);
+                    sb.Draw(glow, new Vector2(barX + fillWidth, barY + ProgressBarHeight * 0.5f), null,
+                        new Color(75, 205, 255, 0) * (alpha * (0.32f + glowPulse * 0.32f)),
+                        0f, glow.Size() / 2f, 0.21f, SpriteEffects.None, 0f);
                 }
             }
 
-            //进度百分比文字
-            string percentText = $"{(int)(currentProgress * 100)}%";
-            Vector2 percentSize = FontAssets.MouseText.Value.MeasureString(percentText) * 0.95f;
-            Vector2 percentPos = new(barX + ProgressBarWidth + 16, barY + ProgressBarHeight * 0.5f - percentSize.Y * 0.5f);
-            Color percentColor = Color.Lerp(new Color(100, 180, 230), new Color(150, 240, 255), MathF.Sin(globalTime * 2f) * 0.5f + 0.5f);
-            Utils.DrawBorderString(sb, percentText, percentPos, percentColor * alpha, 0.95f);
-
-            //小刻度标记
+            //刻度标记（10个）
             for (int i = 1; i < 10; i++) {
                 float markX = barX + ProgressBarWidth * i / 10f;
-                float markHeight = (i == 5) ? 7f : 4f;
-                Color markColor = new Color(50, 140, 220) * (alpha * 0.4f);
-                sb.Draw(pixel, new Rectangle((int)markX, (int)(barY + ProgressBarHeight + 2), 1, (int)markHeight),
-                    new Rectangle(0, 0, 1, 1), markColor);
+                float markH = (i == 5) ? 6f : 3.5f;
+                sb.Draw(pixel, new Rectangle((int)markX, (int)(barY + ProgressBarHeight + 2), 1, (int)markH),
+                    new Rectangle(0, 0, 1, 1), new Color(38, 105, 185) * (alpha * 0.38f));
             }
+
+            //百分比文字
+            string percentText = $"{(int)(currentProgress * 100)}%";
+            Vector2 percentSize = FontAssets.MouseText.Value.MeasureString(percentText) * 0.9f;
+            float colorPulse = MathF.Sin(globalTime * 2f) * 0.5f + 0.5f;
+            Color percentColor = Color.Lerp(new Color(95, 172, 222), new Color(138, 232, 255), colorPulse);
+            Utils.DrawBorderString(sb, percentText,
+                new Vector2(barX + ProgressBarWidth + 14f, barY + ProgressBarHeight * 0.5f - percentSize.Y * 0.5f),
+                percentColor * alpha, 0.9f);
         }
 
         private void DrawLoadingText(SpriteBatch sb, int sw, int sh, float alpha) {
@@ -868,98 +943,390 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
 
             string hint = HintTexts[currentHintIndex].Value;
             float hintAlpha = hintFadeProgress * alpha;
-
-            //引号装饰
             string displayText = $"「{hint}」";
 
-            Vector2 textSize = FontAssets.MouseText.Value.MeasureString(displayText) * 0.9f;
-            Vector2 textPos = new((sw - textSize.X) * 0.5f, sh - 75f);
+            Vector2 textSize = FontAssets.MouseText.Value.MeasureString(displayText) * 0.88f;
+            //位于底部状态栏内垂直居中
+            float textY = sh - FooterBarH * 0.5f - textSize.Y * 0.5f;
+            Vector2 textPos = new((sw - textSize.X) * 0.5f, textY);
 
-            //文字发光底层
-            Color glowColor = new Color(40, 120, 180) * (hintAlpha * 0.15f);
+            //光晕底层
+            Color glowColor = new Color(28, 95, 155) * (hintAlpha * 0.11f);
             for (int i = 0; i < 4; i++) {
-                float angle = MathHelper.TwoPi * i / 4f;
-                Vector2 off = angle.ToRotationVector2() * 1.5f;
-                Utils.DrawBorderString(sb, displayText, textPos + off, glowColor, 0.9f);
+                Vector2 off = (MathHelper.TwoPi * i / 4f).ToRotationVector2() * 1.5f;
+                Utils.DrawBorderString(sb, displayText, textPos + off, glowColor, 0.88f);
             }
 
-            //主文字（淡蓝灰色，带轻微闪烁）
-            float textFlicker = 0.9f + MathF.Sin(globalTime * 5f) * 0.1f;
-            Color hintColor = new Color(140, 180, 210) * (hintAlpha * textFlicker);
-            Utils.DrawBorderString(sb, displayText, textPos, hintColor, 0.9f);
-
-            //提示文字下方的短横线装饰
-            float lineWidth = textSize.X * 0.3f;
-            Vector2 lineCenter = new(sw * 0.5f, sh - 50f);
-            DrawLine(sb, VaultAsset.placeholder2.Value,
-                lineCenter - new Vector2(lineWidth * 0.5f, 0),
-                lineCenter + new Vector2(lineWidth * 0.5f, 0),
-                new Color(50, 140, 200) * (hintAlpha * 0.4f), 1f);
+            //主文字（轻微闪烁）
+            float textFlicker = 0.89f + MathF.Sin(globalTime * 5f) * 0.11f;
+            Utils.DrawBorderString(sb, displayText, textPos,
+                new Color(130, 175, 205) * (hintAlpha * textFlicker), 0.88f);
         }
 
         private void DrawHologramOverlay(SpriteBatch sb, Texture2D pixel, int sw, int sh, float alpha) {
-            //全局全息闪烁叠加
+            //全局全息闪烁叠加（偶发亮闪）
             float flicker = MathF.Sin(hologramFlicker * 1.5f) * 0.5f + 0.5f;
-            if (flicker > 0.85f) {
-                Color overlayColor = new Color(20, 60, 100) * (alpha * 0.04f * (flicker - 0.85f) * 6.67f);
-                sb.Draw(pixel, new Rectangle(0, 0, sw, sh), new Rectangle(0, 0, 1, 1), overlayColor);
+            if (flicker > 0.88f) {
+                sb.Draw(pixel, new Rectangle(0, 0, sw, sh), new Rectangle(0, 0, 1, 1),
+                    new Color(12, 45, 85) * (alpha * 0.025f * (flicker - 0.88f) * 8.33f));
             }
 
-            //偶尔的故障条
-            if (MathF.Sin(globalTime * 7f) > 0.95f) {
-                int glitchY = (int)(MathF.Sin(globalTime * 23f) * 0.5f + 0.5f) * sh;
-                int glitchH = Main.rand?.Next(2, 8) ?? 4;
-                Color glitchColor = new Color(80, 200, 255) * (alpha * 0.12f);
-                sb.Draw(pixel, new Rectangle(0, glitchY, sw, glitchH), new Rectangle(0, 0, 1, 1), glitchColor);
-            }
-        }
-
-        private void DrawCornerDecorations(SpriteBatch sb, Texture2D pixel, int sw, int sh, float alpha) {
-            float pulse = MathF.Sin(circuitPulseTimer * 1.8f) * 0.5f + 0.5f;
-            Color cornerColor = new Color(60, 170, 240) * (alpha * (0.4f + pulse * 0.3f));
-            float len = 40f;
-            float thickness = 2f;
-
-            //左上
-            DrawLine(sb, pixel, new Vector2(10, 10), new Vector2(10 + len, 10), cornerColor, thickness);
-            DrawLine(sb, pixel, new Vector2(10, 10), new Vector2(10, 10 + len), cornerColor, thickness);
-
-            //右上
-            DrawLine(sb, pixel, new Vector2(sw - 10, 10), new Vector2(sw - 10 - len, 10), cornerColor, thickness);
-            DrawLine(sb, pixel, new Vector2(sw - 10, 10), new Vector2(sw - 10, 10 + len), cornerColor, thickness);
-
-            //左下
-            DrawLine(sb, pixel, new Vector2(10, sh - 10), new Vector2(10 + len, sh - 10), cornerColor, thickness);
-            DrawLine(sb, pixel, new Vector2(10, sh - 10), new Vector2(10, sh - 10 - len), cornerColor, thickness);
-
-            //右下
-            DrawLine(sb, pixel, new Vector2(sw - 10, sh - 10), new Vector2(sw - 10 - len, sh - 10), cornerColor, thickness);
-            DrawLine(sb, pixel, new Vector2(sw - 10, sh - 10), new Vector2(sw - 10, sh - 10 - len), cornerColor, thickness);
-
-            //角点发光
-            Vector2[] corners = [
-                new(10, 10), new(sw - 10, 10),
-                new(10, sh - 10), new(sw - 10, sh - 10)
-            ];
-            foreach (var corner in corners) {
-                sb.Draw(pixel, corner, new Rectangle(0, 0, 1, 1),
-                    cornerColor * 0.8f, MathHelper.PiOver4, new Vector2(0.5f), new Vector2(5f), SpriteEffects.None, 0f);
+            //偶发宽幅故障横条（通过glitchTimer驱动，比背景故障条更宽更亮）
+            if (MathF.Sin(glitchTimer * 4.1f) > 0.94f) {
+                int gy = (int)((MathF.Sin(glitchTimer * 17f) * 0.5f + 0.5f) * sh);
+                int gh = Main.rand?.Next(1, 6) ?? 2;
+                sb.Draw(pixel, new Rectangle(0, gy, sw, gh), new Rectangle(0, 0, 1, 1),
+                    new Color(55, 175, 255) * (alpha * 0.08f));
             }
         }
 
-        private void DrawEdgeBorders(SpriteBatch sb, Texture2D pixel, int sw, int sh, float alpha) {
-            float pulse = MathF.Sin(circuitPulseTimer) * 0.5f + 0.5f;
-            Color borderColor = new Color(40, 120, 200) * (alpha * (0.3f + pulse * 0.2f));
+        private void DrawCornerBrackets(SpriteBatch sb, Texture2D pixel, int sw, int sh, float alpha) {
+            float pulse = MathF.Sin(circuitPulseTimer * 1.6f) * 0.35f + 0.65f;
+            Color cornerBright = new Color(50, 165, 240) * (alpha * pulse);
+            Color cornerDim = new Color(30, 100, 178) * (alpha * pulse * 0.5f);
+            float len = 58f;
+            float thick = 2f;
 
-            //顶部边框
+            //左上（亮）
+            DrawLine(sb, pixel, new Vector2(12, 12), new Vector2(12 + len, 12), cornerBright, thick);
+            DrawLine(sb, pixel, new Vector2(12, 12), new Vector2(12, 12 + len), cornerBright, thick);
+            sb.Draw(pixel, new Vector2(12, 12), new Rectangle(0, 0, 1, 1), cornerBright * 0.85f,
+                MathHelper.PiOver4, new Vector2(0.5f), new Vector2(5f), SpriteEffects.None, 0f);
+
+            //右上（亮）
+            DrawLine(sb, pixel, new Vector2(sw - 12, 12), new Vector2(sw - 12 - len, 12), cornerBright, thick);
+            DrawLine(sb, pixel, new Vector2(sw - 12, 12), new Vector2(sw - 12, 12 + len), cornerBright, thick);
+            sb.Draw(pixel, new Vector2(sw - 12, 12), new Rectangle(0, 0, 1, 1), cornerBright * 0.85f,
+                MathHelper.PiOver4, new Vector2(0.5f), new Vector2(5f), SpriteEffects.None, 0f);
+
+            //左下（暗）
+            DrawLine(sb, pixel, new Vector2(12, sh - 12), new Vector2(12 + len, sh - 12), cornerDim, thick);
+            DrawLine(sb, pixel, new Vector2(12, sh - 12), new Vector2(12, sh - 12 - len), cornerDim, thick);
+
+            //右下（暗）
+            DrawLine(sb, pixel, new Vector2(sw - 12, sh - 12), new Vector2(sw - 12 - len, sh - 12), cornerDim, thick);
+            DrawLine(sb, pixel, new Vector2(sw - 12, sh - 12), new Vector2(sw - 12, sh - 12 - len), cornerDim, thick);
+
+            //角落延伸次级刻度线（L末端之后的短线段）
+            float extLen = 22f;
+            Color extColor = new Color(38, 136, 218) * (alpha * pulse * 0.32f);
+            DrawLine(sb, pixel, new Vector2(12 + len + 4, 12), new Vector2(12 + len + 4 + extLen, 12), extColor, 1f);
+            DrawLine(sb, pixel, new Vector2(12, 12 + len + 4), new Vector2(12, 12 + len + 4 + extLen), extColor, 1f);
+            DrawLine(sb, pixel, new Vector2(sw - 12 - len - 4, 12), new Vector2(sw - 12 - len - 4 - extLen, 12), extColor, 1f);
+            DrawLine(sb, pixel, new Vector2(sw - 12, 12 + len + 4), new Vector2(sw - 12, 12 + len + 4 + extLen), extColor, 1f);
+        }
+
+        private void DrawFrameBorders(SpriteBatch sb, Texture2D pixel, int sw, int sh, float alpha) {
+            float pulse = MathF.Sin(circuitPulseTimer * 0.9f) * 0.5f + 0.5f;
+            Color borderColor = new Color(28, 95, 175) * (alpha * (0.26f + pulse * 0.16f));
+
+            //顶部双边框
             sb.Draw(pixel, new Rectangle(0, 0, sw, 2), new Rectangle(0, 0, 1, 1), borderColor);
-            //底部边框
-            sb.Draw(pixel, new Rectangle(0, sh - 2, sw, 2), new Rectangle(0, 0, 1, 1), borderColor);
+            sb.Draw(pixel, new Rectangle(0, sh - 2, sw, 2), new Rectangle(0, 0, 1, 1), borderColor * 0.6f);
 
-            //顶部内线
-            sb.Draw(pixel, new Rectangle(50, 6, sw - 100, 1), new Rectangle(0, 0, 1, 1), borderColor * 0.4f);
-            //底部内线
-            sb.Draw(pixel, new Rectangle(50, sh - 7, sw - 100, 1), new Rectangle(0, 0, 1, 1), borderColor * 0.4f);
+            //内缩次级线
+            sb.Draw(pixel, new Rectangle(60, 5, sw - 120, 1), new Rectangle(0, 0, 1, 1), borderColor * 0.3f);
+            sb.Draw(pixel, new Rectangle(60, sh - 6, sw - 120, 1), new Rectangle(0, 0, 1, 1), borderColor * 0.25f);
+
+            //左右侧边（顶栏到底栏之间）
+            int sideYS = (int)HeaderBarH + 4;
+            int sideYE = sh - (int)FooterBarH - 4;
+            sb.Draw(pixel, new Rectangle(0, sideYS, 1, sideYE - sideYS), new Rectangle(0, 0, 1, 1), borderColor * 0.28f);
+            sb.Draw(pixel, new Rectangle(sw - 1, sideYS, 1, sideYE - sideYS), new Rectangle(0, 0, 1, 1), borderColor * 0.28f);
+        }
+
+        private void DrawTopHeader(SpriteBatch sb, Texture2D pixel, int sw, int sh, float alpha) {
+            int bh = (int)HeaderBarH;
+
+            //标题栏背景（略比底色更亮，形成层次）
+            sb.Draw(pixel, new Rectangle(0, 0, sw, bh), new Rectangle(0, 0, 1, 1), new Color(5, 10, 22) * (alpha * 0.97f));
+
+            //底部分割双线
+            float lineAlpha = alpha * (0.52f + MathF.Sin(circuitPulseTimer) * 0.14f);
+            sb.Draw(pixel, new Rectangle(0, bh - 2, sw, 2), new Rectangle(0, 0, 1, 1),
+                new Color(0, 155, 235) * lineAlpha);
+            sb.Draw(pixel, new Rectangle(0, bh, sw, 1), new Rectangle(0, 0, 1, 1),
+                new Color(0, 55, 115) * (alpha * 0.42f));
+
+            //左侧L形角括号
+            DrawHorStrip(sb, pixel, 8, 8, 18, 2, new Color(0, 198, 255) * (alpha * 0.88f));
+            DrawVerStrip(sb, pixel, 8, 8, 18, 2, new Color(0, 198, 255) * (alpha * 0.88f));
+
+            //标题文字居中
+            string title = "DRAEDON SYSTEMS  ·  ACHERON PROTOCOL";
+            Vector2 titleSize = FontAssets.MouseText.Value.MeasureString(title) * 0.87f;
+            float titleX = sw * 0.5f - titleSize.X * 0.5f;
+            float titleY = bh * 0.5f - titleSize.Y * 0.5f;
+            float flicker = 0.92f + MathF.Sin(hologramFlicker * 1.8f) * 0.08f;
+
+            //文字光晕
+            Color titleGlow = new Color(0, 95, 195) * (alpha * 0.18f);
+            for (int i = 0; i < 3; i++) {
+                Vector2 off = (MathHelper.TwoPi * i / 3f + globalTime * 0.55f).ToRotationVector2() * 1.4f;
+                Utils.DrawBorderString(sb, title, new Vector2(titleX, titleY) + off, titleGlow, 0.87f);
+            }
+            Utils.DrawBorderString(sb, title, new Vector2(titleX, titleY),
+                new Color(158, 228, 255) * (alpha * flicker), 0.87f);
+
+            //右侧状态指示器
+            DrawHeaderStatus(sb, pixel, sw, bh, alpha);
+        }
+
+        private void DrawHeaderStatus(SpriteBatch sb, Texture2D pixel, int sw, int bh, float alpha) {
+            float blink = MathF.Sin(warningPulse * 2.5f) * 0.45f + 0.55f;
+            float blink2 = MathF.Sin(warningPulse * 2.5f + MathHelper.PiOver2) * 0.45f + 0.55f;
+
+            //ONLINE 指示点+标签
+            int dotR = 3;
+            Color onlineColor = new Color(38, 242, 135);
+            sb.Draw(pixel, new Rectangle(sw - 192 - dotR, (int)(bh * 0.5f) - dotR, dotR * 2, dotR * 2),
+                new Rectangle(0, 0, 1, 1), onlineColor * (alpha * blink));
+            Utils.DrawBorderString(sb, "ONLINE",
+                new Vector2(sw - 184f, bh * 0.5f - 7f),
+                new Color(38, 218, 128) * (alpha * 0.7f), 0.65f);
+
+            //竖向分隔线
+            sb.Draw(pixel, new Rectangle(sw - 118, 10, 1, bh - 20), new Rectangle(0, 0, 1, 1),
+                new Color(0, 75, 138) * (alpha * 0.42f));
+
+            //SYNC 指示点+标签
+            Color syncColor = new Color(0, 198, 255);
+            sb.Draw(pixel, new Rectangle(sw - 102 - dotR, (int)(bh * 0.5f) - dotR, dotR * 2, dotR * 2),
+                new Rectangle(0, 0, 1, 1), syncColor * (alpha * blink2));
+            Utils.DrawBorderString(sb, "SYNC",
+                new Vector2(sw - 90f, bh * 0.5f - 7f),
+                new Color(0, 178, 242) * (alpha * 0.7f), 0.65f);
+
+            //右侧L括号
+            DrawHorStrip(sb, pixel, sw - 8 - 18, 8, 18, 2, new Color(0, 158, 218) * (alpha * 0.68f));
+            DrawVerStrip(sb, pixel, sw - 10, 8, 18, 2, new Color(0, 158, 218) * (alpha * 0.68f));
+        }
+
+        private void DrawBottomBar(SpriteBatch sb, Texture2D pixel, int sw, int sh, float alpha) {
+            int bh = (int)FooterBarH;
+            int by = sh - bh;
+
+            //底部栏背景
+            sb.Draw(pixel, new Rectangle(0, by, sw, bh), new Rectangle(0, 0, 1, 1), new Color(4, 9, 20) * (alpha * 0.97f));
+
+            //顶部分割双线
+            float lineAlpha = alpha * (0.48f + MathF.Sin(circuitPulseTimer + MathHelper.Pi) * 0.11f);
+            sb.Draw(pixel, new Rectangle(0, by, sw, 2), new Rectangle(0, 0, 1, 1),
+                new Color(0, 138, 218) * lineAlpha);
+            sb.Draw(pixel, new Rectangle(0, by - 1, sw, 1), new Rectangle(0, 0, 1, 1),
+                new Color(0, 48, 108) * (alpha * 0.38f));
+        }
+
+        private void DrawLeftPanel(SpriteBatch sb, Texture2D pixel, int sw, int sh, float alpha) {
+            int panelW = (int)(sw * SidePanelRatio);
+            int panelX = 14;
+            int panelY = (int)HeaderBarH + 10;
+            int panelH = sh - (int)HeaderBarH - (int)FooterBarH - 20;
+
+            //面板背景
+            sb.Draw(pixel, new Rectangle(panelX, panelY, panelW, panelH), new Rectangle(0, 0, 1, 1),
+                new Color(3, 8, 18) * (alpha * 0.87f));
+            DrawBracketBorder(sb, pixel, new Rectangle(panelX, panelY, panelW, panelH), alpha);
+
+            //标题
+            Utils.DrawBorderString(sb, "SYS STATUS",
+                new Vector2(panelX + 12f, panelY + 10f),
+                new Color(0, 218, 255) * (alpha * 0.83f), 0.75f);
+
+            //流动分割线
+            DrawFlowLine(sb, pixel, panelX + 8, panelY + 30, panelW - 16, alpha * 0.7f);
+
+            //系统状态条目
+            DrawSystemStatusItems(sb, pixel, panelX, panelY, panelW, panelH, alpha);
+
+            //底部均衡器条（占据面板底部区域）
+            int eqY = panelY + panelH - 52;
+            DrawEQBars(sb, pixel, panelX + 12, eqY, panelW - 24, 36, alpha * 0.78f);
+        }
+
+        private void DrawSystemStatusItems(SpriteBatch sb, Texture2D pixel,
+            int panelX, int panelY, int panelW, int panelH, float alpha) {
+            int startY = panelY + 38;
+            int itemH = 26;
+            int barX = panelX + panelW - 72;
+            int barW = 54;
+            int barH = 6;
+
+            for (int i = 0; i < StatusLabels.Length; i++) {
+                int iy = startY + i * itemH;
+                float itemPhase = globalTime * 2.5f + i * 1.1f;
+
+                //根据状态类型确定颜色和标签文字
+                Color statusColor;
+                string statusTag;
+                switch (StatusTypes[i]) {
+                    case 0:
+                        statusColor = new Color(38, 238, 128);
+                        statusTag = "ONLINE";
+                        break;
+                    case 1:
+                        statusColor = new Color(0, 198, 255);
+                        statusTag = "ACTIVE";
+                        break;
+                    case 2:
+                        float loadPulse = MathF.Sin(itemPhase) * 0.38f + 0.62f;
+                        statusColor = new Color(175, 218, 255) * loadPulse;
+                        statusTag = "LOADING";
+                        break;
+                    default:
+                        statusColor = new Color(38, 78, 128);
+                        statusTag = "STANDBY";
+                        break;
+                }
+
+                //左侧状态圆点
+                int dotR = 3;
+                sb.Draw(pixel, new Rectangle(panelX + 10, iy + 5, dotR * 2, dotR * 2),
+                    new Rectangle(0, 0, 1, 1), statusColor * (alpha * 0.88f));
+
+                //项目标签
+                Utils.DrawBorderString(sb, StatusLabels[i],
+                    new Vector2(panelX + 20f, iy),
+                    new Color(95, 155, 198) * (alpha * 0.76f), 0.64f);
+
+                //进度条背景
+                sb.Draw(pixel, new Rectangle(barX, iy + 3, barW, barH), new Rectangle(0, 0, 1, 1),
+                    new Color(7, 16, 32) * (alpha * 0.92f));
+
+                //进度条填充（各项目依次完成）
+                float itemProgress = Math.Clamp(currentProgress * 1.25f - i * 0.12f, 0f, 1f);
+                int fillW = (int)(barW * itemProgress);
+                if (fillW > 0) {
+                    sb.Draw(pixel, new Rectangle(barX, iy + 3, fillW, barH), new Rectangle(0, 0, 1, 1),
+                        statusColor * (alpha * 0.72f));
+                }
+
+                //完成后显示状态标签
+                if (itemProgress >= 0.95f) {
+                    Utils.DrawBorderString(sb, statusTag,
+                        new Vector2(barX + barW + 3f, iy - 1f),
+                        statusColor * (alpha * 0.62f), 0.53f);
+                }
+            }
+        }
+
+        private void DrawEQBars(SpriteBatch sb, Texture2D pixel, int x, int y, int totalW, int maxH, float alpha) {
+            if (alpha < 0.01f) return;
+            int n = eqBars.Length;
+            float barW = (float)totalW / n - 1.5f;
+            for (int i = 0; i < n; i++) {
+                float h = eqBars[i] * maxH;
+                float bx = x + i * (barW + 1.5f);
+                float by = y + (maxH - h);
+                //冷色系渐变：低频蓝偏向高频青绿
+                Color c = Color.Lerp(new Color(0, 155, 255), new Color(38, 252, 195), eqBars[i]);
+                sb.Draw(pixel, new Rectangle((int)bx, (int)by, (int)Math.Max(1f, barW), (int)Math.Max(1f, h)),
+                    new Rectangle(0, 0, 1, 1), c * alpha);
+            }
+        }
+
+        private void DrawRightPanel(SpriteBatch sb, Texture2D pixel, int sw, int sh, float alpha) {
+            int panelW = (int)(sw * SidePanelRatio);
+            int panelX = sw - panelW - 14;
+            int panelY = (int)HeaderBarH + 10;
+            int panelH = sh - (int)HeaderBarH - (int)FooterBarH - 20;
+
+            //面板背景
+            sb.Draw(pixel, new Rectangle(panelX, panelY, panelW, panelH), new Rectangle(0, 0, 1, 1),
+                new Color(3, 8, 18) * (alpha * 0.87f));
+            DrawBracketBorder(sb, pixel, new Rectangle(panelX, panelY, panelW, panelH), alpha);
+
+            //标题
+            Utils.DrawBorderString(sb, "COMM LOG",
+                new Vector2(panelX + 12f, panelY + 10f),
+                new Color(0, 218, 255) * (alpha * 0.83f), 0.75f);
+
+            //流动分割线
+            DrawFlowLine(sb, pixel, panelX + 8, panelY + 30, panelW - 16, alpha * 0.7f);
+
+            //终端滚动日志
+            DrawTerminalLog(sb, panelX, panelY + 38, panelW, panelH - 46, alpha);
+        }
+
+        private void DrawTerminalLog(SpriteBatch sb, int panelX, int startY, int panelW, int panelH, float alpha) {
+            if (TerminalMessages == null || TerminalMessages.Length == 0) return;
+
+            int logX = panelX + 12;
+            float lineH = 22f;
+            int maxLines = (int)(panelH / lineH);
+
+            //根据全局时间偏移模拟滚动
+            float scrollOffset = globalTime * 0.1f;
+            int baseIdx = (int)scrollOffset % TerminalMessages.Length;
+
+            for (int i = 0; i < Math.Min(maxLines, TerminalMessages.Length); i++) {
+                int msgIdx = (baseIdx + i) % TerminalMessages.Length;
+                float lineY = startY + i * lineH;
+
+                //最新行高亮闪烁，旧行逐渐变暗
+                bool isNewest = (i == Math.Min(maxLines, TerminalMessages.Length) - 1);
+                float lineAlpha = isNewest
+                    ? (MathF.Sin(circuitPulseTimer * 3.2f) * 0.28f + 0.72f)
+                    : (0.28f + (1f - (float)i / maxLines) * 0.22f);
+
+                Color textColor = isNewest
+                    ? new Color(0, 215, 255) * (alpha * lineAlpha)
+                    : new Color(55, 125, 175) * (alpha * lineAlpha);
+
+                Utils.DrawBorderString(sb, TerminalMessages[msgIdx],
+                    new Vector2(logX, lineY), textColor, 0.59f);
+
+                //行左侧指示线（最新行高亮）
+                Color lineAccent = isNewest
+                    ? new Color(0, 175, 255) * (alpha * lineAlpha * 0.78f)
+                    : new Color(12, 48, 88) * (alpha * 0.48f);
+                sb.Draw(VaultAsset.placeholder2.Value,
+                    new Rectangle(panelX + 4, (int)lineY + 2, 2, (int)lineH - 6), new Rectangle(0, 0, 1, 1), lineAccent);
+            }
+        }
+
+        private void DrawBracketBorder(SpriteBatch sb, Texture2D pixel, Rectangle rect, float alpha) {
+            Color edge = new Color(38, 188, 255) * (alpha * 0.83f);
+            Color edgeDim = edge * 0.48f;
+            int bl = 20;
+            int bw = 2;
+
+            //顶部全宽薄高光线（极细，增加精致感）
+            sb.Draw(pixel, new Rectangle(rect.X, rect.Y, rect.Width, 1), new Rectangle(0, 0, 1, 1), edge * 0.33f);
+
+            //四角L括号
+            DrawHorStrip(sb, pixel, rect.X, rect.Y, bl, bw, edge);
+            DrawVerStrip(sb, pixel, rect.X, rect.Y, bl, bw, edge);
+            DrawHorStrip(sb, pixel, rect.Right - bl, rect.Y, bl, bw, edge);
+            DrawVerStrip(sb, pixel, rect.Right - bw, rect.Y, bl, bw, edge);
+            DrawHorStrip(sb, pixel, rect.X, rect.Bottom - bw, bl, bw, edgeDim);
+            DrawVerStrip(sb, pixel, rect.X, rect.Bottom - bl, bl, bw, edgeDim);
+            DrawHorStrip(sb, pixel, rect.Right - bl, rect.Bottom - bw, bl, bw, edgeDim);
+            DrawVerStrip(sb, pixel, rect.Right - bw, rect.Bottom - bl, bl, bw, edgeDim);
+
+            //顶部角落切口刻痕
+            DrawHorStrip(sb, pixel, rect.X + bl + 2, rect.Y, 4, 1, edge * 0.32f);
+            DrawHorStrip(sb, pixel, rect.Right - bl - 6, rect.Y, 4, 1, edge * 0.32f);
+        }
+
+        private void DrawFlowLine(SpriteBatch sb, Texture2D pixel, int x, int y, int w, float alpha) {
+            //带亮点流动效果的水平分割线
+            int segs = Math.Max(1, w / 3);
+            for (int i = 0; i < segs; i++) {
+                float t = i / (float)segs;
+                float flow = (t + circuitPulseTimer * 0.23f) % 1f;
+                float bright = MathF.Sin(flow * MathHelper.Pi) * 0.52f + 0.38f;
+                Color c = new Color(28, 125, 215) * (alpha * bright);
+                sb.Draw(pixel, new Rectangle(x + i * 3, y, 2, 1), new Rectangle(0, 0, 1, 1), c);
+            }
+        }
+
+        private static void DrawHorStrip(SpriteBatch sb, Texture2D pixel, int x, int y, int w, int h, Color c) {
+            sb.Draw(pixel, new Rectangle(x, y, w, h), new Rectangle(0, 0, 1, 1), c);
+        }
+
+        private static void DrawVerStrip(SpriteBatch sb, Texture2D pixel, int x, int y, int h, int w, Color c) {
+            sb.Draw(pixel, new Rectangle(x, y, w, h), new Rectangle(0, 0, 1, 1), c);
         }
 
         #endregion
