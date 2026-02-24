@@ -244,7 +244,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Galac
                 });
                 Add(DraedonName.Value, AndroidReveal2.Value);
                 Add(DraedonName.Value, AndroidReveal3.Value);
-                Add(DraedonName.Value, AndroidReveal4.Value);
+                //Add(DraedonName.Value, AndroidReveal4.Value);
                 Add(DraedonName.Value, MissionObjective.Value);
                 Add(DraedonName.Value + red, MissionObjectiveDark.Value);
                 Add(DraedonName.Value + red, FinalSendOff.Value);

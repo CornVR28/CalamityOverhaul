@@ -166,7 +166,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
                 this.GetLocalization("Hint3", () => "嘉登的机械造物已经超越了现实的极限"),
                 this.GetLocalization("Hint4", () => "没有大到无法接受的牺牲，没有小到可以原谅的背叛"),
                 this.GetLocalization("Hint5", () => "任何足够先进的技术，皆与魔法无异"),
-                this.GetLocalization("Hint6", () => "灾厄之中蕴藏着超越一切的可能性"),
+                //this.GetLocalization("Hint6", () => "灾厄之中蕴藏着超越一切的可能性"),
                 this.GetLocalization("Hint7", () => "嘉登从不做无意义的事，每一步都是精密计算的结果"),
                 this.GetLocalization("Hint8", () => "数据即是力量，知识即是武装"),
                 this.GetLocalization("Hint9", () => "机械不会背叛，但操控机械的人或许会"),
@@ -1139,9 +1139,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
             //系统状态条目
             DrawSystemStatusItems(sb, pixel, panelX, panelY, panelW, panelH, alpha);
 
-            //底部均衡器条（占据面板底部区域）
-            int eqY = panelY + panelH - 52;
-            DrawEQBars(sb, pixel, panelX + 12, eqY, panelW - 24, 36, alpha * 0.78f);
+            //底部信号波形监视器（占据面板底部区域）
+            int waveY = panelY + panelH - 60;
+            DrawSignalWave(sb, pixel, panelX + 12, waveY, panelW - 24, 44, alpha * 0.82f);
         }
 
         private void DrawSystemStatusItems(SpriteBatch sb, Texture2D pixel,
@@ -1210,19 +1210,83 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
             }
         }
 
-        private void DrawEQBars(SpriteBatch sb, Texture2D pixel, int x, int y, int totalW, int maxH, float alpha) {
+        private void DrawSignalWave(SpriteBatch sb, Texture2D pixel, int x, int y, int totalW, int totalH, float alpha) {
             if (alpha < 0.01f) return;
+
             int n = eqBars.Length;
-            float barW = (float)totalW / n - 1.5f;
+            //波形垂直中心线（0振幅基线位置）
+            float baselineY = y + totalH * 0.62f;
+            float ampRange = totalH * 0.36f;
+
+            //区域背景
+            sb.Draw(pixel, new Rectangle(x, y, totalW, totalH), new Rectangle(0, 0, 1, 1),
+                new Color(2, 6, 15) * (alpha * 0.78f));
+
+            //标签
+            Utils.DrawBorderString(sb, "WAVEFORM",
+                new Vector2(x + 2f, y + 1f),
+                new Color(0, 155, 218) * (alpha * 0.52f), 0.46f);
+
+            //水平基线
+            sb.Draw(pixel, new Rectangle(x, (int)baselineY, totalW, 1), new Rectangle(0, 0, 1, 1),
+                new Color(0, 78, 145) * (alpha * 0.55f));
+
+            //计算各采样点的屏幕坐标
+            //使用eqBars作为振幅数据，以正弦噪波叠加让静止时也有动感
+            float[] ys = new float[n];
             for (int i = 0; i < n; i++) {
-                float h = eqBars[i] * maxH;
-                float bx = x + i * (barW + 1.5f);
-                float by = y + (maxH - h);
-                //冷色系渐变：低频蓝偏向高频青绿
-                Color c = Color.Lerp(new Color(0, 155, 255), new Color(38, 252, 195), eqBars[i]);
-                sb.Draw(pixel, new Rectangle((int)bx, (int)by, (int)Math.Max(1f, barW), (int)Math.Max(1f, h)),
-                    new Rectangle(0, 0, 1, 1), c * alpha);
+                //eqBars在[-1,1]范围内居中映射，偏移量用正弦底波叠加
+                float amp = (eqBars[i] - 0.5f) * 2f;
+                float noise = MathF.Sin(globalTime * 3.8f + i * 0.72f) * 0.08f;
+                ys[i] = baselineY - (amp + noise) * ampRange;
             }
+
+            //逐段绘制波形折线（带拖影填充）
+            float stepX = (float)totalW / (n - 1);
+            for (int i = 0; i < n - 1; i++) {
+                float x0 = x + i * stepX;
+                float x1 = x + (i + 1) * stepX;
+                float y0 = ys[i];
+                float y1 = ys[i + 1];
+
+                //振幅越大越亮越偏青绿，振幅偏低偏蓝
+                float t = (eqBars[i] + eqBars[i + 1]) * 0.5f;
+                Color lineColor = Color.Lerp(new Color(0, 158, 255), new Color(28, 245, 195), t);
+
+                //主折线段
+                DrawLine(sb, pixel, new Vector2(x0, y0), new Vector2(x1, y1),
+                    lineColor * (alpha * 0.88f), 1.5f);
+
+                //向基线方向的半透明填充（制造示波器屏光效果）
+                int fillSteps = Math.Max(1, (int)Math.Abs(y0 - baselineY) / 2);
+                for (int f = 1; f <= fillSteps; f++) {
+                    float ft = f / (float)(fillSteps + 1);
+                    float fy = y0 + (baselineY - y0) * ft;
+                    sb.Draw(pixel, new Vector2(x0, fy), new Rectangle(0, 0, 1, 1),
+                        lineColor * (alpha * 0.045f * (1f - ft)), 0f, new Vector2(0.5f),
+                        new Vector2(1.5f, 1f), SpriteEffects.None, 0f);
+                }
+
+                //采样节点高亮点
+                float nodePulse = MathF.Sin(globalTime * 4.2f + i * 0.55f) * 0.28f + 0.72f;
+                sb.Draw(pixel, new Vector2(x0, y0), new Rectangle(0, 0, 1, 1),
+                    lineColor * (alpha * 0.72f * nodePulse), 0f, new Vector2(0.5f),
+                    new Vector2(2.2f), SpriteEffects.None, 0f);
+            }
+
+            //末端节点
+            float lastT = eqBars[n - 1];
+            Color lastColor = Color.Lerp(new Color(0, 158, 255), new Color(28, 245, 195), lastT);
+            float lastNodePulse = MathF.Sin(globalTime * 4.2f + (n - 1) * 0.55f) * 0.28f + 0.72f;
+            sb.Draw(pixel, new Vector2(x + totalW, ys[n - 1]), new Rectangle(0, 0, 1, 1),
+                lastColor * (alpha * 0.72f * lastNodePulse), 0f, new Vector2(0.5f),
+                new Vector2(2.2f), SpriteEffects.None, 0f);
+
+            //区域边框（薄线）
+            sb.Draw(pixel, new Rectangle(x, y, totalW, 1), new Rectangle(0, 0, 1, 1),
+                new Color(0, 88, 155) * (alpha * 0.42f));
+            sb.Draw(pixel, new Rectangle(x, y + totalH - 1, totalW, 1), new Rectangle(0, 0, 1, 1),
+                new Color(0, 55, 108) * (alpha * 0.32f));
         }
 
         private void DrawRightPanel(SpriteBatch sb, Texture2D pixel, int sw, int sh, float alpha) {
