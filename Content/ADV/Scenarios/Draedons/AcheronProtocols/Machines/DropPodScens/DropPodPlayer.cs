@@ -1,4 +1,5 @@
 ﻿using InnoVault.GameSystem;
+using Microsoft.Xna.Framework.Input;
 using System.Collections.Generic;
 using System.Linq;
 using Terraria;
@@ -37,6 +38,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
 
         private float moveVelocity;
 
+        /// <summary>上一帧 2 键状态，用于边沿检测</summary>
+        private bool prevD2Pressed;
+
         public override void PostUpdate() {
             if (!DropPodWorld.Active) {
                 if (DropPodActive) {
@@ -73,6 +77,14 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
             //根据移动速度计算倾斜角度
             float targetTilt = (moveVelocity / MoveSpeed) * TiltMax;
             TiltAngle = MathHelper.Lerp(TiltAngle, targetTilt, TiltLerp);
+
+            // ── 调试：按 2 键触发坠入环节 ─────────────────────────────────────────
+            bool d2 = Keyboard.GetState().IsKeyDown(Keys.D2);
+            if (d2 && !prevD2Pressed) {
+                DropPodActor.TriggerLandingPhase();
+            }
+            prevD2Pressed = d2;
+            // ──────────────────────────────────────────────────────────────────────
 
             //锁定玩家位置在世界中央，无重力
             Player.position = new Vector2(

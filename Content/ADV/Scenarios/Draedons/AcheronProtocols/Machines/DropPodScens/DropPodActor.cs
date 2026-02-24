@@ -68,6 +68,36 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         /// </summary>
         private bool incomingCallTriggered;
 
+        // ── 坠入环节 ──────────────────────────────────────────────────────────────
+        /// <summary>
+        /// 坠入环节是否已激活——空降仓向下移出屏幕并渐黑
+        /// </summary>
+        private bool landingPhaseActive;
+
+        /// <summary>
+        /// 坠入环节已运行帧数
+        /// </summary>
+        private int landingTimer;
+
+        /// <summary>
+        /// 坠入下坠速度（世界坐标 px/帧），每帧加速
+        /// </summary>
+        private float landingVelocityY;
+
+        /// <summary>
+        /// 由外部调用 <see cref="TriggerLandingPhase"/> 设置的一次性触发标记
+        /// </summary>
+        private static bool landingPhaseRequested;
+        // ──────────────────────────────────────────────────────────────────────────
+
+        /// <summary>
+        /// 触发坠入环节——空降仓向下移出屏幕，同时屏幕渐黑<br/>
+        /// 此接口可在任意时机调用，常用于切换世界前的过渡演出
+        /// </summary>
+        internal static void TriggerLandingPhase() {
+            landingPhaseRequested = true;
+        }
+
         public override void OnSpawn(params object[] args) {
             Width = 240;
             Height = 280;
@@ -80,6 +110,10 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
             tiltAngle = 0f;
             debrisSpawnTimer = 0;
             incomingCallTriggered = false;
+            landingPhaseActive = false;
+            landingTimer = 0;
+            landingVelocityY = 0f;
+            landingPhaseRequested = false;
         }
 
         public override void AI() {
@@ -89,6 +123,35 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
             }
 
             dropTimer++;
+
+            // ── 坠入环节处理 ────────────────────────────────────────────────────────
+            //接收外部触发请求
+            if (landingPhaseRequested) {
+                landingPhaseRequested = false;
+                landingPhaseActive = true;
+                landingTimer = 0;
+                landingVelocityY = 0f;
+            }
+
+            if (landingPhaseActive) {
+                landingTimer++;
+
+                //加速下坠（模拟重力），上限 60px/帧
+                landingVelocityY = MathHelper.Clamp(landingVelocityY + 0.45f, 0f, 60f);
+                Position = new Vector2(Position.X, Position.Y + landingVelocityY);
+
+                //坠入时消除震动，保持画面平稳
+                shakeOffset = Vector2.Zero;
+
+                //渐黑进度：80 帧内平滑插值到全黑
+                float fadeProg = MathHelper.Clamp(landingTimer / 80f, 0f, 1f);
+                DropPodDrawSystem.SyncLandingFade(MathHelper.SmoothStep(0f, 1f, fadeProg));
+
+                //仍同步 dropTimer 供其他屏幕特效使用
+                DropPodDrawSystem.SyncDropTimer(dropTimer, reentryHeat);
+                return;
+            }
+            // ──────────────────────────────────────────────────────────────────────
 
             //震动效果——随时间加剧（模拟大气再入的颠簸）
             float shakeProgress = MathHelper.Clamp(dropTimer / 600f, 0f, 1f);
