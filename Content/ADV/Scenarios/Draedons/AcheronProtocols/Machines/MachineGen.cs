@@ -1,4 +1,4 @@
-﻿using DimensionalRelease.Common;
+﻿using CalamityOverhaul.Common;
 using System;
 using Terraria;
 using Terraria.ID;
