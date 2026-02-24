@@ -1,5 +1,6 @@
 ﻿using CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.ApolliaActors.States;
 using CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machines;
+using CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machines.Gargoyles;
 using CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machines.LandingScens;
 using InnoVault.Actors;
 using Terraria;
@@ -34,6 +35,11 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
 
         /// <summary>英雄面板是否已激活</summary>
         internal bool HeroPanelActivated;
+
+        /// <summary>石像鬼序列阶段：0=未开始  1=延迟计时（8秒）  2=演出播放中  3=警示对话已启动</summary>
+        private int gargoylePhase;
+        /// <summary>延迟计时器（目标 480 帧 ≈ 8 秒）</summary>
+        private int gargoyleDelayTimer;
 
         public override void PostUpdate() {
             if (!Player.Alives()) {
@@ -85,6 +91,26 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
             //阶段4：英雄面板同步
             if (HeroPanelActivated && ApolliaHeroPanelUI.Instance != null) {
                 ApolliaHeroPanelUI.Instance.Unlocked = true;
+            }
+
+            //阶段5：英雄面板刚激活时，开始 8 秒倒计时
+            if (HeroPanelActivated && gargoylePhase == 0) {
+                gargoylePhase = 1;
+            }
+
+            if (gargoylePhase == 1) {
+                gargoyleDelayTimer++;
+                if (gargoyleDelayTimer >= 480) {
+                    gargoylePhase = 2;
+                    GargoyleSwarmPlayer.StartCutscene();
+                }
+            }
+
+            //阶段6：等待演出结束，触发警示对话
+            if (gargoylePhase == 2 && !GargoyleSwarmPlayer.IsActive) {
+                gargoylePhase = 3;
+                ScenarioManager.Reset<GargoyleWarningScenario>();
+                ScenarioManager.Start<GargoyleWarningScenario>();
             }
         }
 
@@ -143,6 +169,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
             HeroPanelActivated = false;
             landingPodCenter = Vector2.Zero;
             apolliaActorIndex = -1;
+            gargoylePhase = 0;
+            gargoyleDelayTimer = 0;
 
             if (ApolliaHeroPanelUI.Instance != null) {
                 ApolliaHeroPanelUI.Instance.Unlocked = false;
