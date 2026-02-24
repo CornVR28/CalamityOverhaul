@@ -47,11 +47,11 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         /// <summary>摄像机上摇距离（像素）</summary>
         private const float PanDistance = 500f;
         /// <summary>虫群总生成数量</summary>
-        private const int SwarmCount = 3000;
+        private const int SwarmCount = 5000;
         /// <summary>虫群整体飞越方向基础速度（负=向左）</summary>
-        private const float SwarmBaseSpeed = -13f;
+        private const float SwarmBaseSpeed = -16f;
         /// <summary>流道垂直分布总高度</summary>
-        private const float StreamSpread = 400f;
+        private const float StreamSpread = 500f;
         /// <summary>缩放：飞越期间略微拉远以展示更多天空</summary>
         private const float CrossingZoom = 0.85f;
         /// <summary>摄像机水平跟踪比例（0=不跟, 1=完全跟随集群重心）</summary>
@@ -136,10 +136,15 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
                 PruneOffscreenGargoyles();
             }
 
+            //生成结束后清理散兵——掉队或飞反方向的个体直接击杀
+            if (timer >= SpawnEnd + 60) {
+                PruneStragglers();
+            }
+
             //演出结束：下摇完成后，等待所有石像鬼飞出屏幕再收场
             if (timer >= PanDownEnd) {
                 List<GargoyleActor> remaining = ActorLoader.GetActiveActors<GargoyleActor>();
-                if (remaining.Count < 10 || timer >= CutsceneHardLimit) {
+                if (remaining.Count < 15 || timer >= CutsceneHardLimit) {
                     StopCutscene();
                     return;
                 }
@@ -248,6 +253,43 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
             List<GargoyleActor> gargoyles = ActorLoader.GetActiveActors<GargoyleActor>();
             foreach (GargoyleActor g in gargoyles) {
                 if (g.Position.X < leftKill) {
+                    ActorLoader.KillActor(g.WhoAmI, false);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 智能散兵清理：击杀飞反方向（向右）、垂直速度过大（失控上下窜）
+        /// 或远离视野的掉队个体，避免演出结束时被少数迷路者拖住
+        /// </summary>
+        private static void PruneStragglers() {
+            float screenLeft = Main.screenPosition.X;
+            float screenRight = Main.screenPosition.X + Main.screenWidth;
+            float screenTop = Main.screenPosition.Y;
+            float screenBottom = Main.screenPosition.Y + Main.screenHeight;
+
+            List<GargoyleActor> gargoyles = ActorLoader.GetActiveActors<GargoyleActor>();
+            foreach (GargoyleActor g in gargoyles) {
+                //飞反方向（X速度向右 > 2）——迷路了
+                if (g.BoidVelocity.X > 2f) {
+                    ActorLoader.KillActor(g.WhoAmI, false);
+                    continue;
+                }
+
+                //垂直速度过大、水平速度接近0——旋转失控
+                if (MathF.Abs(g.BoidVelocity.Y) > 10f && MathF.Abs(g.BoidVelocity.X) < 3f) {
+                    ActorLoader.KillActor(g.WhoAmI, false);
+                    continue;
+                }
+
+                //远离视野范围（上下飞出太远）
+                if (g.Position.Y < screenTop - 1500f || g.Position.Y > screenBottom + 1500f) {
+                    ActorLoader.KillActor(g.WhoAmI, false);
+                    continue;
+                }
+
+                //在屏幕右侧太远处还在晃——刷不过来的
+                if (g.Position.X > screenRight + 2000f) {
                     ActorLoader.KillActor(g.WhoAmI, false);
                 }
             }

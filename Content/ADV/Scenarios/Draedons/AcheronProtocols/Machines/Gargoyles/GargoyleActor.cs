@@ -30,15 +30,11 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         /// <summary>翅膀拍打速度（每帧弧度增量）</summary>
         internal float WingSpeed;
 
-        /// <summary>流道索引 (0~7)，决定个体沿哪条蛀蜒路径飞行</summary>
+        /// <summary>流道索引，决定个体沿哪条蛀蜒路径飞行</summary>
         internal int SwarmGroup;
 
-        /// <summary>个体游走相位——每个石像鬼独立的圆形游走力相位</summary>
-        internal float WanderPhase;
-        /// <summary>游走速度——每帧相位增量，随机化让每个个体轨迹不同</summary>
-        internal float WanderSpeed;
-        /// <summary>游走力幅度——随机化制造差异</summary>
-        internal float WanderStrength;
+        /// <summary>个体噪声种子——用于湍流场差异化采样，每个个体唯一</summary>
+        internal float NoiseSeed;
 
         #endregion
 
@@ -55,9 +51,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
             WingPhase = Main.rand.NextFloat(MathHelper.TwoPi);
             WingSpeed = Main.rand.NextFloat(0.12f, 0.22f);
             SwarmGroup = Main.rand.Next(GargoyleBoids.NumStreams);
-            WanderPhase = Main.rand.NextFloat(MathHelper.TwoPi);
-            WanderSpeed = Main.rand.NextFloat(0.03f, 0.09f);
-            WanderStrength = Main.rand.NextFloat(0.6f, 1.4f);
+            NoiseSeed = Main.rand.NextFloat(0f, 100f);
 
             BoidVelocity = Velocity;
         }
@@ -81,20 +75,14 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
                 WingPhase -= MathHelper.TwoPi;
             }
 
-            //个体游走相位推进
-            WanderPhase += WanderSpeed;
-            if (WanderPhase > MathHelper.TwoPi) {
-                WanderPhase -= MathHelper.TwoPi;
-            }
-
             //将鸟群速度写入 Actor.Velocity（ActorLoader 会自动执行 Position += Velocity）
             Velocity = BoidVelocity;
 
-            //朝向平滑跟随速度方向
+            //朝向平滑跟随速度方向——较快的插值让转向更流畅
             if (BoidVelocity.LengthSquared() > 0.1f) {
                 float targetRot = BoidVelocity.ToRotation();
                 float diff = MathHelper.WrapAngle(targetRot - Rotation);
-                Rotation += diff * 0.08f;
+                Rotation += diff * 0.18f;
             }
         }
 
