@@ -62,6 +62,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         #region 运行时状态
 
         private static bool cutsceneActive;
+        /// <summary>镜头平滑归位阶段——游戏对象已清理，镜头仍在过渡中</summary>
+        private static bool isExiting;
         private static int timer;
         private static Vector2 cutsceneOrigin;
         private static Vector2 cameraOffset;
@@ -93,16 +95,28 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         }
 
         /// <summary>
-        /// 立即停止演出并清理所有石像鬼
+        /// 开始结束演出流程：立即清理游戏对象，镜头进入平滑归位阶段
         /// </summary>
         internal static void StopCutscene() {
+            if (!cutsceneActive) return;
             cutsceneActive = false;
+            isExiting = true;
+            timer = 0;
+            totalSpawned = 0;
+            GargoyleBoids.Reset();
+            KillAllGargoyles();
+        }
+
+        /// <summary>
+        /// 硬重置——仅用于紧急退出（离开子世界等异常情况）或平滑归位完成后的最终清理
+        /// </summary>
+        private static void FullStop() {
+            cutsceneActive = false;
+            isExiting = false;
             timer = 0;
             totalSpawned = 0;
             cameraOffset = Vector2.Zero;
             currentZoom = 1f;
-            GargoyleBoids.Reset();
-            KillAllGargoyles();
         }
 
         #endregion
@@ -110,9 +124,21 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         #region 每帧逻辑
 
         public override void PostUpdate() {
-            //安全退出：离开子世界时自动终止
-            if (!MachineWorld.Active && cutsceneActive) {
-                StopCutscene();
+            //安全退出：离开子世界时强制硬停（异常情况，不做平滑）
+            if (!MachineWorld.Active && (cutsceneActive || isExiting)) {
+                FullStop();
+                return;
+            }
+
+            //──── 平滑归位阶段 ────
+            if (isExiting) {
+                cameraOffset.X = MathHelper.Lerp(cameraOffset.X, 0f, 0.06f);
+                cameraOffset.Y = MathHelper.Lerp(cameraOffset.Y, 0f, 0.06f);
+                currentZoom = MathHelper.Lerp(currentZoom, 1f, 0.05f);
+                //偏移和缩放均已足够接近目标值时完全退出
+                if (cameraOffset.LengthSquared() < 0.5f && MathF.Abs(currentZoom - 1f) < 0.008f) {
+                    FullStop();
+                }
                 return;
             }
 
@@ -155,7 +181,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         }
 
         public override void ModifyScreenPosition() {
-            if (!cutsceneActive) return;
+            if (!cutsceneActive && !isExiting) return;
 
             //叠加运镜偏移
             Main.screenPosition += cameraOffset;
