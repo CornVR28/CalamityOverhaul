@@ -11,9 +11,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
     /// <summary>
     /// 阿波利娅靠近玩家后的对话场景
     /// </summary>
-    internal class ApolliaDialogueScenario : ADVScenarioBase, ILocalizedModType
+    internal class FirstMetApollia : ADVScenarioBase, ILocalizedModType
     {
-        public override string Key => nameof(ApolliaDialogueScenario);
+        public override string Key => nameof(FirstMetApollia);
         protected override Func<DialogueBoxBase> DefaultDialogueStyle => () => StarStreamDialogueBox.Instance;
 
         public static LocalizedText Rolename { get; private set; }
@@ -43,7 +43,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
             Line4 = this.GetLocalization(nameof(Line4), () => "......(读取芯片数据)");
             Line5 = this.GetLocalization(nameof(Line5), () => "就你一个？！搞什么！");
             Line6 = this.GetLocalization(nameof(Line6), () => "这里需要的是泰坦军团，还有灭绝令！而不是再派一个人来送死！");
-            Line7 = this.GetLocalization(nameof(Line7), () => "......抱歉，源头的安排我都已知晓");
+            Line7 = this.GetLocalization(nameof(Line7), () => "(深呼吸)......抱歉，源头的安排我都已知晓");
             Line8 = this.GetLocalization(nameof(Line8), () => "阿波利娅，原隶属第九军团，现在将协助你在这颗星球上的所有行动");
         }
 

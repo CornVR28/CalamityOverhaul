@@ -942,7 +942,7 @@ GalacticCrisis: {
 	FinalSendOff: 坐标已输入，去吧，向我展示你能否再次超越我的计算
 }
 
-ApolliaDialogueScenario: {
+FirstMetApollia: {
 	Rolename: 阿波利娅
 	Line1: ......人类?
 	Line2: 大气层的空降轨迹太显眼了，我预判了落点过来碰碰运气
@@ -954,6 +954,6 @@ ApolliaDialogueScenario: {
 	Line4: ......(读取芯片数据)
 	Line5: 就你一个？！搞什么！
 	Line6: 这里需要的是泰坦军团，还有灭绝令！而不是再派一个人来送死！
-	Line7: ......抱歉，源头的安排我都已知晓
+	Line7: (深呼吸)......抱歉，源头的安排我都已知晓
 	Line8: 阿波利娅，原隶属第九军团，现在将协助你在这颗星球上的所有行动
 }

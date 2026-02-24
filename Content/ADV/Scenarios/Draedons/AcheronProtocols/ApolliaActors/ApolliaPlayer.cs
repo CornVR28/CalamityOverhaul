@@ -77,8 +77,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
                 ApolliaActor actor = GetApolliaActor();
                 if (actor?.CurrentState is ApolliaArrivedState) {
                     dialogueTriggered = true;
-                    ScenarioManager.Reset<ApolliaDialogueScenario>();
-                    ScenarioManager.Start<ApolliaDialogueScenario>();
+                    ScenarioManager.Reset<FirstMetApollia>();
+                    ScenarioManager.Start<FirstMetApollia>();
                 }
             }
 
