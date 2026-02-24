@@ -51,6 +51,13 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
                 groundFrames++;
             }
 
+            //紧急逃逸：无论宽限期，若当前身体已陷入实心方块则立即起飞
+            //（IsWallAhead 的前瞻有时因帧率/速度差异未能及时拦截，此处作兜底）
+            if (actor.IsEmbeddedInSolid()) {
+                Vector2 escapeTarget = new(actor.Center.X + FlyLookaheadX, actor.Center.Y);
+                return new ApolliaFlyingState(escapeTarget, onLand: _ => new ApolliaLeadRightState());
+            }
+
             //障碍检测：落地宽限期后才触发飞行，避免着陆抖动
             if (groundFrames > PostLandingGrace && actor.OnGround
                 && (actor.IsWallAhead(MoveDirection) || actor.IsGapAhead(MoveDirection))) {

@@ -324,15 +324,36 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
         }
 
         /// <summary>
-        /// 检测角色前方是否有实心墙壁阻挡 (检测碰撞体前方2格高度)
+        /// 检测角色前方是否有实心墙壁阻挡，扫描范围覆盖完整身体高度（头到脚）。
+        /// 修正：原逻辑只检测脚部往上3行，导致头部碰撞遗漏、角色穿入上半部分墙壁。
         /// </summary>
         internal bool IsWallAhead(int direction) {
             int checkX = (int)((Center.X + direction * (Width * 0.5f + 8f)) / 16f);
             int footY = (int)((Position.Y + Height - 4f) / 16f);
+            int headY = (int)((Position.Y + 4f) / 16f); // 从脚扫到头，覆盖全身
 
-            for (int y = footY; y >= footY - 2; y--) {
+            for (int y = footY; y >= headY; y--) {
                 if (!WorldGen.InWorld(checkX, y)) continue;
                 Tile tile = Framing.GetTileSafely(checkX, y);
+                if (tile.HasTile && Main.tileSolid[tile.TileType] && !Main.tileSolidTop[tile.TileType]) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// 检测角色身体中心列是否当前已陷入实心方块中（帧间穿越后的紧急检测）。
+        /// 不做严格碰撞，仅作为寻路兜底：一旦发现陷入则立即触发飞行逃逸。
+        /// </summary>
+        internal bool IsEmbeddedInSolid() {
+            int tileX = (int)(Center.X / 16f);
+            int headTileY = (int)((Position.Y + 4f) / 16f);
+            int footTileY = (int)((Position.Y + Height - 4f) / 16f);
+
+            for (int y = headTileY; y <= footTileY; y++) {
+                if (!WorldGen.InWorld(tileX, y)) continue;
+                Tile tile = Framing.GetTileSafely(tileX, y);
                 if (tile.HasTile && Main.tileSolid[tile.TileType] && !Main.tileSolidTop[tile.TileType]) {
                     return true;
                 }
