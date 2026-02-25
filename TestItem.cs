@@ -74,7 +74,7 @@ namespace CalamityOverhaul
         public override bool? UseItem(Player player) {
             //ScenarioManager.Reset<GalacticCrisis>();
             //ScenarioManager.Start<GalacticCrisis>();
-            //MachineWorld.Enter();
+            MachineWorld.Enter();
             //DropPodWorld.Enter();
             //ActorLoader.NewActor<DropPodActor>(player.Center, Vector2.Zero);
             //if (player.altFunctionUse == 0) {

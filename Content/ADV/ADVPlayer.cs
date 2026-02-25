@@ -43,7 +43,7 @@ namespace CalamityOverhaul.Content.ADV
             var previous = Main.oldKeyState;
             if (current.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.D4)
                 && !previous.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.D4)) {
-                DropPodWorld.Enter();
+                MachineWorld.Enter();
             }
         }
     }

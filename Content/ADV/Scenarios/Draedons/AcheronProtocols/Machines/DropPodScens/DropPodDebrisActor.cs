@@ -239,22 +239,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
                 });
             }
 
-            //金属撞击音效——钢铁碰撞声，随机化音调避免重复感
-            SoundEngine.PlaySound(CWRSound.HitTheSteel with {
-                Volume = 0.8f,
-                Pitch = -0.8f,
-                PitchVariance = 0.15f,
-                MaxInstances = 3
-            }, hitPoint);
-
-            //叠加一层低沉的金属共振回响，增加撞击的厚重感
-            SoundEngine.PlaySound(SoundID.DD2_MonkStaffGroundMiss with {
-                Volume = 0.5f,
-                Pitch = -0.6f,
-                PitchVariance = 0.1f,
-                MaxInstances = 2
-            }, hitPoint);
-
             //碰撞闪光——在撞击点产生短暂白色闪光
             hitFlashTimer = 1f;
             hitFlashPos = hitPoint;
