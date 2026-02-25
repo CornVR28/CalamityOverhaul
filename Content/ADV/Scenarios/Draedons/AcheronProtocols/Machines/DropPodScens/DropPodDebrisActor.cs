@@ -1,9 +1,12 @@
-﻿using InnoVault.Actors;
+﻿using CalamityOverhaul.Common;
+using InnoVault.Actors;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using System;
 using System.Collections.Generic;
 using Terraria;
+using Terraria.Audio;
+using Terraria.ID;
 
 namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machines.DropPodScens
 {
@@ -78,6 +81,10 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         //能量脉冲计时器
         private float pulseTimer;
 
+        //碰撞闪光
+        private float hitFlashTimer;
+        private Vector2 hitFlashPos;
+
         public override void OnSpawn(params object[] args) {
             Width = 20;
             Height = 20;
@@ -121,6 +128,11 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
             }
 
             pulseTimer += 0.08f;
+
+            //碰撞闪光衰减
+            if (hitFlashTimer > 0f) {
+                hitFlashTimer -= 0.08f;
+            }
 
             //更新火花粒子
             for (int i = sparks.Count - 1; i >= 0; i--) {
@@ -227,10 +239,34 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
                 });
             }
 
+            //金属撞击音效——钢铁碰撞声，随机化音调避免重复感
+            SoundEngine.PlaySound(CWRSound.HitTheSteel with {
+                Volume = 0.8f,
+                Pitch = -0.8f,
+                PitchVariance = 0.15f,
+                MaxInstances = 3
+            }, hitPoint);
+
+            //叠加一层低沉的金属共振回响，增加撞击的厚重感
+            SoundEngine.PlaySound(SoundID.DD2_MonkStaffGroundMiss with {
+                Volume = 0.5f,
+                Pitch = -0.6f,
+                PitchVariance = 0.1f,
+                MaxInstances = 2
+            }, hitPoint);
+
+            //碰撞闪光——在撞击点产生短暂白色闪光
+            hitFlashTimer = 1f;
+            hitFlashPos = hitPoint;
+
+            //残骸碰撞后速度微偏转，模拟物理擦撞效果
+            flySpeed *= 0.85f;
+            debrisRotationSpeed += Main.rand.NextFloat(-0.08f, 0.08f);
+
             //给空降仓增加额外的震动
             Player player = Main.LocalPlayer;
             if (player != null && player.active) {
-                player.CWR().GetScreenShake(6f);
+                player.CWR().GetScreenShake(8f);
             }
         }
 
@@ -243,6 +279,11 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
             //绘制残骸
             if (phase == DebrisPhase.Flying) {
                 DrawDebris(spriteBatch);
+            }
+
+            //绘制碰撞闪光
+            if (hitFlashTimer > 0f) {
+                DrawHitFlash(spriteBatch);
             }
 
             //绘制火花粒子
@@ -357,6 +398,29 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
                 0f, Vector2.Zero, new Vector2(bracketLen, bracketThickness), SpriteEffects.None, 0f);
             sb.Draw(px, drawPos + new Vector2(halfW - bracketThickness, halfH - bracketLen), new Rectangle(0, 0, 1, 1), bracketColor,
                 0f, Vector2.Zero, new Vector2(bracketThickness, bracketLen), SpriteEffects.None, 0f);
+        }
+
+        /// <summary>
+        /// 绘制碰撞瞬间的闪光效果——白色→橙色渐变的短暂辉光
+        /// </summary>
+        private void DrawHitFlash(SpriteBatch sb) {
+            if (CWRAsset.SoftGlow == null || CWRAsset.SoftGlow.IsDisposed) return;
+            Texture2D glow = CWRAsset.SoftGlow.Value;
+            Vector2 drawPos = hitFlashPos - Main.screenPosition;
+
+            float t = hitFlashTimer; // 1 → 0
+            float flashScale = (1f - t) * 0.8f + 0.3f; // 快速扩散
+            float flashAlpha = t * t; // 快速衰减
+
+            //内层白色核心闪光
+            Color coreColor = Color.White * (flashAlpha * 0.9f);
+            sb.Draw(glow, drawPos, null, coreColor with { A = 0 }, 0f,
+                glow.Size() * 0.5f, flashScale * 0.5f, SpriteEffects.None, 0f);
+
+            //外层橙红色扩散辉光
+            Color outerColor = new Color(255, 160, 60) * (flashAlpha * 0.6f);
+            sb.Draw(glow, drawPos, null, outerColor with { A = 0 }, 0f,
+                glow.Size() * 0.5f, flashScale * 1.2f, SpriteEffects.None, 0f);
         }
 
         private void DrawSparks(SpriteBatch sb) {
