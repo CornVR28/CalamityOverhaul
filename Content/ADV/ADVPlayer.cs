@@ -38,13 +38,6 @@ namespace CalamityOverhaul.Content.ADV
             }
 
             AccPlayerCount = num;
-
-            var current = Main.keyState;
-            var previous = Main.oldKeyState;
-            if (current.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.D4)
-                && !previous.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.D4)) {
-                MachineWorld.Enter();
-            }
         }
     }
 }
