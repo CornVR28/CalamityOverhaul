@@ -366,7 +366,7 @@ namespace CalamityOverhaul.Content
         }
 
         public override void OnEnterWorld() {
-            Information();
+            //Information();
 
             if (OverhaulTheBibleUI.Instance != null) {
                 OverhaulTheBibleUI.Instance.Active = false;
