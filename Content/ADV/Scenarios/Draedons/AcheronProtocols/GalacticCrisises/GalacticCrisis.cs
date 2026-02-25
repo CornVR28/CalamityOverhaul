@@ -146,8 +146,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Galac
         protected override void Build() {
             //注册嘉登立绘
             DialogueBoxBase.RegisterPortrait(DraedonName.Value, ADVAsset.Draedon2ADV, silhouette: false);
-            DialogueBoxBase.RegisterPortrait(DraedonName.Value + red, ADVAsset.Draedon2RedADV, silhouette: false);
-            DialogueBoxBase.RegisterPortrait(DraedonName.Value + alt, ADVAsset.DraedonADV, silhouette: false);
+            DialogueBoxBase.RegisterPortrait(DraedonName.Value + red, ADVAsset.Draedon2ADV, silhouette: false);
+            DialogueBoxBase.RegisterPortrait(DraedonName.Value + alt, ADVAsset.Draedon2ADV, silhouette: false);
 
             //阶段一：危机与灭绝令
             //第一句台词开始时启动银河系展现动画
@@ -214,8 +214,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Galac
             protected override void Build() {
                 //注册嘉登立绘
                 DialogueBoxBase.RegisterPortrait(DraedonName.Value, ADVAsset.Draedon2ADV, silhouette: false);
-                DialogueBoxBase.RegisterPortrait(DraedonName.Value + red, ADVAsset.Draedon2RedADV, silhouette: false);
-                DialogueBoxBase.RegisterPortrait(DraedonName.Value + alt, ADVAsset.DraedonADV, silhouette: false);
+                DialogueBoxBase.RegisterPortrait(DraedonName.Value + red, ADVAsset.Draedon2ADV, silhouette: false);
+                DialogueBoxBase.RegisterPortrait(DraedonName.Value + alt, ADVAsset.Draedon2ADV, silhouette: false);
 
                 //阶段二：嘉登的转折（意料之中的反应）
                 Add(DraedonName.Value + alt, RebuttalLine1.Value);

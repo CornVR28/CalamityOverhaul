@@ -2,6 +2,7 @@
 using CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Campsites;
 using CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.GalacticCrisises;
 using CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machines;
+using CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machines.DropPodScens;
 using Terraria;
 using Terraria.ModLoader;
 
@@ -42,8 +43,7 @@ namespace CalamityOverhaul.Content.ADV
             var previous = Main.oldKeyState;
             if (current.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.D4)
                 && !previous.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.D4)) {
-                ScenarioManager.Reset<GalacticCrisis>();
-                ScenarioManager.Start<GalacticCrisis>();
+                DropPodWorld.Enter();
             }
         }
     }
