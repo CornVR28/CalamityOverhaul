@@ -24,7 +24,6 @@ using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using Terraria;
 using Terraria.Audio;
 using Terraria.DataStructures;
@@ -43,292 +42,310 @@ namespace CalamityOverhaul
     /// </summary>
     internal static class CWRRef
     {
-        private static bool? _has = null;
+        /// <summary>
+        /// Calamity Mod的目标版本，只有当安装了这个版本的Calamity Mod时才会启用相关功能
+        /// </summary>
+        public static Version TargetCalamityVersion => new(2, 1, 2);
         /// <summary>
         /// 是否安装了指定版本的Calamity Mod
         /// </summary>
         public static bool Has {
             get {
-                _has ??= ModLoader.TryGetMod("CalamityMod", out Mod mod) && mod.Version == new Version(2, 1, 1);
+                _has ??= ModLoader.TryGetMod("CalamityMod", out Mod mod) && mod.Version == TargetCalamityVersion;
                 return _has.Value;
             }
         }
+        private static bool? _has = null;
 
         private static int dummyInt;
         private static float dummyFloat;
+        private static Type DownedBossSystemType;
 
-        internal static void UnLoad() => _has = null;
+        internal static void Load() {
+            if (ModLoader.TryGetMod("CalamityMod", out Mod mod)) {
+                DownedBossSystemType = mod.Code.GetType("CalamityMod.DownedBossSystem");
+            }
+
+            if (DownedBossSystemType is not null) {
+                const BindingFlags bf = BindingFlags.Public | BindingFlags.Static;
+                downedDesertScourgeProp = DownedBossSystemType.GetProperty("downedDesertScourge", bf);
+                downedCLAMProp = DownedBossSystemType.GetProperty("downedCLAM", bf);
+                downedCrabulonProp = DownedBossSystemType.GetProperty("downedCrabulon", bf);
+                downedHiveMindProp = DownedBossSystemType.GetProperty("downedHiveMind", bf);
+                downedPerforatorProp = DownedBossSystemType.GetProperty("downedPerforator", bf);
+                downedSlimeGodProp = DownedBossSystemType.GetProperty("downedSlimeGod", bf);
+                downedCryogenProp = DownedBossSystemType.GetProperty("downedCryogen", bf);
+                downedBrimstoneElementalProp = DownedBossSystemType.GetProperty("downedBrimstoneElemental", bf);
+                downedAquaticScourgeProp = DownedBossSystemType.GetProperty("downedAquaticScourge", bf);
+                downedCragmawMireProp = DownedBossSystemType.GetProperty("downedCragmawMire", bf);
+                downedCalamitasCloneProp = DownedBossSystemType.GetProperty("downedCalamitasClone", bf);
+                downedGSSProp = DownedBossSystemType.GetProperty("downedGSS", bf);
+                downedLeviathanProp = DownedBossSystemType.GetProperty("downedLeviathan", bf);
+                downedAstrumAureusProp = DownedBossSystemType.GetProperty("downedAstrumAureus", bf);
+                downedPlaguebringerProp = DownedBossSystemType.GetProperty("downedPlaguebringer", bf);
+                downedRavagerProp = DownedBossSystemType.GetProperty("downedRavager", bf);
+                downedAstrumDeusProp = DownedBossSystemType.GetProperty("downedAstrumDeus", bf);
+                downedGuardiansProp = DownedBossSystemType.GetProperty("downedGuardians", bf);
+                downedDragonfollyProp = DownedBossSystemType.GetProperty("downedDragonfolly", bf);
+                downedProvidenceProp = DownedBossSystemType.GetProperty("downedProvidence", bf);
+                downedCeaselessVoidProp = DownedBossSystemType.GetProperty("downedCeaselessVoid", bf);
+                downedStormWeaverProp = DownedBossSystemType.GetProperty("downedStormWeaver", bf);
+                downedSignusProp = DownedBossSystemType.GetProperty("downedSignus", bf);
+                downedPolterghastProp = DownedBossSystemType.GetProperty("downedPolterghast", bf);
+                downedMaulerProp = DownedBossSystemType.GetProperty("downedMauler", bf);
+                downedNuclearTerrorProp = DownedBossSystemType.GetProperty("downedNuclearTerror", bf);
+                downedBoomerDukeProp = DownedBossSystemType.GetProperty("downedBoomerDuke", bf);
+                downedDoGProp = DownedBossSystemType.GetProperty("downedDoG", bf);
+                downedYharonProp = DownedBossSystemType.GetProperty("downedYharon", bf);
+                downedExoMechsProp = DownedBossSystemType.GetProperty("downedExoMechs", bf);
+                downedCalamitasProp = DownedBossSystemType.GetProperty("downedCalamitas", bf);
+                downedPrimordialWyrmProp = DownedBossSystemType.GetProperty("downedPrimordialWyrm", bf);
+                downedBossRushProp = DownedBossSystemType.GetProperty("downedBossRush", bf);
+                downedThanatosProp = DownedBossSystemType.GetProperty("downedThanatos", bf);
+            }
+        }
+        internal static void UnLoad() {
+            _has = null;
+            DownedBossSystemType = null;
+            downedDesertScourgeProp = null;
+            downedCLAMProp = null;
+            downedCrabulonProp = null;
+            downedHiveMindProp = null;
+            downedPerforatorProp = null;
+            downedSlimeGodProp = null;
+            downedCryogenProp = null;
+            downedBrimstoneElementalProp = null;
+            downedAquaticScourgeProp = null;
+            downedCragmawMireProp = null;
+            downedCalamitasCloneProp = null;
+            downedGSSProp = null;
+            downedLeviathanProp = null;
+            downedAstrumAureusProp = null;
+            downedPlaguebringerProp = null;
+            downedRavagerProp = null;
+            downedAstrumDeusProp = null;
+            downedGuardiansProp = null;
+            downedDragonfollyProp = null;
+            downedProvidenceProp = null;
+            downedCeaselessVoidProp = null;
+            downedStormWeaverProp = null;
+            downedSignusProp = null;
+            downedPolterghastProp = null;
+            downedMaulerProp = null;
+            downedNuclearTerrorProp = null;
+            downedBoomerDukeProp = null;
+            downedDoGProp = null;
+            downedYharonProp = null;
+            downedExoMechsProp = null;
+            downedCalamitasProp = null;
+            downedPrimordialWyrmProp = null;
+            downedBossRushProp = null;
+            downedThanatosProp = null;
+        }
+
+        private static bool GetDownedProp(PropertyInfo prop) => prop != null && (bool)prop.GetValue(null);
+        private static void SetDownedProp(PropertyInfo prop, bool value) => prop?.SetValue(null, value);
+        private static PropertyInfo downedDesertScourgeProp;
+        private static PropertyInfo downedCLAMProp;
+        private static PropertyInfo downedCrabulonProp;
+        private static PropertyInfo downedHiveMindProp;
+        private static PropertyInfo downedPerforatorProp;
+        private static PropertyInfo downedSlimeGodProp;
+        private static PropertyInfo downedCryogenProp;
+        private static PropertyInfo downedBrimstoneElementalProp;
+        private static PropertyInfo downedAquaticScourgeProp;
+        private static PropertyInfo downedCragmawMireProp;
+        private static PropertyInfo downedCalamitasCloneProp;
+        private static PropertyInfo downedGSSProp;
+        private static PropertyInfo downedLeviathanProp;
+        private static PropertyInfo downedAstrumAureusProp;
+        private static PropertyInfo downedPlaguebringerProp;
+        private static PropertyInfo downedRavagerProp;
+        private static PropertyInfo downedAstrumDeusProp;
+        private static PropertyInfo downedGuardiansProp;
+        private static PropertyInfo downedDragonfollyProp;
+        private static PropertyInfo downedProvidenceProp;
+        private static PropertyInfo downedCeaselessVoidProp;
+        private static PropertyInfo downedStormWeaverProp;
+        private static PropertyInfo downedSignusProp;
+        private static PropertyInfo downedPolterghastProp;
+        private static PropertyInfo downedMaulerProp;
+        private static PropertyInfo downedNuclearTerrorProp;
+        private static PropertyInfo downedBoomerDukeProp;
+        private static PropertyInfo downedDoGProp;
+        private static PropertyInfo downedYharonProp;
+        private static PropertyInfo downedExoMechsProp;
+        private static PropertyInfo downedCalamitasProp;
+        private static PropertyInfo downedPrimordialWyrmProp;
+        private static PropertyInfo downedBossRushProp;
+        private static PropertyInfo downedThanatosProp;
 
         /// <summary>
         /// 荒漠灾虫
         /// </summary>
-        public static bool GetDownedDesertScourge() => Has && GetDownedDesertScourgeInner();
-        [CWRJITEnabled]
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static bool GetDownedDesertScourgeInner() => DownedBossSystem.downedDesertScourge;
+        public static bool GetDownedDesertScourge() => GetDownedProp(downedDesertScourgeProp);
 
         /// <summary>
         /// 巨像蛤
         /// </summary>
-        public static bool GetDownedCLAM() => Has && GetDownedCLAMInner();
-        [CWRJITEnabled]
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static bool GetDownedCLAMInner() => DownedBossSystem.downedCLAM;
+        public static bool GetDownedCLAM() => GetDownedProp(downedCLAMProp);
 
         /// <summary>
         /// 蘑菇蟹
         /// </summary>
-        public static bool GetDownedCrabulon() => Has && GetDownedCrabulonInner();
-        [CWRJITEnabled]
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static bool GetDownedCrabulonInner() => DownedBossSystem.downedCrabulon;
+        public static bool GetDownedCrabulon() => GetDownedProp(downedCrabulonProp);
 
         /// <summary>
         /// 腐巢意志
         /// </summary>
-        public static bool GetDownedHiveMind() => Has && GetDownedHiveMindInner();
-        [CWRJITEnabled]
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static bool GetDownedHiveMindInner() => DownedBossSystem.downedHiveMind;
+        public static bool GetDownedHiveMind() => GetDownedProp(downedHiveMindProp);
 
         /// <summary>
         /// 血肉宿主
         /// </summary>
-        public static bool GetDownedPerforator() => Has && GetDownedPerforatorInner();
-        [CWRJITEnabled]
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static bool GetDownedPerforatorInner() => DownedBossSystem.downedPerforator;
+        public static bool GetDownedPerforator() => GetDownedProp(downedPerforatorProp);
 
         /// <summary>
         /// 史莱姆之神
         /// </summary>
-        public static bool GetDownedSlimeGod() => Has && GetDownedSlimeGodInner();
-        [CWRJITEnabled]
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static bool GetDownedSlimeGodInner() => DownedBossSystem.downedSlimeGod;
+        public static bool GetDownedSlimeGod() => GetDownedProp(downedSlimeGodProp);
 
         /// <summary>
         /// 极地冰灵
         /// </summary>
-        public static bool GetDownedCryogen() => Has && GetDownedCryogenInner();
-        [CWRJITEnabled]
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static bool GetDownedCryogenInner() => DownedBossSystem.downedCryogen;
+        public static bool GetDownedCryogen() => GetDownedProp(downedCryogenProp);
 
         /// <summary>
         /// 硫磺火元素
         /// </summary>
-        public static bool GetDownedBrimstoneElemental() => Has && GetDownedBrimstoneElementalInner();
-        [CWRJITEnabled]
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static bool GetDownedBrimstoneElementalInner() => DownedBossSystem.downedBrimstoneElemental;
+        public static bool GetDownedBrimstoneElemental() => GetDownedProp(downedBrimstoneElementalProp);
 
         /// <summary>
         /// 渊海灾虫
         /// </summary>
-        public static bool GetDownedAquaticScourge() => Has && GetDownedAquaticScourgeInner();
-        [CWRJITEnabled]
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static bool GetDownedAquaticScourgeInner() => DownedBossSystem.downedAquaticScourge;
+        public static bool GetDownedAquaticScourge() => GetDownedProp(downedAquaticScourgeProp);
 
         /// <summary>
         /// 辐射之主
         /// </summary>
-        public static bool GetDownedCragmawMire() => Has && GetDownedCragmawMireInner();
-        [CWRJITEnabled]
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static bool GetDownedCragmawMireInner() => DownedBossSystem.downedCragmawMire;
+        public static bool GetDownedCragmawMire() => GetDownedProp(downedCragmawMireProp);
 
         /// <summary>
         /// 灾厄之影
         /// </summary>
-        public static bool GetDownedCalamitasClone() => Has && GetDownedCalamitasCloneInner();
-        [CWRJITEnabled]
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static bool GetDownedCalamitasCloneInner() => DownedBossSystem.downedCalamitasClone;
+        public static bool GetDownedCalamitasClone() => GetDownedProp(downedCalamitasCloneProp);
 
         /// <summary>
         /// 沙漠巨鲨
         /// </summary>
-        public static bool GetDownedGSS() => Has && GetDownedGSSInner();
-        [CWRJITEnabled]
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static bool GetDownedGSSInner() => DownedBossSystem.downedGSS;
+        public static bool GetDownedGSS() => GetDownedProp(downedGSSProp);
 
         /// <summary>
         /// 利维坦
         /// </summary>
-        public static bool GetDownedLeviathan() => Has && GetDownedLeviathanInner();
-        [CWRJITEnabled]
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static bool GetDownedLeviathanInner() => DownedBossSystem.downedLeviathan;
+        public static bool GetDownedLeviathan() => GetDownedProp(downedLeviathanProp);
 
         /// <summary>
         /// 白金星舰
         /// </summary>
-        public static bool GetDownedAstrumAureus() => Has && GetDownedAstrumAureusInner();
-        [CWRJITEnabled]
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static bool GetDownedAstrumAureusInner() => DownedBossSystem.downedAstrumAureus;
+        public static bool GetDownedAstrumAureus() => GetDownedProp(downedAstrumAureusProp);
 
         /// <summary>
         /// 瘟疫使者
         /// </summary>
-        public static bool GetDownedPlaguebringer() => Has && GetDownedPlaguebringerInner();
-        [CWRJITEnabled]
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static bool GetDownedPlaguebringerInner() => DownedBossSystem.downedPlaguebringer;
+        public static bool GetDownedPlaguebringer() => GetDownedProp(downedPlaguebringerProp);
 
         /// <summary>
         /// 毁灭魔像
         /// </summary>
-        public static bool GetDownedRavager() => Has && GetDownedRavagerInner();
-        [CWRJITEnabled]
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static bool GetDownedRavagerInner() => DownedBossSystem.downedRavager;
+        public static bool GetDownedRavager() => GetDownedProp(downedRavagerProp);
 
         /// <summary>
         /// 星神游龙
         /// </summary>
-        public static bool GetDownedAstrumDeus() => Has && GetDownedAstrumDeusInner();
-        [CWRJITEnabled]
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static bool GetDownedAstrumDeusInner() => DownedBossSystem.downedAstrumDeus;
+        public static bool GetDownedAstrumDeus() => GetDownedProp(downedAstrumDeusProp);
 
         /// <summary>
         /// 亵渎使徒
         /// </summary>
-        public static bool GetDownedGuardians() => Has && GetDownedGuardiansInner();
-        [CWRJITEnabled]
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static bool GetDownedGuardiansInner() => DownedBossSystem.downedGuardians;
+        public static bool GetDownedGuardians() => GetDownedProp(downedGuardiansProp);
 
         /// <summary>
         /// 痴愚金龙
         /// </summary>
-        public static bool GetDownedDragonfolly() => Has && GetDownedDragonfollyInner();
-        [CWRJITEnabled]
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static bool GetDownedDragonfollyInner() => DownedBossSystem.downedDragonfolly;
+        public static bool GetDownedDragonfolly() => GetDownedProp(downedDragonfollyProp);
 
         /// <summary>
         /// 亵渎天神
         /// </summary>
-        public static bool GetDownedProvidence() => Has && GetDownedProvidenceInner();
-        [CWRJITEnabled]
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static bool GetDownedProvidenceInner() => DownedBossSystem.downedProvidence;
+        public static bool GetDownedProvidence() => GetDownedProp(downedProvidenceProp);
 
         /// <summary>
         /// 无尽虚空
         /// </summary>
-        public static bool GetDownedCeaselessVoid() => Has && GetDownedCeaselessVoidInner();
-        [CWRJITEnabled]
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static bool GetDownedCeaselessVoidInner() => DownedBossSystem.downedCeaselessVoid;
+        public static bool GetDownedCeaselessVoid() => GetDownedProp(downedCeaselessVoidProp);
 
         /// <summary>
         /// 风暴编织者
         /// </summary>
-        public static bool GetDownedStormWeaver() => Has && GetDownedStormWeaverInner();
-        [CWRJITEnabled]
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static bool GetDownedStormWeaverInner() => DownedBossSystem.downedStormWeaver;
+        public static bool GetDownedStormWeaver() => GetDownedProp(downedStormWeaverProp);
 
         /// <summary>
         /// 西格纳斯
         /// </summary>
-        public static bool GetDownedSignus() => Has && GetDownedSignusInner();
-        [CWRJITEnabled]
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static bool GetDownedSignusInner() => DownedBossSystem.downedSignus;
+        public static bool GetDownedSignus() => GetDownedProp(downedSignusProp);
 
         /// <summary>
         /// 噬魂幽花
         /// </summary>
-        public static bool GetDownedPolterghast() => Has && GetDownedPolterghastInner();
-        [CWRJITEnabled]
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static bool GetDownedPolterghastInner() => DownedBossSystem.downedPolterghast;
+        public static bool GetDownedPolterghast() => GetDownedProp(downedPolterghastProp);
 
         /// <summary>
         /// 酸雨二
         /// </summary>
-        public static bool GetDownedMauler() => Has && GetDownedMaulerInner();
-        [CWRJITEnabled]
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static bool GetDownedMaulerInner() => DownedBossSystem.downedMauler;
+        public static bool GetDownedMauler() => GetDownedProp(downedMaulerProp);
 
         /// <summary>
         /// 生化恐惧
         /// </summary>
-        public static bool GetDownedNuclearTerror() => Has && GetDownedNuclearTerrorInner();
-        [CWRJITEnabled]
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static bool GetDownedNuclearTerrorInner() => DownedBossSystem.downedNuclearTerror;
+        public static bool GetDownedNuclearTerror() => GetDownedProp(downedNuclearTerrorProp);
 
         /// <summary>
         /// 老核弹
         /// </summary>
-        public static bool GetDownedBoomerDuke() => Has && GetDownedBoomerDukeInner();
-        [CWRJITEnabled]
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static bool GetDownedBoomerDukeInner() => DownedBossSystem.downedBoomerDuke;
+        public static bool GetDownedBoomerDuke() => GetDownedProp(downedBoomerDukeProp);
 
         /// <summary>
         /// 神明吞噬者
         /// </summary>
-        public static bool GetDownedDoG() => Has && GetDownedDoGInner();
-        [CWRJITEnabled]
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static bool GetDownedDoGInner() => DownedBossSystem.downedDoG;
+        public static bool GetDownedDoG() => GetDownedProp(downedDoGProp);
 
         /// <summary>
         /// 丛林龙
         /// </summary>
-        public static bool GetDownedYharon() => Has && GetDownedYharonInner();
-        [CWRJITEnabled]
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static bool GetDownedYharonInner() => DownedBossSystem.downedYharon;
+        public static bool GetDownedYharon() => GetDownedProp(downedYharonProp);
 
         /// <summary>
         /// 星流巨械
         /// </summary>
-        public static bool GetDownedExoMechs() => Has && GetDownedExoMechsInner();
-        [CWRJITEnabled]
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static bool GetDownedExoMechsInner() => DownedBossSystem.downedExoMechs;
+        public static bool GetDownedExoMechs() => GetDownedProp(downedExoMechsProp);
 
         /// <summary>
         /// 至尊灾厄
         /// </summary>
-        public static bool GetDownedCalamitas() => Has && GetDownedCalamitasInner();
-        [CWRJITEnabled]
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static bool GetDownedCalamitasInner() => DownedBossSystem.downedCalamitas;
+        public static bool GetDownedCalamitas() => GetDownedProp(downedCalamitasProp);
 
         /// <summary>
         /// 始源妖龙
         /// </summary>
-        public static bool GetDownedPrimordialWyrm() => Has && GetDownedPrimordialWyrmInner();
-        [CWRJITEnabled]
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static bool GetDownedPrimordialWyrmInner() => DownedBossSystem.downedPrimordialWyrm;
+        public static bool GetDownedPrimordialWyrm() => GetDownedProp(downedPrimordialWyrmProp);
 
         /// <summary>
         /// 终焉之战
         /// </summary>
-        public static bool GetDownedBossRush() => Has && GetDownedBossRushInner();
-        [CWRJITEnabled]
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static bool GetDownedBossRushInner() => DownedBossSystem.downedBossRush;
+        public static bool GetDownedBossRush() => GetDownedProp(downedBossRushProp);
 
-        public static void SetDownedPrimordialWyrm(bool value) {
-            if (!Has) return;
-            SetDownedPrimordialWyrmInner(value);
-        }
-        [CWRJITEnabled]
-        private static void SetDownedPrimordialWyrmInner(bool value) => DownedBossSystem.downedPrimordialWyrm = value;
+        public static void SetDownedPrimordialWyrm(bool value) => SetDownedProp(downedPrimordialWyrmProp, value);
 
         public static bool GetDeathMode() => Has && GetDeathModeInner();
         [CWRJITEnabled]
@@ -684,21 +701,9 @@ namespace CalamityOverhaul
             GeneralParticleHandler.SpawnParticle(spark2);
         }
 
-        public static void SetDownedCalamitas(bool value) {
-            if (!Has) return;
-            SetDownedCalamitasInner(value);
-        }
-        [CWRJITEnabled]
-        private static void SetDownedCalamitasInner(bool value) {
-            DownedBossSystem.downedCalamitas = value;
-        }
+        public static void SetDownedCalamitas(bool value) => SetDownedProp(downedCalamitasProp, value);
 
-        public static void SetDownedBoomerDuke(bool value) {
-            if (!Has) return;
-            SetDownedBoomerDukeInner(value);
-        }
-        [CWRJITEnabled]
-        private static void SetDownedBoomerDukeInner(bool value) => DownedBossSystem.downedBoomerDuke = value;
+        public static void SetDownedBoomerDuke(bool value) => SetDownedProp(downedBoomerDukeProp, value);
 
         public static bool GetSupCalPermafrost(NPC npc) => Has && GetSupCalPermafrostInner(npc);
         [CWRJITEnabled]
@@ -716,9 +721,7 @@ namespace CalamityOverhaul
             return CWRSound.None;
         }
 
-        public static bool GetDownedThanatos() => Has && GetDownedThanatosInner();
-        [CWRJITEnabled]
-        private static bool GetDownedThanatosInner() => DownedBossSystem.downedThanatos;
+        public static bool GetDownedThanatos() => GetDownedProp(downedThanatosProp);
 
         public static void SetSupCalPermafrost(NPC npc, bool value) {
             if (!Has) return;
@@ -848,7 +851,7 @@ namespace CalamityOverhaul
         private static void OldDukeOnKillInner(NPC npc) {
             StopAcidRainInner();
             CalamityGlobalNPC.SetNewBossJustDowned(npc);
-            DownedBossSystem.downedBoomerDuke = true;
+            SetDownedProp(downedBoomerDukeProp, true);
             AcidRainEvent.OldDukeHasBeenEncountered = true;
             NPCLoader.OnKill(npc);
         }
