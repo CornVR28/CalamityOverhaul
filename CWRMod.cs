@@ -79,6 +79,7 @@ namespace CalamityOverhaul
                 ModGanged.Load();
             }
 
+            CWRRef.Load();
             ILoaders = VaultUtils.GetDerivedInstances<ICWRLoader>();
             foreach (var load in ILoaders) {
                 try {
