@@ -47,6 +47,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.ModifySupCalNPCs
         }
 
         public override void SetStaticDefaults() {
+            Homeless.Clear();
             Homeless.Add(this.GetLocalization("Homeless0"));
             Homeless.Add(this.GetLocalization("Homeless1"));
             Homeless.Add(this.GetLocalization("Homeless2"));
@@ -98,6 +99,14 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.ModifySupCalNPCs
             }
 
             chat = randChat;
+        }
+
+        public override bool AI() {
+            if (!CWRRef.GetDownedCalamitas()) {
+                //考虑到总是有人遇到无法正确设置击败状态的问题，这里直接让女巫的AI里设置击败状态，确保只要女巫存在了，就一定会设置击败状态
+                CWRRef.SetDownedCalamitas(true);
+            }
+            return true;
         }
     }
 }

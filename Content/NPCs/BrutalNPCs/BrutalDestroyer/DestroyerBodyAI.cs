@@ -1,4 +1,5 @@
-﻿using CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalSkeletronPrime;
+﻿using CalamityOverhaul.Content.DamageModify;
+using CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalSkeletronPrime;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using System;
@@ -120,7 +121,7 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalDestroyer
             UpdateFlightPhase();
             UpdateEnrageScale();
             UpdateAlpha();
-            CWRRef.UpdateDestroyerBodyDRIncrease(npc);
+
             VaultUtils.ClockFrame(ref frame, 5, 3);
 
             int headIndex = FindHeadIndex((int)npc.ai[3]);
@@ -462,18 +463,18 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalDestroyer
             }
         }
 
-        public override void ModifyHitByItem(Player player, Item item, ref NPC.HitModifiers modifiers) {
-            if (time < DestroyerHeadAI.StretchTime) {
-                modifiers.FinalDamage /= 100f;
-                modifiers.SetMaxDamage(90);
+        public override bool? On_ModifyIncomingHit(NPC npc, ref NPC.HitModifiers modifiers) {
+            if (modifiers.DamageType == EndlessDamageClass.Instance) {
+                //我们希望无尽伤害类型不会受到其他代码的减伤影响，所以，如果是无尽伤害，那么就阻止后面所有代码的执行
+                return false;
             }
-        }
-
-        public override void ModifyHitByProjectile(Projectile projectile, ref NPC.HitModifiers modifiers) {
             if (time < DestroyerHeadAI.StretchTime) {
                 modifiers.FinalDamage /= 100f;
                 modifiers.SetMaxDamage(82);
+                return false;
             }
+            modifiers.FinalDamage /= 2f;
+            return false;
         }
 
         public override bool? Draw(SpriteBatch spriteBatch, Vector2 screenPos, Color drawColor) {

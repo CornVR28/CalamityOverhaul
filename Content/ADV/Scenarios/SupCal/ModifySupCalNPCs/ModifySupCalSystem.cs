@@ -7,11 +7,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.ModifySupCalNPCs
     internal class ModifySupCalSystem : ModSystem
     {
         public override void PostUpdateNPCs() {
-            if (NPC.AnyNPCs(CWRID.NPC_WITCH)) {
-                int witch = NPC.FindFirstNPC(CWRID.NPC_WITCH);
-                if (witch == -1) {
-                    return;
-                }
+            int witch = NPC.FindFirstNPC(CWRID.NPC_WITCH);
+            if (witch != -1) {
                 bool hasEbn = false;
                 foreach (var p in Main.ActivePlayers) {
                     //如果已经有人达成了永恒燃烧的现在结局，说明女巫已死，玩家替换女巫的位置
@@ -21,6 +18,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.ModifySupCalNPCs
                     }
                 }
                 if (hasEbn) {
+                    //考虑到总是有人遇到无法正确设置击败状态的问题，这里直接让女巫的AI里设置击败状态，确保只要女巫存在了，就一定会设置击败状态
+                    CWRRef.SetDownedCalamitas(true);
                     Main.npc[witch].active = false;
                     Main.npc[witch].netUpdate = true;
                 }

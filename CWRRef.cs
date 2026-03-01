@@ -11,7 +11,6 @@ using CalamityMod.NPCs.ExoMechs;
 using CalamityMod.NPCs.SupremeCalamitas;
 using CalamityMod.Particles;
 using CalamityMod.Projectiles;
-using CalamityMod.Tiles.Furniture.CraftingStations;
 using CalamityMod.UI;
 using CalamityMod.World;
 using CalamityOverhaul.Common;
@@ -56,7 +55,6 @@ namespace CalamityOverhaul
         }
         private static bool? _has = null;
 
-        private static int dummyInt;
         private static float dummyFloat;
         private static Type DownedBossSystemType;
 
@@ -385,22 +383,9 @@ namespace CalamityOverhaul
         [CWRJITEnabled]
         private static float ChargeRatioInner(Item item) => item.Calamity().ChargeRatio;
 
-        public static bool GetNPCIsAnEnemy(this NPC npc) => Has && GetNPCIsAnEnemyInner(npc);
-        [CWRJITEnabled]
-        private static bool GetNPCIsAnEnemyInner(NPC npc) => npc.IsAnEnemy();
-
         public static bool GetPlayerBladeArmEnchant(this Player player) => Has && GetPlayerBladeArmEnchantInner(player);
         [CWRJITEnabled]
         private static bool GetPlayerBladeArmEnchantInner(Player player) => player.Calamity().bladeArmEnchant;
-
-        public static ref int RefPlayerEvilSmasherBoost(this Player player) {
-            if (!Has) {
-                return ref dummyInt;
-            }
-            return ref RefPlayerEvilSmasherBoostInner(player);
-        }
-        [CWRJITEnabled]
-        private static ref int RefPlayerEvilSmasherBoostInner(Player player) => ref player.Calamity().evilSmasherBoost;
 
         public static bool GetPlayerAdrenalineMode(this Player player) => Has && GetPlayerAdrenalineModeInner(player);
         [CWRJITEnabled]
@@ -413,19 +398,6 @@ namespace CalamityOverhaul
         [CWRJITEnabled]
         private static void LargeFieryExplosionInner(Projectile projectile) => projectile.LargeFieryExplosion();
 
-        public static bool DrawBeam(Projectile projectile, float length, float spacer, Color lightColor, Texture2D texture = null, bool curve = false) => Has && DrawBeamInner(projectile, length, spacer, lightColor, texture, curve);
-        [CWRJITEnabled]
-        private static bool DrawBeamInner(Projectile projectile, float length, float spacer, Color lightColor, Texture2D texture, bool curve) => projectile.DrawBeam(length, spacer, lightColor, texture, curve);
-
-        public static int GetRandomProjectileType() {
-            return Main.rand.Next(4) switch {
-                0 => CWRID.Proj_SwordsplosionBlue,
-                1 => CWRID.Proj_SwordsplosionGreen,
-                2 => CWRID.Proj_SwordsplosionPurple,
-                3 => CWRID.Proj_SwordsplosionRed,
-                _ => CWRID.Proj_SwordsplosionBlue,
-            };
-        }
         public static void UpdateRogueStealth(Player player) {
             if (!Has) return;
             UpdateRogueStealthInner(player);
@@ -449,12 +421,7 @@ namespace CalamityOverhaul
         }
 
         public static void SummonSupCal(Vector2 spawnPos) {
-            if (!Has) return;
-            SummonSupCalInner(spawnPos);
-        }
-        [CWRJITEnabled]
-        private static void SummonSupCalInner(Vector2 spawnPos) {
-            SoundEngine.PlaySound(SCalAltar.SummonSound, spawnPos);
+            SoundEngine.PlaySound("CalamityMod/Sounds/Custom/SCalAltarSummon".GetSound(), spawnPos);
             Projectile.NewProjectile(new EntitySource_WorldEvent(), spawnPos, Vector2.Zero
                 , CWRID.Proj_SCalRitualDrama, 0, 0f, Main.myPlayer, 0, 0);
         }
@@ -671,6 +638,15 @@ namespace CalamityOverhaul
 
         public static void SetDownedBoomerDuke(bool value) => SetDownedProp(downedBoomerDukeProp, value);
 
+        public static bool GetSupCalPermafrost(NPC npc) => Has && GetSupCalPermafrostInner(npc);
+        [CWRJITEnabled]
+        private static bool GetSupCalPermafrostInner(NPC npc) {
+            if (npc.ModNPC is SupremeCalamitas supCal) {
+                return supCal.permafrost;
+            }
+            return false;
+        }
+
         public static SoundStyle GetSound(this string path) {
             if (ModContent.HasAsset(path)) {
                 return new SoundStyle(path);
@@ -679,6 +655,17 @@ namespace CalamityOverhaul
         }
 
         public static bool GetDownedThanatos() => GetDownedProp(downedThanatosProp);
+
+        public static void SetSupCalPermafrost(NPC npc, bool value) {
+            if (!Has) return;
+            SetSupCalPermafrostInner(npc, value);
+        }
+        [CWRJITEnabled]
+        private static void SetSupCalPermafrostInner(NPC npc, bool value) {
+            if (npc.ModNPC is SupremeCalamitas supCal) {
+                supCal.permafrost = value;
+            }
+        }
 
         public static int GetSupCalGiveUpCounter(NPC npc) => Has ? GetSupCalGiveUpCounterInner(npc) : 0;
         [CWRJITEnabled]
@@ -741,6 +728,10 @@ namespace CalamityOverhaul
         public static bool GetEarlyHardmodeProgressionReworkBool() => Has && GetEarlyHardmodeProgressionReworkBoolInner();
         [CWRJITEnabled]
         private static bool GetEarlyHardmodeProgressionReworkBoolInner() => CalamityServerConfig.Instance.EarlyHardmodeProgressionRework;
+
+        public static bool GetAfterimages() => Has && GetAfterimagesInner();
+        [CWRJITEnabled]
+        private static bool GetAfterimagesInner() => CalamityClientConfig.Instance.Afterimages;
 
         public static int GetProjectileDamage(NPC npc, int projType) {
             int num = npc.defDamage / 2;//暂时使用这个，原来的方法在某些情况下会返回1或者0
@@ -923,19 +914,6 @@ namespace CalamityOverhaul
         [CWRJITEnabled]
         private static void SetPlayerDashIDInner(Player player, string value) => player.Calamity().DashID = value;
 
-        public static void SetNSMBPlayer(Player player) {
-            if (!Has) return;
-            SetNSMBPlayerInner(player);
-        }
-        [CWRJITEnabled]
-        private static void SetNSMBPlayerInner(Player player) {
-            CalamityPlayer calPlayer = player.Calamity();
-            calPlayer.deadshotBrooch = true;
-            calPlayer.dynamoStemCells = true;
-            calPlayer.eleResist = true;
-            calPlayer.voidField = true;
-        }
-
         public static LocalizedText ConstructRecipeCondition(int tier, out Func<bool> condition) {
             condition = null;
             return Has ? ConstructRecipeConditionInner(tier, out condition) : null;
@@ -957,16 +935,6 @@ namespace CalamityOverhaul
         [CWRJITEnabled]
         private static void CosmicFireEffectInner(Projectile Projectile) {
             StreamGougeMetaball.SpawnParticle(Projectile.Center + VaultUtils.RandVr(13), Projectile.velocity, Main.rand.NextFloat(11.3f, 21.5f));
-        }
-
-        public static void UpdateDestroyerBodyDRIncrease(NPC npc) {
-            if (!Has) return;
-            UpdateDestroyerBodyDRIncreaseInner(npc);
-        }
-        [CWRJITEnabled]
-        private static void UpdateDestroyerBodyDRIncreaseInner(NPC npc) {
-            npc.Calamity().newAI[1] = 1200;
-            npc.Calamity().CurrentlyIncreasingDefenseOrDR = false;
         }
 
         public static Projectile ProjectileRain(IEntitySource source, Vector2 targetPos, float xLimit
