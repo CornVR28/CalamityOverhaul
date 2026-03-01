@@ -37,7 +37,6 @@ namespace CalamityOverhaul.Content.Items.Accessories
             CWRPlayer modplayer = player.CWR();
             modplayer.LoadMuzzleBrakeLevel = 4;
             modplayer.PressureIncrease = 0;
-            CWRRef.SetNSMBPlayer(player);
             player.moveSpeed += 0.25f;
             player.magicQuiver = true;
             player.GetDamage<RangedDamageClass>() += 1f;

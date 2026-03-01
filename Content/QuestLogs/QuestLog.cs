@@ -90,7 +90,7 @@ namespace CalamityOverhaul.Content.QuestLogs
             //设置初始面板大小
             panelRect = new Rectangle(0, 0, 800, 600);
             //设置启动图标初始位置
-            LauncherPosition = new Vector2(380, 270);
+            LauncherPosition = new Vector2(572, 108);
 
             availableStyles = [
                 new HotwindQuestLogStyle(),

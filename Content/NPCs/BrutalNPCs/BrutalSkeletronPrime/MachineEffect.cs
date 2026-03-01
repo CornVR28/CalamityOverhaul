@@ -1,8 +1,11 @@
 ﻿using CalamityOverhaul.Common;
 using CalamityOverhaul.Content.ADV;
+using CalamityOverhaul.Content.Items.Tools;
+using InnoVault.GameSystem;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using Terraria;
 using Terraria.Graphics.Effects;
@@ -21,6 +24,16 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalSkeletronPrime
         public override SceneEffectPriority Priority => SceneEffectPriority.BossHigh;
         public override bool IsSceneEffectActive(Player player) => MachineEffect.IsActive;
         public override void SpecialVisuals(Player player, bool isActive) => player.ManageSpecialBiomeVisuals(MachineSky.Name, isActive);
+    }
+
+    internal class MachinePlayer : PlayerOverride
+    {
+        public override IEnumerable<string> GetActiveSceneEffectFullNames() {
+            yield return "UnCalamityModMusic.Common.Music.Mechs";
+        }
+        public override bool? PreIsSceneEffectActive(ModSceneEffect modSceneEffect) {
+            return false;
+        }
     }
 
     ///<summary>
@@ -278,7 +291,7 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalSkeletronPrime
                 return;
             }
 
-            if (!CWRRef.GetBossRushActive() && !VaultUtils.isServer) {
+            if (!CWRRef.GetBossRushActive() && !VaultUtils.isServer && !SirenMusicalSystem.HasActiveBox) {
                 Main.newMusic = Main.musicBox2 = MusicLoader.GetMusicSlot("CalamityOverhaul/Assets/Sounds/Music/Metal");
             }
         }
