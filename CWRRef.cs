@@ -11,7 +11,6 @@ using CalamityMod.NPCs.ExoMechs;
 using CalamityMod.NPCs.SupremeCalamitas;
 using CalamityMod.Particles;
 using CalamityMod.Projectiles;
-using CalamityMod.TileEntities;
 using CalamityMod.UI;
 using CalamityMod.World;
 using CalamityOverhaul.Common;
@@ -915,29 +914,12 @@ namespace CalamityOverhaul
         [CWRJITEnabled]
         private static void SetPlayerDashIDInner(Player player, string value) => player.Calamity().DashID = value;
 
-        public static void SetNSMBPlayer(Player player) {
-            if (!Has) return;
-            SetNSMBPlayerInner(player);
-        }
-        [CWRJITEnabled]
-        private static void SetNSMBPlayerInner(Player player) {
-            CalamityPlayer calPlayer = player.Calamity();
-            calPlayer.deadshotBrooch = true;
-            calPlayer.dynamoStemCells = true;
-            calPlayer.eleResist = true;
-            calPlayer.voidField = true;
-        }
-
         public static LocalizedText ConstructRecipeCondition(int tier, out Func<bool> condition) {
             condition = null;
             return Has ? ConstructRecipeConditionInner(tier, out condition) : null;
         }
         [CWRJITEnabled]
         private static LocalizedText ConstructRecipeConditionInner(int tier, out Func<bool> condition) => ArsenalTierGatedRecipe.ConstructRecipeCondition(tier, out condition);
-
-        public static IList<Type> GetTEBaseTurretTypes() => Has ? GetTEBaseTurretTypesInner() : null;
-        [CWRJITEnabled]
-        public static IList<Type> GetTEBaseTurretTypesInner() => VaultUtils.GetDerivedTypes<TEBaseTurret>();
 
         public static void DrawStarTrail(Projectile projectile, Color outer, Color inner, float auraHeight = 10f) {
             if (!Has) return;
@@ -953,16 +935,6 @@ namespace CalamityOverhaul
         [CWRJITEnabled]
         private static void CosmicFireEffectInner(Projectile Projectile) {
             StreamGougeMetaball.SpawnParticle(Projectile.Center + VaultUtils.RandVr(13), Projectile.velocity, Main.rand.NextFloat(11.3f, 21.5f));
-        }
-
-        public static void UpdateDestroyerBodyDRIncrease(NPC npc) {
-            if (!Has) return;
-            UpdateDestroyerBodyDRIncreaseInner(npc);
-        }
-        [CWRJITEnabled]
-        private static void UpdateDestroyerBodyDRIncreaseInner(NPC npc) {
-            npc.Calamity().newAI[1] = 1200;
-            npc.Calamity().CurrentlyIncreasingDefenseOrDR = false;
         }
 
         public static Projectile ProjectileRain(IEntitySource source, Vector2 targetPos, float xLimit
