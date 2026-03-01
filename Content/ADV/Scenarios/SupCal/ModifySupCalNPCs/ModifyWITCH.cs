@@ -99,5 +99,11 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.ModifySupCalNPCs
 
             chat = randChat;
         }
+
+        public override bool AI() {
+            //考虑到总是有人遇到无法正确设置击败状态的问题，这里直接让女巫的AI里设置击败状态，确保只要女巫存在了，就一定会设置击败状态
+            CWRRef.SetDownedCalamitas(true);
+            return true;
+        }
     }
 }
