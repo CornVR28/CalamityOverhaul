@@ -286,6 +286,8 @@ namespace CalamityOverhaul.Content.NPCs.Modifys.Crabulons
         public bool? ShouldFallThroughPlatforms() {
             //骑乘模式下按S键穿过平台
             if (owner.Mount && owner.Owner.Alives() && owner.Owner.holdDownCardinalTimer[0] > 2) {
+                if (npc.velocity.Y == 0)
+                    npc.position.Y += 1f;
                 return true;
             }
 
@@ -296,6 +298,8 @@ namespace CalamityOverhaul.Content.NPCs.Modifys.Crabulons
 
             //需要下落时穿过平台
             if (owner.ai[10] > 0) {
+                if (npc.velocity.Y == 0)
+                    npc.position.Y += 1f;
                 return true;
             }
 
