@@ -75,23 +75,5 @@ namespace CalamityOverhaul.Content.NPCs.Modifys.Crabulons
             players = players.Where(p => !PlayerIsMount(p));//删掉关于骑乘玩家的绘制
             return true;
         }
-        public override IEnumerable<string> GetActiveSceneEffectFullNames() {
-            yield return "CalamityMod.Systems.CrabulonMusicScene";
-        }
-        public override bool? PreIsSceneEffectActive(ModSceneEffect modSceneEffect) {
-            if (CrabulonIndex == -1) {
-                return false;//直接返回，这里算作一次性能优化
-            }
-            int crabulon = CWRID.NPC_Crabulon;
-            foreach (var npc in Main.ActiveNPCs) {
-                if (!npc.boss) {//这里可以排除掉被驯服的菌生蟹，因为被驯服后不会被算作Boss
-                    continue;
-                }
-                if (npc.type == crabulon) {
-                    return true;
-                }
-            }
-            return false;
-        }
     }
 }
