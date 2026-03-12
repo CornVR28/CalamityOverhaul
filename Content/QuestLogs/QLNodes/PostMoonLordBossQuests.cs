@@ -1,6 +1,4 @@
-﻿using CalamityOverhaul.Content.Items.Materials;
-using CalamityOverhaul.Content.Items.Tools;
-using CalamityOverhaul.Content.QuestLogs.Core;
+﻿using CalamityOverhaul.Content.QuestLogs.Core;
 using Terraria.ModLoader;
 
 namespace CalamityOverhaul.Content.QuestLogs.QLNodes

@@ -1,21 +1,12 @@
-﻿using CalamityOverhaul.Common;
-using CalamityOverhaul.Content;
-using CalamityOverhaul.Content.Items.Magic;
-using CalamityOverhaul.Content.Items.Melee;
-using CalamityOverhaul.Content.Items.Ranged;
-using CalamityOverhaul.Content.Items.Rogue;
-using CalamityOverhaul.Content.Items.Tools;
+﻿using CalamityOverhaul.Content;
 using CalamityOverhaul.Content.MeleeModify.Core;
-using CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalSkeletronPrime;
 using CalamityOverhaul.Content.RangedModify.Core;
-using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
-using static Terraria.ModLoader.ModContent;
 
 namespace CalamityOverhaul
 {

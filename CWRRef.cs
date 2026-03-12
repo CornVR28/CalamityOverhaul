@@ -10,7 +10,6 @@ using CalamityMod.NPCs;
 using CalamityMod.NPCs.ExoMechs;
 using CalamityMod.NPCs.SupremeCalamitas;
 using CalamityMod.Particles;
-using CalamityMod.Projectiles;
 using CalamityMod.UI;
 using CalamityMod.World;
 using CalamityOverhaul.Common;
