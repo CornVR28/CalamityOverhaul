@@ -54,28 +54,6 @@ namespace CalamityOverhaul.Content.Projectiles.Weapons.Summon.Whips
 
             Main.player[Projectile.owner].MinionAttackTargetNPC = target.whoAmI;
             Projectile.damage = Projectile.damage / 2;
-
-            if (Projectile.numHits == 0) {
-                target.CWR().WhipHitNum += 3;
-                target.CWR().WhipHitType = (byte)WhipHitTypeEnum.WhiplashGalactica;
-
-                //for (int i = 0; i < 3; i++) {
-                //    Projectile.NewProjectile(
-                //        Projectile.FromObjectGetParent(),
-
-                //        target.Center -
-                //        Main.player[Projectile.owner].Center.To(target.Center).UnitVector()
-                //        .RotatedBy(MathHelper.ToRadians(Main.rand.Next(-75, 75))) * 300,
-
-                //        Vector2.Zero,
-                //        ModContent.ProjectileType<CosmicFire>(),
-                //        Projectile.damage,
-                //        0,
-                //        Projectile.owner,
-                //        Projectile.whoAmI
-                //    );
-                //}
-            }
         }
 
         private void DrawLine(List<Vector2> list) {

@@ -7,6 +7,7 @@ namespace CalamityOverhaul.Content.Items.Modifys
 {
     internal class RMagicConch : ItemOverride
     {
+        public override bool CanLoadLocalization => false;
         public override int TargetID => ItemID.MagicConch;
         public override bool DrawingInfo => false;
         public override bool? On_CanUseItem(Item item, Player player) => DontInBossUseItem(player);
@@ -32,6 +33,7 @@ namespace CalamityOverhaul.Content.Items.Modifys
 
     internal class RDemonConch : ItemOverride
     {
+        public override bool CanLoadLocalization => false;
         public override int TargetID => ItemID.DemonConch;
         public override bool DrawingInfo => false;
         public override bool? On_CanUseItem(Item item, Player player) => RMagicConch.DontInBossUseItem(player);

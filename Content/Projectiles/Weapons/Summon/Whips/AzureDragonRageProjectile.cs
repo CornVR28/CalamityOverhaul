@@ -36,9 +36,6 @@ namespace CalamityOverhaul.Content.Projectiles.Weapons.Summon.Whips
         public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone) {
             Projectile.damage -= 55;
             if (Projectile.numHits == 0) {
-                target.CWR().WhipHitNum += 3;
-                target.CWR().WhipHitType = (byte)WhipHitTypeEnum.AzureDragonRage;
-
                 for (int i = 0; i < 3; i++) {
                     Projectile.NewProjectile(
                         Projectile.FromObjectGetParent(),

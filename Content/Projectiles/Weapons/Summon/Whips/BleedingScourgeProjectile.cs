@@ -36,9 +36,6 @@ namespace CalamityOverhaul.Content.Projectiles.Weapons.Summon.Whips
         public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone) {
             Projectile.damage -= 35;
             if (Projectile.numHits == 0) {
-                target.CWR().WhipHitNum += 2;
-                target.CWR().WhipHitType = (byte)WhipHitTypeEnum.BleedingScourge;
-
                 for (int i = 0; i < 3; i++) {
                     Vector2 pos = target.Center + VaultUtils.RandVrInAngleRange(-120, -60, Main.rand.Next(760, 820));
                     Projectile.NewProjectile(

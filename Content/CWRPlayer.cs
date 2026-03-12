@@ -8,7 +8,6 @@ using CalamityOverhaul.Content.NPCs.Modifys.Crabulons;
 using CalamityOverhaul.Content.Projectiles.Others;
 using CalamityOverhaul.Content.RangedModify;
 using CalamityOverhaul.Content.RangedModify.Core;
-using CalamityOverhaul.Content.UIs.OverhaulTheBible;
 using CalamityOverhaul.OtherMods.HighFPSSupport;
 using CalamityOverhaul.OtherMods.ImproveGame;
 using CalamityOverhaul.OtherMods.SubWorld;
@@ -361,10 +360,6 @@ namespace CalamityOverhaul.Content
 
         public override void OnEnterWorld() {
             Information();
-
-            if (OverhaulTheBibleUI.Instance != null) {
-                OverhaulTheBibleUI.Instance.Active = false;
-            }
 
             SpearOfLonginus.ZenithWorldAsset();
 

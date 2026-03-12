@@ -48,9 +48,6 @@ namespace CalamityOverhaul.Content.Projectiles.Weapons.Summon.Whips
                 Projectile.damage = 5;
             target.AddBuff(ModContent.BuffType<SoulBurning>(), 60);
             if (Projectile.numHits == 0) {
-                target.CWR().WhipHitNum += 3;
-                target.CWR().WhipHitType = (byte)WhipHitTypeEnum.GhostFireWhip;
-
                 for (int i = 0; i < 3; i++) {
                     int proj = Projectile.NewProjectile(
                         Projectile.FromObjectGetParent(),

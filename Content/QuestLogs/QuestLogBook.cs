@@ -1,5 +1,4 @@
 ﻿using CalamityOverhaul.Common;
-using CalamityOverhaul.Content.UIs.OverhaulTheBible;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using System;
@@ -33,7 +32,7 @@ namespace CalamityOverhaul.Content.QuestLogs
         }
 
         public override bool PreDrawInInventory(SpriteBatch spriteBatch, Vector2 position, Rectangle frame, Color drawColor, Color itemColor, Vector2 origin, float scale) {
-            if (OverhaulTheBibleUI.Instance.Active) {
+            if (QuestLog.Instance.visible) {
                 TextureAssets.Item[Type] = QuestLogBook_Open1;
                 spriteBatch.Draw(QuestLogBook_Open1.Value, position, null, Color.White, 0, TextureAssets.Item[Type].Value.Size() / 2, scale, SpriteEffects.None, 0);
                 Color sengsColor = Color.White * Math.Abs(MathF.Sin(Main.GameUpdateCount * 0.05f));

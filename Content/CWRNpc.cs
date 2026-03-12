@@ -85,8 +85,6 @@ namespace CalamityOverhaul.Content
             cwr.CreateHitPlayer = CreateHitPlayer;
             cwr.ContagionOnHitNum = ContagionOnHitNum;
             cwr.PhosphorescentGauntletHitCount = PhosphorescentGauntletHitCount;
-            cwr.WhipHitNum = WhipHitNum;
-            cwr.WhipHitType = WhipHitType;
             cwr.LonginusSign = LonginusSign;
             cwr.IceParclose = IceParclose;
             return cwr;
@@ -162,14 +160,6 @@ namespace CalamityOverhaul.Content
                 IsWeakTime--;
             }
             return base.PreAI(npc);
-        }
-
-        public override void PostAI(NPC npc) {
-            if (!VaultUtils.isClient) {
-                if (WhipHitNum > 10) {
-                    WhipHitNum = 10;
-                }
-            }
         }
 
         public override bool CanHitPlayer(NPC npc, Player target, ref int cooldownSlot) {

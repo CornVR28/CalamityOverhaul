@@ -53,24 +53,6 @@ namespace CalamityOverhaul.Content
                 , Language.GetTextValue($"Mods.CalamityOverhaul.Tools.RecipesLoseText"));
         }
 
-        public static void MouldRecipeEvent(Recipe recipe, Item item, List<Item> consumedItems, Item destinationStack) {
-            MurasamaMould murasamaMould = null;
-            foreach (Item i in consumedItems) {
-                if (i.type == ItemType<MurasamaMould>()) {
-                    murasamaMould = (MurasamaMould)i.ModItem;
-                }
-            }
-            if (murasamaMould != null) {
-                murasamaMould.Durability--;
-                if (murasamaMould.Durability <= 0) {
-                    murasamaMould.Item.TurnToAir();
-                }
-                else {
-                    Main.LocalPlayer.QuickSpawnItem(item.FromObjectGetParent(), murasamaMould.Item);
-                }
-            }
-        }
-
         public override void Unload() {
             ARGroup = null;
             GodDWGroup = null;
@@ -358,54 +340,6 @@ namespace CalamityOverhaul.Content
                     .AddIngredient(ItemID.Hellstone, 15)
                     .AddIngredient(CWRID.Item_PearlShard, 5)
                     .AddTile(TileID.Anvils)
-                    .Register();
-            }
-            //添加鬼妖村正的合成
-            {
-                int _Mould = ItemType<MurasamaMould>();
-                int murasamaItem = CWRID.Item_Murasama;
-
-                Recipe.Create(_Mould)
-                    .AddIngredient(murasamaItem, 1)
-                    .AddIngredient(CWRID.Item_PlasmaDriveCore, 1)
-                    .AddIngredient(CWRID.Item_MysteriousCircuitry, 5)
-                    .AddIngredient(ItemID.CrimtaneBar, 15)
-                    .AddConsumeIngredientCallback((Recipe recipe, int type, ref int amount, bool isDecrafting) => {
-                        if (type == murasamaItem)
-                            amount = 0;
-                    })
-                    .AddTile(TileID.Anvils)
-                    .DisableDecraft()
-                    .Register();
-
-                Recipe.Create(_Mould)
-                    .AddIngredient(CWRID.Item_EncryptedSchematicHell, 1)
-                    .AddIngredient(ItemID.CrimtaneBar, 15)
-                    .AddConsumeIngredientCallback((Recipe recipe, int type, ref int amount, bool isDecrafting) => {
-                        if (type == murasamaItem)
-                            amount = 0;
-                    })
-                    .AddTile(TileID.Anvils)
-                    .DisableDecraft()
-                    .Register();
-
-                Recipe.Create(CWRID.Item_Murasama)
-                    .AddIngredient(ItemID.Muramasa, 1)
-                    .AddIngredient(ItemID.MeteoriteBar, 1)
-                    .AddIngredient(_Mould, 1)
-                    .AddOnCraftCallback(MouldRecipeEvent)
-                    .AddTile(TileID.Anvils)
-                    .DisableDecraft()
-                    .Register();
-
-                Recipe.Create(CWRID.Item_Murasama)
-                    .AddIngredient(ItemID.Katana, 1)
-                    .AddIngredient(ItemID.MeteoriteBar, 1)
-                    .AddIngredient(ItemID.CobaltBar, 1)
-                    .AddIngredient(_Mould, 1)
-                    .AddOnCraftCallback(MouldRecipeEvent)
-                    .AddTile(TileID.Anvils)
-                    .DisableDecraft()
                     .Register();
             }
             //添加卢克索礼物的合成
