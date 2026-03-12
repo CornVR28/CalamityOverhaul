@@ -367,8 +367,6 @@ namespace CalamityOverhaul
                 }
             }
 
-            LogBoss();
-
             OnLoadContentBool = true;
         }
 
@@ -384,36 +382,6 @@ namespace CalamityOverhaul
             ItemIsGunAndGetRecoilValue?.Clear();
             ItemIsGunAndGetRecoilLocKey?.Clear();
             ProjValue.ImmuneFrozen?.Clear();
-        }
-
-        public static void LogBoss() {
-            if (CWRMod.Instance.bossChecklist == null) {
-                return;
-            }
-
-            CWRMod.Instance.bossChecklist.Call("LogBoss", CWRMod.Instance, "MachineRebellion", 22.1f,
-                () => CWRWorld.MachineRebellionDowned,
-                new List<int> { NPCID.SkeletronPrime, NPCID.Spazmatism, NPCID.Retinazer, NPCID.TheDestroyer },
-                new Dictionary<string, object>() {
-                    ["spawnInfo"] = CWRLocText.Instance.MachineRebellion_SpawnInfo,
-                    ["despawnMessage"] = CWRLocText.Instance.MachineRebellion_DespawnMessage,
-                    ["displayName"] = CWRLocText.Instance.MachineRebellion_DisplayName,
-                    ["spawnItems"] = ItemType<DraedonsRemote>(),
-                    ["availability"] = () => true,
-                    ["collectibles"] = new List<int> {
-                    ItemType<GeminisTributeEX>(),
-                    ItemType<RaiderGunEX>(),
-                    ItemType<CommandersChainsawEX>(),
-                    ItemType<CommandersStaffEX>()
-                },
-                    ["customPortrait"] = (SpriteBatch sb, Rectangle rect, Color color) => {
-                        Texture2D texture = HeadPrimeAI.MachineRebellionAsset.Value;
-                        Vector2 centered = rect.TopLeft() + rect.Size() / 2;
-                        Rectangle rectangle = texture.GetRectangle();
-                        float scale = rect.Width / (float)rectangle.Width;
-                        sb.Draw(texture, centered, rectangle, color, 0, rectangle.Size() / 2, scale, SpriteEffects.None, 0);
-                    }
-                });
         }
 
         public static string GetLckRecoilKey(float recoil) {

@@ -31,7 +31,7 @@ namespace CalamityOverhaul.Content
         /// </summary>
         public static bool HasBoss;
 
-        internal static bool BossRush => CWRRef.GetBossRushActive() || MachineRebellion;
+        internal static bool BossRush => CWRRef.GetBossRushActive();
         internal static bool MasterMode => Main.masterMode || BossRush;
         internal static bool ExpertMode => Main.expertMode || BossRush;
         internal static bool Death => CWRRef.GetDeathMode() || BossRush;
