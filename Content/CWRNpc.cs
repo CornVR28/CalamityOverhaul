@@ -7,7 +7,6 @@ using CalamityOverhaul.Content.Items.Painting;
 using CalamityOverhaul.Content.Items.Placeable;
 using CalamityOverhaul.Content.Items.Rogue;
 using CalamityOverhaul.Content.Items.Tools;
-using CalamityOverhaul.Content.Projectiles.Weapons.Ranged;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.IO;
@@ -191,17 +190,6 @@ namespace CalamityOverhaul.Content
                 return false;
             }
             return base.SpecialOnKill(npc);
-        }
-
-        public override bool PreKill(NPC npc) {
-            if (ContagionOnHitNum > 0 && CreateHitPlayer != null) {
-                if (Main.myPlayer == CreateHitPlayer.whoAmI && CreateHitPlayer.ownedProjectileCounts[ModContent.ProjectileType<NurgleSoul>()] <= 13) {
-                    Projectile proj = Projectile.NewProjectileDirect(CreateHitPlayer.FromObjectGetParent(), npc.Center, VaultUtils.RandVr(13)
-                        , ModContent.ProjectileType<NurgleSoul>(), npc.damage, 2, CreateHitPlayer.whoAmI);
-                    proj.scale = (npc.width / proj.width) * npc.scale;
-                }
-            }
-            return base.PreKill(npc);
         }
 
         public override void OnKill(NPC npc) {

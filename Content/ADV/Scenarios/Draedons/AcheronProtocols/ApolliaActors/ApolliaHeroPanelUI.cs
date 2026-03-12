@@ -1,5 +1,4 @@
-﻿using CalamityOverhaul.Common;
-using CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machines;
+﻿using CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machines;
 using CalamityOverhaul.Content.ADV.UIEffect;
 using InnoVault.UIHandles;
 using Microsoft.Xna.Framework.Graphics;

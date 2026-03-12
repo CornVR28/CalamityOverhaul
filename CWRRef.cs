@@ -16,7 +16,6 @@ using CalamityMod.World;
 using CalamityOverhaul.Common;
 using CalamityOverhaul.Content.ADV;
 using CalamityOverhaul.Content.LegendWeapon.MurasamaLegend.UI;
-using CalamityOverhaul.Content.RemakeItems;
 using InnoVault.GameSystem;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -465,38 +464,6 @@ namespace CalamityOverhaul
             }
         }
 
-
-        public static int GetCurrentSeason() {
-            DateTime date = DateTime.Now;
-            int day = date.DayOfYear - Convert.ToInt32(DateTime.IsLeapYear(date.Year) && date.DayOfYear > 59);
-
-            if (day < 80 || day >= 355) {
-                return 0;
-            }
-
-            else if (day >= 80 && day < 172) {
-                return 1;
-            }
-
-            else if (day >= 172 && day < 266) {
-                return 2;
-            }
-
-            else {
-                return 3;
-            }
-        }
-        public static void SpawnMediumMistParticle(Vector2 smokePos, Vector2 smokeVel, bool Smoketype) {
-            if (!Has) return;
-            SpawnMediumMistParticleInner(smokePos, smokeVel, Smoketype);
-        }
-        [CWRJITEnabled]
-        private static void SpawnMediumMistParticleInner(Vector2 smokePos, Vector2 smokeVel, bool Smoketype) {
-            Particle smoke = new MediumMistParticle(smokePos, smokeVel, new Color(255, 110, 50), Color.OrangeRed
-                    , Smoketype ? Main.rand.NextFloat(0.4f, 0.75f) : Main.rand.NextFloat(1.5f, 2f), 220 - Main.rand.Next(50), 0.1f);
-            GeneralParticleHandler.SpawnParticle(smoke);
-        }
-
         public static void DrawAfterimagesCentered(Projectile proj, int mode, Color lightColor, int typeOneIncrement = 1, Texture2D texture = null, bool drawCentered = true) {
             if (!Has) {
                 Main.spriteBatch.Draw(TextureAssets.Projectile[proj.type].Value, proj.Center - Main.screenPosition
@@ -514,15 +481,6 @@ namespace CalamityOverhaul
         }
         [CWRJITEnabled]
         private static void HomeInOnNPCInner(Projectile projectile, bool ignoreTiles, float distanceRequired, float homingVelocity, float inertia) => CalamityUtils.HomeInOnNPC(projectile, ignoreTiles, distanceRequired, homingVelocity, inertia);
-
-        public static Projectile ProjectileBarrage(IEntitySource source, Vector2 originVec, Vector2 targetPos, bool fromRight, float xOffsetMin, float xOffsetMax
-            , float yOffsetMin, float yOffsetMax, float projSpeed, int projType, int damage, float knockback, int owner, bool clamped = false, float inaccuracyOffset = 5f)
-            => Has ? ProjectileBarrageInner(source, originVec, targetPos, fromRight, xOffsetMin, xOffsetMax, yOffsetMin, yOffsetMax, projSpeed, projType, damage, knockback, owner, clamped, inaccuracyOffset) : null;
-        [CWRJITEnabled]
-        private static Projectile ProjectileBarrageInner(IEntitySource source, Vector2 originVec, Vector2 targetPos, bool fromRight, float xOffsetMin, float xOffsetMax
-            , float yOffsetMin, float yOffsetMax, float projSpeed, int projType, int damage, float knockback, int owner, bool clamped, float inaccuracyOffset)
-            => CalamityUtils.ProjectileBarrage(source, originVec, targetPos, fromRight, xOffsetMin, xOffsetMax
-                , yOffsetMin, yOffsetMax, projSpeed, projType, damage, knockback, owner, clamped, inaccuracyOffset);
 
         public static void SetDraedonDefeatTimer(NPC npc, float value) {
             if (!Has) return;
@@ -548,8 +506,6 @@ namespace CalamityOverhaul
         [CWRJITEnabled]
         private static bool HasExoInner() => Draedon.ExoMechIsPresent;
 
-        public static int GetCalItemID(this string key) => CWRItemOverride.GetCalItemID(key);
-
         public static void SetAbleToSelectExoMech(Player player, bool value) {
             if (!Has) return;
             SetAbleToSelectExoMechInner(player, value);
@@ -566,20 +522,6 @@ namespace CalamityOverhaul
         [CWRJITEnabled]
         private static void SetProjtimesPiercedInner(Projectile projectile, int value) => projectile.Calamity().timesPierced = value;
 
-        public static void SetBrimstoneBullets(this Projectile projectile, bool value) {
-            if (!Has) return;
-            SetBrimstoneBulletsInner(projectile, value);
-        }
-        [CWRJITEnabled]
-        private static void SetBrimstoneBulletsInner(Projectile projectile, bool value) => projectile.Calamity().brimstoneBullets = value;
-
-        public static void SetDeepcoreBullet(this Projectile projectile, bool value) {
-            if (!Has) return;
-            SetDeepcoreBulletInner(projectile, value);
-        }
-        [CWRJITEnabled]
-        private static void SetDeepcoreBulletInner(Projectile projectile, bool value) => projectile.Calamity().deepcoreBullet = value;
-
         public static void SetAllProjectilesHome(this Projectile projectile, bool value) {
             if (!Has) return;
             SetAllProjectilesHomeInner(projectile, value);
@@ -587,65 +529,7 @@ namespace CalamityOverhaul
         [CWRJITEnabled]
         private static void SetAllProjectilesHomeInner(Projectile projectile, bool value) => projectile.Calamity().conditionalHomingRange = (value ? 450 : 0);
 
-        public static void SetBetterLifeBullet1(this Projectile projectile, bool value) {
-            if (!Has) return;
-            SetBetterLifeBullet1Inner(projectile, value);
-        }
-        [CWRJITEnabled]
-        private static void SetBetterLifeBullet1Inner(Projectile projectile, bool value) => projectile.Calamity().betterLifeBullet1 = value;
-
-        public static void SetBetterLifeBullet2(this Projectile projectile, bool value) {
-            if (!Has) return;
-            SetBetterLifeBullet2Inner(projectile, value);
-        }
-        [CWRJITEnabled]
-        private static void SetBetterLifeBullet2Inner(Projectile projectile, bool value) => projectile.Calamity().betterLifeBullet2 = value;
-
-        public static Vector2 GetCoinTossVelocity(Player player) => Has ? GetCoinTossVelocityInner(player) : Vector2.Zero;
-        [CWRJITEnabled]
-        private static Vector2 GetCoinTossVelocityInner(Player player) => player.GetCoinTossVelocity();
-
-        public static bool GetAlchFlask(this Player player) => Has && GetAlchFlaskInner(player);
-        [CWRJITEnabled]
-        private static bool GetAlchFlaskInner(Player player) => player.Calamity().alchFlask;
-
-        public static bool GetSpiritOrigin(this Player player) => Has && GetSpiritOriginInner(player);
-        [CWRJITEnabled]
-        private static bool GetSpiritOriginInner(Player player) => player.Calamity().spiritOrigin;
-
-        public static void SetProjCGP(int proj) {
-            if (!Has) return;
-            SetProjCGPInner(proj);
-        }
-        [CWRJITEnabled]
-        private static void SetProjCGPInner(int proj) {
-            CalamityGlobalProjectile cgp = Main.projectile[proj].Calamity();
-            cgp.supercritHits = -1;
-            cgp.appliesSomaShred = true;
-        }
-
-        public static void Spawn_Effect_1(Vector2 spawnPos, Vector2 vel) {
-            if (!Has) return;
-            Spawn_Effect_1Inner(spawnPos, vel);
-        }
-        [CWRJITEnabled]
-        private static void Spawn_Effect_1Inner(Vector2 spawnPos, Vector2 vel) {
-            Particle spark2 = new LineParticle(spawnPos, vel, false, Main.rand.Next(15, 25 + 1), Main.rand.NextFloat(1.5f, 2f), Main.rand.NextBool() ? Color.MediumOrchid : Color.DarkViolet);
-            GeneralParticleHandler.SpawnParticle(spark2);
-        }
-
         public static void SetDownedCalamitas(bool value) => SetDownedProp(downedCalamitasProp, value);
-
-        public static void SetDownedBoomerDuke(bool value) => SetDownedProp(downedBoomerDukeProp, value);
-
-        public static bool GetSupCalPermafrost(NPC npc) => Has && GetSupCalPermafrostInner(npc);
-        [CWRJITEnabled]
-        private static bool GetSupCalPermafrostInner(NPC npc) {
-            if (npc.ModNPC is SupremeCalamitas supCal) {
-                return supCal.permafrost;
-            }
-            return false;
-        }
 
         public static SoundStyle GetSound(this string path) {
             if (ModContent.HasAsset(path)) {
@@ -655,17 +539,6 @@ namespace CalamityOverhaul
         }
 
         public static bool GetDownedThanatos() => GetDownedProp(downedThanatosProp);
-
-        public static void SetSupCalPermafrost(NPC npc, bool value) {
-            if (!Has) return;
-            SetSupCalPermafrostInner(npc, value);
-        }
-        [CWRJITEnabled]
-        private static void SetSupCalPermafrostInner(NPC npc, bool value) {
-            if (npc.ModNPC is SupremeCalamitas supCal) {
-                supCal.permafrost = value;
-            }
-        }
 
         public static int GetSupCalGiveUpCounter(NPC npc) => Has ? GetSupCalGiveUpCounterInner(npc) : 0;
         [CWRJITEnabled]
@@ -729,10 +602,6 @@ namespace CalamityOverhaul
         [CWRJITEnabled]
         private static bool GetEarlyHardmodeProgressionReworkBoolInner() => CalamityServerConfig.Instance.EarlyHardmodeProgressionRework;
 
-        public static bool GetAfterimages() => Has && GetAfterimagesInner();
-        [CWRJITEnabled]
-        private static bool GetAfterimagesInner() => CalamityClientConfig.Instance.Afterimages;
-
         public static int GetProjectileDamage(NPC npc, int projType) {
             int num = npc.defDamage / 2;//暂时使用这个，原来的方法在某些情况下会返回1或者0
             if (Main.expertMode) {
@@ -761,16 +630,6 @@ namespace CalamityOverhaul
         }
         [CWRJITEnabled]
         private static void SetProjStealthStrikeInner(Projectile projectile, bool value) => projectile.Calamity().stealthStrike = value;
-
-        public static void HorsemansBladeOnHit(Player player, int targetIdx, int damage, float knockback
-            , int extraUpdateAmt = 0, int type = ProjectileID.FlamingJack) {
-            if (!Has) return;
-            HorsemansBladeOnHitInner(player, targetIdx, damage, knockback, extraUpdateAmt, type);
-        }
-        [CWRJITEnabled]
-        private static void HorsemansBladeOnHitInner(Player player, int targetIdx, int damage, float knockback
-            , int extraUpdateAmt, int type)
-            => CalamityPlayer.HorsemansBladeOnHit(player, targetIdx, damage, knockback, extraUpdateAmt, type);
 
         public static bool GetProjStealthStrike(this Projectile projectile) => Has && GetProjStealthStrikeInner(projectile);
         [CWRJITEnabled]
@@ -920,31 +779,6 @@ namespace CalamityOverhaul
         }
         [CWRJITEnabled]
         private static LocalizedText ConstructRecipeConditionInner(int tier, out Func<bool> condition) => ArsenalTierGatedRecipe.ConstructRecipeCondition(tier, out condition);
-
-        public static void DrawStarTrail(Projectile projectile, Color outer, Color inner, float auraHeight = 10f) {
-            if (!Has) return;
-            DrawStarTrailInner(projectile, outer, inner, auraHeight);
-        }
-        [CWRJITEnabled]
-        private static void DrawStarTrailInner(Projectile projectile, Color outer, Color inner, float auraHeight) => CalamityUtils.DrawStarTrail(projectile, outer, inner, auraHeight);
-
-        public static void CosmicFireEffect(Projectile Projectile) {
-            if (!Has) return;
-            CosmicFireEffectInner(Projectile);
-        }
-        [CWRJITEnabled]
-        private static void CosmicFireEffectInner(Projectile Projectile) {
-            StreamGougeMetaball.SpawnParticle(Projectile.Center + VaultUtils.RandVr(13), Projectile.velocity, Main.rand.NextFloat(11.3f, 21.5f));
-        }
-
-        public static Projectile ProjectileRain(IEntitySource source, Vector2 targetPos, float xLimit
-            , float xVariance, float yLimitLower, float yLimitUpper, float projSpeed, int projType, int damage, float knockback, int owner)
-            => Has ? ProjectileRainInner(source, targetPos, xLimit, xVariance, yLimitLower, yLimitUpper, projSpeed, projType, damage, knockback, owner) : null;
-        [CWRJITEnabled]
-        private static Projectile ProjectileRainInner(IEntitySource source, Vector2 targetPos, float xLimit
-            , float xVariance, float yLimitLower, float yLimitUpper, float projSpeed, int projType, int damage, float knockback, int owner)
-            => CalamityUtils.ProjectileRain(source, targetPos, xLimit, xVariance, yLimitLower
-                , yLimitUpper, projSpeed, projType, damage, knockback, owner);
 
         public static List<Vector2> BezierCurveGetPoints(int count, params Vector2[] pos) => Has ? BezierCurveGetPointsInner(count, pos) : new List<Vector2>();
         [CWRJITEnabled]

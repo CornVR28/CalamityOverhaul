@@ -1,6 +1,5 @@
 ﻿using CalamityOverhaul.Common;
 using CalamityOverhaul.Content.Industrials.MaterialFlow.Batterys;
-using CalamityOverhaul.Content.RemakeItems;
 using InnoVault.GameSystem;
 using InnoVault.TileProcessors;
 using Microsoft.Xna.Framework.Graphics;
@@ -14,7 +13,7 @@ using Terraria.ModLoader.IO;
 
 namespace CalamityOverhaul.Content.Industrials.Modifys
 {
-    internal class ModifyChargingStationItem : CWRItemOverride
+    internal class ModifyChargingStationItem : ItemOverride
     {
         public override int TargetID => CWRID.Item_ChargingStationItem;
         public override bool DrawingInfo => false;

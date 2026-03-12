@@ -1,5 +1,5 @@
 ﻿using CalamityOverhaul.Content.LegendWeapon.HalibutLegend.DomainSkills;
-using CalamityOverhaul.Content.RemakeItems;
+using InnoVault.GameSystem;
 using System;
 using System.Collections.Generic;
 using Terraria;
@@ -9,7 +9,7 @@ using Terraria.ModLoader;
 
 namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend
 {
-    internal class HalibutOverride : CWRItemOverride
+    internal class HalibutOverride : ItemOverride
     {
         #region Data
         /// <summary>
@@ -117,8 +117,6 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend
             Item.useAmmo = AmmoID.Bullet;
             Item.CWR().LegendData = new HalibutData();
         }
-
-        public override bool? CanCWROverride() => true;
 
         public override bool? CanUseItem(Item item, Player player) {
             item.UseSound = SoundID.Item38 with { Volume = 0.6f };

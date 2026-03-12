@@ -1,4 +1,4 @@
-﻿using CalamityOverhaul.Content.Projectiles.Weapons.Ranged.HeldProjs;
+﻿using CalamityOverhaul.Content.RangedModify.Core;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -46,6 +46,19 @@ namespace CalamityOverhaul.Content.Items.Ranged
                 .AddIngredient(CWRID.Item_LunarianBow)
                 .AddTile(TileID.Anvils)
                 .Register();
+        }
+    }
+
+    internal class BarrenBowHeld : BaseBow//TODO:等待重做，目前失去了特殊效果
+    {
+        public override string Texture => CWRConstant.Item_Ranged + "BarrenBow";
+        public override int TargetID => ModContent.ItemType<BarrenBow>();
+        public override void SetRangedProperty() {
+            DrawArrowMode = -18;
+            //InOwner_HandState_AlwaysSetInFireRoding = true;
+            BowstringData.DeductRectangle = new Rectangle(18, 22, 2, 38);
+            BowstringData.TopBowOffset = new Vector2(18, 20);
+            BowstringData.BottomBowOffset = new Vector2(18, 12);
         }
     }
 }

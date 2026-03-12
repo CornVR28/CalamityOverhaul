@@ -1,5 +1,4 @@
 ﻿using CalamityOverhaul.Content.Projectiles.Weapons.Rogue.HeldProjs;
-using CalamityOverhaul.Content.RemakeItems.Melee;
 using InnoVault.GameSystem;
 using Terraria;
 using Terraria.Audio;
@@ -121,13 +120,6 @@ namespace CalamityOverhaul.Content.Items.Rogue
             }
 
             Projectile.rotation = Projectile.velocity.ToRotation() + MathHelper.PiOver2;
-
-            if (Main.rand.NextBool(3)) {
-                int dustType = SolsticeHomeBeam.GetDustTypeBySeason(CWRRef.GetCurrentSeason());
-                int dust = Dust.NewDust(Projectile.position, Projectile.width, Projectile.height, dustType,
-                                        Projectile.velocity.X * 0.05f, Projectile.velocity.Y * 0.05f);
-                Main.dust[dust].noGravity = true;
-            }
         }
 
         public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone) {

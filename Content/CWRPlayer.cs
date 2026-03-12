@@ -8,7 +8,6 @@ using CalamityOverhaul.Content.NPCs.Modifys.Crabulons;
 using CalamityOverhaul.Content.Projectiles.Others;
 using CalamityOverhaul.Content.RangedModify;
 using CalamityOverhaul.Content.RangedModify.Core;
-using CalamityOverhaul.Content.RemakeItems;
 using CalamityOverhaul.Content.UIs.OverhaulTheBible;
 using CalamityOverhaul.OtherMods.HighFPSSupport;
 using CalamityOverhaul.OtherMods.ImproveGame;
@@ -358,15 +357,10 @@ namespace CalamityOverhaul.Content
                 SpwanTextProj.New(Player, () => VaultUtils.Text(improvGameText, Color.Red), 210);
                 CWRMod.Instance.Logger.Info(improvGameText);
             }
-
-            if (Player.name == "HoCha113") {
-                string text = CWRItemOverride.ByID.Count + CWRLocText.GetTextValue("OnEnterWorld_TextContent");
-                SpwanTextProj.New(Player, () => VaultUtils.Text(text, Color.GreenYellow), 240);
-            }
         }
 
         public override void OnEnterWorld() {
-            //Information();
+            Information();
 
             if (OverhaulTheBibleUI.Instance != null) {
                 OverhaulTheBibleUI.Instance.Active = false;

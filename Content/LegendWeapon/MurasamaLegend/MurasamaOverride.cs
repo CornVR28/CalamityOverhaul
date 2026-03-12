@@ -1,6 +1,6 @@
 ﻿using CalamityOverhaul.Content.LegendWeapon.MurasamaLegend.MurasamaProj;
 using CalamityOverhaul.Content.LegendWeapon.MurasamaLegend.UI;
-using CalamityOverhaul.Content.RemakeItems;
+using InnoVault.GameSystem;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using System;
@@ -16,7 +16,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.MurasamaLegend
     /// <summary>
     /// 妖刀
     /// </summary>
-    internal class MurasamaOverride : CWRItemOverride
+    internal class MurasamaOverride : ItemOverride
     {
         #region Data
         /// <summary>
@@ -51,7 +51,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.MurasamaLegend
         public static Asset<Texture2D> MuraItemAsset { get; private set; }
         private static readonly string[] SamNameList = ["激流山姆", "山姆", "Samuel Rodrigues", "Jetstream Sam", "Sam"];
         private static readonly string[] VergilNameList = ["维吉尔", "Vergil"];
-        public static int ID => GetCalItemID("Murasama");
+        public static int ID => CWRID.Item_Murasama;
         public override int TargetID => ID;
         #endregion
         /// <summary>
@@ -100,7 +100,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.MurasamaLegend
         /// <param name="item"></param>
         /// <returns></returns>
         public static int GetLevel(Item item) {
-            if (item.type != GetCalItemID("Murasama")) {
+            if (item.type != CWRID.Item_Murasama) {
                 return 0;
             }
             CWRItem cwrItem = item.CWR();
@@ -208,8 +208,6 @@ namespace CalamityOverhaul.Content.LegendWeapon.MurasamaLegend
         }
 
         public override void SetDefaults(Item item) => SetDefaultsFunc(item);
-
-        public override bool? CanCWROverride() => true;
 
         public override void ModifyTooltips(Item item, List<TooltipLine> tooltips) => TooltipHandler.SetTooltip(item, ref tooltips);
 

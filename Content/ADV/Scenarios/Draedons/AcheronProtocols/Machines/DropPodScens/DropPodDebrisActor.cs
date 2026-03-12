@@ -1,12 +1,9 @@
-﻿using CalamityOverhaul.Common;
-using InnoVault.Actors;
+﻿using InnoVault.Actors;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using System;
 using System.Collections.Generic;
 using Terraria;
-using Terraria.Audio;
-using Terraria.ID;
 
 namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machines.DropPodScens
 {

@@ -1,5 +1,4 @@
-﻿using CalamityOverhaul.Content.Projectiles.Weapons.Ranged;
-using CalamityOverhaul.Content.RangedModify.Core;
+﻿using CalamityOverhaul.Content.RangedModify.Core;
 using Terraria.ID;
 using Terraria.ModLoader;
 

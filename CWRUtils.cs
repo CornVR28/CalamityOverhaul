@@ -396,6 +396,20 @@ namespace CalamityOverhaul
             }
         }
 
+        /// <summary>
+        /// 获取来自灾厄的物品名
+        /// </summary>
+        /// <param name="itemKey"></param>
+        /// <returns></returns>
+        public static string GetCalItem(string itemKey) => $"CalamityMod/{itemKey}";
+
+        /// <summary>
+        /// 获取来自灾厄的物品ID
+        /// </summary>
+        /// <param name="itemKey"></param>
+        /// <returns></returns>
+        public static int GetCalItemID(string itemKey) => VaultUtils.GetItemTypeFromFullName(GetCalItem(itemKey));
+
         public static void ModifyLegendWeaponDamageFunc(Item item, int GetOnDamage, int GetStartDamage, ref StatModifier damage) {
             float oldMultiplicative = damage.Multiplicative;
             damage *= GetOnDamage / (float)GetStartDamage;
@@ -994,32 +1008,6 @@ namespace CalamityOverhaul
         #endregion
 
         #region DrawUtils
-        [VaultLoaden(CWRConstant.UI + "RageEnergyBar")]
-        private static Asset<Texture2D> rageEnergyBarAsset;
-        [VaultLoaden(CWRConstant.UI + "RageEnergyBack")]
-        private static Asset<Texture2D> rageEnergyBackAsset;
-        public static void DrawRageEnergyChargeBar(Player player, float alp, float charge) {
-            Item item = player.GetItem();
-            if (item.IsAir) {
-                return;
-            }
-
-            Texture2D rageEnergyBar = rageEnergyBarAsset.Value;
-            Texture2D rageEnergyBack = rageEnergyBackAsset.Value;
-
-            float slp = 1;
-            Vector2 drawPos = player.GetPlayerStabilityCenter() + new Vector2(rageEnergyBack.Width / -2, 120) - Main.screenPosition;
-            int width = (int)(rageEnergyBar.Width * charge);
-            if (width > rageEnergyBar.Width) {
-                width = rageEnergyBar.Width;
-            }
-            Rectangle backRec = new Rectangle(0, 0, width, rageEnergyBar.Height);
-
-            Main.EntitySpriteDraw(rageEnergyBack, drawPos, null, Color.White * alp, 0, Vector2.Zero, slp, SpriteEffects.None, 0);
-
-            Main.EntitySpriteDraw(rageEnergyBar, drawPos + new Vector2(10, 12) * slp, backRec, Color.White * alp, 0, Vector2.Zero, slp, SpriteEffects.None, 0);
-        }
-
         /// <summary>
         /// 获取指定路径的纹理实例 <see cref="Texture2D"/>
         /// </summary>
@@ -1049,13 +1037,6 @@ namespace CalamityOverhaul
                 , immediateLoad ? AssetRequestMode.ImmediateLoad : AssetRequestMode.AsyncLoad);
         }
 
-        #endregion
-
-        #region TileUtils
-        /// <summary>
-        /// 检测该位置是否存在一个实心的固体方块
-        /// </summary>
-        public static bool HasSolidTile(this Tile tile) => tile.HasTile && Main.tileSolid[tile.TileType] && !Main.tileSolidTop[tile.TileType];
         #endregion
     }
 }

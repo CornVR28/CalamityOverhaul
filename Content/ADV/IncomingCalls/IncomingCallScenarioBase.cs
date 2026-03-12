@@ -127,7 +127,7 @@ namespace CalamityOverhaul.Content.ADV.IncomingCalls
 
                 Action finishCallback = isLast
                     ? () => { line.OnFinish?.Invoke(); OnScenarioComplete(); }
-                    : line.OnFinish;
+                : line.OnFinish;
 
                 if (line.PortraitKey != null) {
                     call.EnqueueLine(line.Speaker, line.PortraitKey, line.Content,

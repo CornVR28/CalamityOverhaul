@@ -1,10 +1,10 @@
 ﻿using CalamityOverhaul.Common;
 using CalamityOverhaul.Content.Industrials.Generator;
+using CalamityOverhaul.Content.Items.Modifys;
 using CalamityOverhaul.Content.LegendWeapon;
 using CalamityOverhaul.Content.LegendWeapon.HalibutLegend.UI;
 using CalamityOverhaul.Content.RangedModify;
 using CalamityOverhaul.Content.RangedModify.UI.AmmoView;
-using CalamityOverhaul.Content.RemakeItems;
 using InnoVault.GameSystem;
 using Microsoft.Xna.Framework.Graphics;
 using System;

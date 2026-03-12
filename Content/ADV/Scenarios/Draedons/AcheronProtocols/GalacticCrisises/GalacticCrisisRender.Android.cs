@@ -136,30 +136,30 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
 
             //上边（顶部加强线，3px亮+1px暗）
             Color topEdge = techColor * (alpha * 0.75f * pulse);
-            sb.Draw(pixel, new Vector2(lineX, rect.Y),       new Rectangle(0, 0, 1, 1), topEdge, 0f, Vector2.Zero, new Vector2(lineWidth, 3f), SpriteEffects.None, 0f);
-            sb.Draw(pixel, new Vector2(lineX, rect.Y + 3),   new Rectangle(0, 0, 1, 1), topEdge * 0.35f, 0f, Vector2.Zero, new Vector2(lineWidth, 1f), SpriteEffects.None, 0f);
+            sb.Draw(pixel, new Vector2(lineX, rect.Y), new Rectangle(0, 0, 1, 1), topEdge, 0f, Vector2.Zero, new Vector2(lineWidth, 3f), SpriteEffects.None, 0f);
+            sb.Draw(pixel, new Vector2(lineX, rect.Y + 3), new Rectangle(0, 0, 1, 1), topEdge * 0.35f, 0f, Vector2.Zero, new Vector2(lineWidth, 1f), SpriteEffects.None, 0f);
             //下边细线
             sb.Draw(pixel, new Vector2(lineX, rect.Bottom - 1), new Rectangle(0, 0, 1, 1), techColor * (alpha * 0.45f * pulse), 0f, Vector2.Zero, new Vector2(lineWidth, 1f), SpriteEffects.None, 0f);
             //左右边
-            sb.Draw(pixel, new Vector2(rect.X,         lineY), new Rectangle(0, 0, 1, 1), techColor * (alpha * 0.55f), 0f, Vector2.Zero, new Vector2(2f, lineHeight), SpriteEffects.None, 0f);
+            sb.Draw(pixel, new Vector2(rect.X, lineY), new Rectangle(0, 0, 1, 1), techColor * (alpha * 0.55f), 0f, Vector2.Zero, new Vector2(2f, lineHeight), SpriteEffects.None, 0f);
             sb.Draw(pixel, new Vector2(rect.Right - 2, lineY), new Rectangle(0, 0, 1, 1), techColor * (alpha * 0.55f), 0f, Vector2.Zero, new Vector2(2f, lineHeight), SpriteEffects.None, 0f);
 
             //内层辅助线（很淡，制造双层感）
             Color dim = techColor * (alpha * 0.18f);
-            sb.Draw(pixel, new Vector2(rect.X + 4, rect.Y + 4),   new Rectangle(0, 0, 1, 1), dim, 0f, Vector2.Zero, new Vector2(rect.Width - 8, 1f), SpriteEffects.None, 0f);
+            sb.Draw(pixel, new Vector2(rect.X + 4, rect.Y + 4), new Rectangle(0, 0, 1, 1), dim, 0f, Vector2.Zero, new Vector2(rect.Width - 8, 1f), SpriteEffects.None, 0f);
             sb.Draw(pixel, new Vector2(rect.X + 4, rect.Bottom - 5), new Rectangle(0, 0, 1, 1), dim * 0.6f, 0f, Vector2.Zero, new Vector2(rect.Width - 8, 1f), SpriteEffects.None, 0f);
 
             //四角L形括号（与主面板边框风格统一）
             Color cornerColor = new Color(80, 200, 255) * (alpha * 0.7f * pulse);
             float cLen = 20f;
-            DrawAndroidLBracket(sb, pixel, new Vector2(rect.X + 2,         rect.Y + 2),          cornerColor, cLen, false, false);
-            DrawAndroidLBracket(sb, pixel, new Vector2(rect.Right - 2,      rect.Y + 2),          cornerColor, cLen, true,  false);
-            DrawAndroidLBracket(sb, pixel, new Vector2(rect.X + 2,         rect.Bottom - 2),      cornerColor, cLen, false, true);
-            DrawAndroidLBracket(sb, pixel, new Vector2(rect.Right - 2,      rect.Bottom - 2),      cornerColor, cLen, true,  true);
+            DrawAndroidLBracket(sb, pixel, new Vector2(rect.X + 2, rect.Y + 2), cornerColor, cLen, false, false);
+            DrawAndroidLBracket(sb, pixel, new Vector2(rect.Right - 2, rect.Y + 2), cornerColor, cLen, true, false);
+            DrawAndroidLBracket(sb, pixel, new Vector2(rect.X + 2, rect.Bottom - 2), cornerColor, cLen, false, true);
+            DrawAndroidLBracket(sb, pixel, new Vector2(rect.Right - 2, rect.Bottom - 2), cornerColor, cLen, true, true);
 
             //顶部左侧刻痕（与主面板统一的机械感点缀）
             Color notchColor = techColor * (alpha * 0.55f);
-            sb.Draw(pixel, new Rectangle(rect.X + 6,  rect.Y, 1, 9), new Rectangle(0, 0, 1, 1), notchColor);
+            sb.Draw(pixel, new Rectangle(rect.X + 6, rect.Y, 1, 9), new Rectangle(0, 0, 1, 1), notchColor);
             sb.Draw(pixel, new Rectangle(rect.X + 20, rect.Y, 1, 6), new Rectangle(0, 0, 1, 1), notchColor * 0.6f);
             sb.Draw(pixel, new Rectangle(rect.X + 34, rect.Y, 1, 4), new Rectangle(0, 0, 1, 1), notchColor * 0.35f);
         }

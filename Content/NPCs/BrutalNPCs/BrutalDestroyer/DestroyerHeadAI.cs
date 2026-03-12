@@ -1,10 +1,10 @@
 ﻿using CalamityOverhaul.Content.Items.Melee;
+using CalamityOverhaul.Content.Items.Modifys.ModifyBag;
 using CalamityOverhaul.Content.Items.Summon;
 using CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalDestroyer.Core;
 using CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalDestroyer.Rendering;
 using CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalDestroyer.States;
 using CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalSkeletronPrime;
-using CalamityOverhaul.Content.RemakeItems.ModifyBag;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using Terraria;

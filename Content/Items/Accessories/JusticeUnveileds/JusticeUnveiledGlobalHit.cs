@@ -22,7 +22,6 @@ namespace CalamityOverhaul.Content.Items.Accessories.JusticeUnveileds
         }
         public override void AI() => Projectile.Center = Owner.GetPlayerStabilityCenter();
         public override bool PreDraw(ref Color lightColor) {
-            CWRUtils.DrawRageEnergyChargeBar(Owner, 255, Projectile.timeLeft / 300f);
             return false;
         }
     }

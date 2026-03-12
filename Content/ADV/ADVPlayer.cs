@@ -1,8 +1,4 @@
-﻿using CalamityOverhaul.Content.ADV.Scenarios;
-using CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Campsites;
-using CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.GalacticCrisises;
-using CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machines;
-using CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machines.DropPodScens;
+﻿using CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Campsites;
 using Terraria;
 using Terraria.ModLoader;
 

@@ -132,10 +132,10 @@ namespace CalamityOverhaul.Content.ADV.DialogueBoxs.Styles
 
             sb.Draw(px, glowRect, new Rectangle(0, 0, 1, 1), glow * 0.13f);
             int b = 2;
-            sb.Draw(px, new Rectangle(glowRect.X,          glowRect.Y,          glowRect.Width, b),  new Rectangle(0, 0, 1, 1), glow * 0.75f);
-            sb.Draw(px, new Rectangle(glowRect.X,          glowRect.Bottom - b, glowRect.Width, b),  new Rectangle(0, 0, 1, 1), glow * 0.45f);
-            sb.Draw(px, new Rectangle(glowRect.X,          glowRect.Y,          b, glowRect.Height), new Rectangle(0, 0, 1, 1), glow * 0.60f);
-            sb.Draw(px, new Rectangle(glowRect.Right - b,  glowRect.Y,          b, glowRect.Height), new Rectangle(0, 0, 1, 1), glow * 0.60f);
+            sb.Draw(px, new Rectangle(glowRect.X, glowRect.Y, glowRect.Width, b), new Rectangle(0, 0, 1, 1), glow * 0.75f);
+            sb.Draw(px, new Rectangle(glowRect.X, glowRect.Bottom - b, glowRect.Width, b), new Rectangle(0, 0, 1, 1), glow * 0.45f);
+            sb.Draw(px, new Rectangle(glowRect.X, glowRect.Y, b, glowRect.Height), new Rectangle(0, 0, 1, 1), glow * 0.60f);
+            sb.Draw(px, new Rectangle(glowRect.Right - b, glowRect.Y, b, glowRect.Height), new Rectangle(0, 0, 1, 1), glow * 0.60f);
         }
 
         /// <summary>
@@ -182,7 +182,7 @@ namespace CalamityOverhaul.Content.ADV.DialogueBoxs.Styles
             float x = start.X - (flow % period);
             while (x < end.X) {
                 float segStart = Math.Max(x, start.X);
-                float segEnd   = Math.Min(x + dashW, end.X);
+                float segEnd = Math.Min(x + dashW, end.X);
                 if (segEnd > segStart) {
                     float t = (segStart - start.X) / len;
                     float bright = MathF.Sin(t * MathHelper.Pi) * 0.45f + 0.55f;
@@ -198,8 +198,8 @@ namespace CalamityOverhaul.Content.ADV.DialogueBoxs.Styles
 
         protected override void StyleUpdate(Vector2 panelPos, Vector2 panelSize) {
             Advance(ref circuitPulseTimer, 0.025f);
-            Advance(ref hologramFlicker,   0.13f);
-            Advance(ref dataStreamTimer,   0.022f);
+            Advance(ref hologramFlicker, 0.13f);
+            Advance(ref dataStreamTimer, 0.022f);
             // 匀速扫描（不是来电框的正弦往返，而是永远向下循环）
             sweepTimer = (sweepTimer + 0.008f) % 1f;
             glitchTimer += 0.16f;
@@ -236,7 +236,7 @@ namespace CalamityOverhaul.Content.ADV.DialogueBoxs.Styles
             if (Active && circuitNodeSpawnTimer >= 38 && circuitNodes.Count < 6) {
                 circuitNodeSpawnTimer = 0;
                 float scaleW = Main.UIScale;
-                float left  = panelPos.X + TechSideMargin * scaleW;
+                float left = panelPos.X + TechSideMargin * scaleW;
                 float right = panelPos.X + panelSize.X - TechSideMargin * scaleW;
                 circuitNodes.Add(new CircuitNodePRT(
                     new Vector2(Main.rand.NextFloat(left, right),
@@ -323,14 +323,14 @@ namespace CalamityOverhaul.Content.ADV.DialogueBoxs.Styles
             // ── 纵向渐变（分28段，轻微脉冲呼吸）──
             int segs = 28;
             for (int i = 0; i < segs; i++) {
-                float t  = i / (float)segs;
+                float t = i / (float)segs;
                 float t2 = (i + 1) / (float)segs;
-                int y1 = rect.Y + (int)(t  * rect.Height);
+                int y1 = rect.Y + (int)(t * rect.Height);
                 int y2 = rect.Y + (int)(t2 * rect.Height);
                 float pulse = MathF.Sin(circuitPulseTimer * 0.55f + t * 2.1f) * 0.5f + 0.5f;
                 Color dark = new Color(4, 8, 18);
-                Color mid  = Color.Lerp(new Color(10, 20, 34), new Color(9, 20, 28), t * 0.5f);
-                Color c    = Color.Lerp(dark, mid, pulse) * (alpha * 0.95f);
+                Color mid = Color.Lerp(new Color(10, 20, 34), new Color(9, 20, 28), t * 0.5f);
+                Color c = Color.Lerp(dark, mid, pulse) * (alpha * 0.95f);
                 sb.Draw(px, new Rectangle(rect.X, y1, rect.Width, Math.Max(1, y2 - y1)),
                     new Rectangle(0, 0, 1, 1), c);
             }
@@ -364,13 +364,13 @@ namespace CalamityOverhaul.Content.ADV.DialogueBoxs.Styles
 
             // 顶部主强调线（3px+1px双层）
             Color topBright = new Color(0, 218, 208) * (alpha * 0.97f);
-            Color topDim    = new Color(0, 140, 160) * (alpha * 0.45f);
-            sb.Draw(px, new Rectangle(rect.X, rect.Y,     rect.Width, 3), new Rectangle(0, 0, 1, 1), topBright);
+            Color topDim = new Color(0, 140, 160) * (alpha * 0.45f);
+            sb.Draw(px, new Rectangle(rect.X, rect.Y, rect.Width, 3), new Rectangle(0, 0, 1, 1), topBright);
             sb.Draw(px, new Rectangle(rect.X, rect.Y + 3, rect.Width, 1), new Rectangle(0, 0, 1, 1), topDim);
 
             // 左侧强调竖条（4px全高，渐变：上亮下暗）
             int lbH = rect.Height / 2;
-            sb.Draw(px, new Rectangle(rect.X, rect.Y,       4, lbH),              new Rectangle(0, 0, 1, 1), new Color(0, 200, 190) * (alpha * 0.72f));
+            sb.Draw(px, new Rectangle(rect.X, rect.Y, 4, lbH), new Rectangle(0, 0, 1, 1), new Color(0, 200, 190) * (alpha * 0.72f));
             sb.Draw(px, new Rectangle(rect.X, rect.Y + lbH, 4, rect.Height - lbH), new Rectangle(0, 0, 1, 1), new Color(0, 130, 130) * (alpha * 0.35f));
 
             // 右侧细线
@@ -381,7 +381,7 @@ namespace CalamityOverhaul.Content.ADV.DialogueBoxs.Styles
                 new Rectangle(0, 0, 1, 1), new Color(0, 115, 135) * (alpha * 0.32f));
 
             // 顶部左侧刻痕（机械感，来电框没有这个）
-            sb.Draw(px, new Rectangle(rect.X + 4,  rect.Y, 1, 9), new Rectangle(0, 0, 1, 1), topBright * 0.82f);
+            sb.Draw(px, new Rectangle(rect.X + 4, rect.Y, 1, 9), new Rectangle(0, 0, 1, 1), topBright * 0.82f);
             sb.Draw(px, new Rectangle(rect.X + 18, rect.Y, 1, 6), new Rectangle(0, 0, 1, 1), topBright * 0.55f);
             sb.Draw(px, new Rectangle(rect.X + 32, rect.Y, 1, 4), new Rectangle(0, 0, 1, 1), topBright * 0.32f);
         }
@@ -392,15 +392,15 @@ namespace CalamityOverhaul.Content.ADV.DialogueBoxs.Styles
         /// </summary>
         private void DrawRuler(SpriteBatch sb, Rectangle rect, float alpha) {
             Texture2D px = VaultAsset.placeholder2.Value;
-            int rx      = rect.Right - 10;
+            int rx = rect.Right - 10;
             int spacing = 12;
-            int marks   = rect.Height / spacing;
-            float flow  = circuitPulseTimer * 0.25f;
+            int marks = rect.Height / spacing;
+            float flow = circuitPulseTimer * 0.25f;
             for (int i = 0; i < marks; i++) {
-                float t      = (float)i / marks;
+                float t = (float)i / marks;
                 float bright = MathF.Sin((t + flow) * MathHelper.TwoPi) * 0.3f + 0.45f;
-                int   mLen   = (i % 4 == 0) ? 7 : 4;
-                Color mc     = new Color(0, 175, 168) * (alpha * bright);
+                int mLen = (i % 4 == 0) ? 7 : 4;
+                Color mc = new Color(0, 175, 168) * (alpha * bright);
                 sb.Draw(px, new Rectangle(rx - mLen, rect.Y + i * spacing, mLen, 1),
                     new Rectangle(0, 0, 1, 1), mc);
             }
@@ -413,9 +413,9 @@ namespace CalamityOverhaul.Content.ADV.DialogueBoxs.Styles
         private void DrawCornerHex(SpriteBatch sb, Rectangle rect, float alpha) {
             if (alpha < 0.04f) return;
             float blink = MathF.Sin(circuitPulseTimer * 0.75f) * 0.18f + 0.82f;
-            Color col   = new Color(0, 155, 148) * (alpha * 0.55f * blink);
-            float sc    = 0.55f;
-            var font    = Terraria.GameContent.FontAssets.MouseText.Value;
+            Color col = new Color(0, 155, 148) * (alpha * 0.55f * blink);
+            float sc = 0.55f;
+            var font = Terraria.GameContent.FontAssets.MouseText.Value;
 
             // 左上
             Utils.DrawBorderString(sb, cornerHex[0], new Vector2(rect.X + 6f, rect.Y + 6f), col, sc);
@@ -433,10 +433,10 @@ namespace CalamityOverhaul.Content.ADV.DialogueBoxs.Styles
         /// 矩形线框（一次性画4条边）
         /// </summary>
         private static void DrawRect(SpriteBatch sb, Texture2D px, Rectangle r, int bw, Color c) {
-            sb.Draw(px, new Rectangle(r.X,          r.Y,          r.Width,  bw),       new Rectangle(0, 0, 1, 1), c);
-            sb.Draw(px, new Rectangle(r.X,          r.Bottom - bw, r.Width, bw),       new Rectangle(0, 0, 1, 1), c * 0.7f);
-            sb.Draw(px, new Rectangle(r.X,          r.Y,          bw, r.Height),       new Rectangle(0, 0, 1, 1), c * 0.85f);
-            sb.Draw(px, new Rectangle(r.Right - bw, r.Y,          bw, r.Height),       new Rectangle(0, 0, 1, 1), c * 0.85f);
+            sb.Draw(px, new Rectangle(r.X, r.Y, r.Width, bw), new Rectangle(0, 0, 1, 1), c);
+            sb.Draw(px, new Rectangle(r.X, r.Bottom - bw, r.Width, bw), new Rectangle(0, 0, 1, 1), c * 0.7f);
+            sb.Draw(px, new Rectangle(r.X, r.Y, bw, r.Height), new Rectangle(0, 0, 1, 1), c * 0.85f);
+            sb.Draw(px, new Rectangle(r.Right - bw, r.Y, bw, r.Height), new Rectangle(0, 0, 1, 1), c * 0.85f);
         }
 
         /// <summary>

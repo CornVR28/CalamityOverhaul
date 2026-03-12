@@ -1,5 +1,4 @@
-﻿using CalamityOverhaul.Content.RemakeItems;
-using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
 using Terraria;
 using Terraria.Audio;
@@ -11,7 +10,7 @@ namespace CalamityOverhaul.Content.MeleeModify.Core
 {
     internal abstract class BaseKnife : BaseSwing
     {
-        public override int TargetID => CWRItemOverride.GetCalItemID(Name[..^4]);
+        public override int TargetID => CWRUtils.GetCalItemID(Name[..^4]);
         public override string Texture => CWRConstant.Placeholder3;
         public override Texture2D TextureValue => TargetID == ItemID.None ? TextureAssets.Projectile[Type].Value : TextureAssets.Item[TargetID].Value;
         public SwingDataStruct SwingData = new SwingDataStruct();

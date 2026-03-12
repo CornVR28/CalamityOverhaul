@@ -532,7 +532,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols
 
             //顶部刻痕（靠左，机械感点缀）
             Color notchColor = techColor * (alpha * 0.62f);
-            sb.Draw(pixel, new Rectangle(rect.X + 6,  rect.Y, 1, 9), new Rectangle(0, 0, 1, 1), notchColor);
+            sb.Draw(pixel, new Rectangle(rect.X + 6, rect.Y, 1, 9), new Rectangle(0, 0, 1, 1), notchColor);
             sb.Draw(pixel, new Rectangle(rect.X + 22, rect.Y, 1, 6), new Rectangle(0, 0, 1, 1), notchColor * 0.65f);
             sb.Draw(pixel, new Rectangle(rect.X + 38, rect.Y, 1, 4), new Rectangle(0, 0, 1, 1), notchColor * 0.38f);
 

@@ -1,5 +1,4 @@
 ﻿using CalamityOverhaul.Common;
-using CalamityOverhaul.Content.RemakeItems;
 using InnoVault.GameContent.BaseEntity;
 using InnoVault.GameSystem;
 using System;
@@ -31,7 +30,7 @@ namespace CalamityOverhaul.Content.RangedModify.Core
         /// <summary>
         /// 目标物品对象
         /// </summary>
-        public virtual int TargetID => CWRItemOverride.GetCalItemID(Name[..^4]);
+        public virtual int TargetID => CWRUtils.GetCalItemID(Name[..^4]);
         /// <summary>
         /// 右手角度值
         /// </summary>

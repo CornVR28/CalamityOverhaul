@@ -1,5 +1,4 @@
 ﻿using CalamityOverhaul.Common;
-using CalamityOverhaul.Content.RemakeItems;
 using InnoVault.GameSystem;
 using System;
 using System.Collections.Generic;
@@ -12,7 +11,7 @@ using static InnoVault.GameSystem.ItemRebuildLoader;
 
 namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
 {
-    internal class SHPCOverride : CWRItemOverride, ICWRLoader
+    internal class SHPCOverride : ItemOverride, ICWRLoader
     {
         /// <summary>
         /// 每个时期阶段对应的伤害，这个成员一般不需要直接访问，而是使用<see cref="GetOnDamage"/>
@@ -26,7 +25,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
         /// 当前选中的魂魄类型，UI选择后会更新这个值
         /// </summary>
         public static int SelectedSoulType = ItemID.SoulofLight;
-        public override int TargetID => GetCalItemID("SHPC");
+        public override int TargetID => CWRID.Item_SHPC;
         private static void OnSHPCToolFunc(On_ModItem_ModifyTooltips_Delegate orig, object obj, List<TooltipLine> list) { }
         void ICWRLoader.LoadData() {
             var type = CWRRef.GetItem_SHPC_Type();
@@ -50,7 +49,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
         /// <param name="item"></param>
         /// <returns></returns>
         public static int GetLevel(Item item) {
-            if (item.type != GetCalItemID("SHPC")) {
+            if (item.type != CWRID.Item_SHPC) {
                 return 0;
             }
             CWRItem cwrItem = item.CWR();
@@ -89,7 +88,6 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
 
         public override void SetStaticDefaults() => ItemID.Sets.ShimmerTransformToItem[TargetID] = CWRID.Item_PlasmaDriveCore;
         public override void SetDefaults(Item item) => SetDefaultsFunc(item);
-        public override bool? CanCWROverride() => true;
         public override bool On_ModifyWeaponDamage(Item item, Player player, ref StatModifier damage) => SHPCDamage(item, ref damage);
         public override void ModifyTooltips(Item item, List<TooltipLine> tooltips) => SetTooltip(item, ref tooltips);
 

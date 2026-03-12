@@ -190,10 +190,6 @@ namespace CalamityOverhaul.Content.UIs.OverhaulSettings
             contentCat.EnsureInitialized();
             categories.Add(contentCat);
 
-            var weaponCat = new WeaponOverrideCategory();
-            weaponCat.EnsureInitialized();
-            categories.Add(weaponCat);
-
             var worldGenCat = new WorldGenSettingsCategory();
             worldGenCat.EnsureInitialized();
             categories.Add(worldGenCat);

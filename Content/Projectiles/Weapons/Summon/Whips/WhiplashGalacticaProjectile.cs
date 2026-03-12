@@ -59,22 +59,22 @@ namespace CalamityOverhaul.Content.Projectiles.Weapons.Summon.Whips
                 target.CWR().WhipHitNum += 3;
                 target.CWR().WhipHitType = (byte)WhipHitTypeEnum.WhiplashGalactica;
 
-                for (int i = 0; i < 3; i++) {
-                    Projectile.NewProjectile(
-                        Projectile.FromObjectGetParent(),
+                //for (int i = 0; i < 3; i++) {
+                //    Projectile.NewProjectile(
+                //        Projectile.FromObjectGetParent(),
 
-                        target.Center -
-                        Main.player[Projectile.owner].Center.To(target.Center).UnitVector()
-                        .RotatedBy(MathHelper.ToRadians(Main.rand.Next(-75, 75))) * 300,
+                //        target.Center -
+                //        Main.player[Projectile.owner].Center.To(target.Center).UnitVector()
+                //        .RotatedBy(MathHelper.ToRadians(Main.rand.Next(-75, 75))) * 300,
 
-                        Vector2.Zero,
-                        ModContent.ProjectileType<CosmicFire>(),
-                        Projectile.damage,
-                        0,
-                        Projectile.owner,
-                        Projectile.whoAmI
-                    );
-                }
+                //        Vector2.Zero,
+                //        ModContent.ProjectileType<CosmicFire>(),
+                //        Projectile.damage,
+                //        0,
+                //        Projectile.owner,
+                //        Projectile.whoAmI
+                //    );
+                //}
             }
         }
 

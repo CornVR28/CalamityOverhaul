@@ -1,5 +1,5 @@
-﻿using CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.ApolliaActors.States;
-using CalamityOverhaul.Common;
+﻿using CalamityOverhaul.Common;
+using CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.ApolliaActors.States;
 using CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machines;
 using InnoVault.Actors;
 using InnoVault.Trails;

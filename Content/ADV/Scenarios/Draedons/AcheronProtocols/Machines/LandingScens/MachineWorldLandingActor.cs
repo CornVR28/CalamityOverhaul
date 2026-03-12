@@ -1,5 +1,4 @@
 ﻿using InnoVault.Actors;
-using InnoVault.GameSystem;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Graphics;
 using System;
