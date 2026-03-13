@@ -1,17 +1,17 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using System.Linq;
 using Terraria.ID;
 
 namespace CalamityOverhaul.Content.UIs.SupertableUIs
 {
     /// <summary>
-    /// Åä·½Æ¥ÅäÒıÇæ£¬¸ºÔğÅä·½µÄÆ¥ÅäºÍ²éÑ¯
+    /// é…æ–¹åŒ¹é…å¼•æ“ï¼Œè´Ÿè´£é…æ–¹çš„åŒ¹é…å’ŒæŸ¥è¯¢
     /// </summary>
     public class RecipeMatchingEngine
     {
         private readonly List<RecipeData> _recipes;
-        private Dictionary<int, List<RecipeData>> _targetItemIndex; //°´½á¹ûÎïÆ·Ë÷Òı
-        private Dictionary<int, HashSet<RecipeData>> _materialIndex; //°´²ÄÁÏË÷Òı
+        private Dictionary<int, List<RecipeData>> _targetItemIndex; //æŒ‰ç»“æœç‰©å“ç´¢å¼•
+        private Dictionary<int, HashSet<RecipeData>> _materialIndex; //æŒ‰ææ–™ç´¢å¼•
 
         public IReadOnlyList<RecipeData> AllRecipes => _recipes.AsReadOnly();
         public int RecipeCount => _recipes.Count;
@@ -23,19 +23,19 @@ namespace CalamityOverhaul.Content.UIs.SupertableUIs
         }
 
         /// <summary>
-        /// Ìí¼ÓÅä·½
+        /// æ·»åŠ é…æ–¹
         /// </summary>
         public void AddRecipe(RecipeData recipe) {
             if (recipe == null) return;
 
             _recipes.Add(recipe);
 
-            //¹¹½¨Ë÷Òı
+            //æ„å»ºç´¢å¼•
             BuildIndicesForRecipe(recipe);
         }
 
         /// <summary>
-        /// ÅúÁ¿Ìí¼ÓÅä·½
+        /// æ‰¹é‡æ·»åŠ é…æ–¹
         /// </summary>
         public void AddRecipes(IEnumerable<RecipeData> recipes) {
             if (recipes == null) return;
@@ -46,7 +46,7 @@ namespace CalamityOverhaul.Content.UIs.SupertableUIs
         }
 
         /// <summary>
-        /// ÖØ½¨ËùÓĞË÷Òı
+        /// é‡å»ºæ‰€æœ‰ç´¢å¼•
         /// </summary>
         public void RebuildIndices() {
             _targetItemIndex.Clear();
@@ -58,7 +58,7 @@ namespace CalamityOverhaul.Content.UIs.SupertableUIs
         }
 
         /// <summary>
-        /// Æ¥ÅäÅä·½
+        /// åŒ¹é…é…æ–¹
         /// </summary>
         public RecipeMatchResult MatchRecipe(int[] materialTypes) {
             if (materialTypes == null || materialTypes.Length != SupertableConstants.TOTAL_SLOTS) {
@@ -75,7 +75,7 @@ namespace CalamityOverhaul.Content.UIs.SupertableUIs
         }
 
         /// <summary>
-        /// ¸ù¾İ½á¹ûÎïÆ·²éÕÒÅä·½
+        /// æ ¹æ®ç»“æœç‰©å“æŸ¥æ‰¾é…æ–¹
         /// </summary>
         public IEnumerable<RecipeData> FindRecipesByTarget(int targetItemType) {
             if (_targetItemIndex.TryGetValue(targetItemType, out var recipes)) {
@@ -85,7 +85,7 @@ namespace CalamityOverhaul.Content.UIs.SupertableUIs
         }
 
         /// <summary>
-        /// ¸ù¾İ²ÄÁÏ²éÕÒÅä·½
+        /// æ ¹æ®ææ–™æŸ¥æ‰¾é…æ–¹
         /// </summary>
         public IEnumerable<RecipeData> FindRecipesByMaterial(int materialType) {
             if (_materialIndex.TryGetValue(materialType, out var recipes)) {
@@ -95,7 +95,7 @@ namespace CalamityOverhaul.Content.UIs.SupertableUIs
         }
 
         /// <summary>
-        /// ¼ì²éÅä·½ÊÇ·ñÆ¥Åä
+        /// æ£€æŸ¥é…æ–¹æ˜¯å¦åŒ¹é…
         /// </summary>
         private bool IsRecipeMatch(RecipeData recipe, int[] materialTypes) {
             if (recipe.MaterialTypesCache == null || recipe.MaterialTypesCache.Length != SupertableConstants.TOTAL_SLOTS) {
@@ -112,16 +112,16 @@ namespace CalamityOverhaul.Content.UIs.SupertableUIs
         }
 
         /// <summary>
-        /// ÎªÅä·½¹¹½¨Ë÷Òı
+        /// ä¸ºé…æ–¹æ„å»ºç´¢å¼•
         /// </summary>
         private void BuildIndicesForRecipe(RecipeData recipe) {
-            //°´½á¹ûÎïÆ·Ë÷Òı
+            //æŒ‰ç»“æœç‰©å“ç´¢å¼•
             if (!_targetItemIndex.ContainsKey(recipe.Target)) {
                 _targetItemIndex[recipe.Target] = new List<RecipeData>();
             }
             _targetItemIndex[recipe.Target].Add(recipe);
 
-            //°´²ÄÁÏË÷Òı
+            //æŒ‰ææ–™ç´¢å¼•
             if (recipe.MaterialTypesCache != null) {
                 foreach (var materialType in recipe.MaterialTypesCache) {
                     if (materialType == ItemID.None) continue;
@@ -135,7 +135,7 @@ namespace CalamityOverhaul.Content.UIs.SupertableUIs
         }
 
         /// <summary>
-        /// Çå³ıËùÓĞÅä·½
+        /// æ¸…é™¤æ‰€æœ‰é…æ–¹
         /// </summary>
         public void Clear() {
             _recipes.Clear();
@@ -144,7 +144,7 @@ namespace CalamityOverhaul.Content.UIs.SupertableUIs
         }
 
         /// <summary>
-        /// ÒÆ³ıÖ¸¶¨·¶Î§µÄÅä·½
+        /// ç§»é™¤æŒ‡å®šèŒƒå›´çš„é…æ–¹
         /// </summary>
         public void RemoveRange(int startIndex, int count) {
             if (startIndex < 0 || startIndex >= _recipes.Count) return;
@@ -156,7 +156,7 @@ namespace CalamityOverhaul.Content.UIs.SupertableUIs
     }
 
     /// <summary>
-    /// Åä·½Æ¥Åä½á¹û
+    /// é…æ–¹åŒ¹é…ç»“æœ
     /// </summary>
     public class RecipeMatchResult
     {

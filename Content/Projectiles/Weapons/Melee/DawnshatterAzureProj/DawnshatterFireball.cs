@@ -1,4 +1,4 @@
-using CalamityOverhaul.Content.PRTTypes;
+ï»¿using CalamityOverhaul.Content.PRTTypes;
 using InnoVault.PRT;
 using Terraria;
 using Terraria.Audio;
@@ -34,22 +34,22 @@ namespace CalamityOverhaul.Content.Projectiles.Weapons.Melee.DawnshatterAzurePro
         }
 
         public override void AI() {
-            //ÇáÎ¢ÖØÁ¦ºÍ¿ÕÆø×èÁ¦
+            //è½»å¾®é‡åŠ›å’Œç©ºæ°”é˜»åŠ›
             Projectile.velocity.Y += 0.12f;
             Projectile.velocity *= 0.995f;
 
-            //Ğı×ª
+            //æ—‹è½¬
             Projectile.rotation += Projectile.velocity.Length() * 0.05f;
 
-            //Âö³åËõ·ÅĞ§¹û
+            //è„‰å†²ç¼©æ”¾æ•ˆæœ
             scale = 1f + (float)System.Math.Sin(Projectile.timeLeft * 0.2f) * 0.15f;
 
-            //»ªÀöµÄ»ğÑæÍÏÎ²
+            //åä¸½çš„ç«ç„°æ‹–å°¾
             if (Main.rand.NextBool()) {
                 SpawnTrailEffect();
             }
 
-            //Ñ°ÕÒµĞÈË×·×Ù
+            //å¯»æ‰¾æ•Œäººè¿½è¸ª
             if (Projectile.timeLeft > 40 && Projectile.timeLeft % 10 == 0) {
                 NPC target = Projectile.Center.FindClosestNPC(300f);
                 if (target != null) {
@@ -57,29 +57,29 @@ namespace CalamityOverhaul.Content.Projectiles.Weapons.Melee.DawnshatterAzurePro
                     float targetAngle = toTarget.ToRotation();
                     float currentAngle = Projectile.velocity.ToRotation();
 
-                    //Æ½»¬×ªÏò
+                    //å¹³æ»‘è½¬å‘
                     float angleDiff = MathHelper.WrapAngle(targetAngle - currentAngle);
                     Projectile.velocity = Projectile.velocity.RotatedBy(angleDiff * 0.1f);
                     Projectile.velocity = Projectile.velocity.SafeNormalize(Vector2.Zero) * MathHelper.Lerp(Projectile.velocity.Length(), 14f, 0.05f);
                 }
             }
 
-            //µ­³öĞ§¹û
+            //æ·¡å‡ºæ•ˆæœ
             if (Projectile.timeLeft < 40) {
                 Projectile.alpha += 6;
             }
 
-            //Ìí¼Ó¹âÕÕ
+            //æ·»åŠ å…‰ç…§
             Lighting.AddLight(Projectile.Center, new Vector3(1.2f, 0.8f, 0.3f) * scale);
 
-            //»·ÈÆÁ£×Ó
+            //ç¯ç»•ç²’å­
             trailCounter++;
             if (trailCounter % 3 == 0) {
                 SpawnOrbitParticle();
             }
         }
 
-        //ÍÏÎ²ÌØĞ§
+        //æ‹–å°¾ç‰¹æ•ˆ
         private void SpawnTrailEffect() {
             Vector2 trailPos = Projectile.Center - Projectile.velocity * 0.5f + Main.rand.NextVector2Circular(5f, 5f);
 
@@ -93,7 +93,7 @@ namespace CalamityOverhaul.Content.Projectiles.Weapons.Melee.DawnshatterAzurePro
             Main.dust[dust].noGravity = true;
         }
 
-        //»·ÈÆÁ£×Ó
+        //ç¯ç»•ç²’å­
         private void SpawnOrbitParticle() {
             float angle = trailCounter * 0.3f;
             Vector2 offset = angle.ToRotationVector2() * 15f * scale;
@@ -105,7 +105,7 @@ namespace CalamityOverhaul.Content.Projectiles.Weapons.Melee.DawnshatterAzurePro
         }
 
         public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone) {
-            //Ç¿Á¦debuff
+            //å¼ºåŠ›debuff
             target.AddBuff(BuffID.OnFire3, 300);
             target.AddBuff(BuffID.Daybreak, 240);
 
@@ -116,17 +116,17 @@ namespace CalamityOverhaul.Content.Projectiles.Weapons.Melee.DawnshatterAzurePro
                 return;
             }
 
-            //ÃüÖĞ±¬·¢
+            //å‘½ä¸­çˆ†å‘
             SpawnHitBurst(target.Center);
 
-            //ÃüÖĞÒôĞ§
+            //å‘½ä¸­éŸ³æ•ˆ
             SoundEngine.PlaySound("CalamityMod/Sounds/Custom/Yharon/YharonFireOrb".GetSound() with { Volume = 0.4f, Pitch = 0.5f }, target.Center);
 
-            //·´µ¯²¢¼õËÙ
+            //åå¼¹å¹¶å‡é€Ÿ
             Projectile.velocity *= -0.7f;
             Projectile.velocity = Projectile.velocity.RotatedByRandom(0.5f);
 
-            //Èç¹û´©Í¸´ÎÊı»¹Ê£ºÜ¶à£¬³¢ÊÔÑ°ÕÒĞÂÄ¿±ê
+            //å¦‚æœç©¿é€æ¬¡æ•°è¿˜å‰©å¾ˆå¤šï¼Œå°è¯•å¯»æ‰¾æ–°ç›®æ ‡
             if (Projectile.penetrate > 2) {
                 NPC newTarget = Projectile.Center.FindClosestNPC(400f, false, true, new System.Collections.Generic.HashSet<NPC> { target });
                 if (newTarget != null) {
@@ -136,7 +136,7 @@ namespace CalamityOverhaul.Content.Projectiles.Weapons.Melee.DawnshatterAzurePro
             }
         }
 
-        //ÃüÖĞ±¬·¢
+        //å‘½ä¸­çˆ†å‘
         private void SpawnHitBurst(Vector2 position) {
             for (int i = 0; i < 15; i++) {
                 Vector2 vel = Main.rand.NextVector2Circular(8f, 8f);
@@ -155,7 +155,7 @@ namespace CalamityOverhaul.Content.Projectiles.Weapons.Melee.DawnshatterAzurePro
         }
 
         public override bool OnTileCollide(Vector2 oldVelocity) {
-            //Åö×²Ê±µ¯Ìø
+            //ç¢°æ’æ—¶å¼¹è·³
             if (System.Math.Abs(Projectile.velocity.X - oldVelocity.X) > float.Epsilon) {
                 Projectile.velocity.X = -oldVelocity.X * 0.7f;
             }
@@ -165,7 +165,7 @@ namespace CalamityOverhaul.Content.Projectiles.Weapons.Melee.DawnshatterAzurePro
 
             SoundEngine.PlaySound(SoundID.Dig with { Volume = 0.4f, Pitch = 0.4f }, Projectile.Center);
 
-            //Éú³ÉÅö×²Á£×Ó
+            //ç”Ÿæˆç¢°æ’ç²’å­
             for (int i = 0; i < 8; i++) {
                 int dust = Dust.NewDust(Projectile.Center, 1, 1, DustID.Torch, 0, 0, 100, default, 1.5f);
                 Main.dust[dust].velocity = Main.rand.NextVector2Circular(4f, 4f);
@@ -177,10 +177,10 @@ namespace CalamityOverhaul.Content.Projectiles.Weapons.Melee.DawnshatterAzurePro
         }
 
         public override void OnKill(int timeLeft) {
-            //±¬Õ¨ÒôĞ§
+            //çˆ†ç‚¸éŸ³æ•ˆ
             SoundEngine.PlaySound(SoundID.DD2_ExplosiveTrapExplode with { Volume = 0.5f, Pitch = 0.4f }, Projectile.Center);
 
-            //±¬Õ¨Á£×Ó
+            //çˆ†ç‚¸ç²’å­
             for (int i = 0; i < 35; i++) {
                 Vector2 vel = Main.rand.NextVector2Circular(12f, 12f);
 
@@ -190,7 +190,7 @@ namespace CalamityOverhaul.Content.Projectiles.Weapons.Melee.DawnshatterAzurePro
                 PRTLoader.AddParticle(explosion);
             }
 
-            //»ğÑæ³¾°£
+            //ç«ç„°å°˜åŸƒ
             for (int i = 0; i < 40; i++) {
                 int dustType = Main.rand.NextBool() ? DustID.Torch : DustID.FireworkFountain_Red;
                 int dust = Dust.NewDust(Projectile.Center, 1, 1, dustType, 0, 0, 100, default, Main.rand.NextFloat(2f, 3.5f));
@@ -198,7 +198,7 @@ namespace CalamityOverhaul.Content.Projectiles.Weapons.Melee.DawnshatterAzurePro
                 Main.dust[dust].noGravity = true;
             }
 
-            //½ğÉ«±¬Õ¨¹âĞ§
+            //é‡‘è‰²çˆ†ç‚¸å…‰æ•ˆ
             for (int i = 0; i < 20; i++) {
                 int dust = Dust.NewDust(Projectile.Center, 1, 1, DustID.GoldCoin, 0, 0, 100, default, 2.5f);
                 Main.dust[dust].velocity = Main.rand.NextVector2Circular(8f, 8f);
@@ -206,7 +206,7 @@ namespace CalamityOverhaul.Content.Projectiles.Weapons.Melee.DawnshatterAzurePro
                 Main.dust[dust].fadeIn = 1.5f;
             }
 
-            //³å»÷²¨
+            //å†²å‡»æ³¢
             for (int i = 0; i < 16; i++) {
                 float angle = MathHelper.TwoPi * i / 16f;
                 Vector2 shockPos = Projectile.Center + angle.ToRotationVector2() * 40f;
@@ -218,7 +218,7 @@ namespace CalamityOverhaul.Content.Projectiles.Weapons.Melee.DawnshatterAzurePro
         }
 
         public override Color? GetAlpha(Color lightColor) {
-            //»ğÇò×Ô·¢¹â
+            //ç«çƒè‡ªå‘å…‰
             float intensity = 1f - Projectile.alpha / 255f;
             return VaultUtils.MultiStepColorLerp(0.5f, Color.OrangeRed, Color.Orange, Color.Yellow) * intensity;
         }

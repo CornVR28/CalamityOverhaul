@@ -151,9 +151,6 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalMechanicalEye
         #region 初始化
 
         public override bool? CanCWROverride() {
-            if (CWRWorld.MachineRebellion) {
-                return true;
-            }
             return null;
         }
 
@@ -189,12 +186,6 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalMechanicalEye
                 npc.life = npc.lifeMax = (int)(npc.lifeMax * 0.8f);
             }
 
-            if (CWRWorld.MachineRebellion) {
-                npc.life = npc.lifeMax *= 32;
-                npc.defDefense = npc.defense = 40;
-                npc.defDamage = npc.damage *= 2;
-            }
-
             //初始化状态上下文
             InitializeStateContext();
         }
@@ -207,7 +198,6 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalMechanicalEye
                 Npc = npc,
                 Ai = ai,
                 IsAccompanyMode = accompany,
-                IsMachineRebellion = CWRWorld.MachineRebellion,
                 IsDeathMode = CWRRef.GetDeathMode() || CWRRef.GetBossRushActive(),
                 IsSpazmatism = npc.type == NPCID.Spazmatism
             };

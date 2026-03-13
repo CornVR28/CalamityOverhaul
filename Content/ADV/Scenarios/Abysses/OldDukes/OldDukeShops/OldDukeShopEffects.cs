@@ -1,4 +1,4 @@
-using CalamityOverhaul.Content.ADV.UIEffect;
+ï»¿using CalamityOverhaul.Content.ADV.UIEffect;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
 using Terraria;
@@ -6,16 +6,16 @@ using Terraria;
 namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.OldDukeShops
 {
     /// <summary>
-    /// ÀÏ¹«¾ôÉÌµêÊÓ¾õĞ§¹û¹ÜÀíÆ÷
+    /// è€å…¬çˆµå•†åº—è§†è§‰æ•ˆæœç®¡ç†å™¨
     /// </summary>
     internal class OldDukeShopEffects
     {
-        //Á£×ÓÁĞ±í
+        //ç²’å­åˆ—è¡¨
         private readonly List<BubblePRT> bubbles = [];
         private readonly List<AshPRT> ashParticles = [];
         private readonly List<SeaStarPRT> seaStars = [];
 
-        //Á£×ÓË¢ĞÂ¼ÆÊ±Æ÷
+        //ç²’å­åˆ·æ–°è®¡æ—¶å™¨
         private int bubbleSpawnTimer = 0;
         private int ashSpawnTimer = 0;
         private int starSpawnTimer = 0;
@@ -23,7 +23,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.OldDukeShops
         private const float SulfseaSideMargin = 30f;
 
         /// <summary>
-        /// ¸üĞÂËùÓĞÁ£×ÓºÍÌØĞ§
+        /// æ›´æ–°æ‰€æœ‰ç²’å­å’Œç‰¹æ•ˆ
         /// </summary>
         public void UpdateParticles(bool isActive, Vector2 panelPosition, int panelWidth, int panelHeight) {
             UpdateBubbles(isActive, panelPosition, panelWidth, panelHeight);
@@ -87,10 +87,10 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.OldDukeShops
         }
 
         /// <summary>
-        /// »æÖÆËùÓĞÌØĞ§
+        /// ç»˜åˆ¶æ‰€æœ‰ç‰¹æ•ˆ
         /// </summary>
         public void DrawEffects(SpriteBatch spriteBatch, float uiAlpha) {
-            //ÏÈ»æÖÆ»Ò½ı£¬ºó»æÖÆÆøÅİºÍĞÇĞÇ
+            //å…ˆç»˜åˆ¶ç°çƒ¬ï¼Œåç»˜åˆ¶æ°”æ³¡å’Œæ˜Ÿæ˜Ÿ
             foreach (var ash in ashParticles) {
                 ash.Draw(spriteBatch, uiAlpha * 0.75f);
             }
@@ -105,7 +105,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.OldDukeShops
         }
 
         /// <summary>
-        /// Çå³ıËùÓĞÌØĞ§
+        /// æ¸…é™¤æ‰€æœ‰ç‰¹æ•ˆ
         /// </summary>
         public void Clear() {
             bubbles.Clear();

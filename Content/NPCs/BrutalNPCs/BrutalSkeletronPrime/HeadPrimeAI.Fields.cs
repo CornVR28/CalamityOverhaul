@@ -1,4 +1,4 @@
-using Microsoft.Xna.Framework.Graphics;
+ï»¿using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using Terraria;
 using Terraria.ID;
@@ -6,7 +6,7 @@ using Terraria.ID;
 namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalSkeletronPrime
 {
     /// <summary>
-    /// ´æ´¢AIÏà¹Ø×Ö¶ÎºÍÊôÐÔ
+    /// ï¿½æ´¢AIï¿½ï¿½ï¿½ï¿½Ö¶Îºï¿½ï¿½ï¿½ï¿½ï¿½
     /// </summary>
     internal partial class HeadPrimeAI
     {
@@ -42,8 +42,6 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalSkeletronPrime
         internal ref float ai9 => ref ai[9];
         internal ref float ai10 => ref ai[10];
         internal ref float ai11 => ref ai[11];
-        [VaultLoaden(CWRConstant.NPC + "BSP/MachineRebellion")]
-        internal static Asset<Texture2D> MachineRebellionAsset = null;
         [VaultLoaden(CWRConstant.NPC + "BSP/BrutalSkeletron")]
         internal static Asset<Texture2D> HandAsset = null;
         [VaultLoaden(CWRConstant.NPC + "BSP/BSPCannon")]
@@ -72,7 +70,7 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalSkeletronPrime
         internal static Asset<Texture2D> BSPRAMGlow = null;
         [VaultLoaden(CWRConstant.NPC + "BSP/BSPRAM_ForearmGlow")]
         internal static Asset<Texture2D> BSPRAM_ForearmGlow = null;
-        //ÏÂÃæÊÇÓÃÓÚ»º´æÔ­°æÎÆÀíµÄ×Ö¶Î
+        //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú»ï¿½ï¿½ï¿½Ô­ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¶ï¿½
         internal static Asset<Texture2D> Vanilla_TwinsBossBag;
         internal static Asset<Texture2D> Vanilla_DestroyerBossBag;
         internal static Asset<Texture2D> Vanilla_SkeletronPrimeBossBag;

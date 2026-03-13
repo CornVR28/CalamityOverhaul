@@ -22,11 +22,4 @@ namespace CalamityOverhaul.Content.Items.Modifys.ModifyBag
         public bool CanShowItemDropInUI() => CWRWorld.Death || InfernumRef.InfernumModeOpenState;
         public string GetConditionDescription() => CWRLocText.Instance.DeathModeItem.Value;
     }
-
-    public class DropInMachineRebellion : IItemDropRuleCondition, IProvideItemConditionDescription
-    {
-        public bool CanDrop(DropAttemptInfo info) => CWRWorld.MachineRebellion;
-        public bool CanShowItemDropInUI() => CWRWorld.MachineRebellion;
-        public string GetConditionDescription() => CWRLocText.Instance.DropInMachineRebellion.Value;
-    }
 }

@@ -25,7 +25,6 @@ namespace CalamityOverhaul.Common
         public LocalizedText KreloadTimeAddText { get; private set; }
         public LocalizedText KreloadTimeLessenText { get; private set; }
         public LocalizedText DeathModeItem { get; private set; }
-        public LocalizedText DropInMachineRebellion { get; private set; }
         public LocalizedText DontUseMagicConch { get; private set; }
         public LocalizedText OnlyZenith { get; private set; }
         public LocalizedText Event_TungstenRiot_Name { get; private set; }
@@ -177,9 +176,6 @@ namespace CalamityOverhaul.Common
         public LocalizedText Config_1 { get; private set; }
         public LocalizedText Config_2 { get; private set; }
         public LocalizedText SkeletronPrime_Text { get; private set; }
-        public LocalizedText MachineRebellion_SpawnInfo { get; private set; }
-        public LocalizedText MachineRebellion_DespawnMessage { get; private set; }
-        public LocalizedText MachineRebellion_DisplayName { get; private set; }
         public LocalizedText Notbound { get; private set; }
         public LocalizedText DisableMotionInterpolationMessage { get; private set; }
         public LocalizedText LegendItemUpgradeDisable { get; private set; }

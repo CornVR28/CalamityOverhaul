@@ -685,19 +685,6 @@ QuestNode: {
 		DetailedDescription: 神圣之地的水晶女皇，统御着所有圣洁的凝胶生物。比起她的配偶，她更加敏捷且致命。准备好迎接一场华丽的弹幕洗礼吧。
 	}
 
-	MachineRebellionQuest: {
-		DisplayName: 机械暴乱
-		Description: 击败机械三王EX
-		QuestObjective.Description: 击败机械三王EX
-
-		QuestReward: {
-			Description: 恐惧之魂EX
-			Description2: 力量之魂EX
-			Description3: 视域之魂EX
-		}
-
-		DetailedDescription: 那些被遗弃的实验品并未停止运作，反而通过自我修复进化出了更恐怖的形态。原本用于守护的程序已被重写为纯粹的杀戮指令。准备好面对嘉登造物的真正愤怒了吗？
-	}
 
 	BuildHouse: {
 		DisplayName: 建筑大师

@@ -1,10 +1,10 @@
-using System;
+ï»¿using System;
 using Terraria;
 
 namespace CalamityOverhaul.Content.NPCs.Modifys.Crabulons
 {
     /// <summary>
-    /// ¾úÉúĞ·Ö¡¶¯»­ÏµÍ³
+    /// èŒç”ŸèŸ¹å¸§åŠ¨ç”»ç³»ç»Ÿ
     /// </summary>
     internal class CrabulonAnimation
     {
@@ -18,7 +18,7 @@ namespace CalamityOverhaul.Content.NPCs.Modifys.Crabulons
             this.physics = physics;
         }
 
-        //¸üĞÂÖ¡¶¯»­
+        //æ›´æ–°å¸§åŠ¨ç”»
         public bool UpdateFrame(int frameHeight) {
             if (owner.FeedValue <= 0f) {
                 return true;
@@ -34,7 +34,7 @@ namespace CalamityOverhaul.Content.NPCs.Modifys.Crabulons
             return false;
         }
 
-        //¸üĞÂ¿ÕÖĞÖ¡
+        //æ›´æ–°ç©ºä¸­å¸§
         private void UpdateAirFrames(int frameHeight) {
             if (npc.velocity.Y < 0 || physics.GroundClearance > 100) {
                 owner.ai[11] = MathHelper.Lerp(owner.ai[11], CrabulonConstants.JumpFrame, CrabulonConstants.FrameLerpSpeed);
@@ -48,7 +48,7 @@ namespace CalamityOverhaul.Content.NPCs.Modifys.Crabulons
             npc.frameCounter = 0;
         }
 
-        //¸üĞÂµØÃæÖ¡
+        //æ›´æ–°åœ°é¢å¸§
         private void UpdateGroundFrames(int frameHeight) {
             if (Math.Abs(npc.velocity.X) > 0.1f) {
                 UpdateRunningFrames(frameHeight);
@@ -58,7 +58,7 @@ namespace CalamityOverhaul.Content.NPCs.Modifys.Crabulons
             }
         }
 
-        //¸üĞÂÅÜ²½Ö¡
+        //æ›´æ–°è·‘æ­¥å¸§
         private void UpdateRunningFrames(int frameHeight) {
             npc.frameCounter += Math.Abs(npc.velocity.X) * CrabulonConstants.RunFrameSpeed;
             npc.frameCounter %= Main.npcFrameCount[npc.type];
@@ -66,7 +66,7 @@ namespace CalamityOverhaul.Content.NPCs.Modifys.Crabulons
             npc.frame.Y = frame * frameHeight;
         }
 
-        //¸üĞÂ´ı»úÖ¡
+        //æ›´æ–°å¾…æœºå¸§
         private void UpdateIdleFrames(int frameHeight) {
             if (owner.ai[9] > 0) {
                 npc.frameCounter += CrabulonConstants.CrouchIdleFrameSpeed;

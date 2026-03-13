@@ -1,4 +1,4 @@
-using CalamityOverhaul.Content.ADV.ADVQuestTracker;
+ï»¿using CalamityOverhaul.Content.ADV.ADVQuestTracker;
 using CalamityOverhaul.Content.ADV.Scenarios.Draedons.Quest.DeploySignaltowers.SignalTower;
 using CalamityOverhaul.Content.LegendWeapon.HalibutLegend;
 using InnoVault.UIHandles;
@@ -12,7 +12,7 @@ using Terraria.ModLoader;
 namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.Quest.DeploySignaltowers
 {
     /// <summary>
-    /// ĞÅºÅËş´î½¨ÈÎÎñ×·×ÙUI
+    /// ä¿¡å·å¡”æ­å»ºä»»åŠ¡è¿½è¸ªUI
     /// </summary>
     internal class DeploySignaltowerTrackerUI : BaseQuestTrackerUI
     {
@@ -20,9 +20,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.Quest.DeploySignaltowe
 
         public override string LocalizationCategory => "UI";
 
-        public override int TargetNPCType => -1; //ĞÅºÅËşÈÎÎñ²»ĞèÒªNPC
+        public override int TargetNPCType => -1; //ä¿¡å·å¡”ä»»åŠ¡ä¸éœ€è¦NPC
 
-        //±¾µØ»¯ÎÄ±¾
+        //æœ¬åœ°åŒ–æ–‡æœ¬
         public static LocalizedText NearestTargetText { get; private set; }
         public static LocalizedText NodeText { get; private set; }
         public static LocalizedText StatusText { get; private set; }
@@ -35,24 +35,24 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.Quest.DeploySignaltowe
         public override void SetStaticDefaults() {
             base.SetStaticDefaults();
 
-            NearestTargetText = this.GetLocalization(nameof(NearestTargetText), () => "×î½üµÄÄ¿±êµã");
-            NodeText = this.GetLocalization(nameof(NodeText), () => "[NUM]ºÅ¾À²ø½Úµã");
-            StatusText = this.GetLocalization(nameof(StatusText), () => "×´Ì¬");
-            InRangeText = this.GetLocalization(nameof(InRangeText), () => "·¶Î§ÄÚ");
-            DistanceText = this.GetLocalization(nameof(DistanceText), () => "¾àÀë");
-            QuestCompleteText = this.GetLocalization(nameof(QuestCompleteText), () => "ÈÎÎñÍê³É!");
+            NearestTargetText = this.GetLocalization(nameof(NearestTargetText), () => "æœ€è¿‘çš„ç›®æ ‡ç‚¹");
+            NodeText = this.GetLocalization(nameof(NodeText), () => "[NUM]å·çº ç¼ èŠ‚ç‚¹");
+            StatusText = this.GetLocalization(nameof(StatusText), () => "çŠ¶æ€");
+            InRangeText = this.GetLocalization(nameof(InRangeText), () => "èŒƒå›´å†…");
+            DistanceText = this.GetLocalization(nameof(DistanceText), () => "è·ç¦»");
+            QuestCompleteText = this.GetLocalization(nameof(QuestCompleteText), () => "ä»»åŠ¡å®Œæˆ!");
         }
 
         protected override void SetupLocalizedTexts() {
-            QuestTitle = this.GetLocalization(nameof(QuestTitle), () => "Á¿×Ó¾À²øÍøÂç²¿Êğ");
-            DamageContribution = this.GetLocalization(nameof(DamageContribution), () => "²¿Êğ½ø¶È");
-            RequiredContribution = this.GetLocalization(nameof(RequiredContribution), () => "Ä¿±ê:10×ùĞÅºÅËş");
+            QuestTitle = this.GetLocalization(nameof(QuestTitle), () => "é‡å­çº ç¼ ç½‘ç»œéƒ¨ç½²");
+            DamageContribution = this.GetLocalization(nameof(DamageContribution), () => "éƒ¨ç½²è¿›åº¦");
+            RequiredContribution = this.GetLocalization(nameof(RequiredContribution), () => "ç›®æ ‡:10åº§ä¿¡å·å¡”");
         }
 
         public override bool CanOpne {
             get {
                 if (CWRWorld.HasBoss) {
-                    return false;//ÒòÎªÊÇ¾çÇéÈÎÎñ£¬Õ½¶·ÖĞÉèÖÃ²»´ò¿ª
+                    return false;//å› ä¸ºæ˜¯å‰§æƒ…ä»»åŠ¡ï¼Œæˆ˜æ–—ä¸­è®¾ç½®ä¸æ‰“å¼€
                 }
 
                 if (Main.LocalPlayer == null || !Main.LocalPlayer.active) {
@@ -102,7 +102,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.Quest.DeploySignaltowe
         }
 
         protected override float GetRequiredContribution() {
-            return 1.0f; //ĞÅºÅËşÈÎÎñĞèÒªÍê³ÉÈ«²¿
+            return 1.0f; //ä¿¡å·å¡”ä»»åŠ¡éœ€è¦å®Œæˆå…¨éƒ¨
         }
 
         protected override float CalculateContentHeight() {
@@ -115,26 +115,26 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.Quest.DeploySignaltowe
             float dividerHeight = 2f;
             float dividerBottomMargin = 12f;
 
-            //¸ù¾İÊÇ·ñÓĞ×î½üÄ¿±ê¼ÆËã²»Í¬µÄÄÚÈİ¸ß¶È
+            //æ ¹æ®æ˜¯å¦æœ‰æœ€è¿‘ç›®æ ‡è®¡ç®—ä¸åŒçš„å†…å®¹é«˜åº¦
             SignalTowerTargetPoint nearestTarget = SignalTowerTargetManager.GetNearestTarget(Main.LocalPlayer);
             float contentBlockHeight;
 
             if (nearestTarget != null) {
-                //Ä¿±êĞÅÏ¢ÎÄ±¾
+                //ç›®æ ‡ä¿¡æ¯æ–‡æœ¬
                 string targetText = $"{NearestTargetText.Value}: {NodeText.Value.Replace("[NUM]", (nearestTarget.Index + 1).ToString())}";
                 float targetTextHeight = CalculateTextHeight(targetText, textScale);
 
-                //¾àÀë/×´Ì¬ÎÄ±¾
+                //è·ç¦»/çŠ¶æ€æ–‡æœ¬
                 bool playerInRange = nearestTarget.IsPlayerInRange(Main.LocalPlayer);
                 string distanceText = playerInRange
                     ? $"{StatusText.Value}: {InRangeText.Value}"
-                    : $"{DistanceText.Value}: 0m"; //Ê¹ÓÃÕ¼Î»·û¼ÆËã¸ß¶È
+                    : $"{DistanceText.Value}: 0m"; //ä½¿ç”¨å ä½ç¬¦è®¡ç®—é«˜åº¦
                 float distanceTextHeight = CalculateTextHeight(distanceText, textScale * 0.9f);
 
-                //½ø¶ÈÎÄ±¾
+                //è¿›åº¦æ–‡æœ¬
                 float progressTextHeight = FontAssets.MouseText.Value.MeasureString("A").Y * textScale;
 
-                //½ø¶ÈÌõ
+                //è¿›åº¦æ¡
                 float progressBarHeight = 6f;
 
                 contentBlockHeight = targetTextHeight
@@ -143,7 +143,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.Quest.DeploySignaltowe
                     + progressBarHeight;
             }
             else {
-                //ÈÎÎñÍê³É×´Ì¬
+                //ä»»åŠ¡å®ŒæˆçŠ¶æ€
                 float completeTextHeight = CalculateTextHeight(QuestCompleteText.Value, textScale * 1.2f);
                 float numberTextHeight = FontAssets.MouseText.Value.MeasureString("A").Y * 0.7f;
                 float progressBarHeight = 6f;
@@ -161,14 +161,14 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.Quest.DeploySignaltowe
 
         protected override void UpdatePanelHeight() {
             base.UpdatePanelHeight();
-            currentPanelHeight += 30f; //Îª¶îÍâĞÅÏ¢Ôö¼Ó¸ß¶È
+            currentPanelHeight += 30f; //ä¸ºé¢å¤–ä¿¡æ¯å¢åŠ é«˜åº¦
         }
 
         /// <summary>
-        /// ÖØĞ´±êÌâĞĞĞ§¹û£¬Ìí¼ÓÇ¿»¯·¢¹âĞ§¹û
+        /// é‡å†™æ ‡é¢˜è¡Œæ•ˆæœï¼Œæ·»åŠ å¼ºåŒ–å‘å…‰æ•ˆæœ
         /// </summary>
         protected override void DrawTitleLineEffect(SpriteBatch spriteBatch, string text, Vector2 position, Color color, float scale, float alpha, int lineIndex) {
-            //±êÌâ¼ÓÇ¿·¢¹âĞ§¹û
+            //æ ‡é¢˜åŠ å¼ºå‘å…‰æ•ˆæœ
             Color titleGlow = new Color(80, 200, 255) * (alpha * 0.6f);
             for (int i = 0; i < 4; i++) {
                 float a = MathHelper.TwoPi * i / 4f;
@@ -176,7 +176,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.Quest.DeploySignaltowe
                 Utils.DrawBorderString(spriteBatch, text, position + off, titleGlow * 0.5f, scale);
             }
 
-            //»æÖÆÖ÷ÎÄ±¾
+            //ç»˜åˆ¶ä¸»æ–‡æœ¬
             Utils.DrawBorderString(spriteBatch, text, position, color, scale);
         }
 
@@ -184,16 +184,16 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.Quest.DeploySignaltowe
             const float titleScale = 0.72f;
             const float textScale = 0.62f;
 
-            //Ê¹ÓÃ»ùÀàµÄ±êÌâ»æÖÆ½Ó¿Ú£¬×Ô¶¯Ö§³Ö»»ĞĞºÍÌØÊâĞ§¹û
+            //ä½¿ç”¨åŸºç±»çš„æ ‡é¢˜ç»˜åˆ¶æ¥å£ï¼Œè‡ªåŠ¨æ”¯æŒæ¢è¡Œå’Œç‰¹æ®Šæ•ˆæœ
             Vector2 titlePos = DrawPosition + new Vector2(10, 8);
             float titleHeight = DrawTitle(spriteBatch, titlePos, alpha, titleScale);
 
-            //·Ö¸ôÏß
+            //åˆ†éš”çº¿
             Vector2 dividerStart = titlePos + new Vector2(0, titleHeight + 4);
             Vector2 dividerEnd = dividerStart + new Vector2(PanelWidth - 20, 0);
             currentStyle?.DrawDivider(spriteBatch, dividerStart, dividerEnd, alpha);
 
-            //»ñÈ¡×î½üµÄÄ¿±êµã
+            //è·å–æœ€è¿‘çš„ç›®æ ‡ç‚¹
             SignalTowerTargetPoint nearestTarget = SignalTowerTargetManager.GetNearestTarget(Main.LocalPlayer);
             if (nearestTarget != null) {
                 DrawTargetInfo(spriteBatch, dividerStart, nearestTarget, alpha, textScale);
@@ -208,7 +208,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.Quest.DeploySignaltowe
 
             Vector2 targetInfoPos = startPos + new Vector2(0, 12);
 
-            //Ä¿±ê±àºÅºÍ×´Ì¬
+            //ç›®æ ‡ç¼–å·å’ŒçŠ¶æ€
             string targetText = $"{NearestTargetText.Value}: {NodeText.Value.Replace("[NUM]", (target.Index + 1).ToString())}";
             Color targetTextColor = playerInRange
                 ? Color.Lerp(new Color(255, 200, 100), Color.LimeGreen, 0.5f) * alpha
@@ -216,7 +216,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.Quest.DeploySignaltowe
 
             float targetTextHeight = DrawWrappedText(spriteBatch, targetText, targetInfoPos, targetTextColor, textScale, alpha);
 
-            //¾àÀë»ò×´Ì¬
+            //è·ç¦»æˆ–çŠ¶æ€
             Vector2 distancePos = targetInfoPos + new Vector2(0, targetTextHeight + 3);
             string distanceText;
             Color distanceColor;
@@ -225,7 +225,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.Quest.DeploySignaltowe
                 distanceText = $"{StatusText.Value}: {InRangeText.Value}";
                 distanceColor = Color.LimeGreen * alpha;
 
-                //Ìí¼ÓÂö³åĞ§¹û
+                //æ·»åŠ è„‰å†²æ•ˆæœ
                 float pulse = (float)Math.Sin(pulseTimer * 3f) * 0.3f + 0.7f;
                 distanceColor *= pulse;
             }
@@ -237,18 +237,18 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.Quest.DeploySignaltowe
 
             float distanceTextHeight = DrawWrappedText(spriteBatch, distanceText, distancePos, distanceColor, textScale * 0.9f, alpha);
 
-            //½ø¶ÈÎÄ±¾
+            //è¿›åº¦æ–‡æœ¬
             Vector2 progressTextPos = distancePos + new Vector2(0, distanceTextHeight + 3);
             DrawContributionText(spriteBatch, progressTextPos, alpha, textScale);
 
-            //½ø¶ÈÌõ
+            //è¿›åº¦æ¡
             DrawProgressBar(spriteBatch, progressTextPos + new Vector2(0, 18), alpha);
         }
 
         private void DrawQuestComplete(SpriteBatch spriteBatch, Vector2 startPos, float alpha, float textScale) {
             Vector2 progressTextPos = startPos + new Vector2(0, 12);
 
-            //Íê³ÉÎÄ±¾
+            //å®Œæˆæ–‡æœ¬
             float completeTextHeight = DrawWrappedText(
                 spriteBatch,
                 QuestCompleteText.Value,
@@ -271,7 +271,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.Quest.DeploySignaltowe
             Utils.DrawBorderString(spriteBatch, progressText, position,
                 new Color(200, 230, 255) * alpha, textScale);
 
-            //½ø¶ÈÊı×Ö
+            //è¿›åº¦æ•°å­—
             Vector2 numberPos = position + new Vector2(font.MeasureString(progressText).X * textScale, 0);
             string numberText = $"{DeploySignaltowerCheck.DeployedTowerCount}/{DeploySignaltowerCheck.TargetTowerCount}";
 

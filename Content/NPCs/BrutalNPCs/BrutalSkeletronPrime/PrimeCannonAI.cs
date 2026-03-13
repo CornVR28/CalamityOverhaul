@@ -190,7 +190,7 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalSkeletronPrime
                 Vector2 perturbedSpeed = baseVelocity.RotatedBy(rotOffset);
                 Vector2 spawnPos = npc.Center + aimDirection * 40f;
 
-                if (CWRRef.GetDeathMode() || CWRWorld.MachineRebellion || bossRush || InfernumRef.InfernumModeOpenState) {
+                if (CWRRef.GetDeathMode() || bossRush || InfernumRef.InfernumModeOpenState) {
                     Projectile.NewProjectile(npc.GetSource_FromAI(),
                         spawnPos, perturbedSpeed,
                         ModContent.ProjectileType<PrimeCannonOnSpan>(), damage, 0f,

@@ -46,23 +46,16 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalDestroyer
         }
 
         public override void SetProperty() {
-            if (CWRWorld.MachineRebellion) {
-                npc.life = npc.lifeMax *= 32;
-                npc.defDefense = npc.defense = 40;
-                npc.defDamage = npc.damage *= 3;
-                npc.scale = 1.2f;
-            }
             InitializeStateContext();
         }
 
         public override bool? CanCWROverride() {
-            return CWRWorld.MachineRebellion ? true : null;
+            return null;
         }
 
         private void InitializeStateContext() {
             stateContext = new DestroyerStateContext {
                 Npc = npc,
-                IsMachineRebellion = CWRWorld.MachineRebellion,
                 IsDeathMode = CWRRef.GetDeathMode() || CWRRef.GetBossRushActive()
             };
             stateMachine = new DestroyerStateMachine(stateContext);
@@ -180,12 +173,6 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalDestroyer
                     0, ai0: oldIndex, ai1: index, ai2: 0, ai3: headNpc.whoAmI);
                 Main.npc[index].realLife = headNpc.whoAmI;
                 Main.npc[index].netUpdate = true;
-
-                if (CWRWorld.MachineRebellion) {
-                    Main.npc[index].lifeMax = headNpc.lifeMax;
-                    Main.npc[index].life = headNpc.life;
-                    Main.npc[index].defense = 50;
-                }
             }
         }
 

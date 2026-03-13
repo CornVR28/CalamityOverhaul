@@ -1,4 +1,4 @@
-using CalamityOverhaul.Content.PRTTypes;
+ï»¿using CalamityOverhaul.Content.PRTTypes;
 using InnoVault.GameContent.BaseEntity;
 using InnoVault.PRT;
 using Microsoft.Xna.Framework.Graphics;
@@ -11,7 +11,7 @@ using Terraria.ModLoader;
 namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
 {
     /// <summary>
-    /// Ù¤ÂíÉäÏß
+    /// ä¼½é©¬å°„çº¿
     /// </summary>
     internal class GammaRayBeam : BaseHeldProj
     {
@@ -23,7 +23,7 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
         private float beamLength = 0f;
         private float maxBeamLength = 2200f;
 
-        //ÊÓ¾õĞ§¹û²ÎÊı
+        //è§†è§‰æ•ˆæœå‚æ•°
         private float pulseIntensity = 1f;
         private float coreIntensity = 1f;
         private float distortionStrength = 0.15f;
@@ -59,43 +59,43 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
             Projectile.rotation = Projectile.velocity.ToRotation();
             Projectile.position -= Projectile.velocity;
 
-            //¹âÊøÕ¹¿ªºÍÊÕËõ¶¯»­
+            //å…‰æŸå±•å¼€å’Œæ”¶ç¼©åŠ¨ç”»
             float lifeRatio = 1f - Projectile.timeLeft / 300f;
 
             if (lifeRatio < 0.1f) {
-                //¿ìËÙÕ¹¿ª½×¶Î
+                //å¿«é€Ÿå±•å¼€é˜¶æ®µ
                 float expandProgress = lifeRatio / 0.15f;
                 beamWidth = MathHelper.Lerp(4f, maxBeamWidth, CWRUtils.EaseOutCubic(expandProgress));
                 beamLength = MathHelper.Lerp(0f, maxBeamLength, CWRUtils.EaseOutQuad(expandProgress));
                 coreIntensity = MathHelper.Lerp(0.5f, 1.5f, expandProgress);
             }
             else if (lifeRatio > 0.9f) {
-                //ÊÕËõÏûÊ§½×¶Î
+                //æ”¶ç¼©æ¶ˆå¤±é˜¶æ®µ
                 float collapseProgress = (lifeRatio - 0.85f) / 0.15f;
                 beamWidth = MathHelper.Lerp(maxBeamWidth, 4f, CWRUtils.EaseInQuad(collapseProgress));
                 coreIntensity = MathHelper.Lerp(1.5f, 0f, collapseProgress);
             }
             else {
-                //ÎÈ¶¨½×¶Î
+                //ç¨³å®šé˜¶æ®µ
                 beamWidth = maxBeamWidth;
                 beamLength = maxBeamLength;
 
-                //Âö¶¯Ğ§¹û
+                //è„‰åŠ¨æ•ˆæœ
                 float pulse = (float)Math.Sin(Main.GlobalTimeWrappedHourly * 8f) * 0.1f + 0.9f;
                 pulseIntensity = pulse;
                 coreIntensity = 1.2f + pulse * 0.3f;
             }
 
-            //ÄÜÁ¿Á£×ÓÌØĞ§
+            //èƒ½é‡ç²’å­ç‰¹æ•ˆ
             SpawnEnergyParticles();
 
-            //·¢¹âĞ§¹û
+            //å‘å…‰æ•ˆæœ
             Lighting.AddLight(Projectile.Center,
                 0.6f * coreIntensity,
                 0.9f * coreIntensity,
                 1.2f * coreIntensity);
 
-            //ÒôĞ§
+            //éŸ³æ•ˆ
             if (Projectile.timeLeft % 30 == 0) {
                 SoundEngine.PlaySound(SoundID.Item15 with {
                     Volume = 0.3f,
@@ -117,7 +117,7 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
                 return;
             }
 
-            //ĞÇ¹âÉÁË¸
+            //æ˜Ÿå…‰é—ªçƒ
             if (Main.rand.NextBool(6)) {
                 Vector2 sparkPos = Projectile.Center + Main.rand.NextVector2Circular(beamWidth * 0.4f, beamWidth * 0.4f);
                 Vector2 sparkVel = Main.rand.NextVector2Circular(1f, 1f);
@@ -134,7 +134,7 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
                 PRTLoader.AddParticle(spark);
             }
 
-            //ÄÜÁ¿Á÷¶¯ÏßÌõ
+            //èƒ½é‡æµåŠ¨çº¿æ¡
             if (Main.rand.NextBool(5)) {
                 Vector2 lineStart = Projectile.Center + Main.rand.NextVector2Circular(beamWidth * 0.3f, beamWidth * 0.3f);
                 Vector2 lineVel = Projectile.rotation.ToRotationVector2() * Main.rand.NextFloat(4f, 8f);
@@ -156,14 +156,14 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
                 return;
             }
 
-            //»÷ÖĞ±¬·¢Ğ§¹û
+            //å‡»ä¸­çˆ†å‘æ•ˆæœ
             SoundEngine.PlaySound(SoundID.Item94 with {
                 Volume = 0.5f,
                 Pitch = 0.4f
             }, Projectile.Center);
 
             if (!VaultUtils.isServer) {
-                //±¬·¢³å»÷Á£×Ó
+                //çˆ†å‘å†²å‡»ç²’å­
                 for (int i = 0; i < 12; i++) {
                     float angle = MathHelper.TwoPi * i / 12f;
                     Vector2 velocity = angle.ToRotationVector2() * Main.rand.NextFloat(4f, 9f);
@@ -182,7 +182,7 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
                 }
 
                 float rand = Main.rand.NextFloat(MathHelper.TwoPi);
-                //¹âÃ¢Á£×Ó
+                //å…‰èŠ’ç²’å­
                 for (int i = 0; i < 15; i++) {
                     float angle = MathHelper.TwoPi * i / 15f + rand;
                     Vector2 velocity = angle.ToRotationVector2() * Main.rand.NextFloat(23f, 37f);
@@ -200,7 +200,7 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
                     PRTLoader.AddParticle(light);
                 }
 
-                //³å»÷²¨»·
+                //å†²å‡»æ³¢ç¯
                 for (int i = 0; i < 20; i++) {
                     float angle = MathHelper.TwoPi * i / 20f;
                     Vector2 offset = angle.ToRotationVector2() * 30f;
@@ -219,19 +219,19 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
                 }
             }
 
-            //´©Í¸ÉËº¦µİ¼õ
+            //ç©¿é€ä¼¤å®³é€’å‡
             Projectile.damage = (int)(Projectile.damage * 0.8f);
         }
 
         public override void OnKill(int timeLeft) {
-            //ÏûÊ§±¬Õ¨Ğ§¹û
+            //æ¶ˆå¤±çˆ†ç‚¸æ•ˆæœ
             if (!VaultUtils.isServer) {
                 SoundEngine.PlaySound(SoundID.Item62 with {
                     Volume = 0.5f,
                     Pitch = 0.3f
                 }, Projectile.Center);
 
-                //·ÅÉä×´³å»÷Á£×Ó
+                //æ”¾å°„çŠ¶å†²å‡»ç²’å­
                 for (int i = 0; i < 24; i++) {
                     float angle = MathHelper.TwoPi * i / 24f;
                     Vector2 velocity = angle.ToRotationVector2() * Main.rand.NextFloat(6f, 13f);
@@ -250,7 +250,7 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
                     PRTLoader.AddParticle(burst);
                 }
 
-                //ÄÚ±¬ÊÕËõÁ£×Ó
+                //å†…çˆ†æ”¶ç¼©ç²’å­
                 for (int i = 0; i < 15; i++) {
                     Vector2 spawnPos = Projectile.Center + Main.rand.NextVector2Circular(90f, 90f);
                     Vector2 velocity = (Projectile.Center - spawnPos).SafeNormalize(Vector2.Zero) * Main.rand.NextFloat(10f, 18f);
@@ -270,7 +270,7 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
         }
 
         public override Color? GetAlpha(Color lightColor) {
-            //¶¯Ì¬ÑÕÉ«±ä»¯
+            //åŠ¨æ€é¢œè‰²å˜åŒ–
             float colorShift = (float)Math.Sin(Main.GlobalTimeWrappedHourly * 6f) * 0.5f + 0.5f;
             return Color.Lerp(Color.Cyan, Color.White, colorShift * coreIntensity);
         }
@@ -287,14 +287,14 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
 
             SpriteBatch sb = Main.spriteBatch;
 
-            //×¼±¸äÖÈ¾
+            //å‡†å¤‡æ¸²æŸ“
             sb.End();
             sb.Begin(SpriteSortMode.Immediate, BlendState.Additive, SamplerState.LinearWrap,
                 DepthStencilState.None, RasterizerState.CullNone, null, Main.GameViewMatrix.TransformationMatrix);
 
             Effect shader = Common.EffectLoader.GammaRayBeam.Value;
 
-            //ÉèÖÃ×ÅÉ«Æ÷²ÎÊı
+            //è®¾ç½®ç€è‰²å™¨å‚æ•°
             shader.Parameters["uTime"]?.SetValue(Main.GlobalTimeWrappedHourly);
             shader.Parameters["uOpacity"]?.SetValue(1f - Projectile.alpha / 255f);
             shader.Parameters["uIntensity"]?.SetValue(pulseIntensity);
@@ -304,14 +304,14 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
             shader.Parameters["uDistortionStrength"]?.SetValue(distortionStrength);
             shader.Parameters["uCoreIntensity"]?.SetValue(coreIntensity);
 
-            //ÉèÖÃÎÆÀí
-            shader.Parameters["uImage1"]?.SetValue(CWRAsset.Extra_193.Value); //ÔëÉùÎÆÀí
-            shader.Parameters["uImage2"]?.SetValue(CWRAsset.StarTexture.Value); //ĞÇ¹âÎÆÀí
-            shader.Parameters["uImage3"]?.SetValue(CWRAsset.Placeholder_White.Value); //¹âÊøÎÆÀí
+            //è®¾ç½®çº¹ç†
+            shader.Parameters["uImage1"]?.SetValue(CWRAsset.Extra_193.Value); //å™ªå£°çº¹ç†
+            shader.Parameters["uImage2"]?.SetValue(CWRAsset.StarTexture.Value); //æ˜Ÿå…‰çº¹ç†
+            shader.Parameters["uImage3"]?.SetValue(CWRAsset.Placeholder_White.Value); //å…‰æŸçº¹ç†
 
             shader.CurrentTechnique.Passes["GammaRayPass"].Apply();
 
-            //»æÖÆÖ÷¹âÊø
+            //ç»˜åˆ¶ä¸»å…‰æŸ
             Texture2D beamTexture = CWRAsset.Placeholder_White.Value;
             Vector2 beamOrigin = new Vector2(0, beamTexture.Height / 2f);
             Vector2 beamScale = new Vector2(beamLength / beamTexture.Width, beamWidth / beamTexture.Height);
@@ -328,17 +328,17 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
                 0f
             );
 
-            //»æÖÆºËĞÄ¸ß¹â²ã
+            //ç»˜åˆ¶æ ¸å¿ƒé«˜å…‰å±‚
             DrawCoreHighlight(sb);
 
-            //»Ö¸´Ä¬ÈÏäÖÈ¾×´Ì¬
+            //æ¢å¤é»˜è®¤æ¸²æŸ“çŠ¶æ€
             sb.End();
             sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointWrap,
                 DepthStencilState.None, RasterizerState.CullNone, null, Main.GameViewMatrix.TransformationMatrix);
         }
 
         private void DrawCoreHighlight(SpriteBatch sb) {
-            //»æÖÆ¶îÍâµÄºËĞÄ·¢¹â²ã
+            //ç»˜åˆ¶é¢å¤–çš„æ ¸å¿ƒå‘å…‰å±‚
             Texture2D glowTexture = CWRAsset.StarTexture.Value;
             Vector2 drawPos = Projectile.Center - Main.screenPosition;
 

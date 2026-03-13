@@ -1,11 +1,11 @@
-using Microsoft.Xna.Framework.Graphics;
+锘縰sing Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;
 
 namespace CalamityOverhaul.Content.ADV.UIEffect
 {
     /// <summary>
-    /// 海洋气泡粒子
+    /// 娴锋磱姘旀场绮掑瓙
     /// </summary>
     public class BubblePRT(Vector2 p)
     {

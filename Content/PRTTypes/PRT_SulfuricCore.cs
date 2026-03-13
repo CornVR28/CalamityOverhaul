@@ -1,4 +1,4 @@
-using InnoVault.PRT;
+ï»¿using InnoVault.PRT;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;
@@ -6,7 +6,7 @@ using Terraria;
 namespace CalamityOverhaul.Content.PRTTypes
 {
     /// <summary>
-    /// ÁòËá±¬·¢ºËĞÄÁ£×Ó£¬ÓÃÓÚÁòËá±¬·¢µÄÖĞĞÄÇ¿¹âĞ§¹û
+    /// ç¡«é…¸çˆ†å‘æ ¸å¿ƒç²’å­ï¼Œç”¨äºç¡«é…¸çˆ†å‘çš„ä¸­å¿ƒå¼ºå…‰æ•ˆæœ
     /// </summary>
     internal class PRT_SulfuricCore : BasePRT
     {
@@ -16,7 +16,7 @@ namespace CalamityOverhaul.Content.PRTTypes
         private float maxPulseScale;
         private Color coreColor;
         private Color haloColor;
-        private int burstPhase; //0: ÅòÕÍ, 1: ÉÁ¹â, 2: ÊÕËõ
+        private int burstPhase; //0: è†¨èƒ€, 1: é—ªå…‰, 2: æ”¶ç¼©
 
         public PRT_SulfuricCore(Vector2 position, float scale, int lifetime) {
             Position = position;
@@ -39,34 +39,34 @@ namespace CalamityOverhaul.Content.PRTTypes
         public override void AI() {
             float progress = LifetimeCompletion;
 
-            //Èı½×¶Î¶¯»­
+            //ä¸‰é˜¶æ®µåŠ¨ç”»
             if (progress < 0.2f) {
-                //½×¶Î0: ¿ìËÙÅòÕÍ
+                //é˜¶æ®µ0: å¿«é€Ÿè†¨èƒ€
                 burstPhase = 0;
                 float expandProgress = progress / 0.2f;
                 Scale = MathHelper.Lerp(Scale * 0.3f, maxPulseScale, CWRUtils.EaseOutCubic(expandProgress));
                 Opacity = expandProgress;
             }
             else if (progress < 0.4f) {
-                //½×¶Î1: Ç¿ÁÒÉÁ¹â
+                //é˜¶æ®µ1: å¼ºçƒˆé—ªå…‰
                 burstPhase = 1;
                 float flashProgress = (progress - 0.2f) / 0.2f;
                 float flashIntensity = MathF.Sin(flashProgress * MathHelper.Pi);
-                Opacity = 1f + flashIntensity * 0.5f; //¹ıÆØĞ§¹û
+                Opacity = 1f + flashIntensity * 0.5f; //è¿‡æ›æ•ˆæœ
                 Scale = maxPulseScale * (1f + flashIntensity * 0.2f);
             }
             else {
-                //½×¶Î2: Âö¶¯ÊÕËõ
+                //é˜¶æ®µ2: è„‰åŠ¨æ”¶ç¼©
                 burstPhase = 2;
                 float fadeProgress = (progress - 0.4f) / 0.6f;
                 Opacity = (float)Math.Sin((1f - fadeProgress) * MathHelper.PiOver2);
 
-                //Âö¶¯Ğ§¹û
+                //è„‰åŠ¨æ•ˆæœ
                 float pulse = MathF.Sin(Time * pulseSpeed) * 0.1f + 1f;
                 Scale = MathHelper.Lerp(maxPulseScale, maxPulseScale * 0.5f, fadeProgress) * pulse;
             }
 
-            //É«ÏàÆ«ÒÆ£¨¶¾ĞÔÂö¶¯£©
+            //è‰²ç›¸åç§»ï¼ˆæ¯’æ€§è„‰åŠ¨ï¼‰
             float hueShift = MathF.Sin(Time * 0.05f) * 0.02f;
             coreColor = Main.hslToRgb(
                 (Main.rgbToHsl(coreColor).X + hueShift) % 1,
@@ -82,17 +82,17 @@ namespace CalamityOverhaul.Content.PRTTypes
             Vector2 drawPos = Position - Main.screenPosition;
             Vector2 origin = texture.Size() / 2f;
 
-            //¸ù¾İ²»Í¬½×¶Îµ÷ÕûäÖÈ¾
+            //æ ¹æ®ä¸åŒé˜¶æ®µè°ƒæ•´æ¸²æŸ“
             switch (burstPhase) {
-                case 0: //ÅòÕÍ½×¶Î£¬Ã÷ÁÁµÄºËĞÄ
+                case 0: //è†¨èƒ€é˜¶æ®µï¼Œæ˜äº®çš„æ ¸å¿ƒ
                     DrawExpandingCore(spriteBatch, texture, drawPos, origin);
                     break;
 
-                case 1: //ÉÁ¹â½×¶Î£¬Ç¿ÁÒµÄ¹âÃ¢
+                case 1: //é—ªå…‰é˜¶æ®µï¼Œå¼ºçƒˆçš„å…‰èŠ’
                     DrawFlashCore(spriteBatch, texture, drawPos, origin);
                     break;
 
-                case 2: //Âö¶¯½×¶Î£¬ÈáºÍµÄÓà»Ô
+                case 2: //è„‰åŠ¨é˜¶æ®µï¼ŒæŸ”å’Œçš„ä½™è¾‰
                     DrawPulsingCore(spriteBatch, texture, drawPos, origin);
                     break;
             }
@@ -101,7 +101,7 @@ namespace CalamityOverhaul.Content.PRTTypes
         }
 
         private void DrawExpandingCore(SpriteBatch sb, Texture2D tex, Vector2 pos, Vector2 origin) {
-            //ÍâÈ¦¹âÔÎ
+            //å¤–åœˆå…‰æ™•
             for (int i = 0; i < 3; i++) {
                 float ringScale = Scale * (1.5f + i * 0.3f);
                 float ringAlpha = Opacity * (1f - i * 0.3f);
@@ -109,13 +109,13 @@ namespace CalamityOverhaul.Content.PRTTypes
                     origin, ringScale, SpriteEffects.None, 0f);
             }
 
-            //ºËĞÄ
+            //æ ¸å¿ƒ
             sb.Draw(tex, pos, null, coreColor * Opacity, Rotation, origin, Scale, SpriteEffects.None, 0f);
             sb.Draw(tex, pos, null, Color.White * Opacity * 0.7f, Rotation, origin, Scale * 0.6f, SpriteEffects.None, 0f);
         }
 
         private void DrawFlashCore(SpriteBatch sb, Texture2D tex, Vector2 pos, Vector2 origin) {
-            //Ç¿ÁÒµÄ·øÉä¹âÔÎ
+            //å¼ºçƒˆçš„è¾å°„å…‰æ™•
             for (int i = 0; i < 5; i++) {
                 float ringScale = Scale * (1.2f + i * 0.4f);
                 float ringAlpha = Opacity * (1f - i * 0.2f);
@@ -123,13 +123,13 @@ namespace CalamityOverhaul.Content.PRTTypes
                     origin, ringScale, SpriteEffects.None, 0f);
             }
 
-            //³¬ÁÁºËĞÄ
+            //è¶…äº®æ ¸å¿ƒ
             sb.Draw(tex, pos, null, Color.White * Opacity, Rotation, origin, Scale * 0.8f, SpriteEffects.None, 0f);
             sb.Draw(tex, pos, null, coreColor * Opacity * 0.8f, -Rotation, origin, Scale, SpriteEffects.None, 0f);
         }
 
         private void DrawPulsingCore(SpriteBatch sb, Texture2D tex, Vector2 pos, Vector2 origin) {
-            //ÈáºÍµÄÂö¶¯¹âÔÎ
+            //æŸ”å’Œçš„è„‰åŠ¨å…‰æ™•
             float pulse = MathF.Sin(Time * pulseSpeed * 2f) * 0.3f + 0.7f;
 
             for (int i = 0; i < 4; i++) {
@@ -139,7 +139,7 @@ namespace CalamityOverhaul.Content.PRTTypes
                     origin, ringScale, SpriteEffects.None, 0f);
             }
 
-            //ºËĞÄÓà»Ô
+            //æ ¸å¿ƒä½™è¾‰
             sb.Draw(tex, pos, null, coreColor * Opacity * pulse, Rotation, origin, Scale * 0.9f, SpriteEffects.None, 0f);
             sb.Draw(tex, pos, null, haloColor * Opacity * 0.6f, -Rotation * 0.7f, origin, Scale * 0.7f, SpriteEffects.None, 0f);
         }

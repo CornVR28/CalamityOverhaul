@@ -1,4 +1,4 @@
-using InnoVault.RenderHandles;
+ï»¿using InnoVault.RenderHandles;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Graphics;
 using System;
@@ -11,33 +11,33 @@ using Terraria.ModLoader;
 namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Campsites
 {
     /// <summary>
-    /// ÀÏ¹«¾ôÓªµØäÖÈ¾Æ÷
+    /// è€å…¬çˆµè¥åœ°æ¸²æŸ“å™¨
     /// </summary>
     internal class OldDukeCampsiteRenderer : RenderHandle, ILocalizedModType, IWorldInfo
     {
         public string LocalizationCategory => "ADV.OldDukeCampsite";
 
-        //±¾µØ»¯ÎÄ±¾
+        //æœ¬åœ°åŒ–æ–‡æœ¬
         public static LocalizedText InteractHint;
         public static LocalizedText GreetingText;
 
-        //Áò»Çº£Á£×ÓĞ§¹û
+        //ç¡«ç£ºæµ·ç²’å­æ•ˆæœ
         private readonly List<ToxicBubblePRT> toxicBubbles = [];
         private int bubbleSpawnTimer;
 
-        //·¢¹âĞ§¹û
+        //å‘å…‰æ•ˆæœ
         private float glowTimer;
 
-        //ÀÏ¹«¾ôÊµÌå
+        //è€å…¬çˆµå®ä½“
         internal OldDukeEntity oldDukeEntity;
         private bool entityInitialized;
 
-        //¶Ô»°×´Ì¬
+        //å¯¹è¯çŠ¶æ€
         private bool inDialogue;
 
         public override void SetStaticDefaults() {
-            InteractHint = this.GetLocalization(nameof(InteractHint), () => "[ÓÒ¼ü] ¶Ô»°");
-            GreetingText = this.GetLocalization(nameof(GreetingText), () => "àÅ£¿ÄãºÃ°¡...");
+            InteractHint = this.GetLocalization(nameof(InteractHint), () => "[å³é”®] å¯¹è¯");
+            GreetingText = this.GetLocalization(nameof(GreetingText), () => "å—¯ï¼Ÿä½ å¥½å•Š...");
         }
 
         void IWorldInfo.OnWorldLoad() {
@@ -51,7 +51,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Campsites
                 return;
             }
 
-            //³õÊ¼»¯ÀÏ¹«¾ôÊµÌå
+            //åˆå§‹åŒ–è€å…¬çˆµå®ä½“
             if (!entityInitialized && OldDukeCampsite.CampsitePosition != Vector2.Zero) {
                 oldDukeEntity = new OldDukeEntity(OldDukeCampsite.CampsitePosition);
                 oldDukeEntity.SetPotPositions(OldDukeCampsiteDecoration.GetPotPositions());
@@ -64,16 +64,16 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Campsites
                 oldDukeEntity.Position = OldDukeCampsite.CampsitePosition;
             }
 
-            //¸üĞÂ·¢¹â¼ÆÊ±Æ÷
+            //æ›´æ–°å‘å…‰è®¡æ—¶å™¨
             glowTimer += 0.03f;
             if (glowTimer > MathHelper.TwoPi) {
                 glowTimer -= MathHelper.TwoPi;
             }
 
-            //¼ì²â¶Ô»°×´Ì¬
+            //æ£€æµ‹å¯¹è¯çŠ¶æ€
             inDialogue = OldDukeEffect.IsActive;
 
-            //¸üĞÂÀÏ¹«¾ôÊµÌå
+            //æ›´æ–°è€å…¬çˆµå®ä½“
             Vector2 dialogueTarget = Vector2.Zero;
             if (inDialogue) {
                 Player player = Main.LocalPlayer;
@@ -84,7 +84,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Campsites
 
             oldDukeEntity?.Update(inDialogue, dialogueTarget);
 
-            //Í¨Öª¹øµÄ·ÃÎÊ×´Ì¬
+            //é€šçŸ¥é”…çš„è®¿é—®çŠ¶æ€
             if (oldDukeEntity != null) {
                 OldDukeCampsiteDecoration.NotifyPotVisit(
                     oldDukeEntity.Position,
@@ -93,14 +93,14 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Campsites
                 );
             }
 
-            //Éú³É¶¾ÅİÁ£×Ó
+            //ç”Ÿæˆæ¯’æ³¡ç²’å­
             bubbleSpawnTimer++;
             if (bubbleSpawnTimer >= 15 && toxicBubbles.Count < 12) {
                 bubbleSpawnTimer = 0;
                 SpawnToxicBubble();
             }
 
-            //¸üĞÂÁ£×Ó
+            //æ›´æ–°ç²’å­
             for (int i = toxicBubbles.Count - 1; i >= 0; i--) {
                 if (toxicBubbles[i].Update()) {
                     toxicBubbles.RemoveAt(i);
@@ -115,7 +115,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Campsites
 
             Vector2 screenPos = oldDukeEntity.Position - Main.screenPosition;
 
-            //¼ì²éÊÇ·ñÔÚÆÁÄ»ÄÚ
+            //æ£€æŸ¥æ˜¯å¦åœ¨å±å¹•å†…
             if (!VaultUtils.IsPointOnScreen(screenPos, 400)) {
                 return;
             }
@@ -123,22 +123,22 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Campsites
             Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointWrap
                 , DepthStencilState.None, RasterizerState.CullNone, null, Main.GameViewMatrix.TransformationMatrix);
 
-            //»æÖÆÁ£×ÓĞ§¹û
+            //ç»˜åˆ¶ç²’å­æ•ˆæœ
             foreach (var bubble in toxicBubbles) {
                 bubble.Draw(spriteBatch);
             }
 
-            //»æÖÆÀÏ¹«¾ô
+            //ç»˜åˆ¶è€å…¬çˆµ
             DrawOldDuke(spriteBatch, screenPos);
 
-            //»æÖÆ½»»¥ÌáÊ¾
+            //ç»˜åˆ¶äº¤äº’æç¤º
             DrawInteractPrompt(spriteBatch, screenPos);
 
             Main.spriteBatch.End();
         }
 
         /// <summary>
-        /// »æÖÆÀÏ¹«¾ô
+        /// ç»˜åˆ¶è€å…¬çˆµ
         /// </summary>
         private void DrawOldDuke(SpriteBatch sb, Vector2 screenPos) {
             if (OldDukeCampsite.OldDuke == null || oldDukeEntity == null) {
@@ -148,16 +148,16 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Campsites
             Rectangle frame = OldDukeCampsite.GetCurrentFrame();
             Vector2 origin = frame.Size() / 2f;
 
-            //ÇáÎ¢ºôÎüĞ§¹û
+            //è½»å¾®å‘¼å¸æ•ˆæœ
             float breathScale = 1f + MathF.Sin(glowTimer * 1.5f) * 0.01f;
 
-            //ÓÎÓ¾²¨¶¯Æ«ÒÆ
+            //æ¸¸æ³³æ³¢åŠ¨åç§»
             Vector2 bobOffset = oldDukeEntity.GetSwimBobOffset();
 
-            //ÓÎÓ¾ÇãĞ±
+            //æ¸¸æ³³å€¾æ–œ
             float swimTilt = oldDukeEntity.GetSwimTilt();
 
-            //»æÖÆµ×²ã·¢¹â£¨Áò»Çº£·ç¸ñ£©
+            //ç»˜åˆ¶åº•å±‚å‘å…‰ï¼ˆç¡«ç£ºæµ·é£æ ¼ï¼‰
             float glowIntensity = (MathF.Sin(glowTimer * 2f) * 0.5f + 0.5f) * 0.4f;
             Color glowColor = new Color(100, 200, 120) with { A = 0 };
 
@@ -179,7 +179,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Campsites
                 );
             }
 
-            //»æÖÆÖ÷Ìå
+            //ç»˜åˆ¶ä¸»ä½“
             sb.Draw(
                 OldDukeCampsite.OldDuke,
                 screenPos + bobOffset,
@@ -194,7 +194,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Campsites
         }
 
         /// <summary>
-        /// »æÖÆ½»»¥ÌáÊ¾
+        /// ç»˜åˆ¶äº¤äº’æç¤º
         /// </summary>
         private void DrawInteractPrompt(SpriteBatch sb, Vector2 screenPos) {
             float alpha = OldDukeCampsite.GetInteractPromptAlpha();
@@ -202,10 +202,10 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Campsites
                 return;
             }
 
-            //ÌáÊ¾ÎÄ×ÖÎ»ÖÃ£¨ÔÚÀÏ¹«¾ôÉÏ·½£©
+            //æç¤ºæ–‡å­—ä½ç½®ï¼ˆåœ¨è€å…¬çˆµä¸Šæ–¹ï¼‰
             Vector2 textPos = screenPos + new Vector2(0, -150);
 
-            //»æÖÆÌáÊ¾±³¾°
+            //ç»˜åˆ¶æç¤ºèƒŒæ™¯
             DynamicSpriteFont font = FontAssets.MouseText.Value;
             string hintText = InteractHint.Value;
             Vector2 textSize = font.MeasureString(hintText) * 0.9f;
@@ -219,23 +219,23 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Campsites
 
             Texture2D pixel = VaultAsset.placeholder2.Value;
 
-            //±³¾°
+            //èƒŒæ™¯
             sb.Draw(pixel, bgRect, new Color(20, 30, 25) * (alpha * 0.85f));
 
-            //±ß¿ò£¨Áò»Çº£·ç¸ñ£©
+            //è¾¹æ¡†ï¼ˆç¡«ç£ºæµ·é£æ ¼ï¼‰
             Color borderColor = new Color(100, 200, 120) * (alpha * 0.8f);
             sb.Draw(pixel, new Rectangle(bgRect.X, bgRect.Y, bgRect.Width, 2), borderColor);
             sb.Draw(pixel, new Rectangle(bgRect.X, bgRect.Bottom - 2, bgRect.Width, 2), borderColor * 0.7f);
             sb.Draw(pixel, new Rectangle(bgRect.X, bgRect.Y, 2, bgRect.Height), borderColor * 0.85f);
             sb.Draw(pixel, new Rectangle(bgRect.Right - 2, bgRect.Y, 2, bgRect.Height), borderColor * 0.85f);
 
-            //ÎÄ×Ö
+            //æ–‡å­—
             Color textColor = new Color(200, 240, 220) * alpha;
             Utils.DrawBorderString(sb, hintText, textPos - textSize / 2, textColor, 0.9f);
 
-            //Âö¶¯Í¼±ê
+            //è„‰åŠ¨å›¾æ ‡
             float iconPulse = MathF.Sin(Main.GlobalTimeWrappedHourly * 4f) * 0.5f + 0.5f;
-            string iconText = "¨‹";
+            string iconText = "â–¼";
             Vector2 iconSize = font.MeasureString(iconText) * 0.7f;
             Vector2 iconPos = textPos + new Vector2(0, textSize.Y / 2 + 8);
             Utils.DrawBorderString(sb, iconText, iconPos - iconSize / 2,
@@ -243,14 +243,14 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Campsites
         }
 
         /// <summary>
-        /// Éú³É¶¾ÅİÁ£×Ó
+        /// ç”Ÿæˆæ¯’æ³¡ç²’å­
         /// </summary>
         private void SpawnToxicBubble() {
             if (oldDukeEntity == null) {
                 return;
             }
 
-            //ÔÚÀÏ¹«¾ôµ±Ç°Î»ÖÃÖÜÎ§Éú³É
+            //åœ¨è€å…¬çˆµå½“å‰ä½ç½®å‘¨å›´ç”Ÿæˆ
             Vector2 spawnPos = oldDukeEntity.Position;
             spawnPos += new Vector2(
                 Main.rand.NextFloat(-80f, 80f),
@@ -261,7 +261,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Campsites
         }
 
         /// <summary>
-        /// ¶¾ÅİÁ£×Ó
+        /// æ¯’æ³¡ç²’å­
         /// </summary>
         private class ToxicBubblePRT
         {
@@ -290,10 +290,10 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Campsites
                 Life++;
                 Position += Velocity;
 
-                //ºáÏòÆ¯ÒÆ
+                //æ¨ªå‘æ¼‚ç§»
                 Velocity.X += MathF.Sin(Life * 0.1f) * 0.02f;
 
-                //ËÙ¶ÈË¥¼õ
+                //é€Ÿåº¦è¡°å‡
                 Velocity *= 0.99f;
 
                 return Life >= MaxLife;
@@ -304,7 +304,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Campsites
                 float alpha = (float)Math.Sin((Life / MaxLife) * MathHelper.Pi);
                 Vector2 screenPos = Position - Main.screenPosition;
 
-                //ÍâÈ¦
+                //å¤–åœˆ
                 sb.Draw(
                     pixel,
                     screenPos,
@@ -317,7 +317,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Campsites
                     0f
                 );
 
-                //ÄÚºË
+                //å†…æ ¸
                 sb.Draw(
                     pixel,
                     screenPos,

@@ -1,4 +1,4 @@
-using CalamityOverhaul.Content.ADV.UIEffect;
+ï»¿using CalamityOverhaul.Content.ADV.UIEffect;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
@@ -7,16 +7,16 @@ using Terraria;
 namespace CalamityOverhaul.Content.ADV.ADVChoices.Styles
 {
     /// <summary>
-    /// Áò»Çº£·ç¸ñÑ¡Ïî¿òÑùÊ½
+    /// ç¡«ç£ºæµ·é£æ ¼é€‰é¡¹æ¡†æ ·å¼
     /// </summary>
     internal class SulfseaChoiceBoxStyle : IChoiceBoxStyle
     {
-        //¶¯»­¼ÆÊ±Æ÷
+        //åŠ¨ç”»è®¡æ—¶å™¨
         private float toxicWavePhase = 0f;
         private float sulfurPulse = 0f;
         private float miasmaTimer = 0f;
 
-        //Á£×ÓÏµÍ³
+        //ç²’å­ç³»ç»Ÿ
         private readonly List<BubblePRT> bubbles = [];
         private int bubbleSpawnTimer = 0;
         private readonly List<AshPRT> ashParticles = [];
@@ -25,7 +25,7 @@ namespace CalamityOverhaul.Content.ADV.ADVChoices.Styles
         private const float BubbleSideMargin = 20f;
 
         public void Update(Rectangle panelRect, bool active, bool closing) {
-            //¸üĞÂ¶¯»­¼ÆÊ±Æ÷
+            //æ›´æ–°åŠ¨ç”»è®¡æ—¶å™¨
             toxicWavePhase += 0.022f;
             sulfurPulse += 0.015f;
             miasmaTimer += 0.032f;
@@ -34,7 +34,7 @@ namespace CalamityOverhaul.Content.ADV.ADVChoices.Styles
             if (sulfurPulse > MathHelper.TwoPi) sulfurPulse -= MathHelper.TwoPi;
             if (miasmaTimer > MathHelper.TwoPi) miasmaTimer -= MathHelper.TwoPi;
 
-            //ÆøÅİÁ£×Ó¸üĞÂ
+            //æ°”æ³¡ç²’å­æ›´æ–°
             float scaleW = Main.UIScale;
             bubbleSpawnTimer++;
             if (active && !closing && bubbleSpawnTimer >= 12 && bubbles.Count < 15) {
@@ -56,7 +56,7 @@ namespace CalamityOverhaul.Content.ADV.ADVChoices.Styles
                 }
             }
 
-            //»Ò½ıÁ£×Ó¸üĞÂ
+            //ç°çƒ¬ç²’å­æ›´æ–°
             ashSpawnTimer++;
             if (active && !closing && ashSpawnTimer >= 18 && ashParticles.Count < 10) {
                 ashSpawnTimer = 0;
@@ -78,12 +78,12 @@ namespace CalamityOverhaul.Content.ADV.ADVChoices.Styles
         public void Draw(SpriteBatch spriteBatch, Rectangle panelRect, float alpha) {
             Texture2D pixel = VaultAsset.placeholder2.Value;
 
-            //»æÖÆÒõÓ°
+            //ç»˜åˆ¶é˜´å½±
             Rectangle shadowRect = panelRect;
             shadowRect.Offset(6, 8);
             spriteBatch.Draw(pixel, shadowRect, new Rectangle(0, 0, 1, 1), Color.Black * (alpha * 0.60f));
 
-            //»æÖÆ½¥±ä±³¾° - Áò»Çº£ÅäÉ«
+            //ç»˜åˆ¶æ¸å˜èƒŒæ™¯ - ç¡«ç£ºæµ·é…è‰²
             int segments = 30;
             for (int i = 0; i < segments; i++) {
                 float t = i / (float)segments;
@@ -92,7 +92,7 @@ namespace CalamityOverhaul.Content.ADV.ADVChoices.Styles
                 int y2 = panelRect.Y + (int)(t2 * panelRect.Height);
                 Rectangle r = new(panelRect.X, y1, panelRect.Width, Math.Max(1, y2 - y1));
 
-                //Áò»Çº£ÅäÉ«:ÉîÂÌ¡¢»ÆÂÌ¡¢´ø¶¾µÄ»ÆÉ«
+                //ç¡«ç£ºæµ·é…è‰²:æ·±ç»¿ã€é»„ç»¿ã€å¸¦æ¯’çš„é»„è‰²
                 Color sulfurDeep = new Color(12, 18, 8);
                 Color toxicMid = new Color(28, 38, 15);
                 Color acidEdge = new Color(65, 85, 30);
@@ -105,24 +105,24 @@ namespace CalamityOverhaul.Content.ADV.ADVChoices.Styles
                 spriteBatch.Draw(pixel, r, new Rectangle(0, 0, 1, 1), c);
             }
 
-            //ÕÎÆø¸²¸Ç²ã
+            //ç˜´æ°”è¦†ç›–å±‚
             float miasmaEffect = (float)Math.Sin(miasmaTimer * 1.1f) * 0.5f + 0.5f;
             Color miasmaTint = new Color(45, 55, 20) * (alpha * 0.4f * miasmaEffect);
             spriteBatch.Draw(pixel, panelRect, new Rectangle(0, 0, 1, 1), miasmaTint);
 
-            //»æÖÆ¶¾²¨ÎÆÀíĞ§¹û
+            //ç»˜åˆ¶æ¯’æ³¢çº¹ç†æ•ˆæœ
             DrawToxicWaveOverlay(spriteBatch, panelRect, alpha * 0.85f);
 
-            //»æÖÆÄÚ·¢¹â
+            //ç»˜åˆ¶å†…å‘å…‰
             float pulse = (float)Math.Sin(Main.GlobalTimeWrappedHourly * 2.2f) * 0.5f + 0.5f;
             Rectangle inner = panelRect;
             inner.Inflate(-6, -6);
             spriteBatch.Draw(pixel, inner, new Rectangle(0, 0, 1, 1), new Color(80, 100, 35) * (alpha * 0.09f * (0.5f + pulse * 0.5f)));
 
-            //»æÖÆ±ß¿ò
+            //ç»˜åˆ¶è¾¹æ¡†
             DrawFrameSulfur(spriteBatch, panelRect, alpha, pulse);
 
-            //»æÖÆÁ£×ÓĞ§¹û
+            //ç»˜åˆ¶ç²’å­æ•ˆæœ
             foreach (var ash in ashParticles) {
                 ash.Draw(spriteBatch, alpha * 0.75f);
             }
@@ -134,19 +134,19 @@ namespace CalamityOverhaul.Content.ADV.ADVChoices.Styles
         public void DrawChoiceBackground(SpriteBatch spriteBatch, Rectangle choiceRect, bool enabled, float hoverProgress, float alpha) {
             Texture2D pixel = VaultAsset.placeholder2.Value;
 
-            //Ñ¡Ïî±³¾°
+            //é€‰é¡¹èƒŒæ™¯
             Color choiceBg = enabled
                 ? Color.Lerp(new Color(20, 30, 10) * 0.3f, new Color(50, 70, 25) * 0.5f, hoverProgress)
                 : new Color(15, 20, 10) * 0.15f;
 
             spriteBatch.Draw(pixel, choiceRect, new Rectangle(0, 0, 1, 1), choiceBg * alpha);
 
-            //Ñ¡Ïî±ß¿ò
+            //é€‰é¡¹è¾¹æ¡†
             Color edgeColor = GetEdgeColor(alpha);
             if (enabled && hoverProgress > 0.01f) {
                 DrawChoiceBorder(spriteBatch, choiceRect, edgeColor * (hoverProgress * 0.6f));
 
-                //ĞüÍ£Ê±µÄ¶¾ÒºĞ§¹û
+                //æ‚¬åœæ—¶çš„æ¯’æ¶²æ•ˆæœ
                 float toxicGlow = (float)Math.Sin(toxicWavePhase * 2f + hoverProgress * 3f) * 0.5f + 0.5f;
                 Color toxicColor = new Color(100, 140, 50) * (alpha * 0.15f * hoverProgress * toxicGlow);
                 spriteBatch.Draw(pixel, choiceRect, new Rectangle(0, 0, 1, 1), toxicColor);
@@ -190,7 +190,7 @@ namespace CalamityOverhaul.Content.ADV.ADVChoices.Styles
             ashSpawnTimer = 0;
         }
 
-        #region ¸¨Öú·½·¨
+        #region è¾…åŠ©æ–¹æ³•
         private void DrawToxicWaveOverlay(SpriteBatch sb, Rectangle rect, float alpha) {
             Texture2D pixel = VaultAsset.placeholder2.Value;
             int bands = 6;
@@ -223,13 +223,13 @@ namespace CalamityOverhaul.Content.ADV.ADVChoices.Styles
             Texture2D pixel = VaultAsset.placeholder2.Value;
             Color edge = Color.Lerp(new Color(70, 100, 35), new Color(130, 160, 65), pulse) * (alpha * 0.85f);
 
-            //»æÖÆÖ÷±ß¿ò
+            //ç»˜åˆ¶ä¸»è¾¹æ¡†
             sb.Draw(pixel, new Rectangle(rect.X, rect.Y, rect.Width, 2), new Rectangle(0, 0, 1, 1), edge);
             sb.Draw(pixel, new Rectangle(rect.X, rect.Bottom - 2, rect.Width, 2), new Rectangle(0, 0, 1, 1), edge * 0.75f);
             sb.Draw(pixel, new Rectangle(rect.X, rect.Y, 2, rect.Height), new Rectangle(0, 0, 1, 1), edge * 0.88f);
             sb.Draw(pixel, new Rectangle(rect.Right - 2, rect.Y, 2, rect.Height), new Rectangle(0, 0, 1, 1), edge * 0.88f);
 
-            //»æÖÆÄÚ±ß¿ò
+            //ç»˜åˆ¶å†…è¾¹æ¡†
             Rectangle inner = rect;
             inner.Inflate(-5, -5);
             Color innerC = new Color(140, 170, 70) * (alpha * 0.22f * pulse);
@@ -238,7 +238,7 @@ namespace CalamityOverhaul.Content.ADV.ADVChoices.Styles
             sb.Draw(pixel, new Rectangle(inner.X, inner.Y, 1, inner.Height), new Rectangle(0, 0, 1, 1), innerC * 0.88f);
             sb.Draw(pixel, new Rectangle(inner.Right - 1, inner.Y, 1, inner.Height), new Rectangle(0, 0, 1, 1), innerC * 0.88f);
 
-            //»æÖÆ½ÇĞÇ×°ÊÎ
+            //ç»˜åˆ¶è§’æ˜Ÿè£…é¥°
             DrawCornerStar(sb, new Vector2(rect.X + 10, rect.Y + 10), alpha * 0.9f);
             DrawCornerStar(sb, new Vector2(rect.Right - 10, rect.Y + 10), alpha * 0.9f);
             DrawCornerStar(sb, new Vector2(rect.X + 10, rect.Bottom - 10), alpha * 0.65f);

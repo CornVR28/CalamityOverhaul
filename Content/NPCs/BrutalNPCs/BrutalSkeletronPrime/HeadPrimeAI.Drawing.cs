@@ -1,4 +1,4 @@
-using InnoVault.GameSystem;
+锘縰sing InnoVault.GameSystem;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;
@@ -8,7 +8,7 @@ using Terraria.ID;
 namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalSkeletronPrime
 {
     /// <summary>
-    /// 包含AI的绘制和动画逻辑
+    /// 鍖呭惈AI鐨勭粯鍒跺拰鍔ㄧ敾閫昏緫
     /// </summary>
     internal partial class HeadPrimeAI
     {

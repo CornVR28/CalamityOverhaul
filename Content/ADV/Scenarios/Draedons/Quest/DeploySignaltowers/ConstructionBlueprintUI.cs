@@ -1,4 +1,4 @@
-using CalamityOverhaul.Content.ADV.Common;
+锘縰sing CalamityOverhaul.Content.ADV.Common;
 using InnoVault.UIHandles;
 using Terraria;
 using Terraria.ModLoader;
@@ -6,17 +6,17 @@ using Terraria.ModLoader;
 namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.Quest.DeploySignaltowers
 {
     /// <summary>
-    /// 量子塔构建蓝图UI
+    /// 閲忓瓙濉旀瀯寤鸿摑鍥綰I
     /// </summary>
     internal class ConstructionBlueprintUI : BaseRecipeDisplayUI
     {
         public static ConstructionBlueprintUI Instance => UIHandleLoader.GetUIHandleOfType<ConstructionBlueprintUI>();
 
         public override void SetStaticDefaults() {
-            UITitle = this.GetLocalization(nameof(UITitle), () => "量子塔自我构建器");
-            MaterialsRequired = this.GetLocalization(nameof(MaterialsRequired), () => "所需材料:");
-            CloseHint = this.GetLocalization(nameof(CloseHint), () => "点击关闭");
-            CraftingStation = this.GetLocalization(nameof(CraftingStation), () => "合成站点:");
+            UITitle = this.GetLocalization(nameof(UITitle), () => "閲忓瓙濉旇嚜鎴戞瀯寤哄櫒");
+            MaterialsRequired = this.GetLocalization(nameof(MaterialsRequired), () => "鎵�闇�鏉愭枡:");
+            CloseHint = this.GetLocalization(nameof(CloseHint), () => "鐐瑰嚮鍏抽棴");
+            CraftingStation = this.GetLocalization(nameof(CraftingStation), () => "鍚堟垚绔欑偣:");
         }
 
         protected override Recipe GetDisplayRecipe() {

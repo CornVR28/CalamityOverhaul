@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Terraria.ModLoader.IO;
 
 namespace CalamityOverhaul.Content.QuestLogs.Core

@@ -34,7 +34,7 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalMechanicalEye.States.Sp
         /// <summary>
         /// 风暴阶段
         /// </summary>
-        private int StormPhase => Context.IsMachineRebellion ? 140 : (Context.IsDeathMode ? 130 : 120);
+        private int StormPhase => Context.IsDeathMode ? 130 : 120;
 
         /// <summary>
         /// 恢复阶段
@@ -49,12 +49,12 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalMechanicalEye.States.Sp
         /// <summary>
         /// 旋转速度
         /// </summary>
-        private float RotSpeed => Context.IsMachineRebellion ? 0.08f : (Context.IsDeathMode ? 0.075f : 0.06f);
+        private float RotSpeed => Context.IsDeathMode ? 0.075f : 0.06f;
 
         /// <summary>
         /// 火球发射间隔
         /// </summary>
-        private int FireRate => Context.IsMachineRebellion ? 6 : (Context.IsDeathMode ? 8 : 10);
+        private int FireRate => Context.IsDeathMode ? 8 : 10;
 
         private TwinsStateContext Context;
         private Vector2 stormCenter;

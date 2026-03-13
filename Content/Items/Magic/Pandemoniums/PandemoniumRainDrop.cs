@@ -1,4 +1,4 @@
-using Microsoft.Xna.Framework.Graphics;
+ï»¿using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;
 using Terraria.Audio;
@@ -8,7 +8,7 @@ using Terraria.ModLoader;
 namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
 {
     /// <summary>
-    /// Áò»ÇÑªÓê
+    /// ç¡«ç£ºè¡€é›¨
     /// </summary>
     internal class PandemoniumRainDrop : ModProjectile
     {
@@ -33,13 +33,13 @@ namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
         public override void AI() {
             Timer++;
 
-            //µ­Èë
+            //æ·¡å…¥
             if (Projectile.alpha > 0) {
                 Projectile.alpha -= 10;
                 if (Projectile.alpha < 0) Projectile.alpha = 0;
             }
 
-            //ÖØÁ¦¼ÓËÙ
+            //é‡åŠ›åŠ é€Ÿ
             Projectile.velocity.Y += 0.3f;
             if (Projectile.velocity.Y > 20f) {
                 Projectile.velocity.Y = 20f;
@@ -47,7 +47,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
 
             Projectile.rotation = Projectile.velocity.ToRotation() + MathHelper.PiOver2;
 
-            //Áò»Ç»ğÍÏÎ²
+            //ç¡«ç£ºç«æ‹–å°¾
             if (Main.rand.NextBool(2)) {
                 Dust d = Dust.NewDustPerfect(
                     Projectile.Center + Projectile.velocity * -0.3f,
@@ -61,7 +61,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
                 d.fadeIn = 1.2f;
             }
 
-            //»ğÑæÁ£×Ó
+            //ç«ç„°ç²’å­
             if (Main.rand.NextBool(3)) {
                 Dust fire = Dust.NewDustPerfect(
                     Projectile.Center,
@@ -74,7 +74,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
                 fire.noGravity = true;
             }
 
-            //Áò»Ç»ğ¹âÃ¢
+            //ç¡«ç£ºç«å…‰èŠ’
             float lightIntensity = (255 - Projectile.alpha) / 255f;
             Lighting.AddLight(Projectile.Center, 1.5f * lightIntensity, 0.6f * lightIntensity, 0.3f * lightIntensity);
         }
@@ -99,10 +99,10 @@ namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
             if (hasHit) return;
             hasHit = true;
 
-            //³å»÷ÒôĞ§
+            //å†²å‡»éŸ³æ•ˆ
             SoundEngine.PlaySound(SoundID.Item74 with { Volume = 0.5f, Pitch = 0.2f }, Projectile.Center);
 
-            //Áò»Ç»ğ±¬·¢
+            //ç¡«ç£ºç«çˆ†å‘
             for (int i = 0; i < 20; i++) {
                 Vector2 vel = Main.rand.NextVector2Circular(6f, 6f);
                 Dust d = Dust.NewDustPerfect(
@@ -116,7 +116,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
                 d.noGravity = true;
             }
 
-            //»ğÑæ»·
+            //ç«ç„°ç¯
             for (int i = 0; i < 12; i++) {
                 float angle = MathHelper.TwoPi * i / 12f;
                 Vector2 vel = angle.ToRotationVector2() * Main.rand.NextFloat(4f, 8f);
@@ -124,7 +124,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
                 d.noGravity = true;
             }
 
-            //µØÃæÈ¼ÉÕĞ§¹û - Éú³ÉĞ¡ĞÍ»ğÑæÖù
+            //åœ°é¢ç‡ƒçƒ§æ•ˆæœ - ç”Ÿæˆå°å‹ç«ç„°æŸ±
             if (Projectile.owner == Main.myPlayer && Main.rand.NextBool(3)) {
                 Vector2 spawnPos = Projectile.Center;
                 int flameProj = Projectile.NewProjectile(
@@ -155,7 +155,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
             Vector2 drawPos = Projectile.Center - Main.screenPosition;
             float alpha = (255 - Projectile.alpha) / 255f;
 
-            //À­³¤µÄÓêµÎĞÎ×´
+            //æ‹‰é•¿çš„é›¨æ»´å½¢çŠ¶
             Vector2 scale = new Vector2(0.6f, 1.2f + Projectile.velocity.Y * 0.02f);
 
             Main.spriteBatch.Draw(glow, drawPos, null, c3 * 0.6f * alpha, Projectile.rotation, glow.Size() / 2, scale * Projectile.scale * 1.5f * pulse, 0, 0);
@@ -167,7 +167,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
     }
 
     /// <summary>
-    /// µØÃæ»ğÑæ
+    /// åœ°é¢ç«ç„°
     /// </summary>
     internal class PandemoniumGroundFlame : ModProjectile
     {
@@ -194,7 +194,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
         public override void AI() {
             Timer++;
 
-            //»ğÑæÁ£×Ó
+            //ç«ç„°ç²’å­
             if (Main.rand.NextBool(2)) {
                 Vector2 spawnPos = Projectile.position + new Vector2(Main.rand.Next(Projectile.width), Main.rand.Next(Projectile.height));
                 Vector2 vel = new Vector2(Main.rand.NextFloat(-1f, 1f), Main.rand.NextFloat(-3f, -1f));
@@ -203,14 +203,14 @@ namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
                 d.noGravity = true;
             }
 
-            //Áò»Ç»ğÁ£×Ó
+            //ç¡«ç£ºç«ç²’å­
             if (Main.rand.NextBool(3)) {
                 Vector2 spawnPos = Projectile.position + new Vector2(Main.rand.Next(Projectile.width), Main.rand.Next(Projectile.height));
                 Dust d = Dust.NewDustPerfect(spawnPos, CWRID.Dust_Brimstone, Vector2.UnitY * -2f, 100, default, 1.2f);
                 d.noGravity = true;
             }
 
-            //Öğ½¥ÏûÉ¢
+            //é€æ¸æ¶ˆæ•£
             float fadeProgress = Timer / MaxLifetime;
             Projectile.alpha = (int)(fadeProgress * 255);
 
@@ -222,7 +222,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
         }
 
         public override bool PreDraw(ref Color lightColor) {
-            return false; //ÍêÈ«ÓÉÁ£×Ó±íÏÖ
+            return false; //å®Œå…¨ç”±ç²’å­è¡¨ç°
         }
     }
 }

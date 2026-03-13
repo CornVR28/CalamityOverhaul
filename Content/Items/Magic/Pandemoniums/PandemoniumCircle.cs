@@ -1,4 +1,4 @@
-using InnoVault.GameContent.BaseEntity;
+ï»¿using InnoVault.GameContent.BaseEntity;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using System;
@@ -11,7 +11,7 @@ using Terraria.ModLoader;
 namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
 {
     /// <summary>
-    /// Êó±êÎ»ÖÃµÄÁò»Ç»ğ·¨Õó
+    /// é¼ æ ‡ä½ç½®çš„ç¡«ç£ºç«æ³•é˜µ
     /// </summary>
     internal class PandemoniumCircle : BaseHeldProj
     {
@@ -20,7 +20,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
         private ref float ExpandTimer => ref Projectile.ai[0];
         private ref float AttackTimer => ref Projectile.ai[1];
 
-        //·¨ÕóÊÓ¾õÊı¾İ
+        //æ³•é˜µè§†è§‰æ•°æ®
         private List<RuneData> runes = new();
         private List<LightningData> lightnings = new();
         private float circleRadius = 0f;
@@ -82,7 +82,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
             ExpandTimer++;
             AttackTimer++;
 
-            //³õÊ¼»¯
+            //åˆå§‹åŒ–
             if (ExpandTimer == 1) {
                 InitializeRunes();
                 SoundEngine.PlaySound(SoundID.DD2_EtherianPortalOpen with {
@@ -91,7 +91,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
                 }, Projectile.Center);
             }
 
-            //·¨ÕóÀ©Õ¹½×¶Î (0-30Ö¡)
+            //æ³•é˜µæ‰©å±•é˜¶æ®µ (0-30å¸§)
             if (ExpandTimer <= 30f) {
                 float progress = ExpandTimer / 30f;
                 circleRadius = CWRUtils.EaseOutCubic(progress) * 200f;
@@ -102,30 +102,30 @@ namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
                 circleAlpha = 1f;
             }
 
-            //·¨ÕóĞı×ª
+            //æ³•é˜µæ—‹è½¬
             rotationAngle += 0.02f;
 
-            //¸üĞÂ·ûÎÄ
+            //æ›´æ–°ç¬¦æ–‡
             UpdateRunes();
 
-            //Éú³ÉÁ¬½ÓÉÁµç
+            //ç”Ÿæˆè¿æ¥é—ªç”µ
             if (AttackTimer % 8 == 0 && ExpandTimer > 15f) {
                 SpawnPlayerLightning();
             }
 
-            //¸üĞÂÉÁµç
+            //æ›´æ–°é—ªç”µ
             UpdateLightnings();
 
-            //³ÖĞø¹¥»÷µĞÈË
+            //æŒç»­æ”»å‡»æ•Œäºº
             if (AttackTimer % 20 == 0 && ExpandTimer > 30f) {
                 AttackNearbyEnemies();
             }
 
-            //Áò»Ç»ğÕÕÃ÷
+            //ç¡«ç£ºç«ç…§æ˜
             float lightIntensity = circleAlpha * 2f;
             Lighting.AddLight(Projectile.Center, 1.5f * lightIntensity, 0.5f * lightIntensity, 0.2f * lightIntensity);
 
-            //Éú³ÉÁò»Ç»ğÁ£×Ó
+            //ç”Ÿæˆç¡«ç£ºç«ç²’å­
             SpawnBrimstoneParticles();
         }
 
@@ -147,17 +147,17 @@ namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
 
         private void UpdateRunes() {
             foreach (var rune in runes) {
-                //µ­Èë
+                //æ·¡å…¥
                 rune.Alpha = MathHelper.Lerp(rune.Alpha, circleAlpha, 0.1f);
 
-                //»ğÑæÖ¡¸üĞÂ
+                //ç«ç„°å¸§æ›´æ–°
                 rune.FireFrameCounter += 0.4f;
                 if (rune.FireFrameCounter >= 1f) {
                     rune.FireFrameCounter = 0;
                     rune.FireFrame = (rune.FireFrame + 1) % 16;
                 }
 
-                //Ğı×ª
+                //æ—‹è½¬
                 rune.Rotation += 0.03f;
                 rune.PulsePhase += 0.08f;
             }
@@ -166,7 +166,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
         private void SpawnPlayerLightning() {
             if (!Owner.active || Owner.dead) return;
 
-            //Éú³É´Ó·¨Õóµ½Íæ¼ÒµÄÉÁµç
+            //ç”Ÿæˆä»æ³•é˜µåˆ°ç©å®¶çš„é—ªç”µ
             List<Vector2> points = GenerateLightningPath(Projectile.Center, Owner.Center, 6);
 
             lightnings.Add(new LightningData {
@@ -178,7 +178,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
                 Intensity = Main.rand.NextFloat(0.8f, 1f)
             });
 
-            //Áò»Ç»ğÉÁµçÒôĞ§
+            //ç¡«ç£ºç«é—ªç”µéŸ³æ•ˆ
             if (Main.rand.NextBool(3)) {
                 SoundEngine.PlaySound(SoundID.Item122 with {
                     Volume = 0.4f,
@@ -192,7 +192,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
                 var lightning = lightnings[i];
                 lightning.Life++;
 
-                //¸üĞÂÖÕµãÎ»ÖÃ(¸úËæÍæ¼Ò)
+                //æ›´æ–°ç»ˆç‚¹ä½ç½®(è·Ÿéšç©å®¶)
                 if (Owner.active && !Owner.dead) {
                     lightning.EndPos = Owner.Center;
                     lightning.SegmentPoints = GenerateLightningPath(lightning.StartPos, lightning.EndPos, 6);
@@ -236,7 +236,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
             }
 
             if (closestNPC != null && Main.myPlayer == Projectile.owner) {
-                //·¢ÉäÁò»Ç»ğÇò
+                //å‘å°„ç¡«ç£ºç«çƒ
                 Vector2 velocity = (closestNPC.Center - Projectile.Center).SafeNormalize(Vector2.Zero) * 12f;
                 Projectile.NewProjectile(
                     Projectile.GetSource_FromThis(),
@@ -247,10 +247,10 @@ namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
                     Projectile.knockBack,
                     Projectile.owner,
                     0,
-                    2 //±ê¼ÇÎª·¨Õó»ğÇò
+                    2 //æ ‡è®°ä¸ºæ³•é˜µç«çƒ
                 );
 
-                //Éú³É¹¥»÷ÉÁµçÊÓ¾õĞ§¹û
+                //ç”Ÿæˆæ”»å‡»é—ªç”µè§†è§‰æ•ˆæœ
                 List<Vector2> lightningPath = GenerateLightningPath(Projectile.Center, closestNPC.Center, 5);
                 lightnings.Add(new LightningData {
                     StartPos = Projectile.Center,
@@ -280,7 +280,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
                 brimstone.noGravity = true;
             }
 
-            //·¨Õó±ßÔµ»ğÑæ
+            //æ³•é˜µè¾¹ç¼˜ç«ç„°
             if (Main.rand.NextBool(3)) {
                 float angle = Main.rand.NextFloat(MathHelper.TwoPi);
                 Vector2 edgePos = Projectile.Center + angle.ToRotationVector2() * circleRadius;
@@ -298,7 +298,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
         }
 
         public override void OnKill(int timeLeft) {
-            //·¨ÕóÏûÉ¢ÌØĞ§
+            //æ³•é˜µæ¶ˆæ•£ç‰¹æ•ˆ
             for (int i = 0; i < 50; i++) {
                 float angle = MathHelper.TwoPi * i / 50f;
                 Vector2 velocity = angle.ToRotationVector2() * Main.rand.NextFloat(4f, 8f);
@@ -324,12 +324,12 @@ namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
             SpriteBatch sb = Main.spriteBatch;
             Vector2 center = Projectile.Center - Main.screenPosition;
 
-            //Áò»Ç»ğÉ«²Ê
+            //ç¡«ç£ºç«è‰²å½©
             Color coreColor = new Color(255, 80, 40);
             Color midColor = new Color(200, 50, 30);
             Color darkColor = new Color(120, 30, 20);
 
-            //»æÖÆÍâ²ã°µÓ°¹â»·
+            //ç»˜åˆ¶å¤–å±‚æš—å½±å…‰ç¯
             if (GlowAsset?.IsLoaded ?? false) {
                 for (int i = 0; i < 3; i++) {
                     float ringSize = circleRadius * (1.2f + i * 0.3f);
@@ -350,20 +350,20 @@ namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
                 }
             }
 
-            //»æÖÆ·¨Õó¼¸ºÎÍ¼ĞÎ
+            //ç»˜åˆ¶æ³•é˜µå‡ ä½•å›¾å½¢
             DrawCircle(sb, center, circleRadius, 3f, darkColor * circleAlpha);
             DrawPentagram(sb, center, circleRadius * 0.8f, 2.5f, midColor * circleAlpha, rotationAngle);
             DrawHexagram(sb, center, circleRadius * 0.6f, 2f, coreColor * circleAlpha, -rotationAngle * 1.5f);
 
-            //»æÖÆ·ûÎÄ
+            //ç»˜åˆ¶ç¬¦æ–‡
             if (RuneAsset?.IsLoaded ?? false) {
                 DrawRunes(sb, RuneAsset.Value, center);
             }
 
-            //»æÖÆÉÁµç
+            //ç»˜åˆ¶é—ªç”µ
             DrawLightnings(sb);
 
-            //»æÖÆÖĞĞÄ»Ô¹â
+            //ç»˜åˆ¶ä¸­å¿ƒè¾‰å…‰
             if (GlowAsset?.IsLoaded ?? false) {
                 DrawCenterGlow(sb, GlowAsset.Value, center, coreColor, midColor);
             }
@@ -404,7 +404,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
         private void DrawHexagram(SpriteBatch sb, Vector2 center, float radius, float thickness, Color color, float rotation) {
             Texture2D pixel = CWRAsset.Placeholder_White.Value;
 
-            //»æÖÆÁ½¸öÈı½ÇĞÎ
+            //ç»˜åˆ¶ä¸¤ä¸ªä¸‰è§’å½¢
             for (int t = 0; t < 2; t++) {
                 Vector2[] vertices = new Vector2[3];
                 for (int i = 0; i < 3; i++) {
@@ -445,12 +445,12 @@ namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
 
                 Vector2 pos = center + rune.Offset.RotatedBy(rotationAngle) * (circleRadius / 180f);
 
-                //¼ÆËã»ğÑæÖ¡
+                //è®¡ç®—ç«ç„°å¸§
                 int frameX = rune.FireFrame % 4;
                 int frameY = rune.FireFrame / 4;
                 Rectangle fireFrame = new Rectangle(frameX * frameWidth, frameY * frameHeight, frameWidth, frameHeight);
 
-                //»ğÑæĞ§¹û
+                //ç«ç„°æ•ˆæœ
                 float intensityPulse = (float)Math.Sin(rune.PulsePhase) * 0.3f + 0.7f;
                 Color fireColor = Color.Lerp(
                     new Color(180, 60, 40),
@@ -463,7 +463,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
 
                 float scale = rune.Scale * (0.9f + intensityPulse * 0.2f);
 
-                //»æÖÆ»ğÑæ
+                //ç»˜åˆ¶ç«ç„°
                 sb.Draw(
                     runeTex,
                     pos,
@@ -476,7 +476,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
                     0f
                 );
 
-                //ĞÇĞÇºËĞÄ
+                //æ˜Ÿæ˜Ÿæ ¸å¿ƒ
                 if (StarTexture != null && StarTexture.IsLoaded) {
                     Color coreColor = new Color(255, 90, 50) with { A = 0 } * rune.Alpha * circleAlpha * 0.6f;
                     sb.Draw(
@@ -516,7 +516,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
         private void DrawCenterGlow(SpriteBatch sb, Texture2D glow, Vector2 center, Color c1, Color c2) {
             float pulse = (float)Math.Sin(Main.GlobalTimeWrappedHourly * 8f) * 0.3f + 0.7f;
 
-            //Íâ²ã
+            //å¤–å±‚
             sb.Draw(
                 glow,
                 center,
@@ -529,7 +529,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
                 0
             );
 
-            //ÖĞ²ã
+            //ä¸­å±‚
             sb.Draw(
                 glow,
                 center,
@@ -542,7 +542,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
                 0
             );
 
-            //ÄÚ²ã
+            //å†…å±‚
             sb.Draw(
                 glow,
                 center,

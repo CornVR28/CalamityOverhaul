@@ -50,7 +50,7 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalMechanicalEye.States.Sp
         /// <summary>
         /// 分身数量
         /// </summary>
-        private int ShadowCount => Context.IsMachineRebellion ? 5 : (Context.IsDeathMode ? 4 : 3);
+        private int ShadowCount => Context.IsDeathMode ? 4 : 3;
 
         private TwinsStateContext Context;
         private Vector2[] shadowPositions;
@@ -69,7 +69,7 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalMechanicalEye.States.Sp
             Context = context;
             shadowPositions = new Vector2[ShadowCount];
             shadowDirections = new Vector2[ShadowCount];
-            dashSpeed = context.IsMachineRebellion ? 28f : (context.IsDeathMode ? 26f : 22f);
+            dashSpeed = Context.IsDeathMode ? 26f : 22f;
             hasDashed = false;
         }
 

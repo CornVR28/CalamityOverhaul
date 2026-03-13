@@ -1,4 +1,4 @@
-using CalamityOverhaul.Content.ADV.UIEffect;
+ï»¿using CalamityOverhaul.Content.ADV.UIEffect;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
 using Terraria;
@@ -6,16 +6,16 @@ using Terraria;
 namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.PQCDs.DraedonShops
 {
     /// <summary>
-    /// ÊÓ¾õÌØĞ§¹ÜÀíÆ÷
+    /// è§†è§‰ç‰¹æ•ˆç®¡ç†å™¨
     /// </summary>
     internal class DraedonShopEffects
     {
-        //Á£×ÓÁĞ±í
+        //ç²’å­åˆ—è¡¨
         private readonly List<DraedonDataPRT> dataParticles = new();
         private readonly List<CircuitNodePRT> circuitNodes = new();
         private readonly List<EnergyLinePRT> energyLines = new();
 
-        //Á£×ÓË¢ĞÂ¼ÆÊ±Æ÷
+        //ç²’å­åˆ·æ–°è®¡æ—¶å™¨
         private int dataParticleSpawnTimer = 0;
         private int circuitNodeSpawnTimer = 0;
         private int energyLineSpawnTimer = 0;
@@ -23,7 +23,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.PQCDs.DraedonShops
         private const float TechSideMargin = 35f;
 
         /// <summary>
-        /// ¸üĞÂËùÓĞÁ£×ÓÌØĞ§
+        /// æ›´æ–°æ‰€æœ‰ç²’å­ç‰¹æ•ˆ
         /// </summary>
         public void UpdateParticles(bool isActive, Vector2 panelPosition, int panelWidth, int panelHeight) {
             UpdateDataParticles(isActive, panelPosition, panelWidth, panelHeight);
@@ -91,7 +91,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.PQCDs.DraedonShops
         }
 
         /// <summary>
-        /// »æÖÆËùÓĞÌØĞ§
+        /// ç»˜åˆ¶æ‰€æœ‰ç‰¹æ•ˆ
         /// </summary>
         public void DrawEffects(SpriteBatch spriteBatch, float uiAlpha) {
             foreach (var line in energyLines) {
@@ -108,7 +108,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.PQCDs.DraedonShops
         }
 
         /// <summary>
-        /// ÇåÀíËùÓĞÌØĞ§
+        /// æ¸…ç†æ‰€æœ‰ç‰¹æ•ˆ
         /// </summary>
         public void Clear() {
             dataParticles.Clear();

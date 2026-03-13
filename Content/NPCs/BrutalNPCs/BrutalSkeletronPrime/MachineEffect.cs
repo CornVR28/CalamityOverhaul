@@ -226,11 +226,6 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalSkeletronPrime
                 return;
             }
 
-            if (CWRWorld.MachineRebellion) {
-                IsActive = true;
-                return;
-            }
-
             if (!CWRWorld.HasBoss) {
                 return;
             }

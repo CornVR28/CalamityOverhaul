@@ -1,4 +1,4 @@
-using Microsoft.Xna.Framework.Graphics;
+ï»¿using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;
 using Terraria.Audio;
@@ -7,30 +7,30 @@ using Terraria.ID;
 namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.PQCDs.DraedonShops
 {
     /// <summary>
-    /// ¿ÉÍÏ¶¯µÄ¿Æ¼¼·ç¸ñ¹ö¶¯Ìõ
+    /// å¯æ‹–åŠ¨çš„ç§‘æŠ€é£æ ¼æ»šåŠ¨æ¡
     /// </summary>
     internal class DraedonScrollBar
     {
-        //¹ö¶¯Ìõ×´Ì¬
+        //æ»šåŠ¨æ¡çŠ¶æ€
         private bool isDragging = false;
         private float dragStartY = 0f;
         private int dragStartOffset = 0;
 
-        //¶¯»­Ğ§¹û
+        //åŠ¨ç”»æ•ˆæœ
         private float hoverProgress = 0f;
         private float glowIntensity = 0f;
         private float pulseTimer = 0f;
 
-        //¹ö¶¯Ìõ³ß´ç
+        //æ»šåŠ¨æ¡å°ºå¯¸
         private const int BarWidth = 4;
         private const int IndicatorWidth = 6;
         private const int MinIndicatorHeight = 20;
 
-        //½»»¥ÇøÓòÀ©Õ¹£¨·½±ãµã»÷£©
+        //äº¤äº’åŒºåŸŸæ‰©å±•ï¼ˆæ–¹ä¾¿ç‚¹å‡»ï¼‰
         private const int InteractionPadding = 8;
 
         /// <summary>
-        /// »ñÈ¡¹ö¶¯Ìõ±³¾°¾ØĞÎ
+        /// è·å–æ»šåŠ¨æ¡èƒŒæ™¯çŸ©å½¢
         /// </summary>
         public Rectangle GetBarBackground(Vector2 panelPosition, int barHeight) {
             Vector2 barPos = panelPosition + new Vector2(GetBarX(panelPosition), 120);
@@ -38,7 +38,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.PQCDs.DraedonShops
         }
 
         /// <summary>
-        /// »ñÈ¡¹ö¶¯ÌõÖ¸Ê¾Æ÷¾ØĞÎ
+        /// è·å–æ»šåŠ¨æ¡æŒ‡ç¤ºå™¨çŸ©å½¢
         /// </summary>
         public Rectangle GetIndicatorRect(Vector2 panelPosition, int barHeight,
             int scrollOffset, int maxScroll, int totalItems, int visibleItems) {
@@ -52,7 +52,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.PQCDs.DraedonShops
         }
 
         /// <summary>
-        /// »ñÈ¡½»»¥ÇøÓò¾ØĞÎ£¨À©Õ¹µÄµã»÷ÇøÓò£©
+        /// è·å–äº¤äº’åŒºåŸŸçŸ©å½¢ï¼ˆæ‰©å±•çš„ç‚¹å‡»åŒºåŸŸï¼‰
         /// </summary>
         public Rectangle GetInteractionRect(Rectangle indicatorRect) {
             return new Rectangle(
@@ -64,7 +64,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.PQCDs.DraedonShops
         }
 
         /// <summary>
-        /// ¸üĞÂ¹ö¶¯Ìõ×´Ì¬
+        /// æ›´æ–°æ»šåŠ¨æ¡çŠ¶æ€
         /// </summary>
         public void Update(Vector2 panelPosition, int barHeight, int scrollOffset, int maxScroll,
             int totalItems, int visibleItems, Point mousePosition, bool mouseLeftDown,
@@ -79,25 +79,25 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.PQCDs.DraedonShops
             bool mouseOverIndicator = interactionRect.Contains(mousePosition);
             bool mouseOverBar = barBg.Contains(mousePosition);
 
-            //¸üĞÂĞüÍ£¶¯»­
+            //æ›´æ–°æ‚¬åœåŠ¨ç”»
             float targetHover = (mouseOverIndicator || isDragging) ? 1f : 0f;
             hoverProgress = MathHelper.Lerp(hoverProgress, targetHover, 0.2f);
 
-            //¸üĞÂ·¢¹âÇ¿¶È
+            //æ›´æ–°å‘å…‰å¼ºåº¦
             float targetGlow = isDragging ? 1f : (mouseOverIndicator ? 0.6f : 0f);
             glowIntensity = MathHelper.Lerp(glowIntensity, targetGlow, 0.15f);
 
-            //¸üĞÂÂö³å¼ÆÊ±Æ÷
+            //æ›´æ–°è„‰å†²è®¡æ—¶å™¨
             pulseTimer += 0.08f;
             if (pulseTimer > MathHelper.TwoPi) pulseTimer -= MathHelper.TwoPi;
 
-            //´¦ÀíÍÏ¶¯¿ªÊ¼
+            //å¤„ç†æ‹–åŠ¨å¼€å§‹
             if (mouseLeftDown && !isDragging && mouseOverIndicator) {
                 isDragging = true;
                 dragStartY = mousePosition.Y;
                 dragStartOffset = scrollOffset;
 
-                //²¥·Å×¥È¡ÒôĞ§
+                //æ’­æ”¾æŠ“å–éŸ³æ•ˆ
                 SoundEngine.PlaySound(SoundID.MenuTick with {
                     Volume = 0.3f,
                     Pitch = 0.5f,
@@ -105,7 +105,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.PQCDs.DraedonShops
                 });
             }
 
-            //´¦ÀíÍÏ¶¯ÖĞ
+            //å¤„ç†æ‹–åŠ¨ä¸­
             if (isDragging && mouseLeftDown) {
                 float dragDelta = mousePosition.Y - dragStartY;
                 int indicatorHeight = Math.Max(MinIndicatorHeight, barHeight * visibleItems / totalItems);
@@ -116,7 +116,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.PQCDs.DraedonShops
                     int offsetDelta = (int)(progressDelta * maxScroll);
                     newScrollOffset = Math.Clamp(dragStartOffset + offsetDelta, 0, maxScroll);
 
-                    //Èç¹û¹ö¶¯Î»ÖÃ·¢Éú±ä»¯£¬²¥·ÅÏ¸Î¢ÒôĞ§
+                    //å¦‚æœæ»šåŠ¨ä½ç½®å‘ç”Ÿå˜åŒ–ï¼Œæ’­æ”¾ç»†å¾®éŸ³æ•ˆ
                     if (newScrollOffset != scrollOffset) {
                         if (Main.GameUpdateCount % 3 == 0) {
                             SoundEngine.PlaySound(SoundID.MenuTick with {
@@ -129,11 +129,11 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.PQCDs.DraedonShops
                 }
             }
 
-            //´¦ÀíÍÏ¶¯½áÊø
+            //å¤„ç†æ‹–åŠ¨ç»“æŸ
             if (!mouseLeftDown && isDragging) {
                 isDragging = false;
 
-                //²¥·ÅÊÍ·ÅÒôĞ§
+                //æ’­æ”¾é‡Šæ”¾éŸ³æ•ˆ
                 SoundEngine.PlaySound(SoundID.MenuTick with {
                     Volume = 0.2f,
                     Pitch = -0.3f,
@@ -141,7 +141,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.PQCDs.DraedonShops
                 });
             }
 
-            //´¦Àíµã»÷¹ö¶¯Ìõ±³¾°Ö±½ÓÌø×ª
+            //å¤„ç†ç‚¹å‡»æ»šåŠ¨æ¡èƒŒæ™¯ç›´æ¥è·³è½¬
             if (mouseLeftRelease && mouseOverBar && !mouseOverIndicator && maxScroll > 0) {
                 float clickY = mousePosition.Y;
                 float barTopY = barBg.Y;
@@ -150,7 +150,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.PQCDs.DraedonShops
 
                 newScrollOffset = (int)(clickProgress * maxScroll);
 
-                //²¥·ÅÌø×ªÒôĞ§
+                //æ’­æ”¾è·³è½¬éŸ³æ•ˆ
                 SoundEngine.PlaySound(SoundID.MenuTick with {
                     Volume = 0.25f,
                     Pitch = 0.0f,
@@ -160,7 +160,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.PQCDs.DraedonShops
         }
 
         /// <summary>
-        /// »æÖÆ¹ö¶¯Ìõ
+        /// ç»˜åˆ¶æ»šåŠ¨æ¡
         /// </summary>
         public void Draw(SpriteBatch spriteBatch, Vector2 panelPosition, int barHeight,
             int scrollOffset, int maxScroll, int totalItems, int visibleItems,
@@ -173,13 +173,13 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.PQCDs.DraedonShops
             Rectangle indicatorRect = GetIndicatorRect(panelPosition, barHeight, scrollOffset,
                 maxScroll, totalItems, visibleItems);
 
-            //»æÖÆ¹ö¶¯Ìõ±³¾°
+            //ç»˜åˆ¶æ»šåŠ¨æ¡èƒŒæ™¯
             DrawScrollBarBackground(spriteBatch, barBg, pixel, uiAlpha, circuitPulseTimer);
 
-            //»æÖÆÖ¸Ê¾Æ÷
+            //ç»˜åˆ¶æŒ‡ç¤ºå™¨
             DrawScrollIndicator(spriteBatch, indicatorRect, pixel, uiAlpha, circuitPulseTimer);
 
-            //»æÖÆÍÏ¶¯ÌáÊ¾Ğ§¹û
+            //ç»˜åˆ¶æ‹–åŠ¨æç¤ºæ•ˆæœ
             if (isDragging || hoverProgress > 0.01f) {
                 DrawDragHint(spriteBatch, indicatorRect, pixel, uiAlpha);
             }
@@ -187,11 +187,11 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.PQCDs.DraedonShops
 
         private void DrawScrollBarBackground(SpriteBatch spriteBatch, Rectangle barBg,
             Texture2D pixel, float uiAlpha, float circuitPulseTimer) {
-            //±³¾°¹ìµÀ
+            //èƒŒæ™¯è½¨é“
             Color bgColor = new Color(40, 100, 150) * (uiAlpha * 0.3f);
             spriteBatch.Draw(pixel, barBg, bgColor);
 
-            //¹ìµÀ±ßÔµ¸ß¹â
+            //è½¨é“è¾¹ç¼˜é«˜å…‰
             float edgePulse = (float)Math.Sin(circuitPulseTimer * 0.5f) * 0.5f + 0.5f;
             Color edgeColor = new Color(60, 140, 200) * (uiAlpha * 0.15f * edgePulse);
 
@@ -204,7 +204,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.PQCDs.DraedonShops
 
         private void DrawScrollIndicator(SpriteBatch spriteBatch, Rectangle indicatorRect,
             Texture2D pixel, float uiAlpha, float circuitPulseTimer) {
-            //»ù´¡ÑÕÉ«ËæÍÏ¶¯ºÍĞüÍ£±ä»¯
+            //åŸºç¡€é¢œè‰²éšæ‹–åŠ¨å’Œæ‚¬åœå˜åŒ–
             Color baseColor = new Color(80, 200, 255);
             Color hoverColor = new Color(120, 220, 255);
             Color dragColor = new Color(150, 255, 200);
@@ -217,11 +217,11 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.PQCDs.DraedonShops
                 currentColor = Color.Lerp(baseColor, hoverColor, hoverProgress);
             }
 
-            //Ö÷Ö¸Ê¾Æ÷
+            //ä¸»æŒ‡ç¤ºå™¨
             Color indicatorColor = currentColor * (uiAlpha * (0.8f + hoverProgress * 0.2f));
             spriteBatch.Draw(pixel, indicatorRect, indicatorColor);
 
-            //Âö³åĞ§¹û
+            //è„‰å†²æ•ˆæœ
             float pulse = (float)Math.Sin(pulseTimer + circuitPulseTimer * 0.5f) * 0.5f + 0.5f;
             float pulseIntensity = 0.3f + glowIntensity * 0.4f;
             Color pulseColor = currentColor * (uiAlpha * pulse * pulseIntensity);
@@ -230,7 +230,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.PQCDs.DraedonShops
             pulseRect.Inflate(1, 0);
             spriteBatch.Draw(pixel, pulseRect, pulseColor * 0.5f);
 
-            //·¢¹â±ßÔµ
+            //å‘å…‰è¾¹ç¼˜
             if (glowIntensity > 0.01f) {
                 Color glowColor = currentColor * (uiAlpha * glowIntensity * 0.6f);
 
@@ -241,7 +241,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.PQCDs.DraedonShops
                 spriteBatch.Draw(pixel, bottomGlow, glowColor * 0.8f);
             }
 
-            //ÖĞĞÄ¸ß¹âÏß
+            //ä¸­å¿ƒé«˜å…‰çº¿
             if (hoverProgress > 0.01f || isDragging) {
                 int centerY = indicatorRect.Y + indicatorRect.Height / 2;
                 Rectangle centerLine = new Rectangle(indicatorRect.X + 1, centerY, indicatorRect.Width - 2, 1);
@@ -249,7 +249,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.PQCDs.DraedonShops
                 spriteBatch.Draw(pixel, centerLine, centerColor);
             }
 
-            //ÄÜÁ¿Á÷¶¯Ğ§¹û£¨ÍÏ¶¯Ê±£©
+            //èƒ½é‡æµåŠ¨æ•ˆæœï¼ˆæ‹–åŠ¨æ—¶ï¼‰
             if (isDragging) {
                 DrawEnergyFlow(spriteBatch, indicatorRect, pixel, uiAlpha);
             }
@@ -274,7 +274,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.PQCDs.DraedonShops
 
         private void DrawDragHint(SpriteBatch spriteBatch, Rectangle indicatorRect,
             Texture2D pixel, float uiAlpha) {
-            //Íâ·¢¹â¿ò
+            //å¤–å‘å…‰æ¡†
             Rectangle outerGlow = indicatorRect;
             outerGlow.Inflate(2, 2);
 
@@ -283,7 +283,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.PQCDs.DraedonShops
                 glowColor = new Color(150, 255, 200) * (uiAlpha * 0.3f);
             }
 
-            //»æÖÆÀ©É¢µÄ·¢¹âĞ§¹û
+            //ç»˜åˆ¶æ‰©æ•£çš„å‘å…‰æ•ˆæœ
             for (int i = 0; i < 3; i++) {
                 Rectangle glowRect = outerGlow;
                 glowRect.Inflate(i, i);
@@ -293,7 +293,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.PQCDs.DraedonShops
         }
 
         /// <summary>
-        /// ÖØÖÃ¹ö¶¯Ìõ×´Ì¬
+        /// é‡ç½®æ»šåŠ¨æ¡çŠ¶æ€
         /// </summary>
         public void Reset() {
             isDragging = false;
@@ -303,14 +303,14 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.PQCDs.DraedonShops
         }
 
         /// <summary>
-        /// »ñÈ¡¹ö¶¯ÌõX×ø±ê£¨Ïà¶ÔÓÚÃæ°å£©
+        /// è·å–æ»šåŠ¨æ¡Xåæ ‡ï¼ˆç›¸å¯¹äºé¢æ¿ï¼‰
         /// </summary>
         private static float GetBarX(Vector2 panelPosition) {
             return 660; //PanelWidth (680) - 20
         }
 
         /// <summary>
-        /// ÊÇ·ñÕıÔÚÍÏ¶¯
+        /// æ˜¯å¦æ­£åœ¨æ‹–åŠ¨
         /// </summary>
         public bool IsDragging => isDragging;
     }

@@ -1,15 +1,15 @@
-using Terraria;
+ï»¿using Terraria;
 
 namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.OldDukeShops
 {
     /// <summary>
-    /// ÀÏ¹«¾ôÉÌµêÎïÆ·Êı¾İ
+    /// è€å…¬çˆµå•†åº—ç‰©å“æ•°æ®
     /// </summary>
     public class OldDukeShopItem
     {
         public int itemType;
         public int stack;
-        public int price;//º£Ñó²ĞÆ¬ÊıÁ¿
+        public int price;//æµ·æ´‹æ®‹ç‰‡æ•°é‡
 
         public OldDukeShopItem(int itemType, int stack, int price) {
             Main.instance.LoadItem(itemType);

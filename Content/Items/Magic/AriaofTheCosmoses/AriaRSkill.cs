@@ -1,4 +1,4 @@
-using CalamityOverhaul.Common;
+ï»¿using CalamityOverhaul.Common;
 using CalamityOverhaul.Content.PRTTypes;
 using InnoVault.PRT;
 using Microsoft.Xna.Framework.Graphics;
@@ -12,16 +12,16 @@ using Terraria.ModLoader;
 namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
 {
     /// <summary>
-    /// å¾ÓîÓ½Ì¾µ÷R¼¼ÄÜ£¬Ù¤ÂíÉäÏß±¬
-    /// ÏòÊó±ê·½ÏòÊÍ·Å¶àµÀÙ¤ÂíÉäÏßÊø£¬Ôì³É´ó·¶Î§»ÙÃğĞÔÉËº¦
+    /// å¯°å®‡å’å¹è°ƒRæŠ€èƒ½ï¼Œä¼½é©¬å°„çº¿çˆ†
+    /// å‘é¼ æ ‡æ–¹å‘é‡Šæ”¾å¤šé“ä¼½é©¬å°„çº¿æŸï¼Œé€ æˆå¤§èŒƒå›´æ¯ç­æ€§ä¼¤å®³
     /// </summary>
     internal class AriaRSkill : ModProjectile
     {
         public override string Texture => CWRConstant.Placeholder;
 
-        private const int ChargeTime = 60; //1ÃëĞîÁ¦
-        private const int FireTime = 90; //1.5Ãë³ÖĞøÊ±¼ä
-        private const int BeamCount = 9; //ÉäÏßÊıÁ¿
+        private const int ChargeTime = 60; //1ç§’è“„åŠ›
+        private const int FireTime = 90; //1.5ç§’æŒç»­æ—¶é—´
+        private const int BeamCount = 9; //å°„çº¿æ•°é‡
 
         private List<int> beamIndices = new();
         private float chargeProgress;
@@ -47,19 +47,19 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
                 return;
             }
 
-            //¸úËæÍæ¼Ò
+            //è·Ÿéšç©å®¶
             Projectile.Center = player.Center;
 
-            //ĞîÁ¦½×¶Î
+            //è“„åŠ›é˜¶æ®µ
             if (Projectile.timeLeft > FireTime) {
                 ChargePhase(player);
             }
-            //·¢Éä½×¶Î
+            //å‘å°„é˜¶æ®µ
             else if (!isFiring) {
                 FirePhase(player);
                 isFiring = true;
             }
-            //Î¬³Ö½×¶Î
+            //ç»´æŒé˜¶æ®µ
             else {
                 MaintainPhase(player);
             }
@@ -69,7 +69,7 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
             int currentTime = ChargeTime - (Projectile.timeLeft - FireTime);
             chargeProgress = MathHelper.Clamp(currentTime / (float)ChargeTime, 0f, 1f);
 
-            //ĞîÁ¦ÒôĞ§
+            //è“„åŠ›éŸ³æ•ˆ
             if (currentTime == 1) {
                 SoundEngine.PlaySound(SoundID.DD2_DarkMageHealImpact with {
                     Volume = 0.8f,
@@ -83,29 +83,29 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
                 }, Projectile.Center);
             }
 
-            //ĞîÁ¦Á£×Ó
+            //è“„åŠ›ç²’å­
             if (currentTime % 2 == 0) {
                 SpawnChargeParticles(player);
             }
 
-            //ĞîÁ¦ÄÜÁ¿»·
+            //è“„åŠ›èƒ½é‡ç¯
             if (currentTime % 8 == 0) {
                 SpawnChargeRing(player);
             }
 
-            //ÆÁÄ»Õğ¶¯
+            //å±å¹•éœ‡åŠ¨
             if (chargeProgress > 0.5f) {
                 player.GetModPlayer<CWRPlayer>().GetScreenShake(chargeProgress * 3f);
             }
 
-            //·¢¹âĞ§¹û
+            //å‘å…‰æ•ˆæœ
             float lightIntensity = chargeProgress * 1.5f;
             Lighting.AddLight(Projectile.Center,
                 new Vector3(0.3f, 0.6f, 1f) * lightIntensity);
         }
 
         private void FirePhase(Player player) {
-            //²¥·Å·¢ÉäÒôĞ§
+            //æ’­æ”¾å‘å°„éŸ³æ•ˆ
             SoundEngine.PlaySound(SoundID.Item109 with {
                 Volume = 1.2f,
                 Pitch = 0.5f
@@ -116,12 +116,12 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
                 Pitch = 0.3f
             }, Projectile.Center);
 
-            //Ç¿ÁÒÆÁÄ»Õğ¶¯
+            //å¼ºçƒˆå±å¹•éœ‡åŠ¨
             player.GetModPlayer<CWRPlayer>().GetScreenShake(15f);
 
-            //´´½¨¶àµÀÙ¤ÂíÉäÏß
+            //åˆ›å»ºå¤šé“ä¼½é©¬å°„çº¿
             Vector2 mouseDirection = (Main.MouseWorld - player.Center).SafeNormalize(Vector2.Zero);
-            float spreadAngle = MathHelper.ToRadians(45f); //45¶ÈÀ©É¢½Ç
+            float spreadAngle = MathHelper.ToRadians(45f); //45åº¦æ‰©æ•£è§’
 
             for (int i = 0; i < BeamCount; i++) {
                 float angleOffset = MathHelper.Lerp(-spreadAngle / 2, spreadAngle / 2, i / (float)(BeamCount - 1));
@@ -141,12 +141,12 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
                 beamIndices.Add(beamIndex);
             }
 
-            //·¢ÉäÌØĞ§
+            //å‘å°„ç‰¹æ•ˆ
             SpawnFireEffect(player, mouseDirection);
         }
 
         private void MaintainPhase(Player player) {
-            //Î¬³ÖÉäÏß´æ»î
+            //ç»´æŒå°„çº¿å­˜æ´»
             foreach (int beamIndex in beamIndices) {
                 if (beamIndex >= 0 && Main.projectile[beamIndex].active) {
                     if (Main.projectile[beamIndex].timeLeft < 10)
@@ -154,15 +154,15 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
                 }
             }
 
-            //³ÖĞøÁ£×ÓĞ§¹û
+            //æŒç»­ç²’å­æ•ˆæœ
             if (Projectile.timeLeft % 3 == 0) {
                 SpawnMaintainParticles(player);
             }
 
-            //·¢¹â
+            //å‘å…‰
             Lighting.AddLight(Projectile.Center, new Vector3(0.5f, 0.8f, 1.2f) * 1.2f);
 
-            //µ­³öĞ§¹û
+            //æ·¡å‡ºæ•ˆæœ
             if (Projectile.timeLeft < 20) {
                 float fadeProgress = Projectile.timeLeft / 20f;
                 foreach (int beamIndex in beamIndices) {
@@ -232,7 +232,7 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
                 return;
             }
 
-            //±¬·¢Á£×Ó
+            //çˆ†å‘ç²’å­
             for (int i = 0; i < 100; i++) {
                 float angle = MathHelper.TwoPi * i / 100f;
                 Vector2 velocity = angle.ToRotationVector2() * Main.rand.NextFloat(8f, 20f);
@@ -250,7 +250,7 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
                 PRTLoader.AddParticle(particle);
             }
 
-            //·½ÏòĞÔ³å»÷²¨
+            //æ–¹å‘æ€§å†²å‡»æ³¢
             for (int ring = 0; ring < 3; ring++) {
                 int segments = 32;
                 float radius = 50f + ring * 80f;
@@ -299,14 +299,14 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
         }
 
         public override void OnKill(int timeLeft) {
-            //ÇåÀíËùÓĞÉäÏß
+            //æ¸…ç†æ‰€æœ‰å°„çº¿
             foreach (int beamIndex in beamIndices) {
                 if (beamIndex >= 0 && Main.projectile[beamIndex].active) {
                     Main.projectile[beamIndex].Kill();
                 }
             }
 
-            //ÏûÊ§ÌØĞ§
+            //æ¶ˆå¤±ç‰¹æ•ˆ
             if (!VaultUtils.isServer) {
                 SoundEngine.PlaySound(SoundID.Item62 with {
                     Volume = 0.7f,
@@ -332,7 +332,7 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
     }
 
     /// <summary>
-    /// R¼¼ÄÜµÄÙ¤ÂíÉäÏßÊø
+    /// RæŠ€èƒ½çš„ä¼½é©¬å°„çº¿æŸ
     /// </summary>
     internal class AriaRSkillBeam : ModProjectile
     {
@@ -388,20 +388,20 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
 
             float lifeRatio = 1f - Projectile.timeLeft / 300f;
 
-            //Õ¹¿ª½×¶Î
+            //å±•å¼€é˜¶æ®µ
             if (lifeRatio < 0.15f) {
                 float expandProgress = lifeRatio / 0.15f;
                 beamWidth = MathHelper.Lerp(6f, maxBeamWidth, CWRUtils.EaseOutCubic(expandProgress));
                 beamLength = MathHelper.Lerp(0f, maxBeamLength, CWRUtils.EaseOutQuad(expandProgress));
                 coreIntensity = MathHelper.Lerp(0.8f, 2f, expandProgress);
             }
-            //ÊÕËõ½×¶Î
+            //æ”¶ç¼©é˜¶æ®µ
             else if (lifeRatio > 0.85f) {
                 float collapseProgress = (lifeRatio - 0.85f) / 0.15f;
                 beamWidth = MathHelper.Lerp(maxBeamWidth, 6f, CWRUtils.EaseInQuad(collapseProgress));
                 coreIntensity = MathHelper.Lerp(2f, 0f, collapseProgress);
             }
-            //ÎÈ¶¨½×¶Î
+            //ç¨³å®šé˜¶æ®µ
             else {
                 beamWidth = maxBeamWidth;
                 beamLength = maxBeamLength;
@@ -411,16 +411,16 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
                 coreIntensity = 1.8f + pulse * 0.4f;
             }
 
-            //Éú³ÉÄÜÁ¿Á£×Ó
+            //ç”Ÿæˆèƒ½é‡ç²’å­
             SpawnEnergyParticles();
 
-            //·¢¹âĞ§¹û
+            //å‘å…‰æ•ˆæœ
             Lighting.AddLight(Projectile.Center,
                 0.3f * coreIntensity,
                 0.8f * coreIntensity,
                 1.2f * coreIntensity);
 
-            //ÒôĞ§
+            //éŸ³æ•ˆ
             if (Projectile.timeLeft % 40 == 0) {
                 SoundEngine.PlaySound(SoundID.Item15 with {
                     Volume = 0.35f,
@@ -442,7 +442,7 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
                 return;
             }
 
-            //ĞÇ¹âÉÁË¸
+            //æ˜Ÿå…‰é—ªçƒ
             if (Main.rand.NextBool(4)) {
                 Vector2 sparkPos = Projectile.Center + Main.rand.NextVector2Circular(beamWidth * 0.5f, beamWidth * 0.5f);
                 Vector2 sparkVel = Main.rand.NextVector2Circular(1.5f, 1.5f);
@@ -459,7 +459,7 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
                 PRTLoader.AddParticle(spark);
             }
 
-            //ÄÜÁ¿Á÷Ïß
+            //èƒ½é‡æµçº¿
             if (Main.rand.NextBool(3)) {
                 Vector2 lineStart = Projectile.Center + Main.rand.NextVector2Circular(beamWidth * 0.4f, beamWidth * 0.4f);
                 Vector2 lineVel = Projectile.rotation.ToRotationVector2() * Main.rand.NextFloat(6f, 12f);
@@ -481,14 +481,14 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
                 return;
             }
 
-            //»÷ÖĞÒôĞ§
+            //å‡»ä¸­éŸ³æ•ˆ
             SoundEngine.PlaySound(SoundID.Item94 with {
                 Volume = 0.4f,
                 Pitch = 0.5f
             }, target.Center);
 
             if (!VaultUtils.isServer) {
-                //Ù¤Âí³å»÷Á£×Ó
+                //ä¼½é©¬å†²å‡»ç²’å­
                 for (int i = 0; i < 10; i++) {
                     float angle = MathHelper.TwoPi * i / 10f;
                     Vector2 velocity = angle.ToRotationVector2() * Main.rand.NextFloat(5f, 12f);
@@ -506,7 +506,7 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
                     PRTLoader.AddParticle(impactBurst);
                 }
 
-                //¹âÃ¢Á£×Ó
+                //å…‰èŠ’ç²’å­
                 for (int i = 0; i < 12; i++) {
                     Vector2 velocity = Main.rand.NextVector2Circular(25f, 25f);
 
@@ -524,19 +524,19 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
                 }
             }
 
-            //´©Í¸ÉËº¦Ë¥¼õ
+            //ç©¿é€ä¼¤å®³è¡°å‡
             Projectile.damage = (int)(Projectile.damage * 0.92f);
         }
 
         public override void OnKill(int timeLeft) {
-            //ÏûÊ§±¬Õ¨Ğ§¹û
+            //æ¶ˆå¤±çˆ†ç‚¸æ•ˆæœ
             if (!VaultUtils.isServer) {
                 SoundEngine.PlaySound(SoundID.Item62 with {
                     Volume = 0.6f,
                     Pitch = 0.4f
                 }, Projectile.Center);
 
-                //·ÅÉä×´Á£×Ó±¬·¢
+                //æ”¾å°„çŠ¶ç²’å­çˆ†å‘
                 for (int i = 0; i < 30; i++) {
                     float angle = MathHelper.TwoPi * i / 30f;
                     Vector2 velocity = angle.ToRotationVector2() * Main.rand.NextFloat(8f, 16f);
@@ -555,7 +555,7 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
                     PRTLoader.AddParticle(burst);
                 }
 
-                //ÄÚ±¬ÊÕËõÁ£×Ó
+                //å†…çˆ†æ”¶ç¼©ç²’å­
                 for (int i = 0; i < 20; i++) {
                     Vector2 spawnPos = Projectile.Center + Main.rand.NextVector2Circular(120f, 120f);
                     Vector2 velocity = (Projectile.Center - spawnPos).SafeNormalize(Vector2.Zero) * Main.rand.NextFloat(12f, 22f);

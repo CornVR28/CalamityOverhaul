@@ -14,7 +14,6 @@
 	// KreloadTimeAddText: "Ammunition reloading time increased "
 	// KreloadTimeLessenText: "Ammunition reloading time is reduced "
 	DeathModeItem: Death Mode Item
-	// DropInMachineRebellion: Dropped by the Mech Trio EX
 	DontUseMagicConch: You're being watched by a powerful creature...
 	OnlyZenith: Solo en el mundo de Zenith
 	Event_TungstenRiot_Name: Revuelta de tungsteno
@@ -413,9 +412,6 @@
 	CWRGun_Recoil_Level_5: Loco
 	CWRGun_Recoil_Level_6: Ridículo
 	// SkeletronPrime_Text: Don't try to kill me with this stupid thing! Die, organism!
-	// MachineRebellion_SpawnInfo: Use the Garden remote control at night
-	// MachineRebellion_DespawnMessage: Use the Garden remote control at night
-	// MachineRebellion_DisplayName: Machine Rebellion
 	// Notbound: "[Unbound keys]"
 	/* DisableMotionInterpolationMessage:
 		'''

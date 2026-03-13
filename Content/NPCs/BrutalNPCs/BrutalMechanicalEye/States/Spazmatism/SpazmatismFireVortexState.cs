@@ -17,11 +17,11 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalMechanicalEye.States.Sp
         public override string StateName => "SpazmatismFireVortex";
         public override TwinsStateIndex StateIndex => TwinsStateIndex.SpazmatismFireVortex;
 
-        private int ChargeTime => Context.IsMachineRebellion ? 40 : (Context.IsDeathMode ? 45 : 60);
-        private int TotalDuration => Context.IsMachineRebellion ? 60 : (Context.IsDeathMode ? 70 : 90);
+        private int ChargeTime => Context.IsDeathMode ? 45 : 60;
+        private int TotalDuration => Context.IsDeathMode ? 70 : 90;
 
-        private float MoveSpeed => Context.IsMachineRebellion ? 16f : (Context.IsDeathMode ? 14f : 12f);
-        private int BulletCount => Context.IsMachineRebellion ? 12 : (Context.IsDeathMode ? 10 : 8);
+        private float MoveSpeed => Context.IsDeathMode ? 14f : 12f;
+        private int BulletCount => Context.IsDeathMode ? 10 : 8;
         private float BulletSpeed => Context.IsDeathMode ? 7f : 6f;
 
         private TwinsStateContext Context;

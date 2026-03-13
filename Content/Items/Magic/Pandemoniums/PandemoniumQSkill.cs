@@ -1,4 +1,4 @@
-using Microsoft.Xna.Framework.Graphics;
+ï»¿using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using System;
 using System.Collections.Generic;
@@ -10,8 +10,8 @@ using Terraria.ModLoader;
 namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
 {
     /// <summary>
-    /// Q¼¼ÄÜ£ºÁò»Ç»ğÌì·££¬³¬±ØÉ±
-    /// ÕÙ»½´óÁ¿Áò»Ç»ğÖù´ÓÌì¶ø½µ£¬¸²¸ÇÊó±êÖÜÎ§´ó·¶Î§ÇøÓò
+    /// QæŠ€èƒ½ï¼šç¡«ç£ºç«å¤©ç½šï¼Œè¶…å¿…æ€
+    /// å¬å”¤å¤§é‡ç¡«ç£ºç«æŸ±ä»å¤©è€Œé™ï¼Œè¦†ç›–é¼ æ ‡å‘¨å›´å¤§èŒƒå›´åŒºåŸŸ
     /// </summary>
     internal class PandemoniumQSkill : ModProjectile
     {
@@ -20,13 +20,13 @@ namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
         private ref float Phase => ref Projectile.ai[0];
         private ref float Timer => ref Projectile.ai[1];
 
-        //¼¼ÄÜ²ÎÊı
+        //æŠ€èƒ½å‚æ•°
         private Vector2 targetCenter;
         private const float SkillRadius = 600f;
         private const int PillarCount = 20;
         private const int Duration = 180;
 
-        //ÊÓ¾õĞ§¹û
+        //è§†è§‰æ•ˆæœ
         private List<PillarSpawnData> pillarSpawnQueue = new();
         private List<RuneRingData> runeRings = new();
         private float warningIntensity = 0f;
@@ -56,7 +56,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
         public override void SetDefaults() {
             Projectile.width = 1200;
             Projectile.height = 1200;
-            Projectile.friendly = false; //¿ØÖÆÆ÷±¾Éí²»Ôì³ÉÉËº¦
+            Projectile.friendly = false; //æ§åˆ¶å™¨æœ¬èº«ä¸é€ æˆä¼¤å®³
             Projectile.DamageType = DamageClass.Magic;
             Projectile.penetrate = -1;
             Projectile.timeLeft = Duration;
@@ -67,13 +67,13 @@ namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
         public override void AI() {
             Timer++;
 
-            //³õÊ¼»¯
+            //åˆå§‹åŒ–
             if (Timer == 1) {
                 targetCenter = Main.MouseWorld;
                 Projectile.Center = targetCenter;
                 InitializeSkill();
 
-                //³¬±ØÉ±Æô¶¯ÒôĞ§
+                //è¶…å¿…æ€å¯åŠ¨éŸ³æ•ˆ
                 SoundEngine.PlaySound(SoundID.DD2_BetsyScream with {
                     Volume = 1.5f,
                     Pitch = -0.6f
@@ -85,7 +85,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
                 }, targetCenter);
             }
 
-            //½×¶Î0£ºÔ¤¾¯½×¶Î (0-60Ö¡)
+            //é˜¶æ®µ0ï¼šé¢„è­¦é˜¶æ®µ (0-60å¸§)
             if (Phase == 0) {
                 WarningPhase();
                 if (Timer >= 60) {
@@ -93,28 +93,28 @@ namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
                     Timer = 0;
                 }
             }
-            //½×¶Î1£º»ğÖù½µÁÙ (60-150Ö¡)
+            //é˜¶æ®µ1ï¼šç«æŸ±é™ä¸´ (60-150å¸§)
             else if (Phase == 1) {
                 PillarPhase();
                 if (Timer >= 90) {
                     Phase = 2;
                 }
             }
-            //½×¶Î2£ºÓà²¨ (150-180Ö¡)
+            //é˜¶æ®µ2ï¼šä½™æ³¢ (150-180å¸§)
             else {
                 AftermathPhase();
             }
 
-            //Éú³É»ğÖùµ¯Ä»
+            //ç”Ÿæˆç«æŸ±å¼¹å¹•
             SpawnPillars();
 
-            //³¬Ç¿ÕÕÃ÷
+            //è¶…å¼ºç…§æ˜
             float lightIntensity = 3f + warningIntensity * 2f;
             Lighting.AddLight(targetCenter, 2.5f * lightIntensity, 0.8f * lightIntensity, 0.4f * lightIntensity);
         }
 
         private void InitializeSkill() {
-            //³õÊ¼»¯»ğÖùÉú³É¶ÓÁĞ
+            //åˆå§‹åŒ–ç«æŸ±ç”Ÿæˆé˜Ÿåˆ—
             for (int i = 0; i < PillarCount; i++) {
                 float angle = MathHelper.TwoPi * i / PillarCount + Main.rand.NextFloat(-0.2f, 0.2f);
                 float distance = Main.rand.NextFloat(SkillRadius * 0.3f, SkillRadius);
@@ -122,12 +122,12 @@ namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
 
                 pillarSpawnQueue.Add(new PillarSpawnData {
                     Position = pos,
-                    SpawnTime = 60f + i * 3f + Main.rand.NextFloat(0, 10f), //Ô¤¾¯ºó¿ªÊ¼Éú³É
+                    SpawnTime = 60f + i * 3f + Main.rand.NextFloat(0, 10f), //é¢„è­¦åå¼€å§‹ç”Ÿæˆ
                     Spawned = false
                 });
             }
 
-            //³õÊ¼»¯·ûÎÄ»·
+            //åˆå§‹åŒ–ç¬¦æ–‡ç¯
             for (int i = 0; i < 3; i++) {
                 runeRings.Add(new RuneRingData {
                     Position = targetCenter,
@@ -141,15 +141,15 @@ namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
         }
 
         private void WarningPhase() {
-            //Ô¤¾¯Ç¿¶ÈÂö³å
+            //é¢„è­¦å¼ºåº¦è„‰å†²
             warningIntensity = (float)Math.Sin(Timer * 0.2f) * 0.5f + 0.5f;
 
-            //·ûÎÄ»·µ­Èë²¢Ğı×ª
+            //ç¬¦æ–‡ç¯æ·¡å…¥å¹¶æ—‹è½¬
             foreach (var ring in runeRings) {
                 ring.Alpha = MathHelper.Lerp(ring.Alpha, 1f, 0.05f);
                 ring.Rotation += 0.02f;
 
-                //»ğÑæÖ¡¸üĞÂ
+                //ç«ç„°å¸§æ›´æ–°
                 ring.FireFrameCounter += 0.5f;
                 if (ring.FireFrameCounter >= 1f) {
                     ring.FireFrameCounter = 0;
@@ -157,12 +157,12 @@ namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
                 }
             }
 
-            //Ô¤¾¯Á£×Ó
+            //é¢„è­¦ç²’å­
             if (Main.rand.NextBool(2)) {
                 SpawnWarningParticles();
             }
 
-            //Ô¤¾¯ÒôĞ§
+            //é¢„è­¦éŸ³æ•ˆ
             if (Timer % 20 == 0) {
                 SoundEngine.PlaySound(SoundID.DD2_BetsyFireballImpact with {
                     Volume = 0.4f + warningIntensity * 0.3f,
@@ -172,7 +172,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
         }
 
         private void PillarPhase() {
-            //·ûÎÄ»·¼ÓËÙĞı×ª
+            //ç¬¦æ–‡ç¯åŠ é€Ÿæ—‹è½¬
             foreach (var ring in runeRings) {
                 ring.Rotation += 0.05f;
                 ring.FireFrameCounter += 0.6f;
@@ -182,7 +182,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
                 }
             }
 
-            //³ÖĞø»ğÑæÒôĞ§
+            //æŒç»­ç«ç„°éŸ³æ•ˆ
             if (Timer % 10 == 0) {
                 SoundEngine.PlaySound(SoundID.Item74 with {
                     Volume = 0.8f,
@@ -192,12 +192,12 @@ namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
         }
 
         private void AftermathPhase() {
-            //·ûÎÄ»·µ­³ö
+            //ç¬¦æ–‡ç¯æ·¡å‡º
             foreach (var ring in runeRings) {
                 ring.Alpha *= 0.95f;
                 ring.Rotation += 0.03f;
 
-                //¸üĞÂ»ğÑæÖ¡
+                //æ›´æ–°ç«ç„°å¸§
                 ring.FireFrameCounter += 0.4f;
                 if (ring.FireFrameCounter >= 1f) {
                     ring.FireFrameCounter = 0;
@@ -211,12 +211,12 @@ namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
         private void SpawnPillars() {
             if (Main.myPlayer != Projectile.owner) return;
 
-            //±éÀúÉú³É¶ÓÁĞ
+            //éå†ç”Ÿæˆé˜Ÿåˆ—
             for (int i = pillarSpawnQueue.Count - 1; i >= 0; i--) {
                 var data = pillarSpawnQueue[i];
 
                 if (!data.Spawned && Projectile.timeLeft <= (Duration - data.SpawnTime)) {
-                    //Éú³É»ğÖùµ¯Ä»
+                    //ç”Ÿæˆç«æŸ±å¼¹å¹•
                     Projectile.NewProjectile(
                         Projectile.GetSource_FromThis(),
                         data.Position,
@@ -252,7 +252,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
         }
 
         public override void OnKill(int timeLeft) {
-            //ÖÕ½á±¬·¢
+            //ç»ˆç»“çˆ†å‘
             for (int i = 0; i < 100; i++) {
                 float angle = MathHelper.TwoPi * i / 100f;
                 Vector2 velocity = angle.ToRotationVector2() * Main.rand.NextFloat(10f, 20f);
@@ -272,12 +272,12 @@ namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
         public override bool PreDraw(ref Color lightColor) {
             SpriteBatch sb = Main.spriteBatch;
 
-            //»æÖÆÔ¤¾¯ÇøÓò
+            //ç»˜åˆ¶é¢„è­¦åŒºåŸŸ
             if (Phase == 0) {
                 DrawWarningArea(sb);
             }
 
-            //»æÖÆ·ûÎÄ»·
+            //ç»˜åˆ¶ç¬¦æ–‡ç¯
             DrawRuneRings(sb);
 
             return false;
@@ -289,7 +289,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
             Vector2 screenCenter = targetCenter - Main.screenPosition;
             float pulse = (float)Math.Sin(Timer * 0.3f) * 0.4f + 0.6f;
 
-            //ºìÉ«Ô¤¾¯¹âÔÎ
+            //çº¢è‰²é¢„è­¦å…‰æ™•
             for (int i = 0; i < 4; i++) {
                 float scale = (SkillRadius / GlowAsset.Value.Width) * (2f + i * 0.3f);
                 float alpha = warningIntensity * (0.3f - i * 0.06f) * pulse;

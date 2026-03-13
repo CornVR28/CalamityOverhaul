@@ -1,4 +1,4 @@
-using CalamityOverhaul.Content.ADV.UIEffect;
+ï»¿using CalamityOverhaul.Content.ADV.UIEffect;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
@@ -7,7 +7,7 @@ using Terraria;
 namespace CalamityOverhaul.Content.ADV.ADVRewardPopups.Styles
 {
     /// <summary>
-    /// Áò»Çº£½±Àø·ç¸ñ
+    /// ç¡«ç£ºæµ·å¥–åŠ±é£æ ¼
     /// </summary>
     internal class SulfseaRewardStyle : IRewardPopupStyle
     {
@@ -32,7 +32,7 @@ namespace CalamityOverhaul.Content.ADV.ADVRewardPopups.Styles
         public void DrawPanel(SpriteBatch spriteBatch, Rectangle rect, float alpha, float hoverGlow) {
             Texture2D px = VaultAsset.placeholder2.Value;
 
-            //»æÖÆ½¥±ä±³¾° - Áò»Çº£ÅäÉ«
+            //ç»˜åˆ¶æ¸å˜èƒŒæ™¯ - ç¡«ç£ºæµ·é…è‰²
             int segments = 26;
             for (int i = 0; i < segments; i++) {
                 float t = i / (float)segments;
@@ -41,7 +41,7 @@ namespace CalamityOverhaul.Content.ADV.ADVRewardPopups.Styles
                 int y2 = rect.Y + (int)(t2 * rect.Height);
                 Rectangle r = new(rect.X, y1, rect.Width, Math.Max(1, y2 - y1));
 
-                //Áò»Çº£ÅäÉ«:ÉîÂÌ¡¢»ÆÂÌ¡¢´ø¶¾µÄ»ÆÉ«
+                //ç¡«ç£ºæµ·é…è‰²:æ·±ç»¿ã€é»„ç»¿ã€å¸¦æ¯’çš„é»„è‰²
                 Color sulfurDeep = new Color(12, 18, 8);
                 Color toxicMid = new Color(28, 38, 15);
                 Color acidEdge = new Color(65, 85, 30);
@@ -54,15 +54,15 @@ namespace CalamityOverhaul.Content.ADV.ADVRewardPopups.Styles
                 spriteBatch.Draw(px, r, new Rectangle(0, 0, 1, 1), c);
             }
 
-            //ÕÎÆø¸²¸Ç²ã
+            //ç˜´æ°”è¦†ç›–å±‚
             float miasmaEffect = (float)Math.Sin(miasmaTimer * 1.1f) * 0.5f + 0.5f;
             Color miasmaTint = new Color(45, 55, 20) * (alpha * (0.4f + hoverGlow * 0.2f) * miasmaEffect);
             spriteBatch.Draw(px, rect, new Rectangle(0, 0, 1, 1), miasmaTint);
 
-            //»æÖÆ¶¾²¨ÎÆÀíĞ§¹û
+            //ç»˜åˆ¶æ¯’æ³¢çº¹ç†æ•ˆæœ
             DrawToxicWaveOverlay(spriteBatch, rect, alpha * (0.85f + hoverGlow * 0.15f));
 
-            //ÄÚ±ß¿òÎ¢¹â
+            //å†…è¾¹æ¡†å¾®å…‰
             Rectangle inner = rect;
             inner.Inflate(-6, -6);
             float pulse = (float)Math.Sin(Main.GlobalTimeWrappedHourly * 2.2f) * 0.5f + 0.5f;
@@ -74,13 +74,13 @@ namespace CalamityOverhaul.Content.ADV.ADVRewardPopups.Styles
             float pulse = (float)Math.Sin(sulfurPulse) * 0.5f + 0.5f;
             Color edge = Color.Lerp(new Color(70, 100, 35), new Color(130, 160, 65), pulse) * (alpha * (0.85f + hoverGlow * 0.3f));
 
-            //»æÖÆÖ÷±ß¿ò
+            //ç»˜åˆ¶ä¸»è¾¹æ¡†
             spriteBatch.Draw(px, new Rectangle(rect.X, rect.Y, rect.Width, 2), new Rectangle(0, 0, 1, 1), edge);
             spriteBatch.Draw(px, new Rectangle(rect.X, rect.Bottom - 2, rect.Width, 2), new Rectangle(0, 0, 1, 1), edge * 0.75f);
             spriteBatch.Draw(px, new Rectangle(rect.X, rect.Y, 2, rect.Height), new Rectangle(0, 0, 1, 1), edge * 0.88f);
             spriteBatch.Draw(px, new Rectangle(rect.Right - 2, rect.Y, 2, rect.Height), new Rectangle(0, 0, 1, 1), edge * 0.88f);
 
-            //»æÖÆÄÚ±ß¿ò
+            //ç»˜åˆ¶å†…è¾¹æ¡†
             Rectangle inner = rect;
             inner.Inflate(-5, -5);
             Color innerC = new Color(140, 170, 70) * (alpha * 0.22f * pulse * (1f + hoverGlow * 0.5f));
@@ -89,7 +89,7 @@ namespace CalamityOverhaul.Content.ADV.ADVRewardPopups.Styles
             spriteBatch.Draw(px, new Rectangle(inner.X, inner.Y, 1, inner.Height), new Rectangle(0, 0, 1, 1), innerC * 0.88f);
             spriteBatch.Draw(px, new Rectangle(inner.Right - 1, inner.Y, 1, inner.Height), new Rectangle(0, 0, 1, 1), innerC * 0.88f);
 
-            //»æÖÆ½ÇĞÇ×°ÊÎ
+            //ç»˜åˆ¶è§’æ˜Ÿè£…é¥°
             DrawCornerStar(spriteBatch, new Vector2(rect.X + 10, rect.Y + 10), alpha * (0.9f + hoverGlow * 0.4f));
             DrawCornerStar(spriteBatch, new Vector2(rect.Right - 10, rect.Y + 10), alpha * (0.9f + hoverGlow * 0.4f));
             DrawCornerStar(spriteBatch, new Vector2(rect.X + 10, rect.Bottom - 10), alpha * (0.65f + hoverGlow * 0.3f));
@@ -126,7 +126,7 @@ namespace CalamityOverhaul.Content.ADV.ADVRewardPopups.Styles
         }
 
         public void UpdateParticles(Vector2 basePos, float panelFade) {
-            //ÆøÅİÁ£×Ó¸üĞÂ
+            //æ°”æ³¡ç²’å­æ›´æ–°
             bubbleTimer++;
             if (panelFade > 0.6f && bubbleTimer >= 12 && bubbles.Count < 15) {
                 bubbleTimer = 0;
@@ -143,7 +143,7 @@ namespace CalamityOverhaul.Content.ADV.ADVRewardPopups.Styles
                 }
             }
 
-            //»Ò½ıÁ£×Ó¸üĞÂ
+            //ç°çƒ¬ç²’å­æ›´æ–°
             ashTimer++;
             if (panelFade > 0.6f && ashTimer >= 18 && ashParticles.Count < 10) {
                 ashTimer = 0;
@@ -158,7 +158,7 @@ namespace CalamityOverhaul.Content.ADV.ADVRewardPopups.Styles
             }
         }
 
-        #region ¸¨Öú·½·¨
+        #region è¾…åŠ©æ–¹æ³•
         private void DrawToxicWaveOverlay(SpriteBatch sb, Rectangle rect, float alpha) {
             Texture2D pixel = VaultAsset.placeholder2.Value;
             int bands = 5;

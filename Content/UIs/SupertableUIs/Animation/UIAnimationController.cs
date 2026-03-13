@@ -1,9 +1,9 @@
-using System;
+ï»¿using System;
 
 namespace CalamityOverhaul.Content.UIs.SupertableUIs.Animation
 {
     /// <summary>
-    /// UI¶¯»­¿ØÖÆÆ÷£¬¸ºÔğ¹ÜÀíUIµÄ¿ª¹Ø¶¯»­ºÍĞüÍ£Ğ§¹û
+    /// UIåŠ¨ç”»æ§åˆ¶å™¨ï¼Œè´Ÿè´£ç®¡ç†UIçš„å¼€å…³åŠ¨ç”»å’Œæ‚¬åœæ•ˆæœ
     /// </summary>
     public class UIAnimationController
     {
@@ -22,7 +22,7 @@ namespace CalamityOverhaul.Content.UIs.SupertableUIs.Animation
         }
 
         /// <summary>
-        /// ¸üĞÂ¿ªÆô/¹Ø±Õ¶¯»­
+        /// æ›´æ–°å¼€å¯/å…³é—­åŠ¨ç”»
         /// </summary>
         public void UpdateOpenAnimation(bool shouldBeOpen) {
             if (shouldBeOpen && _closeDelayTimer <= 0) {
@@ -44,7 +44,7 @@ namespace CalamityOverhaul.Content.UIs.SupertableUIs.Animation
         }
 
         /// <summary>
-        /// ¸üĞÂ²ÛÎ»ĞüÍ£¶¯»­
+        /// æ›´æ–°æ§½ä½æ‚¬åœåŠ¨ç”»
         /// </summary>
         public void UpdateSlotHoverAnimation(int hoveredSlotIndex) {
             for (int i = 0; i < _slotHoverProgress.Length; i++) {
@@ -62,7 +62,7 @@ namespace CalamityOverhaul.Content.UIs.SupertableUIs.Animation
         }
 
         /// <summary>
-        /// »ñÈ¡²ÛÎ»ĞüÍ£½ø¶È
+        /// è·å–æ§½ä½æ‚¬åœè¿›åº¦
         /// </summary>
         public float GetSlotHoverProgress(int slotIndex) {
             if (slotIndex < 0 || slotIndex >= _slotHoverProgress.Length)
@@ -72,14 +72,14 @@ namespace CalamityOverhaul.Content.UIs.SupertableUIs.Animation
         }
 
         /// <summary>
-        /// ÇëÇóÑÓ³Ù¹Ø±Õ
+        /// è¯·æ±‚å»¶è¿Ÿå…³é—­
         /// </summary>
         public void RequestDelayedClose(int delayFrames = 30) {
             _closeDelayTimer = delayFrames;
         }
 
         /// <summary>
-        /// Á¢¼´¹Ø±Õ
+        /// ç«‹å³å…³é—­
         /// </summary>
         public void ForceClose() {
             _closeDelayTimer = 0;
@@ -87,7 +87,7 @@ namespace CalamityOverhaul.Content.UIs.SupertableUIs.Animation
         }
 
         /// <summary>
-        /// Á¢¼´´ò¿ª
+        /// ç«‹å³æ‰“å¼€
         /// </summary>
         public void ForceOpen() {
             _closeDelayTimer = 0;
@@ -95,7 +95,7 @@ namespace CalamityOverhaul.Content.UIs.SupertableUIs.Animation
         }
 
         /// <summary>
-        /// ÖØÖÃËùÓĞ¶¯»­
+        /// é‡ç½®æ‰€æœ‰åŠ¨ç”»
         /// </summary>
         public void Reset() {
             _openProgress = 0f;
@@ -104,7 +104,7 @@ namespace CalamityOverhaul.Content.UIs.SupertableUIs.Animation
         }
 
         /// <summary>
-        /// »ñÈ¡»º¶¯ºóµÄ¿ªÆô½ø¶È(ÓÃÓÚÆ½»¬¶¯»­)
+        /// è·å–ç¼“åŠ¨åçš„å¼€å¯è¿›åº¦(ç”¨äºå¹³æ»‘åŠ¨ç”»)
         /// </summary>
         public float GetEasedOpenProgress(EasingType easingType = EasingType.EaseOutCubic) {
             return ApplyEasing(_openProgress, easingType);
@@ -122,7 +122,7 @@ namespace CalamityOverhaul.Content.UIs.SupertableUIs.Animation
     }
 
     /// <summary>
-    /// »º¶¯ÀàĞÍ
+    /// ç¼“åŠ¨ç±»å‹
     /// </summary>
     public enum EasingType
     {

@@ -1,4 +1,4 @@
-using CalamityOverhaul.Content.ADV.ADVQuestTracker;
+ï»¿using CalamityOverhaul.Content.ADV.ADVQuestTracker;
 using CalamityOverhaul.Content.Items.Melee;
 using CalamityOverhaul.Content.LegendWeapon.HalibutLegend;
 using InnoVault.UIHandles;
@@ -8,7 +8,7 @@ using Terraria.ModLoader;
 namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest.DoGQuest
 {
     /// <summary>
-    /// ÉñÃ÷ÍÌÊÉÕßÈÎÎñUI
+    /// ç¥æ˜åå™¬è€…ä»»åŠ¡UI
     /// </summary>
     internal class DoGQuestUI : BaseQuestAcceptUI
     {
@@ -16,10 +16,10 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest.DoGQuest
         public static DoGQuestUI Instance => UIHandleLoader.GetUIHandleOfType<DoGQuestUI>();
 
         protected override void SetupLocalizedTexts() {
-            QuestTitle = this.GetLocalization(nameof(QuestTitle), () => "Î¯ÍĞ£ºÉñÃ÷ÍÌÊÉÕß");
-            QuestDesc = this.GetLocalization(nameof(QuestDesc), () => "Ê¹ÓÃ¿ÌĞÄÕß»÷É±ÉñÃ÷ÍÌÊÉÕß");
-            AcceptText = this.GetLocalization(nameof(AcceptText), () => "½ÓÊÜ");
-            DeclineText = this.GetLocalization(nameof(DeclineText), () => "¾Ü¾ø");
+            QuestTitle = this.GetLocalization(nameof(QuestTitle), () => "å§”æ‰˜ï¼šç¥æ˜åå™¬è€…");
+            QuestDesc = this.GetLocalization(nameof(QuestDesc), () => "ä½¿ç”¨åˆ»å¿ƒè€…å‡»æ€ç¥æ˜åå™¬è€…");
+            AcceptText = this.GetLocalization(nameof(AcceptText), () => "æ¥å—");
+            DeclineText = this.GetLocalization(nameof(DeclineText), () => "æ‹’ç»");
         }
 
         protected override bool ShouldShowQuest() {
@@ -27,14 +27,14 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest.DoGQuest
                 return false;
             }
 
-            //Èç¹ûÍæ¼ÒÒÑ¾­½ÓÊÜ/¾Ü¾ø/Íê³ÉÁËÈÎÎñ£¬¾Í²»ÔÙÏÔÊ¾UI
+            //å¦‚æœç©å®¶å·²ç»æ¥å—/æ‹’ç»/å®Œæˆäº†ä»»åŠ¡ï¼Œå°±ä¸å†æ˜¾ç¤ºUI
             if (halibutPlayer.ADVSave.SupCalDoGQuestReward
                 || halibutPlayer.ADVSave.SupCalDoGQuestAccepted
                 || halibutPlayer.ADVSave.SupCalDoGQuestDeclined) {
                 return false;
             }
 
-            //Ç°ÖÃÈÎÎñ±ØĞëÍê³É
+            //å‰ç½®ä»»åŠ¡å¿…é¡»å®Œæˆ
             if (!halibutPlayer.ADVSave.SupCalQuestReward) {
                 return false;
             }

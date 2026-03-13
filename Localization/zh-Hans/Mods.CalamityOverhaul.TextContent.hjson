@@ -14,7 +14,6 @@
 	KreloadTimeAddText: 弹药装填时间增加
 	KreloadTimeLessenText: 弹药装填时间减少
 	DeathModeItem: 死亡模式
-	DropInMachineRebellion: 掉落自机械三王EX
 	DontUseMagicConch: 你被一个强大的生物盯住了...
 	OnlyZenith: 仅在天顶世界
 	Event_TungstenRiot_Name: 钨钢暴乱
@@ -341,9 +340,6 @@
 	CWRGun_Recoil_Level_5: 疯狂的
 	CWRGun_Recoil_Level_6: 荒诞的
 	SkeletronPrime_Text: 别妄图用这愚蠢的东西杀死我!去死吧有机体!
-	MachineRebellion_SpawnInfo: 在夜晚使用嘉登遥控器
-	MachineRebellion_DespawnMessage: 在夜晚使用嘉登遥控器
-	MachineRebellion_DisplayName: 机械暴乱
 	Notbound: "[未绑定按键]"
 	DisableMotionInterpolationMessage:
 		'''

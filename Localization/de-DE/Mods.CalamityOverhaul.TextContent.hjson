@@ -14,7 +14,6 @@
 	// KreloadTimeAddText: "Ammunition reloading time increased "
 	// KreloadTimeLessenText: "Ammunition reloading time is reduced "
 	DeathModeItem: Death Mode Item
-	// DropInMachineRebellion: Dropped by the Mech Trio EX
 	DontUseMagicConch: You're being watched by a powerful creature...
 	OnlyZenith: Nur in der Zenith-Welt
 	Event_TungstenRiot_Name: Wolfram-Aufstand
@@ -391,9 +390,6 @@
 	CWRGun_Recoil_Level_5: Extremer
 	CWRGun_Recoil_Level_6: Absurder
 	// SkeletronPrime_Text: Don't try to kill me with this stupid thing! Die, organism!
-	// MachineRebellion_SpawnInfo: Use the Garden remote control at night
-	// MachineRebellion_DespawnMessage: Use the Garden remote control at night
-	// MachineRebellion_DisplayName: Machine Rebellion
 	// Notbound: "[Unbound keys]"
 	/* DisableMotionInterpolationMessage:
 		'''

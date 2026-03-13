@@ -15,7 +15,7 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalMechanicalEye.States.Re
         public override TwinsStateIndex StateIndex => TwinsStateIndex.RetinazerHorizontalBarrage;
 
         private const int Duration = 150;
-        private int RapidFireRate => Context.IsMachineRebellion ? 10 : 15;
+        private int RapidFireRate => 15;
 
         private TwinsStateContext Context;
         private int comboStep;

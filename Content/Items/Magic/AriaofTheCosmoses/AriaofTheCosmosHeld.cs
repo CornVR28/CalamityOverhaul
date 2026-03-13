@@ -1,4 +1,4 @@
-using CalamityOverhaul.Common;
+ï»¿using CalamityOverhaul.Common;
 using CalamityOverhaul.Content.Projectiles.Weapons.Magic.Core;
 using CalamityOverhaul.Content.PRTTypes;
 using InnoVault.PRT;
@@ -10,14 +10,14 @@ using Terraria.ModLoader;
 namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
 {
     /// <summary>
-    /// å¾ÓîÓ½Ì¾µ÷ÊÖ³Öµ¯Ä»
+    /// å¯°å®‡å’å¹è°ƒæ‰‹æŒå¼¹å¹•
     /// </summary>
     internal class AriaofTheCosmosHeld : BaseMagicGun
     {
         public override string Texture => CWRConstant.Item_Magic + "AriaofTheCosmos";
         public override int TargetID => ModContent.ItemType<AriaofTheCosmos>();
 
-        //×ó¼üÏà¹Ø
+        //å·¦é”®ç›¸å…³
         private int chargeTime;
         private int maxChargeTime = 180;
         private int minChargeTime = 30;
@@ -26,7 +26,7 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
         private bool isCharging;
         private bool hasReleasedAttack;
 
-        //ÓÒ¼üÏà¹Ø
+        //å³é”®ç›¸å…³
         private int chargeTimeR;
         private int maxChargeTimeR = 180;
         private int minChargeTimeR = 30;
@@ -35,24 +35,24 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
         private bool isChargingR;
         private bool hasReleasedAttackR;
 
-        //ĞîÁ¦½×¶Î
+        //è“„åŠ›é˜¶æ®µ
         private const int Stage1 = 60;
         private const int Stage2 = 120;
         private const int Stage3 = 180;
 
-        //ÊÓ¾õĞ§¹û²ÎÊı
+        //è§†è§‰æ•ˆæœå‚æ•°
         private float particleTimer;
         private Color currentGlowColor;
 
-        //ÓÒ¼üÊÓ¾õĞ§¹û²ÎÊı
+        //å³é”®è§†è§‰æ•ˆæœå‚æ•°
         private float particleTimerR;
         private Color currentGlowColorR;
 
-        //¼¼ÄÜÏà¹Ø
+        //æŠ€èƒ½ç›¸å…³
         private int qSkillCooldown;
         private int rSkillCooldown;
-        private const int QSkillMaxCooldown = 120;  //2ÃëÀäÈ´
-        private const int RSkillMaxCooldown = 180;  //3ÃëÀäÈ´
+        private const int QSkillMaxCooldown = 120;  //2ç§’å†·å´
+        private const int RSkillMaxCooldown = 180;  //3ç§’å†·å´
 
         public override void SetMagicProperty() {
             Recoil = 0;
@@ -70,7 +70,7 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
         }
 
         public override void PostInOwner() {
-            //¼¼ÄÜÀäÈ´¸üĞÂ
+            //æŠ€èƒ½å†·å´æ›´æ–°
             if (qSkillCooldown > 0) {
                 qSkillCooldown--;
             }
@@ -78,7 +78,7 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
                 rSkillCooldown--;
             }
 
-            //Q¼¼ÄÜ¼ì²â
+            //QæŠ€èƒ½æ£€æµ‹
             if (Projectile.IsOwnedByLocalPlayer() && CWRKeySystem.AriaofTheCosmos_Q.JustPressed && qSkillCooldown <= 0) {
                 if (Owner.CountProjectilesOfID<AriaQSkill>() == 0) {
                     int qSkillIndex = Projectile.NewProjectile(
@@ -94,14 +94,14 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
                     if (qSkillIndex >= 0) {
                         qSkillCooldown = QSkillMaxCooldown;
 
-                        //ÏûºÄÄ§Á¦
+                        //æ¶ˆè€—é­”åŠ›
                         int manaCost = Item.mana * 2;
                         Owner.statMana -= manaCost;
                         if (Owner.statMana < 0) {
                             Owner.statMana = 0;
                         }
 
-                        //²¥·Å¼¤»îÒôĞ§
+                        //æ’­æ”¾æ¿€æ´»éŸ³æ•ˆ
                         SoundEngine.PlaySound(SoundID.Item109 with {
                             Volume = 0.8f,
                             Pitch = 0.3f
@@ -110,7 +110,7 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
                 }
             }
 
-            //R¼¼ÄÜ¼ì²â
+            //RæŠ€èƒ½æ£€æµ‹
             if (Projectile.IsOwnedByLocalPlayer() && CWRKeySystem.AriaofTheCosmos_R.JustPressed && rSkillCooldown <= 0) {
                 if (Owner.CountProjectilesOfID<AriaRSkill>() == 0) {
                     int rSkillIndex = Projectile.NewProjectile(
@@ -126,14 +126,14 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
                     if (rSkillIndex >= 0) {
                         rSkillCooldown = RSkillMaxCooldown;
 
-                        //ÏûºÄÄ§Á¦
+                        //æ¶ˆè€—é­”åŠ›
                         int manaCost = Item.mana * 3;
                         Owner.statMana -= manaCost;
                         if (Owner.statMana < 0) {
                             Owner.statMana = 0;
                         }
 
-                        //²¥·Å¼¤»îÒôĞ§
+                        //æ’­æ”¾æ¿€æ´»éŸ³æ•ˆ
                         SoundEngine.PlaySound(SoundID.DD2_DarkMageHealImpact with {
                             Volume = 0.9f,
                             Pitch = -0.3f
@@ -142,7 +142,7 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
                 }
             }
 
-            //×ó¼üÂß¼­
+            //å·¦é”®é€»è¾‘
             if (onFire && !hasReleasedAttack) {
                 isCharging = true;
                 chargeTime++;
@@ -165,7 +165,7 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
                 ResetCharge();
             }
 
-            //ÓÒ¼üÂß¼­
+            //å³é”®é€»è¾‘
             if (onFireR && !hasReleasedAttackR) {
                 isChargingR = true;
                 chargeTimeR++;
@@ -190,30 +190,30 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
         }
 
         private void UpdateChargeEffects() {
-            //¸ù¾İĞîÁ¦½×¶Î¸Ä±äÑÕÉ«
+            //æ ¹æ®è“„åŠ›é˜¶æ®µæ”¹å˜é¢œè‰²
             if (chargeTime < Stage1) {
-                //µÚÒ»½×¶Î - »Æ³ÈÉ«
+                //ç¬¬ä¸€é˜¶æ®µ - é»„æ©™è‰²
                 currentGlowColor = Color.Lerp(Color.Orange, Color.Yellow, chargeProgress * 3f);
             }
             else if (chargeTime < Stage2) {
-                //µÚ¶ş½×¶Î - ³ÈºìÉ«
+                //ç¬¬äºŒé˜¶æ®µ - æ©™çº¢è‰²
                 float stage2Progress = (chargeTime - Stage1) / (float)(Stage2 - Stage1);
                 currentGlowColor = Color.Lerp(Color.Yellow, Color.OrangeRed, stage2Progress);
             }
             else {
-                //µÚÈı½×¶Î - Éîºì×ÏÉ«
+                //ç¬¬ä¸‰é˜¶æ®µ - æ·±çº¢ç´«è‰²
                 float stage3Progress = (chargeTime - Stage2) / (float)(Stage3 - Stage2);
                 currentGlowColor = Color.Lerp(Color.OrangeRed, Color.Purple, stage3Progress);
             }
 
-            //Éú³ÉĞîÁ¦Á£×Ó
+            //ç”Ÿæˆè“„åŠ›ç²’å­
             particleTimer++;
             if (particleTimer >= (5 - chargeProgress * 3)) {
                 SpawnChargeParticles();
                 particleTimer = 0;
             }
 
-            //ÆÁÄ»Ğ§¹û
+            //å±å¹•æ•ˆæœ
             if (chargeTime >= Stage2) {
                 Owner.GetModPlayer<CWRPlayer>().GetScreenShake(chargeProgress * 2f);
             }
@@ -236,7 +236,7 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
                 dust.fadeIn = 1.2f;
             }
 
-            //ÔÚ¸ßĞîÁ¦½×¶ÎÉú³É¶îÍâµÄÄÜÁ¿»·
+            //åœ¨é«˜è“„åŠ›é˜¶æ®µç”Ÿæˆé¢å¤–çš„èƒ½é‡ç¯
             if (chargeTime >= Stage2 && chargeTime % 10 == 0) {
                 SpawnEnergyRing();
             }
@@ -260,7 +260,7 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
         }
 
         private void UpdateAccretionDisk() {
-            //Èç¹ûÎü»ıÅÌ»¹Ã»Éú³É»òÒÑ¾­ËÀÍö£¬´´½¨ĞÂµÄ
+            //å¦‚æœå¸ç§¯ç›˜è¿˜æ²¡ç”Ÿæˆæˆ–å·²ç»æ­»äº¡ï¼Œåˆ›å»ºæ–°çš„
             if (accretionDiskIndex == -1 || !Main.projectile[accretionDiskIndex].active
                 || Main.projectile[accretionDiskIndex].type != ModContent.ProjectileType<AccretionDisk>()) {
 
@@ -275,32 +275,32 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
                 );
             }
 
-            //¸üĞÂÎü»ıÅÌÎ»ÖÃºÍ²ÎÊı
+            //æ›´æ–°å¸ç§¯ç›˜ä½ç½®å’Œå‚æ•°
             if (accretionDiskIndex >= 0 && Main.projectile[accretionDiskIndex].active) {
                 Projectile disk = Main.projectile[accretionDiskIndex];
                 disk.Center = ShootPos;
-                disk.timeLeft = 10; //±£³Ö´æ»î
+                disk.timeLeft = 10; //ä¿æŒå­˜æ´»
 
                 if (disk.ModProjectile is AccretionDisk accretionDisk) {
-                    //¸ù¾İĞîÁ¦½ø¶Èµ÷Õû²ÎÊı
+                    //æ ¹æ®è“„åŠ›è¿›åº¦è°ƒæ•´å‚æ•°
                     float sizeScale = MathHelper.Lerp(0.3f, 2.5f, chargeProgress);
                     disk.scale = sizeScale;
 
-                    //µ÷ÕûĞı×ªËÙ¶È
+                    //è°ƒæ•´æ—‹è½¬é€Ÿåº¦
                     accretionDisk.RotationSpeed = MathHelper.Lerp(0.5f, 3f, chargeProgress);
 
-                    //µ÷Õû°ë¾¶
+                    //è°ƒæ•´åŠå¾„
                     accretionDisk.InnerRadius = MathHelper.Lerp(0.25f, 0.15f, chargeProgress);
                     accretionDisk.OuterRadius = MathHelper.Lerp(0.7f, 0.9f, chargeProgress);
 
-                    //ÈÃÎü»ıÅÌÔÚĞîÁ¦Ê±²»Í¸Ã÷
+                    //è®©å¸ç§¯ç›˜åœ¨è“„åŠ›æ—¶ä¸é€æ˜
                     disk.alpha = 0;
                 }
             }
         }
 
         private void PlayChargeSound() {
-            //ÔÚÌØ¶¨½×¶Î²¥·ÅÒôĞ§
+            //åœ¨ç‰¹å®šé˜¶æ®µæ’­æ”¾éŸ³æ•ˆ
             if (chargeTime == 1) {
                 SoundEngine.PlaySound(SoundID.Item29 with { Volume = 0.6f, Pitch = -0.3f }, Projectile.Center);
             }
@@ -314,60 +314,60 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
 
         private void ReleaseAttack() {
             if (chargeTime < minChargeTime) {
-                //ĞîÁ¦²»×ã£¬²»·¢Éä
+                //è“„åŠ›ä¸è¶³ï¼Œä¸å‘å°„
                 ResetCharge();
                 return;
             }
 
-            //¼ÆËãÉËº¦±¶ÂÊ
+            //è®¡ç®—ä¼¤å®³å€ç‡
             float damageMultiplier = MathHelper.Lerp(1f, 3.5f, chargeProgress);
             int finalDamage = (int)(WeaponDamage * damageMultiplier);
 
-            //½«Îü»ıÅÌ×ª»»Îª¹¥»÷µ¯Ä»
+            //å°†å¸ç§¯ç›˜è½¬æ¢ä¸ºæ”»å‡»å¼¹å¹•
             if (accretionDiskIndex >= 0 && Main.projectile[accretionDiskIndex].active) {
                 Projectile disk = Main.projectile[accretionDiskIndex];
 
                 if (disk.ModProjectile is AccretionDisk accretionDisk) {
-                    //ÉèÖÃ¹¥»÷²ÎÊı
+                    //è®¾ç½®æ”»å‡»å‚æ•°
                     disk.damage = finalDamage;
                     disk.knockBack = WeaponKnockback * (1f + chargeProgress);
                     disk.friendly = true;
 
-                    //ÉèÖÃÉúÃüÊ±¼ä
-                    disk.timeLeft = (int)(120 + chargeProgress * 180); //2-5Ãë
+                    //è®¾ç½®ç”Ÿå‘½æ—¶é—´
+                    disk.timeLeft = (int)(120 + chargeProgress * 180); //2-5ç§’
 
-                    //¸øÓè³õÊ¼ËÙ¶È£¬³¯ÏòÊó±ê
+                    //ç»™äºˆåˆå§‹é€Ÿåº¦ï¼Œæœå‘é¼ æ ‡
                     Vector2 velocity = (InMousePos - disk.Center).SafeNormalize(Vector2.Zero) * (8f + chargeProgress * 12f);
                     disk.velocity = velocity;
 
-                    //ÆôÓÃÅö×²
+                    //å¯ç”¨ç¢°æ’
                     disk.tileCollide = false;
 
-                    //ÈÃÎü»ıÅÌÂıÂıÏûÊ§
+                    //è®©å¸ç§¯ç›˜æ…¢æ…¢æ¶ˆå¤±
                     disk.alpha = 50;
                 }
             }
 
-            //²¥·ÅÊÍ·ÅÒôĞ§
+            //æ’­æ”¾é‡Šæ”¾éŸ³æ•ˆ
             PlayReleaseSound();
 
-            //Éú³ÉÊÍ·ÅÌØĞ§
+            //ç”Ÿæˆé‡Šæ”¾ç‰¹æ•ˆ
             SpawnReleaseEffect();
 
-            //ºó×øÁ¦
+            //åååŠ›
             Owner.velocity -= ShootVelocity.SafeNormalize(Vector2.Zero) * (3f + chargeProgress * 5f);
 
-            //ÆÁÄ»Õğ¶¯
+            //å±å¹•éœ‡åŠ¨
             Owner.GetModPlayer<CWRPlayer>().GetScreenShake(5f + chargeProgress * 10f);
 
-            //ÏûºÄÄ§Á¦
+            //æ¶ˆè€—é­”åŠ›
             int manaCost = (int)(Item.mana * (1f + chargeProgress));
             Owner.statMana -= manaCost;
             if (Owner.statMana < 0) {
                 Owner.statMana = 0;
             }
 
-            //ÖØÖÃ×´Ì¬
+            //é‡ç½®çŠ¶æ€
             chargeTime = 0;
             accretionDiskIndex = -1;
         }
@@ -391,7 +391,7 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
 
             int particleCount = (int)(30 + chargeProgress * 70);
 
-            //ÄÚ±¬ÊÕËõÁ£×Ó
+            //å†…çˆ†æ”¶ç¼©ç²’å­
             for (int i = 0; i < 15 + particleCount; i++) {
                 Vector2 spawnPos = Projectile.Center + Main.rand.NextVector2Circular(90f, 90f);
                 Vector2 velocity = (Projectile.Center - spawnPos).SafeNormalize(Vector2.Zero) * Main.rand.NextFloat(10f, 18f);
@@ -415,16 +415,16 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
             particleTimer = 0;
             hasReleasedAttack = false;
 
-            //ÇåÀíÎü»ıÅÌ
+            //æ¸…ç†å¸ç§¯ç›˜
             if (accretionDiskIndex >= 0 && Main.projectile[accretionDiskIndex].active) {
                 Main.projectile[accretionDiskIndex].Kill();
             }
             accretionDiskIndex = -1;
         }
 
-        //ÓÒ¼üĞîÁ¦Ïà¹Ø·½·¨
+        //å³é”®è“„åŠ›ç›¸å…³æ–¹æ³•
         private void UpdateChargeEffectsR() {
-            //ÓÒ¼üÊ¹ÓÃÀ¶É«Ïµ
+            //å³é”®ä½¿ç”¨è“è‰²ç³»
             if (chargeTimeR < Stage1) {
                 currentGlowColorR = Color.Lerp(Color.Cyan, Color.DeepSkyBlue, chargeProgressR * 3f);
             }
@@ -458,7 +458,7 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
                 Vector2 particlePos = ShootPos + Main.rand.NextVector2Circular(30, 30);
                 Vector2 particleVel = (ShootPos - particlePos).SafeNormalize(Vector2.Zero) * Main.rand.NextFloat(2f, 5f);
 
-                //Ê¹ÓÃ¸ß¼¶Á£×ÓÏµÍ³ - À¶É«Ïµ
+                //ä½¿ç”¨é«˜çº§ç²’å­ç³»ç»Ÿ - è“è‰²ç³»
                 BasePRT particle = new PRT_AccretionDiskImpact(
                     particlePos,
                     particleVel,
@@ -487,7 +487,7 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
                 Vector2 particlePos = ShootPos + offset;
                 Vector2 particleVel = offset.SafeNormalize(Vector2.Zero) * 2f;
 
-                //Ê¹ÓÃ¸ß¼¶Á£×Ó´´½¨ÄÜÁ¿»· - À¶É«Ïµ
+                //ä½¿ç”¨é«˜çº§ç²’å­åˆ›å»ºèƒ½é‡ç¯ - è“è‰²ç³»
                 BasePRT particle = new PRT_AccretionDiskImpact(
                     particlePos,
                     particleVel,
@@ -552,21 +552,21 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
                 return;
             }
 
-            //ÇåÀíÑ¹±âÎü»ıÅÌ
+            //æ¸…ç†å‹æ‰å¸ç§¯ç›˜
             if (flattenedDiskIndex >= 0 && Main.projectile[flattenedDiskIndex].active) {
                 Main.projectile[flattenedDiskIndex].Kill();
             }
 
-            //²¥·ÅÊÍ·ÅÒôĞ§
+            //æ’­æ”¾é‡Šæ”¾éŸ³æ•ˆ
             PlayReleaseSoundR();
 
-            //Éú³ÉÊÍ·ÅÌØĞ§
+            //ç”Ÿæˆé‡Šæ”¾ç‰¹æ•ˆ
             SpawnReleaseEffectR();
 
-            //ÆÁÄ»Õğ¶¯
+            //å±å¹•éœ‡åŠ¨
             Owner.GetModPlayer<CWRPlayer>().GetScreenShake(3f + chargeProgressR * 8f);
 
-            //ÏûºÄÄ§Á¦
+            //æ¶ˆè€—é­”åŠ›
             int manaCost = (int)(Item.mana * 0.8f * (1f + chargeProgressR * 0.5f));
             Owner.statMana -= manaCost;
             if (Owner.statMana < 0) {
@@ -599,9 +599,9 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
             for (int i = 0; i < particleCount; i++) {
                 float angle = MathHelper.TwoPi * i / particleCount;
                 Vector2 velocity = angle.ToRotationVector2() * Main.rand.NextFloat(4f, 12f + chargeProgressR * 8f);
-                velocity.Y *= 0.6f; //±£³ÖÑ¹±âĞ§¹û
+                velocity.Y *= 0.6f; //ä¿æŒå‹æ‰æ•ˆæœ
 
-                //Ê¹ÓÃ¸ß¼¶Á£×Ó´´½¨ÊÍ·Å±¬·¢Ğ§¹û
+                //ä½¿ç”¨é«˜çº§ç²’å­åˆ›å»ºé‡Šæ”¾çˆ†å‘æ•ˆæœ
                 BasePRT particle = new PRT_AccretionDiskImpact(
                     ShootPos,
                     velocity,
@@ -615,7 +615,7 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
                 PRTLoader.AddParticle(particle);
             }
 
-            //Éú³É±âÆ½³å»÷²¨
+            //ç”Ÿæˆæ‰å¹³å†²å‡»æ³¢
             for (int i = 0; i < 2; i++) {
                 int segments = 48;
                 float radius = 30f + i * 40f + chargeProgressR * 40f;
@@ -627,7 +627,7 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
                     Vector2 particlePos = ShootPos + offset;
                     Vector2 particleVel = offset.SafeNormalize(Vector2.Zero) * 2.5f;
 
-                    //±âÆ½³å»÷²¨Á£×Ó
+                    //æ‰å¹³å†²å‡»æ³¢ç²’å­
                     BasePRT particle = new PRT_AccretionDiskImpact(
                         particlePos,
                         particleVel,
@@ -656,11 +656,11 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
         }
 
         public override void FiringShoot() {
-            //ĞîÁ¦ÎäÆ÷²»Ê¹ÓÃÄ¬ÈÏÉä»÷
+            //è“„åŠ›æ­¦å™¨ä¸ä½¿ç”¨é»˜è®¤å°„å‡»
         }
 
         public override void FiringShootR() {
-            //ÓÒ¼üĞîÁ¦ÎäÆ÷²»Ê¹ÓÃÄ¬ÈÏÉä»÷
+            //å³é”®è“„åŠ›æ­¦å™¨ä¸ä½¿ç”¨é»˜è®¤å°„å‡»
         }
 
         public override void PostGunDraw(Vector2 drawPos, ref Color lightColor) {

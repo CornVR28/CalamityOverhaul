@@ -17,10 +17,10 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalMechanicalEye.States.Re
         public override string StateName => "RetinazerPrecisionSniper";
         public override TwinsStateIndex StateIndex => TwinsStateIndex.RetinazerPrecisionSniper;
 
-        private int ChargeTime => Context.IsMachineRebellion ? 60 : (Context.IsDeathMode ? 65 : 80);
-        private int RecoveryTime => Context.IsMachineRebellion ? 90 : (Context.IsDeathMode ? 95 : 110);
+        private int ChargeTime => Context.IsDeathMode ? 65 : 80;
+        private int RecoveryTime => Context.IsDeathMode ? 95 : 110;
         private int MaxSniperCount => Context.IsDeathMode ? 3 : 2;
-        private int ProjectileCount => Context.IsMachineRebellion ? 15 : (Context.IsDeathMode ? 13 : 11);
+        private int ProjectileCount => Context.IsDeathMode ? 13 : 11;
         private float SpreadAngle => Context.IsDeathMode ? 60f : 50f;
         private float BaseSpeed => Context.IsDeathMode ? 7f : 5f;
 

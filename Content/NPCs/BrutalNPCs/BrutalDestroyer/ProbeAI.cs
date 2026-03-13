@@ -18,19 +18,11 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalDestroyer
         private static Asset<Texture2D> Probe_Glow { get; set; }
         public static int ReelBackTime => CWRRef.GetBossRushActive() ? 30 : 60;
         public override bool? CanCWROverride() {
-            if (CWRWorld.MachineRebellion) {
-                return true;
-            }
             return null;
         }
         public override void SetProperty() {
             NPCID.Sets.TrailingMode[npc.type] = 1;
             NPCID.Sets.TrailCacheLength[npc.type] = 16;
-            if (CWRWorld.MachineRebellion) {
-                npc.life = npc.lifeMax *= 8;
-                npc.defDefense = npc.defense = 20;
-                npc.defDamage = npc.damage *= 3;
-            }
         }
         public override bool AI() {
             if (CWRWorld.CanTimeFrozen()) {

@@ -1,4 +1,4 @@
-using CalamityOverhaul.Content.ADV.UIEffect;
+ï»¿using CalamityOverhaul.Content.ADV.UIEffect;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
@@ -7,7 +7,7 @@ using Terraria;
 namespace CalamityOverhaul.Content.ADV.ADVRewardPopups.Styles
 {
     /// <summary>
-    /// º£Ñó·ç¸ñ½±Àøµ¯´°
+    /// æµ·æ´‹é£æ ¼å¥–åŠ±å¼¹çª—
     /// </summary>
     internal class OceanRewardStyle : IRewardPopupStyle
     {
@@ -31,7 +31,7 @@ namespace CalamityOverhaul.Content.ADV.ADVRewardPopups.Styles
         public void DrawPanel(SpriteBatch spriteBatch, Rectangle rect, float alpha, float hoverGlow) {
             Texture2D px = VaultAsset.placeholder2.Value;
 
-            //Éîº£½¥²ã±³¾°Ìõ
+            //æ·±æµ·æ¸å±‚èƒŒæ™¯æ¡
             int segs = 26;
             for (int i = 0; i < segs; i++) {
                 float t = i / (float)segs;
@@ -52,10 +52,10 @@ namespace CalamityOverhaul.Content.ADV.ADVRewardPopups.Styles
                 spriteBatch.Draw(px, r, new Rectangle(0, 0, 1, 1), c);
             }
 
-            //²¨ÀËºáÏß
+            //æ³¢æµªæ¨ªçº¿
             DrawWaveLines(spriteBatch, rect, alpha * 0.65f);
 
-            //ÄÚ±ßÎ¢¹â
+            //å†…è¾¹å¾®å…‰
             Rectangle inner = rect;
             inner.Inflate(-6, -6);
             spriteBatch.Draw(px, inner, new Rectangle(0, 0, 1, 1), new Color(30, 120, 150) * (alpha * (0.08f + hoverGlow * 0.5f) * (0.4f + (float)Math.Sin(panelPulse * 1.3f) * 0.6f)));

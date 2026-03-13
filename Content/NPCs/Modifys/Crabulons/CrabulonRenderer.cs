@@ -1,11 +1,11 @@
-using CalamityOverhaul.Content.Items.Tools;
+ï»¿using CalamityOverhaul.Content.Items.Tools;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 
 namespace CalamityOverhaul.Content.NPCs.Modifys.Crabulons
 {
     /// <summary>
-    /// ¾úÉúĞ·äÖÈ¾ÏµÍ³
+    /// èŒç”ŸèŸ¹æ¸²æŸ“ç³»ç»Ÿ
     /// </summary>
     internal class CrabulonRenderer
     {
@@ -18,7 +18,7 @@ namespace CalamityOverhaul.Content.NPCs.Modifys.Crabulons
             this.owner = owner;
         }
 
-        //»æÖÆÇ°´¦Àí
+        //ç»˜åˆ¶å‰å¤„ç†
         public bool PreDraw(SpriteBatch spriteBatch, Vector2 screenPos, Color drawColor) {
             if (owner.Mount && owner.Owner != null) {
                 DrawMountedPlayer();
@@ -35,7 +35,7 @@ namespace CalamityOverhaul.Content.NPCs.Modifys.Crabulons
             return true;
         }
 
-        //»æÖÆºó´¦Àí
+        //ç»˜åˆ¶åå¤„ç†
         public bool PostDraw(SpriteBatch spriteBatch, Vector2 screenPos, Color drawColor) {
             if (owner.DyeItemID > 0) {
                 npc.EndDyeEffectForWorld();
@@ -48,7 +48,7 @@ namespace CalamityOverhaul.Content.NPCs.Modifys.Crabulons
             return true;
         }
 
-        //»æÖÆÆï³ËµÄÍæ¼Ò
+        //ç»˜åˆ¶éª‘ä¹˜çš„ç©å®¶
         private void DrawMountedPlayer() {
             if (owner.CrabulonPlayer == null || !owner.CrabulonPlayer.IsMount) {
                 return;
@@ -83,7 +83,7 @@ namespace CalamityOverhaul.Content.NPCs.Modifys.Crabulons
             );
         }
 
-        //ÅäÖÃÆï³ËÍæ¼Ò
+        //é…ç½®éª‘ä¹˜ç©å®¶
         private void ConfigureMountedPlayer() {
             mountPlayerClone.fullRotation = npc.rotation + MathHelper.PiOver2;
             mountPlayerClone.fullRotationOrigin = mountPlayerClone.Size / 2f;
@@ -95,7 +95,7 @@ namespace CalamityOverhaul.Content.NPCs.Modifys.Crabulons
             }
         }
 
-        //»æÖÆÆï³ËÍæ¼Ò
+        //ç»˜åˆ¶éª‘ä¹˜ç©å®¶
         private void DrawPlayerOnMount() {
             Main.PlayerRenderer.DrawPlayer(
                 Main.Camera,
@@ -106,7 +106,7 @@ namespace CalamityOverhaul.Content.NPCs.Modifys.Crabulons
             );
         }
 
-        //¸üĞÂÊÖ³Öµ¯Ä»
+        //æ›´æ–°æ‰‹æŒå¼¹å¹•
         private void UpdateHeldProjectile() {
             ModifyCrabulon.mountPlayerHeldProj = mountPlayerClone.heldProj;
             if (ModifyCrabulon.mountPlayerHeldProj.TryGetProjectile(out var heldProj)) {
@@ -115,12 +115,12 @@ namespace CalamityOverhaul.Content.NPCs.Modifys.Crabulons
             }
         }
 
-        //»Ö¸´Íæ¼ÒĞı×ª
+        //æ¢å¤ç©å®¶æ—‹è½¬
         private void RestorePlayerRotation() {
             mountPlayerClone.fullRotation = 0;
         }
 
-        //»æÖÆ°°¾ß
+        //ç»˜åˆ¶éå…·
         private void DrawSaddle(SpriteBatch spriteBatch, Color drawColor) {
             npc.BeginDyeEffectForWorld(owner.SaddleItem.CWR().DyeItemID);
 

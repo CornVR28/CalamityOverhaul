@@ -72,9 +72,6 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalDestroyer
         public override bool CheckActive() => false;
 
         public override bool? CanCWROverride() {
-            if (CWRWorld.MachineRebellion) {
-                return true;
-            }
             return null;
         }
 

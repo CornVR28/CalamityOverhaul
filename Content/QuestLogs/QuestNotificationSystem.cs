@@ -1,4 +1,4 @@
-using CalamityOverhaul.Common;
+﻿using CalamityOverhaul.Common;
 using CalamityOverhaul.Content.QuestLogs.Core;
 using InnoVault.UIHandles;
 using Microsoft.Xna.Framework.Graphics;

@@ -23,12 +23,12 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalMechanicalEye.States.Re
         /// <summary>
         /// 部署阶段
         /// </summary>
-        private int DeployPhase => Context.IsMachineRebellion ? 45 : (Context.IsDeathMode ? 50 : 60);
+        private int DeployPhase => Context.IsDeathMode ? 50 : 60;
 
         /// <summary>
         /// 蓄力阶段
         /// </summary>
-        private int ChargePhase => Context.IsMachineRebellion ? 35 : (Context.IsDeathMode ? 38 : 45);
+        private int ChargePhase => Context.IsDeathMode ? 38 : 45;
 
         /// <summary>
         /// 发射阶段
@@ -48,7 +48,7 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalMechanicalEye.States.Re
         /// <summary>
         /// 矩阵点数量
         /// </summary>
-        private int MatrixPointCount => Context.IsMachineRebellion ? 6 : (Context.IsDeathMode ? 5 : 4);
+        private int MatrixPointCount => Context.IsDeathMode ? 5 : 4;
 
         /// <summary>
         /// 激光速度

@@ -13,7 +13,7 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalMechanicalEye.States.Re
 
         private const int MaxDuration = 70;
 
-        private float MoveSpeed => Context.IsMachineRebellion ? 14f : 10f;
+        private float MoveSpeed => 10f;
 
         /// <summary>
         /// 基于comboStep的固定位置偏移角度表，确保确定性行为

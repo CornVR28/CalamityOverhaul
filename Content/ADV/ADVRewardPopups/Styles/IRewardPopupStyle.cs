@@ -1,55 +1,55 @@
-using Microsoft.Xna.Framework.Graphics;
+ï»¿using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
 
 namespace CalamityOverhaul.Content.ADV.ADVRewardPopups.Styles
 {
     /// <summary>
-    /// ½±Àøµ¯´°ÑùÊ½½Ó¿Ú
+    /// å¥–åŠ±å¼¹çª—æ ·å¼æ¥å£
     /// </summary>
     internal interface IRewardPopupStyle
     {
         /// <summary>
-        /// ¸üĞÂÑùÊ½¶¯»­
+        /// æ›´æ–°æ ·å¼åŠ¨ç”»
         /// </summary>
         void Update(Rectangle panelRect, bool active, bool closing);
 
         /// <summary>
-        /// »æÖÆÃæ°å±³¾°
+        /// ç»˜åˆ¶é¢æ¿èƒŒæ™¯
         /// </summary>
         void DrawPanel(SpriteBatch spriteBatch, Rectangle panelRect, float alpha, float hoverGlow);
 
         /// <summary>
-        /// »æÖÆÃæ°å±ß¿ò
+        /// ç»˜åˆ¶é¢æ¿è¾¹æ¡†
         /// </summary>
         void DrawFrame(SpriteBatch spriteBatch, Rectangle panelRect, float alpha, float hoverGlow);
 
         /// <summary>
-        /// »ñÈ¡Ãû³Æ·¢¹âÑÕÉ«
+        /// è·å–åç§°å‘å…‰é¢œè‰²
         /// </summary>
         Color GetNameGlowColor(float alpha);
 
         /// <summary>
-        /// »ñÈ¡Ãû³ÆÖ÷ÑÕÉ«
+        /// è·å–åç§°ä¸»é¢œè‰²
         /// </summary>
         Color GetNameColor(float alpha);
 
         /// <summary>
-        /// »ñÈ¡ÌáÊ¾ÎÄ×ÖÑÕÉ«
+        /// è·å–æç¤ºæ–‡å­—é¢œè‰²
         /// </summary>
         Color GetHintColor(float alpha, float blink);
 
         /// <summary>
-        /// ÖØÖÃÑùÊ½×´Ì¬
+        /// é‡ç½®æ ·å¼çŠ¶æ€
         /// </summary>
         void Reset();
 
         /// <summary>
-        /// »ñÈ¡ÑùÊ½ÌØ¶¨Á£×ÓÁĞ±í£¨ÓÃÓÚ»æÖÆ£©
+        /// è·å–æ ·å¼ç‰¹å®šç²’å­åˆ—è¡¨ï¼ˆç”¨äºç»˜åˆ¶ï¼‰
         /// </summary>
         void GetParticles(out List<object> particles);
 
         /// <summary>
-        /// ¸üĞÂÑùÊ½ÌØ¶¨Á£×Ó
+        /// æ›´æ–°æ ·å¼ç‰¹å®šç²’å­
         /// </summary>
         void UpdateParticles(Vector2 basePos, float panelFade);
     }

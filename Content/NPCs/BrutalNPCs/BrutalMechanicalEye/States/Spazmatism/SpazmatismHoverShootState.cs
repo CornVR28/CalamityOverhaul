@@ -15,8 +15,8 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalMechanicalEye.States.Sp
         public override string StateName => "SpazmatismHoverShoot";
         public override TwinsStateIndex StateIndex => TwinsStateIndex.SpazmatismHoverShoot;
 
-        private int ShootRate => Context.IsMachineRebellion ? 55 : (Context.IsDeathMode ? 60 : 80);
-        private float MoveSpeed => Context.IsMachineRebellion ? 16f : (Context.IsDeathMode ? 14f : 12f);
+        private int ShootRate => Context.IsDeathMode ? 60 : 80;
+        private float MoveSpeed => Context.IsDeathMode ? 14f : 12f;
         private int MaxShootCount => Context.IsDeathMode ? 2 : 3;
 
         private TwinsStateContext Context;

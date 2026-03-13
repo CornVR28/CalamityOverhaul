@@ -48,8 +48,8 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalMechanicalEye.States.Re
             "PrecisionSniper"
         ];
 
-        private int Duration => Context.IsMachineRebellion ? 180 : (Context.IsDeathMode ? 120 : 150);
-        private int RapidFireRate => Context.IsMachineRebellion ? 10 : (Context.IsDeathMode ? 12 : 15);
+        private int Duration => Context.IsDeathMode ? 120 : 150;
+        private int RapidFireRate => Context.IsDeathMode ? 12 : 15;
         private float LaserSpeed => Context.IsDeathMode ? 18f : 16f;
 
         private TwinsStateContext Context;

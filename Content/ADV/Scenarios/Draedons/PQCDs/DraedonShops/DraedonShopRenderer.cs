@@ -1,4 +1,4 @@
-using CalamityOverhaul.OtherMods.ImproveGame.Ammos;
+ï»¿using CalamityOverhaul.OtherMods.ImproveGame.Ammos;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Graphics;
 using System;
@@ -10,7 +10,7 @@ using Terraria.ID;
 namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.PQCDs.DraedonShops
 {
     /// <summary>
-    /// äÖÈ¾Æ÷
+    /// æ¸²æŸ“å™¨
     /// </summary>
     internal class DraedonShopRenderer
     {
@@ -31,7 +31,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.PQCDs.DraedonShops
         }
 
         /// <summary>
-        /// ¼ÆËãÃæ°åÎ»ÖÃ
+        /// è®¡ç®—é¢æ¿ä½ç½®
         /// </summary>
         public Vector2 CalculatePanelPosition() {
             float slideOffset = (1f - CWRUtils.EaseOutCubic(animation.PanelSlideProgress)) * PanelWidth;
@@ -40,7 +40,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.PQCDs.DraedonShops
         }
 
         /// <summary>
-        /// »æÖÆËùÓĞÄÚÈİ
+        /// ç»˜åˆ¶æ‰€æœ‰å†…å®¹
         /// </summary>
         public void Draw(SpriteBatch spriteBatch, Vector2 panelPosition, DraedonShopEffects effects) {
             if (animation.UIAlpha <= 0f) return;
@@ -61,31 +61,31 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.PQCDs.DraedonShops
                 PanelHeight
             );
 
-            //Éî¶ÈÒõÓ°
+            //æ·±åº¦é˜´å½±
             Rectangle shadow = panelRect;
             shadow.Offset(6, 8);
             spriteBatch.Draw(pixel, shadow, Color.Black * (animation.UIAlpha * 0.7f));
 
-            //Ö÷±³¾°½¥±ä
+            //ä¸»èƒŒæ™¯æ¸å˜
             DrawGradientBackground(spriteBatch, panelRect, pixel);
 
-            //È«Ï¢ÉÁË¸µş¼Ó
+            //å…¨æ¯é—ªçƒå åŠ 
             float flicker = (float)Math.Sin(animation.HologramFlicker * 1.5f) * 0.5f + 0.5f;
             spriteBatch.Draw(pixel, panelRect, new Color(15, 30, 45) * (animation.UIAlpha * 0.25f * flicker));
 
-            //Áù½ÇÍø¸ñ
+            //å…­è§’ç½‘æ ¼
             DrawHexGrid(spriteBatch, panelRect, pixel);
 
-            //É¨ÃèÏß
+            //æ‰«æçº¿
             DrawScanLines(spriteBatch, panelRect, pixel);
 
-            //ÄÚ²¿Âö³å·¢¹â
+            //å†…éƒ¨è„‰å†²å‘å…‰
             float innerPulse = (float)Math.Sin(animation.CircuitPulseTimer * 1.3f) * 0.5f + 0.5f;
             Rectangle inner = panelRect;
             inner.Inflate(-5, -5);
             spriteBatch.Draw(pixel, inner, new Color(40, 180, 255) * (animation.UIAlpha * 0.12f * innerPulse));
 
-            //¿Æ¼¼±ß¿ò
+            //ç§‘æŠ€è¾¹æ¡†
             DrawTechFrame(spriteBatch, panelRect, innerPulse, pixel);
         }
 
@@ -111,7 +111,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.PQCDs.DraedonShops
         }
 
         private void DrawHexGrid(SpriteBatch spriteBatch, Rectangle rect, Texture2D pixel) {
-            //Ë®Æ½Íø¸ñÏß
+            //æ°´å¹³ç½‘æ ¼çº¿
             int hexRows = 12;
             float hexHeight = rect.Height / (float)hexRows;
 
@@ -125,7 +125,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.PQCDs.DraedonShops
                 spriteBatch.Draw(pixel, new Rectangle(rect.X + 15, (int)y, rect.Width - 30, 1), gridColor);
             }
 
-            //´¹Ö±Íø¸ñÏß
+            //å‚ç›´ç½‘æ ¼çº¿
             int hexCols = 15;
             float hexWidth = rect.Width / (float)hexCols;
             for (int col = 0; col < hexCols; col++) {
@@ -155,13 +155,13 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.PQCDs.DraedonShops
         private void DrawTechFrame(SpriteBatch spriteBatch, Rectangle rect, float pulse, Texture2D pixel) {
             Color borderColor = Color.Lerp(new Color(40, 160, 240), new Color(80, 200, 255), pulse) * (animation.UIAlpha * 0.9f);
 
-            //Íâ±ß¿ò
+            //å¤–è¾¹æ¡†
             spriteBatch.Draw(pixel, new Rectangle(rect.X, rect.Y, rect.Width, 4), borderColor);
             spriteBatch.Draw(pixel, new Rectangle(rect.X, rect.Bottom - 4, rect.Width, 4), borderColor * 0.75f);
             spriteBatch.Draw(pixel, new Rectangle(rect.X, rect.Y, 4, rect.Height), borderColor * 0.9f);
             spriteBatch.Draw(pixel, new Rectangle(rect.Right - 4, rect.Y, 4, rect.Height), borderColor * 0.9f);
 
-            //ÄÚ·¢¹â±ß¿ò
+            //å†…å‘å…‰è¾¹æ¡†
             Rectangle inner = rect;
             inner.Inflate(-8, -8);
             Color innerGlow = new Color(100, 200, 255) * (animation.UIAlpha * 0.25f * pulse);
@@ -170,7 +170,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.PQCDs.DraedonShops
             spriteBatch.Draw(pixel, new Rectangle(inner.X, inner.Y, 2, inner.Height), innerGlow * 0.9f);
             spriteBatch.Draw(pixel, new Rectangle(inner.Right - 2, inner.Y, 2, inner.Height), innerGlow * 0.9f);
 
-            //½ÇÂäµçÂ·×°ÊÎ
+            //è§’è½ç”µè·¯è£…é¥°
             DrawCornerCircuit(spriteBatch, new Vector2(rect.X + 15, rect.Y + 15), animation.UIAlpha);
             DrawCornerCircuit(spriteBatch, new Vector2(rect.Right - 15, rect.Y + 15), animation.UIAlpha);
             DrawCornerCircuit(spriteBatch, new Vector2(rect.X + 15, rect.Bottom - 15), animation.UIAlpha * 0.7f);
@@ -190,12 +190,12 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.PQCDs.DraedonShops
         private void DrawHeader(SpriteBatch spriteBatch, Vector2 panelPosition) {
             DynamicSpriteFont font = FontAssets.MouseText.Value;
 
-            //±êÌâ
+            //æ ‡é¢˜
             string title = "DRAEDON QUANTUM STORE";
             Vector2 titleSize = font.MeasureString(title) * 1.3f;
             Vector2 titlePos = panelPosition + new Vector2((PanelWidth - titleSize.X) / 2f, 25);
 
-            //±êÌâ·¢¹âĞ§¹û
+            //æ ‡é¢˜å‘å…‰æ•ˆæœ
             Color glowColor = new Color(80, 220, 255) * (animation.UIAlpha * 0.9f);
             for (int i = 0; i < 8; i++) {
                 float angle = MathHelper.TwoPi * i / 8f;
@@ -204,14 +204,14 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.PQCDs.DraedonShops
             }
             Utils.DrawBorderString(spriteBatch, title, titlePos, Color.White * animation.UIAlpha, 1.3f);
 
-            //·Ö¸ôÏß
+            //åˆ†éš”çº¿
             Vector2 lineStart = panelPosition + new Vector2(40, 75);
             Vector2 lineEnd = lineStart + new Vector2(PanelWidth - 80, 0);
             DrawGradientLine(spriteBatch, lineStart, lineEnd,
                 new Color(60, 160, 240) * (animation.UIAlpha * 0.9f),
                 new Color(60, 160, 240) * (animation.UIAlpha * 0.1f), 2f);
 
-            //»õ±ÒÏÔÊ¾
+            //è´§å¸æ˜¾ç¤º
             DrawCurrencyDisplay(spriteBatch, panelPosition);
         }
 
@@ -219,7 +219,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.PQCDs.DraedonShops
             DynamicSpriteFont font = FontAssets.MouseText.Value;
             Vector2 currencyPos = panelPosition + new Vector2(40, 85);
 
-            //¼ÆËãÍæ¼Ò×Ü»õ±Ò
+            //è®¡ç®—ç©å®¶æ€»è´§å¸
             long totalCopper = CalculateTotalCurrency();
 
             int platinum = (int)(totalCopper / 1000000);
@@ -227,7 +227,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.PQCDs.DraedonShops
             int silver = (int)(totalCopper % 10000 / 100);
             int copper = (int)(totalCopper % 100);
 
-            //FUNDSÎÄ×Ö
+            //FUNDSæ–‡å­—
             string fundsText = "FUNDS: ";
             float pulse = (float)Math.Sin(animation.CoinDisplayPulse) * 0.5f + 0.5f;
             Color fundsTitleColor = Color.Lerp(new Color(200, 220, 255), new Color(255, 255, 255), pulse * 0.3f) * animation.UIAlpha;
@@ -239,7 +239,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.PQCDs.DraedonShops
             float coinScale = 0.8f;
             float spacing = 8f;
 
-            //»æÖÆ¸÷ÖÖ»õ±Ò
+            //ç»˜åˆ¶å„ç§è´§å¸
             if (platinum > 0) {
                 DrawCoinWithAmount(spriteBatch, coinPos, ItemID.PlatinumCoin, platinum, coinScale, animation.UIAlpha, pulse);
                 coinPos.X += GetCoinDisplayWidth(platinum, coinScale) + spacing;
@@ -263,22 +263,22 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.PQCDs.DraedonShops
         private long CalculateTotalCurrency() {
             long totalCopper = 0;
 
-            //°²È«»ñÈ¡´óÈİÆ÷ÎïÆ·
+            //å®‰å…¨è·å–å¤§å®¹å™¨ç‰©å“
             Item[] bigBagItems = player.GetBigBagItems()?.ToArray();
 
-            //¼ÆËã¸÷¸ö±³°üÖĞµÄÇ®±Ò
+            //è®¡ç®—å„ä¸ªèƒŒåŒ…ä¸­çš„é’±å¸
             CalculateInventory(player.inventory, ref totalCopper);
             CalculateInventory(player.bank.item, ref totalCopper);
             CalculateInventory(player.bank2.item, ref totalCopper);
             CalculateInventory(player.bank3.item, ref totalCopper);
             CalculateInventory(player.bank4.item, ref totalCopper);
 
-            //°²È«´¦Àí´óÈİÆ÷ÎïÆ·
+            //å®‰å…¨å¤„ç†å¤§å®¹å™¨ç‰©å“
             if (bigBagItems != null && bigBagItems.Length > 0) {
                 CalculateInventory(bigBagItems, ref totalCopper);
             }
 
-            //·ÀÖ¹Òç³ö»ò¸ºÊı
+            //é˜²æ­¢æº¢å‡ºæˆ–è´Ÿæ•°
             return Math.Max(0, totalCopper);
         }
 
@@ -290,17 +290,17 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.PQCDs.DraedonShops
             for (int i = 0; i < items.Length; i++) {
                 Item item = items[i];
 
-                //Ê¹ÓÃ¸üÑÏ¸ñµÄÓĞĞ§ĞÔ¼ì²é
+                //ä½¿ç”¨æ›´ä¸¥æ ¼çš„æœ‰æ•ˆæ€§æ£€æŸ¥
                 if (item == null || !item.active || item.type == ItemID.None || item.stack <= 0) {
                     continue;
                 }
 
-                //Ê¹ÓÃItem.IsACoinÅĞ¶ÏÇ®±ÒÀàĞÍ
+                //ä½¿ç”¨Item.IsACoinåˆ¤æ–­é’±å¸ç±»å‹
                 if (!item.IsACoin) {
                     continue;
                 }
 
-                //¸ù¾İÇ®±ÒÀàĞÍÀÛ¼Ó¼ÛÖµ£¨Ê¹ÓÃlong·ÀÖ¹Òç³ö£©
+                //æ ¹æ®é’±å¸ç±»å‹ç´¯åŠ ä»·å€¼ï¼ˆä½¿ç”¨longé˜²æ­¢æº¢å‡ºï¼‰
                 long coinValue = item.type switch {
                     ItemID.CopperCoin => 1L,
                     ItemID.SilverCoin => 100L,
@@ -309,10 +309,10 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.PQCDs.DraedonShops
                     _ => 0L
                 };
 
-                //¼ì²éÊÇ·ñ»áÒç³ö
+                //æ£€æŸ¥æ˜¯å¦ä¼šæº¢å‡º
                 long itemTotal = coinValue * item.stack;
                 if (totalCopper > long.MaxValue - itemTotal) {
-                    //·ÀÖ¹Òç³ö£¬Ö±½ÓÉèÖÃÎª×î´óÖµ
+                    //é˜²æ­¢æº¢å‡ºï¼Œç›´æ¥è®¾ç½®ä¸ºæœ€å¤§å€¼
                     totalCopper = long.MaxValue;
                     return;
                 }
@@ -330,7 +330,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.PQCDs.DraedonShops
             float iconScale = Math.Min(24f / coinFrame.Width, 24f / coinFrame.Height) * scale;
             Vector2 iconPos = position + new Vector2(12, 12);
 
-            //»õ±Ò·¢¹âĞ§¹û
+            //è´§å¸å‘å…‰æ•ˆæœ
             Color glowColor = GetCoinGlowColor(coinType, pulse) * (alpha * 0.6f);
             for (int i = 0; i < 4; i++) {
                 float angle = MathHelper.TwoPi * i / 4f;
@@ -342,7 +342,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.PQCDs.DraedonShops
             spriteBatch.Draw(coinTexture, iconPos, coinFrame, Color.White * alpha, 0f,
                 coinFrame.Size() / 2f, iconScale, SpriteEffects.None, 0f);
 
-            //»æÖÆÊıÁ¿ÎÄ×Ö
+            //ç»˜åˆ¶æ•°é‡æ–‡å­—
             string amountText = amount.ToString();
             Vector2 textPos = position + new Vector2(26, 4);
             Color textColor = Color.Lerp(Color.White, GetCoinColor(coinType), 0.4f) * alpha;
@@ -407,29 +407,29 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.PQCDs.DraedonShops
 
             bool isHolding = interaction.HoldingPurchaseIndex == currentItemIndex && interaction.HoldingPurchaseTimer > 0;
 
-            //²ÛÎ»±³¾°ºÍ±ß¿ò
+            //æ§½ä½èƒŒæ™¯å’Œè¾¹æ¡†
             DrawSlotBackground(spriteBatch, slotRect, isHovered, isSelected, isHolding, hoverProgress, pixel);
 
-            //³¤°´¹ºÂò½ø¶ÈÌõ
+            //é•¿æŒ‰è´­ä¹°è¿›åº¦æ¡
             if (isHolding && interaction.HoldingPurchaseTimer < 20) {
                 DrawHoldProgressBar(spriteBatch, slotRect, pixel);
             }
 
-            //Á¬Ğø¹ºÂò¼ÆÊıÏÔÊ¾
+            //è¿ç»­è´­ä¹°è®¡æ•°æ˜¾ç¤º
             if (isHolding && interaction.ConsecutivePurchaseCount > 0 && interaction.HoldingPurchaseTimer >= 20) {
                 DrawPurchaseCounter(spriteBatch, slotRect);
             }
 
-            //ÎïÆ·Í¼±ê
+            //ç‰©å“å›¾æ ‡
             DrawItemIcon(spriteBatch, shopItem, position, hoverProgress);
 
-            //ÎïÆ·Ãû³Æ
+            //ç‰©å“åç§°
             DrawItemName(spriteBatch, shopItem, position, hoverProgress);
 
-            //¼Û¸ñÏÔÊ¾
+            //ä»·æ ¼æ˜¾ç¤º
             DrawPriceDisplay(spriteBatch, shopItem, position, hoverProgress);
 
-            //Êı¾İÁ÷Ğ§¹û
+            //æ•°æ®æµæ•ˆæœ
             DrawDataStreamEffect(spriteBatch, position, hoverProgress, pixel);
         }
 
@@ -454,7 +454,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.PQCDs.DraedonShops
 
             spriteBatch.Draw(pixel, slotRect, slotColor);
 
-            //²ÛÎ»±ß¿ò
+            //æ§½ä½è¾¹æ¡†
             float borderPulse = (float)Math.Sin(animation.CircuitPulseTimer * 1.5f + slotRect.Y * 0.01f) * 0.5f + 0.5f;
 
             if (isHolding && interaction.HoldingPurchaseTimer >= 20) {
@@ -475,7 +475,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.PQCDs.DraedonShops
             spriteBatch.Draw(pixel, new Rectangle(slotRect.X, slotRect.Y, slotRect.Width, 2), borderColor);
             spriteBatch.Draw(pixel, new Rectangle(slotRect.X, slotRect.Bottom - 2, slotRect.Width, 2), borderColor * 0.7f);
 
-            //ĞüÍ£·¢¹âĞ§¹û
+            //æ‚¬åœå‘å…‰æ•ˆæœ
             if (hoverProgress > 0.01f) {
                 Rectangle glowRect = slotRect;
                 glowRect.Inflate(2, 2);
@@ -629,12 +629,12 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.PQCDs.DraedonShops
             DynamicSpriteFont font = FontAssets.MouseText.Value;
             int maxScroll = Math.Max(0, shopItems.Count - DraedonShopInteraction.MaxVisibleItems);
 
-            //¹ö¶¯Ìõ»æÖÆ
+            //æ»šåŠ¨æ¡ç»˜åˆ¶
             interaction.DrawScrollBar(spriteBatch, panelPosition, animation.UIAlpha, animation.CircuitPulseTimer);
 
-            //¹ö¶¯ÌáÊ¾ÎÄ×Ö
+            //æ»šåŠ¨æç¤ºæ–‡å­—
             if (interaction.ScrollOffset > 0 || interaction.ScrollOffset < maxScroll) {
-                string hint = $"¡ø¨‹ [{interaction.ScrollOffset + 1}/{shopItems.Count}]";
+                string hint = $"â–²â–¼ [{interaction.ScrollOffset + 1}/{shopItems.Count}]";
                 Vector2 hintPos = panelPosition + new Vector2(PanelWidth - 35, PanelHeight - 25);
                 Utils.DrawBorderString(spriteBatch, hint, hintPos, new Color(100, 180, 230) * (animation.UIAlpha * 0.6f), 0.7f);
             }

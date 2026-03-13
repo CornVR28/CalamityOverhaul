@@ -17,11 +17,6 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalSkeletronPrime
             int newMaxLife = (int)(npc.lifeMax * 0.7f);
             npc.life = npc.lifeMax = newMaxLife;
             npc.defDefense = npc.defense = 20;
-            if (CWRWorld.MachineRebellion) {
-                npc.life = npc.lifeMax *= 28;
-                npc.defDefense = npc.defense = 40;
-                npc.defDamage = npc.damage *= 3;
-            }
         }
 
         public override bool AI() {
@@ -30,7 +25,7 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalSkeletronPrime
                 return false;
             }
 
-            bossRush = CWRRef.GetBossRushActive() || CWRWorld.MachineRebellion;
+            bossRush = CWRRef.GetBossRushActive();
             death = CWRRef.GetDeathMode() || bossRush;
             player = Main.player[npc.target];
             npc.defense = npc.defDefense;

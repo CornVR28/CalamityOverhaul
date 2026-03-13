@@ -1,4 +1,4 @@
-using CalamityOverhaul.Content.ADV.ADVQuestTracker;
+锘縰sing CalamityOverhaul.Content.ADV.ADVQuestTracker;
 using CalamityOverhaul.Content.Items.Melee;
 using CalamityOverhaul.Content.LegendWeapon.HalibutLegend;
 using InnoVault.UIHandles;
@@ -8,7 +8,7 @@ using Terraria.ModLoader;
 namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest.YharonQuest
 {
     /// <summary>
-    /// 鬼面刀任务UI
+    /// 楝奸潰鍒�浠诲姟UI
     /// </summary>
     internal class YharonQuestUI : BaseQuestAcceptUI
     {
@@ -16,10 +16,10 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest.YharonQuest
         public static YharonQuestUI Instance => UIHandleLoader.GetUIHandleOfType<YharonQuestUI>();
 
         protected override void SetupLocalizedTexts() {
-            QuestTitle = this.GetLocalization(nameof(QuestTitle), () => "委托：焚世龙");
-            QuestDesc = this.GetLocalization(nameof(QuestDesc), () => "使用鬼面刀击杀焚世之龙");
-            AcceptText = this.GetLocalization(nameof(AcceptText), () => "接受");
-            DeclineText = this.GetLocalization(nameof(DeclineText), () => "拒绝");
+            QuestTitle = this.GetLocalization(nameof(QuestTitle), () => "濮旀墭锛氱剼涓栭緳");
+            QuestDesc = this.GetLocalization(nameof(QuestDesc), () => "浣跨敤楝奸潰鍒�鍑绘潃鐒氫笘涔嬮緳");
+            AcceptText = this.GetLocalization(nameof(AcceptText), () => "鎺ュ彈");
+            DeclineText = this.GetLocalization(nameof(DeclineText), () => "鎷掔粷");
         }
 
         protected override bool ShouldShowQuest() {
@@ -27,12 +27,12 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest.YharonQuest
                 return false;
             }
 
-            //如果玩家已经接受/拒绝/完成了任务，就不再显示UI
+            //濡傛灉鐜╁宸茬粡鎺ュ彈/鎷掔粷/瀹屾垚浜嗕换鍔★紝灏变笉鍐嶆樉绀篣I
             if (halibutPlayer.ADVSave.SupCalYharonQuestAccepted) {
                 return false;
             }
 
-            //前置任务必须完成
+            //鍓嶇疆浠诲姟蹇呴』瀹屾垚
             if (!halibutPlayer.ADVSave.SupCalDoGQuestReward) {
                 return false;
             }

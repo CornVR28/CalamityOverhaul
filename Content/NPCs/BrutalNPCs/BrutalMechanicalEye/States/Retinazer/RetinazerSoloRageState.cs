@@ -51,11 +51,11 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalMechanicalEye.States.Re
         private bool hasPlayedModeSound;
 
         //难度调整参数
-        private int LaserStormFireRate => Context.IsMachineRebellion ? 3 : (Context.IsDeathMode ? 4 : 5);
-        private int LaserStormDuration => Context.IsMachineRebellion ? 120 : (Context.IsDeathMode ? 100 : 80);
-        private float LaserSpeed => Context.IsMachineRebellion ? 18f : (Context.IsDeathMode ? 16f : 14f);
-        private int CrossBeamCount => Context.IsMachineRebellion ? 8 : (Context.IsDeathMode ? 6 : 5);
-        private int MatrixPointCount => Context.IsMachineRebellion ? 8 : (Context.IsDeathMode ? 6 : 5);
+        private int LaserStormFireRate => Context.IsDeathMode ? 4 : 5;
+        private int LaserStormDuration => Context.IsDeathMode ? 100 : 80;
+        private float LaserSpeed => Context.IsDeathMode ? 16f : 14f;
+        private int CrossBeamCount => Context.IsDeathMode ? 6 : 5;
+        private int MatrixPointCount => Context.IsDeathMode ? 6 : 5;
 
         public override void OnEnter(TwinsStateContext context) {
             base.OnEnter(context);
@@ -311,7 +311,7 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalMechanicalEye.States.Re
         /// 追踪激光模式 - 持续追踪玩家发射激光
         /// </summary>
         private void ExecuteHomingLaser(NPC npc, Player player) {
-            int homingDuration = Context.IsMachineRebellion ? 150 : (Context.IsDeathMode ? 120 : 100);
+            int homingDuration = Context.IsDeathMode ? 120 : 100;
 
             if (!hasPlayedModeSound) {
                 hasPlayedModeSound = true;
@@ -329,7 +329,7 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalMechanicalEye.States.Re
             FaceTarget(npc, player.Center);
 
             //持续发射激光
-            int fireRate = Context.IsMachineRebellion ? 8 : (Context.IsDeathMode ? 10 : 12);
+            int fireRate = Context.IsDeathMode ? 10 : 12;
             if (modeTimer % fireRate == 0) {
                 if (!VaultUtils.isClient) {
                     Vector2 toPlayer = GetDirectionToTarget(Context);

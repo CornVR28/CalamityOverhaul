@@ -82,10 +82,6 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalMechanicalEye.Core
         /// </summary>
         public bool IsSecondPhase { get; set; }
         /// <summary>
-        /// 是否为机械叛乱模式
-        /// </summary>
-        public bool IsMachineRebellion { get; set; }
-        /// <summary>
         /// 是否为死亡模式
         /// </summary>
         public bool IsDeathMode { get; set; }

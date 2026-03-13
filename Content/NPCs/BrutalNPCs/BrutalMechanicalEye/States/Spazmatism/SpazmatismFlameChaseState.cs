@@ -39,9 +39,9 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalMechanicalEye.States.Sp
             "Phase2Dash"
         ];
 
-        private float ChaseSpeed => Context.IsMachineRebellion ? 10f : (Context.IsDeathMode ? 8f : 6f);
-        private float TurnSpeed => Context.IsMachineRebellion ? 0.2f : (Context.IsDeathMode ? 0.16f : 0.12f);
-        private int FlameDuration => Context.IsMachineRebellion ? 200 : (Context.IsDeathMode ? 120 : 150);
+        private float ChaseSpeed => Context.IsDeathMode ? 8f : 6f;
+        private float TurnSpeed => Context.IsDeathMode ? 0.16f : 0.12f;
+        private int FlameDuration => Context.IsDeathMode ? 120 : 150;
         private int FlameInterval => Context.IsDeathMode ? 6 : 8;
 
         private TwinsStateContext Context;

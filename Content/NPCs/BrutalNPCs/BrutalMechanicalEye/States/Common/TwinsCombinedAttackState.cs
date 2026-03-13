@@ -72,7 +72,7 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalMechanicalEye.States.Co
             Context = context;
             hasCollided = false;
             hasBurst = false;
-            chargeSpeed = context.IsMachineRebellion ? 25f : 20f;
+            chargeSpeed = 20f;
 
             //寻找另一只眼睛
             FindPartner(context);
@@ -334,7 +334,7 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalMechanicalEye.States.Co
 
                 //发射弹幕
                 if (!VaultUtils.isClient) {
-                    int projectileCount = Context.IsMachineRebellion ? 16 : 12;
+                    int projectileCount = 12;
                     int projType = Context.IsSpazmatism ? ModContent.ProjectileType<Fireball>() : ModContent.ProjectileType<DeadLaser>();
                     float baseSpeed = 8f;
 

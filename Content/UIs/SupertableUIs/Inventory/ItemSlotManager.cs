@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using System.Linq;
 using Terraria;
 using Terraria.ID;
@@ -6,7 +6,7 @@ using Terraria.ID;
 namespace CalamityOverhaul.Content.UIs.SupertableUIs.Inventory
 {
     /// <summary>
-    /// ÎïÆ·²ÛÎ»¹ÜÀíÆ÷£¬¸ºÔğ¹ÜÀí81¸ö²ÄÁÏ²ÛÎ»
+    /// ç‰©å“æ§½ä½ç®¡ç†å™¨ï¼Œè´Ÿè´£ç®¡ç†81ä¸ªææ–™æ§½ä½
     /// </summary>
     public class ItemSlotManager
     {
@@ -29,7 +29,7 @@ namespace CalamityOverhaul.Content.UIs.SupertableUIs.Inventory
         }
 
         /// <summary>
-        /// »ñÈ¡Ö¸¶¨²ÛÎ»µÄÎïÆ·
+        /// è·å–æŒ‡å®šæ§½ä½çš„ç‰©å“
         /// </summary>
         public Item GetSlot(int index) {
             if (!IsValidIndex(index)) return null;
@@ -37,7 +37,7 @@ namespace CalamityOverhaul.Content.UIs.SupertableUIs.Inventory
         }
 
         /// <summary>
-        /// ÉèÖÃÖ¸¶¨²ÛÎ»µÄÎïÆ·
+        /// è®¾ç½®æŒ‡å®šæ§½ä½çš„ç‰©å“
         /// </summary>
         public void SetSlot(int index, Item item) {
             if (!IsValidIndex(index)) return;
@@ -45,7 +45,7 @@ namespace CalamityOverhaul.Content.UIs.SupertableUIs.Inventory
         }
 
         /// <summary>
-        /// »ñÈ¡Ô¤ÀÀ²ÛÎ»
+        /// è·å–é¢„è§ˆæ§½ä½
         /// </summary>
         public Item GetPreviewSlot(int index) {
             if (!IsValidIndex(index)) return null;
@@ -53,7 +53,7 @@ namespace CalamityOverhaul.Content.UIs.SupertableUIs.Inventory
         }
 
         /// <summary>
-        /// ÉèÖÃÔ¤ÀÀ²ÛÎ»
+        /// è®¾ç½®é¢„è§ˆæ§½ä½
         /// </summary>
         public void SetPreviewSlot(int index, Item item) {
             if (!IsValidIndex(index)) return;
@@ -61,7 +61,7 @@ namespace CalamityOverhaul.Content.UIs.SupertableUIs.Inventory
         }
 
         /// <summary>
-        /// Çå¿ÕËùÓĞ²ÛÎ»
+        /// æ¸…ç©ºæ‰€æœ‰æ§½ä½
         /// </summary>
         public void ClearAllSlots() {
             for (int i = 0; i < _slots.Length; i++) {
@@ -70,7 +70,7 @@ namespace CalamityOverhaul.Content.UIs.SupertableUIs.Inventory
         }
 
         /// <summary>
-        /// Çå¿ÕÖ¸¶¨²ÛÎ»
+        /// æ¸…ç©ºæŒ‡å®šæ§½ä½
         /// </summary>
         public void ClearSlot(int index) {
             if (!IsValidIndex(index)) return;
@@ -78,7 +78,7 @@ namespace CalamityOverhaul.Content.UIs.SupertableUIs.Inventory
         }
 
         /// <summary>
-        /// »ñÈ¡ËùÓĞ·Ç¿Õ²ÛÎ»
+        /// è·å–æ‰€æœ‰éç©ºæ§½ä½
         /// </summary>
         public IEnumerable<(int index, Item item)> GetNonEmptySlots() {
             for (int i = 0; i < _slots.Length; i++) {
@@ -89,14 +89,14 @@ namespace CalamityOverhaul.Content.UIs.SupertableUIs.Inventory
         }
 
         /// <summary>
-        /// ¼ì²éÊÇ·ñÓĞÈÎºÎÎïÆ·
+        /// æ£€æŸ¥æ˜¯å¦æœ‰ä»»ä½•ç‰©å“
         /// </summary>
         public bool HasAnyItems() {
             return _slots.Any(item => item.type != ItemID.None);
         }
 
         /// <summary>
-        /// »ñÈ¡ËùÓĞÎïÆ·ÀàĞÍ
+        /// è·å–æ‰€æœ‰ç‰©å“ç±»å‹
         /// </summary>
         public int[] GetAllItemTypes() {
             int[] types = new int[_slots.Length];
@@ -107,7 +107,7 @@ namespace CalamityOverhaul.Content.UIs.SupertableUIs.Inventory
         }
 
         /// <summary>
-        /// ¸ù¾İÎïÆ·ÀàĞÍÊı×éÉèÖÃÔ¤ÀÀ²ÛÎ»
+        /// æ ¹æ®ç‰©å“ç±»å‹æ•°ç»„è®¾ç½®é¢„è§ˆæ§½ä½
         /// </summary>
         public void SetPreviewFromTypes(int[] types) {
             if (types == null || types.Length != _slots.Length) return;
@@ -118,7 +118,7 @@ namespace CalamityOverhaul.Content.UIs.SupertableUIs.Inventory
         }
 
         /// <summary>
-        /// »ñÈ¡×îĞ¡¶ÑµşÊıÁ¿(ÓÃÓÚ¼ÆËãºÏ³ÉÊıÁ¿)
+        /// è·å–æœ€å°å †å æ•°é‡(ç”¨äºè®¡ç®—åˆæˆæ•°é‡)
         /// </summary>
         public int GetMinimumStackSize() {
             int minStack = int.MaxValue;
@@ -134,7 +134,7 @@ namespace CalamityOverhaul.Content.UIs.SupertableUIs.Inventory
         }
 
         /// <summary>
-        /// ÏûºÄ²ÄÁÏ
+        /// æ¶ˆè€—ææ–™
         /// </summary>
         public void ConsumeItems(int amount) {
             foreach (var item in _slots) {
@@ -150,12 +150,12 @@ namespace CalamityOverhaul.Content.UIs.SupertableUIs.Inventory
         private bool IsValidIndex(int index) => index >= 0 && index < _slots.Length;
 
         /// <summary>
-        /// Ö±½Ó·ÃÎÊ²ÛÎ»Êı×é(ÓÃÓÚ¼æÈİĞÔ)
+        /// ç›´æ¥è®¿é—®æ§½ä½æ•°ç»„(ç”¨äºå…¼å®¹æ€§)
         /// </summary>
         public ref Item[] Slots => ref _slots;
 
         /// <summary>
-        /// Ö±½Ó·ÃÎÊÔ¤ÀÀ²ÛÎ»Êı×é(ÓÃÓÚ¼æÈİĞÔ)
+        /// ç›´æ¥è®¿é—®é¢„è§ˆæ§½ä½æ•°ç»„(ç”¨äºå…¼å®¹æ€§)
         /// </summary>
         public Item[] PreviewSlots => _previewSlots;
     }

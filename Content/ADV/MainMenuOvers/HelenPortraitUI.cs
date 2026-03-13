@@ -1,4 +1,4 @@
-using InnoVault.UIHandles;
+ï»¿using InnoVault.UIHandles;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
@@ -9,28 +9,28 @@ using Terraria.ID;
 namespace CalamityOverhaul.Content.ADV.MainMenuOvers
 {
     /// <summary>
-    /// ±ÈÄ¿ÓãĞ¡½ãÁ¢»æUI,Ö÷²Ëµ¥ÏÔÊ¾
+    /// æ¯”ç›®é±¼å°å§ç«‹ç»˜UI,ä¸»èœå•æ˜¾ç¤º
     /// </summary>
     internal class HelenPortraitUI : BasePortraitUI
     {
-        #region Êı¾İ×Ö¶Î
+        #region æ•°æ®å­—æ®µ
         public static HelenPortraitUI Instance => UIHandleLoader.GetUIHandleOfType<HelenPortraitUI>();
         public override LayersModeEnum LayersMode => LayersModeEnum.None;
 
-        private bool _unlocked = false; //ÊÇ·ñÒÑ½âËø
-        private float _unlockProgress = 0f; //½âËø½ø¶È¶¯»­
+        private bool _unlocked = false; //æ˜¯å¦å·²è§£é”
+        private float _unlockProgress = 0f; //è§£é”è¿›åº¦åŠ¨ç”»
 
-        //¶¯»­¼ÆÊ±Æ÷
+        //åŠ¨ç”»è®¡æ—¶å™¨
         private float _waveTimer = 0f;
         private float _bubbleTimer = 0f;
 
-        //Á£×ÓÏµÍ³
+        //ç²’å­ç³»ç»Ÿ
         private readonly List<BubbleParticle> _bubbles = [];
         private int _bubbleSpawnTimer = 0;
         private readonly List<WaterRipple> _ripples = [];
         private int _rippleSpawnTimer = 0;
 
-        //ÖØĞ´»ùÀàÊôĞÔ
+        //é‡å†™åŸºç±»å±æ€§
         protected override Vector2 GetIconBasePosition() => new Vector2(
             Main.screenWidth / 2 - IconSize / 2 + IconSpacing / 2,
             Main.screenHeight - IconSize - IconBottomMargin
@@ -44,7 +44,7 @@ namespace CalamityOverhaul.Content.ADV.MainMenuOvers
         protected override Color GetPulseColor() => new Color(30, 120, 150);
         #endregion
 
-        #region Á£×ÓÄÚ²¿Àà
+        #region ç²’å­å†…éƒ¨ç±»
         private class BubbleParticle
         {
             public Vector2 Pos;
@@ -138,7 +138,7 @@ namespace CalamityOverhaul.Content.ADV.MainMenuOvers
         }
         #endregion
 
-        #region ÉúÃüÖÜÆÚ
+        #region ç”Ÿå‘½å‘¨æœŸ
         protected override void OnSetStaticDefaults() {
             _unlocked = false;
             _unlockProgress = 0f;
@@ -173,7 +173,7 @@ namespace CalamityOverhaul.Content.ADV.MainMenuOvers
         }
         #endregion
 
-        #region ½âËø¹ÜÀí
+        #region è§£é”ç®¡ç†
         public void Unlock() {
             if (!_unlocked) {
                 _unlocked = true;
@@ -187,7 +187,7 @@ namespace CalamityOverhaul.Content.ADV.MainMenuOvers
         }
         #endregion
 
-        #region ¸üĞÂÂß¼­
+        #region æ›´æ–°é€»è¾‘
         public override void Update() {
             UpdateIconAlpha();
 
@@ -201,7 +201,7 @@ namespace CalamityOverhaul.Content.ADV.MainMenuOvers
                 return;
             }
 
-            //½âËø¶¯»­
+            //è§£é”åŠ¨ç”»
             if (_unlocked && _unlockProgress < 1f) {
                 _unlockProgress += 0.03f;
             }
@@ -209,7 +209,7 @@ namespace CalamityOverhaul.Content.ADV.MainMenuOvers
                 _unlockProgress -= 0.03f;
             }
 
-            //¶¯»­¼ÆÊ±Æ÷
+            //åŠ¨ç”»è®¡æ—¶å™¨
             _waveTimer += 0.035f;
             _bubbleTimer += 0.025f;
             UpdatePulseTimer();
@@ -268,7 +268,7 @@ namespace CalamityOverhaul.Content.ADV.MainMenuOvers
         }
         #endregion
 
-        #region »æÖÆ
+        #region ç»˜åˆ¶
         public override void Draw(SpriteBatch spriteBatch) {
             if (_iconAlpha <= 0.01f || !IsResourceLoaded()) {
                 return;
@@ -287,12 +287,12 @@ namespace CalamityOverhaul.Content.ADV.MainMenuOvers
             Vector2 iconCenter = IconPosition + new Vector2(IconSize / 2);
             bool hoverIcon = IconHitBox.Contains(MousePosition.ToPoint()) && CanInteract();
 
-            //»æÖÆË®²¨ÎÆ
+            //ç»˜åˆ¶æ°´æ³¢çº¹
             foreach (var ripple in _ripples) {
                 ripple.Draw(spriteBatch, _iconAlpha * _unlockProgress);
             }
 
-            //»æÖÆÆøÅİÁ£×Ó
+            //ç»˜åˆ¶æ°”æ³¡ç²’å­
             foreach (var bubble in _bubbles) {
                 bubble.Draw(spriteBatch, _iconAlpha * 0.8f);
             }
@@ -307,7 +307,7 @@ namespace CalamityOverhaul.Content.ADV.MainMenuOvers
             Color bgColor = new Color(5, 20, 28) * (_iconAlpha * 0.9f);
             DrawBaseBackground(spriteBatch, bgRect, _iconAlpha, hoverIcon, bgColor);
 
-            //Í·Ïñ»æÖÆ
+            //å¤´åƒç»˜åˆ¶
             float iconScale = IconSize / Math.Max(iconTex.Width, iconTex.Height);
             if (hoverIcon) {
                 iconScale *= 1.08f + (float)Math.Sin(_waveTimer * 1.8f) * 0.04f;
@@ -322,10 +322,10 @@ namespace CalamityOverhaul.Content.ADV.MainMenuOvers
             spriteBatch.Draw(iconTex, iconDrawPos, null, iconColor,
                 0f, iconTex.Size() / 2, iconScale, SpriteEffects.None, 0f);
 
-            //Éîº£±ß¿ò
+            //æ·±æµ·è¾¹æ¡†
             DrawOceanFrame(spriteBatch, bgRect, _iconAlpha, (float)Math.Sin(_pulseTimer * 1.5f) * 0.5f + 0.5f);
 
-            //½âËø¶¯»­ÌØĞ§
+            //è§£é”åŠ¨ç”»ç‰¹æ•ˆ
             if (_unlockProgress > 0f && _unlockProgress < 1f) {
                 DrawUnlockEffect(spriteBatch, iconCenter, _unlockProgress);
             }

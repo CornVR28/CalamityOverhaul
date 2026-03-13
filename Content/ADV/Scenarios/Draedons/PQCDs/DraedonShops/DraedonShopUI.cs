@@ -1,4 +1,4 @@
-using CalamityOverhaul.Common;
+ï»¿using CalamityOverhaul.Common;
 using InnoVault.UIHandles;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
@@ -8,34 +8,34 @@ using Terraria.Audio;
 namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.PQCDs.DraedonShops
 {
     /// <summary>
-    /// ¼ÎµÇÉÌµêUI
+    /// å˜‰ç™»å•†åº—UI
     /// </summary>
     internal class DraedonShopUI : UIHandle
     {
         public static DraedonShopUI Instance => UIHandleLoader.GetUIHandleOfType<DraedonShopUI>();
 
-        //UI×´Ì¬
+        //UIçŠ¶æ€
         private bool _active;
         public override bool Active {
             get => _active || animation.UIAlpha > 0f;
             set => _active = value;
         }
 
-        //UI³ß´ç
+        //UIå°ºå¯¸
         private const int PanelWidth = 680;
         private const int PanelHeight = 640;
 
-        //ÉÌµêÊı¾İ
+        //å•†åº—æ•°æ®
         private readonly List<ShopItem> shopItems = new();
 
-        //×é¼ş
+        //ç»„ä»¶
         private readonly DraedonShopAnimation animation = new();
         private readonly DraedonShopEffects effects = new();
         private DraedonShopInteraction interaction;
         private DraedonShopRenderer renderer;
 
         public override void Update() {
-            //¸üĞÂ¶¯»­½ø¶È
+            //æ›´æ–°åŠ¨ç”»è¿›åº¦
             animation.UpdateUIAnimation(_active);
 
             if (animation.UIAlpha <= 0f) {
@@ -43,10 +43,10 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.PQCDs.DraedonShops
                 return;
             }
 
-            //³õÊ¼»¯ÉÌµê
+            //åˆå§‹åŒ–å•†åº—
             InitializeShop();
 
-            //³õÊ¼»¯×é¼ş£¨ÑÓ³Ù³õÊ¼»¯£¬È·±£shopItemsÒÑÌî³ä£©
+            //åˆå§‹åŒ–ç»„ä»¶ï¼ˆå»¶è¿Ÿåˆå§‹åŒ–ï¼Œç¡®ä¿shopItemså·²å¡«å……ï¼‰
             if (interaction == null) {
                 interaction = new DraedonShopInteraction(player, shopItems);
                 renderer = new DraedonShopRenderer(player, shopItems, animation, interaction);
@@ -54,21 +54,21 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.PQCDs.DraedonShops
 
             DraedonCallUI.Instance.Active = animation.UIAlpha >= 0f;
 
-            //¸üĞÂ¿Æ¼¼¶¯»­
+            //æ›´æ–°ç§‘æŠ€åŠ¨ç”»
             animation.UpdateTechEffects();
 
-            //¼ÆËãÃæ°åÎ»ÖÃ
+            //è®¡ç®—é¢æ¿ä½ç½®
             Vector2 panelPosition = renderer.CalculatePanelPosition();
 
-            //¸üĞÂÁ£×ÓºÍÌØĞ§
+            //æ›´æ–°ç²’å­å’Œç‰¹æ•ˆ
             effects.UpdateParticles(_active, panelPosition, PanelWidth, PanelHeight);
 
-            //¸üĞÂUI½»»¥
+            //æ›´æ–°UIäº¤äº’
             if (_active && animation.PanelSlideProgress > 0.9f) {
                 UpdateInteraction(panelPosition);
             }
 
-            //¸üĞÂ²ÛÎ»ĞüÍ£¶¯»­
+            //æ›´æ–°æ§½ä½æ‚¬åœåŠ¨ç”»
             animation.UpdateSlotHoverAnimations(interaction.HoveredIndex);
         }
 
@@ -87,17 +87,17 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.PQCDs.DraedonShops
                 player.CWR().DontSwitchWeaponTime = 2;
 
                 if (keyLeftPressState != KeyPressState.None) {
-                    //¸üĞÂ¹ö¶¯Ìõ£¨ÓÅÏÈ´¦Àí£©
+                    //æ›´æ–°æ»šåŠ¨æ¡ï¼ˆä¼˜å…ˆå¤„ç†ï¼‰
                     interaction.UpdateScrollBar(panelPosition, MousePosition.ToPoint(),
                         Main.mouseLeft, Main.mouseLeftRelease);
                 }
 
-                //¹öÂÖ¹ö¶¯£¨¹ö¶¯ÌõÎ´ÍÏ¶¯Ê±²ÅÏìÓ¦£©
+                //æ»šè½®æ»šåŠ¨ï¼ˆæ»šåŠ¨æ¡æœªæ‹–åŠ¨æ—¶æ‰å“åº”ï¼‰
                 if (!interaction.IsScrollBarDragging) {
                     interaction.HandleScroll();
                 }
 
-                //¼ì²âÎïÆ·µã»÷ºÍĞüÍ££¨¹ö¶¯ÌõÎ´ÍÏ¶¯Ê±²ÅÏìÓ¦£©
+                //æ£€æµ‹ç‰©å“ç‚¹å‡»å’Œæ‚¬åœï¼ˆæ»šåŠ¨æ¡æœªæ‹–åŠ¨æ—¶æ‰å“åº”ï¼‰
                 if (!interaction.IsScrollBarDragging) {
                     Vector2 itemListPos = panelPosition + new Vector2(30, 120);
                     interaction.UpdateItemSelection(MousePosition.ToPoint(), itemListPos, PanelWidth);
@@ -108,7 +108,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.PQCDs.DraedonShops
                 SoundEngine.PlaySound(CWRSound.ButtonZero with { Pitch = 0.2f });
             }
 
-            //ESC¹Ø±Õ
+            //ESCå…³é—­
             if (Main.keyState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.Escape)) {
                 _active = false;
                 SoundEngine.PlaySound(CWRSound.ButtonZero with { Pitch = 0.2f });
@@ -128,11 +128,11 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.PQCDs.DraedonShops
         }
 
         /// <summary>
-        /// ³õÊ¼»¯ÉÌµêÎïÆ·
+        /// åˆå§‹åŒ–å•†åº—ç‰©å“
         /// </summary>
         public void InitializeShop() {
             if (shopItems.Count > 0) return;
-            //Ìí¼Ó¼ÎµÇ²ÄÁÏºÏ³ÉµÄÎïÆ·
+            //æ·»åŠ å˜‰ç™»ææ–™åˆæˆçš„ç‰©å“
             ShopHandle.Handle(shopItems);
         }
     }

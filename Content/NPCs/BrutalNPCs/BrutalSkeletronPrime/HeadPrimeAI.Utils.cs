@@ -16,9 +16,7 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalSkeletronPrime
             if (!CWRRef.Has) {
                 return !Main.expertMode || !Main.masterMode;
             }//在没有启用灾厄的情况下，只要是专家或者大师就可以使用
-            if (CWRWorld.MachineRebellion) {
-                return false;
-            }//机械暴乱，无条件使用
+
             if (!Main.expertMode) {
                 return true;
             }//如果不是专家模式，就不要使用重做后的绘制
@@ -231,12 +229,6 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalSkeletronPrime
                 }
             }
 
-            if (CWRWorld.MachineRebellion) {
-                CWRWorld.MachineRebellionDowned = true;
-                if (Main.dedServ) {
-                    NetMessage.SendData(MessageID.WorldData);
-                }
-            }
             return base.On_PreKill();
         }
     }

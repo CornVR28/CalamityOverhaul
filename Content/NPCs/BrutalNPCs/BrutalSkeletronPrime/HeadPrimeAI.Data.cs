@@ -67,12 +67,6 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalSkeletronPrime
             rule.OnSuccess(ItemDropRule.Common(ModContent.ItemType<CommandersClaw>(), 4));
             rule.OnSuccess(ItemDropRule.Common(ModContent.ItemType<RaiderGun>(), 4));
             npcLoot.Add(rule);
-            LeadingConditionRule rule2 = new LeadingConditionRule(new DropInMachineRebellion());
-            rule2.OnSuccess(ItemDropRule.Common(ModContent.ItemType<SoulofFrightEX>()));
-            rule2.OnSuccess(ItemDropRule.Common(ModContent.ItemType<SoulofMightEX>()));
-            rule2.OnSuccess(ItemDropRule.Common(ModContent.ItemType<SoulofSightEX>()));
-            rule2.OnSuccess(ItemDropRule.Common(ModContent.ItemType<MetalMusicBox>(), 5));
-            npcLoot.Add(rule2);
         }
 
         public override void BossHeadSlot(ref int index) {
@@ -84,9 +78,6 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalSkeletronPrime
         public override bool CanLoad() => true;
 
         public override bool? CanCWROverride() {
-            if (CWRWorld.MachineRebellion) {
-                return true;
-            }
             return null;
         }
     }

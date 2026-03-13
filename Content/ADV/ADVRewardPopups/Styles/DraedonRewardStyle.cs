@@ -1,4 +1,4 @@
-using CalamityOverhaul.Content.ADV.UIEffect;
+ï»¿using CalamityOverhaul.Content.ADV.UIEffect;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
@@ -7,7 +7,7 @@ using Terraria;
 namespace CalamityOverhaul.Content.ADV.ADVRewardPopups.Styles
 {
     /// <summary>
-    /// ¼ÎµÇ¿Æ¼¼·ç¸ñ½±Àøµ¯´°
+    /// å˜‰ç™»ç§‘æŠ€é£æ ¼å¥–åŠ±å¼¹çª—
     /// </summary>
     internal class DraedonRewardStyle : IRewardPopupStyle
     {
@@ -38,7 +38,7 @@ namespace CalamityOverhaul.Content.ADV.ADVRewardPopups.Styles
         public void DrawPanel(SpriteBatch spriteBatch, Rectangle rect, float alpha, float hoverGlow) {
             Texture2D px = VaultAsset.placeholder2.Value;
 
-            //Ö÷±³¾°½¥±ä - ÉîÀ¶¿Æ¼¼É«µ÷
+            //ä¸»èƒŒæ™¯æ¸å˜ - æ·±è“ç§‘æŠ€è‰²è°ƒ
             int segments = 30;
             for (int i = 0; i < segments; i++) {
                 float t = i / (float)segments;
@@ -59,18 +59,18 @@ namespace CalamityOverhaul.Content.ADV.ADVRewardPopups.Styles
                 spriteBatch.Draw(px, r, new Rectangle(0, 0, 1, 1), finalColor);
             }
 
-            //È«Ï¢ÉÁË¸¸²¸Ç²ã
+            //å…¨æ¯é—ªçƒè¦†ç›–å±‚
             float flicker = (float)Math.Sin(draedonHologramFlicker * 1.5f) * 0.5f + 0.5f;
             Color hologramOverlay = new Color(15, 30, 45) * (alpha * 0.25f * flicker);
             spriteBatch.Draw(px, rect, new Rectangle(0, 0, 1, 1), hologramOverlay);
 
-            //Áù½ÇÍø¸ñÎÆÀí
+            //å…­è§’ç½‘æ ¼çº¹ç†
             DrawHexGrid(spriteBatch, rect, alpha * 0.85f);
 
-            //É¨ÃèÏßĞ§¹û
+            //æ‰«æçº¿æ•ˆæœ
             DrawScanLines(spriteBatch, rect, alpha * 0.9f);
 
-            //µçÂ·Âö³åÄÚ·¢¹â
+            //ç”µè·¯è„‰å†²å†…å‘å…‰
             float innerPulse = (float)Math.Sin(draedonCircuitPulse * 1.3f) * 0.5f + 0.5f;
             Rectangle inner = rect;
             inner.Inflate(-5, -5);

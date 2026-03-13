@@ -27,7 +27,6 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalDestroyer.Core
 
         #region 战斗状态
         public bool IsEnraged { get; set; }
-        public bool IsMachineRebellion { get; set; }
         public bool IsDeathMode { get; set; }
         #endregion
 

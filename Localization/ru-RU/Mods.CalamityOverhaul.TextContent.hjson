@@ -14,7 +14,6 @@
 	KreloadTimeAddText: "Время перезарядки боеприпасов увеличено "
 	KreloadTimeLessenText: "Сокращается время перезарядки боеприпасов "
 	DeathModeItem: Предмет режима Смерть
-	DropInMachineRebellion: Выпадает с Трио Мехов EX
 	DontUseMagicConch: За тобой наблюдает могущественное существо...
 	OnlyZenith: Только в мирах с сидом «Get fixed boi»
 	Event_TungstenRiot_Name: Вольфрамовое востание
@@ -359,9 +358,6 @@
 	CWRGun_Recoil_Level_5: Очень сильная
 	CWRGun_Recoil_Level_6: Крайне сильная
 	SkeletronPrime_Text: Не пытайся убить меня этой дурацкой штукой! Умри, организм!
-	MachineRebellion_SpawnInfo: Используйте садовый пульт управления ночью
-	MachineRebellion_DespawnMessage: Используйте садовый пульт управления ночью
-	MachineRebellion_DisplayName: Мятеж Машин
 	Notbound: "[Не назначено]"
 	DisableMotionInterpolationMessage:
 		'''

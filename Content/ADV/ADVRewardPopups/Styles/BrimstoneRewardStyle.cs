@@ -1,4 +1,4 @@
-using CalamityOverhaul.Content.ADV.UIEffect;
+ï»¿using CalamityOverhaul.Content.ADV.UIEffect;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
@@ -7,7 +7,7 @@ using Terraria;
 namespace CalamityOverhaul.Content.ADV.ADVRewardPopups.Styles
 {
     /// <summary>
-    /// Áò»Ç»ğ·ç¸ñ½±Àøµ¯´°
+    /// ç¡«ç£ºç«é£æ ¼å¥–åŠ±å¼¹çª—
     /// </summary>
     internal class BrimstoneRewardStyle : IRewardPopupStyle
     {
@@ -37,7 +37,7 @@ namespace CalamityOverhaul.Content.ADV.ADVRewardPopups.Styles
         public void DrawPanel(SpriteBatch spriteBatch, Rectangle rect, float alpha, float hoverGlow) {
             Texture2D px = VaultAsset.placeholder2.Value;
 
-            //½¥±ä±³¾° - Áò»Ç»ğÉîºìÉ«
+            //æ¸å˜èƒŒæ™¯ - ç¡«ç£ºç«æ·±çº¢è‰²
             int segments = 35;
             for (int i = 0; i < segments; i++) {
                 float t = i / (float)segments;
@@ -60,15 +60,15 @@ namespace CalamityOverhaul.Content.ADV.ADVRewardPopups.Styles
                 spriteBatch.Draw(px, r, new Rectangle(0, 0, 1, 1), finalColor);
             }
 
-            //»ğÑæÂö³åµş¼Ó²ã
+            //ç«ç„°è„‰å†²å åŠ å±‚
             float pulseBrightness = (float)Math.Sin(infernoPulse * 1.8f) * 0.5f + 0.5f;
             Color pulseOverlay = new Color(120, 25, 15) * (alpha * 0.25f * pulseBrightness);
             spriteBatch.Draw(px, rect, new Rectangle(0, 0, 1, 1), pulseOverlay);
 
-            //ÈÈÀËÅ¤ÇúĞ§¹û²ã
+            //çƒ­æµªæ‰­æ›²æ•ˆæœå±‚
             DrawHeatWave(spriteBatch, rect, alpha * 0.85f);
 
-            //ÄÚ·¢¹â
+            //å†…å‘å…‰
             float glowPulse = (float)Math.Sin(emberGlowTimer * 1.5f) * 0.5f + 0.5f;
             Rectangle inner = rect;
             inner.Inflate(-7, -7);
@@ -125,7 +125,7 @@ namespace CalamityOverhaul.Content.ADV.ADVRewardPopups.Styles
         }
 
         public void GetParticles(out List<object> particles) {
-            particles = [.. ashes, .. flameWisps, .. embers];//Ïë³öÕâ¸öÓï·¨ÌÇµÄÈËÕæÄãÂé±ÔÊÇ¸öÌì²Å
+            particles = [.. ashes, .. flameWisps, .. embers];//æƒ³å‡ºè¿™ä¸ªè¯­æ³•ç³–çš„äººçœŸä½ éº»ç—¹æ˜¯ä¸ªå¤©æ‰
         }
 
         public void UpdateParticles(Vector2 basePos, float panelFade) {

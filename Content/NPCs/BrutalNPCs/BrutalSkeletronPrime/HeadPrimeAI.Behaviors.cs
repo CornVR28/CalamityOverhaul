@@ -1,11 +1,11 @@
-using System;
+ï»¿using System;
 using Terraria;
 using Terraria.ID;
 
 namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalSkeletronPrime
 {
     /// <summary>
-    /// °üº¬AIµÄÒÆ¶¯ºÍĞĞÎªÂß¼­
+    /// åŒ…å«AIçš„ç§»åŠ¨å’Œè¡Œä¸ºé€»è¾‘
     /// </summary>
     internal partial class HeadPrimeAI
     {
@@ -136,21 +136,21 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalSkeletronPrime
         }
 
         private void EnrageNPC() {
-            //Ôö¼Ó NPC µÄÉËº¦ºÍ·ÀÓù
+            //å¢åŠ  NPC çš„ä¼¤å®³å’Œé˜²å¾¡
             npc.damage = 1000;
             npc.defense = 9999;
         }
 
         private void MoveTowardsPlayer(float baseSpeed, float minSpeed, float maxSpeed, float speedDivisor) {
-            //¼ÆËãÍæ¼ÒÓë NPC Ö®¼äµÄÏòÁ¿ºÍ¾àÀë
+            //è®¡ç®—ç©å®¶ä¸ NPC ä¹‹é—´çš„å‘é‡å’Œè·ç¦»
             Vector2 npcCenter = npc.Center;
             Vector2 playerCenter = Main.player[npc.target].Center;
             Vector2 directionToPlayer = playerCenter - npcCenter;
             float distanceToPlayer = directionToPlayer.Length();
-            //¼ÆËãËÙ¶È
+            //è®¡ç®—é€Ÿåº¦
             float adjustedSpeed = baseSpeed + distanceToPlayer / speedDivisor;
             adjustedSpeed = Math.Clamp(adjustedSpeed, minSpeed, maxSpeed);
-            //¸ù¾İ¼ÆËã³öµÄÏòÁ¿µ÷ÕûËÙ¶È
+            //æ ¹æ®è®¡ç®—å‡ºçš„å‘é‡è°ƒæ•´é€Ÿåº¦
             directionToPlayer.Normalize();
             npc.velocity = directionToPlayer * adjustedSpeed;
         }
@@ -159,7 +159,7 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalSkeletronPrime
             if (NPC.IsMechQueenUp) {
                 DespawnNPC(NPCID.Retinazer);
                 DespawnNPC(NPCID.Spazmatism);
-                //Èç¹û Retinazer ºÍ Spazmatism ¶¼²»ÔÚ£¬Ôò±äĞÎ²¢ÏûÊ§
+                //å¦‚æœ Retinazer å’Œ Spazmatism éƒ½ä¸åœ¨ï¼Œåˆ™å˜å½¢å¹¶æ¶ˆå¤±
                 if (!NPC.AnyNPCs(NPCID.Retinazer) && !NPC.AnyNPCs(NPCID.Spazmatism)) {
                     TransformOrDespawnNPC(NPCID.TheDestroyer, NPCID.TheDestroyerTail);
                 }

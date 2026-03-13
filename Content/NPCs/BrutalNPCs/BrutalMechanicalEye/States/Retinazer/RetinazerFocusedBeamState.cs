@@ -24,12 +24,12 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalMechanicalEye.States.Re
         /// <summary>
         /// 蓄力阶段
         /// </summary>
-        private int ChargePhase => Context.IsMachineRebellion ? 35 : (Context.IsDeathMode ? 40 : 50);
+        private int ChargePhase => Context.IsDeathMode ? 40 : 50;
 
         /// <summary>
         /// 发射阶段
         /// </summary>
-        private int FirePhase => Context.IsMachineRebellion ? 70 : (Context.IsDeathMode ? 65 : 60);
+        private int FirePhase => Context.IsDeathMode ? 65 : 60;
 
         /// <summary>
         /// 恢复阶段
@@ -49,7 +49,7 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalMechanicalEye.States.Re
         /// <summary>
         /// 激光发射间隔
         /// </summary>
-        private int FireInterval => Context.IsMachineRebellion ? 4 : (Context.IsDeathMode ? 5 : 6);
+        private int FireInterval => Context.IsDeathMode ? 5 : 6;
 
         private TwinsStateContext Context;
         private Vector2 currentDirection;

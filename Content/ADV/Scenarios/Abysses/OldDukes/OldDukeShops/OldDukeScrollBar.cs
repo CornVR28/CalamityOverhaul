@@ -1,11 +1,11 @@
-using Microsoft.Xna.Framework.Graphics;
+ï»¿using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;
 
 namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.OldDukeShops
 {
     /// <summary>
-    /// Áò»Çº£·ç¸ñµÄ¹ö¶¯Ìõ
+    /// ç¡«ç£ºæµ·é£æ ¼çš„æ»šåŠ¨æ¡
     /// </summary>
     internal class OldDukeScrollBar
     {
@@ -14,7 +14,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.OldDukeShops
         private const int offsetX = 550;
         private const int offsetY = 140;
         /// <summary>
-        /// ¸üĞÂ¹ö¶¯Ìõ×´Ì¬
+        /// æ›´æ–°æ»šåŠ¨æ¡çŠ¶æ€
         /// </summary>
         public void Update(Vector2 panelPosition, int barHeight, int scrollOffset, int maxScroll,
             int totalItems, int visibleItems, Point mousePosition, bool mouseLeftDown,
@@ -26,51 +26,51 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.OldDukeShops
                 return;
             }
 
-            //¹ö¶¯ÌõÎ»ÖÃ£¨·ÅÔÚÓÒ²à£©
+            //æ»šåŠ¨æ¡ä½ç½®ï¼ˆæ”¾åœ¨å³ä¾§ï¼‰
             int barX = (int)(panelPosition.X + offsetX);
             int barY = (int)(panelPosition.Y + offsetY);
 
             Rectangle barBg = new Rectangle(barX, barY, 12, barHeight);
 
-            //»¬¿é¸ß¶È
+            //æ»‘å—é«˜åº¦
             float indicatorHeightRatio = (float)visibleItems / totalItems;
             int indicatorHeight = Math.Max(30, (int)(barHeight * indicatorHeightRatio));
 
-            //»¬¿éÎ»ÖÃ
+            //æ»‘å—ä½ç½®
             float scrollRatio = maxScroll > 0 ? (float)scrollOffset / maxScroll : 0f;
             int indicatorY = barY + (int)((barHeight - indicatorHeight) * scrollRatio);
 
             indicatorRect = new Rectangle(barX, indicatorY, 12, indicatorHeight);
 
-            //Êó±ê½»»¥
+            //é¼ æ ‡äº¤äº’
             if (mouseLeftDown) {
                 if (Main.mouseLeftRelease) {
-                    //Ê×´Îµã»÷
+                    //é¦–æ¬¡ç‚¹å‡»
                     if (indicatorRect.Contains(mousePosition)) {
                         IsDragging = true;
                     }
                     else if (barBg.Contains(mousePosition)) {
-                        //µã»÷¹ö¶¯Ìõ±³¾°£¬Ö±½ÓÌø×ª
+                        //ç‚¹å‡»æ»šåŠ¨æ¡èƒŒæ™¯ï¼Œç›´æ¥è·³è½¬
                         float clickRatio = (mousePosition.Y - barY) / (float)barHeight;
                         newScrollOffset = (int)(clickRatio * maxScroll);
                         newScrollOffset = Math.Clamp(newScrollOffset, 0, maxScroll);
                     }
                 }
                 else if (IsDragging) {
-                    //ÍÏ¶¯ÖĞ
+                    //æ‹–åŠ¨ä¸­
                     float dragRatio = (mousePosition.Y - barY - indicatorHeight * 0.5f) / (barHeight - indicatorHeight);
                     newScrollOffset = (int)(dragRatio * maxScroll);
                     newScrollOffset = Math.Clamp(newScrollOffset, 0, maxScroll);
                 }
             }
             else {
-                //ËÉ¿ªÊó±ê
+                //æ¾å¼€é¼ æ ‡
                 IsDragging = false;
             }
         }
 
         /// <summary>
-        /// »æÖÆ¹ö¶¯Ìõ
+        /// ç»˜åˆ¶æ»šåŠ¨æ¡
         /// </summary>
         public void Draw(SpriteBatch spriteBatch, Vector2 panelPosition, int barHeight,
             int scrollOffset, int maxScroll, int totalItems, int visibleItems,
@@ -79,39 +79,39 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.OldDukeShops
 
             Texture2D pixel = VaultAsset.placeholder2.Value;
 
-            //¹ö¶¯ÌõÎ»ÖÃ
+            //æ»šåŠ¨æ¡ä½ç½®
             int barX = (int)(panelPosition.X + offsetX);
             int barY = (int)(panelPosition.Y + offsetY);
 
             Rectangle barBg = new Rectangle(barX, barY, 12, barHeight);
 
-            //»æÖÆ¹ö¶¯Ìõ±³¾°
+            //ç»˜åˆ¶æ»šåŠ¨æ¡èƒŒæ™¯
             DrawScrollBarBackground(spriteBatch, barBg, pixel, uiAlpha, sulfurPulseTimer);
 
-            //»¬¿é¸ß¶È
+            //æ»‘å—é«˜åº¦
             float indicatorHeightRatio = (float)visibleItems / totalItems;
             int indicatorHeight = Math.Max(30, (int)(barHeight * indicatorHeightRatio));
 
-            //»¬¿éÎ»ÖÃ
+            //æ»‘å—ä½ç½®
             float scrollRatio = maxScroll > 0 ? (float)scrollOffset / maxScroll : 0f;
             int indicatorY = barY + (int)((barHeight - indicatorHeight) * scrollRatio);
 
             Rectangle indicatorRect = new Rectangle(barX, indicatorY, 12, indicatorHeight);
 
-            //»æÖÆ»¬¿é
+            //ç»˜åˆ¶æ»‘å—
             DrawScrollIndicator(spriteBatch, indicatorRect, pixel, uiAlpha, sulfurPulseTimer);
 
-            //»æÖÆ¶¾ÒºÁ÷¶¯Ğ§¹û
+            //ç»˜åˆ¶æ¯’æ¶²æµåŠ¨æ•ˆæœ
             DrawToxicFlow(spriteBatch, indicatorRect, pixel, uiAlpha);
         }
 
         private void DrawScrollBarBackground(SpriteBatch spriteBatch, Rectangle barBg,
             Texture2D pixel, float uiAlpha, float sulfurPulseTimer) {
-            //±³¾°
+            //èƒŒæ™¯
             Color bgColor = new Color(20, 30, 12) * (uiAlpha * 0.6f);
             spriteBatch.Draw(pixel, barBg, new Rectangle(0, 0, 1, 1), bgColor);
 
-            //±ß¿ò
+            //è¾¹æ¡†
             Color borderColor = new Color(70, 100, 35) * (uiAlpha * 0.7f);
             spriteBatch.Draw(pixel, new Rectangle(barBg.X, barBg.Y, barBg.Width, 1),
                 new Rectangle(0, 0, 1, 1), borderColor);
@@ -125,7 +125,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.OldDukeShops
 
         private void DrawScrollIndicator(SpriteBatch spriteBatch, Rectangle indicatorRect,
             Texture2D pixel, float uiAlpha, float sulfurPulseTimer) {
-            //»¬¿éÖ÷Ìå½¥±ä
+            //æ»‘å—ä¸»ä½“æ¸å˜
             float pulse = (float)Math.Sin(sulfurPulseTimer) * 0.5f + 0.5f;
             Color indicatorTop = Color.Lerp(new Color(50, 70, 25), new Color(80, 110, 45), pulse) * uiAlpha;
             Color indicatorBottom = Color.Lerp(new Color(35, 50, 18), new Color(60, 85, 35), pulse) * uiAlpha;
@@ -140,7 +140,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.OldDukeShops
                 spriteBatch.Draw(pixel, segRect, new Rectangle(0, 0, 1, 1), segColor);
             }
 
-            //»¬¿é±ß¿ò£¨Áò»ÇÂÌ£©
+            //æ»‘å—è¾¹æ¡†ï¼ˆç¡«ç£ºç»¿ï¼‰
             Color borderColor = new Color(130, 160, 65) * (uiAlpha * 0.9f);
             spriteBatch.Draw(pixel, new Rectangle(indicatorRect.X, indicatorRect.Y, indicatorRect.Width, 2),
                 new Rectangle(0, 0, 1, 1), borderColor);
@@ -151,7 +151,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.OldDukeShops
             spriteBatch.Draw(pixel, new Rectangle(indicatorRect.Right - 2, indicatorRect.Y, 2, indicatorRect.Height),
                 new Rectangle(0, 0, 1, 1), borderColor);
 
-            //ÍÏ¶¯Ê±¸ßÁÁ
+            //æ‹–åŠ¨æ—¶é«˜äº®
             if (IsDragging) {
                 Color highlightColor = new Color(160, 190, 80) * (uiAlpha * 0.4f);
                 spriteBatch.Draw(pixel, indicatorRect, new Rectangle(0, 0, 1, 1), highlightColor);
@@ -160,7 +160,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.OldDukeShops
 
         private void DrawToxicFlow(SpriteBatch spriteBatch, Rectangle indicatorRect,
             Texture2D pixel, float uiAlpha) {
-            //¶¾ÒºÁ÷¶¯Ğ§¹û
+            //æ¯’æ¶²æµåŠ¨æ•ˆæœ
             float flowTimer = (float)Main.timeForVisualEffects * 0.05f;
             int flowCount = 3;
 
@@ -176,7 +176,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.OldDukeShops
         }
 
         /// <summary>
-        /// ÖØÖÃ¹ö¶¯Ìõ×´Ì¬
+        /// é‡ç½®æ»šåŠ¨æ¡çŠ¶æ€
         /// </summary>
         public void Reset() {
             IsDragging = false;

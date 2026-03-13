@@ -1,4 +1,4 @@
-using Microsoft.Xna.Framework.Graphics;
+ï»¿using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using Terraria;
 using Terraria.Audio;
@@ -8,7 +8,7 @@ using Terraria.ModLoader;
 namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
 {
     /// <summary>
-    /// Áò»Ç»ğÖùµ¯Ä»
+    /// ç¡«ç£ºç«æŸ±å¼¹å¹•
     /// </summary>
     internal class PandemoniumFirePillar : ModProjectile
     {
@@ -38,23 +38,23 @@ namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
 
         public override void AI() {
             if (Life == 0) {
-                //³õÊ¼»¯
+                //åˆå§‹åŒ–
                 MaxLife = MaxLifeTime;
                 radius = Main.rand.NextFloat(180f, 220f);
                 Projectile.width = Projectile.height = (int)(radius * 2);
 
-                //Éú³É±¬·¢ÌØĞ§
+                //ç”Ÿæˆçˆ†å‘ç‰¹æ•ˆ
                 SpawnInitialEffect();
             }
 
             Life++;
 
-            //³ÖĞøÁ£×ÓĞ§¹û
+            //æŒç»­ç²’å­æ•ˆæœ
             if (Main.rand.NextBool(2)) {
                 SpawnParticles();
             }
 
-            //Ç¿ÁÒÕÕÃ÷
+            //å¼ºçƒˆç…§æ˜
             float lightIntensity = GetAlphaValue() * 3f;
             Lighting.AddLight(Projectile.Center, 2.5f * lightIntensity, 0.8f * lightIntensity, 0.3f * lightIntensity);
         }
@@ -71,7 +71,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
         }
 
         private void SpawnInitialEffect() {
-            //»ğÖùÉú³É±¬·¢
+            //ç«æŸ±ç”Ÿæˆçˆ†å‘
             for (int i = 0; i < 60; i++) {
                 Vector2 velocity = new Vector2(
                     Main.rand.NextFloat(-8f, 8f),
@@ -90,7 +90,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
                 brimstone.fadeIn = 2f;
             }
 
-            //»ğÑæºËĞÄ
+            //ç«ç„°æ ¸å¿ƒ
             for (int i = 0; i < 40; i++) {
                 Dust fire = Dust.NewDustPerfect(
                     Projectile.Center,
@@ -103,7 +103,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
                 fire.noGravity = true;
             }
 
-            //µØÃæ³å»÷»·
+            //åœ°é¢å†²å‡»ç¯
             for (int i = 0; i < 30; i++) {
                 float angle = MathHelper.TwoPi * i / 30f;
                 Vector2 velocity = angle.ToRotationVector2() * 12f;
@@ -128,7 +128,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
         private void SpawnParticles() {
             float lifeRatio = Life / MaxLife;
 
-            //ÉÏÉı»ğÑæ
+            //ä¸Šå‡ç«ç„°
             for (int i = 0; i < 3; i++) {
                 Vector2 spawnPos = Projectile.Center + Main.rand.NextVector2Circular(radius * 0.5f, 10f);
                 Dust flame = Dust.NewDustPerfect(
@@ -142,7 +142,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
                 flame.noGravity = true;
             }
 
-            //»ğÑæÓà½ı
+            //ç«ç„°ä½™çƒ¬
             if (Main.rand.NextBool(2)) {
                 Dust ember = Dust.NewDustPerfect(
                     Projectile.Center + Main.rand.NextVector2Circular(radius * 0.7f, radius * 0.7f),
@@ -161,7 +161,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
         }
 
         public override void OnKill(int timeLeft) {
-            //ÏûÉ¢ÌØĞ§
+            //æ¶ˆæ•£ç‰¹æ•ˆ
             for (int i = 0; i < 30; i++) {
                 Vector2 velocity = Main.rand.NextVector2Circular(8f, 8f);
 
@@ -184,7 +184,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
             Vector2 screenPos = Projectile.Center - Main.screenPosition;
             float alpha = GetAlphaValue();
 
-            //»ğÖù»ù´¡»Ô¹â
+            //ç«æŸ±åŸºç¡€è¾‰å…‰
             for (int i = 0; i < 4; i++) {
                 float scale = (radius / GlowAsset.Value.Width) * (2f + i * 0.2f);
                 float layerAlpha = alpha * (0.6f - i * 0.12f);
@@ -202,7 +202,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
                 );
             }
 
-            //ºËĞÄ°×¹â
+            //æ ¸å¿ƒç™½å…‰
             sb.Draw(
                 GlowAsset.Value,
                 screenPos,
