@@ -685,7 +685,6 @@ QuestNode: {
 		DetailedDescription: 神圣之地的水晶女皇，统御着所有圣洁的凝胶生物。比起她的配偶，她更加敏捷且致命。准备好迎接一场华丽的弹幕洗礼吧。
 	}
 
-
 	BuildHouse: {
 		DisplayName: 建筑大师
 		Description: 建造合适的房屋
