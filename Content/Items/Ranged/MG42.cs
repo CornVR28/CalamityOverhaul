@@ -25,11 +25,11 @@ namespace CalamityOverhaul.Content.Items.Ranged
             Item.value = Terraria.Item.buyPrice(3, 53, 5, 0);
             Item.crit = 2;
             Item.CWR().Scope = true;
-            Item.SetCartridgeGun<MG42Held>(220);
+            Item.SetHeldProj<MG42Held>();
         }
     }
 
-    internal class MG42Held : BaseFeederGun
+    internal class MG42Held : BaseGun
     {
         public override string Texture => CWRConstant.Item_Ranged + "MG42";
         public override int TargetID => ModContent.ItemType<MG42>();
@@ -38,7 +38,7 @@ namespace CalamityOverhaul.Content.Items.Ranged
         private float randomShootRotset;
         private float shootValue;
         public override void SetRangedProperty() {
-            FireTime = 4;
+
             HandIdleDistanceX = 36;
             HandIdleDistanceY = -4;
             HandFireDistanceX = 36;
@@ -62,9 +62,7 @@ namespace CalamityOverhaul.Content.Items.Ranged
 
         public override float GetGunInFireRot() {
             float rot = base.GetGunInFireRot();
-            if (kreloadTimeValue == 0) {
-                rot += randomShootRotset;
-            }
+            rot += randomShootRotset;
             return rot;
         }
 

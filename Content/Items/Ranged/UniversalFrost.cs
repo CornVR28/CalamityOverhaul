@@ -32,7 +32,7 @@ namespace CalamityOverhaul.Content.Items.Ranged
             Item.shootSpeed = 32f;
             Item.crit = 12;
             Item.useAmmo = AmmoID.Snowball;
-            Item.SetCartridgeGun<UniversalFrostHeld>(800);
+            Item.SetHeldProj<UniversalFrostHeld>();
         }
 
         public override void AddRecipes() {
@@ -54,7 +54,7 @@ namespace CalamityOverhaul.Content.Items.Ranged
         }
     }
 
-    internal class UniversalFrostHeld : BaseFeederGun
+    internal class UniversalFrostHeld : BaseGun
     {
         public override string Texture => CWRConstant.Item_Ranged + "UniversalFrostHeld";
         public override int TargetID => ModContent.ItemType<UniversalFrost>();
@@ -62,9 +62,9 @@ namespace CalamityOverhaul.Content.Items.Ranged
         private int onFireTime;
         private int onFireTime2;
         private int blizzardFieldTimer;
+        private int fireRateValue = 18;
         public override void SetRangedProperty() {
             Recoil = 0.25f;
-            FireTime = 18;
             GunPressure = 0;
             HandIdleDistanceX = 42;
             HandIdleDistanceY = 0;
@@ -76,7 +76,6 @@ namespace CalamityOverhaul.Content.Items.Ranged
             RecoilRetroForceMagnitude = 6;
             EnableRecoilRetroEffect = true;
             CanCreateCaseEjection = false;
-            LoadingAA_None.gunBodyY = 55;
             SpwanGunDustData.dustID1 = 76;
             SpwanGunDustData.dustID2 = 149;
             SpwanGunDustData.dustID3 = 76;
@@ -88,10 +87,6 @@ namespace CalamityOverhaul.Content.Items.Ranged
             }
             else {
                 Projectile.frame = 4;
-            }
-            if (kreloadTimeValue > 0) {
-                fireIndex = 0;
-                FireTime = 18;
             }
 
             if (onFireTime2 > 0) {
@@ -115,8 +110,8 @@ namespace CalamityOverhaul.Content.Items.Ranged
                 onFireTime--;
             }
             else {
-                if (FireTime > 35) {
-                    FireTime = 12;
+                if (fireRateValue > 35) {
+                    fireRateValue = 12;
                 }
             }
 
@@ -126,6 +121,7 @@ namespace CalamityOverhaul.Content.Items.Ranged
         }
 
         public override void FiringShoot() {
+            _ = UpdateConsumeAmmo();
             for (int i = 0; i < 35; i++) {
                 Vector2 vr = ShootVelocity.RotateRandom(0.08f) * Main.rand.NextFloat(0.8f, 1.15f);
                 int index2 = Dust.NewDust(ShootPos, 1, 1, DustID.BlueCrystalShard, vr.X, vr.Y, 0, default, 1.2f);
@@ -195,7 +191,7 @@ namespace CalamityOverhaul.Content.Items.Ranged
                 }
 
                 ShootCoolingValue = 18;
-                FireTime = 6;
+                fireRateValue = 6;
                 return;
             }
 
@@ -207,8 +203,8 @@ namespace CalamityOverhaul.Content.Items.Ranged
             fireIndex++;
 
             if (fireIndex > 1) {
-                if (FireTime > 5) {
-                    FireTime--;
+                if (fireRateValue > 5) {
+                    fireRateValue--;
                 }
                 fireIndex = 0;
             }
@@ -222,10 +218,10 @@ namespace CalamityOverhaul.Content.Items.Ranged
                 if (Main.rand.NextBool(2)) {
                     proj.damage /= 3;
                 }
-                if (Main.rand.NextBool(4) && FireTime <= 12) {
+                if (Main.rand.NextBool(4) && fireRateValue <= 12) {
                     proj.scale += Main.rand.NextFloat(0.4f);
                 }
-                if (Main.rand.NextBool(3) && FireTime <= 8) {
+                if (Main.rand.NextBool(3) && fireRateValue <= 8) {
                     proj.extraUpdates += 1;
                     proj.penetrate += 6;
                 }
@@ -235,10 +231,10 @@ namespace CalamityOverhaul.Content.Items.Ranged
                 , ModContent.ProjectileType<FrostNovaOrb>(), WeaponDamage, WeaponKnockback, Owner.whoAmI, 0, 0);
             frostNova.rotation = frostNova.velocity.ToRotation() + MathHelper.PiOver2;
 
-            if (FireTime <= 6) {
+            if (fireRateValue <= 6) {
                 fireIndex2++;
                 if (fireIndex2 > 25) {
-                    FireTime = 60;
+                    fireRateValue = 60;
                     onFireTime += 70;
                     fireIndex2 = 0;
                 }

@@ -36,12 +36,12 @@ namespace CalamityOverhaul.Content.Items.Ranged
             Item.DamageType = DamageClass.Ranged;
             Item.value = Item.buyPrice(13, 83, 5, 0);
             Item.crit = 2;
-            Item.SetCartridgeGun<NeutronGunHeld>(120);
+            Item.SetHeldProj<NeutronGunHeld>();
             Item.CWR().OmigaSnyContent = SupertableRecipeData.FullItems_NeutronGun;
         }
     }
 
-    internal class NeutronGunHeld : BaseFeederGun
+    internal class NeutronGunHeld : BaseGun
     {
         public override string Texture => CWRConstant.Item_Ranged + "NeutronGun";
         public override int TargetID => ModContent.ItemType<NeutronGun>();
@@ -52,7 +52,6 @@ namespace CalamityOverhaul.Content.Items.Ranged
         private int uiframe;
         private bool canattce;
         public override void SetRangedProperty() {
-            FireTime = 5;
             CanRightClick = true;
             ForcedConversionTargetAmmoFunc = () => true;
             ToTargetAmmo = ModContent.ProjectileType<NeutronBullet>();
@@ -60,8 +59,6 @@ namespace CalamityOverhaul.Content.Items.Ranged
             HandIdleDistanceX = 35;
             HandIdleDistanceY = 3;
             HandFireDistanceX = 35;
-            LoadingAmmoAnimation = LoadingAmmoAnimationEnum.Handgun;
-            LoadingAA_Handgun.gunBodyY = -16;
             ShootPosNorlLengValue = -2;
             ShootPosToMouLengValue = 10;
             GunPressure = 0.1f;
@@ -85,7 +82,6 @@ namespace CalamityOverhaul.Content.Items.Ranged
 
         public override void SetShootAttribute() {
             if (onFire) {
-                FireTime = 5;
                 Recoil = 0.45f;
                 GunPressure = 0.1f;
                 ControlForce = 0.03f;
@@ -95,7 +91,6 @@ namespace CalamityOverhaul.Content.Items.Ranged
                 Item.UseSound = CWRSound.Gun_AWP_Shoot with { Pitch = -0.1f, Volume = 0.25f };
             }
             else if (onFireR) {
-                FireTime = 45;
                 Recoil = 1.45f;
                 GunPressure = 0.16f;
                 ControlForce = 0.01f;
@@ -106,8 +101,9 @@ namespace CalamityOverhaul.Content.Items.Ranged
 
         public override void FiringShoot() {
             Projectile.NewProjectile(Source, ShootPos, ShootVelocity, AmmoTypes, WeaponDamage, WeaponKnockback, Owner.whoAmI, 0);
+            _ = UpdateConsumeAmmo();
             if (++fireIndex > 2) {
-                FireTime = 12;
+                ShootCoolingValue += 7;
                 fireIndex = 0;
             }
         }
@@ -115,6 +111,8 @@ namespace CalamityOverhaul.Content.Items.Ranged
         public override void FiringShootR() {
             int newdamage = (int)(WeaponDamage * (canattce ? 15.6f : 5.6f));
             Projectile.NewProjectile(Source, ShootPos, ShootVelocity, AmmoTypes, newdamage, WeaponKnockback, Owner.whoAmI, 1);
+            _ = UpdateConsumeAmmo();
+            ShootCoolingValue += 40;
             if (!canattce) {
                 Charge += 10;
             }

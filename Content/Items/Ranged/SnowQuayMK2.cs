@@ -12,7 +12,7 @@ namespace CalamityOverhaul.Content.Items.Ranged
             Item.damage = 28;
             Item.useAmmo = AmmoID.Snowball;
             Item.UseSound = SoundID.Item36 with { Pitch = -0.2f };
-            Item.SetCartridgeGun<SnowQuayMK2Held>(220);
+            Item.SetHeldProj<SnowQuayMK2Held>();
             Item.value = Terraria.Item.buyPrice(0, 1, 75, 0);
         }
 
@@ -35,13 +35,13 @@ namespace CalamityOverhaul.Content.Items.Ranged
         }
     }
 
-    internal class SnowQuayMK2Held : BaseFeederGun
+    internal class SnowQuayMK2Held : BaseGun
     {
         public override string Texture => CWRConstant.Item_Ranged + "SnowQuayMK2";
         public override int TargetID => ModContent.ItemType<SnowQuayMK2>();
         public override void SetRangedProperty() {
             Recoil = 0.3f;
-            FireTime = 8;
+
             GunPressure = 0;
             HandIdleDistanceX = 40;
             HandIdleDistanceY = 0;

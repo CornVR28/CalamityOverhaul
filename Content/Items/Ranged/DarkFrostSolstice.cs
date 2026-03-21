@@ -23,7 +23,7 @@ namespace CalamityOverhaul.Content.Items.Ranged
             Item.useAmmo = AmmoID.Snowball;
             Item.value = Terraria.Item.buyPrice(0, 35, 5, 5);
             Item.UseSound = SoundID.Item36 with { Pitch = 0.2f };
-            Item.SetCartridgeGun<DarkFrostSolsticeHeld>(1200);
+            Item.SetHeldProj<DarkFrostSolsticeHeld>();
         }
 
         public override void AddRecipes() {
@@ -45,16 +45,16 @@ namespace CalamityOverhaul.Content.Items.Ranged
         }
     }
 
-    internal class DarkFrostSolsticeHeld : BaseFeederGun
+    internal class DarkFrostSolsticeHeld : BaseGun
     {
         public override string Texture => CWRConstant.Item_Ranged + "DarkFrostSolsticeHeld";
         public override int TargetID => ModContent.ItemType<DarkFrostSolstice>();
         private int fireIndex2;
         private int onFireTime;
         private int onFireTime2;
+        private int fireRateValue = 20;
         public override void SetRangedProperty() {
             Recoil = 0.3f;
-            FireTime = 20;
             GunPressure = 0;
             HandIdleDistanceX = 60;
             HandIdleDistanceY = 0;
@@ -67,8 +67,6 @@ namespace CalamityOverhaul.Content.Items.Ranged
             EnableRecoilRetroEffect = true;
             CanCreateCaseEjection = false;
             HandheldDisplay = false;
-            LoadingAA_None.gunBodyY = 0;
-            LoadingAA_None.Roting = -10;
             SpwanGunDustData.dustID1 = 76;
             SpwanGunDustData.dustID2 = 149;
             SpwanGunDustData.dustID3 = 76;
@@ -82,10 +80,6 @@ namespace CalamityOverhaul.Content.Items.Ranged
             }
             else {
                 Projectile.frame = 4;
-            }
-            if (kreloadTimeValue > 0) {
-                fireIndex = 0;
-                FireTime = 20;
             }
 
             if (onFireTime2 > 0) {
@@ -109,13 +103,14 @@ namespace CalamityOverhaul.Content.Items.Ranged
                 onFireTime--;
             }
             else {
-                if (FireTime > 30) {
-                    FireTime = 15;
+                if (fireRateValue > 30) {
+                    fireRateValue = 15;
                 }
             }
         }
 
         public override void FiringShoot() {
+            _ = UpdateConsumeAmmo();
             for (int i = 0; i < 33; i++) {
                 Vector2 vr = ShootVelocity.RotateRandom(0.1f) * Main.rand.NextFloat(0.75f, 1.12f);
                 int index2 = Dust.NewDust(ShootPos, 1, 1, DustID.BlueCrystalShard, vr.X, vr.Y, 0, default, 1.1f);
@@ -206,7 +201,7 @@ namespace CalamityOverhaul.Content.Items.Ranged
                 Main.instance.CameraModifiers.Add(modifier);
 
                 ShootCoolingValue = 15;
-                FireTime = 8;
+                fireRateValue = 8;
                 return;
             }
 
@@ -218,8 +213,8 @@ namespace CalamityOverhaul.Content.Items.Ranged
             fireIndex++;
 
             if (fireIndex > 1) {
-                if (FireTime > 6) {
-                    FireTime--;
+                if (fireRateValue > 6) {
+                    fireRateValue--;
                 }
                 fireIndex = 0;
             }
@@ -233,10 +228,10 @@ namespace CalamityOverhaul.Content.Items.Ranged
                 if (Main.rand.NextBool(2)) {
                     proj.damage /= 2;
                 }
-                if (Main.rand.NextBool(4) && FireTime <= 15) {
+                if (Main.rand.NextBool(4) && fireRateValue <= 15) {
                     proj.scale += Main.rand.NextFloat(0.35f);
                 }
-                if (Main.rand.NextBool(3) && FireTime <= 10) {
+                if (Main.rand.NextBool(3) && fireRateValue <= 10) {
                     proj.extraUpdates += 1;
                     proj.penetrate += 5;
                 }
@@ -248,10 +243,10 @@ namespace CalamityOverhaul.Content.Items.Ranged
                 iceorb.rotation = iceorb.velocity.ToRotation();
             }
 
-            if (FireTime <= 8) {
+            if (fireRateValue <= 8) {
                 fireIndex2++;
                 if (fireIndex2 > 20) {
-                    FireTime = 50;
+                    fireRateValue = 50;
                     onFireTime += 60;
                     fireIndex2 = 0;
                 }

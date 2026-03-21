@@ -17,7 +17,7 @@ namespace CalamityOverhaul.Content.Items.Ranged
             Item.damage = 62;
             Item.useAmmo = AmmoID.Snowball;
             Item.UseSound = SoundID.Item36 with { Pitch = 0.2f };
-            Item.SetCartridgeGun<AvalancheM60Held>(400);
+            Item.SetHeldProj<AvalancheM60Held>();
             Item.value = Item.buyPrice(0, 4, 75, 0);
         }
 
@@ -42,15 +42,15 @@ namespace CalamityOverhaul.Content.Items.Ranged
         }
     }
 
-    internal class AvalancheM60Held : BaseFeederGun
+    internal class AvalancheM60Held : BaseGun
     {
         public override string Texture => CWRConstant.Item_Ranged + "AvalancheM60Held";
         public override int TargetID => ModContent.ItemType<AvalancheM60>();
         private int onFireTime;
         private int onFireTime2;
+        private int fireRateValue = 20;
         public override void SetRangedProperty() {
             Recoil = 0.3f;
-            FireTime = 20;
             GunPressure = 0;
             HandIdleDistanceX = 54;
             HandIdleDistanceY = -4;
@@ -62,8 +62,6 @@ namespace CalamityOverhaul.Content.Items.Ranged
             RecoilRetroForceMagnitude = 5;
             EnableRecoilRetroEffect = true;
             CanCreateCaseEjection = false;
-            LoadingAA_None.gunBodyY = 42;
-            LoadingAA_None.gunBodyX = 20;
         }
 
         public override void PostInOwner() {
@@ -72,10 +70,6 @@ namespace CalamityOverhaul.Content.Items.Ranged
             }
             else {
                 Projectile.frame = 4;
-            }
-            if (kreloadTimeValue > 0) {
-                fireIndex = 0;
-                FireTime = 20;
             }
 
             if (onFireTime2 > 0) {
@@ -99,8 +93,8 @@ namespace CalamityOverhaul.Content.Items.Ranged
                 onFireTime--;
             }
             else {
-                if (FireTime > 30) {
-                    FireTime = 15;
+                if (fireRateValue > 30) {
+                    fireRateValue = 15;
                 }
             }
         }
@@ -110,6 +104,7 @@ namespace CalamityOverhaul.Content.Items.Ranged
         }
 
         public override void FiringShoot() {
+            _ = UpdateConsumeAmmo();
             if (onFireTime > 0) {
                 Recoil = 5;
                 GunPressure = 0.6f;
@@ -135,7 +130,7 @@ namespace CalamityOverhaul.Content.Items.Ranged
                 }
 
                 ShootCoolingValue = 15;
-                FireTime = 8;
+                fireRateValue = 8;
                 return;
             }
 
@@ -144,8 +139,8 @@ namespace CalamityOverhaul.Content.Items.Ranged
             RecoilRetroForceMagnitude = 5;
             RecoilOffsetRecoverValue = 0.5f;
 
-            if (FireTime > 7) {
-                FireTime--;
+            if (fireRateValue > 7) {
+                fireRateValue--;
             }
 
             for (int i = 0; i < 3; i++) {
@@ -155,10 +150,10 @@ namespace CalamityOverhaul.Content.Items.Ranged
                 if (Main.rand.NextBool(2)) {
                     proj.damage /= 3;
                 }
-                if (Main.rand.NextBool(4) && FireTime <= 15) {
+                if (Main.rand.NextBool(4) && fireRateValue <= 15) {
                     proj.scale += Main.rand.NextFloat(0.35f);
                 }
-                if (Main.rand.NextBool(3) && FireTime <= 10) {
+                if (Main.rand.NextBool(3) && fireRateValue <= 10) {
                     proj.extraUpdates += 1;
                     proj.penetrate += 5;
                     proj.usesLocalNPCImmunity = true;
@@ -168,10 +163,10 @@ namespace CalamityOverhaul.Content.Items.Ranged
 
             Projectile proj3 = Projectile.NewProjectileDirect(Source, ShootPos, ShootVelocity, ModContent.ProjectileType<ExtremeColdHail>(), WeaponDamage, WeaponKnockback, Owner.whoAmI, 0, ShootVelocity.Y);
             proj3.rotation = proj3.velocity.ToRotation() + MathHelper.PiOver2;
-            if (FireTime <= 8) {
+            if (fireRateValue <= 8) {
                 fireIndex++;
                 if (fireIndex > 20) {
-                    FireTime = 50;
+                    fireRateValue = 50;
                     onFireTime += 60;
                     fireIndex = 0;
                 }

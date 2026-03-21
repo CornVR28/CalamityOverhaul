@@ -113,10 +113,6 @@ public static class QotUtils
             }
 
             var newAmmo = new Item(ammoType, Math.Min(item.stack, remainingAmount));
-            if (newAmmo.type != ItemID.None) {
-                //newAmmo.CWR().IntendAmmoProjectileReturn = !RangedLoader.IsAmmunitionUnlimited(newAmmo);
-                newAmmo.CWR().FromUnlimitedAmmo = true;
-            }
 
             extractedAmmo.Add(newAmmo);
             totalExtracted += newAmmo.stack;
@@ -143,10 +139,6 @@ public static class QotUtils
             }
 
             var newAmmo = new Item(resolvedAmmoType, Math.Min(item.stack, remainingAmount));
-            if (newAmmo.type != ItemID.None) {
-                //newAmmo.CWR().IntendAmmoProjectileReturn = !RangedLoader.IsAmmunitionUnlimited(newAmmo);
-                newAmmo.CWR().FromUnlimitedAmmo = true;
-            }
 
             extractedAmmo.Add(newAmmo);
             totalExtracted += newAmmo.stack;

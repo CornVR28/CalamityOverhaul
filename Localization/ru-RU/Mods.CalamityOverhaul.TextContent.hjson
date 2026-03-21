@@ -282,13 +282,6 @@
 	OverhaulTheBibleUI_Text3: Наблюдатель-маг
 	OverhaulTheBibleUI_Text4: Наблюдатель-призыватель
 	OverhaulTheBibleUI_Text5: Наблюдатель-разбойник
-	CartridgeHolderUI_Text1: Содержимое магазина патронов
-	CartridgeHolderUI_Text2: Осталось
-	CartridgeHolderUI_Text3: Пусто
-	CartridgeHolderUI_Text4: ПКМ - снять патроны
-	CartridgeHolderUI_Text5: ЛКМ — заполнить всё, ПКМ — добавить один
-	CartridgeHolderUI_Text6: Это оружие не может использовать данный боеприпас!
-	CartridgeHolderUI_Text7: Магазин полностью заряжен!
 	ArrowHolderUI_Text0: ЛКМ - поставить метку
 	ArrowHolderUI_Text1: ПКМ — снять метку
 	SupertableUI_Text4: Отключить наблюдение за расстановкой
@@ -346,10 +339,8 @@
 		'''
 	Config_1: Пользователь
 	Config_2: Конфигурация сервера была изменена
-	CWRGun_KL_Text: Нажмите клавишу [KL], чтобы перезарядить.
 	CWRGun_Scope_Text: Нажмите [Scope], чтобы прицелиться.
 	CWRGun_Recoil_Text: "[Recoil] Отдача"
-	CWRGun_MustCA_Text: Выстрел обязательно потребляет боеприпасы.
 	CWRGun_Recoil_Level_0: Нет
 	CWRGun_Recoil_Level_1: Слабая
 	CWRGun_Recoil_Level_2: Умеренная

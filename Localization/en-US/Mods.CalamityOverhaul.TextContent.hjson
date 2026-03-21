@@ -285,13 +285,6 @@
 	OverhaulTheBibleUI_Text3: Monitor the Mager
 	OverhaulTheBibleUI_Text4: Monitor the summoner
 	OverhaulTheBibleUI_Text5: Monitor the Roguer
-	CartridgeHolderUI_Text1: Magazine stuffing
-	CartridgeHolderUI_Text2: Residue
-	CartridgeHolderUI_Text3: Empty
-	CartridgeHolderUI_Text4: Right-click discharge
-	CartridgeHolderUI_Text5: Left click to fill all, right click to fill one
-	CartridgeHolderUI_Text6: The Weapon Cannot Use This Ammo!
-	CartridgeHolderUI_Text7: The Magazine Is Full!
 	ArrowHolderUI_Text0: Left Click On The Marked Arrow
 	ArrowHolderUI_Text1: Right Click Untag
 	SupertableUI_Text4: Close display monitor
@@ -353,10 +346,8 @@
 		'''
 	Config_1: User
 	Config_2: The server configuration is modified
-	CWRGun_KL_Text: Press the [KL] key to change the cartridge
 	CWRGun_Scope_Text: Press [Scope] to open the lens
 	CWRGun_Recoil_Text: "[Recoil] Recoil"
-	CWRGun_MustCA_Text: Firing must consume ammunition
 	CWRGun_Recoil_Level_0: No
 	CWRGun_Recoil_Level_1: Slight
 	CWRGun_Recoil_Level_2: Weaker

@@ -264,13 +264,6 @@
 	OverhaulTheBibleUI_Text3: 监视法师
 	OverhaulTheBibleUI_Text4: 监视召唤师
 	OverhaulTheBibleUI_Text5: 监视盗贼
-	CartridgeHolderUI_Text1: 弹匣填充内容
-	CartridgeHolderUI_Text2: 剩余
-	CartridgeHolderUI_Text3: 空
-	CartridgeHolderUI_Text4: 右键卸弹
-	CartridgeHolderUI_Text5: 左键点击全部装填，右键点击装填入一颗
-	CartridgeHolderUI_Text6: 该武器不能使用此弹药!
-	CartridgeHolderUI_Text7: 弹匣已满!
 	ArrowHolderUI_Text0: 左键点击标记箭矢
 	ArrowHolderUI_Text1: 右键点击取消标记
 	SupertableUI_Text4: 关闭摆放监视
@@ -328,10 +321,8 @@
 		'''
 	Config_1: 用户
 	Config_2: 修改了服务端配置
-	CWRGun_KL_Text: 按下[KL]键进行换弹
 	CWRGun_Scope_Text: 按下[Scope]开镜
 	CWRGun_Recoil_Text: "[Recoil]后坐力"
-	CWRGun_MustCA_Text: 开火必定消耗弹药
 	CWRGun_Recoil_Level_0: 无
 	CWRGun_Recoil_Level_1: 微弱的
 	CWRGun_Recoil_Level_2: 较弱的

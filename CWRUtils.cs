@@ -481,54 +481,6 @@ namespace CalamityOverhaul
         }
 
         /// <summary>
-        /// 快捷的将一个物品实例设置为手持对象
-        /// </summary>
-        public static void SetHeldProj(this Item item, int id) {
-            item.noUseGraphic = true;
-            item.CWR().hasHeldNoCanUseBool = true;
-            item.CWR().heldProjType = id;
-        }
-
-        /// <summary>
-        /// 快捷的将一个物品实例设置为填装枪类实例
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="item"></param>
-        public static void SetCartridgeGun<T>(this Item item, int ammoCapacity = 1) where T : ModProjectile {
-            item.SetHeldProj<T>();
-            item.CWR().HasCartridgeHolder = true;
-            item.CWR().AmmoCapacity = ammoCapacity;
-        }
-
-        /// <summary>
-        /// 复制一个物品的属性
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="item"></param>
-        public static void SetItemCopySD<T>(this Item item) where T : ModItem => item.CloneDefaults(ModContent.ItemType<T>());
-
-        /// <summary>
-        /// 弹药是否应该被消耗，先行判断武器自带的消耗抵消比率，再在该基础上计算玩家的额外消耗抵消比率，比如弹药箱加成或者药水
-        /// </summary>
-        /// <param name="player"></param>
-        /// <param name="weapon"></param>
-        /// <returns></returns>
-        public static bool CanUseAmmoInWeaponShoot(this Player player, Item weapon) {
-            bool result = true;
-            if (weapon.type != ItemID.None) {
-                Item[] magazineContents = weapon.CWR().MagazineContents;
-                if (magazineContents.Length <= 0) {
-                    return true;
-                }
-                result = ItemLoader.CanConsumeAmmo(weapon, magazineContents[0], player);
-                if (player.IsRangedAmmoFreeThisShot(magazineContents[0])) {
-                    result = false;
-                }
-            }
-            return result;
-        }
-
-        /// <summary>
         /// 赋予玩家无敌状态，这个函数与<see cref="Player.SetImmuneTimeForAllTypes(int)"/>类似
         /// </summary>
         /// <param name="player">要赋予无敌状态的玩家</param>
@@ -540,18 +492,6 @@ namespace CalamityOverhaul
             for (int k = 0; k < player.hurtCooldowns.Length; k++) {
                 player.hurtCooldowns[k] = player.immuneTime;
             }
-        }
-
-        public static Color[] GetColorDate(Texture2D tex) {
-            Color[] colors = new Color[tex.Width * tex.Height];
-            tex.GetData(colors);
-            List<Color> nonTransparentColors = [];
-            foreach (Color color in colors) {
-                if ((color.A > 0 || color.R > 0 || color.G > 0 || color.B > 0) && color != Color.White && color != Color.Black) {
-                    nonTransparentColors.Add(color);
-                }
-            }
-            return [.. nonTransparentColors];
         }
 
         /// <summary>
@@ -600,8 +540,6 @@ namespace CalamityOverhaul
             return line;
         }
 
-        internal static HalibutPlayer GetHalibut(this Player player) => player.GetOverride<HalibutPlayer>();
-
         public static CWRNpc CWR(this NPC npc) {
             return npc.GetGlobalNPC<CWRNpc>();
         }
@@ -630,40 +568,6 @@ namespace CalamityOverhaul
                 item.CWR().ai = [0, 0, 0];
             }
         }
-
-        public static void SpawnGunDust(Projectile projectile, Vector2 pos, Vector2 velocity, int splNum = 1) {
-            if (Main.myPlayer != projectile.owner) return;
-
-            pos += velocity.SafeNormalize(Vector2.Zero) * projectile.width * projectile.scale * 0.71f;
-            for (int i = 0; i < 30 * splNum; i++) {
-                int dustID;
-                switch (Main.rand.Next(6)) {
-                    case 0:
-                        dustID = 262;
-                        break;
-                    case 1:
-                    case 2:
-                        dustID = 54;
-                        break;
-                    default:
-                        dustID = 53;
-                        break;
-                }
-                float num = Main.rand.NextFloat(3f, 13f) * splNum;
-                float angleRandom = 0.06f;
-                Vector2 dustVel = new Vector2(num, 0f).RotatedBy((double)velocity.ToRotation(), default);
-                dustVel = dustVel.RotatedBy(0f - angleRandom);
-                dustVel = dustVel.RotatedByRandom(2f * angleRandom);
-                if (Main.rand.NextBool(4)) {
-                    dustVel = Vector2.Lerp(dustVel, -Vector2.UnitY * dustVel.Length(), Main.rand.NextFloat(0.6f, 0.85f)) * 0.9f;
-                }
-                float scale = Main.rand.NextFloat(0.5f, 1.5f);
-                int idx = Dust.NewDust(pos, 1, 1, dustID, dustVel.X, dustVel.Y, 0, default, scale);
-                Main.dust[idx].noGravity = true;
-                Main.dust[idx].position = pos;
-            }
-        }
-
 
         public static void BlastingSputteringDust(Projectile Projectile, int dustID1, int dustID2, int dustID3, int dustID4, int dustID5) {
             for (int i = 0; i < 40; i++) {

@@ -41,16 +41,6 @@ CWRServerConfig: {
 		Tooltip: Lorsqu'activé, les déplacements rapides à longue distance adoucissent la caméra, évitant ainsi toute sensation de malaise due à un déplacement trop rapide
 	}
 
-	CartridgeUI_Offset_X_Value: {
-		Label: Valeur de décalage horizontale de l'interface utilisateur du chargeur
-		Tooltip: ""
-	}
-
-	CartridgeUI_Offset_Y_Value: {
-		Label: Valeur de décalage verticale de l'interface utilisateur du chargeur
-		Tooltip: ""
-	}
-
 	WeaponHandheldDisplay: {
 		Label: Affichage portatif des armes
 		Tooltip:
@@ -66,18 +56,6 @@ CWRServerConfig: {
 		Tooltip: Une fois activé, les armes à feu auront un effet de recul lors du tir. Désactivez-le pour supprimer ces effets.
 	}
 
-	MagazineSystem: {
-		Label: Système de chargeur
-		Tooltip:
-			'''
-			Un système de contenu volumineux, activé pour la plupart des armes aura un mécanisme de chargeur, y compris le rechargement, le mélange de munitions, etc.
-			La désactivation désactivera ce contenu, les armes utilisant le mécanisme de munitions d'origine
-			[c/fff08c:Il convient de noter que] l'équilibre du jeu Calamité est ajusté sur la base de [c/fff08c:l'activation du système de chargeur]
-			Si vous choisissez de le désactiver, [c/de0808:l'équilibre du jeu pour les armes à distance ne sera plus pertinent]
-			[c/fff08c:Si vous modifiez cette option, veuillez entrer à nouveau dans le monde pour vous assurer que tous les effets sont correctement modifiés]
-			'''
-	}
-
 	BowArrowDraw: {
 		Label: Dessin dynamique des flèches de l'arc
 		Tooltip:
@@ -90,21 +68,6 @@ CWRServerConfig: {
 	EnableCasingsEntity: {
 		Label: Activer les entités d'étui de cartouches
 		Tooltip: Si vous trouvez les douilles éparpillées dérangeantes, désactiver cette option serait une bonne idée
-	}
-
-	LoadingAA_Volume: {
-		Label: Coefficient de volume des effets sonores de rechargement des armes à feu
-		Tooltip: Plus la valeur est élevée, plus le son est fort. 1 correspond au volume original
-	}
-
-	ShotgunFireForcedReloadInterruption: {
-		Label: Interruption forcée du rechargement par le feu des fusils à pompe [c/06e33f:(expérimental)]
-		Tooltip:
-			'''
-			Certaines armes à feu de type fusil à pompe possèdent cette caractéristique : 
-			lors du rechargement des munitions, tenter de tirer interrompt l'action de rechargement
-			Si activé, cette option donnera cette caractéristique à toutes les armes de type fusil à pompe
-			'''
 	}
 
 	WeaponLazyRotationAngle: {

@@ -153,10 +153,6 @@ namespace CalamityOverhaul
         /// </summary>
         internal static Dictionary<int, bool> ItemIsGunAndMustConsumeAmmunition { get; private set; } = [];
         /// <summary>
-        /// 该枪械是否拥有弹匣
-        /// </summary>
-        internal static Dictionary<int, bool> ItemHasCartridgeHolder { get; private set; } = [];
-        /// <summary>
         /// 获取一个枪械的后坐力数值
         /// </summary>
         internal static Dictionary<int, float> ItemIsGunAndGetRecoilValue { get; private set; } = [];
@@ -258,7 +254,6 @@ namespace CalamityOverhaul
                 ItemIsGunAndMustConsumeAmmunition[itemType] = false;
                 ItemIsGunAndGetRecoilValue[itemType] = 1.2f;
                 ItemIsGunAndGetRecoilLocKey[itemType] = "";
-                ItemHasCartridgeHolder[itemType] = false;
                 ItemIsBow[itemType] = false;
                 ItemIsBowAndArrowNum[itemType] = 1;
                 ItemIsRanged[itemType] = false;
@@ -283,7 +278,6 @@ namespace CalamityOverhaul
 
                     ItemIsHeldSwing[itemType] = cwrItem.IsHeldSwing;
                     ItemIsHeldSwingDontStopOrigShoot[itemType] = cwrItem.IsHeldSwingDontStopOrigShoot;
-                    ItemHasCartridgeHolder[itemType] = cwrItem.HasCartridgeHolder;
 
                     if (cwrItem.IsHeldSwing) {//DeBug处理，如果有的地方没有使用正确的初始化函数设置刀剑，就会在加载的时候在这里报错以提醒开发者
                         Projectile shootProj = new Projectile();
@@ -309,9 +303,6 @@ namespace CalamityOverhaul
                                 ItemIsGunAndMustConsumeAmmunition[itemType] = gun.MustConsumeAmmunition;
                                 ItemIsGunAndGetRecoilValue[itemType] = gun.Recoil;
                                 ItemIsGunAndGetRecoilLocKey[itemType] = GetLckRecoilKey(gun.Recoil);
-                            }
-                            if (heldProj.ModProjectile is BaseFeederGun feederGun) {
-                                ItemIsShotgun[itemType] = feederGun.LoadingAmmoAnimation == LoadingAmmoAnimationEnum.Shotgun;
                             }
                             if (heldProj.ModProjectile is BaseBow bow) {
                                 ItemIsBow[itemType] = true;

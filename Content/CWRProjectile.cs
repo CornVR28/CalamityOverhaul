@@ -206,20 +206,6 @@ namespace CalamityOverhaul.Content
         }
 
         public override void PostAI(Projectile projectile) {
-            if (Source?.Context == "CWRGunShoot" && cwrItem != null) {
-                if (cwrItem.SpecialAmmoState == SpecialAmmoStateEnum.armourPiercer) {
-                    Color color = Color.Lerp(Color.Cyan, Color.White, Main.rand.NextFloat(0.3f, 0.64f));
-                    BasePRT spark = new PRT_Spark(projectile.Center, projectile.velocity * 0.3f, false, 9, 2.3f, color * 0.1f);
-                    PRTLoader.AddParticle(spark);
-                }
-                else if (cwrItem.SpecialAmmoState == SpecialAmmoStateEnum.highExplosive) {
-                    if (Main.rand.NextBool(3)) {
-                        int dust = Dust.NewDust(projectile.Center, 1, 1, DustID.FireworkFountain_Red, projectile.velocity.X, projectile.velocity.Y);
-                        Main.dust[dust].noGravity = true;
-                        Main.dust[dust].scale *= 0.6f;
-                    }
-                }
-            }
         }
 
         public override bool PreKill(Projectile projectile, int timeLeft) {
@@ -252,12 +238,6 @@ namespace CalamityOverhaul.Content
                 }
                 modifiers.DefenseEffectiveness *= 0f;
             }
-            if (Source?.Context == "CWRGunShoot" && cwrItem != null) {
-                if (cwrItem.SpecialAmmoState == SpecialAmmoStateEnum.armourPiercer) {
-                    modifiers.DefenseEffectiveness *= 0.75f;
-                }
-            }
-
             if (projectile.type == CWRID.Proj_ArcZap && target.IsWormBody()) {
                 modifiers.FinalDamage /= 2;
             }
@@ -325,67 +305,6 @@ namespace CalamityOverhaul.Content
             }
         }
 
-        internal void SpecialAmmoStateOnHitEffect(Player player, Projectile projectile, NPC target, NPC.HitInfo hit) {
-            if (Source?.Context != "CWRGunShoot" || cwrItem == null) {
-                return;
-            }
-
-            if (cwrItem.SpecialAmmoState == SpecialAmmoStateEnum.napalmBomb) {
-                target.AddBuff(BuffID.OnFire3, 60);
-                player.ApplyDamageToNPC(target, player.GetShootState().WeaponDamage / 5, 0f, 0, false, DamageClass.Default, true);
-                float thirdDustScale = Main.rand.NextFloat(2, 4);
-                Vector2 dustRotation = (target.rotation - MathHelper.PiOver2).ToRotationVector2();
-                Vector2 dustVelocity = dustRotation * target.velocity.Length();
-                _ = SoundEngine.PlaySound(SoundID.Item14, target.Center);
-                for (int j = 0; j < 40; j++) {
-                    int contactDust2 = Dust.NewDust(new Vector2(target.position.X, target.position.Y), target.width, target.height, DustID.InfernoFork, 0f, 0f, 0, default, thirdDustScale);
-                    Dust dust = Main.dust[contactDust2];
-                    dust.position = target.Center + (Vector2.UnitX.RotatedByRandom(MathHelper.Pi).RotatedBy(target.velocity.ToRotation()) * target.width / 3f);
-                    dust.noGravity = true;
-                    dust.velocity.Y -= 6f;
-                    dust.velocity *= 0.5f;
-                    dust.velocity += dustVelocity * (0.6f + (0.6f * Main.rand.NextFloat()));
-                }
-            }
-            else if (cwrItem.SpecialAmmoState == SpecialAmmoStateEnum.highExplosive) {
-                player.ApplyDamageToNPC(target, player.GetShootState().WeaponDamage / 3, 0f, 0, false, DamageClass.Default, true);
-                for (int i = 0; i < 6; i++) {
-                    BasePRT particle = new PRT_Light(projectile.Center, VaultUtils.RandVr(3, 16), Main.rand.NextFloat(0.3f, 0.7f), Color.OrangeRed, 2, 0.2f);
-                    PRTLoader.AddParticle(particle);
-                }
-            }
-            else if (cwrItem.SpecialAmmoState == SpecialAmmoStateEnum.dragonBreath) {
-                if (projectile.numHits == 0 && player.ownedProjectileCounts[ModContent.ProjectileType<BMGFIRE>()] < 33) {
-                    float newdamage = projectile.damage;
-                    int projCount = 1;
-                    if (projectile.type > ProjectileID.None && projectile.type < player.ownedProjectileCounts.Length) {
-                        projCount = player.ownedProjectileCounts[projectile.type];
-                    }
-                    if (newdamage > 1000) {
-                        newdamage = 1000;
-                    }
-                    if (projCount > 5) {
-                        newdamage *= 0.95f;
-                    }
-                    if (projCount > 10) {
-                        newdamage *= 0.93f;
-                    }
-                    if (projCount > 15) {
-                        newdamage *= 0.91f;
-                    }
-                    if (projCount > 20) {
-                        newdamage *= 0.9f;
-                    }
-                    for (int i = 0; i < 4; i++) {
-                        Vector2 vr = projectile.velocity.RotatedBy(Main.rand.NextFloat(-0.2f, 0.2f)) * Main.rand.NextFloat(0.6f, 1.7f);
-                        int proj = Projectile.NewProjectile(projectile.FromObjectGetParent(), projectile.Center + (projectile.velocity * -3), vr
-                            , ModContent.ProjectileType<BMGFIRE>(), (int)(newdamage * (hit.Crit ? 0.35f : 0.2f)), 0, projectile.owner, Main.rand.Next(23));
-                        Main.projectile[proj].timeLeft /= 2;
-                    }
-                }
-            }
-        }
-
         private void ViscositySD(Projectile projectile, NPC target) {
             if (!Viscosity || projectile.numHits != 0) {
                 return;
@@ -403,7 +322,6 @@ namespace CalamityOverhaul.Content
             }
             ViscositySD(projectile, target);
             SuperAttackOnHitNPC(projectile, target);
-            SpecialAmmoStateOnHitEffect(owner, projectile, target, hit);
         }
 
         public override bool PreDraw(Projectile projectile, ref Color lightColor) {

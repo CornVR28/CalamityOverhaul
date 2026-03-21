@@ -15,9 +15,6 @@ namespace CalamityOverhaul.Content.RangedModify
                 if (handItem == null) {
                     return false;
                 }
-                if (CWRLoad.ItemHasCartridgeHolder[handItem.type]) {
-                    return false;
-                }
                 if (handItem.ammo != AmmoID.None) {
                     return false;
                 }

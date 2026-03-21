@@ -31,7 +31,7 @@ namespace CalamityOverhaul.Content.Items.Ranged
             Item.UseSound = SoundID.Item36 with { Volume = 0.7f };
             Item.rare = ItemRarityID.Pink;
             Item.value = Item.buyPrice(0, 1, 60, 10);
-            Item.SetCartridgeGun<RaiderGunHeld>(80);
+            Item.SetHeldProj<RaiderGunHeld>();
             Item.CWR().DeathModeItem = true;
             Dash = false;
         }
@@ -74,7 +74,7 @@ namespace CalamityOverhaul.Content.Items.Ranged
             Item.UseSound = SoundID.Item36 with { Volume = 0.7f };
             Item.rare = ItemRarityID.Red;
             Item.value = Item.buyPrice(0, 12, 60, 10);
-            Item.SetCartridgeGun<RaiderGunEXHeld>(680);
+            Item.SetHeldProj<RaiderGunEXHeld>();
             Item.CWR().DeathModeItem = true;
         }
 
@@ -110,7 +110,7 @@ namespace CalamityOverhaul.Content.Items.Ranged
         }
     }
 
-    internal class RaiderGunHeld : BaseFeederGun
+    internal class RaiderGunHeld : BaseGun
     {
         public override string Texture => CWRConstant.Item_Ranged + "RaiderGun";
         public override int TargetID => ModContent.ItemType<RaiderGun>();
@@ -133,7 +133,6 @@ namespace CalamityOverhaul.Content.Items.Ranged
         public override void SetShootAttribute() {
             if (onFireR) {
                 SoundEngine.PlaySound(CWRSound.Dash, Owner.Center);
-                CanUpdateMagazineContentsInShootBool = false;
                 CanCreateCaseEjection = false;
                 CanCreateSpawnGunDust = false;
                 FiringDefaultSound = false;
@@ -141,7 +140,6 @@ namespace CalamityOverhaul.Content.Items.Ranged
             else {
                 if (RaiderGun.Dash) {
                     Item.UseSound = "CalamityMod/Sounds/Item/ScorchedEarthShot3".GetSound();
-                    FireTime = 4;
                     GunPressure = 0.2f;
                     ControlForce = 0.02f;
                 }
@@ -152,12 +150,10 @@ namespace CalamityOverhaul.Content.Items.Ranged
         }
 
         public override void PostShootEverthing() {
-            CanUpdateMagazineContentsInShootBool = true;
             CanCreateCaseEjection = true;
             CanCreateSpawnGunDust = true;
             FiringDefaultSound = true;
             Item.UseSound = SoundID.Item36;
-            FireTime = Item.useTime;
             GunPressure = 0.1f;
             ControlForce = 0.02f;
         }
@@ -171,7 +167,8 @@ namespace CalamityOverhaul.Content.Items.Ranged
                 return;
             }
 
-            base.FiringShoot();
+            Projectile.NewProjectile(Source, ShootPos, ShootVelocity, AmmoTypes, WeaponDamage, WeaponKnockback, Owner.whoAmI, 0);
+            _ = UpdateConsumeAmmo();
         }
 
         public override bool CanSpanProj() {
@@ -195,11 +192,6 @@ namespace CalamityOverhaul.Content.Items.Ranged
             return Owner.ownedProjectileCounts[ModContent.ProjectileType<RaiderGunDash>()] == 0;
         }
 
-        public override bool KreLoadFulfill() {
-            RaiderGun.Dash = false;//装弹后让冲刺状态失效
-            return base.KreLoadFulfill();
-        }
-
         public override void FiringShootR() {
             float _swingDir = Owner.Center.X + ShootVelocity.X > Owner.position.X ? 1 : -1;
             Projectile.NewProjectile(Source, Owner.Center, ShootVelocity, ModContent.ProjectileType<RaiderGunDash>()
@@ -207,7 +199,7 @@ namespace CalamityOverhaul.Content.Items.Ranged
         }
     }
 
-    internal class RaiderGunEXHeld : BaseFeederGun
+    internal class RaiderGunEXHeld : BaseGun
     {
         public override string Texture => CWRConstant.Item_Ranged + "RaiderGunEX";
         public override int TargetID => ModContent.ItemType<RaiderGunEX>();
@@ -231,7 +223,6 @@ namespace CalamityOverhaul.Content.Items.Ranged
         public override void SetShootAttribute() {
             if (onFireR) {
                 SoundEngine.PlaySound(CWRSound.Dash, Owner.Center);
-                CanUpdateMagazineContentsInShootBool = false;
                 CanCreateCaseEjection = false;
                 CanCreateSpawnGunDust = false;
                 FiringDefaultSound = false;
@@ -239,7 +230,6 @@ namespace CalamityOverhaul.Content.Items.Ranged
             else {
                 if (RaiderGun.Dash) {
                     Item.UseSound = "CalamityMod/Sounds/Item/ScorchedEarthShot3".GetSound();
-                    FireTime = 20;
                     GunPressure = 0.3f;
                     ControlForce = 0.05f;
                 }
@@ -250,12 +240,10 @@ namespace CalamityOverhaul.Content.Items.Ranged
         }
 
         public override void PostShootEverthing() {
-            CanUpdateMagazineContentsInShootBool = true;
             CanCreateCaseEjection = true;
             CanCreateSpawnGunDust = true;
             FiringDefaultSound = true;
             Item.UseSound = SoundID.Item36;
-            FireTime = Item.useTime;
             GunPressure = 0.06f;
             ControlForce = 0.02f;
         }
@@ -279,6 +267,7 @@ namespace CalamityOverhaul.Content.Items.Ranged
             }
             Projectile.NewProjectile(Source, Owner.Center, ShootVelocity.RotatedByRandom(0.1f)
                     , AmmoTypes, WeaponDamage, WeaponKnockback, Owner.whoAmI);
+            _ = UpdateConsumeAmmo();
 
             fireIndex++;
             if (fireIndex > 3) {
@@ -317,11 +306,6 @@ namespace CalamityOverhaul.Content.Items.Ranged
         public override bool CanUseGun() {
             //正在冲刺时无法使用
             return Owner.ownedProjectileCounts[ModContent.ProjectileType<RaiderGunDash>()] == 0;
-        }
-
-        public override bool KreLoadFulfill() {
-            RaiderGun.Dash = false;//装弹后让冲刺状态失效
-            return base.KreLoadFulfill();
         }
 
         public override void FiringShootR() {
@@ -552,12 +536,7 @@ namespace CalamityOverhaul.Content.Items.Ranged
         }
 
         public override void OnKill(int timeLeft) {
-            //冲刺结束，准备强化射击
-            SoundEngine.PlaySound(CWRSound.Gun_Clipout, Owner.Center);
-            Item musketBall = new Item(ItemID.MusketBall, 80);
-            musketBall.CWR().AmmoProjectileReturn = false;
-            Item.CWR().LoadenMagazine(musketBall);
-            RaiderGun.Dash = true;
+            //冲刺结束，准备强化射击\n            SoundEngine.PlaySound(CWRSound.Gun_Clipout, Owner.Center);\n            RaiderGun.Dash = true;
             RaiderGun.DontDashTime += RaiderGun.DashCooling;
             CWRPlayer modPlayer = Owner.CWR();
             modPlayer.IsRotatingDuringDash = false;

@@ -1,6 +1,5 @@
 ﻿using CalamityOverhaul.Content.Items.Melee.StormGoddessSpears;
 using CalamityOverhaul.Content.LegendWeapon.MurasamaLegend.MurasamaProj;
-using CalamityOverhaul.Content.RangedModify;
 using InnoVault.GameSystem;
 using System.Collections.Generic;
 using Terraria;
@@ -35,7 +34,6 @@ namespace CalamityOverhaul.Content.Players
                 if (noRippersProj.Contains(proj.type)) {
                     return false;
                 }
-                GlobalGun.AdrenalineByGunDamageAC(Player, ref modifiers);
             }
             return base.On_ModifyHitNPCWithProj(proj, target, ref modifiers);
         }

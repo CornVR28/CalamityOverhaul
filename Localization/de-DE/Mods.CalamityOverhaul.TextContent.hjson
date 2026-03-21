@@ -310,13 +310,6 @@
 	OverhaulTheBibleUI_Text3: Wächter-Magier
 	OverhaulTheBibleUI_Text4: Wächter-Beschwörer
 	OverhaulTheBibleUI_Text5: Wächter-Dieb
-	CartridgeHolderUI_Text1: Patronenhalterinhalt
-	CartridgeHolderUI_Text2: Restlich
-	CartridgeHolderUI_Text3: Leer
-	CartridgeHolderUI_Text4: Mit der rechten Maustaste entladen
-	CartridgeHolderUI_Text5: Left click to fill all, right click to fill one
-	CartridgeHolderUI_Text6: The Weapon Cannot Use This Ammo!
-	CartridgeHolderUI_Text7: The Magazine Is Full!
 	// ArrowHolderUI_Text0: Left Click On The Marked Arrow
 	// ArrowHolderUI_Text1: Right Click Untag
 	SupertableUI_Text4: Platzierungsüberwachung schließen
@@ -378,10 +371,8 @@
 		''' */
 	// Config_1: User
 	// Config_2: The server configuration is modified
-	CWRGun_KL_Text: Drücke [KL] für Nachladen
 	CWRGun_Scope_Text: Drücke [Scope] für Zielen
 	CWRGun_Recoil_Text: "[Recoil] Rückstoß"
-	CWRGun_MustCA_Text: Schießen verbraucht immer Munition
 	CWRGun_Recoil_Level_0: Kein
 	CWRGun_Recoil_Level_1: Leichter
 	CWRGun_Recoil_Level_2: Geringer

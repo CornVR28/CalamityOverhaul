@@ -1,5 +1,4 @@
-﻿using CalamityOverhaul.Content.RangedModify;
-using CalamityOverhaul.Content.UIs.SupertableUIs;
+﻿using CalamityOverhaul.Content.UIs.SupertableUIs;
 using System;
 using Terraria;
 using static CalamityOverhaul.CWRMod;
@@ -15,7 +14,6 @@ namespace CalamityOverhaul
             Config_ForceReplaceResetContent,
             Config_AddExtrasContent,
             SupertableRecipeDate_ZenithWorld,
-            IsAmmunitionUnlimitedEvent,
             SetSupertableRecipeDate,
         }
 
@@ -109,13 +107,6 @@ namespace CalamityOverhaul
                     Instance.Logger.Info("Call-SupertableRecipeDate_ZenithWorld was made with incorrect parameter types.");
                     return null;
                 }
-            }
-            else if (callType == CallType.IsAmmunitionUnlimitedEvent) {
-                if (contentCount < 2) {
-                    Instance.Logger.Info("Call-IsAmmunitionUnlimitedEvent was made without additional parameters.");
-                    return null;
-                }
-                RangedLoader.IsAmmunitionUnlimitedEvent += (Func<Item, Player, bool>)args[1];
             }
             else if (callType == CallType.SetSupertableRecipeDate) {
 

@@ -324,13 +324,6 @@
 	OverhaulTheBibleUI_Text3: Surveiller le mage
 	OverhaulTheBibleUI_Text4: Surveiller l'invocateur
 	OverhaulTheBibleUI_Text5: Surveiller le voleur
-	CartridgeHolderUI_Text1: Contenu du chargeur
-	CartridgeHolderUI_Text2: Restant
-	CartridgeHolderUI_Text3: Vide
-	CartridgeHolderUI_Text4: Clic droit pour enlever
-	CartridgeHolderUI_Text5: Left click to fill all, right click to fill one
-	CartridgeHolderUI_Text6: The Weapon Cannot Use This Ammo!
-	CartridgeHolderUI_Text7: The Magazine Is Full!
 	// ArrowHolderUI_Text0: Left Click On The Marked Arrow
 	// ArrowHolderUI_Text1: Right Click Untag
 	SupertableUI_Text4: Désactiver la surveillance de placement
@@ -392,10 +385,8 @@
 		''' */
 	// Config_1: User
 	// Config_2: The server configuration is modified
-	CWRGun_KL_Text: Appuyez sur [KL] pour recharger
 	CWRGun_Scope_Text: Appuyez sur [Scope] pour viser
 	CWRGun_Recoil_Text: "[Recoil] Recul"
-	CWRGun_MustCA_Text: Tirer nécessite obligatoirement des munitions
 	CWRGun_Recoil_Level_0: Aucun
 	CWRGun_Recoil_Level_1: Léger
 	CWRGun_Recoil_Level_2: Modéré

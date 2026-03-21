@@ -292,7 +292,7 @@ namespace CalamityOverhaul.Content
                 }
                 Item newItem = new Item(item.type);
                 CWRItem cwrItem = newItem.CWR();
-                if (cwrItem.HasCartridgeHolder || cwrItem.heldProjType > 0 || cwrItem.isHeldItem) {
+                if (cwrItem.heldProjType > 0 || cwrItem.isHeldItem) {
                     item.SetDefaults(item.type);
                 }
             }

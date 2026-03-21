@@ -31,7 +31,7 @@ namespace CalamityOverhaul.Content.Items.Ranged
             Item.UseSound = CWRSound.Gun_50CAL_Shoot with { Volume = 0.6f };
             Item.rare = ItemRarityID.Pink;
             Item.value = Item.buyPrice(0, 1, 60, 10);
-            Item.SetCartridgeGun<DicoriaHeld>(60);
+            Item.SetHeldProj<DicoriaHeld>();
             Item.CWR().DeathModeItem = true;
         }
 
@@ -42,7 +42,7 @@ namespace CalamityOverhaul.Content.Items.Ranged
         }
     }
 
-    internal class DicoriaHeld : BaseFeederGun
+    internal class DicoriaHeld : BaseGun
     {
         public override string Texture => CWRConstant.Item_Ranged + "Dicoria";
         public override string GlowTexPath => CWRConstant.Item_Ranged + "DicoriaGlow";
@@ -67,23 +67,19 @@ namespace CalamityOverhaul.Content.Items.Ranged
             InOwner_HandState_AlwaysSetInFireRoding = false;
             ShootPosNorlLengValue = -16;
             if (++fireIndex > 6) {
-                FireTime = 40;
                 GunPressure = 0;
                 ControlForce = 0;
                 ShootPosNorlLengValue = 4;
                 InOwner_HandState_AlwaysSetInFireRoding = true;
-                CanUpdateMagazineContentsInShootBool = false;
                 AmmoTypes = ModContent.ProjectileType<DicoriaRay>();
                 Item.UseSound = SoundID.Item69;
             }
         }
 
         public override void PostShootEverthing() {
-            FireTime = Item.useTime;
             GunPressure = 0.1f;
             ControlForce = 0.02f;
             Item.UseSound = CWRSound.Gun_50CAL_Shoot with { Volume = 0.6f };
-            CanUpdateMagazineContentsInShootBool = true;
             if (fireIndex > 6) {
                 fireIndex = 0;
             }
@@ -110,6 +106,7 @@ namespace CalamityOverhaul.Content.Items.Ranged
                 Projectile.NewProjectile(Source, ShootPos, ShootVelocity
                     , AmmoTypes, WeaponDamage, WeaponKnockback, Owner.whoAmI, 0);
             }
+            _ = UpdateConsumeAmmo();
         }
     }
 
@@ -141,7 +138,7 @@ namespace CalamityOverhaul.Content.Items.Ranged
 
         public override void AI() {
             homeProj = Main.projectile.FindByIdentity((int)Projectile.ai[0]);
-            if (homeProj.Alives() && homeProj.ModProjectile is BaseFeederGun gun) {
+            if (homeProj.Alives() && homeProj.ModProjectile is BaseGun gun) {
                 Projectile.Center = gun.ShootPos;
                 Projectile.rotation = homeProj.rotation;
             }

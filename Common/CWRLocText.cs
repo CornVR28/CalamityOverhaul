@@ -122,19 +122,10 @@ namespace CalamityOverhaul.Common
         public LocalizedText OverhaulTheBibleUI_Text3 { get; private set; }
         public LocalizedText OverhaulTheBibleUI_Text4 { get; private set; }
         public LocalizedText OverhaulTheBibleUI_Text5 { get; private set; }
-        public LocalizedText CartridgeHolderUI_Text1 { get; private set; }
-        public LocalizedText CartridgeHolderUI_Text2 { get; private set; }
-        public LocalizedText CartridgeHolderUI_Text3 { get; private set; }
-        public LocalizedText CartridgeHolderUI_Text4 { get; private set; }
-        public LocalizedText CartridgeHolderUI_Text5 { get; private set; }
-        public LocalizedText CartridgeHolderUI_Text6 { get; private set; }
-        public LocalizedText CartridgeHolderUI_Text7 { get; private set; }
         public LocalizedText ArrowHolderUI_Text0 { get; private set; }
         public LocalizedText ArrowHolderUI_Text1 { get; private set; }
-        public LocalizedText CWRGun_KL_Text { get; private set; }
         public LocalizedText CWRGun_Scope_Text { get; private set; }
         public LocalizedText CWRGun_Recoil_Text { get; private set; }
-        public LocalizedText CWRGun_MustCA_Text { get; private set; }
         public LocalizedText CWRGun_Recoil_Level_0 { get; private set; }
         public LocalizedText CWRGun_Recoil_Level_1 { get; private set; }
         public LocalizedText CWRGun_Recoil_Level_2 { get; private set; }

@@ -3,8 +3,6 @@ using CalamityOverhaul.Content.Industrials.Generator;
 using CalamityOverhaul.Content.Items.Modifys;
 using CalamityOverhaul.Content.LegendWeapon;
 using CalamityOverhaul.Content.LegendWeapon.HalibutLegend.UI;
-using CalamityOverhaul.Content.RangedModify;
-using CalamityOverhaul.Content.RangedModify.UI.AmmoView;
 using InnoVault.GameSystem;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -20,30 +18,6 @@ using Terraria.UI.Chat;
 
 namespace CalamityOverhaul.Content
 {
-    public enum SpecialAmmoStateEnum
-    {
-        /// <summary>
-        /// 普通，默认值，即无特殊效果
-        /// </summary>
-        ordinary,
-        /// <summary>
-        /// 燃烧弹
-        /// </summary>
-        napalmBomb,
-        /// <summary>
-        /// 破甲
-        /// </summary>
-        armourPiercer,
-        /// <summary>
-        /// 高爆
-        /// </summary>
-        highExplosive,
-        /// <summary>
-        /// 龙息
-        /// </summary>
-        dragonBreath
-    }
-
     public class CWRItem : GlobalItem
     {
         #region Data
@@ -141,46 +115,6 @@ namespace CalamityOverhaul.Content
         /// </summary>
         public bool DeathModeItem;
         /// <summary>
-        /// 该物品对应的剩余子弹数量，一般用于给手持枪械弹幕访问
-        /// </summary>
-        public int NumberBullets;
-        /// <summary>
-        /// 该物品的弹容量
-        /// </summary>
-        public int AmmoCapacity;
-        /// <summary>
-        /// 大于0时不可以装弹
-        /// </summary>
-        public int NoKreLoadTime;
-        /// <summary>
-        /// 退弹时，该物品是否返还
-        /// </summary>
-        public bool AmmoProjectileReturn;
-        /// <summary>
-        /// 来源是无限的弹药
-        /// </summary>
-        public bool FromUnlimitedAmmo;
-        /// <summary>
-        /// 是否已经装好了弹药，一般来讲，该字段用于存储可装弹式手持弹幕的装弹状态
-        /// </summary>
-        public bool IsKreload;
-        /// <summary>
-        /// 该物品是否具有弹夹系统
-        /// </summary>
-        public bool HasCartridgeHolder;
-        /// <summary>
-        /// 使用的弹匣UI类型
-        /// </summary>
-        public CartridgeUIEnum CartridgeType;
-        /// <summary>
-        /// 特种状态
-        /// </summary>
-        public SpecialAmmoStateEnum SpecialAmmoState;
-        /// <summary>
-        /// 弹匣内容，管理装填后的弹药部分
-        /// </summary>
-        public Item[] MagazineContents;
-        /// <summary>
         /// 需要锁定的弹药类型
         /// </summary>
         public Item TargetLockAmmo;
@@ -208,17 +142,7 @@ namespace CalamityOverhaul.Content
             cwr.IsHeldSwing = IsHeldSwing;
             cwr.heldProjType = heldProjType;
             cwr.hasHeldNoCanUseBool = hasHeldNoCanUseBool;
-            cwr.IsKreload = IsKreload;
-            cwr.HasCartridgeHolder = HasCartridgeHolder;
-            cwr.CartridgeType = CartridgeType;
-            cwr.SpecialAmmoState = SpecialAmmoState;
-            cwr.MagazineContents = MagazineContents;
-            cwr.NumberBullets = NumberBullets;
-            cwr.AmmoCapacity = AmmoCapacity;
-            cwr.NoKreLoadTime = NoKreLoadTime;
             cwr.Scope = Scope;
-            cwr.AmmoProjectileReturn = AmmoProjectileReturn;
-            cwr.FromUnlimitedAmmo = FromUnlimitedAmmo;
             cwr.StorageUE = StorageUE;
             cwr.UEValue = UEValue;
             cwr.ConsumeUseUE = ConsumeUseUE;
@@ -254,17 +178,12 @@ namespace CalamityOverhaul.Content
             CWRItem cwrItem = item.CWR();
             cwrItem.ai = new float[MaxAISlot];
             cwrItem.TargetLockAmmo = new Item();
-            InitializeMagazine(cwrItem);
             SmiperItemSet(item);
             CWRLoad.SetAmmoItem(item);
         }
         //调用在 ItemRebuildLoader.SetDefaults 之后
         public static void PostSetDefaults(Item item) {
             CWRItem cwrItem = item.CWR();
-
-            if (cwrItem.AmmoCapacity == 0) {
-                cwrItem.AmmoCapacity = 1;
-            }
 
             if (cwrItem.MaxUEValue <= 0) {
                 cwrItem.MaxUEValue = cwrItem.ConsumeUseUE;
@@ -276,223 +195,6 @@ namespace CalamityOverhaul.Content
             if (CWRLoad.AddMaxStackItemsIn64.Contains(item.type)) {
                 item.maxStack = 64;
             }
-        }
-
-        #region Magazine
-        /// <summary>
-        /// 安全获取选定的弹匣弹药内容
-        /// </summary>
-        /// <returns></returns>
-        public Item GetSelectedBullets() {
-            if (MagazineContents == null || MagazineContents.Length <= 0 || MagazineContents[^1] == null) {
-                InitializeMagazine();
-            }
-            return MagazineContents[^1];//倒着读，让子弹先进先出
-        }
-
-        /// <summary>
-        /// 装填弹匣，该行为不考虑弹匣上限问题，使用默认添加数量可以自动计算装填数量
-        /// </summary>
-        /// <param name="addAmmo"></param>
-        /// <param name="addStack"></param>
-        public void LoadenMagazine(Item addAmmo, int addStack = 0) {
-            CalculateNumberBullet();
-            bool isUnlimited = RangedLoader.IsAmmunitionUnlimited(addAmmo);
-
-            if (addAmmo.type != ItemID.None && !addAmmo.CWR().AmmoProjectileReturn) {
-                isUnlimited = true;//如果加入的物品本身设置就是不返还，就强行判定为无限弹药
-            }
-
-            if (addStack == 0) {
-                addStack = AmmoCapacity - NumberBullets;
-                if (addStack > addAmmo.stack && !isUnlimited) {
-                    addStack = addAmmo.stack;
-                }
-            }
-
-            if (!isUnlimited) {
-                addAmmo.stack -= addStack;
-            }
-
-            Item newAmmo;
-            if (VaultUtils.ProjectileToSafeAmmoMap.TryGetValue(addAmmo.shoot, out int trueAmmoType)) {
-                newAmmo = new Item(trueAmmoType);
-                if (newAmmo.Alives() && addAmmo.Alives()) {
-                    newAmmo.CWR().DyeItemID = addAmmo.CWR().DyeItemID;//传播染色
-                }
-            }
-            else {
-                newAmmo = addAmmo.Clone();
-            }
-
-            newAmmo.stack = addStack;
-            if (newAmmo.type != ItemID.None) {
-                CWRItem cwrAmmo = newAmmo.CWR();
-                cwrAmmo.AmmoProjectileReturn = !isUnlimited;
-            }
-
-            List<Item> newMagazine = [.. MagazineContents];
-            bool onAdds = false;
-            foreach (var item in newMagazine) {
-                if (item.type == newAmmo.type && item.stack < item.maxStack
-                    && item.CWR().AmmoProjectileReturn == newAmmo.CWR().AmmoProjectileReturn) {
-                    item.stack += newAmmo.stack;
-                    onAdds = true;
-                }
-            }
-            if (!onAdds) {
-                if (addAmmo.type > ItemID.None && addAmmo.CWR().FromUnlimitedAmmo) {
-                    newAmmo.CWR().AmmoProjectileReturn = false;
-                }
-                newMagazine.Add(newAmmo);
-            }
-            SetMagazine(newMagazine);
-        }
-
-        /// <summary>
-        /// 设置弹匣内容，自动处理冗余内容、UI更新、剩余子弹数量等机制，如果输入非法的值，将直接初始化弹匣
-        /// </summary>
-        /// <param name="magazineArray"></param>
-        public void SetMagazine(Item[] magazineArray) {
-            if (magazineArray == null || magazineArray.Length <= 0 || magazineArray[0] == null) {
-                InitializeMagazine();//如果输入的是非法的弹匣内容，直接初始化弹匣，并返回
-                return;
-            }
-            SetMagazine(magazineArray.ToList());
-        }
-
-        /// <summary>
-        /// 设置弹匣内容，自动处理冗余内容、UI更新、剩余子弹数量等机制，如果输入非法的值，将直接初始化弹匣
-        /// </summary>
-        /// <param name="magazineList"></param>
-        public void SetMagazine(List<Item> magazineList) {
-            if (magazineList == null || magazineList.Count <= 0 || magazineList[0] == null) {
-                InitializeMagazine();//如果输入的是非法的弹匣内容，直接初始化弹匣，并返回
-                return;
-            }
-
-            magazineList.RemoveAll(ammo => ammo == null || ammo.type == ItemID.None || ammo.stack <= 0);
-            MagazineContents = magazineList.ToArray();
-            if (MagazineContents.Length > 0) {
-                CalculateNumberBullet();
-                AmmoViewUI.Instance.LoadAmmos(this);
-            }
-            else {
-                InitializeMagazine();
-            }
-        }
-
-        /// <summary>
-        /// 计算并更新弹匣剩余子弹的数量
-        /// </summary>
-        public void CalculateNumberBullet() {
-            int ammoCount = 0;
-            foreach (var ammo in MagazineContents) {
-                if (ammo.type == ItemID.None || ammo.stack <= 0) {
-                    continue;
-                }
-                ammoCount += ammo.stack;
-            }
-            NumberBullets = ammoCount;
-        }
-
-        /// <summary>
-        /// 将枪械的弹匣数据初始化
-        /// </summary>
-        public void InitializeMagazine() {
-            AmmoProjectileReturn = true;
-            IsKreload = false;
-            NumberBullets = 0;
-            NoKreLoadTime = 10;
-            MagazineContents = new Item[AmmoCapacity];
-            for (int i = 0; i < MagazineContents.Length; i++) {
-                MagazineContents[i] = new Item();
-            }
-            if (!CWRServerConfig.Instance.MagazineSystem) {
-                IsKreload = true;
-            }
-            SpecialAmmoState = SpecialAmmoStateEnum.ordinary;
-            AmmoViewUI.Instance.LoadAmmos(this);
-        }
-
-        /// <summary>
-        /// 将枪械的弹匣数据初始化
-        /// </summary>
-        public static void InitializeMagazine(CWRItem cwrItem) {
-            cwrItem.AmmoProjectileReturn = true;
-            cwrItem.IsKreload = false;
-            cwrItem.NumberBullets = 0;
-            cwrItem.NoKreLoadTime = 10;
-            cwrItem.MagazineContents = new Item[cwrItem.AmmoCapacity];
-            for (int i = 0; i < cwrItem.MagazineContents.Length; i++) {
-                cwrItem.MagazineContents[i] = new Item();
-            }
-            if (!CWRServerConfig.Instance.MagazineSystem) {
-                cwrItem.IsKreload = true;
-            }
-            cwrItem.SpecialAmmoState = SpecialAmmoStateEnum.ordinary;
-            AmmoViewUI.Instance.LoadAmmos(cwrItem);
-        }
-        #endregion
-
-        public static void AmmoSend(Item item, BinaryWriter writer) {
-            writer.Write(item.type);
-            writer.Write(item.stack);
-            writer.Write(item.prefix);
-            writer.Write(item.CWR().DyeItemID);
-            writer.Write(item.CWR().AmmoProjectileReturn);
-        }
-
-        public static Item AmmoReceive(BinaryReader reader) {
-            Item item = new(reader.ReadInt32());
-            item.stack = reader.ReadInt32();
-            item.prefix = reader.ReadInt32();
-            item.CWR().DyeItemID = reader.ReadInt32();
-            item.CWR().AmmoProjectileReturn = reader.ReadBoolean();
-            return item;
-        }
-
-        public static TagCompound AmmoSave(Item item) {
-            TagCompound tag = [];
-            tag["type"] = item.type;
-            tag["stack"] = item.stack;
-            tag["prefix"] = item.prefix;
-            tag["dye"] = (int)ItemID.None;
-            try {
-                if (item.Alives() && item.TryGetGlobalItem<CWRItem>(out var cwr)) {
-                    tag["dye"] = cwr.DyeItemID;
-                }
-            } catch (Exception ex) {
-                CWRMod.Instance.Logger.Error($"[AmmoSave:DyeItemID] an error has occurred:{ex.Message}");
-            }
-            try {
-                if (item.Alives() && item.TryGetGlobalItem<CWRItem>(out var cwr)) {
-                    tag["ammoIsReturn"] = cwr.AmmoProjectileReturn;
-                }
-            } catch (Exception ex) {
-                CWRMod.Instance.Logger.Error($"[AmmoSave:AmmoProjectileReturn] an error has occurred:{ex.Message}");
-            }
-            return tag;
-        }
-
-        public static Item AmmoLoad(TagCompound tag) {
-            if (!tag.TryGet("type", out int itemID)) {
-                return new Item();
-            }
-            Item item = new(itemID);
-            if (!tag.TryGet("stack", out item.stack)) {
-                item.stack = 1;
-            }
-            if (!tag.TryGet("prefix", out item.prefix)) {
-                item.prefix = 0;
-            }
-            if (item.Alives() && tag.TryGet("dye", out int dyeItemID)) {
-                item.CWR().DyeItemID = dyeItemID;
-            }
-            if (item.Alives() && tag.TryGet("ammoIsReturn", out bool ammoIsReturn)) {
-                item.CWR().AmmoProjectileReturn = ammoIsReturn;
-            }
-            return item;
         }
 
         #region NetWork
@@ -508,31 +210,6 @@ namespace CalamityOverhaul.Content
             writer.Write(StorageUE);
             writer.Write(UEValue);
 
-            if (HasCartridgeHolder) {
-                if (MagazineContents == null) {
-                    InitializeMagazine();
-                }
-                writer.Write(NumberBullets);
-                writer.Write(NoKreLoadTime);
-                writer.Write(AmmoProjectileReturn);
-                writer.Write(IsKreload);
-                writer.Write((byte)SpecialAmmoState);
-                int count = 0;
-                foreach (var ammo in MagazineContents) {
-                    if (ammo.type == ItemID.None || ammo.stack <= 0) {
-                        continue;
-                    }
-                    count++;
-                }
-                writer.Write(count);
-                foreach (var ammo in MagazineContents) {
-                    if (ammo.type == ItemID.None || ammo.stack <= 0) {
-                        continue;
-                    }
-                    AmmoSend(ammo, writer);
-                }
-            }
-
             writer.Write(TargetByCollector);
         }
 
@@ -547,20 +224,6 @@ namespace CalamityOverhaul.Content
             DyeItemID = reader.ReadInt32();
             StorageUE = reader.ReadBoolean();
             UEValue = reader.ReadSingle();
-
-            if (HasCartridgeHolder) {
-                NumberBullets = reader.ReadInt32();
-                NoKreLoadTime = reader.ReadInt32();
-                AmmoProjectileReturn = reader.ReadBoolean();
-                IsKreload = reader.ReadBoolean();
-                SpecialAmmoState = (SpecialAmmoStateEnum)reader.ReadByte();
-                List<Item> list = new List<Item>();
-                int count = reader.ReadInt32();
-                for (int i = 0; i < count; i++) {
-                    list.Add(AmmoReceive(reader));
-                }
-                MagazineContents = list.ToArray();
-            }
 
             TargetByCollector = reader.ReadInt32();
         }
@@ -615,32 +278,6 @@ namespace CalamityOverhaul.Content
             }
 
             try {
-                if (HasCartridgeHolder) {
-                    if (MagazineContents != null && MagazineContents.Length > 0) {
-                        Item[] safe_MagazineContent = [.. MagazineContents];//这里需要一次安全的保存中转
-
-                        for (int i = 0; i < safe_MagazineContent.Length; i++) {
-                            if (safe_MagazineContent[i] == null) {
-                                safe_MagazineContent[i] = new Item(ItemID.None);
-                            }
-                        }
-
-                        IList<TagCompound> itemTags = [];
-                        for (int i = 0; i < safe_MagazineContent.Length; i++) {
-                            Item ammo = safe_MagazineContent[i];
-                            itemTags.Add(AmmoSave(ammo));
-                        }
-
-                        tag.Add("MagazineContentAmmos", itemTags);
-                    }
-                    tag.Add("_IsKreload", IsKreload);
-                }
-            } catch (Exception ex) {
-                CWRMod.Instance.Logger.Error($"[ItemSave:HasCartridgeHolder] an error has occurred:{ex.Message}");
-            }
-
-
-            try {
                 //存储操作使用StorageOperation上下文，静默升级不弹窗
                 LegendData?.DoUpdate(item, LegendUpdateContext.StorageOperation);
                 LegendData?.SaveData(item, tag);
@@ -660,42 +297,6 @@ namespace CalamityOverhaul.Content
 
             if (!tag.TryGet("_MeleeCharge", out MeleeCharge)) {
                 MeleeCharge = 0;
-            }
-
-            try {
-                if (HasCartridgeHolder) {
-                    if (tag.ContainsKey("_MagazineContents")) {//适配旧版本存档的加载
-                        Item[] magazineContents = tag.Get<Item[]>("_MagazineContents");
-                        for (int i = 0; i < magazineContents.Length; i++) {
-                            if (magazineContents[i] == null) {
-                                magazineContents[i] = new Item(ItemID.None);
-                            }
-                        }
-                        MagazineContents = magazineContents;
-                    }
-
-                    if (tag.ContainsKey("MagazineContentAmmos")) {
-                        List<Item> items = [];
-                        foreach (var itemTag in tag.GetList<TagCompound>("MagazineContentAmmos")) {
-                            Item ammo = AmmoLoad(itemTag);
-                            items.Add(ammo);
-                        }
-                        MagazineContents = [.. items];
-                    }
-
-                    int ammoValue = 0;
-                    foreach (Item i in MagazineContents) {
-                        if (i.type != ItemID.None) {
-                            ammoValue += i.stack;
-                        }
-                    }
-                    NumberBullets = ammoValue;
-                    if (tag.ContainsKey("_IsKreload")) {
-                        IsKreload = tag.GetBool("_IsKreload");
-                    }
-                }
-            } catch (Exception ex) {
-                CWRMod.Instance.Logger.Error($"[ItemSave:HasCartridgeHolder] an error has occurred:{ex.Message}");
             }
 
             try {
@@ -757,13 +358,6 @@ namespace CalamityOverhaul.Content
             bool inRItemIndsDict = ItemOverride.ByID.ContainsKey(item.type);
 
             if (CWRLoad.ItemIsGun[item.type]) {
-                if (CWRLoad.ItemIsGunAndMustConsumeAmmunition[item.type] && item.CWR().HasCartridgeHolder && CWRServerConfig.Instance.MagazineSystem) {
-                    tooltips.Add(new TooltipLine(CWRMod.Instance, "CWRGun_MustCA", CWRLocText.GetTextValue("CWRGun_MustCA_Text")));
-                }
-                if (item.CWR().HasCartridgeHolder && CWRServerConfig.Instance.MagazineSystem) {
-                    string newText = CWRLocText.GetTextValue("CWRGun_KL_Text").Replace("[KL]", CWRKeySystem.KreLoad_Key.ToTooltipString());
-                    tooltips.Add(new TooltipLine(CWRMod.Instance, "CWRGun_KL", newText));
-                }
                 if (item.CWR().Scope) {
                     string newText = CWRLocText.GetTextValue("CWRGun_Scope_Text").Replace("[Scope]", CWRKeySystem.ADS_Key.ToTooltipString());
                     tooltips.Add(new TooltipLine(CWRMod.Instance, "CWRGun_Scope", newText));

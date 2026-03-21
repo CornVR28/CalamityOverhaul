@@ -40,7 +40,6 @@ namespace CalamityOverhaul.Content.UIs.OverhaulSettings
             AddToggle("WeaponHandheldDisplay", () => config.WeaponHandheldDisplay, v => config.WeaponHandheldDisplay = v, false);
             AddToggle("EnableSwordLight", () => config.EnableSwordLight, v => config.EnableSwordLight = v, false);
             AddToggle("ActivateGunRecoil", () => config.ActivateGunRecoil, v => config.ActivateGunRecoil = v, false);
-            AddToggle("MagazineSystem", () => config.MagazineSystem, v => config.MagazineSystem = v, false);
             AddToggle("EnableCasingsEntity", () => config.EnableCasingsEntity, v => config.EnableCasingsEntity = v, false);
             AddToggle("BowArrowDraw", () => config.BowArrowDraw, v => config.BowArrowDraw = v, false);
             AddToggle("ShotgunFireForcedReloadInterruption", () => config.ShotgunFireForcedReloadInterruption, v => config.ShotgunFireForcedReloadInterruption = v, false);
@@ -71,7 +70,6 @@ namespace CalamityOverhaul.Content.UIs.OverhaulSettings
             config.WeaponHandheldDisplay = true;
             config.EnableSwordLight = true;
             config.ActivateGunRecoil = false;
-            config.MagazineSystem = true;
             config.EnableCasingsEntity = true;
             config.BowArrowDraw = true;
             config.ShotgunFireForcedReloadInterruption = false;

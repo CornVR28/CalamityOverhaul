@@ -26,7 +26,7 @@ namespace CalamityOverhaul.Content.Items.Ranged
             Item.shootSpeed = 28f;
             Item.crit = 10;
             Item.useAmmo = AmmoID.Snowball;
-            Item.SetCartridgeGun<SnowblindnessHeld>(500);
+            Item.SetHeldProj<SnowblindnessHeld>();
         }
 
         public override void AddRecipes() {
@@ -39,14 +39,12 @@ namespace CalamityOverhaul.Content.Items.Ranged
         }
     }
 
-    internal class SnowblindnessHeld : BaseFeederGun
+    internal class SnowblindnessHeld : BaseGun
     {
         public override string Texture => CWRConstant.Item_Ranged + "Snowblindness";
         public override int TargetID => ModContent.ItemType<Snowblindness>();
         public override void SetRangedProperty() {
             Recoil = 0.45f;
-            FireTime = 4;
-            KreloadMaxTime = 60;
             HandIdleDistanceX = 40;
             HandIdleDistanceY = 10;
             HandFireDistanceX = 40;
@@ -57,12 +55,6 @@ namespace CalamityOverhaul.Content.Items.Ranged
             ShootPosNorlLengValue = -10;
             ShootPosToMouLengValue = 20;
             EnableRecoilRetroEffect = true;
-            LoadingAmmoAnimation = LoadingAmmoAnimationEnum.Handgun;
-            LoadingAA_Handgun.clipLocked = CWRSound.Gun_Snowblindness_Clipin;
-            LoadingAA_Handgun.clipOut = CWRSound.Gun_Snowblindness_Clipout;
-            LoadingAA_Handgun.Roting = -30;
-            LoadingAA_Handgun.gunBodyX = -8;
-            LoadingAA_Handgun.gunBodyY = -16;
             CanCreateCaseEjection = false;
             SpwanGunDustData.dustID1 = 76;
             SpwanGunDustData.dustID2 = 149;

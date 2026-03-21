@@ -1,6 +1,5 @@
 ﻿using CalamityOverhaul.Common;
 using CalamityOverhaul.Content.Items.Placeable;
-using CalamityOverhaul.Content.RangedModify.Core;
 using InnoVault.GameContent.BaseEntity;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
@@ -44,33 +43,9 @@ namespace CalamityOverhaul.Content.Projectiles.AmmoBoxs
             Projectile.netUpdate = true;
         }
 
-        public virtual bool CanClick(Item item) => item.type != ItemID.None && item.CWR().HasCartridgeHolder;
+        public virtual bool CanClick(Item item) => false;
 
         public virtual void Preprocessing(Player player, Item item) {
-            CWRItem cwrItem = item.CWR();
-            cwrItem.NumberBullets = cwrItem.AmmoCapacity;
-            cwrItem.IsKreload = true;
-            cwrItem.NoKreLoadTime = 30;
-            int num = 0;
-            List<Item> list = [];
-            foreach (Item i in cwrItem.MagazineContents) {
-                if (i.type != ItemID.None && i.stack > 0) {
-                    list.Add(i);
-                }
-            }
-            foreach (Item i in list) {
-                if (i.type != ItemID.None && i.stack > 0) {
-                    num += i.stack;
-                }
-            }
-            if (num < cwrItem.AmmoCapacity) {
-                int ammoType = ItemID.MusketBall;
-                if (VaultUtils.AmmoIDToItemIDMapping.TryGetValue(item.useAmmo, out int ammoItemID)) {
-                    ammoType = ammoItemID;
-                }
-                list.Add(new Item(ammoType, cwrItem.AmmoCapacity - num));
-            }
-            cwrItem.SetMagazine(list);
         }
 
         public virtual bool ClickBehavior(Player player, CWRItem cwr) => true;
@@ -89,9 +64,6 @@ namespace CalamityOverhaul.Content.Projectiles.AmmoBoxs
                     FromeThisTImeID = ModContent.ItemType<AmmoBoxFire>();
                 }
                 player.cursorItemIconID = FromeThisTImeID;
-                if (player.CWR().TryGetInds_BaseFeederGun(out BaseFeederGun gun)) {
-                    gun.ShootCoolingValue = gun.CanRightClick ? 10 : 2;//因为和一些枪械的右键功能按键冲突，所以要额外设置一个长一些的时间
-                }
                 if (rightPrmd && Projectile.IsOwnedByLocalPlayer()) {
                     Item item = player.GetItem();
                     if (CanClick(item)) {
