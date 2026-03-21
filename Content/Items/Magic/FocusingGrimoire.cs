@@ -46,7 +46,6 @@ namespace CalamityOverhaul.Content.Items.Magic
         public override int TargetID => ModContent.ItemType<FocusingGrimoire>();
         public override void SetMagicProperty() {
             CanRightClick = true;
-            Recoil = 0;
             InOwner_HandState_AlwaysSetInFireRoding = true;
         }
 

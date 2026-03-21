@@ -348,7 +348,7 @@ namespace CalamityOverhaul.Content.Items.Melee
         }
 
         public override void ModifyHitNPC(NPC target, ref NPC.HitModifiers modifiers) {
-            if (target.type == CWRID.NPC_DevourerofGodsHead || CWRLoad.targetNpcTypes7_1.Contains(target.type)) {
+            if (target.type == CWRID.NPC_DevourerofGodsHead || CWRLoad.ExoMechAresSegments.Contains(target.type)) {
                 modifiers.FinalDamage /= 2;
             }
         }

@@ -36,7 +36,6 @@ namespace CalamityOverhaul.Content.Items.Magic
         public override string Texture => CWRConstant.Item_Magic + "SandVortexOfTheDecayedSea";
         public override int TargetID => ModContent.ItemType<SandVortexOfTheDecayedSea>();
         public override void SetMagicProperty() {
-            Recoil = 0;
             InOwner_HandState_AlwaysSetInFireRoding = true;
         }
 
@@ -122,7 +121,7 @@ namespace CalamityOverhaul.Content.Items.Magic
             if (CWRLoad.WormBodys.Contains(target.type)) {
                 modifiers.FinalDamage *= 0.4f;
             }
-            if (CWRLoad.targetNpcTypes7_1.Contains(target.type)) {
+            if (CWRLoad.ExoMechAresSegments.Contains(target.type)) {
                 modifiers.FinalDamage *= 0.6f;
             }
         }

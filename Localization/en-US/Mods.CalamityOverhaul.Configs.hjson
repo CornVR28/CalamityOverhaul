@@ -52,11 +52,6 @@
 			'''
 	}
 
-	ActivateGunRecoil: {
-		Label: Activate Gun Recoil [c/06e33f:(Experimental)]
-		Tooltip: When enabled, firearms will have a recoil effect when fired. Disable it to turn off these effects.
-	}
-
 	BowArrowDraw: {
 		Label: Draw the bowstring arrow
 		Tooltip:

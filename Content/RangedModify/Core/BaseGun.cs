@@ -103,14 +103,6 @@ namespace CalamityOverhaul.Content.RangedModify.Core
         /// </summary>
         public float HandFireDistanceY = -4;
         /// <summary>
-        /// 应力范围，默认为10
-        /// </summary>
-        public float RangeOfStress = 10;
-        /// <summary>
-        /// 开火时会制造的后坐力模长，默认为1.2f
-        /// </summary>
-        public float Recoil = 1.2f;
-        /// <summary>
         /// 止推模长恢复系数，值越接近1恢复的越加缓慢，默认为0.6f
         /// </summary>
         protected float RecoilOffsetRecoverValue = 0.6f;
@@ -262,20 +254,10 @@ namespace CalamityOverhaul.Content.RangedModify.Core
             }
         }
         /// <summary>
-        /// 制造后坐力，这个函数只应该由弹幕主人调用，它不会自动调用，需要重写时在合适的代码片段中调用这个函数
-        /// ，以确保制造后坐力的时机正确，一般在<see cref="BaseHeldRanged.SpanProj"/>中调用
+        /// 制造枪压效果，这个函数只应该由弹幕主人调用
         /// </summary>
-        /// <returns>返回制造出的后坐力向量</returns>
-        public virtual Vector2 CreateRecoil() {
+        public virtual void CreateRecoil() {
             OffsetRot += GunPressure * OwnerPressureIncrease;
-            if (!CWRServerConfig.Instance.ActivateGunRecoil) {
-                return Vector2.Zero;
-            }
-            Vector2 recoilVr = ShootVelocity.UnitVector() * (Recoil * -OwnerPressureIncrease);
-            if (Math.Abs(Owner.velocity.X) < RangeOfStress && Math.Abs(Owner.velocity.Y) < RangeOfStress) {
-                Owner.velocity += recoilVr;
-            }
-            return recoilVr;
         }
         /// <summary>
         /// 在枪械的更新周期中的最后被调用，用于复原一些数据

@@ -218,7 +218,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.MurasamaLegend.MurasamaProj
             }
 
             //对渊海灾虫仅造成20%伤害
-            if (CWRLoad.targetNpcTypes11.Contains(target.type)) {
+            if (CWRLoad.AquaticScourgeSegments.Contains(target.type)) {
                 modifiers.FinalDamage *= 0.8f;
             }
 

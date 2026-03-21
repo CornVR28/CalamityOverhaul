@@ -297,7 +297,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.MurasamaLegend.MurasamaProj
             }
 
             //对血肉蠕虫仅造成66%伤害
-            if (CWRLoad.targetNpcTypes4.Contains(target.type) || CWRLoad.targetNpcTypes5.Contains(target.type) || CWRLoad.targetNpcTypes17.Contains(target.type)) {
+            if (CWRLoad.PerforatorLargeSegments.Contains(target.type) || CWRLoad.PerforatorMediumSegments.Contains(target.type) || CWRLoad.PerforatorSmallSegments.Contains(target.type)) {
                 modifiers.FinalDamage *= 0.66f;
             }
 
@@ -349,7 +349,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.MurasamaLegend.MurasamaProj
             }
 
             //对黄沙恶虫仅造成66%伤害
-            if (CWRLoad.targetNpcTypes9.Contains(target.type)) {
+            if (CWRLoad.DesertScourgeSegments.Contains(target.type)) {
                 modifiers.FinalDamage *= 0.66f;
             }
 

@@ -64,7 +64,6 @@ namespace CalamityOverhaul.Content.Items.Ranged
         private int blizzardFieldTimer;
         private int fireRateValue = 18;
         public override void SetRangedProperty() {
-            Recoil = 0.25f;
             GunPressure = 0;
             HandIdleDistanceX = 42;
             HandIdleDistanceY = 0;
@@ -129,7 +128,6 @@ namespace CalamityOverhaul.Content.Items.Ranged
             }
 
             if (onFireTime > 0) {
-                Recoil = 6;
                 GunPressure = 0.8f;
                 ControlForce = 0.12f;
                 RecoilRetroForceMagnitude = 18;
@@ -195,7 +193,6 @@ namespace CalamityOverhaul.Content.Items.Ranged
                 return;
             }
 
-            Recoil = 0.45f;
             GunPressure = 0;
             RecoilRetroForceMagnitude = 6;
             RecoilOffsetRecoverValue = 0.5f;

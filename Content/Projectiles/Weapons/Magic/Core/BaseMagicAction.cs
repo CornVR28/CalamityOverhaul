@@ -16,7 +16,6 @@ namespace CalamityOverhaul.Content.Projectiles.Weapons.Magic.Core
             Onehanded = true;
             GunPressure = 0;
             ControlForce = 0;
-            Recoil = 0;
         }
 
         public override void Initialize() {

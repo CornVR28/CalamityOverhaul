@@ -125,14 +125,6 @@ namespace CalamityOverhaul.Common
         public LocalizedText ArrowHolderUI_Text0 { get; private set; }
         public LocalizedText ArrowHolderUI_Text1 { get; private set; }
         public LocalizedText CWRGun_Scope_Text { get; private set; }
-        public LocalizedText CWRGun_Recoil_Text { get; private set; }
-        public LocalizedText CWRGun_Recoil_Level_0 { get; private set; }
-        public LocalizedText CWRGun_Recoil_Level_1 { get; private set; }
-        public LocalizedText CWRGun_Recoil_Level_2 { get; private set; }
-        public LocalizedText CWRGun_Recoil_Level_3 { get; private set; }
-        public LocalizedText CWRGun_Recoil_Level_4 { get; private set; }
-        public LocalizedText CWRGun_Recoil_Level_5 { get; private set; }
-        public LocalizedText CWRGun_Recoil_Level_6 { get; private set; }
         public LocalizedText AmmoBox_Text { get; private set; }
         public LocalizedText AmmoBox_Text2 { get; private set; }
         public LocalizedText AmmoBox_Text3 { get; private set; }

@@ -347,14 +347,6 @@
 	Config_1: User
 	Config_2: The server configuration is modified
 	CWRGun_Scope_Text: Press [Scope] to open the lens
-	CWRGun_Recoil_Text: "[Recoil] Recoil"
-	CWRGun_Recoil_Level_0: No
-	CWRGun_Recoil_Level_1: Slight
-	CWRGun_Recoil_Level_2: Weaker
-	CWRGun_Recoil_Level_3: Medium
-	CWRGun_Recoil_Level_4: Strong
-	CWRGun_Recoil_Level_5: Crazy
-	CWRGun_Recoil_Level_6: Ridiculous
 	SkeletronPrime_Text: Don't try to kill me with this stupid thing! Die, organism!
 	Notbound: "[Unbound keys]"
 	DisableMotionInterpolationMessage:

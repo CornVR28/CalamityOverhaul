@@ -128,10 +128,10 @@ namespace CalamityOverhaul.Content
         }
 
         public static void MultipleSegmentsLimitDamage(NPC target, ref NPC.HitModifiers modifiers) {
-            if (CWRLoad.targetNpcTypes15.Contains(target.type) || CWRLoad.targetNpcTypes10.Contains(target.type)
-                || CWRLoad.targetNpcTypes8.Contains(target.type) || CWRLoad.targetNpcTypes7.Contains(target.type)
-                || CWRLoad.targetNpcTypes6.Contains(target.type) || CWRLoad.targetNpcTypes5.Contains(target.type)
-                || CWRLoad.targetNpcTypes4.Contains(target.type) || CWRLoad.targetNpcTypes2.Contains(target.type)
+            if (CWRLoad.DestroyerSegments.Contains(target.type) || CWRLoad.AstrumDeusSegments.Contains(target.type)
+                || CWRLoad.DevourerofGodsSegments.Contains(target.type) || CWRLoad.ExoMechSegments.Contains(target.type)
+                || CWRLoad.ArmoredDiggerSegments.Contains(target.type) || CWRLoad.PerforatorMediumSegments.Contains(target.type)
+                || CWRLoad.PerforatorLargeSegments.Contains(target.type) || CWRLoad.StormWeaverSegments.Contains(target.type)
                 || CWRLoad.WormBodys.Contains(target.type) || target.type == CWRID.NPC_AquaticScourgeBodyAlt) {
                 modifiers.FinalDamage *= 0.1f;
                 int dmownInt = (int)(target.lifeMax * 0.001f);
@@ -187,7 +187,7 @@ namespace CalamityOverhaul.Content
                 return;
             }
 
-            if (npc.boss && CWRLoad.targetNpcTypes7.Contains(npc.type) || npc.type == CWRID.NPC_PlaguebringerGoliath) {
+            if (npc.boss && CWRLoad.ExoMechSegments.Contains(npc.type) || npc.type == CWRID.NPC_PlaguebringerGoliath) {
                 for (int i = 0; i < Main.rand.Next(3, 6); i++) {
                     int type = Item.NewItem(npc.FromObjectGetParent(), npc.Hitbox, CWRID.Item_DubiousPlating, Main.rand.Next(7, 13));
                     if (!VaultUtils.isSinglePlayer) {

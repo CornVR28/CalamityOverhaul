@@ -51,11 +51,6 @@ CWRServerConfig: {
 			'''
 	}
 
-	ActivateGunRecoil: {
-		Label: Retroceso de armas[c/06e33f:(experimental)]
-		Tooltip: Al activarlo, las armas de fuego tendrán un efecto de retroceso al disparar. Desactívalo para deshabilitar estos efectos.
-	}
-
 	BowArrowDraw: {
 		Label: Dibujar arco y flecha
 		Tooltip:

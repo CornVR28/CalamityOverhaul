@@ -22,7 +22,6 @@ namespace CalamityOverhaul.Content.Projectiles.Weapons.Magic.NeutronWandProjs
             HandIdleDistanceY = -20;
             HandFireDistanceX = 52;
             GunPressure = 0;
-            Recoil = 0;
             ControlForce = 0;
             InOwner_HandState_AlwaysSetInFireRoding = true;
             Onehanded = true;

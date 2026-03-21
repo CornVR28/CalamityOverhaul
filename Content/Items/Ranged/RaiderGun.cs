@@ -115,7 +115,6 @@ namespace CalamityOverhaul.Content.Items.Ranged
         public override string Texture => CWRConstant.Item_Ranged + "RaiderGun";
         public override int TargetID => ModContent.ItemType<RaiderGun>();
         public override void SetRangedProperty() {
-            Recoil = 0.3f;
             GunPressure = 0.1f;
             ControlForce = 0.02f;
             HandIdleDistanceX = 26;
@@ -204,7 +203,6 @@ namespace CalamityOverhaul.Content.Items.Ranged
         public override string Texture => CWRConstant.Item_Ranged + "RaiderGunEX";
         public override int TargetID => ModContent.ItemType<RaiderGunEX>();
         public override void SetRangedProperty() {
-            Recoil = 0.3f;
             GunPressure = 0.06f;
             ControlForce = 0.02f;
             HandIdleDistanceX = 26;

@@ -85,7 +85,6 @@ namespace CalamityOverhaul.Content.Items.Ranged
         public override string GlowTexPath => CWRConstant.Item_Ranged + "HyperionBarrageGlow";
         public override int TargetID => ModContent.ItemType<HyperionBarrage>();
         public override void SetRangedProperty() {
-            Recoil = 0.3f;
             GunPressure = 0;
             ControlForce = 0;
             HandIdleDistanceX = 26;
@@ -121,7 +120,6 @@ namespace CalamityOverhaul.Content.Items.Ranged
         public override string GlowTexPath => CWRConstant.Item_Ranged + "HyperionBarrageEXGlow";
         public override int TargetID => ModContent.ItemType<HyperionBarrageEX>();
         public override void SetRangedProperty() {
-            Recoil = 0.2f;
             GunPressure = 0;
             ControlForce = 0;
             HandIdleDistanceX = 26;

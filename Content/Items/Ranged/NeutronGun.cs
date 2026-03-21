@@ -55,7 +55,6 @@ namespace CalamityOverhaul.Content.Items.Ranged
             CanRightClick = true;
             ForcedConversionTargetAmmoFunc = () => true;
             ToTargetAmmo = ModContent.ProjectileType<NeutronBullet>();
-            Recoil = 0.45f;
             HandIdleDistanceX = 35;
             HandIdleDistanceY = 3;
             HandFireDistanceX = 35;
@@ -82,7 +81,6 @@ namespace CalamityOverhaul.Content.Items.Ranged
 
         public override void SetShootAttribute() {
             if (onFire) {
-                Recoil = 0.45f;
                 GunPressure = 0.1f;
                 ControlForce = 0.03f;
                 ShootPosToMouLengValue = 10;
@@ -91,7 +89,6 @@ namespace CalamityOverhaul.Content.Items.Ranged
                 Item.UseSound = CWRSound.Gun_AWP_Shoot with { Pitch = -0.1f, Volume = 0.25f };
             }
             else if (onFireR) {
-                Recoil = 1.45f;
                 GunPressure = 0.16f;
                 ControlForce = 0.01f;
                 ShootPosToMouLengValue = -10;

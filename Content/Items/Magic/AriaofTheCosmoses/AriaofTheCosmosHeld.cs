@@ -55,7 +55,6 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
         private const int RSkillMaxCooldown = 180;  //3秒冷却
 
         public override void SetMagicProperty() {
-            Recoil = 0;
             HandFireDistanceX = 25;
             HandFireDistanceY = -8;
             ShootPosNorlLengValue = 0;

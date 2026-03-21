@@ -394,14 +394,6 @@
 	Config_1: Usuario
 	Config_2: Se ha modificado la configuración del servidor
 	CWRGun_Scope_Text: Presiona [Scope] para mirar a través del visor
-	CWRGun_Recoil_Text: "[Retroceso]"
-	CWRGun_Recoil_Level_0: Ninguno
-	CWRGun_Recoil_Level_1: Débil
-	CWRGun_Recoil_Level_2: Moderadamente débil
-	CWRGun_Recoil_Level_3: Normal
-	CWRGun_Recoil_Level_4: Fuerte
-	CWRGun_Recoil_Level_5: Loco
-	CWRGun_Recoil_Level_6: Ridículo
 	// SkeletronPrime_Text: Don't try to kill me with this stupid thing! Die, organism!
 	// Notbound: "[Unbound keys]"
 	/* DisableMotionInterpolationMessage:

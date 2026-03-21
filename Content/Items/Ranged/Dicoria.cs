@@ -48,7 +48,6 @@ namespace CalamityOverhaul.Content.Items.Ranged
         public override string GlowTexPath => CWRConstant.Item_Ranged + "DicoriaGlow";
         public override int TargetID => ModContent.ItemType<Dicoria>();
         public override void SetRangedProperty() {
-            Recoil = 0.3f;
             GunPressure = 0.1f;
             ControlForce = 0.02f;
             HandIdleDistanceX = 26;

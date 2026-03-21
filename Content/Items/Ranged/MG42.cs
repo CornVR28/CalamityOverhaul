@@ -44,7 +44,6 @@ namespace CalamityOverhaul.Content.Items.Ranged
             HandFireDistanceX = 36;
             HandFireDistanceY = -10;
             ShootPosToMouLengValue = 46;
-            Recoil = 0.5f;
             CanCreateSpawnGunDust = false;
             ForcedConversionTargetAmmoFunc = () => AmmoTypes == ProjectileID.Bullet;
             ToTargetAmmo = CWRID.Proj_NitroShot;

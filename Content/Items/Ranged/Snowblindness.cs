@@ -44,14 +44,12 @@ namespace CalamityOverhaul.Content.Items.Ranged
         public override string Texture => CWRConstant.Item_Ranged + "Snowblindness";
         public override int TargetID => ModContent.ItemType<Snowblindness>();
         public override void SetRangedProperty() {
-            Recoil = 0.45f;
             HandIdleDistanceX = 40;
             HandIdleDistanceY = 10;
             HandFireDistanceX = 40;
             HandFireDistanceY = 2;
             RecoilRetroForceMagnitude = 6;
             RecoilOffsetRecoverValue = 0.6f;
-            RangeOfStress = 50;
             ShootPosNorlLengValue = -10;
             ShootPosToMouLengValue = 20;
             EnableRecoilRetroEffect = true;

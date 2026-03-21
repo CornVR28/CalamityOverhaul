@@ -51,11 +51,6 @@ CWRServerConfig: {
 			'''
 	}
 
-	ActivateGunRecoil: {
-		Label: Recul des armes à feu [c/06e33f:(expérimental)]
-		Tooltip: Une fois activé, les armes à feu auront un effet de recul lors du tir. Désactivez-le pour supprimer ces effets.
-	}
-
 	BowArrowDraw: {
 		Label: Dessin dynamique des flèches de l'arc
 		Tooltip:

@@ -322,14 +322,6 @@
 	Config_1: 用户
 	Config_2: 修改了服务端配置
 	CWRGun_Scope_Text: 按下[Scope]开镜
-	CWRGun_Recoil_Text: "[Recoil]后坐力"
-	CWRGun_Recoil_Level_0: 无
-	CWRGun_Recoil_Level_1: 微弱的
-	CWRGun_Recoil_Level_2: 较弱的
-	CWRGun_Recoil_Level_3: 一般的
-	CWRGun_Recoil_Level_4: 较强的
-	CWRGun_Recoil_Level_5: 疯狂的
-	CWRGun_Recoil_Level_6: 荒诞的
 	SkeletronPrime_Text: 别妄图用这愚蠢的东西杀死我!去死吧有机体!
 	Notbound: "[未绑定按键]"
 	DisableMotionInterpolationMessage:

@@ -56,7 +56,6 @@ namespace CalamityOverhaul.Content.Items.Ranged
             HandFireDistanceY = -4;
             GunPressure = 0;
             ControlForce = 0;
-            Recoil = 0;
             Onehanded = true;
             EnableRecoilRetroEffect = true;
             CanCreateSpawnGunDust = false;

@@ -50,7 +50,6 @@ namespace CalamityOverhaul.Content.Items.Ranged
         private int onFireTime2;
         private int fireRateValue = 20;
         public override void SetRangedProperty() {
-            Recoil = 0.3f;
             GunPressure = 0;
             HandIdleDistanceX = 54;
             HandIdleDistanceY = -4;
@@ -106,7 +105,6 @@ namespace CalamityOverhaul.Content.Items.Ranged
         public override void FiringShoot() {
             _ = UpdateConsumeAmmo();
             if (onFireTime > 0) {
-                Recoil = 5;
                 GunPressure = 0.6f;
                 ControlForce = 0.1f;
                 RecoilRetroForceMagnitude = 15;
@@ -134,7 +132,6 @@ namespace CalamityOverhaul.Content.Items.Ranged
                 return;
             }
 
-            Recoil = 0.5f;
             GunPressure = 0;
             RecoilRetroForceMagnitude = 5;
             RecoilOffsetRecoverValue = 0.5f;

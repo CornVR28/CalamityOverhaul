@@ -59,7 +59,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.MurasamaLegend.MurasamaProj
             if (CWRLoad.WormBodys.Contains(target.type)) {
                 modifiers.FinalDamage *= 0.2f;
             }
-            if (CWRLoad.targetNpcTypes7_1.Contains(target.type)) {
+            if (CWRLoad.ExoMechAresSegments.Contains(target.type)) {
                 modifiers.FinalDamage *= 0.4f;
             }
         }

@@ -39,7 +39,6 @@ namespace CalamityOverhaul.Content.UIs.OverhaulSettings
             //CWRWeapon组
             AddToggle("WeaponHandheldDisplay", () => config.WeaponHandheldDisplay, v => config.WeaponHandheldDisplay = v, false);
             AddToggle("EnableSwordLight", () => config.EnableSwordLight, v => config.EnableSwordLight = v, false);
-            AddToggle("ActivateGunRecoil", () => config.ActivateGunRecoil, v => config.ActivateGunRecoil = v, false);
             AddToggle("EnableCasingsEntity", () => config.EnableCasingsEntity, v => config.EnableCasingsEntity = v, false);
             AddToggle("BowArrowDraw", () => config.BowArrowDraw, v => config.BowArrowDraw = v, false);
             AddToggle("ShotgunFireForcedReloadInterruption", () => config.ShotgunFireForcedReloadInterruption, v => config.ShotgunFireForcedReloadInterruption = v, false);
@@ -69,7 +68,6 @@ namespace CalamityOverhaul.Content.UIs.OverhaulSettings
             //CWRWeapon组
             config.WeaponHandheldDisplay = true;
             config.EnableSwordLight = true;
-            config.ActivateGunRecoil = false;
             config.EnableCasingsEntity = true;
             config.BowArrowDraw = true;
             config.ShotgunFireForcedReloadInterruption = false;

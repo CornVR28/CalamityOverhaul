@@ -340,14 +340,6 @@
 	Config_1: Пользователь
 	Config_2: Конфигурация сервера была изменена
 	CWRGun_Scope_Text: Нажмите [Scope], чтобы прицелиться.
-	CWRGun_Recoil_Text: "[Recoil] Отдача"
-	CWRGun_Recoil_Level_0: Нет
-	CWRGun_Recoil_Level_1: Слабая
-	CWRGun_Recoil_Level_2: Умеренная
-	CWRGun_Recoil_Level_3: Средняя
-	CWRGun_Recoil_Level_4: Сильная
-	CWRGun_Recoil_Level_5: Очень сильная
-	CWRGun_Recoil_Level_6: Крайне сильная
 	SkeletronPrime_Text: Не пытайся убить меня этой дурацкой штукой! Умри, организм!
 	Notbound: "[Не назначено]"
 	DisableMotionInterpolationMessage:

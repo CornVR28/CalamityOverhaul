@@ -52,11 +52,6 @@
 			'''
 	}
 
-	ActivateGunRecoil: {
-		Label: 枪械后坐力[c/06e33f:(实验性)]
-		Tooltip: 开启后，枪械开火会具有后坐力效果，禁用以关闭这些效果
-	}
-
 	BowArrowDraw: {
 		Label: 绘制弓弦箭矢
 		Tooltip:

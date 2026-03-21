@@ -51,11 +51,6 @@ CWRServerConfig: {
 			'''
 	}
 
-	ActivateGunRecoil: {
-		Label: Schusswaffen-Rückstoß [c/06e33f:(Experimentell)]
-		Tooltip: Nach der Aktivierung haben Schusswaffen einen Rückstoßeffekt beim Feuern. Deaktivieren Sie es, um diese Effekte auszuschalten.
-	}
-
 	BowArrowDraw: {
 		Label: Bogenpfeilzeichnung
 		Tooltip:

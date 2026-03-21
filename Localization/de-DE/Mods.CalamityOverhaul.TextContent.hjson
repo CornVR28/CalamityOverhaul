@@ -372,14 +372,6 @@
 	// Config_1: User
 	// Config_2: The server configuration is modified
 	CWRGun_Scope_Text: Drücke [Scope] für Zielen
-	CWRGun_Recoil_Text: "[Recoil] Rückstoß"
-	CWRGun_Recoil_Level_0: Kein
-	CWRGun_Recoil_Level_1: Leichter
-	CWRGun_Recoil_Level_2: Geringer
-	CWRGun_Recoil_Level_3: Normaler
-	CWRGun_Recoil_Level_4: Starker
-	CWRGun_Recoil_Level_5: Extremer
-	CWRGun_Recoil_Level_6: Absurder
 	// SkeletronPrime_Text: Don't try to kill me with this stupid thing! Die, organism!
 	// Notbound: "[Unbound keys]"
 	/* DisableMotionInterpolationMessage:

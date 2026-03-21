@@ -12,10 +12,9 @@ namespace CalamityOverhaul
 {
     public static class CWRLoad
     {
-        #region Data
         public static bool OnLoadContentBool;
 
-        #region OtherMods
+        #region 跨Mod物品ID
         public static int EternitySoul;
         public static int DevisCurse;
         public static int DeviatingEnergy;
@@ -24,86 +23,94 @@ namespace CalamityOverhaul
         public static int MetanovaBar;
         #endregion
 
+        #region Boss/蠕虫体节列表
+        /// <summary>
+        /// 灾坟虫
+        /// </summary>
+        public static List<int> SepulcherSegments;
+        /// <summary>
+        /// 风暴编织者
+        /// </summary>
+        public static List<int> StormWeaverSegments;
+        /// <summary>
+        /// 幻海妖龙
+        /// </summary>
+        public static List<int> PrimordialWyrmSegments;
+        /// <summary>
+        /// 血肉蠕虫（大）
+        /// </summary>
+        public static List<int> PerforatorLargeSegments;
+        /// <summary>
+        /// 血肉蠕虫（中）
+        /// </summary>
+        public static List<int> PerforatorMediumSegments;
+        /// <summary>
+        /// 装甲掘地虫
+        /// </summary>
+        public static List<int> ArmoredDiggerSegments;
+        /// <summary>
+        /// 星流巨械（全部件）
+        /// </summary>
+        public static List<int> ExoMechSegments;
+        /// <summary>
+        /// 星流巨械（Ares部件）
+        /// </summary>
+        public static List<int> ExoMechAresSegments;
+        /// <summary>
+        /// 神明吞噬者
+        /// </summary>
+        public static List<int> DevourerofGodsSegments;
+        /// <summary>
+        /// 荒漠灾虫
+        /// </summary>
+        public static List<int> DesertScourgeSegments;
+        /// <summary>
+        /// 星神游龙
+        /// </summary>
+        public static List<int> AstrumDeusSegments;
+        /// <summary>
+        /// 渊海灾虫
+        /// </summary>
+        public static List<int> AquaticScourgeSegments;
+        /// <summary>
+        /// 幻海妖龙幼年体
+        /// </summary>
+        public static List<int> EidolonWyrmSegments;
+        /// <summary>
+        /// 月球领主
+        /// </summary>
+        public static List<int> MoonLordSegments;
+        /// <summary>
+        /// 世界吞噬者
+        /// </summary>
+        public static List<int> EaterofWorldsSegments;
+        /// <summary>
+        /// 毁灭者
+        /// </summary>
+        public static List<int> DestroyerSegments;
+        /// <summary>
+        /// 毁灭魔像
+        /// </summary>
+        public static List<int> RavagerSegments;
+        /// <summary>
+        /// 血肉蠕虫（小）
+        /// </summary>
+        public static List<int> PerforatorSmallSegments;
+        /// <summary>
+        /// 所有Boss/蠕虫体节列表的集合，用于批量检查
+        /// </summary>
+        public static List<List<int>> AllBossSegmentLists { get; private set; }
+        /// <summary>
+        /// 蠕虫类体节ID集合
+        /// </summary>
+        public static int[] WormBodys { get; private set; }
+        #endregion
+
+        #region 物品属性映射
         /// <summary>
         /// 关于哪些物品应该被设置为64的最大堆叠数
         /// </summary>
         public static int[] AddMaxStackItemsIn64 { get; private set; } = [];
-        /// <summary>
-        /// 灾坟虫
-        /// </summary>
-        public static List<int> targetNpcTypes;
-        /// <summary>
-        /// 风暴编织者
-        /// </summary>
-        public static List<int> targetNpcTypes2;
-        /// <summary>
-        /// 幻海妖龙 
-        /// </summary>
-        public static List<int> targetNpcTypes3;
-        /// <summary>
-        /// 血肉蠕虫 
-        /// </summary>
-        public static List<int> targetNpcTypes4;
-        /// <summary>
-        /// 血肉蠕虫2 
-        /// </summary>
-        public static List<int> targetNpcTypes5;
-        /// <summary>
-        /// 装甲掘地虫 
-        /// </summary>
-        public static List<int> targetNpcTypes6;
-        /// <summary>
-        /// 星流巨械
-        /// </summary>
-        public static List<int> targetNpcTypes7;
-        /// <summary>
-        /// 星流巨械Alt
-        /// </summary>
-        public static List<int> targetNpcTypes7_1;
-        /// <summary>
-        /// 神明吞噬者
-        /// </summary>
-        public static List<int> targetNpcTypes8;
-        /// <summary>
-        /// 荒漠灾虫
-        /// </summary>
-        public static List<int> targetNpcTypes9;
-        /// <summary>
-        /// 星神游龙
-        /// </summary>
-        public static List<int> targetNpcTypes10;
-        /// <summary>
-        /// 渊海灾虫
-        /// </summary>
-        public static List<int> targetNpcTypes11;
-        /// <summary>
-        /// 幻海妖龙幼年体
-        /// </summary>
-        public static List<int> targetNpcTypes12;
-        /// <summary>
-        /// 月球领主
-        /// </summary>
-        public static List<int> targetNpcTypes13;
-        /// <summary>
-        /// 世界吞噬者
-        /// </summary>
-        public static List<int> targetNpcTypes14;
-        /// <summary>
-        /// 毁灭者
-        /// </summary>
-        public static List<int> targetNpcTypes15;
-        /// <summary>
-        /// 毁灭魔像
-        /// </summary>
-        public static List<int> targetNpcTypes16;
-        /// <summary>
-        /// 血肉蠕虫3
-        /// </summary>
-        public static List<int> targetNpcTypes17;
-        /// <summary>
-        /// 蠕虫类体节
-        /// </summary>
-        public static int[] WormBodys { get; private set; }
         /// <summary>
         /// 物块对应掉落物的词典
         /// </summary>
@@ -125,7 +132,7 @@ namespace CalamityOverhaul
         /// </summary>
         internal static Dictionary<int, bool> ItemIsGun { get; private set; } = [];
         /// <summary>
-        /// 该物品是否是一把枪械
+        /// 该物品是否是一把霰弹枪
         /// </summary>
         internal static Dictionary<int, bool> ItemIsShotgun { get; private set; } = [];
         /// <summary>
@@ -153,14 +160,6 @@ namespace CalamityOverhaul
         /// </summary>
         internal static Dictionary<int, bool> ItemIsGunAndMustConsumeAmmunition { get; private set; } = [];
         /// <summary>
-        /// 获取一个枪械的后坐力数值
-        /// </summary>
-        internal static Dictionary<int, float> ItemIsGunAndGetRecoilValue { get; private set; } = [];
-        /// <summary>
-        /// 获取一个枪械的后坐力数值所对于的本地化描述键
-        /// </summary>
-        internal static Dictionary<int, string> ItemIsGunAndGetRecoilLocKey { get; private set; } = [];
-        /// <summary>
         /// 从物品id映射到对应的终焉合成内容上，如果该物品没有终焉合成则返回<see langword="null"/>
         /// </summary>
         internal static Dictionary<int, string[]> ItemIDToOmigaSnyContent { get; private set; } = [];
@@ -170,19 +169,37 @@ namespace CalamityOverhaul
         internal static Dictionary<int, bool> ItemAutoloadingOmigaSnyRecipe { get; private set; } = [];
         #endregion
 
+        #region NPC/弹幕属性
         public static class NPCValue
         {
             /// <summary>
             /// 是否免疫冻结
             /// </summary>
             public readonly static Dictionary<int, bool> ImmuneFrozen = [];
+
+            private static readonly HashSet<int> _nonSteelBossTypes = [
+                CWRID.NPC_Providence,
+                CWRID.NPC_ScornEater,
+                CWRID.NPC_Yharon,
+                CWRID.NPC_DevourerofGodsHead,
+            ];
+
+            private static readonly HashSet<Terraria.Audio.SoundStyle?> _steelHitSounds = [
+                SoundID.NPCHit4, SoundID.NPCHit41, SoundID.NPCHit2,
+                SoundID.NPCHit5, SoundID.NPCHit11, SoundID.NPCHit30,
+                SoundID.NPCHit34, SoundID.NPCHit36, SoundID.NPCHit42,
+                SoundID.NPCHit49, SoundID.NPCHit52, SoundID.NPCHit53,
+                SoundID.NPCHit54,
+            ];
+
+            /// <summary>
+            /// 判断NPC是否为金属材质（根据受击音效和特定Boss类型判断）
+            /// </summary>
             public static bool ISTheofSteel(NPC npc) {
-                if ((npc.HitSound != SoundID.NPCHit4 && npc.HitSound != SoundID.NPCHit41 && npc.HitSound != SoundID.NPCHit2 &&
-                npc.HitSound != SoundID.NPCHit5 && npc.HitSound != SoundID.NPCHit11 && npc.HitSound != SoundID.NPCHit30 &&
-                npc.HitSound != SoundID.NPCHit34 && npc.HitSound != SoundID.NPCHit36 && npc.HitSound != SoundID.NPCHit42 &&
-                npc.HitSound != SoundID.NPCHit49 && npc.HitSound != SoundID.NPCHit52 && npc.HitSound != SoundID.NPCHit53 &&
-                npc.HitSound != SoundID.NPCHit54 && npc.HitSound != null)
-                || npc.type == CWRID.NPC_Providence || npc.type == CWRID.NPC_ScornEater || npc.type == CWRID.NPC_Yharon || npc.type == CWRID.NPC_DevourerofGodsHead) {
+                if (_nonSteelBossTypes.Contains(npc.type)) {
+                    return false;
+                }
+                if (npc.HitSound == null || !_steelHitSounds.Contains(npc.HitSound)) {
                     return false;
                 }
                 return true;
@@ -196,32 +213,70 @@ namespace CalamityOverhaul
             /// </summary>
             public readonly static Dictionary<int, bool> ImmuneFrozen = [];
         }
+        #endregion
 
+        #region Setup
         public static void Setup() {
-            #region List
-            targetNpcTypes = [CWRID.NPC_SepulcherHead, CWRID.NPC_SepulcherBody, CWRID.NPC_SepulcherTail];
-            targetNpcTypes2 = [CWRID.NPC_StormWeaverHead, CWRID.NPC_StormWeaverBody, CWRID.NPC_StormWeaverTail];
-            targetNpcTypes3 = [CWRID.NPC_PrimordialWyrmHead, CWRID.NPC_PrimordialWyrmBody, CWRID.NPC_PrimordialWyrmTail];
-            targetNpcTypes4 = [CWRID.NPC_PerforatorHeadLarge, CWRID.NPC_PerforatorBodyLarge, CWRID.NPC_PerforatorTailLarge];
-            targetNpcTypes5 = [CWRID.NPC_PerforatorHeadMedium, CWRID.NPC_PerforatorBodyMedium, CWRID.NPC_PerforatorTailMedium];
-            targetNpcTypes6 = [];
-            targetNpcTypes7 = [CWRID.NPC_Apollo, CWRID.NPC_Artemis, CWRID.NPC_AresBody, CWRID.NPC_ThanatosHead, CWRID.NPC_ThanatosBody1, CWRID.NPC_ThanatosBody2, CWRID.NPC_ThanatosTail];
-            targetNpcTypes7_1 = [CWRID.NPC_AresBody, CWRID.NPC_AresLaserCannon, CWRID.NPC_AresPlasmaFlamethrower, CWRID.NPC_AresTeslaCannon, CWRID.NPC_AresGaussNuke];
-            targetNpcTypes8 = [CWRID.NPC_DevourerofGodsHead, CWRID.NPC_DevourerofGodsBody, CWRID.NPC_DevourerofGodsTail];
-            targetNpcTypes9 = [CWRID.NPC_DesertScourgeHead, CWRID.NPC_DesertScourgeBody, CWRID.NPC_DesertScourgeTail, CWRID.NPC_DesertNuisanceHead, CWRID.NPC_DesertNuisanceBody, CWRID.NPC_DesertNuisanceTail];
-            targetNpcTypes10 = [CWRID.NPC_AstrumDeusHead, CWRID.NPC_AstrumDeusBody, CWRID.NPC_AstrumDeusTail];
-            targetNpcTypes11 = [CWRID.NPC_AquaticScourgeHead, CWRID.NPC_AquaticScourgeBody, CWRID.NPC_AquaticScourgeTail];
-            targetNpcTypes12 = [CWRID.NPC_EidolonWyrmHead, CWRID.NPC_EidolonWyrmBody, CWRID.NPC_EidolonWyrmBodyAlt, CWRID.NPC_EidolonWyrmTail];
-            targetNpcTypes13 = [NPCID.MoonLordFreeEye, NPCID.MoonLordCore, NPCID.MoonLordHand, NPCID.MoonLordHead, NPCID.MoonLordLeechBlob];
-            targetNpcTypes14 = [NPCID.EaterofWorldsHead, NPCID.EaterofWorldsBody, NPCID.EaterofWorldsTail];
-            targetNpcTypes15 = [NPCID.TheDestroyer, NPCID.TheDestroyerBody, NPCID.TheDestroyerTail];
-            targetNpcTypes16 = [CWRID.NPC_RavagerBody, CWRID.NPC_RavagerClawLeft, CWRID.NPC_RavagerClawRight, CWRID.NPC_RavagerHead, CWRID.NPC_RavagerLegLeft, CWRID.NPC_RavagerLegRight];
-            targetNpcTypes17 = [CWRID.NPC_PerforatorHeadSmall, CWRID.NPC_PerforatorBodySmall, CWRID.NPC_PerforatorTailSmall];
+            SetupBossSegmentLists();
+            SetupStaticData();
+            SetupCrossModItems();
+            SetupItemData();
+            SetupNPCData();
+            SetupProjectileData();
+            OnLoadContentBool = true;
+        }
 
-            WormBodys = [ CWRID.NPC_AquaticScourgeBody, CWRID.NPC_StormWeaverBody, CWRID.NPC_DesertScourgeBody, CWRID.NPC_DesertNuisanceBody,
-                CWRID.NPC_DesertNuisanceBodyYoung, CWRID.NPC_PrimordialWyrmBody, CWRID.NPC_ThanatosBody1, CWRID.NPC_ThanatosBody2, CWRID.NPC_DevourerofGodsBody, CWRID.NPC_AstrumDeusBody
-                , CWRID.NPC_SepulcherBody, CWRID.NPC_PerforatorBodyLarge, CWRID.NPC_PerforatorBodyMedium, CWRID.NPC_PerforatorBodySmall, NPCID.TheDestroyerBody, NPCID.EaterofWorldsBody];
+        private static void SetupBossSegmentLists() {
+            SepulcherSegments = [CWRID.NPC_SepulcherHead, CWRID.NPC_SepulcherBody, CWRID.NPC_SepulcherTail];
+            StormWeaverSegments = [CWRID.NPC_StormWeaverHead, CWRID.NPC_StormWeaverBody, CWRID.NPC_StormWeaverTail];
+            PrimordialWyrmSegments = [CWRID.NPC_PrimordialWyrmHead, CWRID.NPC_PrimordialWyrmBody, CWRID.NPC_PrimordialWyrmTail];
+            PerforatorLargeSegments = [CWRID.NPC_PerforatorHeadLarge, CWRID.NPC_PerforatorBodyLarge, CWRID.NPC_PerforatorTailLarge];
+            PerforatorMediumSegments = [CWRID.NPC_PerforatorHeadMedium, CWRID.NPC_PerforatorBodyMedium, CWRID.NPC_PerforatorTailMedium];
+            ArmoredDiggerSegments = [];
+            ExoMechSegments = [CWRID.NPC_Apollo, CWRID.NPC_Artemis, CWRID.NPC_AresBody, CWRID.NPC_ThanatosHead, CWRID.NPC_ThanatosBody1, CWRID.NPC_ThanatosBody2, CWRID.NPC_ThanatosTail];
+            ExoMechAresSegments = [CWRID.NPC_AresBody, CWRID.NPC_AresLaserCannon, CWRID.NPC_AresPlasmaFlamethrower, CWRID.NPC_AresTeslaCannon, CWRID.NPC_AresGaussNuke];
+            DevourerofGodsSegments = [CWRID.NPC_DevourerofGodsHead, CWRID.NPC_DevourerofGodsBody, CWRID.NPC_DevourerofGodsTail];
+            DesertScourgeSegments = [CWRID.NPC_DesertScourgeHead, CWRID.NPC_DesertScourgeBody, CWRID.NPC_DesertScourgeTail, CWRID.NPC_DesertNuisanceHead, CWRID.NPC_DesertNuisanceBody, CWRID.NPC_DesertNuisanceTail];
+            AstrumDeusSegments = [CWRID.NPC_AstrumDeusHead, CWRID.NPC_AstrumDeusBody, CWRID.NPC_AstrumDeusTail];
+            AquaticScourgeSegments = [CWRID.NPC_AquaticScourgeHead, CWRID.NPC_AquaticScourgeBody, CWRID.NPC_AquaticScourgeTail];
+            EidolonWyrmSegments = [CWRID.NPC_EidolonWyrmHead, CWRID.NPC_EidolonWyrmBody, CWRID.NPC_EidolonWyrmBodyAlt, CWRID.NPC_EidolonWyrmTail];
+            MoonLordSegments = [NPCID.MoonLordFreeEye, NPCID.MoonLordCore, NPCID.MoonLordHand, NPCID.MoonLordHead, NPCID.MoonLordLeechBlob];
+            EaterofWorldsSegments = [NPCID.EaterofWorldsHead, NPCID.EaterofWorldsBody, NPCID.EaterofWorldsTail];
+            DestroyerSegments = [NPCID.TheDestroyer, NPCID.TheDestroyerBody, NPCID.TheDestroyerTail];
+            RavagerSegments = [CWRID.NPC_RavagerBody, CWRID.NPC_RavagerClawLeft, CWRID.NPC_RavagerClawRight, CWRID.NPC_RavagerHead, CWRID.NPC_RavagerLegLeft, CWRID.NPC_RavagerLegRight];
+            PerforatorSmallSegments = [CWRID.NPC_PerforatorHeadSmall, CWRID.NPC_PerforatorBodySmall, CWRID.NPC_PerforatorTailSmall];
 
+            AllBossSegmentLists = [
+                SepulcherSegments,
+                StormWeaverSegments,
+                PrimordialWyrmSegments,
+                PerforatorLargeSegments,
+                PerforatorMediumSegments,
+                ArmoredDiggerSegments,
+                ExoMechSegments,
+                DevourerofGodsSegments,
+                DesertScourgeSegments,
+                AstrumDeusSegments,
+                AquaticScourgeSegments,
+                EidolonWyrmSegments,
+                MoonLordSegments,
+                EaterofWorldsSegments,
+                DestroyerSegments,
+            ];
+
+            WormBodys = [
+                CWRID.NPC_AquaticScourgeBody, CWRID.NPC_StormWeaverBody,
+                CWRID.NPC_DesertScourgeBody, CWRID.NPC_DesertNuisanceBody,
+                CWRID.NPC_DesertNuisanceBodyYoung, CWRID.NPC_PrimordialWyrmBody,
+                CWRID.NPC_ThanatosBody1, CWRID.NPC_ThanatosBody2,
+                CWRID.NPC_DevourerofGodsBody, CWRID.NPC_AstrumDeusBody,
+                CWRID.NPC_SepulcherBody, CWRID.NPC_PerforatorBodyLarge,
+                CWRID.NPC_PerforatorBodyMedium, CWRID.NPC_PerforatorBodySmall,
+                NPCID.TheDestroyerBody, NPCID.EaterofWorldsBody,
+            ];
+        }
+
+        private static void SetupStaticData() {
             AddMaxStackItemsIn64 = [
                 CWRID.Item_Rock,
                 CWRID.Item_BloodOrange,
@@ -231,8 +286,9 @@ namespace CalamityOverhaul
                 CWRID.Item_LoreCynosure,
                 ItemID.BloodMoonStarter,
             ];
-            #endregion
+        }
 
+        private static void SetupCrossModItems() {
             if (CWRMod.Instance.fargowiltasSouls != null) {
                 EternitySoul = CWRMod.Instance.fargowiltasSouls.Find<ModItem>("EternitySoul").Type;
                 DevisCurse = CWRMod.Instance.fargowiltasSouls.Find<ModItem>("DevisCurse").Type;
@@ -243,7 +299,9 @@ namespace CalamityOverhaul
             if (CWRMod.Instance.catalystMod != null) {
                 MetanovaBar = CWRMod.Instance.catalystMod.Find<ModItem>("MetanovaBar").Type;
             }
+        }
 
+        private static void SetupItemData() {
             for (int itemType = 0; itemType < ItemLoader.ItemCount; itemType++) {
                 Item item = ContentSamples.ItemsByType[itemType];
                 ItemIsHeldSwing[itemType] = false;
@@ -252,189 +310,162 @@ namespace CalamityOverhaul
                 ItemIsShotgun[itemType] = false;
                 ItemIsCrossBow[itemType] = false;
                 ItemIsGunAndMustConsumeAmmunition[itemType] = false;
-                ItemIsGunAndGetRecoilValue[itemType] = 1.2f;
-                ItemIsGunAndGetRecoilLocKey[itemType] = "";
                 ItemIsBow[itemType] = false;
                 ItemIsBowAndArrowNum[itemType] = 1;
                 ItemIsRanged[itemType] = false;
                 ItemIsRangedAndCanRightClickFire[itemType] = false;
                 ItemIDToOmigaSnyContent[itemType] = null;
                 ItemAutoloadingOmigaSnyRecipe[itemType] = true;
-                if (item != null && item.type != ItemID.None) {//验证物品是否有效
-                    if (item.createTile != -1 && !TileToItem.ContainsKey(item.createTile)) {
-                        TileToItem.Add(item.createTile, item.type);
-                    }
-                    if (item.createWall != -1 && !WallToItem.ContainsKey(item.createWall)) {
-                        WallToItem.Add(item.createWall, item.type);
-                    }
 
-                    CWRItem cwrItem = item.CWR();
-
-                    string[] snyOmig = cwrItem.OmigaSnyContent;
-                    if (snyOmig != null) {
-                        ItemIDToOmigaSnyContent[itemType] = snyOmig;
-                        ItemAutoloadingOmigaSnyRecipe[itemType] = cwrItem.AutoloadingOmigaSnyRecipe;
-                    }
-
-                    ItemIsHeldSwing[itemType] = cwrItem.IsHeldSwing;
-                    ItemIsHeldSwingDontStopOrigShoot[itemType] = cwrItem.IsHeldSwingDontStopOrigShoot;
-
-                    if (cwrItem.IsHeldSwing) {//DeBug处理，如果有的地方没有使用正确的初始化函数设置刀剑，就会在加载的时候在这里报错以提醒开发者
-                        Projectile shootProj = new Projectile();
-                        shootProj.SetDefaults(item.shoot);
-                        if (shootProj.ModProjectile != null && shootProj.ModProjectile is BaseSwing swing) {
-                            if (!cwrItem.WeaponInSetKnifeHeld) {
-                                throw new InvalidOperationException($"The Sword is not initialized correctly：{item} by {swing})。" +
-                                    $"Please check that the initialization function is called correctly"
-                                    + "SetKnifeHeld must be used to set the BaseSwing item");
-                            }
-                        }
-                    }
-
-                    int heldProjType = cwrItem.heldProjType;
-                    if (heldProjType > 0) {
-                        Projectile heldProj = new Projectile();
-                        heldProj.SetDefaults(heldProjType);
-
-                        if (heldProj.ModProjectile != null) {
-                            if (heldProj.ModProjectile is BaseGun gun) {
-                                ItemIsGun[itemType] = true;
-                                ItemIsCrossBow[itemType] = gun.IsCrossbow;
-                                ItemIsGunAndMustConsumeAmmunition[itemType] = gun.MustConsumeAmmunition;
-                                ItemIsGunAndGetRecoilValue[itemType] = gun.Recoil;
-                                ItemIsGunAndGetRecoilLocKey[itemType] = GetLckRecoilKey(gun.Recoil);
-                            }
-                            if (heldProj.ModProjectile is BaseBow bow) {
-                                ItemIsBow[itemType] = true;
-                                ItemIsBowAndArrowNum[itemType] = bow.BowArrowDrawNum;
-                            }
-                            if (heldProj.ModProjectile is BaseHeldRanged ranged) {
-                                ItemIsRanged[itemType] = true;
-                                ItemIsRangedAndCanRightClickFire[itemType] = ranged.CanRightClick;
-                            }
-                        }
-                    }
+                if (item == null || item.type == ItemID.None) {
+                    continue;
                 }
+
+                if (item.createTile != -1 && !TileToItem.ContainsKey(item.createTile)) {
+                    TileToItem.Add(item.createTile, item.type);
+                }
+                if (item.createWall != -1 && !WallToItem.ContainsKey(item.createWall)) {
+                    WallToItem.Add(item.createWall, item.type);
+                }
+
+                CWRItem cwrItem = item.CWR();
+
+                string[] snyOmig = cwrItem.OmigaSnyContent;
+                if (snyOmig != null) {
+                    ItemIDToOmigaSnyContent[itemType] = snyOmig;
+                    ItemAutoloadingOmigaSnyRecipe[itemType] = cwrItem.AutoloadingOmigaSnyRecipe;
+                }
+
+                ItemIsHeldSwing[itemType] = cwrItem.IsHeldSwing;
+                ItemIsHeldSwingDontStopOrigShoot[itemType] = cwrItem.IsHeldSwingDontStopOrigShoot;
+
+                if (cwrItem.IsHeldSwing) {
+                    ValidateSwingInitialization(item, cwrItem);
+                }
+
+                PopulateRangedData(itemType, cwrItem);
+            }
+        }
+
+        private static void ValidateSwingInitialization(Item item, CWRItem cwrItem) {
+            Projectile shootProj = new Projectile();
+            shootProj.SetDefaults(item.shoot);
+            if (shootProj.ModProjectile is BaseSwing swing && !cwrItem.WeaponInSetKnifeHeld) {
+                throw new InvalidOperationException(
+                    $"The Sword is not initialized correctly：{item} by {swing})。" +
+                    $"Please check that the initialization function is called correctly. " +
+                    $"SetKnifeHeld must be used to set the BaseSwing item");
+            }
+        }
+
+        private static void PopulateRangedData(int itemType, CWRItem cwrItem) {
+            int heldProjType = cwrItem.heldProjType;
+            if (heldProjType <= 0) {
+                return;
             }
 
+            Projectile heldProj = new Projectile();
+            heldProj.SetDefaults(heldProjType);
+            if (heldProj.ModProjectile == null) {
+                return;
+            }
+
+            if (heldProj.ModProjectile is BaseGun gun) {
+                ItemIsGun[itemType] = true;
+                ItemIsCrossBow[itemType] = gun.IsCrossbow;
+                ItemIsGunAndMustConsumeAmmunition[itemType] = gun.MustConsumeAmmunition;
+            }
+            if (heldProj.ModProjectile is BaseBow bow) {
+                ItemIsBow[itemType] = true;
+                ItemIsBowAndArrowNum[itemType] = bow.BowArrowDrawNum;
+            }
+            if (heldProj.ModProjectile is BaseHeldRanged ranged) {
+                ItemIsRanged[itemType] = true;
+                ItemIsRangedAndCanRightClickFire[itemType] = ranged.CanRightClick;
+            }
+        }
+
+        private static void SetupNPCData() {
             for (int i = 0; i < NPCLoader.NPCCount; i++) {
                 NPCValue.ImmuneFrozen.TryAdd(i, false);
             }
+        }
 
-            //尝试将此弹幕注册为 Calamity 穿刺抗性豁免
-            HashSet<int> exemptSet = null;
-            if (ModLoader.TryGetMod("CalamityMod", out Mod calamity)) {
-                //找到 PierceResistNPC 类型
-                var pierceResistNPCType = calamity.Code.GetType("CalamityMod.NPCs.PierceResistNPC");
-                if (pierceResistNPCType != null) {
-                    //获取 exemptProjectiles 字段
-                    var field = pierceResistNPCType.GetField("exemptProjectiles",
-                        BindingFlags.Static | BindingFlags.NonPublic);
-
-                    if (field?.GetValue(null) is HashSet<int> reset) {
-                        exemptSet = reset;
-                    }
-                }
-            }
+        private static void SetupProjectileData() {
+            HashSet<int> exemptSet = GetCalamityPierceExemptSet();
 
             for (int i = 0; i < ProjectileLoader.ProjectileCount; i++) {
                 ProjValue.ImmuneFrozen.TryAdd(i, false);
                 Projectile projectile = ContentSamples.ProjectilesByType[i];
                 if (projectile != null && projectile.type != ProjectileID.None) {
                     CWRProjectile cwrProjectile = projectile.CWR();
-                    //尝试将此弹幕注册为 Calamity 穿刺抗性豁免
                     if (exemptSet != null && cwrProjectile.PierceResist) {
                         exemptSet.Add(projectile.type);
                     }
                 }
             }
-
-            OnLoadContentBool = true;
         }
 
+        private static HashSet<int> GetCalamityPierceExemptSet() {
+            if (!ModLoader.TryGetMod("CalamityMod", out Mod calamity)) {
+                return null;
+            }
+
+            var pierceResistNPCType = calamity.Code.GetType("CalamityMod.NPCs.PierceResistNPC");
+            var field = pierceResistNPCType?.GetField("exemptProjectiles",
+                BindingFlags.Static | BindingFlags.NonPublic);
+
+            return field?.GetValue(null) as HashSet<int>;
+        }
+        #endregion
+
+        #region UnLoad
         public static void UnLoad() {
             TileToItem?.Clear();
             WallToItem?.Clear();
+            ItemIsHeldSwing?.Clear();
+            ItemIsHeldSwingDontStopOrigShoot?.Clear();
             ItemIsGun?.Clear();
+            ItemIsShotgun?.Clear();
             ItemIsBow?.Clear();
+            ItemIsCrossBow?.Clear();
             ItemIsRanged?.Clear();
             ItemIsRangedAndCanRightClickFire?.Clear();
             ItemIsBowAndArrowNum?.Clear();
             ItemIsGunAndMustConsumeAmmunition?.Clear();
-            ItemIsGunAndGetRecoilValue?.Clear();
-            ItemIsGunAndGetRecoilLocKey?.Clear();
+            ItemIDToOmigaSnyContent?.Clear();
+            ItemAutoloadingOmigaSnyRecipe?.Clear();
+            NPCValue.ImmuneFrozen?.Clear();
             ProjValue.ImmuneFrozen?.Clear();
+            AllBossSegmentLists = null;
         }
+        #endregion
 
-        public static string GetLckRecoilKey(float recoil) {
-            float recoilValue = Math.Abs(recoil);
-
-            if (recoilValue == 0) {
-                return "CWRGun_Recoil_Level_0";
-            }
-            else if (recoilValue < 0.1f) {
-                return "CWRGun_Recoil_Level_1";
-            }
-            else if (recoilValue < 0.5f) {
-                return "CWRGun_Recoil_Level_2";
-            }
-            else if (recoilValue < 1.5f) {
-                return "CWRGun_Recoil_Level_3";
-            }
-            else if (recoilValue < 2.2f) {
-                return "CWRGun_Recoil_Level_4";
-            }
-            else if (recoilValue < 3.2f) {
-                return "CWRGun_Recoil_Level_5";
-            }
-            return "CWRGun_Recoil_Level_6";
-        }
+        #region SetAmmoItem
+        private static readonly Dictionary<int, int> _ammoShootOverrides = new() {
+            [ItemID.FallenStar] = ProjectileID.StarCannonStar,
+            [ItemID.RocketI] = ProjectileID.RocketI,
+            [ItemID.RocketII] = ProjectileID.RocketII,
+            [ItemID.RocketIII] = ProjectileID.RocketIII,
+            [ItemID.RocketIV] = ProjectileID.RocketIV,
+            [ItemID.ClusterRocketI] = ProjectileID.ClusterRocketI,
+            [ItemID.ClusterRocketII] = ProjectileID.ClusterRocketII,
+            [ItemID.DryRocket] = ProjectileID.DryRocket,
+            [ItemID.WetRocket] = ProjectileID.WetRocket,
+            [ItemID.HoneyRocket] = ProjectileID.HoneyRocket,
+            [ItemID.LavaRocket] = ProjectileID.LavaRocket,
+            [ItemID.MiniNukeI] = ProjectileID.MiniNukeRocketI,
+            [ItemID.MiniNukeII] = ProjectileID.MiniNukeRocketII,
+        };
 
         /// <summary>
         /// 修改一些原弹药设定异常的物品的shoot值
         /// </summary>
-        /// <param name="ammoItem"></param>
         public static void SetAmmoItem(Item ammoItem) {
-            ref int ammoTypes = ref ammoItem.shoot;
-            if (ammoItem.type == ItemID.FallenStar) {
-                ammoTypes = ProjectileID.StarCannonStar;
-            }
-            else if (ammoItem.type == ItemID.RocketI) {
-                ammoTypes = ProjectileID.RocketI;
-            }
-            else if (ammoItem.type == ItemID.RocketII) {
-                ammoTypes = ProjectileID.RocketII;
-            }
-            else if (ammoItem.type == ItemID.RocketIII) {
-                ammoTypes = ProjectileID.RocketIII;
-            }
-            else if (ammoItem.type == ItemID.RocketIV) {
-                ammoTypes = ProjectileID.RocketIV;
-            }
-            else if (ammoItem.type == ItemID.ClusterRocketI) {
-                ammoTypes = ProjectileID.ClusterRocketI;
-            }
-            else if (ammoItem.type == ItemID.ClusterRocketII) {
-                ammoTypes = ProjectileID.ClusterRocketII;
-            }
-            else if (ammoItem.type == ItemID.DryRocket) {
-                ammoTypes = ProjectileID.DryRocket;
-            }
-            else if (ammoItem.type == ItemID.WetRocket) {
-                ammoTypes = ProjectileID.WetRocket;
-            }
-            else if (ammoItem.type == ItemID.HoneyRocket) {
-                ammoTypes = ProjectileID.HoneyRocket;
-            }
-            else if (ammoItem.type == ItemID.LavaRocket) {
-                ammoTypes = ProjectileID.LavaRocket;
-            }
-            else if (ammoItem.type == ItemID.MiniNukeI) {
-                ammoTypes = ProjectileID.MiniNukeRocketI;
-            }
-            else if (ammoItem.type == ItemID.MiniNukeII) {
-                ammoTypes = ProjectileID.MiniNukeRocketII;
+            if (_ammoShootOverrides.TryGetValue(ammoItem.type, out int shootType)) {
+                ammoItem.shoot = shootType;
             }
         }
+        #endregion
     }
 }

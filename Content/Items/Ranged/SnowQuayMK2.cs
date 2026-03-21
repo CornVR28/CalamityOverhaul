@@ -40,8 +40,6 @@ namespace CalamityOverhaul.Content.Items.Ranged
         public override string Texture => CWRConstant.Item_Ranged + "SnowQuayMK2";
         public override int TargetID => ModContent.ItemType<SnowQuayMK2>();
         public override void SetRangedProperty() {
-            Recoil = 0.3f;
-
             GunPressure = 0;
             HandIdleDistanceX = 40;
             HandIdleDistanceY = 0;

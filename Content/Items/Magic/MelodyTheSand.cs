@@ -45,13 +45,10 @@ namespace CalamityOverhaul.Content.Items.Magic
             ShootPosToMouLengValue = 10;
             GunPressure = 0.3f;
             ControlForce = 0.05f;
-            Recoil = 1.2f;
-            RangeOfStress = 25;
             RecoilRetroForceMagnitude = 26;
             RecoilOffsetRecoverValue = 0.65f;
             EnableRecoilRetroEffect = false;
             FiringDefaultSound = false;
-            CanCreateRecoilBool = false;
             CanCreateSpawnGunDust = CanCreateCaseEjection = false;
             InOwner_HandState_AlwaysSetInFireRoding = true;
         }

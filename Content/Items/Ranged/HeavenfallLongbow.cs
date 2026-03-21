@@ -191,32 +191,16 @@ namespace CalamityOverhaul.Content.Items.Ranged
         public static void Obliterate(Vector2 origPos) {
             const int maxLengthSquared = 90000;
 
-            List<List<int>> allTargetNpcTypes = [
-                 CWRLoad.targetNpcTypes,
-                 CWRLoad.targetNpcTypes2,
-                 CWRLoad.targetNpcTypes3,
-                 CWRLoad.targetNpcTypes4,
-                 CWRLoad.targetNpcTypes5,
-                 CWRLoad.targetNpcTypes6,
-                 CWRLoad.targetNpcTypes7,
-                 CWRLoad.targetNpcTypes8,
-                 CWRLoad.targetNpcTypes9,
-                 CWRLoad.targetNpcTypes10,
-                 CWRLoad.targetNpcTypes11,
-                 CWRLoad.targetNpcTypes12,
-                 CWRLoad.targetNpcTypes13,
-                 CWRLoad.targetNpcTypes14,
-                 CWRLoad.targetNpcTypes15
-            ];
+            List<List<int>> allSegmentLists = CWRLoad.AllBossSegmentLists;
 
             foreach (NPC npc in Main.ActiveNPCs) {
                 if (npc.Center.To(origPos).LengthSquared() > maxLengthSquared) {
                     continue;
                 }
 
-                foreach (List<int> targetNpcTypes in allTargetNpcTypes) {
-                    if (targetNpcTypes.Contains(npc.type)) {
-                        foreach (NPC npcToKill in Main.npc.Where(n => targetNpcTypes.Contains(n.type))) {
+                foreach (List<int> segments in allSegmentLists) {
+                    if (segments.Contains(npc.type)) {
+                        foreach (NPC npcToKill in Main.npc.Where(n => segments.Contains(n.type))) {
                             KillAction(npcToKill);
                         }
                         break;

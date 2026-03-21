@@ -26,7 +26,6 @@ namespace CalamityOverhaul.Content.Items.Ranged
         public override string Texture => CWRConstant.Item_Ranged + "FungalRevolver";
         public override int TargetID => ModContent.ItemType<FungalRevolver>();
         public override void SetRangedProperty() {
-            Recoil = 0.9f;
             HandIdleDistanceX = 18;
             HandIdleDistanceY = 3;
             HandFireDistanceX = 18;
@@ -35,7 +34,6 @@ namespace CalamityOverhaul.Content.Items.Ranged
             ShootPosToMouLengValue = 10;
             GunPressure = 0.1f;
             ControlForce = 0.05f;
-            RangeOfStress = 25;
             CanCreateSpawnGunDust = false;
             Onehanded = true;
             InOwner_HandState_AlwaysSetInFireRoding = true;
