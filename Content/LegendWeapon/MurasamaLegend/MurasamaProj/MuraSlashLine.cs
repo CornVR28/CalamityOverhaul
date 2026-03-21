@@ -18,7 +18,6 @@ namespace CalamityOverhaul.Content.LegendWeapon.MurasamaLegend.MurasamaProj
 
         private Color drawColor;
         private float distance;
-        private int timeSinceSpawn = 0;
 
         public override string Texture => MuraSlayAllAssets.TransparentImg;
 

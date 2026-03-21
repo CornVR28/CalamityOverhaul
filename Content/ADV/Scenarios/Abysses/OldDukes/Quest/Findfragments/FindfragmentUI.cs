@@ -1,5 +1,5 @@
 ﻿using CalamityOverhaul.Content.ADV.ADVQuestTracker;
-using CalamityOverhaul.OtherMods.ImproveGame.Ammos;
+using CalamityOverhaul.OtherMods.ImproveGame;
 using InnoVault.UIHandles;
 using Microsoft.Xna.Framework.Graphics;
 using System;

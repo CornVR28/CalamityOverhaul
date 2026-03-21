@@ -454,7 +454,7 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
         }
 
         [VaultLoaden(CWRConstant.Masking)]
-        private static Texture2D TransverseTwill;
+        private static Texture2D TransverseTwill = null!;
 
         private void DrawMiniAccretionDisk() {
             SpriteBatch spriteBatch = Main.spriteBatch;
@@ -716,7 +716,7 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
         }
 
         [VaultLoaden(CWRConstant.Masking)]
-        private static Texture2D TransverseTwill;
+        private static Texture2D TransverseTwill = null!;
 
         private void DrawMiniDisk() {
             SpriteBatch spriteBatch = Main.spriteBatch;

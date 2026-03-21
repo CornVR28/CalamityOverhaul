@@ -330,7 +330,7 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
         }
 
         [VaultLoaden(CWRConstant.Masking)]
-        private static Texture2D TransverseTwill;
+        private static Texture2D TransverseTwill = null!;
 
         private void DrawAccretionDisk() {
             SpriteBatch spriteBatch = Main.spriteBatch;

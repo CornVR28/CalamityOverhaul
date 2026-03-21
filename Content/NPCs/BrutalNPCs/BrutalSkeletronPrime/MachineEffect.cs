@@ -178,7 +178,7 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalSkeletronPrime
         public static bool IsActive;
         public static int CekTimer = 0;
         [VaultLoaden(CWRConstant.NPC + "Meld")]
-        public static Asset<Texture2D> MeldAsset;
+        public static Asset<Texture2D> MeldAsset = null!;
 
         internal static void Send() {
             if (VaultUtils.isSinglePlayer) {

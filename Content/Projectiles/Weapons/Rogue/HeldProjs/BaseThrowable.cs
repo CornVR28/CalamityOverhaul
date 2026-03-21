@@ -48,7 +48,7 @@ namespace CalamityOverhaul.Content.Projectiles.Weapons.Rogue.HeldProjs
         /// <summary>
         /// 使用拖尾绘制
         /// </summary>
-        public bool UseDrawTrail;
+        public bool UseDrawTrail = false;
         /// <summary>
         /// 拖尾颜色衰减，默认为0.8f
         /// </summary>

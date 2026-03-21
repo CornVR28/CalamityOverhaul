@@ -79,14 +79,14 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
                     Tile tile = Main.tile[x, y];
 
                     //清除所有原版墙壁
-                    if (tile.WallType != 0) {
-                        tile.WallType = 0;
+                    if (tile.WallType != WallID.None) {
+                        tile.WallType = WallID.None;
                     }
 
                     //清除液体
                     if (tile.LiquidAmount > 0) {
                         tile.LiquidAmount = 0;
-                        tile.LiquidType = 0;
+                        tile.LiquidType = LiquidID.Water;
                     }
 
                     if (!tile.HasTile)
@@ -206,8 +206,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
                     if (tile.HasTile) {
                         WorldGen.KillTile(x, py, noItem: true);
                     }
-                    if (tile.WallType != 0) {
-                        tile.WallType = 0;
+                    if (tile.WallType != WallID.None) {
+                        tile.WallType = WallID.None;
                     }
                 }
             }

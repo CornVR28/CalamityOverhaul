@@ -118,7 +118,7 @@ namespace CalamityOverhaul.Content.UIs.OverhaulSettings
             /// <summary>
             /// 可选：关联的物品类型ID，用于绘制物品图标
             /// </summary>
-            public int ItemType;
+            public int ItemType = 0;
         }
 
         public override LayersModeEnum LayersMode => LayersModeEnum.Mod_MenuLoad;

@@ -21,7 +21,7 @@ namespace CalamityOverhaul.Content.Industrials.ElectricPowers.Throwers
         public static LocalizedText IdleText { get; private set; }
 
         [VaultLoaden(CWRConstant.UI + "SupertableUIs/InputArrow3")]
-        internal static Asset<Texture2D> InputArrow;
+        internal static Asset<Texture2D> InputArrow = null!;
 
         public override void SetStaticDefaults() {
             NoEnergyText = this.GetLocalization(nameof(NoEnergyText), () => "能量不足!");

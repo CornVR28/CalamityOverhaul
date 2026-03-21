@@ -6,6 +6,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
     internal class DropPod
     {
         [VaultLoaden(CWRConstant.ADV + "Draedon/DropPod")]
-        public static Asset<Texture2D> DropPodAsset;
+        public static Asset<Texture2D> DropPodAsset = null!;
     }
 }

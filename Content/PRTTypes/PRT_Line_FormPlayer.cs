@@ -9,7 +9,7 @@ namespace CalamityOverhaul.Content.PRTTypes
     {
         public Color InitialColor;
         public bool AffectedByGravity;
-        public Player Owner;
+        public Player Owner = null!;
         public override string Texture => CWRConstant.Masking + "Line";
         public PRT_Line_FormPlayer(Vector2 relativePosition, Vector2 velocity
             , bool affectedByGravity, int lifetime, float scale, Color color) {

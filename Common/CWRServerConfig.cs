@@ -62,10 +62,6 @@ namespace CalamityOverhaul.Common
 
         [BackgroundColor(192, 54, 94, 255)]
         [DefaultValue(false)]
-        public bool ShotgunFireForcedReloadInterruption { get; set; }
-
-        [BackgroundColor(192, 54, 94, 255)]
-        [DefaultValue(false)]
         public bool WeaponLazyRotationAngle { get; set; }
 
         [BackgroundColor(192, 54, 94, 255)]

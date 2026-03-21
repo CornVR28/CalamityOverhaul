@@ -1,12 +1,13 @@
 ﻿using CalamityOverhaul.Common;
-using CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalSkeletronPrime;
+using CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalMechanicalEye;
+using CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalMechanicalEye.Core;
 using CalamityOverhaul.Content.Projectiles.Boss.MechanicalEye;
 using CalamityOverhaul.Content.Projectiles.Boss.SkeletronPrime;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 
-namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalMechanicalEye.Core
+namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalSkeletronPrime
 {
     /// <summary>
     /// 双子魔眼随从模式AI处理器
@@ -51,12 +52,12 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalMechanicalEye.Core
             bool isSpazmatism = Npc.type == NPCID.Spazmatism;
             bool lowBloodVolume = lifeRog < 0.7f;
             bool skeletronPrimeIsDead = !skeletronPrime.Alives();
-            bool skeletronPrimeIsTwo = skeletronPrimeIsDead ? false : (skeletronPrime.ai[0] == 3);
+            bool skeletronPrimeIsTwo = skeletronPrimeIsDead ? false : skeletronPrime.ai[0] == 3;
             bool isSpawnFirstStage = Ai[11] == 1;
             bool isSpawnFirstStageFromeExeunt = false;
 
             if (!skeletronPrimeIsDead && isSpawnFirstStage) {
-                isSpawnFirstStageFromeExeunt = ((skeletronPrime.life / (float)skeletronPrime.lifeMax) < 0.6f);
+                isSpawnFirstStageFromeExeunt = skeletronPrime.life / (float)skeletronPrime.lifeMax < 0.6f;
             }
 
             int projType = isSpazmatism ? ModContent.ProjectileType<Fireball>() : ProjectileID.EyeLaser;

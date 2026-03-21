@@ -34,7 +34,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Campsites
             public bool IsBeingVisited;
             public float InteractionIntensity;
             public float BouncePhase;
-            public int ExtraSteamSpawnTimer;
+            public int ExtraSteamSpawnTimer = 0;
 
             //水下状态
             public bool IsUnderwater;

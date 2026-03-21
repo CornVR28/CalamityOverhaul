@@ -1,12 +1,8 @@
 ﻿using CalamityOverhaul.Common;
 using CalamityOverhaul.Content.Items.Ranged;
-using CalamityOverhaul.Content.Projectiles.Weapons.Ranged;
-using CalamityOverhaul.Content.PRTTypes;
-using InnoVault.PRT;
 using System.IO;
 using System.Linq;
 using Terraria;
-using Terraria.Audio;
 using Terraria.DataStructures;
 using Terraria.Graphics.Shaders;
 using Terraria.ID;

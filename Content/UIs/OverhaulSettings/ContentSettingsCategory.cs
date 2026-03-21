@@ -41,7 +41,6 @@ namespace CalamityOverhaul.Content.UIs.OverhaulSettings
             AddToggle("EnableSwordLight", () => config.EnableSwordLight, v => config.EnableSwordLight = v, false);
             AddToggle("EnableCasingsEntity", () => config.EnableCasingsEntity, v => config.EnableCasingsEntity = v, false);
             AddToggle("BowArrowDraw", () => config.BowArrowDraw, v => config.BowArrowDraw = v, false);
-            AddToggle("ShotgunFireForcedReloadInterruption", () => config.ShotgunFireForcedReloadInterruption, v => config.ShotgunFireForcedReloadInterruption = v, false);
             AddToggle("WeaponLazyRotationAngle", () => config.WeaponLazyRotationAngle, v => config.WeaponLazyRotationAngle = v, false);
             AddToggle("ScreenVibration", () => config.ScreenVibration, v => config.ScreenVibration = v, false);
             AddToggle("MurasamaSpaceFragmentationBool", () => config.MurasamaSpaceFragmentationBool, v => config.MurasamaSpaceFragmentationBool = v, false);
@@ -70,7 +69,6 @@ namespace CalamityOverhaul.Content.UIs.OverhaulSettings
             config.EnableSwordLight = true;
             config.EnableCasingsEntity = true;
             config.BowArrowDraw = true;
-            config.ShotgunFireForcedReloadInterruption = false;
             config.WeaponLazyRotationAngle = false;
             config.ScreenVibration = true;
             config.MurasamaSpaceFragmentationBool = true;

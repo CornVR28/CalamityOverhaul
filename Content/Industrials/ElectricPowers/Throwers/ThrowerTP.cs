@@ -345,7 +345,7 @@ namespace CalamityOverhaul.Content.Industrials.ElectricPowers.Throwers
             }
 
             //检查物品是否有弹药属性
-            if (item.ammo > 0 && item.shoot > 0) {
+            if (item.ammo > 0 && item.shoot > ProjectileID.None) {
                 projectileType = item.shoot;
                 return true;
             }

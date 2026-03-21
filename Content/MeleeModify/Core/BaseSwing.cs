@@ -57,11 +57,11 @@ namespace CalamityOverhaul.Content.MeleeModify.Core
         /// <summary>
         /// 是否无视弹幕碰撞箱的大小属性，默认为<see langword="false"/>，而如果为<see langword="true"/>，碰撞箱大小将不会自动影响刀刃的其他设置
         /// </summary>
-        public bool IgnoreImpactBoxSize;
+        public bool IgnoreImpactBoxSize = false;
         /// <summary>
         /// 自发光
         /// </summary>
-        public bool Incandescence;
+        public bool Incandescence = false;
         /// <summary>
         /// 刀光纹理倾斜采样，默认为<see langword="false"/>
         /// </summary>

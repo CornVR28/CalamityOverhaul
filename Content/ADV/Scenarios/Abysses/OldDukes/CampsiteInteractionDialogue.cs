@@ -6,7 +6,7 @@ using CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Campsites;
 using CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.OceanRaiderses;
 using CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.OldDukeShops;
 using CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Quest.Findfragments;
-using CalamityOverhaul.OtherMods.ImproveGame.Ammos;
+using CalamityOverhaul.OtherMods.ImproveGame;
 using System;
 using System.Collections.Generic;
 using Terraria;

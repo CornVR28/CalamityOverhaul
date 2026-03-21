@@ -26,9 +26,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.End.EternalBlazingNows
     internal class EbnRender : RenderHandle//渲染控制
     {
         [VaultLoaden(CWRConstant.Effects)]
-        public static MiscShaderData EbnShader;
+        public static MiscShaderData EbnShader = null!;
         [VaultLoaden(CWRConstant.Masking)]
-        public static Texture2D Noise2;
+        public static Texture2D Noise2 = null!;
         public override void EndCaptureDraw(SpriteBatch spriteBatch, GraphicsDevice graphicsDevice, RenderTarget2D screenSwap) {
             if (!EbnEffect.IsActive && EbnEffect.Sengs <= 0 && !EbnEffect.IsRedScreenActive && !EbnEffect.EpilogueFadeIn) {
                 return;

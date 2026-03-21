@@ -14,7 +14,7 @@ namespace CalamityOverhaul.Content.UIs.SupertableUIs.UIContent
 
         private Vector2 _dragOffset;
         private bool _isDragging;
-        private Rectangle _dragArea;
+        private Rectangle _dragArea = default;
 
         public bool IsDragging => _isDragging;
         public Rectangle DragArea => _dragArea;

@@ -5,6 +5,7 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.DataStructures;
 using Terraria.ID;
+using Terraria.Localization;
 using Terraria.ModLoader;
 
 namespace CalamityOverhaul.Content.Items.Magic.Elysiums
@@ -221,7 +222,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
 
                 //造成斩杀伤害
                 int betrayalDamage = Player.statLife + 100;
-                Player.Hurt(PlayerDeathReason.ByCustomReason($"{Player.name} 被犹大背叛了"), betrayalDamage, 0);
+                Player.Hurt(PlayerDeathReason.ByCustomReason(NetworkText.FromLiteral($"{Player.name} 被犹大背叛了")), betrayalDamage, 0);
 
                 //犹大门徒消失
                 RemoveDiscipleByType(ModContent.ProjectileType<JudasIscariot>());

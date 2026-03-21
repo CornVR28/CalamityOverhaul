@@ -833,7 +833,7 @@ namespace CalamityOverhaul.Content.Industrials.MaterialFlow.ItemPipelines
         }
 
         [VaultLoaden(CWRConstant.UI + "SupertableUIs/InputArrow3")]
-        private static Asset<Texture2D> InputArrow;
+        private static Asset<Texture2D> InputArrow = null!;
 
         public override void FrontDraw(SpriteBatch spriteBatch) {
             //绘制流动动画(只有输出端点才绘制)

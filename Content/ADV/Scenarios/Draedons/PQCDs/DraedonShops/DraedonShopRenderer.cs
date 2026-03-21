@@ -1,4 +1,4 @@
-﻿using CalamityOverhaul.OtherMods.ImproveGame.Ammos;
+﻿using CalamityOverhaul.OtherMods.ImproveGame;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Graphics;
 using System;

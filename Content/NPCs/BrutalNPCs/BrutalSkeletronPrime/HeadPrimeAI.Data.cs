@@ -1,9 +1,7 @@
 ﻿using CalamityOverhaul.Common;
 using CalamityOverhaul.Content.Items.Magic;
-using CalamityOverhaul.Content.Items.Materials;
 using CalamityOverhaul.Content.Items.Melee;
 using CalamityOverhaul.Content.Items.Modifys.ModifyBag;
-using CalamityOverhaul.Content.Items.Placeable;
 using CalamityOverhaul.Content.Items.Ranged;
 using CalamityOverhaul.Content.Items.Rogue;
 using Terraria;

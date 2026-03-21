@@ -203,7 +203,6 @@ namespace CalamityOverhaul.Content.ADV.IncomingCalls
         #region 计时器
 
         private int ringTimeoutCounter;
-        private int hangUpDelayCounter;
 
         #endregion
 
@@ -227,7 +226,6 @@ namespace CalamityOverhaul.Content.ADV.IncomingCalls
             ringPulses.Clear();
             ringPulseSpawnTimer = 0;
             ringTimeoutCounter = 0;
-            hangUpDelayCounter = 0;
             callDurationFrames = 0;
             current = null;
             wrappedLines = null;
@@ -491,7 +489,6 @@ namespace CalamityOverhaul.Content.ADV.IncomingCalls
             if (queue.Count == 0) {
                 //所有台词播完
                 if (AutoHangUpDelay > 0) {
-                    hangUpDelayCounter = 0;
                     //等待一段时间后自动挂断——在Update中检测
                     finishedCurrent = true;
                     current = null;

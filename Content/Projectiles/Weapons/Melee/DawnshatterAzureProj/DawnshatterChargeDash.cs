@@ -29,7 +29,6 @@ namespace CalamityOverhaul.Content.Projectiles.Weapons.Melee.DawnshatterAzurePro
         private Vector2 dashDirection;
         private float chargeProgress;
         private int phaseTimer;
-        private bool hasExploded;
         private float screenShakeIntensity;
         private int hitEnemyCount;
 

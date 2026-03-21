@@ -279,8 +279,7 @@ namespace CalamityOverhaul.Common
                 var modConfig = CWRMod.Instance.magicStorage.Find<ModConfig>("MagicStorageConfig");
                 int depth = (int)_msRecursionCraftingDepthField.GetValue(modConfig);
                 return depth != 0;
-            }
-            catch {
+            } catch {
                 return false;
             }
         }

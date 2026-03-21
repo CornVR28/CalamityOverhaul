@@ -259,7 +259,7 @@ namespace CalamityOverhaul.Content.RangedModify.Core
 
         public virtual void PreInOwner() { }
 
-        internal int idleTimer;
+        internal int idleTimer = 0;
 
         public override void InOwner() {
             PreInOwner();

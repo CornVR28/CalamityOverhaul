@@ -13,7 +13,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
     internal class GargoyleActor : Actor
     {
         [VaultLoaden(CWRConstant.ADV + "Draedon/Gargoyle")]
-        public static Texture2D Gargoyle;
+        public static Texture2D Gargoyle = null!;
 
         #region 鸟群状态字段
 

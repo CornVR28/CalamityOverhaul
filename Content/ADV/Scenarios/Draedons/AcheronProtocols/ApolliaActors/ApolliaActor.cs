@@ -58,7 +58,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
         internal int FrameHeight { get; private set; }
 
         /// <summary>速度向量——供状态类进行物理运动</summary>
-        internal Vector2 Velocity;
+        internal new Vector2 Velocity;
 
         /// <summary>角色是否站在实心地面上</summary>
         internal bool OnGround;

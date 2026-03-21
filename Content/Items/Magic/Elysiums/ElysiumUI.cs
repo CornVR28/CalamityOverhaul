@@ -101,10 +101,12 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
         private int particleSpawnTimer;
 
         //纹理引用
+#pragma warning disable CS0169 // VaultLoaden反射加载，预留给后续使用
         [VaultLoaden(CWRConstant.UI + "Elysium/RoseWindow")]
         private static Asset<Texture2D> RoseWindowTex;
         [VaultLoaden(CWRConstant.UI + "Elysium/CrossMark")]
         private static Asset<Texture2D> CrossMarkTex;
+#pragma warning restore CS0169
 
         #endregion
 
@@ -775,7 +777,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
 
             //获取门徒数据
             int discipleCount = 0;
-            float damageBonus = 0, defenseBonus = 0, critBonus = 0, regenBonus = 0;
+            float damageBonus = 0, defenseBonus = 0, critBonus = 0;
 
             if (player.TryGetModPlayer<ElysiumPlayer>(out var ep)) {
                 discipleCount = ep.GetDiscipleCount();
@@ -785,13 +787,11 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
                     damageBonus = 25;
                     critBonus = 15;
                     defenseBonus = 20;
-                    regenBonus = 5;
                 }
                 else if (discipleCount == 12) {
                     damageBonus = 50;
                     critBonus = 30;
                     defenseBonus = 40;
-                    regenBonus = 10;
                 }
                 else if (discipleCount > 0) {
                     float ratio = discipleCount / 12f;
@@ -824,7 +824,6 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
             //增益信息(在中心下方)
             if (discipleCount > 0) {
                 Vector2 bonusStart = DrawPosition + new Vector2(0, 32);
-                float lineHeight = 11f;
                 float fontSize = 0.35f;
                 Color bonusColor = new Color(200, 180, 140) * alpha;
 
