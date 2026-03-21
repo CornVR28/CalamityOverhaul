@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using Terraria.ModLoader;
 
@@ -326,6 +327,40 @@ namespace CalamityOverhaul
         #endregion
         #region 物品组ID引用
         public readonly static int ItemGroup_RogueWeapon = 570;//盗贼武器物品组ID，因为这个比较特殊，就不通过反射加载了，直接写上readonly
+        #endregion
+
+        #region 保底加载
+
+        /// <summary>
+        /// 在Setup阶段调用，强制访问所有ID属性以预填充缓存
+        /// 加载失败的条目会通过日志输出，便于在调试阶段排查失效内容
+        /// </summary>
+        public static void PreloadAll() {
+            var logger = CWRMod.Instance.Logger;
+            int total = 0;
+            int failed = 0;
+
+            foreach (PropertyInfo prop in typeof(CWRID).GetProperties(BindingFlags.Public | BindingFlags.Static)) {
+                if (prop.PropertyType != typeof(int) || !prop.CanRead) {
+                    continue;
+                }
+
+                total++;
+                int id = (int)prop.GetValue(null)!;
+                if (id == 0) {
+                    failed++;
+                    logger.Warn($"[CWRID] Preload failed: {prop.Name} resolved to 0");
+                }
+            }
+
+            if (failed > 0) {
+                logger.Warn($"[CWRID] Preload complete: {failed}/{total} IDs failed to resolve");
+            }
+            else {
+                logger.Info($"[CWRID] Preload complete: all {total} IDs resolved successfully");
+            }
+        }
+
         #endregion
 
         #region 数据加载逻辑
