@@ -17,430 +17,305 @@ using static CalamityOverhaul.CWRUtils;
 
 namespace CalamityOverhaul.Common
 {
+    /// <summary>
+    /// 跨Mod兼容性Hook管理器，负责对其他Mod的方法进行Hook以实现兼容性处理
+    /// </summary>
     [CWRJITEnabled]
     internal class ModGanged : ICWRLoader
     {
-        #region Data
-        public delegate bool On_BOOL_Dalegate();
+        #region 委托类型
         public delegate void On_PostAI_Dalegate(object obj, Projectile projectile);
         public delegate void On_ModPlayerDraw_Dalegate(object obj, ref PlayerDrawSet drawInfo);
-        public delegate void On_Tooltips_Dalegate(Item item, List<TooltipLine> tooltips);
-        public delegate void On_VoidFunc_Instance_Dalegate(object inds);
         public delegate bool On_ShouldForceUseAnim_Dalegate(Player player, Item item);
-        public delegate void On_TrO_ItemPowerAttacks_Load_Dalegate(object obj);
-        public delegate bool On_TrO_Broadsword_ShouldApplyItemOverhaul_Dalegate(object obj, Item item);
         public delegate bool On_AttemptPowerAttackStart_Dalegate(object obj, Item item, Player player);
         public delegate bool On_OnSpawnEnchCanAffectProjectile_Dalegate(Projectile projectile, bool allowMinions);
         public delegate void On_BossHealthBarManager_Draw_Dalegate(object obj, SpriteBatch spriteBatch, IBigProgressBar currentBar, BigProgressBarInfo info);
         public delegate int On_GetReworkedReforge_Dalegate(Item item, UnifiedRandom rand, int currentPrefix);
-
-        public static Type[] weaponOutCodeTypes;
-
-        public static Type weaponOut_DrawToolType;
-        public static MethodBase on_weaponOut_DrawTool_Method;
-
-        public static Type weaponOut_WeaponLayer_1_Type;
-        public static MethodBase weaponOut_WeaponLayer_1_Method;
-
-        public static Type weaponOut_WeaponLayer_2_Type;
-        public static MethodBase weaponOut_WeaponLayer_2_Method;
-
-        public static Type[] weaponDisplayCodeTypes;
-        public static Type weaponDisplay_ModifyDrawInfo_Type;
-        public static MethodBase weaponDisplay_ModifyDrawInfo_Method;
-
-        public static Type weaponDisplayLite_ModifyDrawInfo_Type;
-        public static MethodBase weaponDisplayLite_ModifyDrawInfo_Method;
-
-        public static Type[] trOCodeTypes;
-        public static Type trO_itemPowerAttacksTypes;
-        public static Type trO_MuzzleflashPlayerDL_Type;
-        public static Type trO_ArrowPlayerDL_Type;
-        public static Type trO_PlayerHoldOutAnimation_Type;
-        public static Type trO_CrosshairSystem_Type;
-        public static Type trO_Broadsword_Type;
-        public static MethodBase trO_MuzzleflashPlayerDL_Draw_Method;
-        public static MethodBase trO_ArrowPlayerDL_Draw_Method;
-        public static MethodBase trO_PlayerHoldOutAnimation_Method;
-        public static MethodBase trO_Crosshair_AddImpulse_Method;
-        public static MethodBase trO_itemPowerAttacksTypes_Load_Method;
-        public static MethodBase trO_Broadsword_ShouldApplyItemOverhaul_Method;
-        public static MethodBase trO_itemPowerAttacksTypes_AttemptPowerAttackStart_Method;
-
-        public static Type[] fargowiltasSoulsTypes;
-        public static Type FGS_Utils_Type;
-        public static Type FGS_FGSGlobalProj_Type;
-        public static MethodBase FGS_Utils_OnSpawnEnchCanAffectProjectile_Method;
-        public static MethodBase FGS_FGSGlobalProj_PostAI_Method;
-
-        public static Type[] coolerItemVisualEffectTypes;
-        public static Type coolerItemVisualEffectPlayerType;
-        public static MethodBase coolerItemVisualEffect_Method;
-
-        public static Type MS_Config_Type;
-        public static FieldInfo MS_Config_recursionCraftingDepth_FieldInfo;
         #endregion
+
+        #region MagicStorage 反射缓存
+        private static FieldInfo _msRecursionCraftingDepthField;
+        #endregion
+
+        #region 加载入口
         public static void Load() {
-            #region weaponOut
-            if (CWRMod.Instance.weaponOut != null) {
-                weaponOutCodeTypes = AssemblyManager.GetLoadableTypes(CWRMod.Instance.weaponOut.Code);
-                foreach (Type type in weaponOutCodeTypes) {
-                    if (type.Name == "DrawTool") {
-                        weaponOut_DrawToolType = type;
-                    }
-                    if (type.Name == "WeaponLayer1") {
-                        weaponOut_WeaponLayer_1_Type = type;
-                    }
-                    if (type.Name == "WeaponLayer2") {
-                        weaponOut_WeaponLayer_2_Type = type;
-                    }
-                }
-
-                if (weaponOut_WeaponLayer_1_Type != null) {
-                    weaponOut_WeaponLayer_1_Method = weaponOut_WeaponLayer_1_Type.GetMethod("Draw", BindingFlags.Instance | BindingFlags.NonPublic);
-                }
-                if (weaponOut_WeaponLayer_1_Method != null) {
-                    VaultHook.Add(weaponOut_WeaponLayer_1_Method, On_MP_Draw_1_Hook);
-                }
-                else {
-                    LogFailedLoad("weaponOut_WeaponLayer_1_Method", "WeaponLayer1.Draw");
-                }
-
-                if (weaponOut_WeaponLayer_2_Type != null) {
-                    weaponOut_WeaponLayer_2_Method = weaponOut_WeaponLayer_2_Type.GetMethod("Draw", BindingFlags.Instance | BindingFlags.NonPublic);
-                }
-                if (weaponOut_WeaponLayer_2_Method != null) {
-                    VaultHook.Add(weaponOut_WeaponLayer_2_Method, On_MP_Draw_2_Hook);
-                }
-                else {
-                    LogFailedLoad("weaponOut_WeaponLayer_2_Method", "WeaponLayer12.Draw");
-                }
-            }
-            else {
-                LogModNotLoaded("WeaponOut");
-            }
-            #endregion
-
-            #region weaponDisplay
-            if (CWRMod.Instance.weaponDisplay != null) {
-                weaponDisplayCodeTypes = AssemblyManager.GetLoadableTypes(CWRMod.Instance.weaponDisplay.Code);
-                foreach (Type type in weaponDisplayCodeTypes) {
-                    if (type.Name == "WeaponDisplayPlayer") {
-                        weaponDisplay_ModifyDrawInfo_Type = type;
-                    }
-                }
-
-                if (weaponDisplay_ModifyDrawInfo_Type != null) {
-                    weaponDisplay_ModifyDrawInfo_Method = weaponDisplay_ModifyDrawInfo_Type
-                        .GetMethod("ModifyDrawInfo", BindingFlags.Instance | BindingFlags.Public);
-                }
-                else {
-                    LogFailedLoad("weaponDisplay_ModifyDrawInfo_Method", "WeaponDisplayPlayer.ModifyDrawInfo");
-                }
-                if (weaponDisplay_ModifyDrawInfo_Method != null) {
-                    VaultHook.Add(weaponDisplay_ModifyDrawInfo_Method, On_MP_Draw_3_Hook);
-                }
-            }
-            else {
-                LogModNotLoaded("WeaponDisplay");
-            }
-            #endregion
-
-            #region weaponDisplayLite
-
-            if (CWRMod.Instance.weaponDisplayLite != null) {
-                var codes = AssemblyManager.GetLoadableTypes(CWRMod.Instance.weaponDisplayLite.Code);
-                foreach (Type type in codes) {
-                    if (type.Name == "WeaponDisplayPlayer") {
-                        weaponDisplayLite_ModifyDrawInfo_Type = type;
-                    }
-                }
-
-                if (weaponDisplayLite_ModifyDrawInfo_Type != null) {
-                    weaponDisplayLite_ModifyDrawInfo_Method = weaponDisplayLite_ModifyDrawInfo_Type
-                        .GetMethod("ModifyDrawInfo", BindingFlags.Instance | BindingFlags.Public);
-                }
-                else {
-                    LogFailedLoad("weaponDisplayLite_ModifyDrawInfo_Method", "WeaponDisplayPlayerLite.ModifyDrawInfo");
-                }
-                if (weaponDisplayLite_ModifyDrawInfo_Method != null) {
-                    VaultHook.Add(weaponDisplayLite_ModifyDrawInfo_Method, On_MP_Draw_5_Hook);
-                }
-            }
-            else {
-                LogModNotLoaded("WeaponDisplayLite");
-            }
-
-            #endregion
-
-            #region terrariaOverhaul
-
-            if (CWRMod.Instance.terrariaOverhaul != null) {
-                trOCodeTypes = AssemblyManager.GetLoadableTypes(CWRMod.Instance.terrariaOverhaul.Code);
-                foreach (Type type in trOCodeTypes) {
-                    if (type.Name == "MuzzleflashPlayerDrawLayer") {
-                        trO_MuzzleflashPlayerDL_Type = type;
-                    }
-                    else if (type.Name == "ArrowPlayerDrawLayer") {
-                        trO_ArrowPlayerDL_Type = type;
-                    }
-                    else if (type.Name == "PlayerHoldOutAnimation") {
-                        trO_PlayerHoldOutAnimation_Type = type;
-                    }
-                    else if (type.Name == "CrosshairSystem") {
-                        trO_CrosshairSystem_Type = type;
-                    }
-                    else if (type.Name == "ItemPowerAttacks") {
-                        trO_itemPowerAttacksTypes = type;
-                    }
-                    else if (type.Name == "Broadsword") {
-                        trO_Broadsword_Type = type;
-                    }
-                }
-
-                if (trO_PlayerHoldOutAnimation_Type != null) {
-                    trO_PlayerHoldOutAnimation_Method = trO_PlayerHoldOutAnimation_Type.GetMethod("ShouldForceUseAnim", BindingFlags.Static | BindingFlags.NonPublic);
-                    if (trO_PlayerHoldOutAnimation_Method != null) {
-                        VaultHook.Add(trO_PlayerHoldOutAnimation_Method, On_ShouldForceUseAnim_Hook);
-                    }
-                    else {
-                        LogFailedLoad("trO_PlayerHoldOutAnimation_Method", "PlayerHoldOutAnimation.ShouldForceUseAnim");
-                    }
-                }
-                else {
-                    LogFailedLoad("trO_PlayerHoldOutAnimation_Type", "TerrariaOverhaul.PlayerHoldOutAnimation");
-                }
-
-                if (trO_CrosshairSystem_Type != null) {
-                    trO_Crosshair_AddImpulse_Method = trO_CrosshairSystem_Type.GetMethod("AddImpulse", BindingFlags.Static | BindingFlags.Public);
-                    if (trO_Crosshair_AddImpulse_Method != null) {
-
-                    }
-                    else {
-                        LogFailedLoad("trO_Crosshair_AddImpulse_Method", "TerrariaOverhaul.CrosshairSystem.AddImpulse");
-                    }
-                }
-                else {
-                    LogFailedLoad("trO_CrosshairSystem_Type", "TerrariaOverhaul.CrosshairSystem");
-                }
-
-                if (trO_itemPowerAttacksTypes != null) {
-                    trO_itemPowerAttacksTypes_AttemptPowerAttackStart_Method = trO_itemPowerAttacksTypes.GetMethod("AttemptPowerAttackStart", BindingFlags.Instance | BindingFlags.Public);
-                    if (trO_itemPowerAttacksTypes_AttemptPowerAttackStart_Method != null) {
-                        VaultHook.Add(trO_itemPowerAttacksTypes_AttemptPowerAttackStart_Method, On_AttemptPowerAttackStart_Hook);
-                    }
-                    else {
-                        LogFailedLoad("trO_itemPowerAttacksTypes_AttemptPowerAttackStart_Method", "TerrariaOverhaul.ItemPowerAttacks.AttemptPowerAttackStart");
-                    }
-                }
-                else {
-                    LogFailedLoad("trO_itemPowerAttacksTypes", "TerrariaOverhaul.ItemPowerAttacks");
-                }
-            }
-            else {
-                LogModNotLoaded("TerrariaOverhaul");
-            }
-
-            #endregion
-
-            #region catalystMod
-
-            if (CWRMod.Instance.catalystMod != null) {
-
-            }
-            else {
-                LogModNotLoaded("CatalystMod");
-            }
-
-            #endregion
-
-            #region fargowiltasSouls
-
-            if (CWRMod.Instance.fargowiltasSouls != null) {
-                fargowiltasSoulsTypes = GetModTypes(CWRMod.Instance.fargowiltasSouls);
-                FGS_FGSGlobalProj_Type = GetTargetTypeInStringKey(fargowiltasSoulsTypes, "FargoSoulsGlobalProjectile");
-                FGS_Utils_Type = GetTargetTypeInStringKey(fargowiltasSoulsTypes, "FargoSoulsUtil");
-
-                if (FGS_Utils_Type != null) {
-                    FGS_Utils_OnSpawnEnchCanAffectProjectile_Method = FGS_Utils_Type
-                        .GetMethod("OnSpawnEnchCanAffectProjectile", BindingFlags.Static | BindingFlags.Public);
-                }
-                if (FGS_FGSGlobalProj_Type != null) {
-                    FGS_FGSGlobalProj_PostAI_Method = FGS_FGSGlobalProj_Type.GetMethod("PostAI", BindingFlags.Instance | BindingFlags.Public);
-                }
-
-                if (FGS_Utils_OnSpawnEnchCanAffectProjectile_Method != null) {
-                    VaultHook.Add(FGS_Utils_OnSpawnEnchCanAffectProjectile_Method, On_OnSpawnEnchCanAffectProjectile_Hook);
-                }
-                else {
-                    LogFailedLoad("FGS_Utils_OnSpawnEnchCanAffectProjectile_Method", "FargoSoulsUtil.OnSpawnEnchCanAffectProjectile");
-                }
-
-                if (FGS_FGSGlobalProj_PostAI_Method != null) {
-                    VaultHook.Add(FGS_FGSGlobalProj_PostAI_Method, On_FGS_FGSGlobalProj_PostAI_Hook);
-                }
-                else {
-                    LogFailedLoad("FGS_FGSGlobalProj_PostAI_Method", "FargoSoulsGlobalProjectile.PostAI");
-                }
-            }
-            else {
-                LogModNotLoaded("FargowiltasSouls");
-            }
-
-            #endregion
-
-            #region coolerItemVisualEffect
-
-            if (CWRMod.Instance.coolerItemVisualEffect != null) {
-                coolerItemVisualEffectTypes = AssemblyManager.GetLoadableTypes(CWRMod.Instance.coolerItemVisualEffect.Code);
-                foreach (Type type in coolerItemVisualEffectTypes) {
-                    if (type.Name == "MeleeModifyPlayer") {
-                        coolerItemVisualEffectPlayerType = type;
-                    }
-                }
-                if (coolerItemVisualEffectPlayerType != null) {
-                    coolerItemVisualEffect_Method = coolerItemVisualEffectPlayerType
-                        .GetMethod("ModifyDrawInfo", BindingFlags.Instance | BindingFlags.Public);
-                }
-                if (coolerItemVisualEffect_Method != null) {
-                    VaultHook.Add(coolerItemVisualEffect_Method, On_MP_Draw_4_Hook);
-                }
-                else {
-                    LogFailedLoad("coolerItemVisualEffect_Method", "MeleeModifyPlayer.ModifyDrawInfo");
-                }
-            }
-            else {
-                LogModNotLoaded("CoolerItemVisualEffect");
-            }
-
-            #endregion
-
-            #region MagicStorage
-
-            if (CWRMod.Instance.magicStorage != null) {
-                MS_Config_Type = GetTargetTypeInStringKey(GetModTypes(CWRMod.Instance.magicStorage), "MagicStorageConfig");
-                if (MS_Config_Type != null) {
-                    MS_Config_recursionCraftingDepth_FieldInfo = MS_Config_Type
-                        .GetField("recursionCraftingDepth", BindingFlags.Public | BindingFlags.Instance);
-                }
-                else {
-                    LogFailedLoad("MagicStorage_MagicStorageConfig_Typ", "MagicStorage.MagicStorageConfig");
-                }
-            }
-            else {
-                LogModNotLoaded("MagicStorage");
-            }
-
-            #endregion
-
+            HookWeaponOut();
+            HookWeaponDisplay();
+            HookWeaponDisplayLite();
+            HookTerrariaOverhaul();
+            HookFargowiltasSouls();
+            HookCoolerItemVisualEffect();
+            LoadMagicStorageReflection();
             CWRRef.LoadComders();
         }
 
         void ICWRLoader.UnLoadData() {
-            weaponOutCodeTypes = null;
-            weaponOut_DrawToolType = null;
-            on_weaponOut_DrawTool_Method = null;
-            weaponOut_WeaponLayer_1_Type = null;
-            weaponOut_WeaponLayer_1_Method = null;
-            weaponOut_WeaponLayer_2_Type = null;
-            weaponOut_WeaponLayer_2_Method = null;
-            weaponDisplayCodeTypes = null;
-            weaponDisplay_ModifyDrawInfo_Type = null;
-            weaponDisplay_ModifyDrawInfo_Method = null;
-            trOCodeTypes = null;
-            trO_itemPowerAttacksTypes = null;
-            trO_MuzzleflashPlayerDL_Type = null;
-            trO_ArrowPlayerDL_Type = null;
-            trO_PlayerHoldOutAnimation_Type = null;
-            trO_CrosshairSystem_Type = null;
-            trO_Broadsword_Type = null;
-            trO_MuzzleflashPlayerDL_Draw_Method = null;
-            trO_ArrowPlayerDL_Draw_Method = null;
-            trO_PlayerHoldOutAnimation_Method = null;
-            trO_Crosshair_AddImpulse_Method = null;
-            trO_itemPowerAttacksTypes_Load_Method = null;
-            trO_Broadsword_ShouldApplyItemOverhaul_Method = null;
-            trO_itemPowerAttacksTypes_AttemptPowerAttackStart_Method = null;
-            fargowiltasSoulsTypes = null;
-            FGS_Utils_Type = null;
-            FGS_Utils_OnSpawnEnchCanAffectProjectile_Method = null;
-            coolerItemVisualEffectTypes = null;
-            coolerItemVisualEffectPlayerType = null;
-            coolerItemVisualEffect_Method = null;
-            MS_Config_Type = null;
-            MS_Config_recursionCraftingDepth_FieldInfo = null;
+            _msRecursionCraftingDepthField = null;
+        }
+        #endregion
+
+        #region 反射Hook辅助方法
+        /// <summary>
+        /// 在Mod的类型集合中查找指定类名并获取其方法，然后注册Hook
+        /// </summary>
+        private static bool TryHookMethod<TDelegate>(
+            Mod mod, string typeName, string methodName,
+            BindingFlags flags, TDelegate hookDelegate,
+            string logContext = null) where TDelegate : Delegate {
+            Type[] types = AssemblyManager.GetLoadableTypes(mod.Code);
+            Type targetType = GetTargetTypeInStringKey(types, typeName);
+            if (targetType == null) {
+                LogFailedLoad(logContext ?? typeName, $"{typeName}");
+                return false;
+            }
+
+            MethodBase method = targetType.GetMethod(methodName, flags);
+            if (method == null) {
+                LogFailedLoad(logContext ?? methodName, $"{typeName}.{methodName}");
+                return false;
+            }
+
+            VaultHook.Add(method, hookDelegate);
+            return true;
         }
 
-        internal static void On_EditEnrageTooltips_Hook(On_Tooltips_Dalegate orig, Item item, List<TooltipLine> tooltips) {
-            orig.Invoke(item, tooltips);
+        /// <summary>
+        /// 在已获取的类型集合中查找指定类名的方法，然后注册Hook
+        /// </summary>
+        private static bool TryHookMethod<TDelegate>(
+            Type[] types, string typeName, string methodName,
+            BindingFlags flags, TDelegate hookDelegate,
+            string logContext = null) where TDelegate : Delegate {
+            Type targetType = GetTargetTypeInStringKey(types, typeName);
+            if (targetType == null) {
+                LogFailedLoad(logContext ?? typeName, $"{typeName}");
+                return false;
+            }
+
+            MethodBase method = targetType.GetMethod(methodName, flags);
+            if (method == null) {
+                LogFailedLoad(logContext ?? methodName, $"{typeName}.{methodName}");
+                return false;
+            }
+
+            VaultHook.Add(method, hookDelegate);
+            return true;
+        }
+        #endregion
+
+        #region WeaponOut
+        private static void HookWeaponOut() {
+            Mod mod = CWRMod.Instance.weaponOut;
+            if (mod == null) {
+                LogModNotLoaded("WeaponOut");
+                return;
+            }
+
+            Type[] types = AssemblyManager.GetLoadableTypes(mod.Code);
+            BindingFlags flags = BindingFlags.Instance | BindingFlags.NonPublic;
+            TryHookMethod(types, "WeaponLayer1", "Draw", flags, On_DrawHeldHook);
+            TryHookMethod(types, "WeaponLayer2", "Draw", flags, On_DrawHeldHook);
+        }
+        #endregion
+
+        #region WeaponDisplay / WeaponDisplayLite
+        private static void HookWeaponDisplay() {
+            Mod mod = CWRMod.Instance.weaponDisplay;
+            if (mod == null) {
+                LogModNotLoaded("WeaponDisplay");
+                return;
+            }
+
+            TryHookMethod(mod, "WeaponDisplayPlayer", "ModifyDrawInfo",
+                BindingFlags.Instance | BindingFlags.Public, On_DrawHeldHook);
         }
 
-        internal static void On_FGS_FGSGlobalProj_PostAI_Hook(On_PostAI_Dalegate orig, object instance, Projectile projectile) {
-            if (projectile.hide) {
-                if (projectile.ModProjectile is BaseHeldRanged ranged && !ranged.CanFire) {
-                    return;
-                }
+        private static void HookWeaponDisplayLite() {
+            Mod mod = CWRMod.Instance.weaponDisplayLite;
+            if (mod == null) {
+                LogModNotLoaded("WeaponDisplayLite");
+                return;
+            }
+
+            TryHookMethod(mod, "WeaponDisplayPlayer", "ModifyDrawInfo",
+                BindingFlags.Instance | BindingFlags.Public, On_DrawHeldHook);
+        }
+        #endregion
+
+        #region TerrariaOverhaul
+        private static void HookTerrariaOverhaul() {
+            Mod mod = CWRMod.Instance.terrariaOverhaul;
+            if (mod == null) {
+                LogModNotLoaded("TerrariaOverhaul");
+                return;
+            }
+
+            Type[] types = AssemblyManager.GetLoadableTypes(mod.Code);
+
+            TryHookMethod(types, "PlayerHoldOutAnimation", "ShouldForceUseAnim",
+                BindingFlags.Static | BindingFlags.NonPublic, On_ShouldForceUseAnim_Hook);
+
+            TryHookMethod(types, "ItemPowerAttacks", "AttemptPowerAttackStart",
+                BindingFlags.Instance | BindingFlags.Public, On_AttemptPowerAttackStart_Hook);
+        }
+        #endregion
+
+        #region FargowiltasSouls
+        private static void HookFargowiltasSouls() {
+            Mod mod = CWRMod.Instance.fargowiltasSouls;
+            if (mod == null) {
+                LogModNotLoaded("FargowiltasSouls");
+                return;
+            }
+
+            Type[] types = GetModTypes(mod);
+
+            TryHookMethod(types, "FargoSoulsUtil", "OnSpawnEnchCanAffectProjectile",
+                BindingFlags.Static | BindingFlags.Public, On_OnSpawnEnchCanAffectProjectile_Hook);
+
+            TryHookMethod(types, "FargoSoulsGlobalProjectile", "PostAI",
+                BindingFlags.Instance | BindingFlags.Public, On_FGS_PostAI_Hook);
+        }
+        #endregion
+
+        #region CoolerItemVisualEffect
+        private static void HookCoolerItemVisualEffect() {
+            Mod mod = CWRMod.Instance.coolerItemVisualEffect;
+            if (mod == null) {
+                LogModNotLoaded("CoolerItemVisualEffect");
+                return;
+            }
+
+            TryHookMethod(mod, "MeleeModifyPlayer", "ModifyDrawInfo",
+                BindingFlags.Instance | BindingFlags.Public, On_DrawHeldHook);
+        }
+        #endregion
+
+        #region MagicStorage
+        private static void LoadMagicStorageReflection() {
+            Mod mod = CWRMod.Instance.magicStorage;
+            if (mod == null) {
+                LogModNotLoaded("MagicStorage");
+                return;
+            }
+
+            Type configType = GetTargetTypeInStringKey(GetModTypes(mod), "MagicStorageConfig");
+            if (configType == null) {
+                LogFailedLoad("MagicStorageConfig", "MagicStorage.MagicStorageConfig");
+                return;
+            }
+
+            _msRecursionCraftingDepthField = configType
+                .GetField("recursionCraftingDepth", BindingFlags.Public | BindingFlags.Instance);
+        }
+        #endregion
+
+        #region Hook回调方法
+
+        /// <summary>
+        /// 统一的武器手持绘制Hook，阻止CWR管理的手持武器被其他Mod重复绘制
+        /// </summary>
+        private static void On_DrawHeldHook(On_ModPlayerDraw_Dalegate orig, object obj, ref PlayerDrawSet drawInfo) {
+            if (!ShouldDrawHeld(orig, drawInfo)) {
+                return;
+            }
+            orig.Invoke(obj, ref drawInfo);
+        }
+
+        /// <summary>
+        /// FargowiltasSouls弹幕PostAI Hook，阻止隐藏的手持弹幕被FGS处理
+        /// </summary>
+        private static void On_FGS_PostAI_Hook(On_PostAI_Dalegate orig, object instance, Projectile projectile) {
+            if (projectile.hide && projectile.ModProjectile is BaseHeldRanged ranged && !ranged.CanFire) {
+                return;
             }
             orig.Invoke(instance, projectile);
         }
 
-        internal static bool Has_MS_Config_recursionCraftingDepth(out ModConfig modConfig) {
-            modConfig = null;
-            if (CWRMod.Instance.magicStorage == null) {
-                return false;
-            }
-            if (MS_Config_recursionCraftingDepth_FieldInfo == null) {
-                return false;
-            }
-
-            try {
-                modConfig = CWRMod.Instance.magicStorage.Find<ModConfig>("MagicStorageConfig");
-                int recursionCraftingDepthNum = (int)MS_Config_recursionCraftingDepth_FieldInfo.GetValue(modConfig);
-                if (recursionCraftingDepthNum == 0) {
-                    return false;
-                }
-            } catch {
-                return false;
-            }
-
-            return true;
-        }
-
+        /// <summary>
+        /// TerrariaOverhaul蓄力攻击Hook，阻止空物品触发蓄力攻击导致报错
+        /// </summary>
         private static bool On_AttemptPowerAttackStart_Hook(On_AttemptPowerAttackStart_Dalegate orig, object obj, Item item, Player player) {
-            return item.IsAir || item.type == ItemID.None ? false : orig.Invoke(obj, item, player);
+            return !item.IsAir && item.type != ItemID.None && orig.Invoke(obj, item, player);
         }
 
+        /// <summary>
+        /// FargowiltasSouls附魔效果Hook，阻止标记为不受特殊效果影响的弹幕被附魔处理
+        /// </summary>
         private static bool On_OnSpawnEnchCanAffectProjectile_Hook(On_OnSpawnEnchCanAffectProjectile_Dalegate orig, Projectile projectile, bool allowMinions) {
             return !projectile.CWR().NotSubjectToSpecialEffects && orig.Invoke(projectile, allowMinions);
         }
 
-        private static bool IFDrawHeld(On_ModPlayerDraw_Dalegate orig, PlayerDrawSet drawInfo) {
-            if (EqualityComparer<PlayerDrawSet>.Default.Equals(drawInfo, default)) {
+        /// <summary>
+        /// TerrariaOverhaul强制使用动画Hook，阻止CWR管理的手持武器触发TrO的使用动画
+        /// </summary>
+        private static bool On_ShouldForceUseAnim_Hook(On_ShouldForceUseAnim_Dalegate orig, Player player, Item item) {
+            if (item == null || item.type == ItemID.None) {
+                return orig.Invoke(player, item);
+            }
+
+            Item heldItem = player.inventory[player.selectedItem];
+            if (heldItem == null || heldItem.type == ItemID.None) {
                 return false;
             }
-            if (drawInfo.DrawDataCache == null) {
+
+            bool shouldApply = ShouldApplyHeldOverride(heldItem, player);
+            return orig.Invoke(player, item) && shouldApply;
+        }
+
+        #endregion
+
+        #region 公共查询方法
+
+        /// <summary>
+        /// 查询MagicStorage的递归合成深度是否已配置
+        /// </summary>
+        internal static bool HasMagicStorageRecursionCraftingDepth() {
+            if (CWRMod.Instance.magicStorage == null || _msRecursionCraftingDepthField == null) {
                 return false;
             }
-            if (drawInfo.DustCache == null) {
+
+            try {
+                var modConfig = CWRMod.Instance.magicStorage.Find<ModConfig>("MagicStorageConfig");
+                int depth = (int)_msRecursionCraftingDepthField.GetValue(modConfig);
+                return depth != 0;
+            }
+            catch {
                 return false;
             }
+        }
+
+        #endregion
+
+        #region 内部辅助方法
+
+        /// <summary>
+        /// 判断是否允许其他Mod绘制当前手持武器
+        /// </summary>
+        private static bool ShouldDrawHeld(On_ModPlayerDraw_Dalegate orig, PlayerDrawSet drawInfo) {
+            if (orig == null) {
+                return false;
+            }
+            if (EqualityComparer<PlayerDrawSet>.Default.Equals(drawInfo, default)
+                || drawInfo.DrawDataCache == null
+                || drawInfo.DustCache == null) {
+                return false;
+            }
+
             Player drawPlayer = drawInfo.drawPlayer;
             Item heldItem = drawPlayer.inventory[drawPlayer.selectedItem];
-            if (heldItem == null) {
-                return false;
-            }
-            if (heldItem.type == ItemID.None) {
+            if (heldItem == null || heldItem.type == ItemID.None) {
                 return false;
             }
 
             CWRItem ritem = heldItem.CWR();
-            CWRPlayer modPlayer = drawPlayer.CWR();
-            bool itemHasHeldProj = ritem.heldProjType > 0;
-            if (ritem.hasHeldNoCanUseBool && itemHasHeldProj) {
-                if (modPlayer.TryGetInds_BaseHeldRanged(out BaseHeldRanged ranged)) {
-                    if (ranged.OnHandheldDisplayBool) {
-                        return false;
-                    }
+            bool hasHeldProj = ritem.heldProjType > 0;
+
+            // 如果物品有手持弹幕且当前正在手持显示，则不让其他Mod绘制
+            if (ritem.hasHeldNoCanUseBool && hasHeldProj) {
+                CWRPlayer modPlayer = drawPlayer.CWR();
+                if (modPlayer.TryGetInds_BaseHeldRanged(out BaseHeldRanged ranged) && ranged.OnHandheldDisplayBool) {
+                    return false;
                 }
             }
 
@@ -448,83 +323,35 @@ namespace CalamityOverhaul.Common
                 return true;
             }
 
-            bool isHeld = ritem.isHeldItem || itemHasHeldProj;
-            return !isHeld && orig != null;
+            bool isHeld = ritem.isHeldItem || hasHeldProj;
+            return !isHeld;
         }
 
-        private static void On_MP_Draw_1_Hook(On_ModPlayerDraw_Dalegate orig, object obj, ref PlayerDrawSet drawInfo) {
-            if (!IFDrawHeld(orig, drawInfo)) {
-                return;
-            }
-            orig.Invoke(obj, ref drawInfo);
-        }
-
-        private static void On_MP_Draw_2_Hook(On_ModPlayerDraw_Dalegate orig, object obj, ref PlayerDrawSet drawInfo) {
-            if (!IFDrawHeld(orig, drawInfo)) {
-                return;
-            }
-            orig.Invoke(obj, ref drawInfo);
-        }
-
-        private static void On_MP_Draw_3_Hook(On_ModPlayerDraw_Dalegate orig, object obj, ref PlayerDrawSet drawInfo) {
-            if (!IFDrawHeld(orig, drawInfo)) {
-                return;
-            }
-            orig.Invoke(obj, ref drawInfo);
-        }
-
-        private static void On_MP_Draw_4_Hook(On_ModPlayerDraw_Dalegate orig, object obj, ref PlayerDrawSet drawInfo) {
-            if (!IFDrawHeld(orig, drawInfo)) {
-                return;
-            }
-            orig.Invoke(obj, ref drawInfo);
-        }
-
-        private static void On_MP_Draw_5_Hook(On_ModPlayerDraw_Dalegate orig, object obj, ref PlayerDrawSet drawInfo) {
-            if (!IFDrawHeld(orig, drawInfo)) {
-                return;
-            }
-            orig.Invoke(obj, ref drawInfo);
-        }
-
-        private static bool On_ShouldForceUseAnim_Hook(On_ShouldForceUseAnim_Dalegate orig, Player player, Item item) {
-            bool result = true;
-
-            if (item == null) {
-                result = false;
-            }
-            if (item.type == ItemID.None) {
-                result = false;
-            }
-
-            Item heldItem = player.inventory[player.selectedItem];
-            if (heldItem == null) {
-                return false;
-            }
-            if (heldItem.type == ItemID.None) {
-                return false;
-            }
-
+        /// <summary>
+        /// 判断是否应该对手持武器应用覆盖逻辑（用于TerrariaOverhaul的ShouldForceUseAnim）
+        /// </summary>
+        private static bool ShouldApplyHeldOverride(Item heldItem, Player player) {
             CWRItem ritem = heldItem.CWR();
-            CWRPlayer modPlayer = player.CWR();
             bool isHeld = ritem.isHeldItem || ritem.heldProjType > 0;
+
             if (isHeld) {
-                result = false;
+                return false;
             }
 
             if (!CWRServerConfig.Instance.WeaponHandheldDisplay) {
-                result = true;
+                return true;
             }
 
             if (ritem.hasHeldNoCanUseBool && ritem.heldProjType > 0) {
-                if (modPlayer.TryGetInds_BaseHeldRanged(out BaseHeldRanged ranged)) {
-                    if (ranged.OnHandheldDisplayBool) {
-                        result = false;
-                    }
+                CWRPlayer modPlayer = player.CWR();
+                if (modPlayer.TryGetInds_BaseHeldRanged(out BaseHeldRanged ranged) && ranged.OnHandheldDisplayBool) {
+                    return false;
                 }
             }
 
-            return orig.Invoke(player, item) && result;
+            return true;
         }
+
+        #endregion
     }
 }
