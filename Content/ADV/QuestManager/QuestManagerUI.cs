@@ -1,4 +1,5 @@
 ﻿using CalamityOverhaul.Common;
+using CalamityOverhaul.Content;
 using InnoVault.UIHandles;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -12,15 +13,34 @@ using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
+using Terraria.UI;
 
 namespace CalamityOverhaul.Content.ADV.QuestManager
 {
     internal class QuestManagerSysteam : ModSystem
     {
+        /// <summary>需要在委托管理界面打开时隐藏的 Vanilla UI 层</summary>
+        private static readonly HashSet<string> HiddenLayers = [
+            "Vanilla: Hotbar",
+            "Vanilla: Inventory",
+            "Vanilla: Info Accessories Bar",
+        ];
+
         public override void UpdateUI(GameTime gameTime) {
             // ── 快捷键开关 ──
             if (CWRKeySystem.QuestManager_Key != null && CWRKeySystem.QuestManager_Key.JustReleased) {
                 QuestManagerUI.Instance.TogglePanel();
+            }
+        }
+
+        public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers) {
+            var ui = QuestManagerUI.Instance;
+            if (ui == null || !ui.IsOpen) return;
+
+            foreach (var layer in layers) {
+                if (HiddenLayers.Contains(layer.Name)) {
+                    layer.Active = false;
+                }
             }
         }
     }
@@ -65,6 +85,9 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
 
         /// <summary>面板是否打开</summary>
         private bool isOpen;
+
+        /// <summary>外部只读访问（供 ModSystem 查询）</summary>
+        public bool IsOpen => isOpen;
 
         /// <summary>打开/关闭动画进度 0~1</summary>
         private float openProgress;
@@ -273,6 +296,13 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
 
             if (!isOpen || openProgress < 0.3f) return;
 
+            // 如果玩家在面板打开期间通过其他方式打开了背包，强制关闭
+            if (Main.playerInventory) {
+                Main.playerInventory = false;
+            }
+
+            player.CWR().DontSwitchWeaponTime = 2;
+
             // ── 交互处理 ──
             if (hoverInMainPage) {
                 player.mouseInterface = true;
@@ -289,6 +319,8 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
         public void TogglePanel() {
             isOpen = !isOpen;
             if (isOpen) {
+                // 关闭背包，避免遮挡
+                Main.playerInventory = false;
                 panelShake = 3f;
                 SoundEngine.PlaySound(SoundID.MenuOpen with { Volume = 0.5f });
             }
