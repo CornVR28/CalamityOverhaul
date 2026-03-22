@@ -591,12 +591,14 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
             }
 
             //裁剪区域——使用 ScissorRectangle 限制绘制范围
+            //裁剪区域采用面板全宽（含滚动条），避免条目背景/边框右侧被截断
             RasterizerState prevRasterizer = sb.GraphicsDevice.RasterizerState;
             Rectangle prevScissor = sb.GraphicsDevice.ScissorRectangle;
 
             sb.End();
-            Rectangle safeClip = Rectangle.Intersect(contentRect, sb.GraphicsDevice.Viewport.Bounds);
-            sb.GraphicsDevice.ScissorRectangle = safeClip;
+            Rectangle clipRect = new(panelRect.X, contentRect.Y, panelRect.Width, contentRect.Height);
+            Rectangle safeClip = Rectangle.Intersect(clipRect, sb.GraphicsDevice.Viewport.Bounds);
+            sb.GraphicsDevice.ScissorRectangle = VaultUtils.GetClippingRectangle(sb, safeClip);
             sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.AnisotropicClamp,
                 DepthStencilState.None, ScissorRaster, null, Main.UIScaleMatrix);
 
