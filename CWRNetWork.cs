@@ -12,6 +12,7 @@ using CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalDestroyer;
 using CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalSkeletronPrime;
 using CalamityOverhaul.Content.NPCs.Modifys;
 using CalamityOverhaul.Content.NPCs.Modifys.Crabulons;
+using CalamityOverhaul.Content.Items.Tools;
 using System.IO;
 using Terraria.ModLoader;
 
@@ -43,6 +44,7 @@ namespace CalamityOverhaul
         ResurrectionRate,
         DespawnDestroyer,
         MachineEffect,
+        SirenMusicalBoxToggle,
     }
 
     public static class CWRNetWork
@@ -91,6 +93,9 @@ namespace CalamityOverhaul
             }
             else if (type == CWRMessageType.DespawnDestroyer) {
                 DestroyerHeadAI.HandleDespawn();
+            }
+            else if (type == CWRMessageType.SirenMusicalBoxToggle) {
+                SirenMusicalBoxTP.HandleTogglePacket(reader, whoAmI);
             }
 
             ModifyCrabulon.NetHandle(type, reader, whoAmI);

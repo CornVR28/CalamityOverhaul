@@ -1,13 +1,13 @@
 ﻿using CalamityOverhaul.Common;
 using CalamityOverhaul.Content.LegendWeapon.HalibutLegend;
 using CalamityOverhaul.Content.PRTTypes;
+using InnoVault.Actors;
 using InnoVault.GameSystem;
 using InnoVault.PRT;
 using InnoVault.TileProcessors;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.IO;
-using System.Linq;
 using Terraria;
 using Terraria.Audio;
 using Terraria.DataStructures;
@@ -21,6 +21,8 @@ using Terraria.ObjectData;
 
 namespace CalamityOverhaul.Content.Items.Tools
 {
+    #region 物品与物块
+
     /// <summary>
     /// 海妖八音盒物品
     /// </summary>
@@ -64,7 +66,7 @@ namespace CalamityOverhaul.Content.Items.Tools
             Main.tileWaterDeath[Type] = false;
             Main.tileFrameImportant[Type] = true;
             AddMapEntry(new Color(139, 0, 139), VaultUtils.GetLocalizedItemName<SirenMusicalBox>());
-            AnimationFrameHeight = 36; //2帧，每帧高度18*2=36
+            AnimationFrameHeight = 36;
 
             TileObjectData.newTile.CopyFrom(TileObjectData.Style2x2);
             TileObjectData.newTile.Width = Width;
@@ -100,15 +102,12 @@ namespace CalamityOverhaul.Content.Items.Tools
             int frameXPos = t.TileFrameX;
             int frameYPos = t.TileFrameY;
 
-            if (!VaultUtils.SafeGetTopLeft(i, j, out var point)) {
-                return false;
-            }
-            if (!TileProcessorLoader.ByPositionGetTP(point, out SirenMusicalBoxTP module)) {
-                return false;
+            bool isPlaying = false;
+            if (VaultUtils.SafeGetTopLeft(i, j, out var point)) {
+                isPlaying = SirenGhostActor.TryFindByBoxPosition(point, out _);
             }
 
-            //根据音乐状态切换帧
-            frameYPos += (module.IsMusicPlaying ? 1 : 0) * (Height * 18);
+            frameYPos += (isPlaying ? 1 : 0) * (Height * 18);
 
             Texture2D tex = ModContent.Request<Texture2D>(Texture).Value;
             Vector2 offset = Main.drawToScreen ? Vector2.Zero : new Vector2(Main.offScreenRange);
@@ -123,64 +122,62 @@ namespace CalamityOverhaul.Content.Items.Tools
 
         public override void ModifyLight(int i, int j, ref float r, ref float g, ref float b) {
             if (VaultUtils.SafeGetTopLeft(i, j, out var point)) {
-                if (TileProcessorLoader.ByPositionGetTP(point, out SirenMusicalBoxTP module)) {
-                    if (module.IsMusicPlaying) {
-                        float pulse = (MathF.Sin(Main.GlobalTimeWrappedHourly * 3f) * 0.3f + 0.7f);
-                        r = 0.5f * pulse;
-                        g = 0f;
-                        b = 0.5f * pulse;
-                    }
+                if (SirenGhostActor.TryFindByBoxPosition(point, out _)) {
+                    float pulse = MathF.Sin(Main.GlobalTimeWrappedHourly * 3f) * 0.3f + 0.7f;
+                    r = 0.5f * pulse;
+                    g = 0f;
+                    b = 0.5f * pulse;
                 }
+            }
+        }
+    }
+
+    #endregion
+
+    #region 系统与玩家
+
+    /// <summary>
+    /// 负责全局音乐覆盖，不再持有可变全局状态
+    /// </summary>
+    internal class SirenMusicalSystem : ModSystem
+    {
+        public override void PostUpdateEverything() {
+            if (Main.dedServ) {
+                return;
+            }
+
+            if (SirenGhostActor.TryGetActiveSession(out _)) {
+                Main.newMusic = Main.musicBox2 = MusicLoader.GetMusicSlot("CalamityOverhaul/Assets/Sounds/Music/SirenMusic");
             }
         }
     }
 
     /// <summary>
-    /// 管理海妖八音盒的音乐播放和全局状态
+    /// 反射级别的死亡拦截，优先级在所有ModPlayer之前。
+    /// 使用每实例标记代替静态字段，多人模式下每个玩家拥有独立状态
     /// </summary>
-    internal class SirenMusicalSystem : ModSystem
-    {
-        /// <summary>
-        /// 当前活动的八音盒位置（用于音乐范围判定）
-        /// </summary>
-        public static Point16 ActiveBoxPosition = Point16.Zero;
-
-        /// <summary>
-        /// 是否有激活的八音盒
-        /// </summary>
-        public static bool HasActiveBox => ActiveBoxPosition != Point16.Zero;
-
-        public override void PostUpdateEverything() {
-            //检查本地玩家是否应该播放音乐
-            foreach (var localPlayer in Main.ActivePlayers) {
-                if (localPlayer == null || !localPlayer.active) {
-                    return;
-                }
-                if (localPlayer.TryGetModPlayer<SirenMusicalBoxPlayer>(out var modPlayer)) {
-                    modPlayer.IsCursed = HasActiveBox;
-                }
-            }
-            if (HasActiveBox) {
-                Main.newMusic = Main.musicBox2 = MusicLoader.GetMusicSlot("CalamityOverhaul/Assets/Sounds/Music/SirenMusic");
-            }
-        }
-
-        public override void ClearWorld() {
-            ActiveBoxPosition = Point16.Zero;
-        }
-    }
-
     internal class SirenMusicalBoxPlayerDeath : PlayerOverride
     {
-        public static bool MusichasEnded;
-        public override bool? On_PreKill(double damage, int hitDirection, bool pvp
-            , ref bool playSound, ref bool genDust, ref PlayerDeathReason damageSource) {//使用反射级别的优先级，确保在所有ModPlayer之前执行，只有灵异才能对抗灵异
-            if (MusichasEnded) {
+        /// <summary>
+        /// 当音乐终结执行死亡时置为 true，同帧内使 On_PreKill 放行
+        /// </summary>
+        public bool MusicHasEnded;
+
+        public override void ResetEffects() {
+            MusicHasEnded = false;
+        }
+
+        public override bool? On_PreKill(double damage, int hitDirection, bool pvp,
+            ref bool playSound, ref bool genDust, ref PlayerDeathReason damageSource) {
+            //音乐终结触发的死亡，强制放行
+            if (MusicHasEnded) {
                 return true;
             }
             if (Player.GetModPlayer<SirenMusicalBoxPlayer>().IsCursed) {
-                if (Player.TryGetOverride<HalibutPlayer>(out var halibutPlayer) && halibutPlayer.ResurrectionSystem.Ratio == 1f) {
-                    return true;//厉鬼复苏的死亡无法阻挡
+                //厉鬼复苏的死亡无法阻挡
+                if (Player.TryGetOverride<HalibutPlayer>(out var halibutPlayer)
+                    && halibutPlayer.ResurrectionSystem.Ratio == 1f) {
+                    return true;
                 }
                 Player.statLife = (int)MathHelper.Clamp(Player.statLife, 1, Player.statLifeMax2);
                 return false;
@@ -190,17 +187,13 @@ namespace CalamityOverhaul.Content.Items.Tools
     }
 
     /// <summary>
-    /// 跟踪玩家与海妖八音盒的交互状态
+    /// 跟踪玩家与海妖八音盒的交互状态。
+    /// IsCursed 每帧从 TileProcessor 状态派生，无需独立网络同步
     /// </summary>
     internal class SirenMusicalBoxPlayer : ModPlayer
     {
         /// <summary>
-        /// 玩家的八音盒计时器
-        /// </summary>
-        public int MusicTimer;
-
-        /// <summary>
-        /// 是否处于八音盒诅咒状态（音乐结束必死）
+        /// 是否处于八音盒诅咒状态（由 PreUpdate 从 TP 状态派生）
         /// </summary>
         public bool IsCursed;
 
@@ -210,58 +203,58 @@ namespace CalamityOverhaul.Content.Items.Tools
         public bool HasSirenMusicalBox;
 
         /// <summary>
-        /// 玩家所属的八音盒位置
+        /// 当前正在播放的海妖会话 Actor（仅当前帧有效）
         /// </summary>
-        public Point16 BoundBoxPosition;
+        private SirenGhostActor activeActor;
 
         /// <summary>
         /// 音乐持续时间（23秒）
         /// </summary>
         public const int MusicDuration = 60 * 23;
 
-        //粒子效果
         private int particleTimer;
-        private const int ParticleSpawnRate = 5;
 
-        public override void ResetEffects() {
-            //如果不在诅咒，重置状态
-            if (!IsCursed) {
-                MusicTimer = 0;
-            }
+        /// <summary>
+        /// 根据当前帧的 TP 状态查找正在播放的八音盒
+        /// </summary>
+        public override void PreUpdate() {
+            SirenGhostActor.TryGetActiveSession(out activeActor);
+            IsCursed = activeActor != null;
         }
 
         public override void PostUpdate() {
-            //如果正在播放音乐，更新计时器
-            if (IsCursed) {
-                MusicTimer++;
-                //音乐结束，执行死亡
-                if (MusicTimer >= MusicDuration) {
-                    ExecuteDeath();
-                }
+            if (!IsCursed || activeActor == null) {
+                particleTimer = 0;
+                return;
+            }
 
-                if (Main.rand.NextBool(13)) {
-                    Newphonogram(Player.Center);
-                }
+            //服务端广播终结状态后，仅本地玩家执行死亡
+            if (activeActor.ResolveDeath && Player.whoAmI == Main.myPlayer) {
+                ExecuteDeath(false);
+            }
 
-                particleTimer++;
+            //客户端粒子效果
+            if (Main.dedServ) {
+                return;
+            }
 
-                //生成粒子效果
-                if (particleTimer >= ParticleSpawnRate) {
-                    particleTimer = 0;
-                    SpawnNoteParticles();
-                }
+            particleTimer++;
+            if (particleTimer % 5 == 0) {
+                SpawnCurseParticles();
             }
         }
 
         /// <summary>
-        /// 生成诡异音符粒子
+        /// 在玩家周围生成诅咒视觉效果
         /// </summary>
-        private void SpawnNoteParticles() {
-            if (!Player.Alives()) {
+        private void SpawnCurseParticles() {
+            if (!Player.Alives() || activeActor == null) {
                 return;
             }
 
-            //音符环绕效果，多层螺旋
+            float timerRatio = activeActor.MusicTimer / (float)MusicDuration;
+
+            //音符环绕效果
             for (int layer = 0; layer < 2; layer++) {
                 float baseAngle = Main.GlobalTimeWrappedHourly * (2f + layer * 0.5f);
                 float angle = baseAngle + Main.rand.NextFloat(MathHelper.TwoPi);
@@ -270,24 +263,19 @@ namespace CalamityOverhaul.Content.Items.Tools
                 Vector2 spawnPos = Player.Center + angle.ToRotationVector2() * radius;
                 Vector2 velocity = (Player.Center - spawnPos).SafeNormalize(Vector2.Zero).RotatedBy(MathHelper.PiOver2) * Main.rand.NextFloat(0.5f, 1.5f);
 
-                //使用音符粒子，随机选择音符类型
                 Color particleColor = Main.rand.Next(4) switch {
-                    0 => new Color(186, 85, 211),  //中紫罗兰色
-                    1 => new Color(138, 43, 226),  //蓝紫色
-                    2 => new Color(147, 112, 219), //中紫色
-                    _ => new Color(255, 0, 255)    //品红色
+                    0 => new Color(186, 85, 211),
+                    1 => new Color(138, 43, 226),
+                    2 => new Color(147, 112, 219),
+                    _ => new Color(255, 0, 255)
                 };
 
-                int noteType = Main.rand.Next(3); //随机选择音符类型
-                PRT_Note noteParticle = new PRT_Note(
-                    spawnPos,
-                    velocity,
-                    particleColor,
+                PRTLoader.AddParticle(new PRT_Note(
+                    spawnPos, velocity, particleColor,
                     Main.rand.Next(45, 75),
                     Main.rand.NextFloat(0.3f, 0.6f),
-                    noteType
-                );
-                PRTLoader.AddParticle(noteParticle);
+                    Main.rand.Next(3)
+                ));
             }
 
             //追踪玩家的幽灵音符
@@ -296,18 +284,16 @@ namespace CalamityOverhaul.Content.Items.Tools
                 Vector2 ghostPos = Player.Center + offsetAngle.ToRotationVector2() * Main.rand.Next(100, 200);
                 Vector2 ghostVel = (Player.Center - ghostPos).SafeNormalize(Vector2.Zero) * Main.rand.NextFloat(2f, 4f);
 
-                PRT_Note ghostNote = new PRT_Note(
-                    ghostPos,
-                    ghostVel,
+                PRTLoader.AddParticle(new PRT_Note(
+                    ghostPos, ghostVel,
                     Color.DarkViolet * 0.8f,
                     Main.rand.Next(30, 50),
                     Main.rand.NextFloat(0.5f, 0.75f),
                     Main.rand.Next(3)
-                );
-                PRTLoader.AddParticle(ghostNote);
+                ));
             }
 
-            //深色暗影尘埃，增加恐怖氛围
+            //暗影尘埃
             if (Main.rand.NextBool(3)) {
                 for (int i = 0; i < 2; i++) {
                     float angle = Main.rand.NextFloat(MathHelper.TwoPi);
@@ -321,189 +307,100 @@ namespace CalamityOverhaul.Content.Items.Tools
                 }
             }
 
-            //血红色警告粒子（音乐快结束时）
-            if (Player.TryGetModPlayer<SirenMusicalBoxPlayer>(out var modPlayer)) {
-                if (modPlayer.MusicTimer >= MusicDuration - 300) {
-                    float dangerIntensity = (modPlayer.MusicTimer - (MusicDuration - 300)) / 300f;
+            //血红色警告粒子（最后5秒）
+            if (timerRatio > 0.78f) {
+                float dangerIntensity = (timerRatio - 0.78f) / 0.22f;
 
-                    if (Main.rand.NextFloat() < dangerIntensity * 0.3f) {
-                        Vector2 warnPos = Player.Center + Main.rand.NextVector2Circular(60f, 60f);
-                        Dust warnDust = Dust.NewDustDirect(warnPos, 0, 0, DustID.Blood, 0f, 0f, 100, Color.Red, Main.rand.NextFloat(2f, 3.5f));
-                        warnDust.noGravity = true;
-                        warnDust.velocity = Main.rand.NextVector2Circular(3f, 3f);
-                    }
-
-                    //快结束时增加音符密度
-                    if (Main.rand.NextBool(2)) {
-                        float panicAngle = Main.rand.NextFloat(MathHelper.TwoPi);
-                        Vector2 panicPos = Player.Center + panicAngle.ToRotationVector2() * Main.rand.NextFloat(40f, 80f);
-                        Vector2 panicVel = Main.rand.NextVector2Circular(2f, 2f);
-
-                        PRT_Note panicNote = new PRT_Note(
-                            panicPos,
-                            panicVel,
-                            Color.Lerp(Color.Red, Color.DarkMagenta, Main.rand.NextFloat()),
-                            Main.rand.Next(20, 40),
-                            Main.rand.NextFloat(0.4f, 0.7f),
-                            Main.rand.Next(3)
-                        );
-                        PRTLoader.AddParticle(panicNote);
-                    }
-                }
-            }
-
-            //海妖之眼效果，偶尔出现诡异的"眼睛"
-            if (Main.rand.NextBool(120)) {
-                Vector2 eyePos = Player.Center + Main.rand.NextVector2Circular(150f, 150f);
-
-                //眼睛外圈
-                for (int i = 0; i < 12; i++) {
-                    float eyeAngle = MathHelper.TwoPi / 12f * i;
-                    Vector2 pos = eyePos + eyeAngle.ToRotationVector2() * 15f;
-
-                    Dust eyeDust = Dust.NewDustDirect(pos, 0, 0, DustID.DungeonWater, 0f, 0f, 100, Color.Cyan, 1.8f);
-                    eyeDust.noGravity = true;
-                    eyeDust.velocity = (eyePos - pos).SafeNormalize(Vector2.Zero) * 0.5f;
+                if (Main.rand.NextFloat() < dangerIntensity * 0.3f) {
+                    Vector2 warnPos = Player.Center + Main.rand.NextVector2Circular(60f, 60f);
+                    Dust warnDust = Dust.NewDustDirect(warnPos, 0, 0, DustID.Blood, 0f, 0f, 100, Color.Red, Main.rand.NextFloat(2f, 3.5f));
+                    warnDust.noGravity = true;
+                    warnDust.velocity = Main.rand.NextVector2Circular(3f, 3f);
                 }
 
-                //眼睛瞳孔
-                Dust pupil = Dust.NewDustDirect(eyePos, 0, 0, DustID.Shadowflame, 0f, 0f, 100, Color.Red, 2.5f);
-                pupil.noGravity = true;
-            }
+                if (Main.rand.NextBool(2)) {
+                    float panicAngle = Main.rand.NextFloat(MathHelper.TwoPi);
+                    Vector2 panicPos = Player.Center + panicAngle.ToRotationVector2() * Main.rand.NextFloat(40f, 80f);
 
-            //扭曲的音波效果，使用音符粒子
-            if (Main.rand.NextBool(10)) {
-                int waveCount = 20;
-                float waveRadius = Main.rand.NextFloat(80f, 150f);
-
-                for (int i = 0; i < waveCount; i++) {
-                    float waveAngle = MathHelper.TwoPi / waveCount * i;
-                    Vector2 wavePos = Player.Center + waveAngle.ToRotationVector2() * waveRadius;
-                    Vector2 waveVel = waveAngle.ToRotationVector2() * Main.rand.NextFloat(1f, 3f);
-
-                    Color waveColor = Color.Lerp(Color.Purple, Color.Cyan, Main.rand.NextFloat());
-                    PRT_Note waveNote = new PRT_Note(
-                        wavePos,
-                        waveVel,
-                        waveColor * 0.6f,
+                    PRTLoader.AddParticle(new PRT_Note(
+                        panicPos,
+                        Main.rand.NextVector2Circular(2f, 2f),
+                        Color.Lerp(Color.Red, Color.DarkMagenta, Main.rand.NextFloat()),
                         Main.rand.Next(20, 40),
-                        Main.rand.NextFloat(0.4f, 0.6f),
+                        Main.rand.NextFloat(0.4f, 0.7f),
                         Main.rand.Next(3)
-                    );
-                    PRTLoader.AddParticle(waveNote);
+                    ));
                 }
             }
 
-            //玩家脚下的深渊涟漪
-            if (Main.rand.NextBool(15)) {
-                Vector2 groundPos = new Vector2(Player.Center.X, Player.Bottom.Y);
-
-                for (int i = 0; i < 3; i++) {
-                    int rippleCount = 16;
-                    float rippleRadius = 30f + i * 25f;
-
-                    for (int j = 0; j < rippleCount; j++) {
-                        float rippleAngle = MathHelper.TwoPi / rippleCount * j;
-                        Vector2 ripplePos = groundPos + rippleAngle.ToRotationVector2() * rippleRadius;
-
-                        Dust ripple = Dust.NewDustDirect(ripplePos, 0, 0, DustID.DungeonWater, 0f, -1f, 100,
-                            Color.DarkBlue * (1f - i * 0.3f), 1.5f - i * 0.3f);
-                        ripple.noGravity = true;
-                        ripple.fadeIn = 0.8f;
-                    }
-                }
-            }
-
-            //音符雨效果，从上方飘落的音符
+            //音符雨
             if (Main.rand.NextBool(8)) {
                 Vector2 fallPos = Player.Center + new Vector2(Main.rand.NextFloat(-200f, 200f), -Main.rand.NextFloat(150f, 250f));
-                Vector2 fallVel = new Vector2(Main.rand.NextFloat(-1f, 1f), Main.rand.NextFloat(1f, 3f));
-
                 Color fallColor = Main.rand.Next(3) switch {
                     0 => Color.Purple,
                     1 => Color.Violet,
                     _ => Color.Magenta
                 };
-
-                PRT_Note fallNote = new PRT_Note(
+                PRTLoader.AddParticle(new PRT_Note(
                     fallPos,
-                    fallVel,
+                    new Vector2(Main.rand.NextFloat(-1f, 1f), Main.rand.NextFloat(1f, 3f)),
                     fallColor * 0.8f,
                     Main.rand.Next(60, 90),
                     Main.rand.NextFloat(0.4f, 0.8f),
                     Main.rand.Next(3)
-                );
-                PRTLoader.AddParticle(fallNote);
+                ));
             }
-        }
-
-        public static void Newphonogram(Vector2 position) {
-            int goreType = Main.rand.Next(570, 573);
-            float wind = Main.WindForVisuals * 2f;
-            float randX = 1f + Main.rand.NextFloat(-1.5f, 1.5f);
-            float randY = 1f + Main.rand.NextFloat(-0.5f, 0.5f);
-
-            if (goreType == 572) {
-                position.X -= 8f;
-            }
-            else if (goreType == 571) {
-                position.X -= 4f;
-            }
-
-            Vector2 velocity = new(wind * randX, -0.5f * randY);
-
-            Gore.NewGore(new EntitySource_TileUpdate((int)position.X, (int)position.Y), position, velocity, goreType, 0.8f);
         }
 
         /// <summary>
-        /// 执行玩家死亡
+        /// 执行玩家死亡（仅在本地玩家上调用）
         /// </summary>
-        internal void ExecuteDeath() {
+        internal void ExecuteDeath(bool stopMusicBoxes) {
             if (Player.dead) {
                 return;
             }
 
-            //移除无敌
+            //设置死亡放行标记（同帧内 On_PreKill 检查此标记）
+            if (Player.TryGetOverride<SirenMusicalBoxPlayerDeath>(out var deathOverride)) {
+                deathOverride.MusicHasEnded = true;
+            }
+
             Player.immune = false;
             Player.immuneTime = 0;
             Player.immuneNoBlink = false;
 
-            //播放恐怖音效
             SoundEngine.PlaySound(SoundID.NPCDeath59 with { Volume = 0.9f, Pitch = -0.8f }, Player.Center);
             SoundEngine.PlaySound(SoundID.Zombie103 with { Volume = 0.7f, Pitch = -0.6f }, Player.Center);
 
-            //死亡演出特效
-            SpawnDeathEffects();
-
-            //重置状态
-            ResetCurse();
+            if (!Main.dedServ) {
+                SpawnDeathEffects();
+            }
 
             PlayerDeathReason damageSource = PlayerDeathReason.ByCustomReason(
                 SirenMusicalBox.DeathText.ToNetworkText(Player.name)
             );
 
-            SirenMusicalBoxPlayerDeath.MusichasEnded = true;
-            //杀死玩家
             Player.KillMe(damageSource, Player.statLifeMax2 * 10, 0, false);
 
-            StopAllMusic();
+            if (stopMusicBoxes) {
+                StopAllMusicBoxes();
+            }
         }
 
-        internal static void StopAllMusic() {
-            foreach (var tp in TileProcessorLoader.TP_InWorld.ToList()) {
-                if (!tp.Active) {
-                    continue;
+        /// <summary>
+        /// 停止所有正在播放的八音盒
+        /// </summary>
+        internal static void StopAllMusicBoxes() {
+            if (Main.netMode == NetmodeID.MultiplayerClient) {
+                if (SirenGhostActor.TryGetActiveSession(out var actor)) {
+                    SirenMusicalBoxTP.RequestToggle(actor.BoxPosition);
                 }
-                if (tp.ID != TPUtils.GetID<SirenMusicalBoxTP>()) {
-                    continue;
-                }
-                if (tp is not SirenMusicalBoxTP smbTP) {
-                    continue;
-                }
-                smbTP.StopMusic();
-                for (int i = 0; i < 16; i++) {
-                    Dust.NewDust(smbTP.PosInWorld, smbTP.Width, smbTP.Height, DustID.Blood);
-                }
+                return;
+            }
+
+            var actors = ActorLoader.GetActiveActors<SirenGhostActor>();
+            foreach (var actor in actors) {
+                actor.StopSession();
             }
         }
 
@@ -511,28 +408,25 @@ namespace CalamityOverhaul.Content.Items.Tools
         /// 生成死亡特效
         /// </summary>
         private void SpawnDeathEffects() {
+            //暗影爆发
             for (int i = 0; i < 150; i++) {
-                Vector2 velocity = Main.rand.NextVector2CircularEdge(12f, 12f);
-                float speed = Main.rand.NextFloat(0.6f, 1.4f);
-                velocity *= speed;
-
+                Vector2 velocity = Main.rand.NextVector2CircularEdge(12f, 12f) * Main.rand.NextFloat(0.6f, 1.4f);
                 Dust dust = Dust.NewDustDirect(Player.Center, 0, 0, DustID.Shadowflame, velocity.X, velocity.Y, 100,
                     Main.rand.NextBool() ? Color.DarkMagenta : Color.Purple, Main.rand.NextFloat(2.5f, 4f));
                 dust.noGravity = true;
                 dust.fadeIn = 1.5f;
             }
 
+            //灵魂碎片
             for (int i = 0; i < 60; i++) {
                 float angle = MathHelper.TwoPi / 60f * i;
                 float radius = Main.rand.NextFloat(20f, 60f);
                 Vector2 pos = Player.Center + angle.ToRotationVector2() * radius;
                 Vector2 vel = new Vector2(0, -Main.rand.NextFloat(3f, 6f)).RotatedBy(angle * 0.3f);
-
-                PRT_Light soulFragment = new PRT_Light(pos, vel, Main.rand.NextFloat(0.5f, 0.75f),
-                    Color.Cyan * 0.8f, Main.rand.Next(40, 70));
-                PRTLoader.AddParticle(soulFragment);
+                PRTLoader.AddParticle(new PRT_Light(pos, vel, Main.rand.NextFloat(0.5f, 0.75f), Color.Cyan * 0.8f, Main.rand.Next(40, 70)));
             }
 
+            //多层光环
             for (int layer = 0; layer < 5; layer++) {
                 int particlesPerRing = 24;
                 float ringRadius = 40f + layer * 35f;
@@ -540,44 +434,35 @@ namespace CalamityOverhaul.Content.Items.Tools
                     float angle = MathHelper.TwoPi / particlesPerRing * j;
                     Vector2 pos = Player.Center + angle.ToRotationVector2() * ringRadius;
                     Vector2 vel = angle.ToRotationVector2() * Main.rand.NextFloat(4f, 8f);
-
                     Color ringColor = Color.Lerp(Color.Purple, Color.DarkRed, layer / 5f);
-                    PRT_Light particle = new PRT_Light(pos, vel, Main.rand.NextFloat(0.5f, 0.75f),
-                        ringColor, Main.rand.Next(30, 60));
-                    PRTLoader.AddParticle(particle);
+                    PRTLoader.AddParticle(new PRT_Light(pos, vel, Main.rand.NextFloat(0.5f, 0.75f), ringColor, Main.rand.Next(30, 60)));
                 }
             }
 
+            //触手轨迹
             for (int i = 0; i < 10; i++) {
                 float angle = Main.rand.NextFloat(MathHelper.TwoPi);
                 Vector2 tentacleStart = Player.Center + angle.ToRotationVector2() * Main.rand.NextFloat(250f, 350f);
 
-                //绘制触手轨迹
                 int segmentCount = Main.rand.Next(20, 30);
                 for (int j = 0; j < segmentCount; j++) {
                     float progress = j / (float)segmentCount;
                     Vector2 pos = Vector2.Lerp(tentacleStart, Player.Center, CWRUtils.EaseOutCubic(progress));
-
-                    //添加一些扭曲
                     float waveOffset = MathF.Sin(progress * MathHelper.Pi * 3f + i) * 20f;
                     Vector2 perpendicular = Vector2.Normalize(new Vector2(-(tentacleStart.Y - Player.Center.Y), tentacleStart.X - Player.Center.X));
                     pos += perpendicular * waveOffset;
 
-                    //触手本体
                     Dust tentacle = Dust.NewDustDirect(pos, 0, 0, DustID.DungeonWater, 0f, 0f, 100,
                         Color.Lerp(Color.DarkBlue, Color.Cyan, progress), Main.rand.NextFloat(2.5f, 4f) * (1f - progress * 0.5f));
                     tentacle.noGravity = true;
                     tentacle.velocity = Main.rand.NextVector2Circular(1f, 1f);
 
-                    //触手末端的能量
                     if (j % 3 == 0) {
-                        PRT_Light energy = new PRT_Light(pos, Main.rand.NextVector2Circular(2f, 2f),
-                            Main.rand.NextFloat(0.31f, 0.5f), Color.Cyan * 0.6f, Main.rand.Next(20, 40));
-                        PRTLoader.AddParticle(energy);
+                        PRTLoader.AddParticle(new PRT_Light(pos, Main.rand.NextVector2Circular(2f, 2f),
+                            Main.rand.NextFloat(0.31f, 0.5f), Color.Cyan * 0.6f, Main.rand.Next(20, 40)));
                     }
                 }
 
-                //触手末端爆炸
                 for (int k = 0; k < 8; k++) {
                     Vector2 burstVel = Main.rand.NextVector2CircularEdge(5f, 5f);
                     Dust burst = Dust.NewDustDirect(Player.Center, 0, 0, DustID.Blood, burstVel.X, burstVel.Y, 100,
@@ -586,33 +471,27 @@ namespace CalamityOverhaul.Content.Items.Tools
                 }
             }
 
+            //海妖之眼
             int eyeCount = Main.rand.Next(6, 10);
             for (int i = 0; i < eyeCount; i++) {
                 float angle = MathHelper.TwoPi / eyeCount * i + Main.rand.NextFloat(-0.2f, 0.2f);
                 Vector2 eyePos = Player.Center + angle.ToRotationVector2() * Main.rand.NextFloat(150f, 250f);
 
-                //白色巩膜
                 for (int j = 0; j < 16; j++) {
                     float eyeAngle = MathHelper.TwoPi / 16f * j;
                     Vector2 scleraPos = eyePos + eyeAngle.ToRotationVector2() * 20f;
-
                     Dust sclera = Dust.NewDustDirect(scleraPos, 0, 0, DustID.Ice, 0f, 0f, 100, Color.White, 2f);
                     sclera.noGravity = true;
                     sclera.velocity = (eyePos - scleraPos).SafeNormalize(Vector2.Zero) * Main.rand.NextFloat(0.3f, 0.8f);
                     sclera.fadeIn = 1.2f;
                 }
-
-                //深蓝色
                 for (int j = 0; j < 12; j++) {
                     float irisAngle = MathHelper.TwoPi / 12f * j;
                     Vector2 irisPos = eyePos + irisAngle.ToRotationVector2() * 12f;
-
                     Dust iris = Dust.NewDustDirect(irisPos, 0, 0, DustID.DungeonWater, 0f, 0f, 100, Color.Cyan, 1.8f);
                     iris.noGravity = true;
                     iris.velocity = (eyePos - irisPos).SafeNormalize(Vector2.Zero) * 0.5f;
                 }
-
-                //血红色
                 for (int j = 0; j < 8; j++) {
                     Vector2 pupilOffset = Main.rand.NextVector2Circular(5f, 5f);
                     Dust pupil = Dust.NewDustDirect(eyePos + pupilOffset, 0, 0, DustID.Blood, 0f, 0f, 100, Color.DarkRed, 2.5f);
@@ -620,16 +499,15 @@ namespace CalamityOverhaul.Content.Items.Tools
                     pupil.velocity = -pupilOffset * 0.1f;
                 }
 
-                //眼睛凝视光线
                 Vector2 gazeDirection = (Player.Center - eyePos).SafeNormalize(Vector2.Zero);
                 for (int j = 0; j < 30; j++) {
                     Vector2 gazePos = eyePos + gazeDirection * (j * 8f);
-                    PRT_Light gaze = new PRT_Light(gazePos, gazeDirection * 0.5f,
-                        Main.rand.NextFloat(0.6f, 0.83f), Color.Red * 0.6f, Main.rand.Next(15, 30));
-                    PRTLoader.AddParticle(gaze);
+                    PRTLoader.AddParticle(new PRT_Light(gazePos, gazeDirection * 0.5f,
+                        Main.rand.NextFloat(0.6f, 0.83f), Color.Red * 0.6f, Main.rand.Next(15, 30)));
                 }
             }
 
+            //血雾
             for (int i = 0; i < 200; i++) {
                 Vector2 mistVel = Main.rand.NextVector2Unit() * Main.rand.NextFloat(3f, 15f);
                 Dust mist = Dust.NewDustDirect(Player.Center, 0, 0, DustID.Blood, mistVel.X, mistVel.Y, 100,
@@ -638,37 +516,34 @@ namespace CalamityOverhaul.Content.Items.Tools
                 mist.fadeIn = Main.rand.NextFloat(0.8f, 1.5f);
             }
 
+            //暗影漩涡
             for (int i = 0; i < 100; i++) {
                 float angle = Main.rand.NextFloat(MathHelper.TwoPi);
                 float radius = Main.rand.NextFloat(5f, 100f);
                 Vector2 pos = Player.Center + angle.ToRotationVector2() * radius;
                 Vector2 vel = (Player.Center - pos).SafeNormalize(Vector2.Zero) * Main.rand.NextFloat(8f, 16f);
-
                 Dust vortex = Dust.NewDustDirect(pos, 0, 0, DustID.Shadowflame, vel.X, vel.Y, 100,
                     Color.Black, Main.rand.NextFloat(2f, 3.5f));
                 vortex.noGravity = true;
                 vortex.fadeIn = 1.5f;
             }
 
+            //灵魂上升
             for (int i = 0; i < 80; i++) {
                 Vector2 pos = Player.Center + Main.rand.NextVector2Circular(40f, 40f);
                 Vector2 vel = new Vector2(Main.rand.NextFloat(-2f, 2f), -Main.rand.NextFloat(6f, 12f));
-
                 Color soulColor = Main.rand.Next(3) switch {
                     0 => Color.White,
                     1 => Color.Cyan,
                     _ => Color.Purple
                 };
-
-                PRT_Light soul = new PRT_Light(pos, vel, Main.rand.NextFloat(0.35f, 0.55f),
-                    soulColor * 0.7f, Main.rand.Next(60, 100));
-                PRTLoader.AddParticle(soul);
+                PRTLoader.AddParticle(new PRT_Light(pos, vel, Main.rand.NextFloat(0.35f, 0.55f), soulColor * 0.7f, Main.rand.Next(60, 100)));
             }
 
+            //空间裂纹
             for (int i = 0; i < 50; i++) {
                 float angle = MathHelper.TwoPi / 50f * i;
                 Vector2 pos = Player.Center + angle.ToRotationVector2() * Main.rand.NextFloat(80f, 150f);
-
                 for (int j = 0; j < 5; j++) {
                     Vector2 crackPos = pos + Main.rand.NextVector2Circular(10f, 10f);
                     Dust crack = Dust.NewDustDirect(crackPos, 0, 0, DustID.Shadowflame, 0f, 0f, 100,
@@ -679,54 +554,18 @@ namespace CalamityOverhaul.Content.Items.Tools
             }
         }
 
-        /// <summary>
-        /// 绑定到八音盒并开始诅咒
-        /// </summary>
-        public void BindToBox(Point16 boxPosition) {
-            IsCursed = true;
-            BoundBoxPosition = boxPosition;
-            MusicTimer = 0;
-        }
-
-        /// <summary>
-        /// 重置诅咒状态
-        /// </summary>
-        public void ResetCurse() {
+        public override void OnRespawn() {
             IsCursed = false;
-            SirenMusicalBoxPlayerDeath.MusichasEnded = false;
-            MusicTimer = 0;
-            BoundBoxPosition = Point16.Zero;
         }
 
         public override void SaveData(TagCompound tag) {
-            tag["IsCursed"] = IsCursed;
-            tag["MusicTimer"] = MusicTimer;
-            tag["BoundBoxX"] = BoundBoxPosition.X;
-            tag["BoundBoxY"] = BoundBoxPosition.Y;
-            //保存是否曾钓到八音盒
             tag["HasSirenMusicalBox"] = HasSirenMusicalBox;
         }
 
         public override void LoadData(TagCompound tag) {
-            try {
-                if (!tag.TryGet("IsCursed", out IsCursed)) {
-                    IsCursed = false;
-                }
-                if (!tag.TryGet("MusicTimer", out MusicTimer)) {
-                    MusicTimer = 0;
-                }
-                if (tag.TryGet("BoundBoxX", out short x) && tag.TryGet("BoundBoxY", out short y)) {
-                    BoundBoxPosition = new Point16(x, y);
-                }
-                //读取是否曾钓到八音盒
-                if (tag.TryGet("HasSirenMusicalBox", out bool hasSirenMusicalBox)) {
-                    HasSirenMusicalBox = hasSirenMusicalBox;
-                }
-            } catch { }
-        }
-
-        public override void OnRespawn() {
-            ResetCurse();//不管如何，重生后都重置一次诅咒状态
+            if (tag.TryGet("HasSirenMusicalBox", out bool value)) {
+                HasSirenMusicalBox = value;
+            }
         }
 
         public override void CatchFish(FishingAttempt attempt, ref int itemDrop, ref int npcSpawn, ref AdvancedPopupRequest sonar, ref Vector2 sonarPosition) {
@@ -739,37 +578,104 @@ namespace CalamityOverhaul.Content.Items.Tools
                     itemDrop = ModContent.ItemType<SirenMusicalBox>();
                 }
             }
-            else {//必出
+            else {
                 itemDrop = ModContent.ItemType<SirenMusicalBox>();
                 HasSirenMusicalBox = true;
             }
         }
+
+        /// <summary>
+        /// 生成音符Gore
+        /// </summary>
+        public static void SpawnMusicNoteGore(Vector2 position) {
+            int goreType = Main.rand.Next(570, 573);
+            float wind = Main.WindForVisuals * 2f;
+            if (goreType == 572) position.X -= 8f;
+            else if (goreType == 571) position.X -= 4f;
+            Vector2 velocity = new(
+                wind * (1f + Main.rand.NextFloat(-1.5f, 1.5f)),
+                -0.5f * (1f + Main.rand.NextFloat(-0.5f, 0.5f))
+            );
+            Gore.NewGore(new EntitySource_TileUpdate((int)position.X, (int)position.Y), position, velocity, goreType, 0.8f);
+        }
     }
 
+    #endregion
+
+    #region TileProcessor
+
     /// <summary>
-    /// 海妖八音盒处理器，控制物块状态和粒子效果
+    /// 海妖八音盒的核心状态管理器。
+    /// 计时器在此处维护并通过网络同步，确保所有客户端状态一致
     /// </summary>
     internal class SirenMusicalBoxTP : TileProcessor, ICWRLoader
     {
         public override int TargetTileID => ModContent.TileType<SirenMusicalBoxTile>();
         public Vector2 Center => PosInWorld + new Vector2(SirenMusicalBoxTile.Width * 8, SirenMusicalBoxTile.Height * 8);
 
-        //音乐相关
-        public bool IsMusicPlaying;
+        internal static bool TryFindMatchingTP(Point16 position, out SirenMusicalBoxTP boxTP) {
+            if (TileProcessorLoader.ByPositionGetTP(position, out SirenMusicalBoxTP targetTP) && targetTP.Active) {
+                boxTP = targetTP;
+                return true;
+            }
 
-        public override void SetProperty() => LoadenWorldSendData = false;
+            boxTP = null;
+            return false;
+        }
+
+        internal static void RequestToggle(Point16 position) {
+            if (Main.netMode == NetmodeID.SinglePlayer) {
+                if (TryFindMatchingTP(position, out var singlePlayerTP)) {
+                    singlePlayerTP.HandleToggleRequest(Main.LocalPlayer);
+                }
+                return;
+            }
+
+            ModPacket packet = CWRMod.Instance.GetPacket();
+            packet.Write((byte)CWRMessageType.SirenMusicalBoxToggle);
+            packet.Write(position.X);
+            packet.Write(position.Y);
+            packet.Send();
+        }
+
+        internal static void HandleTogglePacket(BinaryReader reader, int whoAmI) {
+            Point16 position = new(reader.ReadInt16(), reader.ReadInt16());
+            if (!TryFindMatchingTP(position, out var boxTP)) {
+                return;
+            }
+
+            Player player = Main.player[whoAmI];
+            if (player is null || !player.active || player.dead) {
+                return;
+            }
+
+            boxTP.HandleToggleRequest(player);
+        }
+
+        private void HandleToggleRequest(Player player) {
+            if (player.GetModPlayer<SirenMusicalBoxPlayer>().IsCursed) {
+                return;
+            }
+
+            if (SirenGhostActor.TryFindByBoxPosition(Position, out var actor)) {
+                actor.StopSession();
+                return;
+            }
+
+            if (SirenGhostActor.TryGetActiveSession(out _)) {
+                return;
+            }
+
+            StartMusic();
+        }
 
         public override void OnKill() {
-            if (IsMusicPlaying) {
-                foreach (Player player in Main.ActivePlayers) {
-                    if (player.TryGetModPlayer(out SirenMusicalBoxPlayer modPlayer)) {
-                        if (!modPlayer.IsCursed) {
-                            continue;
-                        }
-                        modPlayer.ExecuteDeath();
-                    }
-                }
-                StopMusic();
+            if (Main.netMode == NetmodeID.MultiplayerClient) {
+                return;
+            }
+
+            if (SirenGhostActor.TryFindByBoxPosition(Position, out var actor)) {
+                actor.BeginResolveDeath();
             }
         }
 
@@ -777,115 +683,301 @@ namespace CalamityOverhaul.Content.Items.Tools
             if (player.whoAmI != Main.myPlayer) {
                 return false;
             }
-            if (player.TryGetModPlayer<SirenMusicalBoxPlayer>(out var sirenMusicalBoxPlayer)
-                && sirenMusicalBoxPlayer.IsCursed) {
+            //被诅咒的玩家无法关闭八音盒
+            if (player.GetModPlayer<SirenMusicalBoxPlayer>().IsCursed) {
                 SoundEngine.PlaySound(CWRSound.ButtonZero with { Pitch = -0.62f });
-                return false;//被诅咒的玩家无法关上八音盒
+                return false;
             }
-            if (!IsMusicPlaying) {
-                StartMusic(player);
-            }
-            else {
-                StopMusic();
-            }
+
+            RequestToggle(Position);
             return false;
         }
 
         /// <summary>
         /// 开始播放音乐
         /// </summary>
-        private void StartMusic(Player triggerPlayer) {
-            if (IsMusicPlaying) {
+        private void StartMusic() {
+            if (Main.netMode == NetmodeID.MultiplayerClient) {
                 return;
             }
 
-            IsMusicPlaying = true;
+            if (SirenGhostActor.TryGetActiveSession(out _)) {
+                return;
+            }
 
-            //播放开始音效
             SoundEngine.PlaySound(SoundID.Item29 with { Volume = 0.6f, Pitch = -0.3f }, Center);
 
-            //设置全局活动八音盒
-            SirenMusicalSystem.ActiveBoxPosition = Position;
-
-            //绑定范围内的所有玩家
-            BindNearbyPlayers();
-
-            SendData();
+            int actorIndex = ActorLoader.NewActor<SirenGhostActor>(Center, Vector2.Zero);
+            if (actorIndex >= 0 && ActorLoader.Actors[actorIndex] is SirenGhostActor ghostActor) {
+                ghostActor.BindToBox(Position, Center);
+                ghostActor.NetUpdate = true;
+            }
         }
 
         /// <summary>
         /// 停止播放音乐
         /// </summary>
         internal void StopMusic() {
-            if (!IsMusicPlaying) {
+            if (Main.netMode == NetmodeID.MultiplayerClient) {
                 return;
             }
 
-            IsMusicPlaying = false;
-
-            //清除全局活动八音盒
-            if (SirenMusicalSystem.ActiveBoxPosition == Position) {
-                SirenMusicalSystem.ActiveBoxPosition = Point16.Zero;
-            }
-
-            //解除所有玩家的绑定
-            UnbindAllPlayers();
-
-            SendData();
-        }
-
-        /// <summary>
-        /// 绑定范围内的所有玩家
-        /// </summary>
-        private void BindNearbyPlayers() {
-            foreach (Player player in Main.player) {
-                if (!player.active || player.dead) {
-                    continue;
+            var ghosts = ActorLoader.GetActiveActors<SirenGhostActor>();
+            foreach (var ghost in ghosts) {
+                if (ghost.BoxPosition == Position) {
+                    ghost.StopSession();
                 }
-                if (player.TryGetModPlayer<SirenMusicalBoxPlayer>(out var modPlayer)) {
-                    modPlayer.BindToBox(Position);
-                }
-            }
-        }
-
-        /// <summary>
-        /// 解除所有玩家的绑定
-        /// </summary>
-        private void UnbindAllPlayers() {
-            foreach (Player player in Main.ActivePlayers) {
-                if (player.TryGetModPlayer<SirenMusicalBoxPlayer>(out var modPlayer)) {
-                    modPlayer.ResetCurse();
-                }
-            }
-        }
-
-        public override void Update() {
-            if (!IsMusicPlaying) {
-                return;
-            }
-
-            if (Main.rand.NextBool(4)) {
-                SirenMusicalBoxPlayer.Newphonogram(Center);
-            }
-
-            //添加光照效果
-            Lighting.AddLight(Center, new Color(139, 0, 139).ToVector3() * (MathF.Sin(Main.GlobalTimeWrappedHourly * 3f) * 0.5f + 0.5f));
-        }
-
-        public override void SendData(ModPacket data) {
-            data.Write(IsMusicPlaying);
-        }
-
-        public override void ReceiveData(BinaryReader reader, int whoAmI) {
-            IsMusicPlaying = reader.ReadBoolean();
-
-            //更新全局状态
-            if (IsMusicPlaying) {
-                SirenMusicalSystem.ActiveBoxPosition = Position;
-            }
-            else if (SirenMusicalSystem.ActiveBoxPosition == Position) {
-                SirenMusicalSystem.ActiveBoxPosition = Point16.Zero;
             }
         }
     }
+
+    #endregion
+
+    #region Actor
+
+    /// <summary>
+    /// 海妖幽灵实体，在八音盒播放期间绕其轨道运行并生成视觉效果
+    /// 位置通过 [SyncVar] 自动在多人模式下同步
+    /// </summary>
+    internal class SirenGhostActor : Actor
+    {
+        private const int ResolveDeathSyncWindow = 15;
+
+        /// <summary>
+        /// 八音盒左上角图格坐标
+        /// </summary>
+        [SyncVar]
+        public Point16 BoxPosition;
+
+        /// <summary>
+        /// 八音盒中心的世界坐标
+        /// </summary>
+        [SyncVar]
+        public Vector2 BoxCenter;
+
+        [SyncVar]
+        public int MusicTimer;
+
+        [SyncVar]
+        public bool ResolveDeath;
+
+        private int timer;
+        private float orbitAngle;
+        private float glowPulse;
+        private int resolveDeathCooldown;
+
+        public static bool TryGetActiveSession(out SirenGhostActor actor) {
+            var actors = ActorLoader.GetActiveActors<SirenGhostActor>();
+            foreach (var sessionActor in actors) {
+                if (sessionActor.Active) {
+                    actor = sessionActor;
+                    return true;
+                }
+            }
+
+            actor = null;
+            return false;
+        }
+
+        public static bool TryFindByBoxPosition(Point16 boxPosition, out SirenGhostActor actor) {
+            var actors = ActorLoader.GetActiveActors<SirenGhostActor>();
+            foreach (var sessionActor in actors) {
+                if (sessionActor.Active && sessionActor.BoxPosition == boxPosition) {
+                    actor = sessionActor;
+                    return true;
+                }
+            }
+
+            actor = null;
+            return false;
+        }
+
+        public override void OnSpawn(params object[] args) {
+            Width = 32;
+            Height = 32;
+            DrawLayer = ActorDrawLayer.AfterTiles;
+            DrawExtendMode = 400;
+            orbitAngle = Main.rand.NextFloat(MathHelper.TwoPi);
+        }
+
+        public void BindToBox(Point16 boxPosition, Vector2 boxCenter) {
+            BoxPosition = boxPosition;
+            BoxCenter = boxCenter;
+            Position = boxCenter;
+            MusicTimer = 0;
+            ResolveDeath = false;
+            resolveDeathCooldown = 0;
+        }
+
+        public void BeginResolveDeath() {
+            if (ResolveDeath) {
+                return;
+            }
+
+            ResolveDeath = true;
+            resolveDeathCooldown = ResolveDeathSyncWindow;
+            NetUpdate = true;
+        }
+
+        public void StopSession() {
+            if (!Main.dedServ) {
+                for (int i = 0; i < 16; i++) {
+                    Dust.NewDust(BoxCenter - new Vector2(16f), 32, 32, DustID.Blood);
+                }
+            }
+
+            ActorLoader.KillActor(WhoAmI);
+        }
+
+        public override void AI() {
+            bool isAuthority = Main.netMode != NetmodeID.MultiplayerClient;
+
+            if (isAuthority) {
+                if (!SirenMusicalBoxTP.TryFindMatchingTP(BoxPosition, out var boxTP)) {
+                    BeginResolveDeath();
+                }
+                else {
+                    BoxCenter = boxTP.Center;
+                }
+
+                if (!ResolveDeath) {
+                    MusicTimer++;
+                    if (MusicTimer >= SirenMusicalBoxPlayer.MusicDuration) {
+                        MusicTimer = SirenMusicalBoxPlayer.MusicDuration;
+                        BeginResolveDeath();
+                    }
+                }
+                else {
+                    resolveDeathCooldown--;
+                    if (resolveDeathCooldown <= 0) {
+                        StopSession();
+                        return;
+                    }
+                }
+
+                if (MusicTimer % 30 == 0 || ResolveDeath) {
+                    NetUpdate = true;
+                }
+            }
+
+            timer++;
+            orbitAngle += 0.025f;
+            glowPulse = MathF.Sin(timer * 0.08f) * 0.3f + 0.7f;
+
+            //椭圆轨道 + 垂直浮动
+            float radius = 80f + MathF.Sin(timer * 0.03f) * 30f;
+            float verticalBob = MathF.Sin(timer * 0.05f) * 15f;
+            Position = BoxCenter + new Vector2(
+                MathF.Cos(orbitAngle) * radius,
+                MathF.Sin(orbitAngle) * radius * 0.5f + verticalBob - 40f
+            );
+
+            Rotation = orbitAngle + MathHelper.PiOver2;
+
+            if (Main.dedServ) {
+                return;
+            }
+
+            Lighting.AddLight(BoxCenter, new Color(139, 0, 139).ToVector3() * (MathF.Sin(Main.GlobalTimeWrappedHourly * 3f) * 0.5f + 0.5f));
+
+            //八音盒周围的音符粒子
+            if (!ResolveDeath && timer % 8 == 0) {
+                Color noteColor = Main.rand.Next(4) switch {
+                    0 => new Color(186, 85, 211),
+                    1 => new Color(138, 43, 226),
+                    2 => new Color(147, 112, 219),
+                    _ => new Color(255, 0, 255)
+                };
+                PRTLoader.AddParticle(new PRT_Note(
+                    Center + Main.rand.NextVector2Circular(20f, 20f),
+                    Main.rand.NextVector2Circular(1f, 1f),
+                    noteColor,
+                    Main.rand.Next(30, 60),
+                    Main.rand.NextFloat(0.3f, 0.5f),
+                    Main.rand.Next(3)
+                ));
+            }
+
+            //幽灵尾迹尘埃
+            if (Main.rand.NextBool(3)) {
+                Dust dust = Dust.NewDustDirect(Center, 0, 0, DustID.Shadowflame, 0f, 0f, 100, Color.Purple, Main.rand.NextFloat(1.5f, 2.5f));
+                dust.noGravity = true;
+                dust.velocity = Main.rand.NextVector2Circular(0.8f, 0.8f);
+            }
+
+            //音符Gore
+            if (!ResolveDeath && Main.rand.NextBool(10)) {
+                SirenMusicalBoxPlayer.SpawnMusicNoteGore(Center);
+            }
+
+            //扭曲音波（低概率）
+            if (!ResolveDeath && Main.rand.NextBool(30)) {
+                int waveCount = 16;
+                float waveRadius = Main.rand.NextFloat(60f, 120f);
+                for (int i = 0; i < waveCount; i++) {
+                    float waveAngle = MathHelper.TwoPi / waveCount * i;
+                    Vector2 wavePos = BoxCenter + waveAngle.ToRotationVector2() * waveRadius;
+                    Color waveColor = Color.Lerp(Color.Purple, Color.Cyan, Main.rand.NextFloat());
+                    PRTLoader.AddParticle(new PRT_Note(
+                        wavePos,
+                        waveAngle.ToRotationVector2() * Main.rand.NextFloat(1f, 2.5f),
+                        waveColor * 0.6f,
+                        Main.rand.Next(20, 40),
+                        Main.rand.NextFloat(0.3f, 0.5f),
+                        Main.rand.Next(3)
+                    ));
+                }
+            }
+
+            //海妖之眼闪现（稀有）
+            if (!ResolveDeath && Main.rand.NextBool(180)) {
+                Vector2 eyePos = BoxCenter + Main.rand.NextVector2Circular(150f, 150f);
+                for (int i = 0; i < 12; i++) {
+                    float eyeAngle = MathHelper.TwoPi / 12f * i;
+                    Vector2 pos = eyePos + eyeAngle.ToRotationVector2() * 15f;
+                    Dust eyeDust = Dust.NewDustDirect(pos, 0, 0, DustID.DungeonWater, 0f, 0f, 100, Color.Cyan, 1.8f);
+                    eyeDust.noGravity = true;
+                    eyeDust.velocity = (eyePos - pos).SafeNormalize(Vector2.Zero) * 0.5f;
+                }
+                Dust pupil = Dust.NewDustDirect(eyePos, 0, 0, DustID.Shadowflame, 0f, 0f, 100, Color.Red, 2.5f);
+                pupil.noGravity = true;
+            }
+
+            //深渊涟漪（从八音盒脚下扩散）
+            if (!ResolveDeath && Main.rand.NextBool(20)) {
+                Vector2 groundPos = BoxCenter + new Vector2(0, SirenMusicalBoxTile.Height * 8);
+                int rippleCount = 12;
+                float rippleRadius = 30f + Main.rand.NextFloat(0, 50f);
+                for (int j = 0; j < rippleCount; j++) {
+                    float rippleAngle = MathHelper.TwoPi / rippleCount * j;
+                    Vector2 ripplePos = groundPos + rippleAngle.ToRotationVector2() * rippleRadius;
+                    Dust ripple = Dust.NewDustDirect(ripplePos, 0, 0, DustID.DungeonWater, 0f, -1f, 100,
+                        Color.DarkBlue * 0.7f, 1.2f);
+                    ripple.noGravity = true;
+                    ripple.fadeIn = 0.8f;
+                }
+            }
+        }
+
+        public override bool PreDraw(SpriteBatch spriteBatch, ref Color drawColor) {
+            Vector2 drawPos = Center - Main.screenPosition;
+            float scale = 0.8f + glowPulse * 0.2f;
+
+            //外层光晕
+            Color glowColor = new Color(139, 0, 139) * glowPulse * 0.5f;
+            spriteBatch.Draw(CWRAsset.SoftGlow.Value, drawPos, null,
+                glowColor with { A = 0 }, Rotation,
+                CWRAsset.SoftGlow.Size() / 2, scale * 3f, SpriteEffects.None, 0f);
+
+            //内层光晕
+            Color innerColor = Color.Lerp(Color.Purple, Color.Cyan, MathF.Sin(timer * 0.05f) * 0.5f + 0.5f) * 0.4f;
+            spriteBatch.Draw(CWRAsset.SoftGlow.Value, drawPos, null,
+                innerColor with { A = 0 }, -Rotation * 0.5f,
+                CWRAsset.SoftGlow.Size() / 2, scale * 1.5f, SpriteEffects.None, 0f);
+
+            return false;
+        }
+    }
+
+    #endregion
 }

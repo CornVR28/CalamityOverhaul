@@ -286,7 +286,7 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalSkeletronPrime
                 return;
             }
 
-            if (!CWRRef.GetBossRushActive() && !VaultUtils.isServer && !SirenMusicalSystem.HasActiveBox) {
+            if (!CWRRef.GetBossRushActive() && !VaultUtils.isServer && !Main.LocalPlayer.GetModPlayer<SirenMusicalBoxPlayer>().IsCursed) {
                 Main.newMusic = Main.musicBox2 = MusicLoader.GetMusicSlot("CalamityOverhaul/Assets/Sounds/Music/Metal");
             }
         }

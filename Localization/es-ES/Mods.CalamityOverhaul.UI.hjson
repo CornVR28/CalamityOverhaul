@@ -206,6 +206,7 @@ QuestLog: {
 	ResetViewText: Restablecer vista
 	SunModeText: Modo Día
 	LauncherHoverText: Clic izq. Interactuar, Clic der. Arrastrar
+	// QuestManagerText: 委托任务
 }
 
 QuestNotificationSystem.Text1: Misión completada
@@ -415,4 +416,16 @@ DraedonIncomingCall: {
 	// TimerLabel: 时长
 	// UnknownCaller: 未知
 	// ChannelPrefix: CH
+}
+
+QuestManagerUI: {
+	// TitleText: 任务管理
+	// CategoryAll: 全部
+	// CategoryActive: 进行中
+	// CategoryCompleted: 已完成
+	// CategorySuspended: 挂起
+	// EmptyHintText: 暂无任务...
+	// TrackHintText: "[右键] 关注/取消关注"
+	// SuspendHintText: "[中键] 挂起/恢复"
+	// OpenHintText: 按 [L] 打开任务管理
 }

@@ -1,4 +1,5 @@
 ﻿using CalamityOverhaul.Common;
+using CalamityOverhaul.Content.ADV.QuestManager;
 using CalamityOverhaul.Content.QuestLogs.Core;
 using CalamityOverhaul.Content.QuestLogs.Styles;
 using InnoVault.UIHandles;
@@ -80,6 +81,7 @@ namespace CalamityOverhaul.Content.QuestLogs
         public static LocalizedText SunModeText;
         public static LocalizedText ResetViewText;
         public static LocalizedText LauncherHoverText;
+        public static LocalizedText QuestManagerText;
 
         private List<IQuestLogStyle> availableStyles;
         private int currentStyleIndex;
@@ -111,6 +113,7 @@ namespace CalamityOverhaul.Content.QuestLogs
             SunModeText = this.GetLocalization(nameof(SunModeText), () => "日间模式");
             ResetViewText = this.GetLocalization(nameof(ResetViewText), () => "重置视图");
             LauncherHoverText = this.GetLocalization(nameof(LauncherHoverText), () => "左键开关面板，右键拖动");
+            QuestManagerText = this.GetLocalization(nameof(QuestManagerText), () => "委托任务");
         }
 
         public new void SaveUIData(TagCompound tag) {
@@ -307,6 +310,17 @@ namespace CalamityOverhaul.Content.QuestLogs
                 hoveredOtherButton = true;
                 if (keyLeftPressState == KeyPressState.Pressed) {
                     NightMode = !NightMode;
+                    SoundEngine.PlaySound(SoundID.MenuTick);
+                }
+            }
+
+            //处理委托任务管理器按钮
+            Rectangle questMgrRect = GetQuestManagerButtonRect(panelRect);
+            if (questMgrRect.Contains(Main.MouseScreen.ToPoint())) {
+                player.mouseInterface = true;
+                hoveredOtherButton = true;
+                if (keyLeftPressState == KeyPressState.Pressed) {
+                    QuestManagerUI.Instance?.TogglePanel();
                     SoundEngine.PlaySound(SoundID.MenuTick);
                 }
             }
@@ -564,10 +578,60 @@ namespace CalamityOverhaul.Content.QuestLogs
                 Main.hoverItemName = NightMode ? NightModeText.Value : SunModeText.Value;
             }
 
+            //绘制委托任务管理器按钮
+            DrawQuestManagerButton(spriteBatch, panelRect);
+
             //如果任务检测被禁用，绘制禁止覆盖层
             var qlPlayer = Main.LocalPlayer.GetModPlayer<QLPlayer>();
             if (!qlPlayer.ShouldCheckQuestInCurrentWorld()) {
                 DrawDisabledOverlay(spriteBatch);
+            }
+        }
+
+        /// <summary>获取委托任务管理器按钮区域——紧跟在夜间模式按钮右侧</summary>
+        private Rectangle GetQuestManagerButtonRect(Rectangle panelRect) {
+            Rectangle nightRect = CurrentStyle.GetNightModeButtonRect(panelRect);
+            return new Rectangle(nightRect.Right + 10, nightRect.Y, 30, 30);
+        }
+
+        private void DrawQuestManagerButton(SpriteBatch spriteBatch, Rectangle panelRect) {
+            Texture2D pixel = VaultAsset.placeholder2.Value;
+            Rectangle buttonRect = GetQuestManagerButtonRect(panelRect);
+            Vector2 center = buttonRect.Center.ToVector2();
+            bool isHovered = buttonRect.Contains(Main.MouseScreen.ToPoint());
+
+            // 背景
+            Color bgColor = isHovered ? new Color(60, 120, 180) : new Color(30, 50, 70);
+            spriteBatch.Draw(pixel, buttonRect, bgColor * mainPanelAlpha);
+
+            // 边框
+            Color borderColor = isHovered ? new Color(140, 210, 255) : new Color(80, 140, 180);
+            int border = 2;
+            spriteBatch.Draw(pixel, new Rectangle(buttonRect.X, buttonRect.Y, buttonRect.Width, border), borderColor * mainPanelAlpha);
+            spriteBatch.Draw(pixel, new Rectangle(buttonRect.X, buttonRect.Bottom - border, buttonRect.Width, border), borderColor * mainPanelAlpha);
+            spriteBatch.Draw(pixel, new Rectangle(buttonRect.X, buttonRect.Y, border, buttonRect.Height), borderColor * mainPanelAlpha);
+            spriteBatch.Draw(pixel, new Rectangle(buttonRect.Right - border, buttonRect.Y, border, buttonRect.Height), borderColor * mainPanelAlpha);
+
+            // 图标：三横线（任务列表样式）
+            Color iconColor = isHovered ? Color.White : new Color(140, 210, 255);
+            float iconAlpha = mainPanelAlpha;
+            int lineW = 14, lineH = 2, gap = 5;
+            int startY = (int)center.Y - gap - lineH;
+            for (int i = 0; i < 3; i++) {
+                int lw = i == 2 ? lineW - 4 : lineW; // 第三条短一点
+                spriteBatch.Draw(pixel,
+                    new Rectangle((int)(center.X - lw / 2f), startY + i * (lineH + gap - 1), lw, lineH),
+                    iconColor * iconAlpha);
+            }
+            // 左侧小圆点（列表项标记）
+            for (int i = 0; i < 3; i++) {
+                spriteBatch.Draw(pixel,
+                    new Rectangle((int)(center.X - lineW / 2f - 4), startY + i * (lineH + gap - 1), 2, 2),
+                    iconColor * (iconAlpha * 0.7f));
+            }
+
+            if (isHovered) {
+                Main.hoverItemName = QuestManagerText.Value;
             }
         }
 

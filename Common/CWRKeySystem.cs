@@ -10,6 +10,7 @@ namespace CalamityOverhaul.Common
         public static ModKeybind Murasama_DownKey { get; private set; }
         public static ModKeybind ADS_Key { get; private set; }
         public static ModKeybind QuestLog_Key { get; private set; }
+        public static ModKeybind QuestManager_Key { get; private set; }
         public static ModKeybind Halibut_Domain { get; private set; }
         public static ModKeybind Halibut_Clone { get; private set; }
         public static ModKeybind Halibut_Restart { get; private set; }
@@ -30,6 +31,7 @@ namespace CalamityOverhaul.Common
             Mod mod = CWRMod.Instance;
             ADS_Key = KeybindLoader.RegisterKeybind(mod, "ADS_Key", "Z");
             QuestLog_Key = KeybindLoader.RegisterKeybind(mod, "QuestLog_Key", "L");
+            QuestManager_Key = KeybindLoader.RegisterKeybind(mod, "QuestManager_Key", "K");
             HeavenfallLongbowSkillKey = KeybindLoader.RegisterKeybind(mod, "HeavenfallLongbowSkillKey", "Q");
             InfinitePickSkillKey = KeybindLoader.RegisterKeybind(mod, "InfinitePickSkillKey", "C");
             Murasama_TriggerKey = KeybindLoader.RegisterKeybind(mod, "Murasama_TriggerKey", "F");
@@ -54,6 +56,7 @@ namespace CalamityOverhaul.Common
         void ICWRLoader.UnLoadData() {
             ADS_Key = null;
             QuestLog_Key = null;
+            QuestManager_Key = null;
             HeavenfallLongbowSkillKey = null;
             InfinitePickSkillKey = null;
             Murasama_TriggerKey = null;

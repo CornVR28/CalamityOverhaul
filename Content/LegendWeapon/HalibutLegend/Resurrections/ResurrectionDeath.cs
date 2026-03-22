@@ -374,7 +374,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend.Resurrections
                 DeathText.ToNetworkText(Player.name)
             );
 
-            SirenMusicalBoxPlayerDeath.MusichasEnded = true;
+            if (Player.TryGetOverride<SirenMusicalBoxPlayerDeath>(out var sirenDeath)) {
+                sirenDeath.MusicHasEnded = true;
+            }
             //杀死玩家
             Player.KillMe(damageSource, Player.statLife + 1, 0, false);
 

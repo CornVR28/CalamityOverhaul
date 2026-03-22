@@ -1,4 +1,4 @@
-﻿ItemFilterUI: {
+ItemFilterUI: {
 	HintText: 左键点击可添加项目
 	HintText2: 左键点击可移除项目
 	CloseHint: "[ESC]键或[右键点击]可关闭"
@@ -206,6 +206,7 @@ QuestLog: {
 	ResetViewText: 重置视图
 	SunModeText: 日间模式
 	LauncherHoverText: 左键交互，右键拖动
+	// QuestManagerText: 委托任务
 }
 
 QuestNotificationSystem.Text1: 任务完成
@@ -415,4 +416,16 @@ DraedonIncomingCall: {
 	TimerLabel: 时长
 	UnknownCaller: 未知
 	ChannelPrefix: CH
+}
+
+QuestManagerUI: {
+	// TitleText: 任务管理
+	// CategoryAll: 全部
+	// CategoryActive: 进行中
+	// CategoryCompleted: 已完成
+	// CategorySuspended: 挂起
+	// EmptyHintText: 暂无任务...
+	// TrackHintText: "[右键] 关注/取消关注"
+	// SuspendHintText: "[中键] 挂起/恢复"
+	// OpenHintText: 按 [L] 打开任务管理
 }

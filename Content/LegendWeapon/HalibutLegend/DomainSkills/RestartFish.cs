@@ -59,8 +59,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend.DomainSkills
             player.SetResurrectionValue(0);//复苏进度归零
 
             if (player.TryGetModPlayer<SirenMusicalBoxPlayer>(out var sirenMusicalBoxPlayer) && sirenMusicalBoxPlayer.IsCursed) {
-                sirenMusicalBoxPlayer.ResetCurse();//清除八音盒诅咒
-                SirenMusicalBoxPlayer.StopAllMusic();
+                sirenMusicalBoxPlayer.IsCursed = false;
+                SirenMusicalBoxPlayer.StopAllMusicBoxes();
             }
 
             //生成大量恢复粒子
