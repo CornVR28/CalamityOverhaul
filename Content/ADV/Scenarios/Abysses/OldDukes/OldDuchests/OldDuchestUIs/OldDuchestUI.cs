@@ -24,7 +24,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.OldDuchests.Ol
 
         //尺寸配置
         public override int PanelWidth => 760;
-        public override int PanelHeight => 520;
+        public override int PanelHeight => 560;
         public override int SlotsPerRow => 20;
         public override int SlotRows => 12;
 

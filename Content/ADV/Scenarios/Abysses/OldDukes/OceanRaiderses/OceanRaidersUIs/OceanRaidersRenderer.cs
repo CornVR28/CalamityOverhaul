@@ -17,7 +17,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.OceanRaiderses
         private OceanRaidersTP machine;
 
         protected override int PanelWidth => 760;
-        protected override int PanelHeight => 700;
+        protected override int PanelHeight => 780;
         protected override int StorageStartX => 20;
         protected override int StorageStartY => 90;
 
@@ -66,11 +66,12 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.OceanRaiderses
             DrawToxicWaveOverlay(spriteBatch, panelRect, pixel);
 
             //内部发光
-            float pulse = (float)Math.Sin(Main.GlobalTimeWrappedHourly * 2.2f) * 0.5f + 0.5f;
+            float pulse = (float)Math.Sin(themeAnimation.SulfurPulse * 1.4f) * 0.5f + 0.5f;
+            float miasmaGlow = (float)Math.Sin(themeAnimation.MiasmaTimer * 0.8f) * 0.5f + 0.5f;
             Rectangle inner = panelRect;
             inner.Inflate(-6, -6);
             spriteBatch.Draw(pixel, inner, new Rectangle(0, 0, 1, 1),
-                new Color(80, 100, 35) * (animation.UIAlpha * 0.09f * (0.5f + pulse * 0.5f)));
+                new Color(80, 100, 35) * (animation.UIAlpha * 0.12f * (0.35f + pulse * 0.4f + miasmaGlow * 0.25f)));
 
             DrawSulfseaFrame(spriteBatch, panelRect, pulse, pixel);
         }
@@ -160,24 +161,26 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.OceanRaiderses
         }
 
         private void DrawToxicWaveOverlay(SpriteBatch spriteBatch, Rectangle rect, Texture2D pixel) {
-            int bands = 6;
+            int bands = 10;
             for (int i = 0; i < bands; i++) {
                 float t = i / (float)bands;
                 float y = rect.Y + 18 + t * (rect.Height - 36);
-                float amp = 7f + (float)Math.Sin((themeAnimation.ToxicWavePhase + t) * 2.2f) * 4.5f;
-                float thickness = 2.2f;
-                int segs = 42;
+                float amp = 9f + (float)Math.Sin((themeAnimation.ToxicWavePhase + t) * 2.5f) * 6.5f;
+                float thickness = 1.6f + (float)Math.Sin(themeAnimation.AcidFlowTimer + i * 0.7f) * 1.4f;
+                int segs = 50;
                 Vector2 prev = Vector2.Zero;
                 for (int s = 0; s <= segs; s++) {
                     float p = s / (float)segs;
-                    float localY = y + (float)Math.Sin(themeAnimation.ToxicWavePhase * 2.2f + p * MathHelper.TwoPi * 1.3f + t) * amp;
+                    float localY = y + (float)Math.Sin(themeAnimation.ToxicWavePhase * 2.5f + p * MathHelper.TwoPi * 1.5f + t * 1.2f) * amp;
+                    localY += (float)Math.Sin(themeAnimation.AcidFlowTimer * 1.8f + p * 3f + i) * 2.5f;
                     Vector2 point = new(rect.X + 8 + p * (rect.Width - 16), localY);
                     if (s > 0) {
                         Vector2 diff = point - prev;
                         float len = diff.Length();
                         if (len > 0.01f) {
                             float rot = diff.ToRotation();
-                            Color c = new Color(60, 90, 30) * (animation.UIAlpha * 0.08f);
+                            float bandAlpha = 0.10f + (float)Math.Sin(themeAnimation.MiasmaTimer + i * 0.4f) * 0.045f;
+                            Color c = new Color(55, 85, 28) * (animation.UIAlpha * bandAlpha);
                             spriteBatch.Draw(pixel, prev, new Rectangle(0, 0, 1, 1), c, rot,
                                 Vector2.Zero, new Vector2(len, thickness), SpriteEffects.None, 0f);
                         }
@@ -204,15 +207,16 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.OceanRaiderses
             spriteBatch.Draw(pixel, new Rectangle(inner.X, inner.Y, 1, inner.Height), new Rectangle(0, 0, 1, 1), innerC * 0.88f);
             spriteBatch.Draw(pixel, new Rectangle(inner.Right - 1, inner.Y, 1, inner.Height), new Rectangle(0, 0, 1, 1), innerC * 0.88f);
 
-            DrawCornerStar(spriteBatch, new Vector2(rect.X + 10, rect.Y + 10), alpha * 0.9f);
-            DrawCornerStar(spriteBatch, new Vector2(rect.Right - 10, rect.Y + 10), alpha * 0.9f);
-            DrawCornerStar(spriteBatch, new Vector2(rect.X + 10, rect.Bottom - 10), alpha * 0.65f);
-            DrawCornerStar(spriteBatch, new Vector2(rect.Right - 10, rect.Bottom - 10), alpha * 0.65f);
+            float starPulse = 0.55f + pulse * 0.45f;
+            DrawCornerStar(spriteBatch, new Vector2(rect.X + 10, rect.Y + 10), alpha * 0.9f * starPulse);
+            DrawCornerStar(spriteBatch, new Vector2(rect.Right - 10, rect.Y + 10), alpha * 0.9f * starPulse);
+            DrawCornerStar(spriteBatch, new Vector2(rect.X + 10, rect.Bottom - 10), alpha * 0.65f * starPulse);
+            DrawCornerStar(spriteBatch, new Vector2(rect.Right - 10, rect.Bottom - 10), alpha * 0.65f * starPulse);
         }
 
         private static void DrawCornerStar(SpriteBatch spriteBatch, Vector2 pos, float alpha) {
             Texture2D pixel = VaultAsset.placeholder2.Value;
-            float size = 5f;
+            float size = 6.5f;
             Color c = new Color(160, 190, 80) * alpha;
             spriteBatch.Draw(pixel, pos, new Rectangle(0, 0, 1, 1), c, 0f,
                 new Vector2(0.5f, 0.5f), new Vector2(size, size * 0.26f), SpriteEffects.None, 0f);

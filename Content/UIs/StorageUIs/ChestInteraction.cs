@@ -1,5 +1,6 @@
 using Microsoft.Xna.Framework.Input;
 using System;
+using System.Collections.Generic;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
@@ -29,6 +30,10 @@ namespace CalamityOverhaul.Content.UIs.StorageUIs
         private int soundCooldown = 0;
         private const int SoundCooldownMax = 15;
         private int lastQuickTransferSlot = -1;
+
+        //右键拖动状态 — 记录当前拖动操作中已分配过的槽位，避免重复
+        private bool isRightDragging;
+        private readonly HashSet<int> rightDragVisitedSlots = new();
 
         public ChestInteraction(Player player, IChestStorage storage) {
             this.player = player;
@@ -105,16 +110,32 @@ namespace CalamityOverhaul.Content.UIs.StorageUIs
                 lastQuickTransferSlot = -1;
             }
 
+            //左键单击
             if (leftPressed) {
                 HandleLeftClick(slotItem);
             }
 
+            //右键交互 — pressed 和 held 互斥处理，避免首帧双重触发
             if (rightPressed) {
                 HandleRightClick(slotItem);
+                //标记拖动开始，记录首个槽位
+                if (Main.mouseItem.type != ItemID.None) {
+                    isRightDragging = true;
+                    rightDragVisitedSlots.Clear();
+                    rightDragVisitedSlots.Add(HoveredSlot);
+                }
+            }
+            else if (rightHeld && isRightDragging) {
+                //拖动中 — 仅对新槽位放入1个
+                HandleRightDrag(HoveredSlot);
             }
 
-            if (rightHeld) {
-                HandleDragPlace(slotItem);
+            //松开右键时结束拖动
+            if (!rightHeld && !rightPressed) {
+                if (isRightDragging) {
+                    isRightDragging = false;
+                    rightDragVisitedSlots.Clear();
+                }
             }
 
             if (shiftPressed && Main.mouseItem.type == ItemID.None) {
@@ -124,6 +145,7 @@ namespace CalamityOverhaul.Content.UIs.StorageUIs
 
         private void HandleLeftClick(Item slotItem) {
             if (Main.mouseItem.type == ItemID.None) {
+                //拿起整组
                 if (slotItem != null && slotItem.type > ItemID.None) {
                     Main.mouseItem = slotItem.Clone();
                     storage.SetItem(HoveredSlot, new Item());
@@ -132,25 +154,29 @@ namespace CalamityOverhaul.Content.UIs.StorageUIs
             }
             else {
                 if (slotItem == null || slotItem.type == ItemID.None) {
+                    //放入空槽
                     storage.SetItem(HoveredSlot, Main.mouseItem.Clone());
                     Main.mouseItem.TurnToAir();
                     PlaySound(SoundID.Grab);
                 }
                 else if (slotItem.type == Main.mouseItem.type && slotItem.stack < slotItem.maxStack) {
+                    //同类堆叠
                     int spaceLeft = slotItem.maxStack - slotItem.stack;
                     int amountToAdd = Math.Min(spaceLeft, Main.mouseItem.stack);
 
-                    slotItem.stack += amountToAdd;
+                    Item updated = slotItem.Clone();
+                    updated.stack += amountToAdd;
                     Main.mouseItem.stack -= amountToAdd;
 
                     if (Main.mouseItem.stack <= 0) {
                         Main.mouseItem.TurnToAir();
                     }
 
-                    storage.SetItem(HoveredSlot, slotItem);
+                    storage.SetItem(HoveredSlot, updated);
                     PlaySound(SoundID.Grab);
                 }
                 else {
+                    //异类交换
                     Item temp = slotItem.Clone();
                     storage.SetItem(HoveredSlot, Main.mouseItem.Clone());
                     Main.mouseItem = temp;
@@ -159,74 +185,88 @@ namespace CalamityOverhaul.Content.UIs.StorageUIs
             }
         }
 
+        /// <summary>
+        /// 右键单击：空手拿半组，持物放1个
+        /// </summary>
         private void HandleRightClick(Item slotItem) {
             if (Main.mouseItem.type == ItemID.None) {
-                if (slotItem != null && slotItem.type > ItemID.None) {
+                //空手 → 拿起一半
+                if (slotItem != null && slotItem.type > ItemID.None && slotItem.stack > 0) {
                     int halfStack = (slotItem.stack + 1) / 2;
                     Main.mouseItem = slotItem.Clone();
                     Main.mouseItem.stack = halfStack;
-                    slotItem.stack -= halfStack;
 
-                    if (slotItem.stack <= 0) {
+                    int remaining = slotItem.stack - halfStack;
+                    if (remaining <= 0) {
                         storage.SetItem(HoveredSlot, new Item());
                     }
                     else {
-                        storage.SetItem(HoveredSlot, slotItem);
+                        Item leftover = slotItem.Clone();
+                        leftover.stack = remaining;
+                        storage.SetItem(HoveredSlot, leftover);
                     }
 
                     PlaySound(SoundID.Grab, 0.1f);
                 }
             }
             else {
-                if (slotItem == null || slotItem.type == ItemID.None) {
-                    Item newItem = Main.mouseItem.Clone();
-                    newItem.stack = 1;
-                    storage.SetItem(HoveredSlot, newItem);
-                    Main.mouseItem.stack--;
-
-                    if (Main.mouseItem.stack <= 0) {
-                        Main.mouseItem.TurnToAir();
-                    }
-
-                    PlaySound(SoundID.Grab, 0.1f);
-                }
-                else if (slotItem.type == Main.mouseItem.type && slotItem.stack < slotItem.maxStack) {
-                    slotItem.stack++;
-                    Main.mouseItem.stack--;
-
-                    if (Main.mouseItem.stack <= 0) {
-                        Main.mouseItem.TurnToAir();
-                    }
-
-                    storage.SetItem(HoveredSlot, slotItem);
-                    PlaySound(SoundID.Grab, 0.1f);
-                }
+                //持物 → 放入1个
+                PlaceOneItem(HoveredSlot);
             }
         }
 
-        private void HandleDragPlace(Item slotItem) {
-            if (Main.mouseItem.type == ItemID.None) return;
+        /// <summary>
+        /// 右键拖动：对每个新经过的槽位放入1个物品
+        /// </summary>
+        private void HandleRightDrag(int slot) {
+            if (Main.mouseItem.type == ItemID.None || Main.mouseItem.stack <= 0) {
+                isRightDragging = false;
+                rightDragVisitedSlots.Clear();
+                return;
+            }
 
-            if (slotItem == null || slotItem.type == ItemID.None) {
+            //已经访问过的槽位不再重复放入
+            if (rightDragVisitedSlots.Contains(slot)) return;
+
+            if (PlaceOneItem(slot)) {
+                rightDragVisitedSlots.Add(slot);
+            }
+        }
+
+        /// <summary>
+        /// 向指定槽位放入1个光标物品，返回是否成功
+        /// </summary>
+        private bool PlaceOneItem(int slot) {
+            if (Main.mouseItem.type == ItemID.None || Main.mouseItem.stack <= 0) return false;
+
+            Item slotItem = storage.GetItem(slot);
+
+            if (slotItem == null || slotItem.type == ItemID.None || slotItem.IsAir) {
+                //空槽 → 放入1个
                 Item newItem = Main.mouseItem.Clone();
                 newItem.stack = 1;
-                storage.SetItem(HoveredSlot, newItem);
-                Main.mouseItem.stack--;
+                storage.SetItem(slot, newItem);
 
-                if (Main.mouseItem.stack <= 0) {
-                    Main.mouseItem.TurnToAir();
-                }
+                Main.mouseItem.stack--;
+                if (Main.mouseItem.stack <= 0) Main.mouseItem.TurnToAir();
+
+                PlaySound(SoundID.Grab, 0.1f);
+                return true;
             }
             else if (slotItem.type == Main.mouseItem.type && slotItem.stack < slotItem.maxStack) {
-                slotItem.stack++;
+                //同类 → 堆叠1个
+                Item updated = slotItem.Clone();
+                updated.stack++;
+                storage.SetItem(slot, updated);
+
                 Main.mouseItem.stack--;
+                if (Main.mouseItem.stack <= 0) Main.mouseItem.TurnToAir();
 
-                if (Main.mouseItem.stack <= 0) {
-                    Main.mouseItem.TurnToAir();
-                }
-
-                storage.SetItem(HoveredSlot, slotItem);
+                PlaySound(SoundID.Grab, 0.1f);
+                return true;
             }
+
+            return false;
         }
 
         private void QuickTransferToInventory(int slotIndex) {
@@ -247,8 +287,7 @@ namespace CalamityOverhaul.Content.UIs.StorageUIs
                 success = true;
             }
             else if (leftover.stack < item.stack) {
-                item.stack = leftover.stack;
-                storage.SetItem(slotIndex, item);
+                storage.SetItem(slotIndex, leftover);
                 partialSuccess = true;
             }
 
@@ -269,24 +308,26 @@ namespace CalamityOverhaul.Content.UIs.StorageUIs
 
             bool gathered = false;
             int totalSlots = storage.TotalSlots;
+            Item accumulated = targetItem.Clone();
 
             for (int i = 0; i < totalSlots; i++) {
                 if (i == targetSlot) continue;
-                if (targetItem.stack >= targetItem.maxStack) break;
+                if (accumulated.stack >= accumulated.maxStack) break;
 
                 Item otherItem = storage.GetItem(i);
-                if (otherItem != null && otherItem.type == targetItem.type) {
-                    int spaceLeft = targetItem.maxStack - targetItem.stack;
+                if (otherItem != null && otherItem.type == accumulated.type) {
+                    int spaceLeft = accumulated.maxStack - accumulated.stack;
                     int amountToTransfer = Math.Min(spaceLeft, otherItem.stack);
 
-                    targetItem.stack += amountToTransfer;
-                    otherItem.stack -= amountToTransfer;
+                    accumulated.stack += amountToTransfer;
 
-                    if (otherItem.stack <= 0) {
+                    if (otherItem.stack - amountToTransfer <= 0) {
                         storage.SetItem(i, new Item());
                     }
                     else {
-                        storage.SetItem(i, otherItem);
+                        Item remaining = otherItem.Clone();
+                        remaining.stack -= amountToTransfer;
+                        storage.SetItem(i, remaining);
                     }
 
                     gathered = true;
@@ -294,7 +335,7 @@ namespace CalamityOverhaul.Content.UIs.StorageUIs
             }
 
             if (gathered) {
-                storage.SetItem(targetSlot, targetItem);
+                storage.SetItem(targetSlot, accumulated);
                 PlaySound(SoundID.Grab);
             }
         }
@@ -321,6 +362,8 @@ namespace CalamityOverhaul.Content.UIs.StorageUIs
             IsCloseButtonHovered = false;
             soundCooldown = 0;
             lastQuickTransferSlot = -1;
+            isRightDragging = false;
+            rightDragVisitedSlots.Clear();
         }
     }
 }

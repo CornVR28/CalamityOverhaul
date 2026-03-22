@@ -34,7 +34,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.OceanRaiderses
         private void UpdateBubbles(bool isActive, Vector2 panelPosition, int panelWidth, int panelHeight) {
             float scaleW = Main.UIScale;
             bubbleSpawnTimer++;
-            if (isActive && bubbleSpawnTimer >= 12 && bubbles.Count < 25) {
+            if (isActive && bubbleSpawnTimer >= 7 && bubbles.Count < 40) {
                 bubbleSpawnTimer = 0;
                 float left = panelPosition.X + SulfseaSideMargin * scaleW;
                 float right = panelPosition.X + panelWidth - SulfseaSideMargin * scaleW;
@@ -56,7 +56,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.OceanRaiderses
         private void UpdateAshParticles(bool isActive, Vector2 panelPosition, int panelWidth, int panelHeight) {
             float scaleW = Main.UIScale;
             ashSpawnTimer++;
-            if (isActive && ashSpawnTimer >= 18 && ashParticles.Count < 15) {
+            if (isActive && ashSpawnTimer >= 10 && ashParticles.Count < 25) {
                 ashSpawnTimer = 0;
                 float left = panelPosition.X + SulfseaSideMargin * scaleW;
                 float right = panelPosition.X + panelWidth - SulfseaSideMargin * scaleW;
@@ -73,7 +73,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.OceanRaiderses
 
         private void UpdateSeaStars(bool isActive, Vector2 panelPosition, int panelWidth, int panelHeight) {
             starSpawnTimer++;
-            if (isActive && starSpawnTimer >= 35 && seaStars.Count < 8) {
+            if (isActive && starSpawnTimer >= 22 && seaStars.Count < 14) {
                 starSpawnTimer = 0;
                 Vector2 p = panelPosition + new Vector2(
                     Main.rand.NextFloat(SulfseaSideMargin, panelWidth - SulfseaSideMargin),
