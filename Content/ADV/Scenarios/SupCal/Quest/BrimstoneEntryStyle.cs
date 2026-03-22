@@ -1,8 +1,6 @@
-using CalamityOverhaul.Content.ADV.QuestManager;
+﻿using CalamityOverhaul.Content.ADV.QuestManager;
 using Microsoft.Xna.Framework.Graphics;
 using System;
-using Terraria;
-using Terraria.GameContent;
 
 namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest
 {

@@ -6,13 +6,13 @@ using CalamityOverhaul.Content.ADV.Scenarios.Draedons;
 using CalamityOverhaul.Content.ADV.Scenarios.Draedons.Quest.DeploySignaltowers.SignalTower;
 using CalamityOverhaul.Content.ADV.Scenarios.Draedons.Tzeentch;
 using CalamityOverhaul.Content.Industrials.Modifys;
+using CalamityOverhaul.Content.Items.Tools;
 using CalamityOverhaul.Content.LegendWeapon.HalibutLegend;
 using CalamityOverhaul.Content.LegendWeapon.HalibutLegend.Resurrections;
 using CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalDestroyer;
 using CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalSkeletronPrime;
 using CalamityOverhaul.Content.NPCs.Modifys;
 using CalamityOverhaul.Content.NPCs.Modifys.Crabulons;
-using CalamityOverhaul.Content.Items.Tools;
 using System.IO;
 using Terraria.ModLoader;
 

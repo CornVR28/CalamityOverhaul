@@ -1,5 +1,4 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
-using System.Collections.Generic;
 
 namespace CalamityOverhaul.Content.ADV.QuestManager
 {
