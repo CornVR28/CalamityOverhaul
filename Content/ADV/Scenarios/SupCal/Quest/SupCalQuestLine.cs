@@ -1,6 +1,8 @@
 using CalamityOverhaul.Content.ADV.QuestManager;
+using CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest.DoGQuest;
+using CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest.PallbearerQuest;
+using CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest.YharonQuest;
 using CalamityOverhaul.Content.LegendWeapon.HalibutLegend;
-using System;
 using Terraria;
 using Terraria.Localization;
 using Terraria.ModLoader;
@@ -36,6 +38,10 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest
         public static LocalizedText YharonTitle { get; private set; }
         public static LocalizedText YharonSummary { get; private set; }
 
+        public static LocalizedText TrackerSummonHint { get; private set; }
+        public static LocalizedText TrackerContribution { get; private set; }
+        public static LocalizedText TrackerRequired { get; private set; }
+
         #endregion
 
         public override void SetStaticDefaults() {
@@ -49,6 +55,10 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest
 
             YharonTitle = this.GetLocalization(nameof(YharonTitle), () => "委托：猎杀焚世龙");
             YharonSummary = this.GetLocalization(nameof(YharonSummary), () => "使用鬼面刀击杀焚世之龙，贡献度需达到75%");
+
+            TrackerSummonHint = this.GetLocalization(nameof(TrackerSummonHint), () => "目标不在场，请召唤 {0}");
+            TrackerContribution = this.GetLocalization(nameof(TrackerContribution), () => "武器贡献: {0:0%}");
+            TrackerRequired = this.GetLocalization(nameof(TrackerRequired), () => "需求: {0:0%}");
         }
 
         public override void PostUpdateWorld() {
@@ -62,6 +72,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest
 
             SyncQuest(manager, save, PALLBEARER_KEY,
                 PallbearerTitle, PallbearerSummary,
+                CWRID.NPC_Providence,
+                PallbearerQuestTracker.REQUIRED_CONTRIBUTION,
                 prerequisite: save.SupCalMoonLordReward,
                 accepted: save.SupCalQuestAccepted,
                 declined: save.SupCalQuestDeclined,
@@ -70,6 +82,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest
 
             SyncQuest(manager, save, DOG_KEY,
                 DoGTitle, DoGSummary,
+                CWRID.NPC_DevourerofGodsHead,
+                DoGQuestTracker.REQUIRED_CONTRIBUTION,
                 prerequisite: save.SupCalQuestReward,
                 accepted: save.SupCalDoGQuestAccepted,
                 declined: save.SupCalDoGQuestDeclined,
@@ -78,6 +92,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest
 
             SyncQuest(manager, save, YHARON_KEY,
                 YharonTitle, YharonSummary,
+                CWRID.NPC_Yharon,
+                YharonQuestTracker.REQUIRED_CONTRIBUTION,
                 prerequisite: save.SupCalDoGQuestReward,
                 accepted: save.SupCalYharonQuestAccepted,
                 declined: save.SupCalYharonQuestDeclined,
@@ -86,43 +102,43 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest
         }
 
         /// <summary>
-        /// 同步单条委托的注册与状态<br/>
+        /// 同步单条猎杀委托的注册与状态<br/>
         /// 前置未满足或已拒绝 → 从管理器移除<br/>
-        /// 已接受 → 注册并设为 Active<br/>
+        /// 已接受 → 注册为 <see cref="SupCalHuntQuestEntry"/> 并设为 Active<br/>
         /// 已完成 → 标记 Completed
         /// </summary>
         private static void SyncQuest(
             QuestManagerUI manager, ADVSave save, string key,
             LocalizedText title, LocalizedText summary,
+            int targetNpcType, float requiredContribution,
             bool prerequisite, bool accepted, bool declined, bool completed,
             int priority)
         {
-            //前置未达成或已拒绝 → 不显示
             if (!prerequisite || declined) {
                 manager.UnregisterQuest(key);
                 return;
             }
 
-            //未接受（委托尚未交付） → 不显示
             if (!accepted) {
                 manager.UnregisterQuest(key);
                 return;
             }
 
-            //确保已注册
             var entry = manager.GetEntry(key);
             if (entry == null) {
-                entry = new QuestEntryData(key, title, summary, QuestCategory) {
+                entry = new SupCalHuntQuestEntry(key, title, summary, QuestCategory) {
                     Priority = priority,
                     EntryStyle = new BrimstoneEntryStyle(),
-                    TrackerStyle = new BrimstoneTrackerWidgetStyle()
+                    TrackerStyle = new BrimstoneTrackerWidgetStyle(),
+                    TargetNpcType = targetNpcType,
+                    RequiredContribution = requiredContribution,
+                    SummonHintFormat = TrackerSummonHint,
+                    ContributionFormat = TrackerContribution,
+                    RequiredFormat = TrackerRequired
                 };
                 manager.RegisterQuest(entry);
             }
 
-            //同步状态
-            var newStatus = completed ? QuestEntryStatus.Completed : entry.Status;
-            //仅在完成时强制设状态，其余由用户交互控制（关注/挂起等）
             if (completed && entry.Status != QuestEntryStatus.Completed) {
                 var old = entry.Status;
                 entry.Status = QuestEntryStatus.Completed;
@@ -131,7 +147,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest
                 manager.MarkFilterDirty();
             }
             else if (!completed && entry.Status == QuestEntryStatus.Completed) {
-                //极端情况：存档回退等导致状态不一致时修正
                 entry.Status = QuestEntryStatus.Active;
                 entry.Progress = 0f;
                 manager.MarkFilterDirty();

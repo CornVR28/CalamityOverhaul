@@ -55,10 +55,11 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
         public override bool Active {
             get {
                 if (Main.gameMenu) return false;
-                //管理器面板打开时隐藏追踪窗口
+                //动画尚未结束时保持激活
+                if (slideProgress > 0.005f) return true;
+                //直接查询管理器源数据，避免缓存列表导致的首帧不活跃问题
                 var manager = QuestManagerUI.Instance;
-                if (manager != null && manager.IsOpen) return slideProgress > 0.005f;
-                return slideProgress > 0.005f || trackedEntries.Count > 0;
+                return manager != null && manager.HasTrackedEntries();
             }
         }
 

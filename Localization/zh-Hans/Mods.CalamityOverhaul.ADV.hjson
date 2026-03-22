@@ -418,6 +418,9 @@ SupCalQuestLine: {
 	DoGSummary: 使用刻心者击杀神明吞噬者，贡献度需达到80%
 	YharonTitle: 委托：猎杀焚世龙
 	YharonSummary: 使用鬼面刀击杀焚世之龙，贡献度需达到75%
+	TrackerSummonHint: 目标不在场，请召唤 {0}
+	TrackerContribution: "武器贡献: {0:0%}"
+	TrackerRequired: "需求: {0:0%}"
 }
 
 HelensInterference: {

@@ -1,12 +1,10 @@
-﻿using CalamityOverhaul.Content.ADV.ADVQuestTracker;
-using CalamityOverhaul.Content.ADV.ADVRewardPopups;
+﻿using CalamityOverhaul.Content.ADV.ADVRewardPopups;
 using CalamityOverhaul.Content.ADV.Common;
 using CalamityOverhaul.Content.ADV.DialogueBoxs;
 using CalamityOverhaul.Content.ADV.DialogueBoxs.Styles;
 using CalamityOverhaul.Content.Items.Accessories;
 using CalamityOverhaul.Content.Items.Melee;
 using CalamityOverhaul.Content.LegendWeapon.HalibutLegend;
-using InnoVault.UIHandles;
 using System;
 using Terraria;
 using Terraria.Localization;
@@ -198,31 +196,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest.YharonQuest
             //延迟触发奖励场景
             SupCalYharonQuestReward.Spawned = true;
             SupCalYharonQuestReward.RandomTimer = 60 * Main.rand.Next(3, 5);
-        }
-    }
-
-    /// <summary>
-    /// 鬼面刀任务追踪UI，显示伤害贡献度
-    /// </summary>
-    internal class YharonQuestTrackerUI : BaseQuestTrackerUI
-    {
-        public override string LocalizationCategory => "UI";
-        public static YharonQuestTrackerUI Instance => UIHandleLoader.GetUIHandleOfType<YharonQuestTrackerUI>();
-
-        public override int TargetNPCType => CWRID.NPC_Yharon;
-
-        protected override void SetupLocalizedTexts() {
-            QuestTitle = this.GetLocalization(nameof(QuestTitle), () => "委托：猎杀焚世龙");
-            DamageContribution = this.GetLocalization(nameof(DamageContribution), () => "鬼面刀伤害");
-            RequiredContribution = this.GetLocalization(nameof(RequiredContribution), () => "需求: 75%");
-        }
-
-        protected override (float current, float total, bool isActive) GetTrackingData() {
-            return BaseDamageTracker.GetDamageTrackingData();
-        }
-
-        protected override float GetRequiredContribution() {
-            return YharonQuestTracker.REQUIRED_CONTRIBUTION; //75%
         }
     }
 }

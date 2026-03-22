@@ -189,6 +189,15 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
             }
         }
 
+        /// <summary>是否存在被关注的条目（避免 Widget 侧缓存导致的鸡生蛋问题）</summary>
+        public bool HasTrackedEntries() {
+            foreach (var e in allEntries) {
+                if (e.Status == QuestEntryStatus.Tracked)
+                    return true;
+            }
+            return false;
+        }
+
         #endregion
 
         #region 样式系统

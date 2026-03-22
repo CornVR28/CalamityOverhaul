@@ -1,12 +1,10 @@
-﻿using CalamityOverhaul.Content.ADV.ADVQuestTracker;
-using CalamityOverhaul.Content.ADV.ADVRewardPopups;
+﻿using CalamityOverhaul.Content.ADV.ADVRewardPopups;
 using CalamityOverhaul.Content.ADV.Common;
 using CalamityOverhaul.Content.ADV.DialogueBoxs;
 using CalamityOverhaul.Content.ADV.DialogueBoxs.Styles;
 using CalamityOverhaul.Content.ADV.Scenarios.Helen;
 using CalamityOverhaul.Content.Items.Melee;
 using CalamityOverhaul.Content.LegendWeapon.HalibutLegend;
-using InnoVault.UIHandles;
 using System;
 using System.Collections.Generic;
 using Terraria;
@@ -174,28 +172,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest.DoGQuest
             //延迟触发奖励场景
             SupCalDoGQuestReward.Spawned = true;
             SupCalDoGQuestReward.RandomTimer = 60 * Main.rand.Next(3, 5);
-        }
-    }
-
-    internal class DoGQuestTrackerUI : BaseQuestTrackerUI
-    {
-        public override string LocalizationCategory => "UI";
-        public static DoGQuestTrackerUI Instance => UIHandleLoader.GetUIHandleOfType<DoGQuestTrackerUI>();
-
-        public override int TargetNPCType => CWRID.NPC_DevourerofGodsHead;
-
-        protected override void SetupLocalizedTexts() {
-            QuestTitle = this.GetLocalization(nameof(QuestTitle), () => "委托：猎杀神明吞噬者");
-            DamageContribution = this.GetLocalization(nameof(DamageContribution), () => "刻心者伤害");
-            RequiredContribution = this.GetLocalization(nameof(RequiredContribution), () => "需求: 80%");
-        }
-
-        protected override (float current, float total, bool isActive) GetTrackingData() {
-            return BaseDamageTracker.GetDamageTrackingData();
-        }
-
-        protected override float GetRequiredContribution() {
-            return DoGQuestTracker.REQUIRED_CONTRIBUTION;
         }
     }
 }

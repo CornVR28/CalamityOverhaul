@@ -418,6 +418,9 @@ SupCalQuestLine: {
 	// DoGSummary: Defeat the Devourer of Gods using the Heartcarver. 80% contribution required.
 	// YharonTitle: Commission: Hunt the Incineration Dragon
 	// YharonSummary: Slay Yharon using the Oni Machete. 75% contribution required.
+	// TrackerSummonHint: Target absent — summon {0}
+	// TrackerContribution: "Weapon contribution: {0:0%}"
+	// TrackerRequired: "Required: {0:0%}"
 }
 
 HelensInterference: {
