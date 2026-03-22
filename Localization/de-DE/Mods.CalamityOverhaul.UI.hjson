@@ -53,18 +53,6 @@ CQETConstructorTP: {
 	GuideText_GroundIncomplete: Untergrund unvollständig!
 }
 
-DeploySignaltowerTrackerUI: {
-	QuestTitle: Quantenverschränkungs-Netzwerk
-	DamageContribution: Bereitstellungsfortschritt
-	RequiredContribution: Ziel: 10 Signaltürme
-	NearestTargetText: Nächstes Ziel
-	NodeText: Verschränkungsknoten Nr. [NUM]
-	StatusText: Status
-	InRangeText: In Reichweite
-	DistanceText: Distanz
-	QuestCompleteText: Quest abgeschlossen!
-}
-
 SignalTowerTargetRenderer: {
 	InRangeText: In Reichweite
 	TargetCompletedText: Zielpunkt [NUM] fertiggestellt!

@@ -53,18 +53,6 @@ CQETConstructorTP: {
 	GuideText_GroundIncomplete: Sol incomplet !
 }
 
-DeploySignaltowerTrackerUI: {
-	QuestTitle: Déploiement du réseau d'intrication quantique
-	DamageContribution: Progression
-	RequiredContribution: Objectif : 10 tours de signalisation
-	NearestTargetText: Cible la plus proche
-	NodeText: Nœud d'intrication N°[NUM]
-	StatusText: État
-	InRangeText: À portée
-	DistanceText: Distance
-	QuestCompleteText: Quête terminée !
-}
-
 SignalTowerTargetRenderer: {
 	InRangeText: À portée
 	TargetCompletedText: Point cible [NUM] terminé !

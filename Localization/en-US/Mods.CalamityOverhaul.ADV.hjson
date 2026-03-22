@@ -580,6 +580,18 @@ ExoMechThirdDefeat: {
 	ThirdDefeatLine2: You have proven your capabilities are not... a statistical anomaly.
 }
 
+DraedonQuestLine: {
+	QuestCategory: Draedon
+	DeployTitle: Quantum Entanglement Network Deployment
+	DeploySummary: Deploy 10 signal towers at target points across the world
+	TrackerNearestTarget: Nearest Target Point
+	TrackerNodeName: Entanglement Node #[NUM]
+	TrackerInRange: In Range
+	TrackerDistance: Distance
+	TrackerDeployProgress: Deployment Progress
+	TrackerQuestComplete: Mission Complete!
+}
+
 MusicToast.NowPlaying: Now Playing
 
 EternalBlazingNow: {

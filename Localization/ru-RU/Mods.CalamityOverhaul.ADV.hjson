@@ -580,6 +580,18 @@ ExoMechThirdDefeat: {
 	ThirdDefeatLine2: Ты доказал, что твоя ценность не случайна.
 }
 
+DraedonQuestLine: {
+	QuestCategory: Дрэйдон
+	DeployTitle: Развертывание квантовой сети
+	DeploySummary: Разместите 10 сигнальных башен в целевых точках мира
+	TrackerNearestTarget: Ближайшая точка
+	TrackerNodeName: Узел запутанности №[NUM]
+	TrackerInRange: В зоне действия
+	TrackerDistance: Дистанция
+	TrackerDeployProgress: Прогресс
+	TrackerQuestComplete: Задание выполнено!
+}
+
 MusicToast.NowPlaying: Сейчас играет
 
 EternalBlazingNow: {

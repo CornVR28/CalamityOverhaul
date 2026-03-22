@@ -580,6 +580,18 @@ ExoMechThirdDefeat: {
 	// ThirdDefeatLine2: You have proven your capabilities are not... a statistical anomaly.
 }
 
+DraedonQuestLine: {
+	QuestCategory: Draedon
+	DeployTitle: Red de entrelazamiento cuántico
+	DeploySummary: Despliega 10 Torres de Señal en puntos objetivo del mundo
+	TrackerNearestTarget: Objetivo más cercano
+	TrackerNodeName: Nodo de entrelazamiento N.º [NUM]
+	TrackerInRange: En rango
+	TrackerDistance: Distancia
+	TrackerDeployProgress: Progreso
+	TrackerQuestComplete: ¡Misión completada!
+}
+
 // MusicToast.NowPlaying: Now Playing
 
 EternalBlazingNow: {

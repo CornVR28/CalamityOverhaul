@@ -580,6 +580,18 @@ ExoMechThirdDefeat: {
 	// ThirdDefeatLine2: You have proven your capabilities are not... a statistical anomaly.
 }
 
+DraedonQuestLine: {
+	QuestCategory: Draedon
+	DeployTitle: Quantenverschränkungs-Netzwerk
+	DeploySummary: Errichte 10 Signaltürme an Zielpunkten in der Welt
+	TrackerNearestTarget: Nächstes Ziel
+	TrackerNodeName: Verschränkungsknoten Nr. [NUM]
+	TrackerInRange: In Reichweite
+	TrackerDistance: Distanz
+	TrackerDeployProgress: Bereitstellungsfortschritt
+	TrackerQuestComplete: Quest abgeschlossen!
+}
+
 // MusicToast.NowPlaying: Now Playing
 
 EternalBlazingNow: {

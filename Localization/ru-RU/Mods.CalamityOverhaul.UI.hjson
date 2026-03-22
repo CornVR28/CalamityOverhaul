@@ -53,18 +53,6 @@ CQETConstructorTP: {
 	GuideText_GroundIncomplete: Поверхность неровная!
 }
 
-DeploySignaltowerTrackerUI: {
-	QuestTitle: Развертывание квантовой сети
-	DamageContribution: Прогресс
-	RequiredContribution: Цель: 10 сигнальных башен
-	NearestTargetText: Ближайшая точка
-	NodeText: Узел запутанности №[NUM]
-	StatusText: Статус
-	InRangeText: В зоне действия
-	DistanceText: Дистанция
-	QuestCompleteText: Задание выполнено!
-}
-
 SignalTowerTargetRenderer: {
 	InRangeText: В зоне действия
 	TargetCompletedText: Точка [NUM] завершена!

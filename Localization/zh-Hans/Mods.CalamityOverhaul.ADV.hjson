@@ -580,6 +580,18 @@ ExoMechThirdDefeat: {
 	ThirdDefeatLine2: 你已经证明了自己的价值不是偶然
 }
 
+DraedonQuestLine: {
+	QuestCategory: 嘉登
+	DeployTitle: 量子纠缠网络部署
+	DeploySummary: 在世界各处的目标点位部署10座信号塔
+	TrackerNearestTarget: 最近的目标点
+	TrackerNodeName: "[NUM]号纠缠节点"
+	TrackerInRange: 范围内
+	TrackerDistance: 距离
+	TrackerDeployProgress: 部署进度
+	TrackerQuestComplete: 任务完成!
+}
+
 MusicToast.NowPlaying: 正在播放
 
 EternalBlazingNow: {

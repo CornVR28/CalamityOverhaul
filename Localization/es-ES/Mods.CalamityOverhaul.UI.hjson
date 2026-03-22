@@ -53,18 +53,6 @@ CQETConstructorTP: {
 	GuideText_GroundIncomplete: ¡Suelo incompleto!
 }
 
-DeploySignaltowerTrackerUI: {
-	QuestTitle: Red de entrelazamiento cuántico
-	DamageContribution: Progreso
-	RequiredContribution: Objetivo: 10 Torres de Señal
-	NearestTargetText: Objetivo más cercano
-	NodeText: Nodo de entrelazamiento N.º [NUM]
-	StatusText: Estado
-	InRangeText: En rango
-	DistanceText: Distancia
-	QuestCompleteText: ¡Misión completada!
-}
-
 SignalTowerTargetRenderer: {
 	InRangeText: En rango
 	TargetCompletedText: ¡Punto objetivo [NUM] completado!

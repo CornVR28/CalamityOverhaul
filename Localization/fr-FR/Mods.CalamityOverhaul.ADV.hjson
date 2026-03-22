@@ -580,6 +580,18 @@ ExoMechThirdDefeat: {
 	// ThirdDefeatLine2: You have proven your capabilities are not... a statistical anomaly.
 }
 
+DraedonQuestLine: {
+	QuestCategory: Draedon
+	DeployTitle: Déploiement du réseau d'intrication quantique
+	DeploySummary: Déployez 10 tours de signalisation aux points cibles du monde
+	TrackerNearestTarget: Cible la plus proche
+	TrackerNodeName: Nœud d'intrication N°[NUM]
+	TrackerInRange: À portée
+	TrackerDistance: Distance
+	TrackerDeployProgress: Progression
+	TrackerQuestComplete: Quête terminée !
+}
+
 // MusicToast.NowPlaying: Now Playing
 
 EternalBlazingNow: {

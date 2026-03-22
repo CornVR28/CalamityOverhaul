@@ -54,18 +54,6 @@ CQETConstructorTP: {
 	GuideText_GroundIncomplete: The Ground Is Incomplete!
 }
 
-DeploySignaltowerTrackerUI: {
-	QuestTitle: Quantum Entanglement Network Deployment
-	DamageContribution: Deployment Progress
-	RequiredContribution: Goal: 10 Signal Towers
-	NearestTargetText: Nearest Target Point
-	NodeText: Entanglement Node #[NUM]
-	StatusText: Status
-	InRangeText: In Range
-	DistanceText: Distance
-	QuestCompleteText: Mission Complete!
-}
-
 SignalTowerTargetRenderer: {
 	InRangeText: In Range
 	TargetCompletedText: Target Point [NUM] Complete!
