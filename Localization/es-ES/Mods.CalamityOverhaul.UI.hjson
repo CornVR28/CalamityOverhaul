@@ -26,24 +26,6 @@ QuestTracker: {
 	}
 }
 
-DoGQuestTrackerUI: {
-	QuestTitle: Contrato: Cazar al Devorador de Dioses
-	DamageContribution: Daño de Rompecorazones
-	RequiredContribution: Requerido: 80%
-}
-
-PallbearerQuestTrackerUI: {
-	QuestTitle: Contrato: Cazar a Providencia
-	DamageContribution: Daño de Portaféretros
-	RequiredContribution: Requerido: 80%
-}
-
-YharonQuestTrackerUI: {
-	QuestTitle: Contrato: Cazar a Yharon
-	DamageContribution: Daño de Hoja Fantasma
-	RequiredContribution: Requerido: 75%
-}
-
 SeaDialogueBox: {
 	ContinueHint: Continuar
 	FastHint: Acelerar

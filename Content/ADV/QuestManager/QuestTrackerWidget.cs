@@ -289,25 +289,38 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
                 y += 16f;
             }
 
-            //分隔线
+            //分隔线 + 进度条
             if (entry.Progress > 0f && entry.Status != QuestEntryStatus.Completed) {
                 y += 3f;
 
-                //进度条
+                //分隔线——委托给样式
+                if (style != null) {
+                    style.DrawWidgetDivider(sb,
+                        new Vector2(contentRect.X, y),
+                        new Vector2(contentRect.Right - 4, y), alpha);
+                }
+                y += 4f;
+
+                //进度条——委托给样式
                 int barW = contentRect.Width - 4;
                 Rectangle barRect = new(contentRect.X, (int)y, barW, 5);
-                BaseManagerStyle.FillRect(sb, barRect, new Color(8, 16, 32) * alpha);
-                int fillW = (int)(barW * MathHelper.Clamp(entry.Progress, 0f, 1f));
-                if (fillW > 0) {
-                    BaseManagerStyle.FillRect(sb, new Rectangle(barRect.X, barRect.Y, fillW, 5), accentC * 0.8f);
+                if (style != null) {
+                    style.DrawWidgetProgress(sb, barRect, entry.Progress,
+                        entry.ProgressText, alpha);
                 }
+                else {
+                    BaseManagerStyle.FillRect(sb, barRect, new Color(8, 16, 32) * alpha);
+                    int fillW = (int)(barW * MathHelper.Clamp(entry.Progress, 0f, 1f));
+                    if (fillW > 0) {
+                        BaseManagerStyle.FillRect(sb, new Rectangle(barRect.X, barRect.Y, fillW, 5), accentC * 0.8f);
+                    }
 
-                //进度文本
-                if (entry.ProgressText != null) {
-                    Utils.DrawBorderString(sb, entry.ProgressText,
-                        new Vector2(barRect.Right - font.MeasureString(entry.ProgressText).X * 0.5f - 2f,
-                            barRect.Bottom + 2f),
-                        accentC * 0.7f, 0.5f);
+                    if (entry.ProgressText != null) {
+                        Utils.DrawBorderString(sb, entry.ProgressText,
+                            new Vector2(barRect.Right - font.MeasureString(entry.ProgressText).X * 0.5f - 2f,
+                                barRect.Bottom + 2f),
+                            accentC * 0.7f, 0.5f);
+                    }
                 }
             }
         }

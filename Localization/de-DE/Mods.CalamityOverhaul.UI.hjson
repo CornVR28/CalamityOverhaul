@@ -26,24 +26,6 @@ QuestTracker: {
 	}
 }
 
-DoGQuestTrackerUI: {
-	QuestTitle: Auftrag: Jagd auf den Götterfresser
-	DamageContribution: Herzensbrecher-Schaden
-	RequiredContribution: Benötigt: 80%
-}
-
-PallbearerQuestTrackerUI: {
-	QuestTitle: Auftrag: Jagd auf die Entweihten Wächter
-	DamageContribution: Sargträger-Schaden
-	RequiredContribution: Benötigt: 80%
-}
-
-YharonQuestTrackerUI: {
-	QuestTitle: Auftrag: Jagd auf den Dschungeldrachen
-	DamageContribution: Geisterklingen-Schaden
-	RequiredContribution: Benötigt: 75%
-}
-
 SeaDialogueBox: {
 	ContinueHint: Weiter
 	FastHint: Beschleunigen

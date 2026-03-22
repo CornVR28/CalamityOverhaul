@@ -26,24 +26,6 @@ QuestTracker: {
 	}
 }
 
-DoGQuestTrackerUI: {
-	QuestTitle: Contrat : Chasser le Dévoreur des Dieux
-	DamageContribution: Dégâts du Briseur de Cœurs
-	RequiredContribution: Requis : 80%
-}
-
-PallbearerQuestTrackerUI: {
-	QuestTitle: Contrat : Chasser la Providence
-	DamageContribution: Dégâts du Porteur de Cercueil
-	RequiredContribution: Requis : 80%
-}
-
-YharonQuestTrackerUI: {
-	QuestTitle: Contrat : Chasser le Dragon de la Renaissance
-	DamageContribution: Dégâts de la Lame Fantôme
-	RequiredContribution: Requis : 75%
-}
-
 SeaDialogueBox: {
 	ContinueHint: Continuer
 	FastHint: Accélérer

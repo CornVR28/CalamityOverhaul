@@ -1,4 +1,4 @@
-﻿FirstMet: {
+FirstMet: {
 	Rolename1: ???
 	Rolename2: 比目鱼
 	Line0: 先生......你的钓鱼技法，还有一些进步空间
@@ -419,8 +419,8 @@ SupCalQuestLine: {
 	YharonTitle: 委托：猎杀焚世龙
 	YharonSummary: 使用鬼面刀击杀焚世之龙，贡献度需达到75%
 	TrackerSummonHint: 目标不在场，请召唤 {0}
-	TrackerContribution: "武器贡献: {0:0%}"
-	TrackerRequired: "需求: {0:0%}"
+	TrackerContribution: 武器贡献: {0:0%}
+	TrackerRequired: 需求: {0:0%}
 }
 
 HelensInterference: {

@@ -419,8 +419,8 @@ SupCalQuestLine: {
 	YharonTitle: Поручение: Охота на Испепеляющего Дракона
 	YharonSummary: Убейте Ярона с помощью Катаны Они. Требуется 75% вклада.
 	TrackerSummonHint: Цель отсутствует — призовите {0}
-	TrackerContribution: "Вклад оружия: {0:0%}"
-	TrackerRequired: "Требуется: {0:0%}"
+	TrackerContribution: Вклад оружия: {0:0%}
+	TrackerRequired: Требуется: {0:0%}
 }
 
 HelensInterference: {

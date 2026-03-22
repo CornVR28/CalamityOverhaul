@@ -221,7 +221,7 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
 
         #region UIHandle 生命周期
 
-        public override bool Active => (openProgress > 0.005f || isOpen) && !Main.gameMenu;
+        public override bool Active => !Main.gameMenu && (openProgress > 0.005f || isOpen || allEntries.Count > 0);
 
         public QuestManagerUI() {
             currentStyle = new DraedonManagerStyle();

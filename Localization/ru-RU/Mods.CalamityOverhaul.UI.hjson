@@ -26,24 +26,6 @@ QuestTracker: {
 	}
 }
 
-DoGQuestTrackerUI: {
-	QuestTitle: Заказ: Охота на Пожирателя богов
-	DamageContribution: Урон Пронзателя сердец
-	RequiredContribution: Требуется: 80%
-}
-
-PallbearerQuestTrackerUI: {
-	QuestTitle: Заказ: Охота на Провиденс
-	DamageContribution: Урон Гробовщика
-	RequiredContribution: Требуется: 80%
-}
-
-YharonQuestTrackerUI: {
-	QuestTitle: Заказ: Охота на Ярона
-	DamageContribution: Урон Лика Они
-	RequiredContribution: Требуется: 75%
-}
-
 SeaDialogueBox: {
 	ContinueHint: Далее
 	FastHint: Ускорить
