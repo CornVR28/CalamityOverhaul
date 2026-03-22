@@ -428,4 +428,6 @@ QuestManagerUI: {
 	// TrackHintText: "[右键] 关注/取消关注"
 	// SuspendHintText: "[中键] 挂起/恢复"
 	// OpenHintText: 按 [L] 打开任务管理
+	// HeaderStatusTag: ◈ ACTIVE
+	// FooterStatsFormat: TOTAL: {0}  |  ACTIVE: {1}
 }

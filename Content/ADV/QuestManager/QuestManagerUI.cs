@@ -241,27 +241,7 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
                 CategorySuspended.Value
             ];
 
-            //测试用数据（后续由真实任务线注册替换）
-            if (allEntries.Count == 0) {
-                RegisterQuest(new QuestEntryData("test_signal", "部署信号塔", "在指定位置建造10座信号中继塔", "嘉登") {
-                    Status = QuestEntryStatus.Active, Progress = 0.3f, ProgressText = "3/10"
-                });
-                RegisterQuest(new QuestEntryData("test_camp", "寻找营地", "前往硫磺海深处的老公爵营地", "深渊") {
-                    Status = QuestEntryStatus.Tracked, Progress = 0.7f, ProgressText = "距离: 450格"
-                });
-                RegisterQuest(new QuestEntryData("test_fragment", "收集海洋残片", "收集777块海洋残片", "深渊") {
-                    Status = QuestEntryStatus.Active, Progress = 0.12f, ProgressText = "93/777", IsNew = true
-                });
-                RegisterQuest(new QuestEntryData("test_pallbearer", "扶柩者的委托", "击败亵渎天神", "至高灾厄") {
-                    Status = QuestEntryStatus.Completed, Progress = 1f
-                });
-                RegisterQuest(new QuestEntryData("test_dog", "刻心者的委托", "击败神明吞噬者", "至高灾厄") {
-                    Status = QuestEntryStatus.Suspended
-                });
-                RegisterQuest(new QuestEntryData("test_fishoil", "鱼油交付", "向海伦提交鱼油材料", "海伦") {
-                    Status = QuestEntryStatus.Active, Progress = 0.5f, ProgressText = "5/10"
-                });
-            }
+            //任务条目由各任务线的ModSystem注册（如SupCalQuestLine）
         }
 
         public override void LogicUpdate() {
