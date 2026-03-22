@@ -27,7 +27,7 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
         ];
 
         public override void UpdateUI(GameTime gameTime) {
-            // ── 快捷键开关 ──
+            //快捷键开关
             if (CWRKeySystem.QuestManager_Key != null && CWRKeySystem.QuestManager_Key.JustReleased) {
                 QuestManagerUI.Instance.TogglePanel();
             }
@@ -46,9 +46,7 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
     }
 
     /// <summary>
-    /// 任务管理器主界面——位于屏幕左侧的可呼出式任务管理面板<br/>
-    /// 受赛博朋克2077任务日志启发，统一管理所有任务线的追踪条目<br/>
-    /// 支持：滑入/滑出动画、分类筛选、滚动浏览、点击选中/关注/挂起、样式切换
+    /// 任务管理器主界面，屏幕左侧可呼出式任务管理面板
     /// </summary>
     internal class QuestManagerUI : UIHandle, ILocalizedModType
     {
@@ -66,6 +64,8 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
         public static LocalizedText TrackHintText { get; private set; }
         public static LocalizedText SuspendHintText { get; private set; }
         public static LocalizedText OpenHintText { get; private set; }
+        public static LocalizedText HeaderStatusTag { get; private set; }
+        public static LocalizedText FooterStatsFormat { get; private set; }
 
         public override void SetStaticDefaults() {
             TitleText = this.GetLocalization(nameof(TitleText), () => "任务管理");
@@ -77,6 +77,8 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
             TrackHintText = this.GetLocalization(nameof(TrackHintText), () => "[右键] 关注/取消关注");
             SuspendHintText = this.GetLocalization(nameof(SuspendHintText), () => "[中键] 挂起/恢复");
             OpenHintText = this.GetLocalization(nameof(OpenHintText), () => "按 [L] 打开任务管理");
+            HeaderStatusTag = this.GetLocalization(nameof(HeaderStatusTag), () => "◈ ACTIVE");
+            FooterStatsFormat = this.GetLocalization(nameof(FooterStatsFormat), () => "TOTAL: {0}  |  ACTIVE: {1}");
         }
 
         #endregion
@@ -86,19 +88,19 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
         /// <summary>面板是否打开</summary>
         private bool isOpen;
 
-        /// <summary>外部只读访问（供 ModSystem 查询）</summary>
+        /// <summary>外部只读访问</summary>
         public bool IsOpen => isOpen;
 
         /// <summary>打开/关闭动画进度 0~1</summary>
         private float openProgress;
 
-        /// <summary>内容淡入进度（在 openProgress > 0.6 后才开始淡入）</summary>
+        /// <summary>内容淡入进度</summary>
         private float contentAlpha;
 
         /// <summary>面板宽度</summary>
         private const int PanelWidth = 340;
 
-        /// <summary>面板上边距（屏幕顶部的间距）</summary>
+        /// <summary>面板上边距</summary>
         private const int PanelTopMargin = 30;
 
         /// <summary>面板下边距</summary>
@@ -140,11 +142,7 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
 
         #region 任务数据（概念化——后续由具体任务线注册）
 
-        /// <summary>
-        /// 所有已注册的任务条目<br/>
-        /// 后续各任务线（Helen/Draedons/OldDukes/SupCal 等）
-        /// 将通过 <see cref="RegisterQuest"/> 向此列表注入条目
-        /// </summary>
+        /// <summary>所有已注册的任务条目</summary>
         private readonly List<QuestEntryData> allEntries = [];
 
         /// <summary>当前过滤后的显示列表</summary>
@@ -180,8 +178,16 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
             filterDirty = true;
         }
 
-        /// <summary>标记过滤列表需要重建（条目状态变化时调用）</summary>
+        /// <summary>标记过滤列表需要重建</summary>
         public void MarkFilterDirty() => filterDirty = true;
+
+        /// <summary>获取所有被关注状态的条目，供 <see cref="QuestTrackerWidget"/> 查询</summary>
+        public void GetTrackedEntries(List<QuestEntryData> result) {
+            foreach (var e in allEntries) {
+                if (e.Status == QuestEntryStatus.Tracked)
+                    result.Add(e);
+            }
+        }
 
         #endregion
 
@@ -189,9 +195,7 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
 
         private IQuestManagerStyle currentStyle;
 
-        /// <summary>
-        /// 切换样式（后续可以注册更多样式，如硫磺海风格、硫火风格等）
-        /// </summary>
+        /// <summary>切换样式</summary>
         public void SetStyle(IQuestManagerStyle style) {
             currentStyle?.Reset();
             currentStyle = style;
@@ -237,7 +241,7 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
                 CategorySuspended.Value
             ];
 
-            // ──── 测试用数据（后续由真实任务线注册替换）────
+            //测试用数据（后续由真实任务线注册替换）
             if (allEntries.Count == 0) {
                 RegisterQuest(new QuestEntryData("test_signal", "部署信号塔", "在指定位置建造10座信号中继塔", "嘉登") {
                     Status = QuestEntryStatus.Active, Progress = 0.3f, ProgressText = "3/10"
@@ -265,45 +269,51 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
         }
 
         public override void Update() {
-            // ── 动画插值 ──
+            //动画插值
             float targetOpen = isOpen ? 1f : 0f;
             openProgress = MathHelper.Lerp(openProgress, targetOpen, 0.12f);
             if (!isOpen && openProgress < 0.005f) openProgress = 0f;
             if (isOpen && openProgress > 0.995f) openProgress = 1f;
 
-            // 内容淡入延迟
+            //内容淡入延迟
             float contentTarget = openProgress > 0.6f ? 1f : 0f;
             contentAlpha = MathHelper.Lerp(contentAlpha, contentTarget, 0.15f);
 
-            // 动画计时器
+            //动画计时器
             edgeGlowPhase += 0.03f;
             if (edgeGlowPhase > MathHelper.TwoPi) edgeGlowPhase -= MathHelper.TwoPi;
             if (panelShake > 0f) panelShake *= 0.88f;
 
-            // 滚动平滑
+            //滚动平滑
             scrollOffset = MathHelper.Lerp(scrollOffset, scrollTarget, 0.18f);
 
-            // 按需刷新过滤列表
+            //按需刷新过滤列表
             if (filterDirty) {
                 RebuildFilteredEntries();
                 filterDirty = false;
             }
 
-            // 面板碰撞区域
+            //更新所有条目的实时数据和自定义样式
+            foreach (var entry in allEntries) {
+                entry.OnUpdate();
+                entry.EntryStyle?.Update();
+            }
+
+            //面板碰撞区域
             Rectangle panelRect = GetPanelRect();
             UIHitBox = panelRect;
             hoverInMainPage = panelRect.Intersects(MouseHitBox) && isOpen;
 
             if (!isOpen || openProgress < 0.3f) return;
 
-            // 如果玩家在面板打开期间通过其他方式打开了背包，强制关闭
+            //如果玩家在面板打开期间通过其他方式打开了背包，强制关闭
             if (Main.playerInventory) {
                 Main.playerInventory = false;
             }
 
             player.CWR().DontSwitchWeaponTime = 2;
 
-            // ── 交互处理 ──
+            //交互处理
             if (hoverInMainPage) {
                 player.mouseInterface = true;
                 HandleScrollInput(panelRect);
@@ -319,7 +329,7 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
         public void TogglePanel() {
             isOpen = !isOpen;
             if (isOpen) {
-                // 关闭背包，避免遮挡
+                //关闭背包，避免遮挡
                 Main.playerInventory = false;
                 panelShake = 3f;
                 SoundEngine.PlaySound(SoundID.MenuOpen with { Volume = 0.5f });
@@ -342,7 +352,7 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
             int entryH = currentStyle?.GetEntryHeight() ?? 62;
             int padding = currentStyle?.GetEntryPadding() ?? 4;
 
-            // ── 分类选项卡点击（按实际文字宽度匹配）──
+            //分类选项卡点击（按实际文字宽度匹配）
             Rectangle tabRect = GetTabRect(panelRect);
             if (tabRect.Contains(Main.mouseX, Main.mouseY)) {
                 if (keyLeftPressState == KeyPressState.Pressed) {
@@ -359,14 +369,14 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
                 return;
             }
 
-            // ── 关闭按钮 ──
+            //关闭按钮
             Rectangle closeBtnRect = GetCloseButtonRect(panelRect);
             if (closeBtnRect.Contains(Main.mouseX, Main.mouseY) && keyLeftPressState == KeyPressState.Pressed) {
                 TogglePanel();
                 return;
             }
 
-            // ── 任务条目交互 ──
+            //任务条目交互
             hoveredIndex = -1;
             if (contentRect.Contains(Main.mouseX, Main.mouseY)) {
                 float relativeY = Main.mouseY - contentRect.Y + scrollOffset;
@@ -375,19 +385,22 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
                 if (idx >= 0 && idx < filteredEntries.Count) {
                     hoveredIndex = idx;
 
-                    // 左键选中
+                    //左键选中
                     if (keyLeftPressState == KeyPressState.Pressed) {
                         selectedIndex = (selectedIndex == idx) ? -1 : idx;
                         SoundEngine.PlaySound(SoundID.MenuTick with { Volume = 0.3f });
                     }
 
-                    // 右键关注/取消关注
+                    //右键关注/取消关注
                     if (keyRightPressState == KeyPressState.Pressed) {
                         var entry = filteredEntries[idx];
+                        var oldStatus = entry.Status;
                         if (entry.Status == QuestEntryStatus.Tracked)
                             entry.Status = QuestEntryStatus.Active;
                         else if (entry.Status == QuestEntryStatus.Active)
                             entry.Status = QuestEntryStatus.Tracked;
+                        if (entry.Status != oldStatus)
+                            entry.OnStatusChanged(oldStatus, entry.Status);
                         filterDirty = true;
                         SoundEngine.PlaySound(SoundID.MenuTick with { Volume = 0.4f });
                     }
@@ -423,19 +436,19 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
 
             IEnumerable<QuestEntryData> source = allEntries;
             switch (selectedCategoryIndex) {
-                case 1: // Active
+                case 1: //Active
                     source = allEntries.Where(e =>
                         e.Status == QuestEntryStatus.Active || e.Status == QuestEntryStatus.Tracked);
                     break;
-                case 2: // Completed
+                case 2: //Completed
                     source = allEntries.Where(e => e.Status == QuestEntryStatus.Completed);
                     break;
-                case 3: // Suspended
+                case 3: //Suspended
                     source = allEntries.Where(e => e.Status == QuestEntryStatus.Suspended);
                     break;
             }
 
-            // 排序：Tracked > Active > Suspended > Completed > Failed，同级按 Priority 降序
+            //排序：Tracked > Active > Suspended > Completed > Failed，同级按 Priority 降序
             filteredEntries.AddRange(source.OrderBy(e => e.Status switch {
                 QuestEntryStatus.Tracked => 0,
                 QuestEntryStatus.Active => 1,
@@ -455,7 +468,7 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
             float eased = CWRUtils.EaseOutCubic(MathHelper.Clamp(openProgress, 0f, 1f));
             int panelX = (int)MathHelper.Lerp(-PanelWidth - 20f, 0f, eased);
 
-            // 打开/关闭时的轻微抖动
+            //打开/关闭时的轻微抖动
             if (panelShake > 0.1f) {
                 panelX += (int)(MathF.Sin(edgeGlowPhase * 12f) * panelShake);
             }
@@ -502,41 +515,41 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
             Rectangle panelRect = GetPanelRect();
             float alpha = openProgress;
 
-            // ── 1. 面板背景 ──
+            //1. 面板背景
             currentStyle?.DrawPanelBackground(spriteBatch, panelRect, alpha);
 
-            // ── 2. 背景粒子 ──
+            //2. 背景粒子
             currentStyle?.DrawParticles(spriteBatch, panelRect, alpha);
 
-            // ── 3. 面板边框 ──
+            //3. 面板边框
             currentStyle?.DrawPanelFrame(spriteBatch, panelRect, alpha);
 
-            // ── 4. 标题栏 ──
+            //4. 标题栏
             Rectangle headerRect = GetHeaderRect(panelRect);
             currentStyle?.DrawHeader(spriteBatch, headerRect, TitleText.Value, alpha);
 
-            // ── 5. 关闭按钮 ──
+            //5. 关闭按钮
             DrawCloseButton(spriteBatch, panelRect, alpha);
 
             if (contentAlpha < 0.01f) {
-                // 展开中——绘制加载指示
+                //展开中——绘制加载指示
                 DrawLoadingIndicator(spriteBatch, panelRect, alpha);
                 currentStyle?.DrawOverlayEffects(spriteBatch, panelRect, alpha);
                 return;
             }
 
-            // ── 6. 分类选项卡 ──
+            //6. 分类选项卡
             Rectangle tabRect = GetTabRect(panelRect);
             currentStyle?.DrawCategoryTabs(spriteBatch, tabRect, categoryNames,
                 selectedCategoryIndex, alpha * contentAlpha);
 
-            // ── 7. 任务条目列表 ──
+            //7. 任务条目列表
             DrawQuestEntries(spriteBatch, panelRect, alpha * contentAlpha);
 
-            // ── 8. 滚动条 ──
+            //8. 滚动条
             DrawScrollbarArea(spriteBatch, panelRect, alpha * contentAlpha);
 
-            // ── 9. 底部状态栏 ──
+            //9. 底部状态栏
             Rectangle footerRect = GetFooterRect(panelRect);
             int activeCount = 0;
             foreach (var e in allEntries) {
@@ -545,10 +558,10 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
             }
             currentStyle?.DrawFooter(spriteBatch, footerRect, allEntries.Count, activeCount, alpha * contentAlpha);
 
-            // ── 10. 前景特效 ──
+            //10. 前景特效
             currentStyle?.DrawOverlayEffects(spriteBatch, panelRect, alpha);
 
-            // ── 11. 操作提示 ──
+            //11. 操作提示
             DrawInteractionHints(spriteBatch, panelRect, alpha * contentAlpha);
         }
 
@@ -556,16 +569,16 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
             Rectangle btn = GetCloseButtonRect(panelRect);
             bool hovered = btn.Contains(Main.mouseX, Main.mouseY) && isOpen;
 
-            // 按钮背景
+            //按钮背景
             Color bgC = hovered ? new Color(60, 150, 220) * (alpha * 0.3f) : new Color(10, 20, 40) * (alpha * 0.4f);
             BaseManagerStyle.FillRect(sb, btn, bgC);
 
-            // X 标记
+            //X 标记
             Color xColor = hovered ? new Color(255, 100, 100) * alpha : new Color(140, 210, 255) * (alpha * 0.6f);
             float cx = btn.X + btn.Width / 2f;
             float cy = btn.Y + btn.Height / 2f;
             float xSize = 4f;
-            // 两条交叉线
+            //两条交叉线
             sb.Draw(VaultAsset.placeholder2.Value, new Vector2(cx, cy), null, xColor,
                 MathHelper.PiOver4, new Vector2(0.5f), new Vector2(xSize * 2f, 1.5f), SpriteEffects.None, 0f);
             sb.Draw(VaultAsset.placeholder2.Value, new Vector2(cx, cy), null, xColor,
@@ -573,7 +586,7 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
         }
 
         private void DrawLoadingIndicator(SpriteBatch sb, Rectangle panelRect, float alpha) {
-            // 展开过程中的加载动画——三个交替闪烁的点
+            //展开过程中的加载动画——三个交替闪烁的点
             float t = openProgress * 8f;
             string dots = "";
             for (int i = 0; i < 3; i++) {
@@ -591,7 +604,7 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
             int padding = currentStyle?.GetEntryPadding() ?? 4;
 
             if (filteredEntries.Count == 0) {
-                // 空列表提示
+                //空列表提示
                 Vector2 emptyCenter = new(contentRect.X + contentRect.Width / 2f,
                     contentRect.Y + contentRect.Height / 2f);
                 BaseManagerStyle.DrawCenteredText(sb, EmptyHintText.Value, emptyCenter,
@@ -599,7 +612,7 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
                 return;
             }
 
-            // 裁剪区域——使用 ScissorRectangle 限制绘制范围
+            //裁剪区域——使用 ScissorRectangle 限制绘制范围
             RasterizerState prevRasterizer = sb.GraphicsDevice.RasterizerState;
             Rectangle prevScissor = sb.GraphicsDevice.ScissorRectangle;
 
@@ -612,7 +625,7 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
             for (int i = 0; i < filteredEntries.Count; i++) {
                 float entryY = contentRect.Y + i * (entryH + padding) - scrollOffset;
 
-                // 视锥裁剪
+                //视锥裁剪
                 if (entryY + entryH < contentRect.Y - 10f) continue;
                 if (entryY > contentRect.Bottom + 10f) break;
 
@@ -620,7 +633,7 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
                 bool isSelected = i == selectedIndex;
                 bool isHovered = i == hoveredIndex;
 
-                // 入场动画（依次延迟淡入）
+                //入场动画（依次延迟淡入）
                 float entryAlpha = alpha;
                 if (contentAlpha < 0.95f) {
                     float delay = i * 0.06f;
@@ -633,7 +646,7 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
                 currentStyle?.DrawQuestEntry(sb, entryRect, filteredEntries[i],
                     isSelected, isHovered, entryAlpha, i);
 
-                // 条目分隔线
+                //条目分隔线
                 if (i < filteredEntries.Count - 1) {
                     Vector2 sepStart = new(contentRect.X + 40f, entryY + entryH + padding / 2f);
                     Vector2 sepEnd = new(contentRect.Right - 12f, sepStart.Y);
@@ -654,7 +667,7 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
             int padding = currentStyle?.GetEntryPadding() ?? 4;
 
             float totalH = filteredEntries.Count * (entryH + padding);
-            if (totalH <= contentRect.Height) return; // 不需要滚动条
+            if (totalH <= contentRect.Height) return; //不需要滚动条
 
             float viewRatio = contentRect.Height / totalH;
             float scrollRatio = scrollOffset / Math.Max(1f, totalH - contentRect.Height);
@@ -664,7 +677,7 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
         private void DrawInteractionHints(SpriteBatch sb, Rectangle panelRect, float alpha) {
             if (hoveredIndex < 0 || hoveredIndex >= filteredEntries.Count) return;
 
-            // 在面板底部状态栏上方显示操作提示
+            //在面板底部状态栏上方显示操作提示
             Rectangle footerRect = GetFooterRect(panelRect);
             var entry = filteredEntries[hoveredIndex];
 

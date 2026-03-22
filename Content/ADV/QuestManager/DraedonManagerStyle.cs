@@ -1,4 +1,4 @@
-using CalamityOverhaul.Content.ADV.UIEffect;
+﻿using CalamityOverhaul.Content.ADV.UIEffect;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
@@ -8,19 +8,9 @@ using Terraria.GameContent;
 namespace CalamityOverhaul.Content.ADV.QuestManager
 {
     /// <summary>
-    /// 嘉登·战术数据链风格——任务管理器默认样式<br/>
-    /// 设计语言：「战术HUD / 数据链路终端」<br/>
-    /// ─ 区别于 DraedonDialogueBox 的「研究终端数据输出」（不对称顶重边框 + 斜切头像 + 虚线）<br/>
-    /// ─ 区别于 DraedonIncomingCall 的「通讯来电」（L角括号 + 均衡器 + 信号格）<br/>
-    /// ─ 区别于 DraedonTrackerStyle 的「小型任务追踪」（十字角标 + 扫描线 + 六边形底纹）<br/>
-    /// 本风格特征：<br/>
-    ///   · 左侧垂直时间线脊柱（timeline spine）连接各任务条目<br/>
-    ///   · 菱形状态节点标记（◇ 空心 = 进行中、◆ 实心 = 已完成）<br/>
-    ///   · 雪佛龙箭头（chevron ›› ）作为选中/关注指示器<br/>
-    ///   · 虎纹扫描带（tiger-scan band）替代单条扫描线<br/>
-    ///   · 六边形蜂巢底纹结合等高线拓扑感<br/>
-    ///   · 雷达旋转弧线作为顶部标题装饰<br/>
-    ///   · 威胁等级色带（条目左侧竖色条 = 任务优先级/状态视觉编码）
+    /// 嘉登·战术数据链风格，任务管理器默认样式，
+    /// 左侧垂直时间线脊柱、菱形状态节点、雪佛龙指示器、
+    /// 虎纹扫描带、六边形蜂巢底纹、雷达旋转弧装饰
     /// </summary>
     internal class DraedonManagerStyle : BaseManagerStyle
     {
@@ -42,18 +32,18 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
 
         #endregion
 
-        #region 色板——偏冷白蓝色调，区别于其他嘉登UI的纯青/纯蓝
+        #region 色板（偏冷白蓝色调，区别于其他嘉登UI的纯青/纯蓝）
 
-        private static readonly Color PrimaryBright = new(140, 210, 255);   // 冷白蓝（区别于来电框的 0,220,255 纯青）
-        private static readonly Color PrimaryMid = new(60, 150, 220);       // 中蓝
-        private static readonly Color PrimaryDim = new(30, 80, 140);        // 暗蓝
-        private static readonly Color AccentCyan = new(80, 255, 220);       // 薄荷青强调（区别于对话框的 0,210,185 青绿）
-        private static readonly Color AccentWarm = new(255, 200, 100);      // 暖琥珀（警告/关注态）
-        private static readonly Color BgDeep = new(4, 8, 20);              // 极深背景
-        private static readonly Color BgMid = new(10, 18, 36);             // 中层背景
-        private static readonly Color StatusComplete = new(60, 220, 140);   // 已完成绿
-        private static readonly Color StatusFailed = new(220, 60, 70);      // 失败红
-        private static readonly Color StatusSuspended = new(160, 140, 100); // 挂起暗金
+        private static readonly Color PrimaryBright = new(140, 210, 255);   //冷白蓝（区别于来电框的40,220,255纯青）
+        private static readonly Color PrimaryMid = new(60, 150, 220);       //中蓝
+        private static readonly Color PrimaryDim = new(30, 80, 140);        //暗蓝
+        private static readonly Color AccentCyan = new(80, 255, 220);       //薄荷青强调（区别于对话框的50,210,185青绿）
+        private static readonly Color AccentWarm = new(255, 200, 100);      //暖琥珀（警告/关注态）
+        private static readonly Color BgDeep = new(4, 8, 20);              //极深背景
+        private static readonly Color BgMid = new(10, 18, 36);             //中层背景
+        private static readonly Color StatusComplete = new(60, 220, 140);   //已完成绿
+        private static readonly Color StatusFailed = new(220, 60, 70);      //失败红
+        private static readonly Color StatusSuspended = new(160, 140, 100); //挂起暗金
 
         #endregion
 
@@ -62,11 +52,11 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
         public override void Update(Rectangle panelRect, float openProgress) {
             base.Update(panelRect, openProgress);
 
-            // 虎纹扫描带——从上往下循环，比单线更宽（覆盖 ~8% 面板高度）
+            //虎纹扫描带，从上往下循环，比单线更宽（覆盖约8%面板高度）
             scanBandPos += 0.004f;
             if (scanBandPos > 1.15f) scanBandPos = -0.15f;
 
-            // 雷达旋转弧
+            //雷达旋转弧
             radarSweep += 0.018f;
             if (radarSweep > MathHelper.TwoPi) radarSweep -= MathHelper.TwoPi;
 
@@ -88,7 +78,7 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
             glitchTimer += 0.12f;
             if (glitchTimer > MathHelper.TwoPi) glitchTimer -= MathHelper.TwoPi;
 
-            // 背景粒子
+            //背景粒子
             Vector2 panelPos = new(panelRect.X, panelRect.Y);
             Vector2 panelSize = new(panelRect.Width, panelRect.Height);
             bgParticleSpawnTimer++;
@@ -104,7 +94,7 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
                     bgParticles.RemoveAt(i);
             }
 
-            // 电路节点
+            //电路节点
             circuitNodeSpawnTimer++;
             if (openProgress > 0.5f && circuitNodeSpawnTimer >= 45 && circuitNodes.Count < 5) {
                 circuitNodeSpawnTimer = 0;
@@ -140,10 +130,10 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
         #region 面板背景
 
         public override void DrawPanelBackground(SpriteBatch sb, Rectangle rect, float alpha) {
-            // ── 多层扩散阴影 ──
+            // 多层扩散阴影 
             DrawShadowLayers(sb, rect, alpha, 10, 4, 5);
 
-            // ── 纵向渐变底色（30段，轻微脉冲呼吸）──
+            // 纵向渐变底色（30段，轻微脉冲呼吸）
             int segs = 30;
             for (int i = 0; i < segs; i++) {
                 float t = i / (float)segs;
@@ -155,10 +145,10 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
                 FillRect(sb, new Rectangle(rect.X, y1, rect.Width, Math.Max(1, y2 - y1)), c);
             }
 
-            // ── 六边形蜂巢底纹（比TrackerStyle的更大、更稀疏，加等高线偏移感）──
+            // 六边形蜂巢底纹（比TrackerStyle更大更稀疏，加等高线偏移感）
             DrawHexTopography(sb, rect, alpha * 0.04f);
 
-            // ── 左侧时间线脊柱背景辉光 ──
+            // 左侧时间线脊柱背景辉光 
             int spineX = rect.X + 28;
             float spineGlow = MathF.Sin(spineGlowPhase) * 0.15f + 0.25f;
             for (int gy = rect.Y + 50; gy < rect.Bottom - 20; gy += 2) {
@@ -169,11 +159,7 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
             }
         }
 
-        /// <summary>
-        /// 六边形 + 等高线拓扑纹理<br/>
-        /// 比 DraedonTrackerStyle 的六边形网格更大单元（24px vs 18px），
-        /// 且引入逐行偏移+明暗起伏模拟"地形等高线"
-        /// </summary>
+        /// <summary>六边形加等高线拓扑纹理</summary>
         private void DrawHexTopography(SpriteBatch sb, Rectangle rect, float alpha) {
             if (alpha < 0.005f) return;
             float cellW = 24f, cellH = 20f;
@@ -186,7 +172,7 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
                     float py = rect.Y + row * cellH;
                     if (px2 < rect.X || px2 >= rect.Right || py < rect.Y || py >= rect.Bottom) continue;
 
-                    // 等高线式明暗起伏
+                    //等高线式明暗起伏
                     float topo = MathF.Sin((col * 0.5f + row * 0.3f) + hexGridPhase * 0.7f);
                     float brightness = 0.3f + topo * 0.25f;
                     Color c = PrimaryDim * (alpha * brightness);
@@ -200,39 +186,39 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
         #region 面板边框
 
         public override void DrawPanelFrame(SpriteBatch sb, Rectangle rect, float alpha) {
-            // ── 顶部双层重线（4px 亮 + 2px 暗）——和对话框的3+1、来电框的L括号都不同 ──
+            // 顶部双层重线（4px亮+2px暗），和对话框的3+1、来电框的L括号都不同 
             Color topBright = PrimaryBright * (alpha * 0.92f);
             Color topDim = PrimaryMid * (alpha * 0.4f);
             HLine(sb, rect.X, rect.Y, rect.Width, 4, topBright);
             HLine(sb, rect.X, rect.Y + 4, rect.Width, 2, topDim);
 
-            // ── 底部渐变线（左亮右暗）──
+            // 底部渐变线（左亮右暗）
             DrawGradientHLine(sb, rect.X, rect.Bottom - 2, rect.Width,
                 PrimaryBright * (alpha * 0.65f), PrimaryDim * (alpha * 0.15f), 20);
             HLine(sb, rect.X, rect.Bottom - 1, rect.Width, PrimaryDim * (alpha * 0.2f));
 
-            // ── 左侧强调竖条（3px，上2/3亮 + 下1/3暗）——区别于对话框的4px全高 ──
+            // 左侧强调竖条（3px，上2/3亮+下1/3暗），区别于对话框的4px全高 
             int leftBarH = (int)(rect.Height * 0.66f);
             VLine(sb, rect.X, rect.Y, leftBarH, 3, PrimaryBright * (alpha * 0.6f));
             VLine(sb, rect.X, rect.Y + leftBarH, rect.Height - leftBarH, 3, PrimaryDim * (alpha * 0.25f));
 
-            // ── 右侧细线 + 中段刻度标尺 ──
+            // 右侧细线 + 中段刻度标尺 
             VLine(sb, rect.Right - 1, rect.Y, rect.Height, PrimaryDim * (alpha * 0.35f));
             DrawRightRuler(sb, rect, alpha);
 
-            // ── 顶部左侧三道刻痕（机械感，间距递减）──
+            // 顶部左侧三道刻痕（机械感，间距递减）
             VLine(sb, rect.X + 5, rect.Y, 12, 1, topBright * 0.7f);
             VLine(sb, rect.X + 14, rect.Y, 8, 1, topBright * 0.45f);
             VLine(sb, rect.X + 21, rect.Y, 5, 1, topBright * 0.25f);
 
-            // ── 右上角斜切装饰（15px 三角缺口）——区别于对话框的大斜切 ──
+            // 右上角斜切装饰（15px三角缺口），区别于对话框的大斜切 
             int cut = 15;
             for (int row = 0; row < cut; row++) {
                 int segLen = cut - row;
                 FillRect(sb, new Rectangle(rect.Right - segLen, rect.Y + row, segLen, 1),
                     BgDeep * (alpha * 0.98f));
             }
-            // 斜线高亮
+            //斜线高亮
             for (int row = 0; row < cut; row++) {
                 float fade = 1f - (float)row / cut;
                 FillRect(sb, new Rectangle(rect.Right - (cut - row), rect.Y + row, 1, 1),
@@ -240,9 +226,7 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
             }
         }
 
-        /// <summary>
-        /// 右侧刻度标尺——与对话框相似但间距不同（8px vs 12px），且有流光效果
-        /// </summary>
+        /// <summary>右侧刻度标尺，带流光效果</summary>
         private void DrawRightRuler(SpriteBatch sb, Rectangle rect, float alpha) {
             int rx = rect.Right - 8;
             int spacing = 8;
@@ -261,35 +245,32 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
         #region 标题栏
 
         public override void DrawHeader(SpriteBatch sb, Rectangle headerRect, string title, float alpha) {
-            // ── 标题栏背景（比面板背景深一层）──
+            // 标题栏背景（比面板背景深一层）
             FillRect(sb, headerRect, new Color(3, 6, 16) * (alpha * 0.7f));
 
-            // ── 雷达旋转弧装饰（标题左侧，替代来电框的信号弧/对话框的HEX读出）──
+            // 雷达旋转弧装饰（标题左侧，替代来电框的信号弧/对话框的HEX读出）
             Vector2 radarCenter = new(headerRect.X + 24f, headerRect.Y + headerRect.Height / 2f);
             DrawRadarArc(sb, radarCenter, 14f, alpha);
 
-            // ── 标题文字 ──
+            // 标题文字 
             float headerBlink = MathF.Sin(headerGlowPhase) * 0.12f + 0.88f;
             Vector2 titlePos = new(headerRect.X + 46f, headerRect.Y + (headerRect.Height - 18f) / 2f);
             Utils.DrawBorderString(sb, title, titlePos, PrimaryBright * (alpha * headerBlink), 0.88f);
 
-            // ── 标题右侧数据流标签（「DATA-LINK ◈ ACTIVE」感）──
+            //标题右侧数据流标签
             float tagBlink = MathF.Sin(headerGlowPhase * 1.6f) * 0.35f + 0.65f;
-            string tag = "◈ ACTIVE";
+            string tag = QuestManagerUI.HeaderStatusTag.Value;
             var font = FontAssets.MouseText.Value;
             float tagW = font.MeasureString(tag).X * 0.6f;
             Utils.DrawBorderString(sb, tag,
                 new Vector2(headerRect.Right - tagW - 14f, headerRect.Y + (headerRect.Height - 14f) / 2f),
                 AccentCyan * (alpha * 0.55f * tagBlink), 0.6f);
 
-            // ── 底部分隔线（虎纹虚线——短实线+间隙交替，区别于对话框的流动虚线）──
+            // 底部分隔线（虎纹虚线，短实线+间隙交替，区别于对话框的流动虚线）
             DrawTigerDash(sb, headerRect.X + 8, headerRect.Bottom - 1, headerRect.Width - 16, alpha * 0.5f);
         }
 
-        /// <summary>
-        /// 雷达旋转弧——两段弧线围绕中心旋转<br/>
-        /// 其他嘉登UI都没有这个元素，是任务管理器的专属标识
-        /// </summary>
+        /// <summary>雷达旋转弧，任务管理器专属标识</summary>
         private void DrawRadarArc(SpriteBatch sb, Vector2 center, float radius, float alpha) {
             int segments = 12;
             for (int arc = 0; arc < 2; arc++) {
@@ -304,14 +285,12 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
                         PrimaryBright * (alpha * 0.5f * fade));
                 }
             }
-            // 中心亮点
+            //中心亮点
             FillRect(sb, new Rectangle((int)(center.X - 1), (int)(center.Y - 1), 3, 3),
                 AccentCyan * (alpha * 0.4f));
         }
 
-        /// <summary>
-        /// 虎纹虚线——4px实线 + 2px间隙，比对话框的 5+3 虚线更紧密
-        /// </summary>
+        /// <summary>虎纹虚线，4px实线加2px间隙的紧密排列</summary>
         private void DrawTigerDash(SpriteBatch sb, int x, int y, int w, float alpha) {
             int dashW = 4, gapW = 2;
             float flow = dataFlowTimer * 18f;
@@ -350,9 +329,9 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
                 FillRect(sb, tab, bgC);
 
                 if (selected) {
-                    // 选中态底部高亮线
+                    //选中态底部高亮线
                     HLine(sb, tab.X, tab.Bottom - 1, tab.Width, 2, AccentCyan * (alpha * 0.85f));
-                    // 轻微辉光
+                    //轻微辉光
                     FillRect(sb, new Rectangle(tab.X, tab.Y, tab.Width, 1), PrimaryBright * (alpha * 0.15f));
                 }
 
@@ -364,7 +343,7 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
                 tabX += tabW + 3f;
             }
 
-            // 整行底部线
+            //整行底部线
             HLine(sb, tabRect.X, tabRect.Bottom - 1, tabRect.Width, PrimaryDim * (alpha * 0.25f));
         }
 
@@ -374,11 +353,11 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
 
         public override void DrawScrollbar(SpriteBatch sb, Rectangle trackRect, float scrollRatio,
             float viewRatio, float alpha) {
-            // 轨道
+            //轨道
             FillRect(sb, trackRect, new Color(8, 16, 32) * (alpha * 0.5f));
             VLine(sb, trackRect.X, trackRect.Y, trackRect.Height, PrimaryDim * (alpha * 0.25f));
 
-            // 滑块
+            //滑块
             float clampedView = MathHelper.Clamp(viewRatio, 0.1f, 1f);
             int thumbH = Math.Max(20, (int)(trackRect.Height * clampedView));
             int thumbY = trackRect.Y + (int)((trackRect.Height - thumbH) * MathHelper.Clamp(scrollRatio, 0f, 1f));
@@ -386,7 +365,7 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
 
             float thumbPulse = MathF.Sin(pulseTimer * 1.5f) * 0.15f + 0.6f;
             FillRect(sb, thumb, PrimaryMid * (alpha * thumbPulse));
-            // 滑块上 3 道刻线
+            //滑块中3道刻线
             int midY = thumb.Y + thumb.Height / 2;
             for (int j = -1; j <= 1; j++) {
                 HLine(sb, thumb.X + 2, midY + j * 3, thumb.Width - 4, PrimaryBright * (alpha * 0.35f));
@@ -399,20 +378,20 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
 
         public override void DrawFooter(SpriteBatch sb, Rectangle footerRect, int totalQuests,
             int activeQuests, float alpha) {
-            // 背景
+            //背景
             FillRect(sb, footerRect, new Color(3, 6, 16) * (alpha * 0.65f));
-            // 顶部分隔
+            //顶部分隔
             HLine(sb, footerRect.X + 8, footerRect.Y, footerRect.Width - 16, PrimaryDim * (alpha * 0.35f));
 
-            // 统计文本
-            string statsText = $"TOTAL: {totalQuests}  |  ACTIVE: {activeQuests}";
+            //统计文本
+            string statsText = string.Format(QuestManagerUI.FooterStatsFormat.Value, totalQuests, activeQuests);
             float statsBlink = MathF.Sin(globalTimer * 1.2f) * 0.1f + 0.9f;
             Utils.DrawBorderString(sb, statsText,
                 new Vector2(footerRect.X + 12f, footerRect.Y + (footerRect.Height - 12f) / 2f),
                 PrimaryMid * (alpha * 0.7f * statsBlink), 0.62f);
 
-            // 右侧版本标记
-            string verTag = "v1.0";
+            //右侧版本标记
+            string verTag = CWRMod.Instance.Version.ToString();
             var font = FontAssets.MouseText.Value;
             float vw = font.MeasureString(verTag).X * 0.55f;
             Utils.DrawBorderString(sb, verTag,
@@ -428,10 +407,10 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
             bool isSelected, bool isHovered, float alpha, int entryIndex) {
             var font = FontAssets.MouseText.Value;
 
-            // ── 背景（悬停/选中态区分）──
+            // 背景（悬停/选中态区分）
             if (isSelected) {
                 FillRect(sb, entryRect, PrimaryDim * (alpha * 0.22f));
-                // 左侧亮边
+                //左侧亮边
                 VLine(sb, entryRect.X, entryRect.Y, entryRect.Height, 2, AccentCyan * (alpha * 0.7f));
             }
             else if (isHovered) {
@@ -439,26 +418,26 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
                 VLine(sb, entryRect.X, entryRect.Y, entryRect.Height, 1, PrimaryMid * (alpha * 0.4f));
             }
 
-            // ── 威胁等级色带（左侧 3px 竖条，按状态着色）──
+            // 威胁等级色带（左侧3px竖条，按状态着色）
             Color statusBarColor = GetStatusColor(entry.Status, alpha);
             VLine(sb, entryRect.X + 4, entryRect.Y + 4, entryRect.Height - 8, 3, statusBarColor);
 
-            // ── 时间线脊柱上的菱形节点 ──
+            // 时间线脊柱上的菱形节点 
             int spineX = entryRect.X + 28;
             int spineNodeY = entryRect.Y + entryRect.Height / 2;
             DrawDiamondNode(sb, new Vector2(spineX, spineNodeY), entry.Status, alpha, entryIndex);
 
-            // ── 连接线（到下一条目的虚线，在条目绘制时只画下半段）──
+            // 连接线（到下一条目的虚线，在条目绘制时只画下半段）
             Color spineLineC = PrimaryDim * (alpha * 0.3f);
             for (int ly = spineNodeY + 6; ly < entryRect.Bottom; ly += 3) {
                 FillRect(sb, new Rectangle(spineX, ly, 1, 1), spineLineC);
             }
-            // 上半段
+            //上半段
             for (int ly = entryRect.Y; ly < spineNodeY - 5; ly += 3) {
                 FillRect(sb, new Rectangle(spineX, ly, 1, 1), spineLineC);
             }
 
-            // ── 任务标题 ──
+            // 任务标题 
             float titleX = entryRect.X + 42f;
             float titleY = entryRect.Y + 6f;
             Color titleColor = entry.Status == QuestEntryStatus.Completed
@@ -470,7 +449,7 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
             }
             Utils.DrawBorderString(sb, entry.Title ?? "", new Vector2(titleX, titleY), titleColor, 0.78f);
 
-            // ── 雪佛龙关注指示器（Tracked 态在标题右侧显示 ›› ）──
+            // 雪佛龙关注指示器（Tracked态在标题右侧显示 ››）
             if (entry.Status == QuestEntryStatus.Tracked) {
                 float chevBlink = MathF.Sin(chevronPulse * 1.5f) * 0.4f + 0.6f;
                 float titleW = font.MeasureString(entry.Title ?? "").X * 0.78f;
@@ -479,11 +458,11 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
                     AccentCyan * (alpha * chevBlink), 0.7f);
             }
 
-            // ── 摘要文本 ──
+            // 摘要文本 
             float summaryY = titleY + 20f;
             Color summaryColor = PrimaryMid * (alpha * 0.6f);
             string summary = entry.Summary ?? "";
-            // 截断过长的摘要
+            //截断过长的摘要
             float maxSummaryW = entryRect.Width - 60f;
             if (font.MeasureString(summary).X * 0.65f > maxSummaryW) {
                 while (summary.Length > 3 && font.MeasureString(summary + "...").X * 0.65f > maxSummaryW)
@@ -492,7 +471,7 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
             }
             Utils.DrawBorderString(sb, summary, new Vector2(titleX, summaryY), summaryColor, 0.65f);
 
-            // ── 进度条（如果有进度数据）──
+            // 进度条（如果有进度数据）
             if (entry.Progress > 0f && entry.Status != QuestEntryStatus.Completed) {
                 int barW = Math.Min(120, entryRect.Width - 60);
                 Rectangle barRect = new((int)titleX, (int)(summaryY + 18f), barW, 5);
@@ -501,7 +480,7 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
                     PrimaryMid * alpha, AccentCyan * alpha,
                     PrimaryDim * (alpha * 0.4f), pulseTimer);
 
-                // 进度文本
+                //进度文本
                 if (entry.ProgressText != null) {
                     Utils.DrawBorderString(sb, entry.ProgressText,
                         new Vector2(barRect.Right + 6f, barRect.Y - 2f),
@@ -511,10 +490,7 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
         }
 
         /// <summary>
-        /// 菱形状态节点——时间线脊柱上的标记点<br/>
-        /// ◇ 空心 = Active/Tracked/Suspended<br/>
-        /// ◆ 实心 = Completed<br/>
-        /// ✕ 叉 = Failed
+        /// 菱形状态节点，空心=进行中，实心=已完成，叉号=失败
         /// </summary>
         private void DrawDiamondNode(SpriteBatch sb, Vector2 center, QuestEntryStatus status, float alpha, int index) {
             float nodeSize = 4f;
@@ -522,25 +498,25 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
             Color nodeColor = GetStatusColor(status, alpha * pulse);
 
             if (status == QuestEntryStatus.Completed) {
-                // 实心菱形（两个旋转矩形叠加）
+                //实心菱形（两个旋转矩形叠加）
                 sb.Draw(Px, center, null, nodeColor, MathHelper.PiOver4, new Vector2(0.5f),
                     new Vector2(nodeSize * 1.4f), SpriteEffects.None, 0f);
             }
             else if (status == QuestEntryStatus.Failed) {
-                // 叉号
+                //叉号
                 sb.Draw(Px, center, null, nodeColor, MathHelper.PiOver4, new Vector2(0.5f),
                     new Vector2(nodeSize * 1.2f, nodeSize * 0.3f), SpriteEffects.None, 0f);
                 sb.Draw(Px, center, null, nodeColor, -MathHelper.PiOver4, new Vector2(0.5f),
                     new Vector2(nodeSize * 1.2f, nodeSize * 0.3f), SpriteEffects.None, 0f);
             }
             else {
-                // 空心菱形（外框）
+                //空心菱形（外框）
                 sb.Draw(Px, center, null, nodeColor, MathHelper.PiOver4, new Vector2(0.5f),
                     new Vector2(nodeSize * 1.4f), SpriteEffects.None, 0f);
                 sb.Draw(Px, center, null, BgDeep * (alpha * 0.9f), MathHelper.PiOver4, new Vector2(0.5f),
                     new Vector2(nodeSize * 0.8f), SpriteEffects.None, 0f);
 
-                // Tracked 态：外层光晕
+                //Tracked 态：外层光晕
                 if (status == QuestEntryStatus.Tracked) {
                     float glowPulse = MathF.Sin(chevronPulse + index) * 0.3f + 0.3f;
                     sb.Draw(Px, center, null, AccentCyan * (alpha * glowPulse), MathHelper.PiOver4,
@@ -550,7 +526,7 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
         }
 
         public override void DrawEntrySeparator(SpriteBatch sb, Vector2 start, Vector2 end, float alpha) {
-            // 极细虚线
+            //极细虚线
             float w = end.X - start.X;
             int dashW = 3, gap = 4;
             float x = start.X;
@@ -594,7 +570,7 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
         }
 
         public override void DrawOverlayEffects(SpriteBatch sb, Rectangle panelRect, float alpha) {
-            // ── 虎纹扫描带（8%面板高度的渐变亮带，从上向下循环）──
+            // 虎纹扫描带（8%面板高度的渐变亮带，从上向下循环）
             float bandH = panelRect.Height * 0.08f;
             float bandY = panelRect.Y + scanBandPos * (panelRect.Height + bandH) - bandH;
             int bandTop = Math.Max(panelRect.Y, (int)bandY);
@@ -608,7 +584,7 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
                 }
             }
 
-            // ── 偶发故障横条（低频，约 1/6 触发）──
+            // 偶发故障横条（低频，约1/6触发）
             float gf = MathF.Sin(glitchTimer * 2.6f);
             if (gf > 0.95f) {
                 float gy = panelRect.Y + (glitchTimer * 113f % panelRect.Height);
@@ -616,7 +592,7 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
                     PrimaryBright * (alpha * (gf - 0.95f) * 4f));
             }
 
-            // ── 全息闪烁叠层（极低透明度的全面板覆盖）──
+            // 全息闪烁叠层（极低透明度的全面板覆盖）
             float flicker = MathF.Sin(globalTimer * 2.4f) * 0.5f + 0.5f;
             FillRect(sb, panelRect, new Color(20, 40, 60) * (alpha * 0.04f * flicker));
         }
