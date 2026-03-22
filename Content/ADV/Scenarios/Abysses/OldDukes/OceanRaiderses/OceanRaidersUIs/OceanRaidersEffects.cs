@@ -1,13 +1,14 @@
 ﻿using CalamityOverhaul.Content.ADV.UIEffect;
+using CalamityOverhaul.Content.UIs.StorageUIs;
 using System.Collections.Generic;
 using Terraria;
 
 namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.OceanRaiderses.OceanRaidersUIs
 {
     /// <summary>
-    /// 海洋吞噬者UI视觉特效管理器
+    /// 海洋吞噬者UI视觉特效 - 硫磺海粒子
     /// </summary>
-    internal class OceanRaidersEffects
+    internal class OceanRaidersEffects : IChestEffects
     {
         //粒子列表
         private readonly List<BubblePRT> bubbles = [];

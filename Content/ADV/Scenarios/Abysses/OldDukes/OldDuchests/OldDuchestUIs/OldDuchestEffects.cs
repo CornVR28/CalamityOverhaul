@@ -1,13 +1,14 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using CalamityOverhaul.Content.UIs.StorageUIs;
+using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
 using Terraria;
 
 namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.OldDuchests.OldDuchestUIs
 {
     /// <summary>
-    /// 老箱子UI视觉特效管理器
+    /// 老箱子UI视觉特效 - 木质灰尘粒子
     /// </summary>
-    internal class OldDuchestEffects
+    internal class OldDuchestEffects : IChestEffects
     {
         //粒子列表
         private readonly List<DustParticle> dustParticles = new();
@@ -90,7 +91,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.OldDuchests.Ol
             public void Draw(SpriteBatch spriteBatch, float uiAlpha) {
                 Texture2D pixel = VaultAsset.placeholder2.Value;
                 Color drawColor = new Color(139, 87, 42) * (Alpha * uiAlpha * 0.3f);
-                spriteBatch.Draw(pixel, Position - Main.screenPosition, null, drawColor,
+                spriteBatch.Draw(pixel, Position, null, drawColor,
                     0f, Vector2.One * 0.5f, Scale * 3f, SpriteEffects.None, 0f);
             }
         }
