@@ -151,6 +151,10 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
         /// <summary>注册一条任务到管理器</summary>
         public void RegisterQuest(QuestEntryData entry) {
             if (allEntries.All(e => e.Key != entry.Key)) {
+                //新注册的进行中任务自动设为关注，使追踪窗口立即显示
+                if (entry.Status == QuestEntryStatus.Active) {
+                    entry.Status = QuestEntryStatus.Tracked;
+                }
                 allEntries.Add(entry);
                 filterDirty = true;
             }

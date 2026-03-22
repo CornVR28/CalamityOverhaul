@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using Terraria;
 using Terraria.GameContent;
+using Terraria.ModLoader.IO;
 
 namespace CalamityOverhaul.Content.ADV.QuestManager
 {
@@ -20,7 +21,6 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
         private const int WidgetWidth = 220;
         private const int WidgetMinHeight = 80;
         private const int WidgetMaxHeight = 160;
-        private const int WidgetMarginTop = 80;
         private const int WidgetMarginLeft = 8;
         private const int WidgetSpacing = 6;
         private const float WidgetPadding = 8f;
@@ -47,6 +47,15 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
         /// <summary>缓存的被关注条目引用</summary>
         private readonly List<QuestEntryData> trackedEntries = [];
 
+        /// <summary>窗口纵向偏移（可拖拽），-1 表示尚未初始化</summary>
+        private float widgetYOffset = -1f;
+
+        /// <summary>是否正在拖拽</summary>
+        private bool isDragging;
+
+        /// <summary>拖拽起始时鼠标与 widgetYOffset 的差</summary>
+        private float dragAnchor;
+
         #endregion
 
         #region UIHandle 生命周期
@@ -70,9 +79,16 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
             animTimer = 0f;
             overlappingAlpha = 1f;
             trackedEntries.Clear();
+            isDragging = false;
+            //widgetYOffset 保留存档值，-1 在首次 Update 中初始化为屏幕中部
         }
 
         public override void Update() {
+            //首次初始化默认 Y 位置：屏幕左侧中间偏上
+            if (widgetYOffset < 0f) {
+                widgetYOffset = Main.screenHeight * 0.35f;
+            }
+
             //刷新被关注条目列表
             RefreshTrackedEntries();
 
@@ -114,6 +130,30 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
                     }
                 }
             }
+
+            //纵向拖拽
+            if (isDragging) {
+                //拖拽过程中强制保持输入拦截，防止误触发武器攻击
+                hoverInMainPage = true;
+                if (Main.mouseLeft) {
+                    widgetYOffset = Main.mouseY - dragAnchor;
+                }
+                else {
+                    isDragging = false;
+                }
+            }
+            else if (hoverInMainPage && keyLeftPressState == KeyPressState.Held) {
+                isDragging = true;
+                dragAnchor = Main.mouseY - widgetYOffset;
+            }
+
+            //每帧夹持 Y 偏移到当前屏幕范围内（应对分辨率变化）
+            int totalH = 0;
+            for (int i = 0; i < trackedEntries.Count; i++) {
+                totalH += GetWidgetHeight(i) + WidgetSpacing;
+            }
+            totalH = Math.Max(totalH, WidgetMinHeight);
+            widgetYOffset = MathHelper.Clamp(widgetYOffset, 0f, Math.Max(0f, Main.screenHeight - totalH));
         }
 
         #endregion
@@ -137,8 +177,8 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
             int w = WidgetWidth;
             int x = (int)MathHelper.Lerp(-w - 10f, WidgetMarginLeft, eased);
 
-            //纵向排列
-            int y = WidgetMarginTop;
+            //纵向排列，从 widgetYOffset 开始
+            int y = (int)widgetYOffset;
             for (int i = 0; i < index; i++) {
                 y += GetWidgetHeight(i) + WidgetSpacing;
             }
@@ -159,9 +199,18 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
             int? custom = entry.TrackerStyle?.GetMinHeight();
             int baseH = custom ?? WidgetMinHeight;
 
-            //根据内容行数动态调整高度
+            //根据内容行数动态调整高度（考虑换行）
             var details = entry.GetTrackerDetails();
-            int contentH = 30 + details.Count * 16; //标题 + 每行16px
+            var font = FontAssets.MouseText.Value;
+            int wrapWidth = (int)((WidgetWidth - WidgetPadding * 2) / 0.6f);
+            int contentH = 30;
+            foreach (string line in details) {
+                string[] wrapped = Utils.WordwrapString(line, font, wrapWidth, 99, out _);
+                foreach (string wl in wrapped) {
+                    if (string.IsNullOrEmpty(wl)) continue;
+                    contentH += (int)(font.MeasureString(wl.TrimEnd('-', ' ')).Y * 0.6f) + 2;
+                }
+            }
             if (entry.Progress > 0f && entry.Status != QuestEntryStatus.Completed) {
                 contentH += 20; //进度条
             }
@@ -262,7 +311,14 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
         private void DrawDefaultHeader(SpriteBatch sb, Rectangle headerRect, string title, float alpha) {
             //标题栏背景
             BaseManagerStyle.FillRect(sb, headerRect, new Color(8, 16, 32) * (alpha * 0.5f));
-            //标题文字
+            //标题文字——超出宽度时截断加省略号
+            var font = FontAssets.MouseText.Value;
+            float maxTitleW = headerRect.Width - 16f;
+            if (font.MeasureString(title).X * 0.72f > maxTitleW) {
+                while (title.Length > 3 && font.MeasureString(title + "...").X * 0.72f > maxTitleW)
+                    title = title[..^1];
+                title += "...";
+            }
             Color titleC = new Color(140, 210, 255) * alpha;
             Utils.DrawBorderString(sb, title,
                 new Vector2(headerRect.X + 8f, headerRect.Y + (headerRect.Height - 16f) / 2f),
@@ -281,12 +337,19 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
 
             float y = contentRect.Y;
 
-            //详细信息行
+            //详细信息行——逐行换行处理
             var details = entry.GetTrackerDetails();
+            int wrapWidth = (int)(contentRect.Width / 0.6f);
             foreach (string line in details) {
                 if (y + 16 > contentRect.Bottom) break;
-                Utils.DrawBorderString(sb, line, new Vector2(contentRect.X, y), textC, 0.6f);
-                y += 16f;
+                string[] wrapped = Utils.WordwrapString(line, font, wrapWidth, 99, out _);
+                foreach (string wl in wrapped) {
+                    if (string.IsNullOrEmpty(wl)) continue;
+                    if (y + 16 > contentRect.Bottom) break;
+                    string trimmed = wl.TrimEnd('-', ' ');
+                    Utils.DrawBorderString(sb, trimmed, new Vector2(contentRect.X, y), textC, 0.6f);
+                    y += (int)(font.MeasureString(trimmed).Y * 0.6f) + 2;
+                }
             }
 
             //分隔线 + 进度条
@@ -346,6 +409,19 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
 
             float target = overlapping ? 0.3f : 1f;
             overlappingAlpha = MathHelper.Lerp(overlappingAlpha, target, 0.08f);
+        }
+
+        #endregion
+
+        #region 存档
+
+        public override void SaveUIData(TagCompound tag) {
+            tag[Name + ":widgetYOffset"] = widgetYOffset;
+        }
+
+        public override void LoadUIData(TagCompound tag) {
+            if (tag.TryGet(Name + ":widgetYOffset", out float y))
+                widgetYOffset = y;
         }
 
         #endregion

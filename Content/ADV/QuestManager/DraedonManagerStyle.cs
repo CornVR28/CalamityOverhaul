@@ -252,15 +252,21 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
             Vector2 radarCenter = new(headerRect.X + 24f, headerRect.Y + headerRect.Height / 2f);
             DrawRadarArc(sb, radarCenter, 14f, alpha);
 
-            // 标题文字 
+            // 标题文字——超出宽度时截断加省略号
+            var font = FontAssets.MouseText.Value;
             float headerBlink = MathF.Sin(headerGlowPhase) * 0.12f + 0.88f;
             Vector2 titlePos = new(headerRect.X + 46f, headerRect.Y + (headerRect.Height - 18f) / 2f);
+            float maxHeaderTitleW = headerRect.Width - 120f;
+            if (font.MeasureString(title).X * 0.88f > maxHeaderTitleW) {
+                while (title.Length > 3 && font.MeasureString(title + "...").X * 0.88f > maxHeaderTitleW)
+                    title = title[..^1];
+                title += "...";
+            }
             Utils.DrawBorderString(sb, title, titlePos, PrimaryBright * (alpha * headerBlink), 0.88f);
 
             //标题右侧数据流标签
             float tagBlink = MathF.Sin(headerGlowPhase * 1.6f) * 0.35f + 0.65f;
             string tag = QuestManagerUI.HeaderStatusTag.Value;
-            var font = FontAssets.MouseText.Value;
             float tagW = font.MeasureString(tag).X * 0.6f;
             Utils.DrawBorderString(sb, tag,
                 new Vector2(headerRect.Right - tagW - 14f, headerRect.Y + (headerRect.Height - 14f) / 2f),
@@ -455,12 +461,20 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
                 float newBlink = MathF.Sin(chevronPulse * 2f) * 0.3f + 0.7f;
                 titleColor = Color.Lerp(titleColor, AccentWarm, newBlink * 0.4f);
             }
-            Utils.DrawBorderString(sb, entry.Title ?? "", new Vector2(titleX, titleY), titleColor, 0.78f);
+            //截断过长的标题
+            string displayTitle = entry.Title ?? "";
+            float maxEntryTitleW = entryRect.Width - 60f - iconOffset;
+            if (font.MeasureString(displayTitle).X * 0.78f > maxEntryTitleW) {
+                while (displayTitle.Length > 3 && font.MeasureString(displayTitle + "...").X * 0.78f > maxEntryTitleW)
+                    displayTitle = displayTitle[..^1];
+                displayTitle += "...";
+            }
+            Utils.DrawBorderString(sb, displayTitle, new Vector2(titleX, titleY), titleColor, 0.78f);
 
             // 雪佛龙关注指示器（Tracked态在标题右侧显示 ››）
             if (entry.Status == QuestEntryStatus.Tracked) {
                 float chevBlink = MathF.Sin(chevronPulse * 1.5f) * 0.4f + 0.6f;
-                float titleW = font.MeasureString(entry.Title ?? "").X * 0.78f;
+                float titleW = font.MeasureString(displayTitle).X * 0.78f;
                 Color chevColor = customStyle?.GetAccentColor(QuestEntryStatus.Tracked, alpha * chevBlink)
                     ?? AccentCyan * (alpha * chevBlink);
                 Utils.DrawBorderString(sb, "››",

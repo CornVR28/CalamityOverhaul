@@ -120,7 +120,14 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest
             sb.Draw(px, new Vector2(iconX, iconY), null, AccentFire * (alpha * iconPulse),
                 MathHelper.PiOver4, new Vector2(0.5f), new Vector2(4f), SpriteEffects.None, 0f);
 
-            //标题文字
+            //标题文字——超出宽度时截断加省略号
+            var font = FontAssets.MouseText.Value;
+            float maxTitleW = headerRect.Width - 30f;
+            if (font.MeasureString(title).X * 0.72f > maxTitleW) {
+                while (title.Length > 3 && font.MeasureString(title + "...").X * 0.72f > maxTitleW)
+                    title = title[..^1];
+                title += "...";
+            }
             Color titleC = TitleWarm * alpha;
             Utils.DrawBorderString(sb, title,
                 new Vector2(headerRect.X + 22f, headerRect.Y + (headerRect.Height - 16f) / 2f),

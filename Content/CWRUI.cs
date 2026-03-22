@@ -1,4 +1,5 @@
 ﻿using CalamityOverhaul.Content.ADV.ADVQuestTracker;
+using CalamityOverhaul.Content.ADV.QuestManager;
 using CalamityOverhaul.Content.ADV.Scenarios.SupCal.End.EternalBlazingNows.Enchants;
 using CalamityOverhaul.Content.QuestLogs;
 using InnoVault.GameSystem;
@@ -39,6 +40,7 @@ namespace CalamityOverhaul.Content
                     EnchantUI.Instance.SaveUIData(tag);
                 }
                 QuestLog.Instance.SaveUIData(tag);
+                QuestTrackerWidget.Instance?.SaveUIData(tag);
                 foreach (var ui in UIHandleLoader.UIHandles) {
                     if (ui is BaseQuestTrackerUI trackerUI) {
                         trackerUI.SaveUIData(tag);
@@ -52,6 +54,7 @@ namespace CalamityOverhaul.Content
                     EnchantUI.Instance.LoadUIData(tag);
                 }
                 QuestLog.Instance.LoadUIData(tag);
+                QuestTrackerWidget.Instance?.LoadUIData(tag);
                 foreach (var ui in UIHandleLoader.UIHandles) {
                     if (ui is BaseQuestTrackerUI trackerUI) {
                         trackerUI.LoadUIData(tag);
