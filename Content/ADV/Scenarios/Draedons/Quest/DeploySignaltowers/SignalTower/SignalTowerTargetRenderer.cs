@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using CalamityOverhaul.Content.ADV.QuestManager;
+using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;
 using Terraria.GameContent;
@@ -12,6 +13,15 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.Quest.DeploySignaltowe
     /// </summary>
     internal class SignalTowerTargetRenderer : ModSystem, ILocalizedModType
     {
+        private const string DEPLOY_KEY = "Draedon_DeploySignaltower";
+
+        /// <summary>
+        /// 检查委托是否正在追踪中，只有追踪时才显示指示箭头
+        /// </summary>
+        private static bool IsQuestTracked() {
+            var entry = QuestManagerUI.Instance?.GetEntry(DEPLOY_KEY);
+            return entry != null && entry.Status == QuestEntryStatus.Tracked;
+        }
         public string LocalizationCategory => "UI";
 
         private float animationTimer;
@@ -29,7 +39,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.Quest.DeploySignaltowe
         }
 
         public override void PostUpdateEverything() {
-            if (!SignalTowerTargetManager.IsGenerated) {
+            if (!SignalTowerTargetManager.IsGenerated || !IsQuestTracked()) {
                 return;
             }
 
@@ -45,7 +55,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.Quest.DeploySignaltowe
         }
 
         public override void PostDrawTiles() {
-            if (!SignalTowerTargetManager.IsGenerated) {
+            if (!SignalTowerTargetManager.IsGenerated || !IsQuestTracked()) {
                 return;
             }
 

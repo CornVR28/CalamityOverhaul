@@ -99,6 +99,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.Quest
             if (entry == null) {
                 entry = new DeploySignaltowerQuestEntry(DEPLOY_KEY, DeployTitle, DeploySummary, QuestCategory) {
                     Priority = 50,
+                    TrackerStyle = new DraedonTrackerWidgetStyle(),
                     NearestTargetFormat = TrackerNearestTarget,
                     NodeNameFormat = TrackerNodeName,
                     InRangeFormat = TrackerInRange,
