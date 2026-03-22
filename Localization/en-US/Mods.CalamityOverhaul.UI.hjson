@@ -132,30 +132,6 @@ OldDukeShopUI: {
 	HintTooltip: Scroll/Drag Bar
 }
 
-FindCampsiteUI: {
-	QuestTitle: The Abyss Beckons
-	DamageContribution: Quest Progress
-	RequiredContribution: Objective: Find and speak to the Old Duke
-	ObjectiveText: Objective
-	LocationText: Go to the Old Duke's Campsite
-	DistanceText: Distance
-	InteractText: Speak to the Old Duke
-	QuestCompleteText: Quest Complete!
-	HoldFragmentHintText: Hold Ocean Scraps to view direction
-}
-
-FindFragmentUI: {
-	QuestTitle: The Abyss Beckons
-	DamageContribution: Collection Progress
-	RequiredContribution: Objective: Collect 777 Ocean Scraps
-	ObjectiveText: Objective
-	CollectFragmentsText: Collect Ocean Scraps
-	CurrentFragmentsText: Currently Held
-	ReturnToCampsiteText: Return to campsite to submit
-	QuestCompleteText: Quest Complete!
-	HintText: Fish or loot creatures in the Ocean
-}
-
 OceanRaidersUI: {
 	TitleText: Ocean Devourer Storage
 	StorageText: Storage

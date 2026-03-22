@@ -131,30 +131,6 @@ OldDukeShopUI: {
 	HintTooltip: Faire défiler/glisser la barre
 }
 
-FindCampsiteUI: {
-	QuestTitle: L'Abysse appelle
-	DamageContribution: Progression
-	RequiredContribution: Objectif : Trouver et parler au Vieux Duc
-	ObjectiveText: Objectif
-	LocationText: Aller au campement du Vieux Duc
-	DistanceText: Distance
-	InteractText: Parler au Vieux Duc
-	QuestCompleteText: Quête terminée !
-	HoldFragmentHintText: Tenez un fragment océanique pour voir la direction
-}
-
-FindFragmentUI: {
-	QuestTitle: L'Abysse appelle
-	DamageContribution: Collecte
-	RequiredContribution: Objectif : Collecter 777 fragments océaniques
-	ObjectiveText: Objectif
-	CollectFragmentsText: Collecter des fragments
-	CurrentFragmentsText: Actuellement possédé
-	ReturnToCampsiteText: Retourner au camp pour livrer
-	QuestCompleteText: Quête terminée !
-	HintText: Pêchez ou pillez des créatures dans la zone océanique
-}
-
 OceanRaidersUI: {
 	TitleText: Stockage du Dévoreur d'Océan
 	StorageText: Espace de stockage

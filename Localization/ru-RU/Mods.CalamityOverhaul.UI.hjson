@@ -131,30 +131,6 @@ OldDukeShopUI: {
 	HintTooltip: Прокрутка / Ползунок
 }
 
-FindCampsiteUI: {
-	QuestTitle: Зов Бездны
-	DamageContribution: Прогресс
-	RequiredContribution: Цель: Найти Старого герцога и поговорить с ним
-	ObjectiveText: Задача
-	LocationText: Идите в лагерь Старого герцога
-	DistanceText: Дистанция
-	InteractText: Поговорите со Старым герцогом
-	QuestCompleteText: Задание выполнено!
-	HoldFragmentHintText: Держите Океанический фрагмент, чтобы увидеть направление
-}
-
-FindFragmentUI: {
-	QuestTitle: Зов Бездны
-	DamageContribution: Сбор
-	RequiredContribution: Цель: Собрать 777 океанических фрагментов
-	ObjectiveText: Задача
-	CollectFragmentsText: Собрать фрагменты
-	CurrentFragmentsText: Сейчас в наличии
-	ReturnToCampsiteText: Вернитесь в лагерь для сдачи
-	QuestCompleteText: Задание выполнено!
-	HintText: Рыбачьте или собирайте лут с существ в океане
-}
-
 OceanRaidersUI: {
 	TitleText: Хранилище Поглотителя
 	StorageText: Хранилище

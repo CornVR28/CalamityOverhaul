@@ -1,4 +1,4 @@
-﻿using CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Quest.Findfragments;
+﻿using CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Quest;
 using CalamityOverhaul.OtherMods.ImproveGame;
 using System;
 using System.Collections.Generic;
@@ -221,7 +221,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.OldDukeShops
             OldDukeShopItem shopItem = shopItems[index];
 
             //检查是否有足够的海洋残片
-            int oceanFragmentCount = FindFragmentUI.GetFragmentCount();
+            int oceanFragmentCount = FindFragmentQuestEntry.GetFragmentCount();
 
             if (oceanFragmentCount >= shopItem.price) {
                 //消耗海洋残片，从所有储物位置循环删除直到达到所需数量

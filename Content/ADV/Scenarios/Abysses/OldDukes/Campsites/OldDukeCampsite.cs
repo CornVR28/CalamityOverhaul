@@ -1,6 +1,4 @@
-﻿using CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Quest.FindCampsites;
-using CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Quest.Findfragments;
-using CalamityOverhaul.OtherMods.SubWorld;
+﻿using CalamityOverhaul.OtherMods.SubWorld;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.IO;
@@ -336,7 +334,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Campsites
         /// 营地生成后的初始化操作
         /// </summary>
         private static void OnCampsiteGenerated() {
-            FindCampsiteUI.Instance.SetDefScreenYValue();
             ModContent.GetInstance<OldDukeCampsiteRenderer>().SetEntityInitialized(false);
             //播放生成音效
             SoundEngine.PlaySound(SoundID.Splash with { Volume = 0.5f, Pitch = -0.2f }, CampsitePosition);
@@ -416,7 +413,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Campsites
                 //触发首次对话场景
                 ScenarioManager.Reset<Quest.FindFragments.FirstCampsiteDialogue>();
                 ScenarioManager.Start<Quest.FindFragments.FirstCampsiteDialogue>();
-                FindFragmentUI.Instance.SetDefScreenYValue();
                 return;
             }
 

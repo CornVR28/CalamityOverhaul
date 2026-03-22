@@ -592,6 +592,26 @@ DraedonQuestLine: {
 	TrackerQuestComplete: Mission Complete!
 }
 
+AbyssQuestLine: {
+	QuestCategory: Old Duke
+	CampsiteTitle: The Abyss Calls
+	CampsiteSummary: Find and speak with the Old Duke
+	CampsiteObjective: Objective
+	CampsiteLocation: Go to the Old Duke's campsite
+	CampsiteDistance: Distance
+	CampsiteInteract: Speak with the Old Duke
+	CampsiteComplete: Quest Complete!
+	CampsiteHoldHint: Hold Ocean Fragments to see direction
+	FragmentTitle: The Abyss Calls
+	FragmentSummary: Collect 777 Ocean Fragments
+	FragmentObjective: Objective
+	FragmentCollect: Collect Ocean Fragments
+	FragmentCurrent: Currently held
+	FragmentReturn: Return to campsite to submit
+	FragmentComplete: Quest Complete!
+	FragmentHint: Fish or hunt ocean creatures
+}
+
 MusicToast.NowPlaying: Now Playing
 
 EternalBlazingNow: {

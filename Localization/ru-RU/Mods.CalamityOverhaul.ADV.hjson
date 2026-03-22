@@ -592,6 +592,26 @@ DraedonQuestLine: {
 	TrackerQuestComplete: Задание выполнено!
 }
 
+AbyssQuestLine: {
+	QuestCategory: Старый Герцог
+	CampsiteTitle: Бездна Зовёт
+	CampsiteSummary: Найти и поговорить со Старым Герцогом
+	CampsiteObjective: Цель
+	CampsiteLocation: Идти к лагерю Старого Герцога
+	CampsiteDistance: Расстояние
+	CampsiteInteract: Поговорить со Старым Герцогом
+	CampsiteComplete: Задание выполнено!
+	CampsiteHoldHint: Держите Океанические Фрагменты чтобы видеть направление
+	FragmentTitle: Бездна Зовёт
+	FragmentSummary: Собрать 777 Океанических Фрагментов
+	FragmentObjective: Цель
+	FragmentCollect: Собрать Океанические Фрагменты
+	FragmentCurrent: Сейчас имеется
+	FragmentReturn: Вернуться в лагерь
+	FragmentComplete: Задание выполнено!
+	FragmentHint: Рыбачьте или охотьтесь на океанических существ
+}
+
 MusicToast.NowPlaying: Сейчас играет
 
 EternalBlazingNow: {

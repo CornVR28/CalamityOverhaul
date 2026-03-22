@@ -5,7 +5,7 @@ using CalamityOverhaul.Content.ADV.DialogueBoxs.Styles;
 using CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Campsites;
 using CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.OceanRaiderses;
 using CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.OldDukeShops;
-using CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Quest.Findfragments;
+using CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Quest;
 using CalamityOverhaul.OtherMods.ImproveGame;
 using System;
 using System.Collections.Generic;
@@ -110,7 +110,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes
             }
             else {
                 //任务进行中，显示选项
-                int fragmentCount = FindFragmentUI.GetFragmentCount();
+                int fragmentCount = FindFragmentQuestEntry.GetFragmentCount();
                 bool hasEnoughFragments = fragmentCount >= 777;
 
                 AddWithChoices(

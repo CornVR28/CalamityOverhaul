@@ -592,6 +592,26 @@ DraedonQuestLine: {
 	TrackerQuestComplete: 任务完成!
 }
 
+AbyssQuestLine: {
+	QuestCategory: 老公爵
+	CampsiteTitle: 深渊在呼唤
+	CampsiteSummary: 找到并与老公爵对话
+	CampsiteObjective: 目标
+	CampsiteLocation: 前往老公爵营地
+	CampsiteDistance: 距离
+	CampsiteInteract: 与老公爵对话
+	CampsiteComplete: 任务完成！
+	CampsiteHoldHint: 持有海洋碎片可查看方向
+	FragmentTitle: 深渊在呼唤
+	FragmentSummary: 收集777块海洋残片
+	FragmentObjective: 目标
+	FragmentCollect: 收集海洋残片
+	FragmentCurrent: 当前拥有
+	FragmentReturn: 返回营地提交
+	FragmentComplete: 任务完成！
+	FragmentHint: 钓鱼或者搜刮海洋区域的生物
+}
+
 MusicToast.NowPlaying: 正在播放
 
 EternalBlazingNow: {

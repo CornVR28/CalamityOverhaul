@@ -592,6 +592,26 @@ DraedonQuestLine: {
 	TrackerQuestComplete: Quest abgeschlossen!
 }
 
+AbyssQuestLine: {
+	QuestCategory: Alter Herzog
+	CampsiteTitle: Der Abgrund ruft
+	CampsiteSummary: Finde und sprich mit dem Alten Herzog
+	CampsiteObjective: Ziel
+	CampsiteLocation: Gehe zum Lager des Alten Herzogs
+	CampsiteDistance: Entfernung
+	CampsiteInteract: Sprich mit dem Alten Herzog
+	CampsiteComplete: Quest abgeschlossen!
+	CampsiteHoldHint: Halte Ozeanfragmente um die Richtung zu sehen
+	FragmentTitle: Der Abgrund ruft
+	FragmentSummary: Sammle 777 Ozeanfragmente
+	FragmentObjective: Ziel
+	FragmentCollect: Sammle Ozeanfragmente
+	FragmentCurrent: Aktuell besessen
+	FragmentReturn: Kehre zum Lager zurück
+	FragmentComplete: Quest abgeschlossen!
+	FragmentHint: Fische oder jage Ozeankreaturen
+}
+
 // MusicToast.NowPlaying: Now Playing
 
 EternalBlazingNow: {

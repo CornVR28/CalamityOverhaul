@@ -131,30 +131,6 @@ OldDukeShopUI: {
 	HintTooltip: Scrollen/Leiste ziehen
 }
 
-FindCampsiteUI: {
-	QuestTitle: Der Abgrund ruft
-	DamageContribution: Quest-Fortschritt
-	RequiredContribution: Ziel: Finde den alten Herzog und sprich mit ihm
-	ObjectiveText: Ziel
-	LocationText: Gehe zum Lager des alten Herzogs
-	DistanceText: Distanz
-	InteractText: Sprich mit dem alten Herzog
-	QuestCompleteText: Quest abgeschlossen!
-	HoldFragmentHintText: Halte ein Ozeanfragment, um die Richtung zu sehen
-}
-
-FindFragmentUI: {
-	QuestTitle: Der Abgrund ruft
-	DamageContribution: Sammelfortschritt
-	RequiredContribution: Ziel: Sammle 777 Ozeanfragmente
-	ObjectiveText: Ziel
-	CollectFragmentsText: Ozeanfragmente sammeln
-	CurrentFragmentsText: Aktuell im Besitz
-	ReturnToCampsiteText: Zum Lager zurückkehren und abgeben
-	QuestCompleteText: Quest abgeschlossen!
-	HintText: Fische oder plündere Kreaturen in der Ozeanzone
-}
-
 OceanRaidersUI: {
 	TitleText: Speicher des Ozeanfressers
 	StorageText: Lagerraum

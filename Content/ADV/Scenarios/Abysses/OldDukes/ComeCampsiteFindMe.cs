@@ -2,7 +2,6 @@
 using CalamityOverhaul.Content.ADV.DialogueBoxs;
 using CalamityOverhaul.Content.ADV.DialogueBoxs.Styles;
 using CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Campsites;
-using CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Quest.FindCampsites;
 using System;
 using Terraria;
 using Terraria.Localization;
@@ -36,9 +35,14 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes
             //注册老公爵立绘
             DialogueBoxBase.RegisterPortrait(OldDukeName.Value, OldDukeCampsite.OldDuke, OldDukeCampsite.PortraitRec, null, true);
 
-            if (FindCampsiteUI.Instance.CanOpne) {
+            //判断寻找营地任务是否仍在进行中（等价于原 FindCampsiteUI.CanOpne）
+            bool campsiteQuestActive = Main.LocalPlayer.TryGetADVSave(out var save)
+                && save.OldDukeCooperationAccepted
+                && !save.OldDukeFirstCampsiteDialogueCompleted
+                && OldDukeCampsite.IsGenerated;
+
+            if (campsiteQuestActive) {
                 //任务未完成，提示去找营地
-                //OldDukeEffect.IsActive由声明式计算自动管理，场景结束后自动关闭
                 Add(OldDukeName.Value, B1_NO.Value);
                 return;
             }

@@ -592,6 +592,26 @@ DraedonQuestLine: {
 	TrackerQuestComplete: Quête terminée !
 }
 
+AbyssQuestLine: {
+	QuestCategory: Vieux Duc
+	CampsiteTitle: L'Abîme Appelle
+	CampsiteSummary: Trouver et parler au Vieux Duc
+	CampsiteObjective: Objectif
+	CampsiteLocation: Aller au campement du Vieux Duc
+	CampsiteDistance: Distance
+	CampsiteInteract: Parler au Vieux Duc
+	CampsiteComplete: Quête terminée !
+	CampsiteHoldHint: Tenez des Fragments Océaniques pour voir la direction
+	FragmentTitle: L'Abîme Appelle
+	FragmentSummary: Collecter 777 Fragments Océaniques
+	FragmentObjective: Objectif
+	FragmentCollect: Collecter des Fragments Océaniques
+	FragmentCurrent: Actuellement possédé
+	FragmentReturn: Retourner au campement
+	FragmentComplete: Quête terminée !
+	FragmentHint: Pêchez ou chassez des créatures océaniques
+}
+
 // MusicToast.NowPlaying: Now Playing
 
 EternalBlazingNow: {

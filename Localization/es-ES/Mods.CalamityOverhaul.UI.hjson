@@ -131,30 +131,6 @@ OldDukeShopUI: {
 	HintTooltip: Desplazar/Arrastrar barra
 }
 
-FindCampsiteUI: {
-	QuestTitle: El Abismo llama
-	DamageContribution: Progreso
-	RequiredContribution: Objetivo: Encontrar y hablar con el Viejo Duque
-	ObjectiveText: Objetivo
-	LocationText: Ir al campamento del Viejo Duque
-	DistanceText: Distancia
-	InteractText: Hablar con el Viejo Duque
-	QuestCompleteText: ¡Misión completada!
-	HoldFragmentHintText: Sostén un fragmento oceánico para ver la dirección
-}
-
-FindFragmentUI: {
-	QuestTitle: El Abismo llama
-	DamageContribution: Recolección
-	RequiredContribution: Objetivo: Recolectar 777 fragmentos oceánicos
-	ObjectiveText: Objetivo
-	CollectFragmentsText: Recolectar fragmentos
-	CurrentFragmentsText: En posesión
-	ReturnToCampsiteText: Volver al campamento para entregar
-	QuestCompleteText: ¡Misión completada!
-	HintText: Pesca o saquea criaturas en la zona oceánica
-}
-
 OceanRaidersUI: {
 	TitleText: Almacén del Devorador de Océanos
 	StorageText: Espacio de almacenamiento

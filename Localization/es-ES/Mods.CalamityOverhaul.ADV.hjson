@@ -592,6 +592,26 @@ DraedonQuestLine: {
 	TrackerQuestComplete: ¡Misión completada!
 }
 
+AbyssQuestLine: {
+	QuestCategory: Viejo Duque
+	CampsiteTitle: El Abismo Llama
+	CampsiteSummary: Encuentra y habla con el Viejo Duque
+	CampsiteObjective: Objetivo
+	CampsiteLocation: Ir al campamento del Viejo Duque
+	CampsiteDistance: Distancia
+	CampsiteInteract: Hablar con el Viejo Duque
+	CampsiteComplete: ¡Misión completada!
+	CampsiteHoldHint: Sostén Fragmentos Oceánicos para ver la dirección
+	FragmentTitle: El Abismo Llama
+	FragmentSummary: Recolecta 777 Fragmentos Oceánicos
+	FragmentObjective: Objetivo
+	FragmentCollect: Recolectar Fragmentos Oceánicos
+	FragmentCurrent: Actualmente poseído
+	FragmentReturn: Regresar al campamento
+	FragmentComplete: ¡Misión completada!
+	FragmentHint: Pesca o caza criaturas oceánicas
+}
+
 // MusicToast.NowPlaying: Now Playing
 
 EternalBlazingNow: {
