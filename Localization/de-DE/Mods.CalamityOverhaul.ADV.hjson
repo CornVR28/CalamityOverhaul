@@ -410,6 +410,16 @@ YharonQuestUI: {
 	// DeclineText: Decline
 }
 
+SupCalQuestLine: {
+	// QuestCategory: Brimstone Witch
+	// PallbearerTitle: Commission: Hunt the Profaned Goddess
+	// PallbearerSummary: Defeat the Profaned Goddess using the Pallbearer. 80% contribution required.
+	// DoGTitle: Commission: Hunt the Devourer of Gods
+	// DoGSummary: Defeat the Devourer of Gods using the Heartcarver. 80% contribution required.
+	// YharonTitle: Commission: Hunt the Incineration Dragon
+	// YharonSummary: Slay Yharon using the Oni Machete. 75% contribution required.
+}
+
 HelensInterference: {
 	// Rolename: Halibut
 	// Line0: ...Hey, are you free?

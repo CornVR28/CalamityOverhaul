@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
+using Terraria.Localization;
 
 namespace CalamityOverhaul.Content.ADV.QuestManager
 {
@@ -22,6 +23,7 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
 
     /// <summary>
     /// 任务管理器中单条委托的数据模型，
+    /// 所有文本字段通过 <see cref="LocalizedText"/> 实现本地化，
     /// 各任务线应继承此类并提供自定义的
     /// <see cref="EntryStyle"/>、<see cref="TrackerStyle"/>，
     /// 重写 <see cref="GetTrackerDetails"/> 和 <see cref="OnUpdate"/>
@@ -32,18 +34,29 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
 
         /// <summary>唯一标识符</summary>
         public string Key;
-        /// <summary>显示名称</summary>
-        public string Title;
-        /// <summary>任务简要描述</summary>
-        public string Summary;
-        /// <summary>所属任务线分类标签</summary>
-        public string Category;
+
+        /// <summary>显示名称（本地化）</summary>
+        public LocalizedText TitleText;
+        /// <summary>任务简要描述（本地化）</summary>
+        public LocalizedText SummaryText;
+        /// <summary>所属任务线分类标签（本地化）</summary>
+        public LocalizedText CategoryText;
+        /// <summary>进度文本（本地化），为null时不显示进度文本</summary>
+        public LocalizedText ProgressLabel;
+
+        /// <summary>显示名称，运行时从 <see cref="TitleText"/> 解析</summary>
+        public string Title => TitleText?.Value ?? "";
+        /// <summary>任务简要描述，运行时从 <see cref="SummaryText"/> 解析</summary>
+        public string Summary => SummaryText?.Value ?? "";
+        /// <summary>分类标签，运行时从 <see cref="CategoryText"/> 解析</summary>
+        public string Category => CategoryText?.Value ?? "";
+        /// <summary>进度文本，运行时从 <see cref="ProgressLabel"/> 解析，null表示无进度文本</summary>
+        public string ProgressText => ProgressLabel?.Value;
+
         /// <summary>当前状态</summary>
         public QuestEntryStatus Status;
         /// <summary>进度 0~1</summary>
         public float Progress;
-        /// <summary>进度文本</summary>
-        public string ProgressText;
         /// <summary>是否为新任务</summary>
         public bool IsNew;
         /// <summary>排序优先级，越大越靠前</summary>
@@ -73,7 +86,7 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
         /// 默认返回Summary单行，子类可重写以提供多行内容
         /// </summary>
         public virtual List<string> GetTrackerDetails() {
-            return [Summary ?? ""];
+            return [Summary];
         }
 
         /// <summary>
@@ -97,11 +110,11 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
 
         #endregion
 
-        public QuestEntryData(string key, string title, string summary, string category) {
+        public QuestEntryData(string key, LocalizedText title, LocalizedText summary, LocalizedText category) {
             Key = key;
-            Title = title;
-            Summary = summary;
-            Category = category;
+            TitleText = title;
+            SummaryText = summary;
+            CategoryText = category;
             Status = QuestEntryStatus.Active;
         }
     }

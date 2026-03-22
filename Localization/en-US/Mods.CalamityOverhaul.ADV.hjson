@@ -1,4 +1,4 @@
-﻿FirstMet: {
+FirstMet: {
 	Rolename1: ???
 	Rolename2: Halibut
 	Line0: Sir... your fishing technique... leaves something to be desired.
@@ -408,6 +408,16 @@ YharonQuestUI: {
 	QuestDesc: Use the Muramasa to slay Yharon, the Incineration Dragon.
 	AcceptText: Accept
 	DeclineText: Decline
+}
+
+SupCalQuestLine: {
+	QuestCategory: Brimstone Witch
+	PallbearerTitle: Commission: Hunt the Profaned Goddess
+	PallbearerSummary: Defeat the Profaned Goddess using the Pallbearer. 80% contribution required.
+	DoGTitle: Commission: Hunt the Devourer of Gods
+	DoGSummary: Defeat the Devourer of Gods using the Heartcarver. 80% contribution required.
+	YharonTitle: Commission: Hunt the Incineration Dragon
+	YharonSummary: Slay Yharon using the Oni Machete. 75% contribution required.
 }
 
 HelensInterference: {

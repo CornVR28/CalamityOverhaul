@@ -406,21 +406,23 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
         public override void DrawQuestEntry(SpriteBatch sb, Rectangle entryRect, QuestEntryData entry,
             bool isSelected, bool isHovered, float alpha, int entryIndex) {
             var font = FontAssets.MouseText.Value;
+            var customStyle = entry.EntryStyle;
 
-            // 背景（悬停/选中态区分）
-            if (isSelected) {
-                FillRect(sb, entryRect, PrimaryDim * (alpha * 0.22f));
-                //左侧亮边
-                VLine(sb, entryRect.X, entryRect.Y, entryRect.Height, 2, AccentCyan * (alpha * 0.7f));
-            }
-            else if (isHovered) {
-                FillRect(sb, entryRect, PrimaryDim * (alpha * 0.12f));
-                VLine(sb, entryRect.X, entryRect.Y, entryRect.Height, 1, PrimaryMid * (alpha * 0.4f));
-            }
+            // === 背景 ===
+            bool bgHandled = customStyle?.DrawEntryBackground(sb, entryRect, entry, isSelected, isHovered, alpha) ?? false;
+            if (!bgHandled) {
+                if (isSelected) {
+                    FillRect(sb, entryRect, PrimaryDim * (alpha * 0.22f));
+                    VLine(sb, entryRect.X, entryRect.Y, entryRect.Height, 2, AccentCyan * (alpha * 0.7f));
+                }
+                else if (isHovered) {
+                    FillRect(sb, entryRect, PrimaryDim * (alpha * 0.12f));
+                    VLine(sb, entryRect.X, entryRect.Y, entryRect.Height, 1, PrimaryMid * (alpha * 0.4f));
+                }
 
-            // 威胁等级色带（左侧3px竖条，按状态着色）
-            Color statusBarColor = GetStatusColor(entry.Status, alpha);
-            VLine(sb, entryRect.X + 4, entryRect.Y + 4, entryRect.Height - 8, 3, statusBarColor);
+                Color statusBarColor = GetStatusColor(entry.Status, alpha);
+                VLine(sb, entryRect.X + 4, entryRect.Y + 4, entryRect.Height - 8, 3, statusBarColor);
+            }
 
             // 时间线脊柱上的菱形节点 
             int spineX = entryRect.X + 28;
@@ -437,12 +439,18 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
                 FillRect(sb, new Rectangle(spineX, ly, 1, 1), spineLineC);
             }
 
-            // 任务标题 
+            // === 图标 + 标题 ===
             float titleX = entryRect.X + 42f;
             float titleY = entryRect.Y + 6f;
-            Color titleColor = entry.Status == QuestEntryStatus.Completed
-                ? StatusComplete * (alpha * 0.75f)
-                : PrimaryBright * alpha;
+
+            //自定义图标（可能右移标题位置）
+            float iconOffset = customStyle?.DrawEntryIcon(sb, new Vector2(titleX, titleY), entry, alpha) ?? 0f;
+            titleX += iconOffset;
+
+            Color titleColor = customStyle?.GetTitleColor(entry.Status, alpha)
+                ?? (entry.Status == QuestEntryStatus.Completed
+                    ? StatusComplete * (alpha * 0.75f)
+                    : PrimaryBright * alpha);
             if (entry.IsNew) {
                 float newBlink = MathF.Sin(chevronPulse * 2f) * 0.3f + 0.7f;
                 titleColor = Color.Lerp(titleColor, AccentWarm, newBlink * 0.4f);
@@ -453,9 +461,11 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
             if (entry.Status == QuestEntryStatus.Tracked) {
                 float chevBlink = MathF.Sin(chevronPulse * 1.5f) * 0.4f + 0.6f;
                 float titleW = font.MeasureString(entry.Title ?? "").X * 0.78f;
+                Color chevColor = customStyle?.GetAccentColor(QuestEntryStatus.Tracked, alpha * chevBlink)
+                    ?? AccentCyan * (alpha * chevBlink);
                 Utils.DrawBorderString(sb, "››",
                     new Vector2(titleX + titleW + 6f, titleY + 1f),
-                    AccentCyan * (alpha * chevBlink), 0.7f);
+                    chevColor, 0.7f);
             }
 
             // 摘要文本 
@@ -463,7 +473,7 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
             Color summaryColor = PrimaryMid * (alpha * 0.6f);
             string summary = entry.Summary ?? "";
             //截断过长的摘要
-            float maxSummaryW = entryRect.Width - 60f;
+            float maxSummaryW = entryRect.Width - 60f - iconOffset;
             if (font.MeasureString(summary).X * 0.65f > maxSummaryW) {
                 while (summary.Length > 3 && font.MeasureString(summary + "...").X * 0.65f > maxSummaryW)
                     summary = summary[..^1];
@@ -487,6 +497,9 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
                         PrimaryMid * (alpha * 0.55f), 0.55f);
                 }
             }
+
+            // === 前景特效 ===
+            customStyle?.DrawEntryOverlay(sb, entryRect, entry, alpha);
         }
 
         /// <summary>

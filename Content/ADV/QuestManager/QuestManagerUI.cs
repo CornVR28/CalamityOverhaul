@@ -216,9 +216,7 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
 
         public QuestManagerUI() {
             currentStyle = new DraedonManagerStyle();
-            categoryNames = [
-                "全部", "进行中", "已完成", "挂起"
-            ];
+            categoryNames = new string[4];
         }
 
         public override void OnEnterWorld() {

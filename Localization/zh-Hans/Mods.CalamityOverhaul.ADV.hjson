@@ -410,6 +410,16 @@ YharonQuestUI: {
 	DeclineText: 拒绝
 }
 
+SupCalQuestLine: {
+	QuestCategory: 硫火女巫
+	PallbearerTitle: 委托：猎杀亵渎天神
+	PallbearerSummary: 使用扶柩者击杀亵渎天神，贡献度需达到80%
+	DoGTitle: 委托：猎杀神明吞噬者
+	DoGSummary: 使用刻心者击杀神明吞噬者，贡献度需达到80%
+	YharonTitle: 委托：猎杀焚世龙
+	YharonSummary: 使用鬼面刀击杀焚世之龙，贡献度需达到75%
+}
+
 HelensInterference: {
 	Rolename: 比目鱼
 	Line0: ……喂，你有空吗？
