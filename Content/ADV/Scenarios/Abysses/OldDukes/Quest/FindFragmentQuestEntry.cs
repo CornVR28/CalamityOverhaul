@@ -1,5 +1,4 @@
-using CalamityOverhaul.Content.ADV.QuestManager;
-using CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Campsites;
+﻿using CalamityOverhaul.Content.ADV.QuestManager;
 using CalamityOverhaul.OtherMods.ImproveGame;
 using System.Collections.Generic;
 using Terraria;
