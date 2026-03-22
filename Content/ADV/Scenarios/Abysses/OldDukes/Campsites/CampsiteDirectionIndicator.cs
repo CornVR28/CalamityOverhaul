@@ -1,4 +1,6 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using CalamityOverhaul.Content.ADV.QuestManager;
+using CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Quest;
+using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Graphics;
 using System;
 using Terraria;
@@ -37,17 +39,16 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Campsites
                 return;
             }
 
-            //检查玩家是否持有海洋碎片
-            bool holdingFragment = false;
-            if (player.HeldItem != null && !player.HeldItem.IsAir) {
-                holdingFragment = player.HeldItem.type == ModContent.ItemType<Oceanfragments>();
-            }
+            //检查寻找营地委托是否处于追踪状态
+            var campsiteEntry = QuestManagerUI.Instance?.GetEntry(AbyssQuestLine.CAMPSITE_KEY);
+            bool questTracked = campsiteEntry != null
+                && campsiteEntry.Status == QuestEntryStatus.Tracked;
 
             //检查营地是否已生成
             bool campsiteExists = OldDukeCampsite.IsGenerated;
 
-            //只有持有碎片且营地已生成时才显示
-            shouldShow = holdingFragment && campsiteExists;
+            //委托追踪中且营地已生成时显示
+            shouldShow = questTracked && campsiteExists;
 
             //更新透明度
             if (shouldShow) {

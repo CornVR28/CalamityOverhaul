@@ -17,8 +17,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Quest
 
         #region 常量 Key
 
-        private const string CAMPSITE_KEY = "Abyss_FindCampsite";
-        private const string FRAGMENT_KEY = "Abyss_FindFragment";
+        internal const string CAMPSITE_KEY = "Abyss_FindCampsite";
+        internal const string FRAGMENT_KEY = "Abyss_FindFragment";
 
         #endregion
 
@@ -108,6 +108,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Quest
             if (entry == null) {
                 entry = new FindCampsiteQuestEntry(CAMPSITE_KEY, CampsiteTitle, CampsiteSummary, QuestCategory) {
                     Priority = 60,
+                    EntryStyle = new SulfseaEntryStyle(),
                     TrackerStyle = new SulfseaTrackerWidgetStyle(),
                     ObjectiveFormat = CampsiteObjective,
                     LocationFormat = CampsiteLocation,
@@ -145,6 +146,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Quest
             if (entry == null) {
                 entry = new FindFragmentQuestEntry(FRAGMENT_KEY, FragmentTitle, FragmentSummary, QuestCategory) {
                     Priority = 55,
+                    EntryStyle = new SulfseaEntryStyle(),
                     TrackerStyle = new SulfseaTrackerWidgetStyle(),
                     ObjectiveFormat = FragmentObjective,
                     CollectFormat = FragmentCollect,
