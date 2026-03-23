@@ -1,6 +1,7 @@
 ﻿using CalamityOverhaul.Content.ADV.DialogueBoxs;
 using System;
 using System.Collections.Generic;
+using Terraria.ModLoader;
 
 namespace CalamityOverhaul.Content.ADV.IncomingCalls
 {
@@ -10,7 +11,7 @@ namespace CalamityOverhaul.Content.ADV.IncomingCalls
     /// 子类重写 <see cref="Build"/> 注册立绘并添加台词，
     /// 外部调用 <see cref="Start"/> 即可发起来电
     /// </summary>
-    internal abstract class IncomingCallScenarioBase
+    internal abstract class IncomingCallScenarioBase : VaultType<IncomingCallScenarioBase>, ILocalizedModType
     {
         /// <summary>
         /// 来电者显示名称
@@ -27,6 +28,8 @@ namespace CalamityOverhaul.Content.ADV.IncomingCalls
         /// </summary>
         protected virtual bool AutoAnswer => false;
 
+        public string LocalizationCategory => "ADV";
+
         /// <summary>
         /// 获取来电UI实例，默认使用 <see cref="IncomingCallRegistry.Current"/>
         /// </summary>
@@ -36,6 +39,17 @@ namespace CalamityOverhaul.Content.ADV.IncomingCalls
         /// 台词缓存列表
         /// </summary>
         private readonly List<CallLine> lines = [];
+
+        protected override void VaultRegister() {
+            Instances.Add(this);
+            TypeToInstance[GetType()] = this;
+        }
+
+        public override void VaultSetup() {
+            SetStaticDefaults();
+        }
+
+        public static T GetScenario<T>() where T : IncomingCallScenarioBase => (T)TypeToInstance[typeof(T)];
 
         /// <summary>
         /// 子类重写：注册立绘并添加台词
