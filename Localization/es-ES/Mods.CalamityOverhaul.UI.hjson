@@ -377,3 +377,22 @@ QuestManagerUI: {
 	// HeaderStatusTag: ◈ ACTIVE
 	// FooterStatsFormat: TOTAL: {0}  |  ACTIVE: {1}
 }
+
+CyberwareUI: {
+	// TitleText: CYBERWARE
+	// StatusText: SYSTEM STATUS: OPERATIONAL
+	// SlotSelectedText: "[ SELECTED ]"
+	// SlotEmptyText: EMPTY
+	// Slot_FrontalCortex: FRONTAL CORTEX
+	// Slot_OcularSystem: OCULAR SYSTEM
+	// Slot_LeftArm: LEFT ARM
+	// Slot_Hands: HANDS
+	// Slot_LeftLeg: LEFT LEG
+	// Slot_Feet: FEET
+	// Slot_OperatingSystem: OPERATING SYSTEM
+	// Slot_CirculatorySystem: CIRCULATORY SYS
+	// Slot_RightArm: RIGHT ARM
+	// Slot_Skeleton: SKELETON
+	// Slot_RightLeg: RIGHT LEG
+	// Slot_NervousSystem: NERVOUS SYSTEM
+}
