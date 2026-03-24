@@ -12,5 +12,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Skills.Sandevistans
         /// </summary>
         [VaultLoaden(CWRConstant.Effects)]
         public static Effect SandevistanGhost { get; private set; }
+
+        /// <summary>
+        /// 屏幕级后处理着色器（色差分离、青色调去饱和、暗角、扫描线、数字噪点）
+        /// </summary>
+        [VaultLoaden(CWRConstant.Effects)]
+        public static Effect SandevistanScreen { get; private set; }
     }
 }

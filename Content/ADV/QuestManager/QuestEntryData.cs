@@ -58,7 +58,7 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
         /// <summary>进度 0~1</summary>
         public float Progress;
         /// <summary>是否为新任务</summary>
-        public bool IsNew;
+        public bool IsNew = false;
         /// <summary>排序优先级，越大越靠前</summary>
         public int Priority;
 
