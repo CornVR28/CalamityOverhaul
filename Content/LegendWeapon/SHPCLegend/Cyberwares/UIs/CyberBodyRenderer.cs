@@ -23,7 +23,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
 
         #region 像素人体数据
 
-        //人体轮廓线段数据，每行为(x1,y1,x2,y2)，坐标基于32x60像素网格（七头身比例）
+        //人体轮廓线段数据，每行为(x1,y1,x2,y2)，坐标基于32x56像素网格（七头身比例，裆部在y=28正中）
         private static readonly int[,] OutlineSegments = {
             //头部（圆角矩形，所有角用斜线连接）
             {12, 0, 20, 0},     //颅顶
@@ -47,65 +47,65 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
             {8, 12, 8, 13},     //左上胸侧
             {24, 12, 24, 13},   //右上胸侧
             {10, 14, 22, 14},   //胸顶横线
-            //左侧躯干（胸→腰收窄→髋外扩）
-            {10, 14, 10, 24},   //左胸侧
-            {10, 24, 11, 28},   //左腰收窄斜线
-            {11, 28, 11, 31},   //左腰窄段
-            {11, 31, 10, 34},   //左髋外扩
+            //左侧躯干（胸→腰收窄→髋外扩，总14格）
+            {10, 14, 10, 21},   //左胸侧
+            {10, 21, 11, 24},   //左腰收窄斜线
+            {11, 24, 11, 26},   //左腰窄段
+            {11, 26, 10, 28},   //左髋外扩
             //右侧躯干（镜像）
-            {22, 14, 22, 24},   //右胸侧
-            {22, 24, 21, 28},   //右腰收窄斜线
-            {21, 28, 21, 31},   //右腰窄段
-            {21, 31, 22, 34},   //右髋外扩
-            //左臂（肩→上臂→肘关节→前臂→腕→手）
+            {22, 14, 22, 21},   //右胸侧
+            {22, 21, 21, 24},   //右腰收窄斜线
+            {21, 24, 21, 26},   //右腰窄段
+            {21, 26, 22, 28},   //右髋外扩
+            //左臂（肩→上臂→肘关节→前臂→腕→手，指尖到大腿中段）
             {5, 13, 8, 13},     //肩顶
-            {5, 13, 5, 28},     //外侧连续线
-            {8, 13, 8, 21},     //上臂内侧
-            {8, 21, 7, 22},     //肘关节内斜
-            {7, 22, 7, 28},     //前臂内侧
-            {5, 28, 4, 29},     //腕外展
-            {7, 28, 8, 29},     //腕内展
-            {4, 29, 4, 32},     //手外侧
-            {8, 29, 8, 32},     //手内侧
+            {5, 13, 5, 29},     //外侧连续线
+            {8, 13, 8, 20},     //上臂内侧
+            {8, 20, 7, 21},     //肘关节内斜
+            {7, 21, 7, 29},     //前臂内侧
+            {5, 29, 4, 30},     //腕外展
+            {7, 29, 8, 30},     //腕内展
+            {4, 30, 4, 32},     //手外侧
+            {8, 30, 8, 32},     //手内侧
             {4, 32, 9, 32},     //手掌底
             //右臂（镜像）
             {24, 13, 27, 13},   //肩顶
-            {27, 13, 27, 28},   //外侧连续线
-            {24, 13, 24, 21},   //上臂内侧
-            {24, 21, 25, 22},   //肘关节内斜
-            {25, 22, 25, 28},   //前臂内侧
-            {27, 28, 28, 29},   //腕外展
-            {25, 28, 24, 29},   //腕内展
-            {28, 29, 28, 32},   //手外侧
-            {24, 29, 24, 32},   //手内侧
+            {27, 13, 27, 29},   //外侧连续线
+            {24, 13, 24, 20},   //上臂内侧
+            {24, 20, 25, 21},   //肘关节内斜
+            {25, 21, 25, 29},   //前臂内侧
+            {27, 29, 28, 30},   //腕外展
+            {25, 29, 24, 30},   //腕内展
+            {28, 30, 28, 32},   //手外侧
+            {24, 30, 24, 32},   //手内侧
             {23, 32, 28, 32},   //手掌底
-            //髋部（分叉+裆部+衔接腿部）
-            {10, 34, 15, 34},   //左髋横线
-            {17, 34, 22, 34},   //右髋横线
-            {10, 34, 10, 35},   //左外侧髋→腿衔接
-            {22, 34, 22, 35},   //右外侧髋→腿衔接
-            {15, 34, 15, 35},   //左裆内侧
-            {17, 34, 17, 35},   //右裆内侧
-            //左腿（大腿→膝关节→小腿→踝→足）
-            {10, 35, 10, 45},   //大腿外侧
-            {15, 35, 15, 45},   //大腿内侧
-            {10, 45, 11, 47},   //膝外斜
-            {15, 45, 14, 47},   //膝内斜
-            {11, 47, 11, 55},   //小腿外侧
-            {14, 47, 14, 55},   //小腿内侧
-            {11, 55, 9, 58},    //踝→足跟
-            {14, 55, 15, 58},   //踝→脚趾
-            {9, 58, 16, 58},    //左足底
+            //髋部（分叉+裆部+衔接腿部，y=28正中线）
+            {10, 28, 15, 28},   //左髋横线
+            {17, 28, 22, 28},   //右髋横线
+            {10, 28, 10, 29},   //左外侧髋→腿衔接
+            {22, 28, 22, 29},   //右外侧髋→腿衔接
+            {15, 28, 15, 29},   //左裆内侧
+            {17, 28, 17, 29},   //右裆内侧
+            //左腿（大腿→膝关节→小腿→踝→足，总28格）
+            {10, 29, 10, 40},   //大腿外侧
+            {15, 29, 15, 40},   //大腿内侧
+            {10, 40, 11, 42},   //膝外斜
+            {15, 40, 14, 42},   //膝内斜
+            {11, 42, 11, 52},   //小腿外侧
+            {14, 42, 14, 52},   //小腿内侧
+            {11, 52, 9, 56},    //踝→足跟
+            {14, 52, 16, 56},   //踝→脚趾
+            {9, 56, 16, 56},    //左足底
             //右腿（镜像）
-            {22, 35, 22, 45},   //大腿外侧
-            {17, 35, 17, 45},   //大腿内侧
-            {22, 45, 21, 47},   //膝外斜
-            {17, 45, 18, 47},   //膝内斜
-            {21, 47, 21, 55},   //小腿外侧
-            {18, 47, 18, 55},   //小腿内侧
-            {21, 55, 23, 58},   //踝→足跟
-            {18, 55, 17, 58},   //踝→脚趾
-            {16, 58, 23, 58},   //右足底
+            {22, 29, 22, 40},   //大腿外侧
+            {17, 29, 17, 40},   //大腿内侧
+            {22, 40, 21, 42},   //膝外斜
+            {17, 40, 18, 42},   //膝内斜
+            {21, 42, 21, 52},   //小腿外侧
+            {18, 42, 18, 52},   //小腿内侧
+            {21, 52, 23, 56},   //踝→足跟
+            {18, 52, 16, 56},   //踝→脚趾
+            {16, 56, 23, 56},   //右足底
         };
 
         //内部结构线，骨骼和电路风格
@@ -117,62 +117,62 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
             {14, 3, 15, 3},     //左眼电路
             {17, 3, 18, 3},     //右眼电路
             //脊椎（从头部延伸到骨盆）
-            {16, 6, 16, 34},
+            {16, 6, 16, 28},
             //锁骨连接器（脊椎→肩关节）
             {10, 14, 16, 13},   //左锁骨
             {22, 14, 16, 13},   //右锁骨
-            //肋骨（从宽到窄匹配躯干锥形）
-            {11, 18, 21, 18},   //上肋
-            {11, 21, 21, 21},   //中肋
-            {12, 24, 20, 24},   //下肋
+            //肋骨（匹配缩短的躯干）
+            {11, 17, 21, 17},   //上肋
+            {11, 19, 21, 19},   //中肋
+            {12, 21, 20, 21},   //下肋
             //胸腔交叉电路（围绕核心）
-            {13, 16, 19, 19},   //左上→右下
-            {19, 16, 13, 19},   //右上→左下
+            {13, 15, 19, 18},   //左上→右下
+            {19, 15, 13, 18},   //右上→左下
             //腹部电路
-            {12, 28, 20, 28},   //腹横线
-            {13, 31, 19, 31},   //下腹横线
+            {12, 24, 20, 24},   //腹横线
+            {13, 26, 19, 26},   //下腹横线
             //骨盆
-            {11, 34, 16, 38},
-            {21, 34, 16, 38},
+            {11, 28, 16, 32},
+            {21, 28, 16, 32},
             //髋关节连接器（脊椎→腿骨）
-            {16, 34, 12, 37},   //左髋
-            {16, 34, 20, 37},   //右髋
-            //腿部中线（分段：大腿骨+小腿骨）
-            {12, 35, 12, 45},   //左大腿骨
-            {12, 47, 12, 55},   //左小腿骨
-            {20, 35, 20, 45},   //右大腿骨
-            {20, 47, 20, 55},   //右小腿骨
+            {16, 28, 12, 31},   //左髋
+            {16, 28, 20, 31},   //右髋
+            //腿部中线（大腿骨+小腿骨）
+            {12, 29, 12, 40},   //左大腿骨
+            {12, 42, 12, 52},   //左小腿骨
+            {20, 29, 20, 40},   //右大腿骨
+            {20, 42, 20, 52},   //右小腿骨
             //膝关节横线
-            {11, 46, 14, 46},   //左膝
-            {18, 46, 21, 46},   //右膝
+            {11, 41, 14, 41},   //左膝
+            {18, 41, 21, 41},   //右膝
             //足部电路
-            {10, 57, 14, 57},   //左足横线
-            {18, 57, 22, 57},   //右足横线
-            //手臂中线（分段：上臂骨+前臂骨+手指分隔）
-            {6, 14, 6, 21},     //左上臂骨
-            {6, 22, 6, 28},     //左前臂骨
+            {10, 55, 14, 55},   //左足横线
+            {18, 55, 22, 55},   //右足横线
+            //手臂中线（上臂骨+前臂骨+手指分隔）
+            {6, 14, 6, 20},     //左上臂骨
+            {6, 21, 6, 29},     //左前臂骨
             {5, 31, 8, 31},     //左手指分隔
-            {26, 14, 26, 21},   //右上臂骨
-            {26, 22, 26, 28},   //右前臂骨
+            {26, 14, 26, 20},   //右上臂骨
+            {26, 21, 26, 29},   //右前臂骨
             {24, 31, 27, 31},   //右手指分隔
             //肘关节横线
-            {5, 22, 7, 22},     //左肘
-            {25, 22, 27, 22},   //右肘
+            {5, 21, 7, 21},     //左肘
+            {25, 21, 27, 21},   //右肘
         };
 
         //赛博植入节点坐标(x,y)
         private static readonly int[,] NodePositions = {
             {16, 4},   //头部芯片
-            {16, 16},  //胸腔核心
-            {6, 21},   //左臂改造
-            {26, 21},  //右臂改造
-            {12, 30},  //左手植入
-            {20, 30},  //右手植入
-            {16, 34},  //腰椎接口
-            {12, 42},  //左腿改造
-            {20, 42},  //右腿改造
-            {12, 53},  //左足增强
-            {20, 53},  //右足增强
+            {16, 17},  //胸腔核心
+            {6, 19},   //左臂改造
+            {26, 19},  //右臂改造
+            {12, 25},  //左手植入
+            {20, 25},  //右手植入
+            {16, 28},  //腰椎接口
+            {12, 36},  //左腿改造
+            {20, 36},  //右腿改造
+            {12, 48},  //左足增强
+            {20, 48},  //右足增强
         };
 
         #endregion
@@ -193,7 +193,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
         /// </summary>
         public Vector2 GetNodeWorldPosition(int nodeIndex, Vector2 bodyOrigin) {
             float s = PixelScale;
-            Vector2 offset = bodyOrigin - new Vector2(16 * s, 29 * s);
+            Vector2 offset = bodyOrigin - new Vector2(16 * s, 28 * s);
             float breathe = MathF.Sin(breathePhase) * 0.8f;
             return offset + new Vector2(NodePositions[nodeIndex, 0] * s, NodePositions[nodeIndex, 1] * s + breathe);
         }
@@ -205,9 +205,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
             breathePhase += 0.02f;
             if (breathePhase > MathHelper.TwoPi) breathePhase -= MathHelper.TwoPi;
 
-            //扫描线从头到脚循环（0→58网格单位）
+            //扫描线从头到脚循环（0→56网格单位）
             scanLineY += 0.35f;
-            if (scanLineY > 62f) scanLineY = -4f;
+            if (scanLineY > 60f) scanLineY = -4f;
 
             //能量流动相位
             energyFlowPhase += 0.04f;
@@ -228,7 +228,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
 
             float breathe = MathF.Sin(breathePhase) * 0.8f;
             float s = PixelScale;
-            Vector2 bodyOffset = bodyOrigin - new Vector2(16 * s, 29 * s);
+            Vector2 bodyOffset = bodyOrigin - new Vector2(16 * s, 28 * s);
 
             //填充身体主要区域
             DrawBodyFill(sb, px, bodyOffset, s, alpha, breathe);
@@ -268,7 +268,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
             if (px == null) return;
 
             float s = PixelScale;
-            Vector2 bodyOffset = bodyOrigin - new Vector2(16 * s, 29 * s);
+            Vector2 bodyOffset = bodyOrigin - new Vector2(16 * s, 28 * s);
             float breathe = MathF.Sin(breathePhase) * 0.8f;
 
             for (int i = 0; i < NodeCount; i++) {
@@ -336,11 +336,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
         private void DrawSpineEnergyFlow(SpriteBatch sb, Texture2D px, Vector2 bodyOffset, float s, float alpha, float breathe, float globalTimer) {
             Texture2D glow = CWRAsset.SoftGlow?.Value;
 
-            //脊椎范围 y=6→y=34
+            //脊椎范围 y=6→y=28
             float spineX = 16 * s;
             const int particleCount = 5;
             float spineTop = 6f;
-            float spineBot = 34f;
+            float spineBot = 28f;
             float spineLen = spineBot - spineTop;
 
             for (int i = 0; i < particleCount; i++) {
@@ -369,8 +369,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
             }
 
             //额外：左右腿骨各2个流动粒子
-            DrawLimbEnergyParticles(sb, px, glow, bodyOffset, s, alpha, breathe, 12f, 35f, 55f); //左腿
-            DrawLimbEnergyParticles(sb, px, glow, bodyOffset, s, alpha, breathe, 20f, 35f, 55f); //右腿
+            DrawLimbEnergyParticles(sb, px, glow, bodyOffset, s, alpha, breathe, 12f, 29f, 52f); //左腿
+            DrawLimbEnergyParticles(sb, px, glow, bodyOffset, s, alpha, breathe, 20f, 29f, 52f); //右腿
         }
 
         /// <summary>
@@ -418,26 +418,26 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
             CyberwareTheme.FillGridRect(sb, px, offset, s, 13, 10, 6, 1, fillColor, breathe);  //锁骨
             CyberwareTheme.FillGridRect(sb, px, offset, s, 10, 11, 12, 1, fillColor, breathe); //肩中段
             CyberwareTheme.FillGridRect(sb, px, offset, s, 8, 12, 16, 2, fillColor, breathe);  //上胸
-            //躯干（分段填充匹配腰部收窄）
-            CyberwareTheme.FillGridRect(sb, px, offset, s, 10, 14, 12, 10, fillColor, breathe); //胸部 y14-24
-            CyberwareTheme.FillGridRect(sb, px, offset, s, 11, 24, 10, 7, fillColor, breathe);  //腰部 y24-31（窄）
-            CyberwareTheme.FillGridRect(sb, px, offset, s, 10, 31, 12, 4, fillColor, breathe);  //髋部 y31-35
+            //躯干（分段填充匹配缩短的躯干和腰部收窄）
+            CyberwareTheme.FillGridRect(sb, px, offset, s, 10, 14, 12, 7, fillColor, breathe); //胸部 y14-21
+            CyberwareTheme.FillGridRect(sb, px, offset, s, 11, 21, 10, 5, fillColor, breathe); //腰部 y21-26（窄）
+            CyberwareTheme.FillGridRect(sb, px, offset, s, 10, 26, 12, 3, fillColor, breathe); //髋部 y26-29
             //左臂（分段填充：上臂+前臂+手）
-            CyberwareTheme.FillGridRect(sb, px, offset, s, 5, 13, 3, 8, fillColor, breathe);    //上臂 y13-21
-            CyberwareTheme.FillGridRect(sb, px, offset, s, 5, 21, 2, 8, fillColor, breathe);    //前臂 y21-29
-            CyberwareTheme.FillGridRect(sb, px, offset, s, 4, 29, 5, 3, fillColor, breathe);    //手掌 y29-32
+            CyberwareTheme.FillGridRect(sb, px, offset, s, 5, 13, 3, 7, fillColor, breathe);   //上臂 y13-20
+            CyberwareTheme.FillGridRect(sb, px, offset, s, 5, 20, 2, 10, fillColor, breathe);  //前臂 y20-30
+            CyberwareTheme.FillGridRect(sb, px, offset, s, 4, 30, 5, 2, fillColor, breathe);   //手掌 y30-32
             //右臂
-            CyberwareTheme.FillGridRect(sb, px, offset, s, 24, 13, 3, 8, fillColor, breathe);   //上臂
-            CyberwareTheme.FillGridRect(sb, px, offset, s, 25, 21, 2, 8, fillColor, breathe);   //前臂
-            CyberwareTheme.FillGridRect(sb, px, offset, s, 24, 29, 5, 3, fillColor, breathe);   //手掌
+            CyberwareTheme.FillGridRect(sb, px, offset, s, 24, 13, 3, 7, fillColor, breathe);  //上臂
+            CyberwareTheme.FillGridRect(sb, px, offset, s, 25, 20, 2, 10, fillColor, breathe); //前臂
+            CyberwareTheme.FillGridRect(sb, px, offset, s, 24, 30, 5, 2, fillColor, breathe);  //手掌
             //左腿（分段：大腿+小腿+足）
-            CyberwareTheme.FillGridRect(sb, px, offset, s, 10, 35, 5, 12, fillColor, breathe);  //大腿+膝 y35-47
-            CyberwareTheme.FillGridRect(sb, px, offset, s, 11, 47, 3, 8, fillColor, breathe);   //小腿 y47-55
-            CyberwareTheme.FillGridRect(sb, px, offset, s, 9, 55, 7, 3, fillColor, breathe);    //足部 y55-58
+            CyberwareTheme.FillGridRect(sb, px, offset, s, 10, 29, 5, 13, fillColor, breathe); //大腿+膝 y29-42
+            CyberwareTheme.FillGridRect(sb, px, offset, s, 11, 42, 3, 10, fillColor, breathe); //小腿 y42-52
+            CyberwareTheme.FillGridRect(sb, px, offset, s, 9, 52, 8, 4, fillColor, breathe);   //足部 y52-56
             //右腿
-            CyberwareTheme.FillGridRect(sb, px, offset, s, 17, 35, 5, 12, fillColor, breathe);  //大腿+膝
-            CyberwareTheme.FillGridRect(sb, px, offset, s, 18, 47, 3, 8, fillColor, breathe);   //小腿
-            CyberwareTheme.FillGridRect(sb, px, offset, s, 16, 55, 7, 3, fillColor, breathe);   //足部
+            CyberwareTheme.FillGridRect(sb, px, offset, s, 17, 29, 5, 13, fillColor, breathe); //大腿+膝
+            CyberwareTheme.FillGridRect(sb, px, offset, s, 18, 42, 3, 10, fillColor, breathe); //小腿
+            CyberwareTheme.FillGridRect(sb, px, offset, s, 16, 52, 8, 4, fillColor, breathe);  //足部
         }
 
         #endregion
