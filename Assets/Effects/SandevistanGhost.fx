@@ -1,5 +1,4 @@
 sampler uImage0 : register(s0);
-float4 tintColor;
 float glowIntensity;
 
 float4 SandevistanPass(float2 coords : TEXCOORD0) : COLOR0
@@ -10,20 +9,19 @@ float4 SandevistanPass(float2 coords : TEXCOORD0) : COLOR0
     if (color.a < 0.01)
         return float4(0, 0, 0, 0);
 
-    //计算亮度
-    float luminance = dot(color.rgb, float3(0.299, 0.587, 0.114));
+    //RT内容为预乘alpha格式，还原为实际颜色以正确处理
+    float3 actual = color.rgb / max(color.a, 0.001);
 
-    //将原始颜色向青色调偏移
-    float3 tinted = lerp(color.rgb, luminance * tintColor.rgb, 0.7);
+    //基于亮度的辉光增强
+    float luminance = dot(actual, float3(0.299, 0.587, 0.114));
+    actual *= (1.0 + glowIntensity * luminance);
 
-    //根据亮度添加辉光，模拟Sandevistan的能量辉光效果
-    tinted += tintColor.rgb * glowIntensity * luminance;
+    //半透明边缘区域柔和光晕，模拟能量扩散
+    float edgeFactor = smoothstep(0.0, 0.15, color.a) * (1.0 - smoothstep(0.15, 0.5, color.a));
+    actual += actual * edgeFactor * 0.3;
 
-    //边缘增强 - 半透明区域产生柔和光晕
-    float edgeGlow = smoothstep(0.0, 0.3, color.a) * (1.0 - smoothstep(0.3, 0.8, color.a));
-    tinted += tintColor.rgb * edgeGlow * 0.2;
-
-    return float4(tinted, color.a * 0.85);
+    //重新预乘alpha输出
+    return float4(actual * color.a, color.a);
 }
 
 technique Technique1

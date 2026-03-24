@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
+using System.Collections.Generic;
 using Terraria;
 
 namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Skills.Sandevistans
@@ -9,54 +10,24 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Skills.Sandevistans
     /// <summary>
     /// 斯安威斯坦残影实体，每个实例代表一个玩家在某一帧的视觉快照。
     /// 使用 <see cref="ActorDrawLayer.BeforePlayers"/> 层级绘制，确保残影出现在玩家身后。
+    /// 绘制采用 RT 架构：所有残影先绘制到独立 RenderTarget，再通过着色器统一处理后合成到屏幕。
     /// </summary>
     internal class SandevistanGhostActor : Actor
     {
         private static Player ghostRenderPlayer;
+        private static RenderTarget2D ghostRT;
+        private static uint lastBatchDrawFrame;
 
-        /// <summary>
-        /// 玩家位置快照
-        /// </summary>
         public Vector2 SnapshotPosition;
-        /// <summary>
-        /// 玩家速度快照
-        /// </summary>
         public Vector2 SnapshotVelocity;
-        /// <summary>
-        /// 玩家朝向快照
-        /// </summary>
         public int SnapshotDirection;
-        /// <summary>
-        /// 身体帧快照
-        /// </summary>
         public Rectangle SnapshotBodyFrame;
-        /// <summary>
-        /// 腿部帧快照
-        /// </summary>
         public Rectangle SnapshotLegFrame;
-        /// <summary>
-        /// 完整旋转角度快照
-        /// </summary>
         public float SnapshotFullRotation;
-        /// <summary>
-        /// 旋转原点快照
-        /// </summary>
         public Vector2 SnapshotFullRotationOrigin;
-        /// <summary>
-        /// 拥有者玩家索引
-        /// </summary>
         public int OwnerIndex;
-        /// <summary>
-        /// 当前剩余生命帧数
-        /// </summary>
         public int Lifetime;
-        /// <summary>
-        /// 最大生命帧数
-        /// </summary>
         public int MaxLifetime;
-        /// <summary>
-        /// 当前透明度，基于生命周期自动计算（1=完全不透明，0=完全透明）
-        /// </summary>
         public float Alpha => Math.Clamp((float)Lifetime / MaxLifetime, 0f, 1f);
 
         public override void OnSpawn(params object[] args) {
@@ -64,7 +35,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Skills.Sandevistans
             Height = 4;
             DrawLayer = ActorDrawLayer.BeforePlayers;
             DrawExtendMode = 600;
-            MaxLifetime = 122;
+            MaxLifetime = 120;
             Lifetime = MaxLifetime;
 
             if (args is not null && args.Length >= 1 && args[0] is Player owner) {
@@ -92,59 +63,118 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Skills.Sandevistans
         }
 
         public override bool PreDraw(SpriteBatch spriteBatch, ref Color drawColor) {
-            if (Alpha <= 0.01f) {
+            //每帧只由第一个被绘制的残影触发一次批量RT渲染，后续残影直接跳过
+            if (Main.GameUpdateCount == lastBatchDrawFrame) {
+                return false;
+            }
+            lastBatchDrawFrame = Main.GameUpdateCount;
+
+            List<SandevistanGhostActor> ghosts = ActorLoader.GetActiveActors<SandevistanGhostActor>();
+            if (ghosts.Count == 0) {
                 return false;
             }
 
-            Player source = Main.player[OwnerIndex];
-            if (source == null || !source.active) {
-                return false;
-            }
+            GraphicsDevice gd = Main.graphics.GraphicsDevice;
+            EnsureRT(gd);
 
-            //结束 ActorLoader 启动的批次，准备切换到适合 PlayerRenderer 的批次设置
+            //保存当前渲染目标
+            RenderTargetBinding[] previousTargets = gd.GetRenderTargets();
+
+            //结束 ActorLoader 的批次
             spriteBatch.End();
+
+            // === Phase 1: 将所有残影绘制到独立RT ===
+            gd.SetRenderTarget(ghostRT);
+            gd.Clear(Color.Transparent);
+
+            //PlayerRenderer.DrawPlayer 内部管理自己的 Begin/End
+            //需要一个活跃批次让它的首次 End 不崩溃
             spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
                 SamplerState.PointClamp, null, Main.Rasterizer, null, Main.GameViewMatrix.ZoomMatrix);
 
-            //构建残影玩家 —— 复制完整视觉外观（装备、头发、皮肤变体等）
             ghostRenderPlayer ??= new Player();
-            Player gp = ghostRenderPlayer;
 
-            gp.CopyVisuals(source);
-            gp.ResetEffects();
-            gp.position = SnapshotPosition;
-            gp.velocity = SnapshotVelocity;
-            gp.direction = SnapshotDirection;
-            gp.bodyFrame = SnapshotBodyFrame;
-            gp.legFrame = SnapshotLegFrame;
-            gp.fullRotation = SnapshotFullRotation;
-            gp.fullRotationOrigin = SnapshotFullRotationOrigin;
-            gp.skinVariant = source.skinVariant;
-            gp.heldProj = -1;
+            foreach (SandevistanGhostActor ghost in ghosts) {
+                if (!ghost.Active || ghost.Alpha <= 0.01f) {
+                    continue;
+                }
 
-            //青色调着色，透明度随生命周期淡出
-            float fade = Alpha;
-            Color tint = new Color(0, 220, 255) * fade;
-            gp.skinColor = tint;
-            gp.shirtColor = tint;
-            gp.underShirtColor = tint;
-            gp.pantsColor = tint;
-            gp.shoeColor = tint;
-            gp.hairColor = tint;
-            gp.eyeColor = tint;
+                Player source = Main.player[ghost.OwnerIndex];
+                if (source == null || !source.active) {
+                    continue;
+                }
 
-            Main.PlayerRenderer.DrawPlayer(
-                Main.Camera, gp, gp.position,
-                gp.fullRotation, gp.fullRotationOrigin
-            );
+                Player gp = ghostRenderPlayer;
+                gp.CopyVisuals(source);
+                gp.ResetEffects();
+                gp.position = ghost.SnapshotPosition;
+                gp.velocity = ghost.SnapshotVelocity;
+                gp.direction = ghost.SnapshotDirection;
+                gp.bodyFrame = ghost.SnapshotBodyFrame;
+                gp.legFrame = ghost.SnapshotLegFrame;
+                gp.fullRotation = ghost.SnapshotFullRotation;
+                gp.fullRotationOrigin = ghost.SnapshotFullRotationOrigin;
+                gp.skinVariant = source.skinVariant;
+                gp.heldProj = -1;
 
-            //DrawPlayer 内部会管理自己的批次，绘制完毕后恢复 ActorLoader 所需的原始批次设置
+                //颜色渐变：蓝 → 青绿，RGB保持明亮，仅用A通道控制淡出
+                float fadeProgress = 1f - ghost.Alpha;
+                Color startColor = new Color(0, 180, 255, 255);
+                Color endColor = new Color(0, 255, 200, 255);
+                Color tint = Color.Lerp(startColor, endColor, fadeProgress);
+                tint.A = (byte)(255 * ghost.Alpha);
+
+                gp.skinColor = tint;
+                gp.shirtColor = tint;
+                gp.underShirtColor = tint;
+                gp.pantsColor = tint;
+                gp.shoeColor = tint;
+                gp.hairColor = tint;
+                gp.eyeColor = tint;
+
+                Main.PlayerRenderer.DrawPlayer(
+                    Main.Camera, gp, gp.position,
+                    gp.fullRotation, gp.fullRotationOrigin
+                );
+            }
+
+            //DrawPlayer 结束后会留一个活跃批次，关掉它
             spriteBatch.End();
+
+            // === Phase 2: 切换回原始RT，用着色器处理ghost RT后绘制到屏幕 ===
+            if (previousTargets.Length > 0) {
+                gd.SetRenderTarget((RenderTarget2D)previousTargets[0].RenderTarget);
+            }
+            else {
+                gd.SetRenderTarget(null);
+            }
+
+            spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend);
+
+            //Effect shader = SandevistanAssets.SandevistanGhost;
+            //if (shader != null) {
+            //    shader.Parameters["glowIntensity"]?.SetValue(0.4f);
+            //    shader.CurrentTechnique.Passes[0].Apply();
+            //}
+
+            spriteBatch.Draw(ghostRT, Vector2.Zero, Color.White);
+            spriteBatch.End();
+
+            //恢复 ActorLoader 所需的原始批次
             spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
                 Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer,
                 null, Main.GameViewMatrix.TransformationMatrix);
 
             return false;
+        }
+
+        private static void EnsureRT(GraphicsDevice gd) {
+            if (ghostRT == null || ghostRT.IsDisposed
+                || ghostRT.Width != Main.screenWidth || ghostRT.Height != Main.screenHeight) {
+                ghostRT?.Dispose();
+                ghostRT = new RenderTarget2D(gd, Main.screenWidth, Main.screenHeight,
+                    false, SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.PreserveContents);
+            }
         }
     }
 }

@@ -37,7 +37,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Skills.Sandevistans
             }
 
             spawnTimer++;
-            if (spawnTimer >= SpawnInterval) {
+            if (spawnTimer >= 4) {
                 spawnTimer = 0;
                 SpawnGhost(player);
             }
