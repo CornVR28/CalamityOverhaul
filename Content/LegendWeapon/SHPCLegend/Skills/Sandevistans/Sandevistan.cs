@@ -1,6 +1,8 @@
-﻿using InnoVault.Actors;
+﻿using CalamityOverhaul.Common;
+using InnoVault.Actors;
 using Microsoft.Xna.Framework;
 using Terraria;
+using Terraria.Audio;
 using Terraria.ModLoader;
 
 namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Skills.Sandevistans
@@ -24,7 +26,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Skills.Sandevistans
         private static int spawnTimer;
 
         private const float FadeInSpeed = 0.05f;
-        private const float FadeOutSpeed = 0.03f;
+        private const float FadeOutSpeed = 0.01f;
 
         /// <summary>
         /// 每隔多少帧生成一个残影（越小残影越密集）
@@ -37,9 +39,15 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Skills.Sandevistans
         public static void Update(Player player) {
             //屏幕效果强度平滑渐变
             if (IsActive) {
+                if (ScreenEffectIntensity == 0) {
+                    SoundEngine.PlaySound(CWRSound.SandevistanStart);
+                }
                 ScreenEffectIntensity = MathHelper.Min(ScreenEffectIntensity + FadeInSpeed, 1f);
             }
             else {
+                if (ScreenEffectIntensity == 1) {
+                    SoundEngine.PlaySound(CWRSound.SandevistanEnd);
+                }
                 ScreenEffectIntensity = MathHelper.Max(ScreenEffectIntensity - FadeOutSpeed, 0f);
             }
 
