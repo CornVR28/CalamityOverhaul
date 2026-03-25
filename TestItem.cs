@@ -81,8 +81,8 @@ namespace CalamityOverhaul
             //else {
             //    GargoyleSwarmPlayer.StartCutscene();
             //}
-            //Sandevistan.IsActive = !Sandevistan.IsActive;
-            CyberwareUI.Instance.Toggle();
+            Sandevistan.IsActive = !Sandevistan.IsActive;
+            //CyberwareUI.Instance.Toggle();
             return true;
         }
     }

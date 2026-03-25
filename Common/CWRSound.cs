@@ -91,5 +91,7 @@ namespace CalamityOverhaul.Common
         public static SoundStyle Rollout = new SoundStyle(CWRConstant.Asset + "Sounds/Rollout");
         public static SoundStyle INeedMorePower = new SoundStyle(CWRConstant.Asset + "Sounds/INeedMorePower");
         public static SoundStyle Thunder = new SoundStyle(CWRConstant.Asset + "Sounds/Thunder");
+        public static SoundStyle SandevistanEnd = new SoundStyle(CWRConstant.Asset + "Sounds/SandevistanEnd");
+        public static SoundStyle SandevistanStart = new SoundStyle(CWRConstant.Asset + "Sounds/SandevistanStart");
     }
 }
