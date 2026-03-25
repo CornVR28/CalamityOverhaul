@@ -6,8 +6,8 @@ using Terraria.ModLoader;
 namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Skills.Sandevistans
 {
     /// <summary>
-    /// 斯安威斯坦技能 - 赛博朋克2077的弹时间系统。
-    /// 负责管理残影的生成节奏与生命周期，以及屏幕效果的强度管理。
+    /// 斯安威斯坦技能
+    /// 负责管理残影的生成节奏与生命周期，以及屏幕效果的强度管理
     /// </summary>
     internal class Sandevistan : ModSystem
     {
