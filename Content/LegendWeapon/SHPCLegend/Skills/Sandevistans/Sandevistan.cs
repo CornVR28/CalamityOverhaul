@@ -43,6 +43,14 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Skills.Sandevistans
                 ScreenEffectIntensity = MathHelper.Max(ScreenEffectIntensity - FadeOutSpeed, 0f);
             }
 
+            //同步时缓系统的开关状态
+            if (IsActive && !SandevistanTimeSlow.IsActive) {
+                SandevistanTimeSlow.Activate();
+            }
+            else if (!IsActive && SandevistanTimeSlow.IsActive) {
+                SandevistanTimeSlow.Deactivate();
+            }
+
             if (!IsActive) {
                 spawnTimer = 0;
                 return;

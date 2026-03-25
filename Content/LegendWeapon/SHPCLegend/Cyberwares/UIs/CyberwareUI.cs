@@ -66,11 +66,20 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
 
         private bool isOpen;
         private float openProgress;
+        private bool isClosing;
+        private float closeAnimTimer;
         private float globalTimer;
         private float dataStreamPhase;
         private Rectangle panelRect;
         private Vector2 panelCenter;
         private Vector2 bodyOrigin;
+
+        //每帧由动画逻辑计算的中间值，Draw直接使用
+        private float currentWidthProgress;
+        private float currentHeightProgress;
+        private float currentAlpha;
+        private float currentContentAlpha;
+        private float closeLineGlow;
 
         #endregion
 
@@ -78,7 +87,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
 
         public static CyberwareUI Instance => UIHandleLoader.GetUIHandleOfType<CyberwareUI>();
 
-        public override bool Active => isOpen || openProgress > 0.01f;
+        public override bool Active => isOpen || openProgress > 0.01f || isClosing;
 
         #endregion
 
@@ -90,6 +99,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
         public void Open() {
             if (!isOpen) {
                 isOpen = true;
+                if (isClosing) {
+                    openProgress = Math.Max(0.05f, currentWidthProgress);
+                    isClosing = false;
+                    closeAnimTimer = 0f;
+                }
                 panelRenderer.TriggerGlitch(0.8f);
             }
         }
@@ -100,7 +114,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
         public void Close() {
             if (isOpen) {
                 isOpen = false;
-                panelRenderer.TriggerGlitch(0.4f);
+                isClosing = true;
+                closeAnimTimer = 0f;
+                panelRenderer.TriggerGlitch(0.6f);
             }
         }
 
@@ -117,7 +133,13 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
         #region 更新
 
         public override void Update() {
-            //开关过渡动画
+            //关闭动画独立处理
+            if (isClosing) {
+                UpdateCloseAnimation();
+                return;
+            }
+
+            //打开过渡动画
             float targetProgress = isOpen ? 1f : 0f;
             openProgress += (targetProgress - openProgress) * 0.12f;
             if (!isOpen && openProgress < 0.01f) openProgress = 0f;
@@ -128,10 +150,16 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
             dataStreamPhase += 0.03f;
             if (dataStreamPhase > MathHelper.TwoPi) dataStreamPhase -= MathHelper.TwoPi;
 
-            //计算面板布局
+            //计算面板布局（开启时宽高统一缩放）
             float easedProgress = CWRUtils.EaseOutCubic(Math.Clamp(openProgress, 0, 1));
-            float panelW = CyberwareTheme.PanelWidth * easedProgress;
-            float panelH = CyberwareTheme.PanelHeight * easedProgress;
+            currentWidthProgress = easedProgress;
+            currentHeightProgress = easedProgress;
+            currentAlpha = easedProgress;
+            currentContentAlpha = easedProgress;
+            closeLineGlow = 0f;
+
+            float panelW = CyberwareTheme.PanelWidth * currentWidthProgress;
+            float panelH = CyberwareTheme.PanelHeight * currentHeightProgress;
             panelCenter = new Vector2(Main.screenWidth / 2f, Main.screenHeight / 2f);
             panelRect = new Rectangle(
                 (int)(panelCenter.X - panelW / 2f),
@@ -157,35 +185,142 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
             }
         }
 
+        /// <summary>
+        ///关闭动画：Phase1纵向压缩（CRT关机效果）→ Phase2水平收缩消失（科幻亮线坍缩）
+        /// </summary>
+        private void UpdateCloseAnimation() {
+            const float closeSpeed = 0.038f;
+            const float phase1End = 0.6f;
+
+            float prevTimer = closeAnimTimer;
+            closeAnimTimer = Math.Min(closeAnimTimer + closeSpeed, 1f);
+
+            //Phase1→Phase2过渡瞬间触发故障闪烁
+            if (prevTimer < phase1End && closeAnimTimer >= phase1End) {
+                panelRenderer.TriggerGlitch(0.9f);
+            }
+
+            if (closeAnimTimer >= 1f) {
+                isClosing = false;
+                openProgress = 0f;
+                closeAnimTimer = 0f;
+                return;
+            }
+
+            float t = closeAnimTimer;
+
+            if (t < phase1End) {
+                //Phase1：面板纵向压缩为细线，内容快速淡出
+                float p = t / phase1End;
+                float hp = CWRUtils.EaseInCubic(p);
+                currentHeightProgress = Math.Max(0.007f, 1f - hp);
+                currentWidthProgress = 1f - p * 0.015f;
+                currentAlpha = 1f - p * 0.1f;
+                currentContentAlpha = Math.Max(0f, 1f - p * 3.5f);
+                closeLineGlow = p * 0.5f;
+            }
+            else {
+                //Phase2：细线水平坍缩+亮线闪烁消散
+                float p = (t - phase1End) / (1f - phase1End);
+                float wp = CWRUtils.EaseInQuad(p);
+                currentHeightProgress = 0.007f;
+                currentWidthProgress = (1f - 0.015f) * (1f - wp);
+                currentAlpha = 0.9f * (1f - wp);
+                currentContentAlpha = 0f;
+                closeLineGlow = (1f - p) * 1.5f;
+            }
+
+            //推进计时器
+            globalTimer += 0.016f;
+            dataStreamPhase += 0.03f;
+            if (dataStreamPhase > MathHelper.TwoPi) dataStreamPhase -= MathHelper.TwoPi;
+
+            //计算面板布局
+            panelCenter = new Vector2(Main.screenWidth / 2f, Main.screenHeight / 2f);
+            float panelW = CyberwareTheme.PanelWidth * currentWidthProgress;
+            float panelH = Math.Max(3, CyberwareTheme.PanelHeight * currentHeightProgress);
+            panelRect = new Rectangle(
+                (int)(panelCenter.X - panelW / 2f),
+                (int)(panelCenter.Y - panelH / 2f),
+                (int)panelW, (int)panelH
+            );
+            bodyOrigin = panelCenter + new Vector2(0, 5);
+
+            //子渲染器继续更新
+            bodyRenderer.Update();
+            panelRenderer.Update();
+            particleSystem.Update(bodyOrigin, currentAlpha);
+        }
+
         #endregion
 
         #region 绘制
 
         public override void Draw(SpriteBatch spriteBatch) {
-            if (openProgress < 0.01f) return;
-            float alpha = CWRUtils.EaseOutCubic(Math.Clamp(openProgress, 0, 1));
+            if (!isClosing && openProgress < 0.01f) return;
 
             //刷新本地化缓存
             RefreshSlotLabelCache();
 
-            //逐层绘制
-            panelRenderer.DrawFullScreenDim(spriteBatch, alpha);
-            panelRenderer.DrawBackground(spriteBatch, alpha, panelRect, panelCenter, globalTimer);
-            panelRenderer.DrawGrid(spriteBatch, alpha, panelRect);
-            panelRenderer.DrawScanLines(spriteBatch, alpha, panelRect);
+            //面板底层（背景、网格、扫描线）
+            panelRenderer.DrawFullScreenDim(spriteBatch, currentAlpha);
+            panelRenderer.DrawBackground(spriteBatch, currentAlpha, panelRect, panelCenter, globalTimer);
+            panelRenderer.DrawGrid(spriteBatch, currentAlpha, panelRect);
+            panelRenderer.DrawScanLines(spriteBatch, currentAlpha, panelRect);
 
-            bodyRenderer.DrawBody(spriteBatch, alpha, bodyOrigin, globalTimer);
-            bodyRenderer.DrawNodes(spriteBatch, alpha, bodyOrigin, slotRenderer.ComputeNodeStates());
+            //内容层（人体、槽位、标题）—— 关闭时快速淡出
+            if (currentContentAlpha > 0.01f) {
+                bodyRenderer.DrawBody(spriteBatch, currentContentAlpha, bodyOrigin, globalTimer);
+                bodyRenderer.DrawNodes(spriteBatch, currentContentAlpha, bodyOrigin, slotRenderer.ComputeNodeStates());
 
-            slotRenderer.DrawConnectors(spriteBatch, alpha, panelRect, bodyRenderer, bodyOrigin, dataStreamPhase);
-            slotRenderer.DrawSlots(spriteBatch, alpha, panelRect, slotLabelCache,
-                SlotSelectedText.Value, SlotEmptyText.Value);
+                slotRenderer.DrawConnectors(spriteBatch, currentContentAlpha, panelRect, bodyRenderer, bodyOrigin, dataStreamPhase);
+                slotRenderer.DrawSlots(spriteBatch, currentContentAlpha, panelRect, slotLabelCache,
+                    SlotSelectedText.Value, SlotEmptyText.Value);
 
-            panelRenderer.DrawTitleAndDecor(spriteBatch, alpha, panelRect, panelCenter,
-                globalTimer, TitleText.Value, StatusText.Value);
+                panelRenderer.DrawTitleAndDecor(spriteBatch, currentContentAlpha, panelRect, panelCenter,
+                    globalTimer, TitleText.Value, StatusText.Value);
+            }
 
-            particleSystem.Draw(spriteBatch, alpha);
-            panelRenderer.DrawGlitchEffect(spriteBatch, alpha, panelRect);
+            particleSystem.Draw(spriteBatch, currentAlpha);
+            panelRenderer.DrawGlitchEffect(spriteBatch, currentAlpha, panelRect);
+
+            //关闭动画的科幻亮线效果
+            if (isClosing && closeLineGlow > 0.01f) {
+                DrawCloseEffectLine(spriteBatch);
+            }
+        }
+
+        /// <summary>
+        ///绘制关闭动画的水平科幻光线（CRT关机风格的亮线坍缩）
+        /// </summary>
+        private void DrawCloseEffectLine(SpriteBatch spriteBatch) {
+            Texture2D px = CWRAsset.Placeholder_White?.Value;
+            if (px == null) return;
+
+            float glow = Math.Min(closeLineGlow, 1f);
+            int lineY = (int)panelCenter.Y;
+            int lineX = panelRect.X;
+            int lineW = panelRect.Width;
+
+            //核心亮线
+            Color lineColor = CyberwareTheme.Accent * glow;
+            spriteBatch.Draw(px, new Rectangle(lineX, lineY - 1, lineW, 3),
+                new Rectangle(0, 0, 1, 1), lineColor);
+
+            //外层柔光
+            Color softColor = CyberwareTheme.Accent * (glow * 0.35f);
+            spriteBatch.Draw(px, new Rectangle(lineX, lineY - 5, lineW, 11),
+                new Rectangle(0, 0, 1, 1), softColor);
+
+            //SoftGlow纹理增强发光感
+            Texture2D glowTex = CWRAsset.SoftGlow?.Value;
+            if (glowTex != null) {
+                Color addGlow = CyberwareTheme.Accent * (glow * 0.5f);
+                addGlow.A = 0;
+                float scaleX = Math.Max(0.01f, lineW / 80f);
+                spriteBatch.Draw(glowTex, panelCenter, null, addGlow, 0,
+                    glowTex.Size() / 2, new Vector2(scaleX, 0.2f), SpriteEffects.None, 0);
+            }
         }
 
         private void RefreshSlotLabelCache() {
