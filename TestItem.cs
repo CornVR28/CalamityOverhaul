@@ -1,6 +1,7 @@
 ﻿#if DEBUG
 using CalamityOverhaul.Content.ADV.Scenarios;
 using CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machines;
+using CalamityOverhaul.Content.ADV.Scenarios.Shepel;
 using CalamityOverhaul.Content.ADV.Scenarios.SupCal.End.EternalBlazingNows;
 using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs;
 using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Skills.Sandevistans;
@@ -81,8 +82,10 @@ namespace CalamityOverhaul
             //else {
             //    GargoyleSwarmPlayer.StartCutscene();
             //}
-            Sandevistan.IsActive = !Sandevistan.IsActive;
+            //Sandevistan.IsActive = !Sandevistan.IsActive;
             //CyberwareUI.Instance.Toggle();
+            ScenarioManager.Reset<FirstMetShepel>();
+            ScenarioManager.Start<FirstMetShepel>();
             return true;
         }
     }
