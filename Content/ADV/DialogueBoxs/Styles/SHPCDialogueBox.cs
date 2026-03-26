@@ -304,17 +304,30 @@ namespace CalamityOverhaul.Content.ADV.DialogueBoxs.Styles
             //左侧霓虹数据流线
             DrawLeftDataLines(spriteBatch, panelRect, alpha);
 
-            //缓慢扫描线（多条拖影，增强质感）
+            //缓慢扫描线（带辉光扩散的宽扫描带，增强实体质感）
             float scanY = panelRect.Y + sweepTimer * panelRect.Height;
-            for (int row = 0; row <= 4; row++) {
+            for (int row = -6; row <= 6; row++) {
                 float iy = scanY + row * 1.5f;
                 if (iy < panelRect.Y || iy > panelRect.Bottom) continue;
-                float fade = 1f - row * 0.22f;
+                float dist = Math.Abs(row) / 6f;
+                float fade = (1f - dist) * (1f - dist);
                 spriteBatch.Draw(px,
                     new Rectangle(panelRect.X + 6, (int)iy, panelRect.Width - 12, 1),
                     new Rectangle(0, 0, 1, 1),
-                    new Color(60, 120, 220) * (alpha * 0.16f * fade));
+                    new Color(55, 120, 220) * (alpha * 0.22f * fade));
             }
+
+            //顶部标题区域暗化条带（头像/名称区域背景加深，区分功能层级）
+            int headerH = 32;
+            spriteBatch.Draw(px,
+                new Rectangle(panelRect.X + 5, panelRect.Y + 5, panelRect.Width - 10, headerH),
+                new Rectangle(0, 0, 1, 1),
+                new Color(4, 3, 12) * (alpha * 0.25f));
+            //标题区域底线
+            spriteBatch.Draw(px,
+                new Rectangle(panelRect.X + 8, panelRect.Y + 5 + headerH, panelRect.Width - 16, 1),
+                new Rectangle(0, 0, 1, 1),
+                new Color(45, 80, 160) * (alpha * 0.12f));
 
             //不对称重边框（替代均匀薄框）
             DrawNeonFrame(spriteBatch, panelRect, alpha);
@@ -348,12 +361,13 @@ namespace CalamityOverhaul.Content.ADV.DialogueBoxs.Styles
         #region 样式工具函数
 
         /// <summary>
-        /// 深紫黑渐变背景+碳纤维对角线纹理+二进制矩阵底纹+全息闪烁叠层+内嵌面板
+        /// 深紫黑渐变背景+碳纤维交叉编织纹理+水平磨砂微纹+二进制矩阵底纹
+        /// +面板接缝线+内嵌斜面光照(上左亮/下右暗)+边缘暗角+全息闪烁叠层
         /// </summary>
         private void DrawCyberMaidBackground(SpriteBatch sb, Rectangle rect, float alpha) {
             Texture2D px = VaultAsset.placeholder2.Value;
 
-            //纵向渐变（深紫黑到深海蓝，32段，高不透明度）
+            // ── 1. 纵向渐变（32段，深紫黑→深海蓝，高不透明度）──
             int segs = 32;
             for (int i = 0; i < segs; i++) {
                 float t = i / (float)segs;
@@ -366,76 +380,122 @@ namespace CalamityOverhaul.Content.ADV.DialogueBoxs.Styles
                 Color botDark = new Color(6, 10, 24);
                 Color mid = Color.Lerp(topDark, botDark, t);
                 Color bright = Color.Lerp(new Color(16, 14, 34), new Color(12, 22, 42), t);
-                Color c = Color.Lerp(mid, bright, pulse * 0.45f) * (alpha * 0.95f);
+                Color c = Color.Lerp(mid, bright, pulse * 0.5f) * (alpha * 0.97f);
 
                 sb.Draw(px, new Rectangle(rect.X, y1, rect.Width, Math.Max(1, y2 - y1)),
                     new Rectangle(0, 0, 1, 1), c);
             }
 
-            //碳纤维对角线纹理（45°交叉细线，给予实体质感）
-            int dSpacing = 16;
-            float dPhase = dataFlowTimer * 10f;
-            Color diagColor = new Color(30, 50, 100) * (alpha * 0.04f);
-            for (int col = -(rect.Height / dSpacing) - 1; col < (rect.Width / dSpacing) + 2; col++) {
+            // ── 2. 碳纤维交叉编织纹理（双向45°交叉，间距更密，可见度更高）──
+            int dSpacing = 14;
+            float dPhase = dataFlowTimer * 8f;
+            Color diagColorA = new Color(35, 55, 110) * (alpha * 0.065f);
+            Color diagColorB = new Color(28, 45, 95) * (alpha * 0.045f);
+            for (int col = -(rect.Height / dSpacing) - 2; col < (rect.Width / dSpacing) + 3; col++) {
                 int ox = (int)(col * dSpacing + dPhase % dSpacing);
                 for (int row = 0; row < rect.Height; row += 2) {
                     int px2 = rect.X + ox + row;
                     if (px2 >= rect.X && px2 < rect.Right)
-                        sb.Draw(px, new Rectangle(px2, rect.Y + row, 1, 1), new Rectangle(0, 0, 1, 1), diagColor);
-                    int px3 = rect.X + ox - row;
+                        sb.Draw(px, new Rectangle(px2, rect.Y + row, 1, 1), new Rectangle(0, 0, 1, 1), diagColorA);
+                    int px3 = rect.X + ox - row + rect.Height;
                     if (px3 >= rect.X && px3 < rect.Right)
-                        sb.Draw(px, new Rectangle(px3, rect.Y + row, 1, 1), new Rectangle(0, 0, 1, 1), diagColor * 0.6f);
+                        sb.Draw(px, new Rectangle(px3, rect.Y + row, 1, 1), new Rectangle(0, 0, 1, 1), diagColorB);
                 }
             }
 
-            //二进制矩阵底纹（更密、更可见的点阵）
-            int gridSpacingX = 10;
-            int gridSpacingY = 8;
-            float matrixPhase = dataFlowTimer * 10f;
-            Color matrixColor = new Color(50, 70, 140) * (alpha * 0.055f);
+            // ── 3. 水平磨砂微纹线（模拟金属面板横向拉丝质感）──
+            for (int row = 0; row < rect.Height; row += 3) {
+                float rowBright = (row % 6 == 0) ? 0.035f : 0.018f;
+                sb.Draw(px, new Rectangle(rect.X + 5, rect.Y + row, rect.Width - 10, 1),
+                    new Rectangle(0, 0, 1, 1), new Color(30, 50, 90) * (alpha * rowBright));
+            }
+
+            // ── 4. 二进制矩阵底纹（更密、更可见的活跃数据点阵）──
+            int gridSpacingX = 8;
+            int gridSpacingY = 7;
+            float matrixPhase = dataFlowTimer * 12f;
+            Color matrixColor = new Color(55, 80, 150) * (alpha * 0.075f);
             for (int col = 0; col < rect.Width / gridSpacingX; col++) {
-                int cx = rect.X + col * gridSpacingX + 5;
-                if (cx >= rect.Right - 5) continue;
+                int cx = rect.X + col * gridSpacingX + 4;
+                if (cx >= rect.Right - 4) continue;
                 float colPhase = matrixPhase + col * 0.7f;
                 for (int row = 0; row < rect.Height / gridSpacingY; row++) {
                     int cy = rect.Y + row * gridSpacingY + 3;
                     if (cy >= rect.Bottom - 3) continue;
                     float hash = MathF.Sin(col * 13.7f + row * 7.3f + colPhase) * 0.5f + 0.5f;
-                    if (hash > 0.5f) {
+                    if (hash > 0.42f) {
+                        float dotAlpha = (hash - 0.42f) / 0.58f;
                         sb.Draw(px, new Rectangle(cx, cy, 1, 1),
-                            new Rectangle(0, 0, 1, 1), matrixColor * hash);
+                            new Rectangle(0, 0, 1, 1), matrixColor * dotAlpha);
                     }
                 }
             }
 
-            //内嵌面板效果（内缩6px的微弱亮边，增添层次深度感）
+            // ── 5. 面板接缝线（每55px一条水平凹槽：暗线+下方高光反射线）──
+            Color seamDark = new Color(3, 4, 10) * (alpha * 0.35f);
+            Color seamLight = new Color(55, 85, 155) * (alpha * 0.06f);
+            for (int sy = rect.Y + 55; sy < rect.Bottom - 20; sy += 55) {
+                sb.Draw(px, new Rectangle(rect.X + 8, sy, rect.Width - 16, 1),
+                    new Rectangle(0, 0, 1, 1), seamDark);
+                sb.Draw(px, new Rectangle(rect.X + 8, sy + 1, rect.Width - 16, 1),
+                    new Rectangle(0, 0, 1, 1), seamLight);
+            }
+
+            // ── 6. 内嵌斜面光照（上/左高光 + 下/右阴影 —— 立体感核心）──
             Rectangle inset = rect;
             inset.Inflate(-6, -6);
-            Color insetEdge = new Color(40, 70, 140) * (alpha * 0.12f);
-            sb.Draw(px, new Rectangle(inset.X, inset.Y, inset.Width, 1), new Rectangle(0, 0, 1, 1), insetEdge);
-            sb.Draw(px, new Rectangle(inset.X, inset.Bottom - 1, inset.Width, 1), new Rectangle(0, 0, 1, 1), insetEdge * 0.5f);
-            sb.Draw(px, new Rectangle(inset.X, inset.Y, 1, inset.Height), new Rectangle(0, 0, 1, 1), insetEdge * 0.7f);
-            sb.Draw(px, new Rectangle(inset.Right - 1, inset.Y, 1, inset.Height), new Rectangle(0, 0, 1, 1), insetEdge * 0.4f);
+            Color bevelLight = new Color(55, 90, 170) * (alpha * 0.18f);
+            Color bevelShadow = new Color(2, 3, 8) * (alpha * 0.4f);
+            // 上边高光（2px渐弱）
+            sb.Draw(px, new Rectangle(inset.X, inset.Y, inset.Width, 1), new Rectangle(0, 0, 1, 1), bevelLight);
+            sb.Draw(px, new Rectangle(inset.X, inset.Y + 1, inset.Width, 1), new Rectangle(0, 0, 1, 1), bevelLight * 0.45f);
+            // 左边高光（2px渐弱）
+            sb.Draw(px, new Rectangle(inset.X, inset.Y, 1, inset.Height), new Rectangle(0, 0, 1, 1), bevelLight * 0.8f);
+            sb.Draw(px, new Rectangle(inset.X + 1, inset.Y, 1, inset.Height), new Rectangle(0, 0, 1, 1), bevelLight * 0.3f);
+            // 下边阴影（2px渐弱）
+            sb.Draw(px, new Rectangle(inset.X, inset.Bottom - 1, inset.Width, 1), new Rectangle(0, 0, 1, 1), bevelShadow);
+            sb.Draw(px, new Rectangle(inset.X, inset.Bottom - 2, inset.Width, 1), new Rectangle(0, 0, 1, 1), bevelShadow * 0.5f);
+            // 右边阴影（2px渐弱）
+            sb.Draw(px, new Rectangle(inset.Right - 1, inset.Y, 1, inset.Height), new Rectangle(0, 0, 1, 1), bevelShadow * 0.75f);
+            sb.Draw(px, new Rectangle(inset.Right - 2, inset.Y, 1, inset.Height), new Rectangle(0, 0, 1, 1), bevelShadow * 0.3f);
 
-            //全息闪烁叠层（偏紫色）
+            // ── 7. 边缘暗角（vignette：四边内侧渐暗条带，增加面板纵深）──
+            int vigW = 28;
+            for (int v = 0; v < vigW; v += 3) {
+                float vFade = (1f - (float)v / vigW) * 0.14f;
+                Color vColor = new Color(2, 2, 8) * (alpha * vFade);
+                int thickness = Math.Max(1, 3 - v / 10);
+                sb.Draw(px, new Rectangle(rect.X + v, rect.Y, thickness, rect.Height), new Rectangle(0, 0, 1, 1), vColor);
+                sb.Draw(px, new Rectangle(rect.Right - v - thickness, rect.Y, thickness, rect.Height), new Rectangle(0, 0, 1, 1), vColor);
+            }
+            int vigH = 18;
+            for (int v = 0; v < vigH; v += 3) {
+                float vFade = (1f - (float)v / vigH) * 0.11f;
+                Color vColor = new Color(2, 2, 8) * (alpha * vFade);
+                int thickness = Math.Max(1, 3 - v / 8);
+                sb.Draw(px, new Rectangle(rect.X, rect.Y + v, rect.Width, thickness), new Rectangle(0, 0, 1, 1), vColor);
+                sb.Draw(px, new Rectangle(rect.X, rect.Bottom - v - thickness, rect.Width, thickness), new Rectangle(0, 0, 1, 1), vColor);
+            }
+
+            // ── 8. 全息闪烁叠层（偏紫色）──
             float flicker = MathF.Sin(holoFlicker * 1.5f) * 0.5f + 0.5f;
             sb.Draw(px, rect, new Rectangle(0, 0, 1, 1),
-                new Color(14, 10, 32) * (alpha * 0.2f * flicker));
+                new Color(14, 10, 32) * (alpha * 0.22f * flicker));
         }
 
         /// <summary>
-        /// 左侧边缘的竖向霓虹数据流线（3条，加宽增亮，增强实体感）
+        /// 左侧边缘的竖向霓虹数据流线（3条，加宽增亮，带辉光侧翼扩散）
         /// </summary>
         private void DrawLeftDataLines(SpriteBatch sb, Rectangle rect, float alpha) {
             Texture2D px = VaultAsset.placeholder2.Value;
-            int[] xOffsets = [8, 14, 21];
-            int[] widths = [2, 1, 2];
+            int[] xOffsets = [8, 15, 22];
+            int[] widths = [3, 2, 3];
 
             for (int lineIdx = 0; lineIdx < 3; lineIdx++) {
                 int lx = rect.X + xOffsets[lineIdx];
                 int lw = widths[lineIdx];
                 float phase = dataLinePhases[lineIdx];
-                int lineLen = (int)(rect.Height * 0.5f);
+                int lineLen = (int)(rect.Height * 0.55f);
                 int startY = rect.Y + (int)(phase * rect.Height);
 
                 for (int dy = 0; dy < lineLen; dy++) {
@@ -444,61 +504,101 @@ namespace CalamityOverhaul.Content.ADV.DialogueBoxs.Styles
                     if (py < rect.Y || py >= rect.Bottom) continue;
 
                     float t = dy / (float)lineLen;
-                    float brightness = MathF.Sin(t * MathHelper.Pi) * 0.7f + 0.2f;
+                    float brightness = MathF.Sin(t * MathHelper.Pi) * 0.75f + 0.22f;
                     Color c = Color.Lerp(new Color(50, 130, 255), new Color(130, 80, 220), t)
-                        * (alpha * brightness * 0.55f);
+                        * (alpha * brightness * 0.62f);
+                    // 主线
                     sb.Draw(px, new Rectangle(lx, py, lw, 1), new Rectangle(0, 0, 1, 1), c);
+                    // 左右侧翼辉光
+                    sb.Draw(px, new Rectangle(lx - 1, py, 1, 1), new Rectangle(0, 0, 1, 1), c * 0.22f);
+                    sb.Draw(px, new Rectangle(lx + lw, py, 1, 1), new Rectangle(0, 0, 1, 1), c * 0.22f);
                 }
             }
 
-            //左侧竖向强调底条（常驻，给予面板左边缘重量感）
-            Color barTop = new Color(50, 130, 255) * (alpha * 0.2f);
-            Color barBot = new Color(90, 60, 180) * (alpha * 0.08f);
+            // 左侧竖向强调底条（常驻，加宽至2px，给面板左边缘重量感）
+            Color barTop = new Color(50, 130, 255) * (alpha * 0.25f);
+            Color barBot = new Color(90, 60, 180) * (alpha * 0.1f);
             int barH = rect.Height / 2;
-            sb.Draw(px, new Rectangle(rect.X + 5, rect.Y + 8, 1, barH), new Rectangle(0, 0, 1, 1), barTop);
-            sb.Draw(px, new Rectangle(rect.X + 5, rect.Y + 8 + barH, 1, rect.Height - barH - 16), new Rectangle(0, 0, 1, 1), barBot);
+            sb.Draw(px, new Rectangle(rect.X + 5, rect.Y + 8, 2, barH), new Rectangle(0, 0, 1, 1), barTop);
+            sb.Draw(px, new Rectangle(rect.X + 5, rect.Y + 8 + barH, 2, rect.Height - barH - 16), new Rectangle(0, 0, 1, 1), barBot);
         }
 
         /// <summary>
-        /// 不对称重边框：顶部3px+1px双层强调 + 左侧4px渐变强调条 + 轻量右/底线 + 顶部刻痕
+        /// 不对称重边框：外侧辉光溢出 + 顶部3px+1px双层强调 + 内侧暗沟斜面
+        /// + 左侧4px渐变强调条含辉光扩散 + 加厚右/底线 + 顶部刻痕
         /// </summary>
         private void DrawNeonFrame(SpriteBatch sb, Rectangle rect, float alpha) {
             Texture2D px = VaultAsset.placeholder2.Value;
             float pulse = MathF.Sin(neonPulseTimer * 1.1f) * 0.2f + 0.8f;
 
-            //顶部主强调线（3px亮 + 1px暗，不对称重点设计）
-            Color topBright = new Color(55, 155, 255) * (alpha * 0.95f * pulse);
-            Color topDim = new Color(35, 90, 190) * (alpha * 0.45f);
+            // ── 外侧辉光溢出（在边框线之前绘制，产生发光"溢出"效果）──
+            // 顶部辉光向上扩散（4层渐弱）
+            for (int g = 1; g <= 4; g++) {
+                float gAlpha = (1f - g / 5f) * 0.16f;
+                sb.Draw(px, new Rectangle(rect.X, rect.Y - g, rect.Width, 1),
+                    new Rectangle(0, 0, 1, 1), new Color(50, 140, 255) * (alpha * gAlpha * pulse));
+            }
+            // 左侧辉光向左扩散（3层渐弱）
+            for (int g = 1; g <= 3; g++) {
+                float gAlpha = (1f - g / 4f) * 0.12f;
+                sb.Draw(px, new Rectangle(rect.X - g, rect.Y, 1, rect.Height),
+                    new Rectangle(0, 0, 1, 1), new Color(50, 140, 255) * (alpha * gAlpha * pulse));
+            }
+
+            // ── 顶部主强调线（3px亮 + 1px暗）──
+            Color topBright = new Color(55, 155, 255) * (alpha * 0.97f * pulse);
+            Color topDim = new Color(35, 90, 190) * (alpha * 0.48f);
             sb.Draw(px, new Rectangle(rect.X, rect.Y, rect.Width, 3), new Rectangle(0, 0, 1, 1), topBright);
             sb.Draw(px, new Rectangle(rect.X, rect.Y + 3, rect.Width, 1), new Rectangle(0, 0, 1, 1), topDim);
 
-            //顶部流动亮暗变化层（在3px线之上叠加波动）
+            // ── 顶部线内侧暗沟（斜面效果—亮线下方的暗线形成凹槽感）──
+            sb.Draw(px, new Rectangle(rect.X + 5, rect.Y + 4, rect.Width - 10, 1),
+                new Rectangle(0, 0, 1, 1), new Color(3, 5, 12) * (alpha * 0.5f));
+
+            // ── 顶部流动波纹（在3px线之上叠加波动的明暗变化）──
             for (int x = rect.X; x < rect.Right; x += 4) {
                 float t = (float)(x - rect.X) / rect.Width;
-                float wave = MathF.Sin(neonPulseTimer * 2.5f + t * MathHelper.TwoPi * 1.5f) * 0.3f + 0.7f;
+                float wave = MathF.Sin(neonPulseTimer * 2.5f + t * MathHelper.TwoPi * 1.5f) * 0.35f + 0.65f;
                 int w = Math.Min(4, rect.Right - x);
                 sb.Draw(px, new Rectangle(x, rect.Y, w, 2), new Rectangle(0, 0, 1, 1),
-                    new Color(80, 180, 255) * (alpha * 0.3f * wave * pulse));
+                    new Color(80, 180, 255) * (alpha * 0.35f * wave * pulse));
             }
 
-            //左侧强调竖条（4px全高，上亮下暗渐变——给面板左侧重量）
+            // ── 左侧强调竖条（4px）+ 辉光向右扩散 ──
             int halfH = rect.Height / 2;
-            Color leftBright = new Color(50, 150, 255) * (alpha * 0.75f * pulse);
-            Color leftDim = new Color(80, 60, 170) * (alpha * 0.35f);
+            Color leftBright = new Color(50, 150, 255) * (alpha * 0.78f * pulse);
+            Color leftDim = new Color(80, 60, 170) * (alpha * 0.38f);
             sb.Draw(px, new Rectangle(rect.X, rect.Y, 4, halfH), new Rectangle(0, 0, 1, 1), leftBright);
             sb.Draw(px, new Rectangle(rect.X, rect.Y + halfH, 4, rect.Height - halfH), new Rectangle(0, 0, 1, 1), leftDim);
+            // 向右扩散辉光（渐弱条带）
+            for (int g = 1; g <= 4; g++) {
+                float gAlpha = (1f - g / 5f) * 0.09f;
+                int gH = Math.Max(20, halfH - g * 12);
+                sb.Draw(px, new Rectangle(rect.X + 4 + g, rect.Y + 4, g, gH),
+                    new Rectangle(0, 0, 1, 1), new Color(45, 130, 240) * (alpha * gAlpha * pulse));
+            }
+            // 左侧内侧暗沟
+            sb.Draw(px, new Rectangle(rect.X + 4, rect.Y + 5, 1, rect.Height - 10),
+                new Rectangle(0, 0, 1, 1), new Color(3, 5, 12) * (alpha * 0.35f));
 
-            //右侧细线（1px，低调）
+            // ── 右侧双线（1px主线 + 1px辉光）──
             sb.Draw(px, new Rectangle(rect.Right - 1, rect.Y, 1, rect.Height),
-                new Rectangle(0, 0, 1, 1), new Color(50, 70, 140) * (alpha * 0.4f));
+                new Rectangle(0, 0, 1, 1), new Color(50, 70, 140) * (alpha * 0.48f));
+            sb.Draw(px, new Rectangle(rect.Right - 2, rect.Y, 1, rect.Height),
+                new Rectangle(0, 0, 1, 1), new Color(40, 55, 120) * (alpha * 0.18f));
+            // 右侧内侧暗沟
+            sb.Draw(px, new Rectangle(rect.Right - 3, rect.Y + 5, 1, rect.Height - 10),
+                new Rectangle(0, 0, 1, 1), new Color(2, 3, 8) * (alpha * 0.25f));
 
-            //底部细线（1px实线 + 1px紫调）
+            // ── 底部三层线（1px实线 + 1px紫调 + 内暗沟）──
             sb.Draw(px, new Rectangle(rect.X, rect.Bottom - 1, rect.Width, 1),
-                new Rectangle(0, 0, 1, 1), new Color(40, 80, 180) * (alpha * 0.4f));
+                new Rectangle(0, 0, 1, 1), new Color(40, 80, 180) * (alpha * 0.48f));
             sb.Draw(px, new Rectangle(rect.X, rect.Bottom - 2, rect.Width, 1),
-                new Rectangle(0, 0, 1, 1), new Color(80, 55, 150) * (alpha * 0.2f));
+                new Rectangle(0, 0, 1, 1), new Color(80, 55, 150) * (alpha * 0.25f));
+            sb.Draw(px, new Rectangle(rect.X + 5, rect.Bottom - 3, rect.Width - 10, 1),
+                new Rectangle(0, 0, 1, 1), new Color(2, 3, 8) * (alpha * 0.3f));
 
-            //顶部左侧刻痕（机械装饰感，短竖线渐弱排列）
+            // ── 顶部左侧刻痕（机械装饰感）──
             sb.Draw(px, new Rectangle(rect.X + 5, rect.Y, 1, 10), new Rectangle(0, 0, 1, 1), topBright * 0.8f);
             sb.Draw(px, new Rectangle(rect.X + 20, rect.Y, 1, 7), new Rectangle(0, 0, 1, 1), topBright * 0.5f);
             sb.Draw(px, new Rectangle(rect.X + 34, rect.Y, 1, 4), new Rectangle(0, 0, 1, 1), topBright * 0.3f);
