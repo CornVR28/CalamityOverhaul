@@ -654,6 +654,8 @@ namespace CalamityOverhaul.Content.ADV.DialogueBoxs
         internal readonly Queue<DialogueSegment> queue = new();
         internal DialogueSegment current;
         protected string[] wrappedLines = Array.Empty<string>();
+        //折行后实际可显示的总字符数（不含换行符和被裁剪的字符）
+        protected int wrappedTotalChars = 0;
         protected int visibleCharCount = 0;
         protected int typeTimer = 0;
         protected const int TypeInterval = 2;
@@ -1077,6 +1079,7 @@ namespace CalamityOverhaul.Content.ADV.DialogueBoxs
         protected virtual void WrapCurrent() {
             if (current == null) {
                 wrappedLines = [];
+                wrappedTotalChars = 0;
                 return;
             }
             string raw = current.Content.Replace("\r", string.Empty);
@@ -1112,10 +1115,13 @@ namespace CalamityOverhaul.Content.ADV.DialogueBoxs
                 }
             }
             wrappedLines = [.. allLines];
+            wrappedTotalChars = 0;
+            foreach (var line in wrappedLines)
+                wrappedTotalChars += line.Length;
             int textLines = wrappedLines.Length;
             int lineHeight = (int)(font.MeasureString("A").Y * textScale) + ScaledLineSpacing;
 
-            int headerHeight = (int)ApplyScale(38f);
+            int headerHeight = (int)ApplyScale(TextBlockOffsetBase);
 
             float contentHeight = textLines * lineHeight + ScaledPadding * 2 + headerHeight;
             panelHeight = MathHelper.Clamp(contentHeight, ScaledMinHeight, ScaledMaxHeight);
@@ -1177,7 +1183,7 @@ namespace CalamityOverhaul.Content.ADV.DialogueBoxs
                     if (typeTimer >= interval) {
                         typeTimer = 0;
                         visibleCharCount++;
-                        int totalChars = current.Content.Length;
+                        int totalChars = wrappedTotalChars;
                         if (visibleCharCount >= totalChars) {
                             visibleCharCount = totalChars;
                             finishedCurrent = true;
