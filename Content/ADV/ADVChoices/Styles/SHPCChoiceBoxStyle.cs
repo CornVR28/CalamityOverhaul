@@ -150,12 +150,22 @@ namespace CalamityOverhaul.Content.ADV.ADVChoices.Styles
         public void DrawChoiceBackground(SpriteBatch spriteBatch, Rectangle choiceRect, bool enabled, float hoverProgress, float alpha) {
             Texture2D px = VaultAsset.placeholder2.Value;
 
-            //选项背景（蓝紫色调）
+            //选项背景（提高对比度：默认更深实底+悬停提亮更显著）
             Color choiceBg = enabled
-                ? Color.Lerp(new Color(6, 4, 18) * 0.3f, new Color(14, 10, 36) * 0.55f, hoverProgress)
-                : new Color(8, 6, 14) * 0.15f;
+                ? Color.Lerp(new Color(10, 7, 22) * 0.55f, new Color(18, 14, 42) * 0.75f, hoverProgress)
+                : new Color(8, 6, 14) * 0.25f;
 
             spriteBatch.Draw(px, choiceRect, new Rectangle(0, 0, 1, 1), choiceBg * alpha);
+
+            //内嵌暗边（上左暗+下右微亮，增加选项条的立体层次感）
+            Color insetShadow = new Color(2, 2, 6) * (alpha * 0.35f);
+            Color insetLight = new Color(40, 65, 130) * (alpha * 0.08f);
+            spriteBatch.Draw(px, new Rectangle(choiceRect.X + 1, choiceRect.Y + 1, choiceRect.Width - 2, 1),
+                new Rectangle(0, 0, 1, 1), insetShadow);
+            spriteBatch.Draw(px, new Rectangle(choiceRect.X + 1, choiceRect.Y + 1, 1, choiceRect.Height - 2),
+                new Rectangle(0, 0, 1, 1), insetShadow * 0.6f);
+            spriteBatch.Draw(px, new Rectangle(choiceRect.X + 1, choiceRect.Bottom - 2, choiceRect.Width - 2, 1),
+                new Rectangle(0, 0, 1, 1), insetLight);
 
             Color neonColor = GetEdgeColor(alpha);
             if (enabled && hoverProgress > 0.01f) {
@@ -167,8 +177,12 @@ namespace CalamityOverhaul.Content.ADV.ADVChoices.Styles
                 //悬停时底部流光
                 DrawChoiceHoverGlow(spriteBatch, choiceRect, hoverProgress, alpha);
             }
-            else if (!enabled) {
-                DrawChoiceBorder(spriteBatch, choiceRect, new Color(25, 20, 50) * (alpha * 0.2f));
+            else if (enabled) {
+                //未悬停但可用的默认细边框（提供选项边界清晰度）
+                DrawChoiceBorder(spriteBatch, choiceRect, new Color(40, 60, 120) * (alpha * 0.18f));
+            }
+            else {
+                DrawChoiceBorder(spriteBatch, choiceRect, new Color(25, 20, 50) * (alpha * 0.15f));
             }
         }
 
@@ -395,7 +409,8 @@ namespace CalamityOverhaul.Content.ADV.ADVChoices.Styles
         }
 
         /// <summary>
-        /// 不对称重边框：顶部3px+1px双层强调+左侧4px渐变+轻量右/底线+顶部刻痕
+        /// 不对称重边框：顶部3px+1px双层强调+内侧暗沟+左侧4px渐变+轻量右/底线+顶部刻痕<br/>
+        /// 各边线精确接合避免拐角像素重叠
         /// </summary>
         private void DrawNeonFrame(SpriteBatch sb, Rectangle rect, float alpha) {
             Texture2D px = VaultAsset.placeholder2.Value;
@@ -407,6 +422,10 @@ namespace CalamityOverhaul.Content.ADV.ADVChoices.Styles
             sb.Draw(px, new Rectangle(rect.X, rect.Y, rect.Width, 3), new Rectangle(0, 0, 1, 1), topBright);
             sb.Draw(px, new Rectangle(rect.X, rect.Y + 3, rect.Width, 1), new Rectangle(0, 0, 1, 1), topDim);
 
+            //顶部线内侧暗沟（增加边框与背景的层次分离）
+            sb.Draw(px, new Rectangle(rect.X + 5, rect.Y + 4, rect.Width - 10, 1),
+                new Rectangle(0, 0, 1, 1), new Color(3, 5, 12) * (alpha * 0.45f));
+
             //顶部流动亮暗变化叠层
             for (int x = rect.X; x < rect.Right; x += 4) {
                 float t = (float)(x - rect.X) / rect.Width;
@@ -416,22 +435,35 @@ namespace CalamityOverhaul.Content.ADV.ADVChoices.Styles
                     new Color(80, 180, 255) * (alpha * 0.3f * wave * pulse));
             }
 
-            //左侧强调竖条（4px全高，上亮下暗渐变）
-            int halfH = rect.Height / 2;
+            //左侧强调竖条（4px，从顶部线下方开始避免拐角重叠）
+            int leftStartY = rect.Y + 3;
+            int leftH = rect.Height - 3;
+            int halfLeftH = leftH / 2;
             Color leftBright = new Color(50, 150, 255) * (alpha * 0.75f * pulse);
             Color leftDim = new Color(80, 60, 170) * (alpha * 0.35f);
-            sb.Draw(px, new Rectangle(rect.X, rect.Y, 4, halfH), new Rectangle(0, 0, 1, 1), leftBright);
-            sb.Draw(px, new Rectangle(rect.X, rect.Y + halfH, 4, rect.Height - halfH), new Rectangle(0, 0, 1, 1), leftDim);
+            sb.Draw(px, new Rectangle(rect.X, leftStartY, 4, halfLeftH), new Rectangle(0, 0, 1, 1), leftBright);
+            sb.Draw(px, new Rectangle(rect.X, leftStartY + halfLeftH, 4, leftH - halfLeftH), new Rectangle(0, 0, 1, 1), leftDim);
+            //左侧内侧暗沟
+            sb.Draw(px, new Rectangle(rect.X + 4, leftStartY + 2, 1, leftH - 4),
+                new Rectangle(0, 0, 1, 1), new Color(3, 5, 12) * (alpha * 0.3f));
 
-            //右侧细线
-            sb.Draw(px, new Rectangle(rect.Right - 1, rect.Y, 1, rect.Height),
+            //右侧细线（从顶部线下方开始，到底部线上方结束）
+            int rightStartY = rect.Y + 3;
+            int rightH = rect.Height - 4;
+            sb.Draw(px, new Rectangle(rect.Right - 1, rightStartY, 1, rightH),
                 new Rectangle(0, 0, 1, 1), new Color(50, 70, 140) * (alpha * 0.4f));
+            //右侧内侧暗沟
+            sb.Draw(px, new Rectangle(rect.Right - 2, rightStartY + 2, 1, rightH - 4),
+                new Rectangle(0, 0, 1, 1), new Color(2, 3, 8) * (alpha * 0.2f));
 
-            //底部细线（1px实线 + 1px紫调）
-            sb.Draw(px, new Rectangle(rect.X, rect.Bottom - 1, rect.Width, 1),
+            //底部细线（1px实线 + 1px紫调，两端避开左右竖条）
+            sb.Draw(px, new Rectangle(rect.X + 4, rect.Bottom - 1, rect.Width - 5, 1),
                 new Rectangle(0, 0, 1, 1), new Color(40, 80, 180) * (alpha * 0.4f));
-            sb.Draw(px, new Rectangle(rect.X, rect.Bottom - 2, rect.Width, 1),
+            sb.Draw(px, new Rectangle(rect.X + 4, rect.Bottom - 2, rect.Width - 5, 1),
                 new Rectangle(0, 0, 1, 1), new Color(80, 55, 150) * (alpha * 0.2f));
+            //底部内侧暗沟
+            sb.Draw(px, new Rectangle(rect.X + 5, rect.Bottom - 3, rect.Width - 10, 1),
+                new Rectangle(0, 0, 1, 1), new Color(2, 3, 8) * (alpha * 0.25f));
 
             //顶部左侧刻痕
             sb.Draw(px, new Rectangle(rect.X + 5, rect.Y, 1, 10), new Rectangle(0, 0, 1, 1), topBright * 0.8f);
@@ -608,26 +640,44 @@ namespace CalamityOverhaul.Content.ADV.ADVChoices.Styles
         }
 
         /// <summary>
-        /// 选项悬停时底部霓虹蓝紫流光
+        /// 选项悬停时底部霓虹蓝紫流光（加宽加亮，增强视觉反馈）
         /// </summary>
-        private static void DrawChoiceHoverGlow(SpriteBatch sb, Rectangle choiceRect, float hoverProgress, float alpha) {
+        private void DrawChoiceHoverGlow(SpriteBatch sb, Rectangle choiceRect, float hoverProgress, float alpha) {
             Texture2D px = VaultAsset.placeholder2.Value;
-            int glowW = (int)(choiceRect.Width * hoverProgress * 0.6f);
-            Color glowColor = new Color(50, 120, 255) * (alpha * hoverProgress * 0.2f);
-            sb.Draw(px, new Rectangle(choiceRect.X, choiceRect.Bottom - 1, glowW, 1),
+            int glowW = (int)(choiceRect.Width * hoverProgress * 0.75f);
+            //主流光线（2px高，更可见）
+            Color glowColor = new Color(50, 120, 255) * (alpha * hoverProgress * 0.35f);
+            sb.Draw(px, new Rectangle(choiceRect.X + 1, choiceRect.Bottom - 2, glowW, 2),
                 new Rectangle(0, 0, 1, 1), glowColor);
+            //上方1px模糊辉光扩散
+            Color softGlow = new Color(40, 90, 200) * (alpha * hoverProgress * 0.12f);
+            sb.Draw(px, new Rectangle(choiceRect.X + 1, choiceRect.Bottom - 4, glowW, 2),
+                new Rectangle(0, 0, 1, 1), softGlow);
+            //流光头部亮点
+            float pulse = MathF.Sin(neonPulseTimer * 3f) * 0.3f + 0.7f;
+            int headX = choiceRect.X + 1 + glowW - 4;
+            if (headX > choiceRect.X + 1 && headX < choiceRect.Right - 4) {
+                Color headColor = new Color(100, 180, 255) * (alpha * hoverProgress * 0.5f * pulse);
+                sb.Draw(px, new Rectangle(headX, choiceRect.Bottom - 3, 4, 3),
+                    new Rectangle(0, 0, 1, 1), headColor);
+            }
         }
 
         private static void DrawChoiceBorder(SpriteBatch spriteBatch, Rectangle rect, Color color) {
             Texture2D px = VaultAsset.placeholder2.Value;
+            //上下水平线
             spriteBatch.Draw(px, new Rectangle(rect.X, rect.Y, rect.Width, 1),
                 new Rectangle(0, 0, 1, 1), color);
             spriteBatch.Draw(px, new Rectangle(rect.X, rect.Bottom - 1, rect.Width, 1),
-                new Rectangle(0, 0, 1, 1), color);
-            spriteBatch.Draw(px, new Rectangle(rect.X, rect.Y, 1, rect.Height),
-                new Rectangle(0, 0, 1, 1), color);
-            spriteBatch.Draw(px, new Rectangle(rect.Right - 1, rect.Y, 1, rect.Height),
-                new Rectangle(0, 0, 1, 1), color);
+                new Rectangle(0, 0, 1, 1), color * 0.7f);
+            //左右竖线避开上下线区域，消除拐角重叠
+            int innerH = rect.Height - 2;
+            if (innerH > 0) {
+                spriteBatch.Draw(px, new Rectangle(rect.X, rect.Y + 1, 1, innerH),
+                    new Rectangle(0, 0, 1, 1), color * 0.85f);
+                spriteBatch.Draw(px, new Rectangle(rect.Right - 1, rect.Y + 1, 1, innerH),
+                    new Rectangle(0, 0, 1, 1), color * 0.85f);
+            }
         }
 
         #endregion

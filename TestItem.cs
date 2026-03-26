@@ -84,8 +84,8 @@ namespace CalamityOverhaul
             //}
             //Sandevistan.IsActive = !Sandevistan.IsActive;
             //CyberwareUI.Instance.Toggle();
-            //ScenarioManager.Reset<FirstMetShepel>();
-            //ScenarioManager.Start<FirstMetShepel>();
+            ScenarioManager.Reset<FirstMetShepel>();
+            ScenarioManager.Start<FirstMetShepel>();
             return true;
         }
     }

@@ -47,6 +47,10 @@ namespace CalamityOverhaul.Content.ADV.DialogueBoxs.Styles
         private int circuitNodeSpawnTimer;
         private const float SideMargin = 24f;
 
+        //斜切角参数（形成非矩形六角轮廓）
+        private const int TopRightChamfer = 24;
+        private const int BottomLeftChamfer = 18;
+
         #region 样式配置重写
 
         protected override float PortraitScaleMin => 0.88f;
@@ -301,6 +305,9 @@ namespace CalamityOverhaul.Content.ADV.DialogueBoxs.Styles
             //深紫黑渐变背景+二进制矩阵底纹
             DrawCyberMaidBackground(spriteBatch, panelRect, alpha);
 
+            //斜切角遮罩（产生非矩形六角轮廓，覆盖右上和左下角的背景）
+            DrawChamferMask(spriteBatch, px, panelRect, alpha);
+
             //左侧霓虹数据流线
             DrawLeftDataLines(spriteBatch, panelRect, alpha);
 
@@ -317,17 +324,23 @@ namespace CalamityOverhaul.Content.ADV.DialogueBoxs.Styles
                     new Color(55, 120, 220) * (alpha * 0.22f * fade));
             }
 
-            //顶部标题区域暗化条带（头像/名称区域背景加深，区分功能层级）
+            //顶部标题区域暗化条带（适配斜切轮廓，右侧缩进避开chamfer区域）
             int headerH = 32;
+            int headerW = panelRect.Width - 10 - TopRightChamfer;
             spriteBatch.Draw(px,
-                new Rectangle(panelRect.X + 5, panelRect.Y + 5, panelRect.Width - 10, headerH),
+                new Rectangle(panelRect.X + 5, panelRect.Y + 5, headerW, headerH),
                 new Rectangle(0, 0, 1, 1),
-                new Color(4, 3, 12) * (alpha * 0.25f));
-            //标题区域底线
+                new Color(4, 3, 12) * (alpha * 0.35f));
+            //标题区域底线（加深加亮增强层次分离）
             spriteBatch.Draw(px,
-                new Rectangle(panelRect.X + 8, panelRect.Y + 5 + headerH, panelRect.Width - 16, 1),
+                new Rectangle(panelRect.X + 8, panelRect.Y + 5 + headerH, headerW - 6, 1),
                 new Rectangle(0, 0, 1, 1),
-                new Color(45, 80, 160) * (alpha * 0.12f));
+                new Color(50, 100, 200) * (alpha * 0.2f));
+            //标题底线下方暗沟（增加区域分割的纵深感）
+            spriteBatch.Draw(px,
+                new Rectangle(panelRect.X + 8, panelRect.Y + 6 + headerH, headerW - 6, 1),
+                new Rectangle(0, 0, 1, 1),
+                new Color(2, 2, 6) * (alpha * 0.3f));
 
             //不对称重边框（替代均匀薄框）
             DrawNeonFrame(spriteBatch, panelRect, alpha);
@@ -524,84 +537,186 @@ namespace CalamityOverhaul.Content.ADV.DialogueBoxs.Styles
         }
 
         /// <summary>
-        /// 不对称重边框：外侧辉光溢出 + 顶部3px+1px双层强调 + 内侧暗沟斜面
-        /// + 左侧4px渐变强调条含辉光扩散 + 加厚右/底线 + 顶部刻痕
+        /// 绘制斜切角遮罩三角形，使面板呈现非矩形的六角轮廓
+        /// </summary>
+        private static void DrawChamferMask(SpriteBatch sb, Texture2D px, Rectangle rect, float alpha) {
+            Color mask = new Color(0, 0, 2) * (alpha * 0.97f);
+
+            // 右上角斜切遮罩（从(Right-chamfer, Top) → (Right, Top+chamfer) 以外区域）
+            for (int row = 0; row < TopRightChamfer; row++) {
+                int cutW = TopRightChamfer - row;
+                sb.Draw(px, new Rectangle(rect.Right - cutW, rect.Y + row, cutW, 1),
+                    new Rectangle(0, 0, 1, 1), mask);
+            }
+
+            // 左下角斜切遮罩（从(Left, Bottom-chamfer) → (Left+chamfer, Bottom) 以外区域）
+            for (int row = 0; row < BottomLeftChamfer; row++) {
+                int cutW = BottomLeftChamfer - row;
+                sb.Draw(px, new Rectangle(rect.X, rect.Bottom - BottomLeftChamfer + row, cutW, 1),
+                    new Rectangle(0, 0, 1, 1), mask);
+            }
+
+            // 遮罩边缘柔化（1px暗边过渡，消除硬切边的锯齿感）
+            Color softEdge = new Color(4, 3, 10) * (alpha * 0.5f);
+            for (int row = 0; row < TopRightChamfer; row++) {
+                int edgeX = rect.Right - (TopRightChamfer - row) - 1;
+                if (edgeX >= rect.X && edgeX < rect.Right)
+                    sb.Draw(px, new Rectangle(edgeX, rect.Y + row, 1, 1),
+                        new Rectangle(0, 0, 1, 1), softEdge);
+            }
+            for (int row = 0; row < BottomLeftChamfer; row++) {
+                int edgeX = rect.X + (BottomLeftChamfer - row);
+                int edgeY = rect.Bottom - BottomLeftChamfer + row;
+                if (edgeX >= rect.X && edgeX < rect.Right)
+                    sb.Draw(px, new Rectangle(edgeX, edgeY, 1, 1),
+                        new Rectangle(0, 0, 1, 1), softEdge);
+            }
+        }
+
+        /// <summary>
+        /// 斜切六角边框：非矩形轮廓 —— 右上斜切+左下斜切+不对称重线<br/>
+        /// 拐角处精确接合避免像素重叠，辉光沿斜切边缘扩散
         /// </summary>
         private void DrawNeonFrame(SpriteBatch sb, Rectangle rect, float alpha) {
             Texture2D px = VaultAsset.placeholder2.Value;
             float pulse = MathF.Sin(neonPulseTimer * 1.1f) * 0.2f + 0.8f;
+            int trCut = TopRightChamfer;
+            int blCut = BottomLeftChamfer;
+            int topLineW = rect.Width - trCut;
+            int leftLineH = rect.Height - blCut;
+            int botLineW = rect.Width - blCut;
+            int rightLineH = rect.Height - trCut;
 
-            // ── 外侧辉光溢出（在边框线之前绘制，产生发光"溢出"效果）──
-            // 顶部辉光向上扩散（4层渐弱）
+            // ── 外侧辉光溢出（沿六角轮廓扩散）──
             for (int g = 1; g <= 4; g++) {
                 float gAlpha = (1f - g / 5f) * 0.16f;
-                sb.Draw(px, new Rectangle(rect.X, rect.Y - g, rect.Width, 1),
-                    new Rectangle(0, 0, 1, 1), new Color(50, 140, 255) * (alpha * gAlpha * pulse));
+                Color gColor = new Color(50, 140, 255) * (alpha * gAlpha * pulse);
+                // 顶部辉光（到斜切起点）
+                sb.Draw(px, new Rectangle(rect.X, rect.Y - g, topLineW, 1),
+                    new Rectangle(0, 0, 1, 1), gColor);
+                // 右侧辉光（从斜切终点开始）
+                sb.Draw(px, new Rectangle(rect.Right + g, rect.Y + trCut, 1, rightLineH),
+                    new Rectangle(0, 0, 1, 1), gColor * 0.4f);
             }
-            // 左侧辉光向左扩散（3层渐弱）
             for (int g = 1; g <= 3; g++) {
                 float gAlpha = (1f - g / 4f) * 0.12f;
-                sb.Draw(px, new Rectangle(rect.X - g, rect.Y, 1, rect.Height),
-                    new Rectangle(0, 0, 1, 1), new Color(50, 140, 255) * (alpha * gAlpha * pulse));
+                Color gColor = new Color(50, 140, 255) * (alpha * gAlpha * pulse);
+                // 左侧辉光（到斜切起点）
+                sb.Draw(px, new Rectangle(rect.X - g, rect.Y, 1, leftLineH),
+                    new Rectangle(0, 0, 1, 1), gColor);
             }
 
-            // ── 顶部主强调线（3px亮 + 1px暗）──
+            // ── 顶部主强调线（3px亮 + 1px暗，截止于右上斜切起点）──
             Color topBright = new Color(55, 155, 255) * (alpha * 0.97f * pulse);
             Color topDim = new Color(35, 90, 190) * (alpha * 0.48f);
-            sb.Draw(px, new Rectangle(rect.X, rect.Y, rect.Width, 3), new Rectangle(0, 0, 1, 1), topBright);
-            sb.Draw(px, new Rectangle(rect.X, rect.Y + 3, rect.Width, 1), new Rectangle(0, 0, 1, 1), topDim);
+            sb.Draw(px, new Rectangle(rect.X, rect.Y, topLineW, 3),
+                new Rectangle(0, 0, 1, 1), topBright);
+            sb.Draw(px, new Rectangle(rect.X, rect.Y + 3, topLineW - 4, 1),
+                new Rectangle(0, 0, 1, 1), topDim);
 
-            // ── 顶部线内侧暗沟（斜面效果—亮线下方的暗线形成凹槽感）──
-            sb.Draw(px, new Rectangle(rect.X + 5, rect.Y + 4, rect.Width - 10, 1),
+            // 顶部线内侧暗沟
+            sb.Draw(px, new Rectangle(rect.X + 5, rect.Y + 4, topLineW - 14, 1),
                 new Rectangle(0, 0, 1, 1), new Color(3, 5, 12) * (alpha * 0.5f));
 
-            // ── 顶部流动波纹（在3px线之上叠加波动的明暗变化）──
-            for (int x = rect.X; x < rect.Right; x += 4) {
-                float t = (float)(x - rect.X) / rect.Width;
+            // 顶部流动波纹
+            for (int x = rect.X; x < rect.X + topLineW; x += 4) {
+                float t = (float)(x - rect.X) / topLineW;
                 float wave = MathF.Sin(neonPulseTimer * 2.5f + t * MathHelper.TwoPi * 1.5f) * 0.35f + 0.65f;
-                int w = Math.Min(4, rect.Right - x);
+                int w = Math.Min(4, rect.X + topLineW - x);
                 sb.Draw(px, new Rectangle(x, rect.Y, w, 2), new Rectangle(0, 0, 1, 1),
                     new Color(80, 180, 255) * (alpha * 0.35f * wave * pulse));
             }
 
-            // ── 左侧强调竖条（4px）+ 辉光向右扩散 ──
-            int halfH = rect.Height / 2;
+            // ── 右上斜切边缘（对角霓虹线：从顶部终点到右侧起点）──
+            Color chamferBright = new Color(80, 170, 255) * (alpha * 0.88f * pulse);
+            Color chamferGlow = new Color(50, 120, 220) * (alpha * 0.32f * pulse);
+            for (int i = 0; i < trCut; i++) {
+                float t = i / (float)trCut;
+                float fade = 1f - t * 0.35f;
+                int dx = rect.Right - trCut + i;
+                int dy = rect.Y + i;
+                // 主线2px
+                sb.Draw(px, new Rectangle(dx, dy, 2, 1), new Rectangle(0, 0, 1, 1), chamferBright * fade);
+                // 内侧辉光扩散
+                if (dx - 1 >= rect.X)
+                    sb.Draw(px, new Rectangle(dx - 1, dy, 1, 1), new Rectangle(0, 0, 1, 1), chamferGlow * fade);
+                // 外侧辉光扩散（2层）
+                sb.Draw(px, new Rectangle(dx + 2, dy, 1, 1), new Rectangle(0, 0, 1, 1), chamferGlow * fade * 0.6f);
+                sb.Draw(px, new Rectangle(dx + 3, dy, 1, 1), new Rectangle(0, 0, 1, 1), chamferGlow * fade * 0.2f);
+            }
+            // 斜切中点发光宝石
+            DrawSmallDiamond(sb, px,
+                new Vector2(rect.Right - trCut * 0.45f, rect.Y + trCut * 0.45f),
+                new Color(120, 200, 255) * (alpha * 0.7f * pulse), 3f);
+
+            // ── 左侧强调竖条（4px，截止于左下斜切起点）+ 辉光扩散 ──
+            int halfLeftH = leftLineH / 2;
             Color leftBright = new Color(50, 150, 255) * (alpha * 0.78f * pulse);
             Color leftDim = new Color(80, 60, 170) * (alpha * 0.38f);
-            sb.Draw(px, new Rectangle(rect.X, rect.Y, 4, halfH), new Rectangle(0, 0, 1, 1), leftBright);
-            sb.Draw(px, new Rectangle(rect.X, rect.Y + halfH, 4, rect.Height - halfH), new Rectangle(0, 0, 1, 1), leftDim);
-            // 向右扩散辉光（渐弱条带）
+            sb.Draw(px, new Rectangle(rect.X, rect.Y, 4, halfLeftH),
+                new Rectangle(0, 0, 1, 1), leftBright);
+            sb.Draw(px, new Rectangle(rect.X, rect.Y + halfLeftH, 4, leftLineH - halfLeftH),
+                new Rectangle(0, 0, 1, 1), leftDim);
             for (int g = 1; g <= 4; g++) {
                 float gAlpha = (1f - g / 5f) * 0.09f;
-                int gH = Math.Max(20, halfH - g * 12);
+                int gH = Math.Max(20, halfLeftH - g * 12);
                 sb.Draw(px, new Rectangle(rect.X + 4 + g, rect.Y + 4, g, gH),
                     new Rectangle(0, 0, 1, 1), new Color(45, 130, 240) * (alpha * gAlpha * pulse));
             }
             // 左侧内侧暗沟
-            sb.Draw(px, new Rectangle(rect.X + 4, rect.Y + 5, 1, rect.Height - 10),
+            sb.Draw(px, new Rectangle(rect.X + 4, rect.Y + 5, 1, leftLineH - 10),
                 new Rectangle(0, 0, 1, 1), new Color(3, 5, 12) * (alpha * 0.35f));
 
-            // ── 右侧双线（1px主线 + 1px辉光）──
-            sb.Draw(px, new Rectangle(rect.Right - 1, rect.Y, 1, rect.Height),
+            // ── 左下斜切边缘（对角线：从左侧终点到底部起点，紫蓝渐变）──
+            Color blChamferBright = new Color(90, 70, 210) * (alpha * 0.75f * pulse);
+            Color blChamferGlow = new Color(55, 45, 160) * (alpha * 0.28f * pulse);
+            for (int i = 0; i < blCut; i++) {
+                float t = i / (float)blCut;
+                float fade = 0.55f + t * 0.45f;
+                int dx = rect.X + i;
+                int dy = rect.Bottom - blCut + i;
+                // 主线1-2px
+                sb.Draw(px, new Rectangle(dx, dy, 1, 2), new Rectangle(0, 0, 1, 1), blChamferBright * fade);
+                // 辉光扩散
+                if (dy - 1 >= rect.Y)
+                    sb.Draw(px, new Rectangle(dx, dy - 1, 1, 1), new Rectangle(0, 0, 1, 1), blChamferGlow * fade);
+                sb.Draw(px, new Rectangle(dx, dy + 2, 1, 1), new Rectangle(0, 0, 1, 1), blChamferGlow * fade * 0.5f);
+            }
+            // 斜切中点发光宝石
+            DrawSmallDiamond(sb, px,
+                new Vector2(rect.X + blCut * 0.5f, rect.Bottom - blCut * 0.5f),
+                new Color(130, 90, 230) * (alpha * 0.55f * pulse), 2.5f);
+
+            // ── 右侧双线（从斜切终点开始到底部）──
+            sb.Draw(px, new Rectangle(rect.Right - 1, rect.Y + trCut, 1, rightLineH),
                 new Rectangle(0, 0, 1, 1), new Color(50, 70, 140) * (alpha * 0.48f));
-            sb.Draw(px, new Rectangle(rect.Right - 2, rect.Y, 1, rect.Height),
+            sb.Draw(px, new Rectangle(rect.Right - 2, rect.Y + trCut + 2, 1, rightLineH - 4),
                 new Rectangle(0, 0, 1, 1), new Color(40, 55, 120) * (alpha * 0.18f));
-            // 右侧内侧暗沟
-            sb.Draw(px, new Rectangle(rect.Right - 3, rect.Y + 5, 1, rect.Height - 10),
+            sb.Draw(px, new Rectangle(rect.Right - 3, rect.Y + trCut + 5, 1, rightLineH - 10),
                 new Rectangle(0, 0, 1, 1), new Color(2, 3, 8) * (alpha * 0.25f));
 
-            // ── 底部三层线（1px实线 + 1px紫调 + 内暗沟）──
-            sb.Draw(px, new Rectangle(rect.X, rect.Bottom - 1, rect.Width, 1),
+            // ── 底部三层线（从斜切终点开始到右侧）──
+            sb.Draw(px, new Rectangle(rect.X + blCut, rect.Bottom - 1, botLineW, 1),
                 new Rectangle(0, 0, 1, 1), new Color(40, 80, 180) * (alpha * 0.48f));
-            sb.Draw(px, new Rectangle(rect.X, rect.Bottom - 2, rect.Width, 1),
+            sb.Draw(px, new Rectangle(rect.X + blCut, rect.Bottom - 2, botLineW, 1),
                 new Rectangle(0, 0, 1, 1), new Color(80, 55, 150) * (alpha * 0.25f));
-            sb.Draw(px, new Rectangle(rect.X + 5, rect.Bottom - 3, rect.Width - 10, 1),
+            sb.Draw(px, new Rectangle(rect.X + blCut + 5, rect.Bottom - 3, botLineW - 10, 1),
                 new Rectangle(0, 0, 1, 1), new Color(2, 3, 8) * (alpha * 0.3f));
 
             // ── 顶部左侧刻痕（机械装饰感）──
             sb.Draw(px, new Rectangle(rect.X + 5, rect.Y, 1, 10), new Rectangle(0, 0, 1, 1), topBright * 0.8f);
             sb.Draw(px, new Rectangle(rect.X + 20, rect.Y, 1, 7), new Rectangle(0, 0, 1, 1), topBright * 0.5f);
             sb.Draw(px, new Rectangle(rect.X + 34, rect.Y, 1, 4), new Rectangle(0, 0, 1, 1), topBright * 0.3f);
+
+            // ── 右上斜切角内侧暗沟（增强切面立体感）──
+            for (int i = 1; i < trCut - 1; i++) {
+                float t = i / (float)trCut;
+                int dx = rect.Right - trCut + i - 2;
+                int dy = rect.Y + i + 1;
+                if (dx >= rect.X)
+                    sb.Draw(px, new Rectangle(dx, dy, 1, 1), new Rectangle(0, 0, 1, 1),
+                        new Color(2, 3, 8) * (alpha * 0.3f * (1f - t)));
+            }
         }
 
         /// <summary>
@@ -647,7 +762,7 @@ namespace CalamityOverhaul.Content.ADV.DialogueBoxs.Styles
         }
 
         /// <summary>
-        /// 其余三角的金属褶边角饰（加密加粗，像素化的硬质女仆装花边纹理）
+        /// 角饰装饰（适配斜切六角轮廓：右上/左下角改为沿斜切边的平行纹饰，保留右下角L角）
         /// </summary>
         private void DrawMetallicFrillCorners(SpriteBatch sb, Rectangle rect, float alpha) {
             Texture2D px = VaultAsset.placeholder2.Value;
@@ -655,29 +770,34 @@ namespace CalamityOverhaul.Content.ADV.DialogueBoxs.Styles
             Color frillBase = new Color(70, 110, 180) * (alpha * 0.55f * pulse);
             Color frillHighlight = new Color(130, 170, 240) * (alpha * 0.4f * pulse);
 
-            //右上角：水平+竖直短褶（加密至7级）
-            for (int i = 0; i < 7; i++) {
-                int segW = 8 - i;
-                sb.Draw(px, new Rectangle(rect.Right - 8 - i * 3, rect.Y + 5, segW, 1),
-                    new Rectangle(0, 0, 1, 1), frillBase * (1f - i * 0.12f));
-                sb.Draw(px, new Rectangle(rect.Right - 5, rect.Y + 5 + i * 3, 1, segW),
-                    new Rectangle(0, 0, 1, 1), frillBase * (1f - i * 0.12f));
+            //右上角：沿斜切边平行的短纹饰（呼应chamfer对角线）
+            int trCut = TopRightChamfer;
+            for (int i = 0; i < 5; i++) {
+                float t = (i + 1) / 6f;
+                int startX = rect.Right - (int)(trCut * (1f - t));
+                int startY = rect.Y + (int)(trCut * t);
+                int segLen = 6 - i;
+                // 沿斜切方向的平行短线（偏移到内侧）
+                for (int s = 0; s < segLen; s++) {
+                    sb.Draw(px, new Rectangle(startX - 6 + s, startY + s, 1, 1),
+                        new Rectangle(0, 0, 1, 1), frillBase * (1f - i * 0.15f));
+                }
             }
-            sb.Draw(px, new Vector2(rect.Right - 7, rect.Y + 7), null, frillHighlight,
-                0f, new Vector2(0.5f), 2f, SpriteEffects.None, 0f);
 
-            //左下角：L形褶（加密至6级）
-            for (int i = 0; i < 6; i++) {
-                int segH = 7 - i;
-                sb.Draw(px, new Rectangle(rect.X + 5, rect.Bottom - 8 - i * 3, 1, segH),
-                    new Rectangle(0, 0, 1, 1), frillBase * (1f - i * 0.14f));
-                sb.Draw(px, new Rectangle(rect.X + 5 + i * 3, rect.Bottom - 5, segH, 1),
-                    new Rectangle(0, 0, 1, 1), frillBase * (1f - i * 0.14f));
+            //左下角：沿斜切边平行的短纹饰
+            int blCut = BottomLeftChamfer;
+            for (int i = 0; i < 4; i++) {
+                float t = (i + 1) / 5f;
+                int startX = rect.X + (int)(blCut * t);
+                int startY = rect.Bottom - (int)(blCut * (1f - t));
+                int segLen = 5 - i;
+                for (int s = 0; s < segLen; s++) {
+                    sb.Draw(px, new Rectangle(startX + 5 + s, startY - 5 + s, 1, 1),
+                        new Rectangle(0, 0, 1, 1), frillBase * (1f - i * 0.16f));
+                }
             }
-            sb.Draw(px, new Vector2(rect.X + 7, rect.Bottom - 7), null, frillHighlight,
-                0f, new Vector2(0.5f), 1.6f, SpriteEffects.None, 0f);
 
-            //右下角：对角短线+L角装饰（加密加长）
+            //右下角：对角短线+L角装饰（保留，这个角没有斜切）
             for (int i = 0; i < 6; i++) {
                 sb.Draw(px, new Rectangle(rect.Right - 8 - i * 2, rect.Bottom - 7 + i, 4, 1),
                     new Rectangle(0, 0, 1, 1), frillBase * (1f - i * 0.15f));
@@ -685,9 +805,9 @@ namespace CalamityOverhaul.Content.ADV.DialogueBoxs.Styles
             sb.Draw(px, new Vector2(rect.Right - 9, rect.Bottom - 7), null, frillHighlight,
                 0f, new Vector2(0.5f), 1.6f, SpriteEffects.None, 0f);
 
-            //底部装饰褶边条（面板底部的连续像素化花边，增添厚实感）
+            //底部装饰褶边条（从斜切终点开始，适配新底线起始位置）
             Color bottomFrill = new Color(60, 90, 160) * (alpha * 0.25f * pulse);
-            for (int x = rect.X + 28; x < rect.Right - 28; x += 4) {
+            for (int x = rect.X + blCut + 8; x < rect.Right - 28; x += 4) {
                 int h = (x % 8 == 0) ? 4 : 2;
                 sb.Draw(px, new Rectangle(x, rect.Bottom - 3 - h, 1, h),
                     new Rectangle(0, 0, 1, 1), bottomFrill);
@@ -731,7 +851,7 @@ namespace CalamityOverhaul.Content.ADV.DialogueBoxs.Styles
         }
 
         /// <summary>
-        /// 四角状态文字（女仆系统状态读出，类似嘉登的HEX但以女仆主题呈现）
+        /// 四角状态文字（适配斜切轮廓：右上/左下文字内缩避开斜切区域）
         /// </summary>
         private void DrawCornerStatusText(SpriteBatch sb, Rectangle rect, float alpha) {
             if (alpha < 0.04f) return;
@@ -740,30 +860,33 @@ namespace CalamityOverhaul.Content.ADV.DialogueBoxs.Styles
             float sc = 0.5f;
             var font = Terraria.GameContent.FontAssets.MouseText.Value;
 
-            //左上（星形符号旁偏移）
+            //左上（星形符号旁偏移，这个角没有斜切）
             Utils.DrawBorderString(sb, cornerStatus[0],
                 new Vector2(rect.X + 28f, rect.Y + 7f), col, sc);
-            //右上
+            //右上（内缩避开斜切区域）
             float w1 = font.MeasureString(cornerStatus[1]).X * sc;
             Utils.DrawBorderString(sb, cornerStatus[1],
-                new Vector2(rect.Right - w1 - 16f, rect.Y + 7f), col, sc);
-            //左下
+                new Vector2(rect.Right - w1 - 16f - TopRightChamfer * 0.6f, rect.Y + 7f), col, sc);
+            //左下（内缩避开斜切区域）
             Utils.DrawBorderString(sb, cornerStatus[2],
-                new Vector2(rect.X + 8f, rect.Bottom - 16f), col * 0.65f, sc);
-            //右下
+                new Vector2(rect.X + 8f + BottomLeftChamfer * 0.7f, rect.Bottom - 16f), col * 0.65f, sc);
+            //右下（这个角没有斜切）
             float w3 = font.MeasureString(cornerStatus[3]).X * sc;
             Utils.DrawBorderString(sb, cornerStatus[3],
                 new Vector2(rect.Right - w3 - 16f, rect.Bottom - 16f), col * 0.65f, sc);
         }
 
         /// <summary>
-        /// 矩形线框
+        /// 矩形线框（修正拐角重叠：左右侧线避开上下线区域）
         /// </summary>
         private static void DrawRect(SpriteBatch sb, Texture2D px, Rectangle r, int bw, Color c) {
             sb.Draw(px, new Rectangle(r.X, r.Y, r.Width, bw), new Rectangle(0, 0, 1, 1), c);
             sb.Draw(px, new Rectangle(r.X, r.Bottom - bw, r.Width, bw), new Rectangle(0, 0, 1, 1), c * 0.7f);
-            sb.Draw(px, new Rectangle(r.X, r.Y, bw, r.Height), new Rectangle(0, 0, 1, 1), c * 0.85f);
-            sb.Draw(px, new Rectangle(r.Right - bw, r.Y, bw, r.Height), new Rectangle(0, 0, 1, 1), c * 0.85f);
+            int innerH = r.Height - bw * 2;
+            if (innerH > 0) {
+                sb.Draw(px, new Rectangle(r.X, r.Y + bw, bw, innerH), new Rectangle(0, 0, 1, 1), c * 0.85f);
+                sb.Draw(px, new Rectangle(r.Right - bw, r.Y + bw, bw, innerH), new Rectangle(0, 0, 1, 1), c * 0.85f);
+            }
         }
 
         /// <summary>
