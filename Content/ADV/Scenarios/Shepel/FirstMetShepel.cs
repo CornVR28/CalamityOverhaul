@@ -61,11 +61,11 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel
 
         protected override void Build() {
             //注册立绘（暂用剪影占位，后续替换为正式立绘资源）
-            DialogueBoxBase.RegisterPortrait(RolenameSHPC.Value, ADVAsset.FUJI);
-            DialogueBoxBase.SetPortraitStyle(RolenameSHPC.Value, silhouette: true);
+            DialogueBoxBase.RegisterPortrait(RolenameSHPC.Value, texture: null);
+            DialogueBoxBase.SetPortraitStyle(RolenameSHPC.Value, silhouette: false);
 
-            DialogueBoxBase.RegisterPortrait(RolenamePlayer.Value, ADVAsset.FUJI);
-            DialogueBoxBase.SetPortraitStyle(RolenamePlayer.Value, silhouette: true);
+            DialogueBoxBase.RegisterPortrait(RolenamePlayer.Value, texture: null);
+            DialogueBoxBase.SetPortraitStyle(RolenamePlayer.Value, silhouette: false);
 
             //对话序列
             Add(RolenamePlayer.Value, Line1.Value);
@@ -81,7 +81,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel
                 new Choice(Choice1Text.Value, OnChoice1),
                 new Choice(Choice2Text.Value, OnChoice2),
             ], styleOverride: () => SHPCDialogueBox.Instance,
-               choiceBoxStyle: ADVChoiceBox.ChoiceBoxStyle.Draedon);
+               choiceBoxStyle: ADVChoiceBox.ChoiceBoxStyle.SHPC);
         }
 
         private void OnChoice1() {
