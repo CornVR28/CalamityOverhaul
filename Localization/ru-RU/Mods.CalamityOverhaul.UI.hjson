@@ -396,3 +396,8 @@ CyberwareUI: {
 	// Slot_RightLeg: RIGHT LEG
 	// Slot_NervousSystem: NERVOUS SYSTEM
 }
+
+SHPCDialogueBox: {
+	// ContinueHint: 继续
+	// FastHint: 加速
+}
