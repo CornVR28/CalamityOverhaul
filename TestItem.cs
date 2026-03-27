@@ -1,10 +1,7 @@
 ﻿#if DEBUG
 using CalamityOverhaul.Content.ADV.Scenarios;
-using CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machines;
 using CalamityOverhaul.Content.ADV.Scenarios.Shepel;
 using CalamityOverhaul.Content.ADV.Scenarios.SupCal.End.EternalBlazingNows;
-using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs;
-using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Skills.Sandevistans;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.ID;

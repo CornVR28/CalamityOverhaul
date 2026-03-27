@@ -1,9 +1,9 @@
-﻿using System;
-using CalamityOverhaul.Content.ADV.QuestManager;
+﻿using CalamityOverhaul.Content.ADV.QuestManager;
 using CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest.DoGQuest;
 using CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest.PallbearerQuest;
 using CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest.YharonQuest;
 using CalamityOverhaul.Content.LegendWeapon.HalibutLegend;
+using System;
 using Terraria;
 using Terraria.Localization;
 using Terraria.ModLoader;

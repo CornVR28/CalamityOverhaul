@@ -1,6 +1,5 @@
 ﻿using CalamityOverhaul.Common;
 using InnoVault.Actors;
-using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ModLoader;

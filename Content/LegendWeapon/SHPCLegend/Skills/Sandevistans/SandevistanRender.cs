@@ -1,5 +1,4 @@
-using InnoVault.RenderHandles;
-using Microsoft.Xna.Framework;
+﻿using InnoVault.RenderHandles;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 
