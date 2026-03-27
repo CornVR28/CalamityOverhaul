@@ -193,6 +193,26 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
         /// <summary>标记过滤列表需要重建</summary>
         public void MarkFilterDirty() => filterDirty = true;
 
+        /// <summary>
+        /// 集中修改条目状态，自动触发 OnStatusChanged、通知弹窗和过滤刷新。
+        /// 任何委托线在程序化变更状态时都应使用此方法，而非手动赋值。
+        /// </summary>
+        /// <returns>true 表示成功变更了状态，false 表示条目不存在或状态未变</returns>
+        public bool SetEntryStatus(string key, QuestEntryStatus newStatus, float? progress = null) {
+            var entry = GetEntry(key);
+            if (entry == null || entry.Status == newStatus) return false;
+
+            var oldStatus = entry.Status;
+            entry.Status = newStatus;
+            if (progress.HasValue) entry.Progress = progress.Value;
+            if (oldStatus == QuestEntryStatus.Suspended && newStatus != QuestEntryStatus.Suspended)
+                entry.OnUnsuspended?.Invoke();
+            entry.OnStatusChanged(oldStatus, newStatus);
+            EmitStatusNotification(entry, oldStatus, newStatus);
+            filterDirty = true;
+            return true;
+        }
+
         /// <summary>获取所有被关注状态的条目，供 <see cref="QuestTrackerWidget"/> 查询</summary>
         public void GetTrackedEntries(List<QuestEntryData> result) {
             foreach (var e in allEntries) {

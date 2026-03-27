@@ -67,14 +67,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.Quest
         private void SyncDeployQuest(QuestManagerUI manager, ADVSave save) {
             //已完成 → 标记完成
             if (save.DeploySignaltowerQuestCompleted) {
-                var existing = manager.GetEntry(DEPLOY_KEY);
-                if (existing != null && existing.Status != QuestEntryStatus.Completed) {
-                    var old = existing.Status;
-                    existing.Status = QuestEntryStatus.Completed;
-                    existing.Progress = 1f;
-                    existing.OnStatusChanged(old, QuestEntryStatus.Completed);
-                    manager.MarkFilterDirty();
-                }
+                manager.SetEntryStatus(DEPLOY_KEY, QuestEntryStatus.Completed, 1f);
                 return;
             }
 

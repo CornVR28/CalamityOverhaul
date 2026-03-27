@@ -86,14 +86,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Quest
         private void SyncCampsiteQuest(QuestManagerUI manager, ADVSave save) {
             //已完成首次对话 → 标记完成
             if (save.OldDukeFirstCampsiteDialogueCompleted) {
-                var existing = manager.GetEntry(CAMPSITE_KEY);
-                if (existing != null && existing.Status != QuestEntryStatus.Completed) {
-                    var old = existing.Status;
-                    existing.Status = QuestEntryStatus.Completed;
-                    existing.Progress = 1f;
-                    existing.OnStatusChanged(old, QuestEntryStatus.Completed);
-                    manager.MarkFilterDirty();
-                }
+                manager.SetEntryStatus(CAMPSITE_KEY, QuestEntryStatus.Completed, 1f);
                 return;
             }
 
@@ -124,14 +117,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Quest
         private void SyncFragmentQuest(QuestManagerUI manager, ADVSave save) {
             //已完成 → 标记完成
             if (save.OldDukeFindFragmentsQuestCompleted) {
-                var existing = manager.GetEntry(FRAGMENT_KEY);
-                if (existing != null && existing.Status != QuestEntryStatus.Completed) {
-                    var old = existing.Status;
-                    existing.Status = QuestEntryStatus.Completed;
-                    existing.Progress = 1f;
-                    existing.OnStatusChanged(old, QuestEntryStatus.Completed);
-                    manager.MarkFilterDirty();
-                }
+                manager.SetEntryStatus(FRAGMENT_KEY, QuestEntryStatus.Completed, 1f);
                 return;
             }
 

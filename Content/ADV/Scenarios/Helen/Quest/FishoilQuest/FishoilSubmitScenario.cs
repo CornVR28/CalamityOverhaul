@@ -129,12 +129,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Quest.FishoilQuest
                 }
 
                 //更新委托管理器中的条目状态
-                var manager = QuestManagerUI.Instance;
-                var entry = manager?.GetEntry(FishoilQuestEntry.QuestKey);
-                if (entry != null) {
-                    entry.Status = QuestEntryStatus.Completed;
-                    manager.MarkFilterDirty();
-                }
+                QuestManagerUI.Instance?.SetEntryStatus(
+                    FishoilQuestEntry.QuestKey, QuestEntryStatus.Completed, 1f);
             }
         }
 
@@ -158,16 +154,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Quest.FishoilQuest
 
             protected override void OnScenarioComplete() {
                 //将任务设为挂起
-                var manager = QuestManagerUI.Instance;
-                var entry = manager?.GetEntry(FishoilQuestEntry.QuestKey);
-                if (entry != null) {
-                    var old = entry.Status;
-                    entry.Status = QuestEntryStatus.Suspended;
-                    if (old != entry.Status) {
-                        entry.OnStatusChanged(old, entry.Status);
-                    }
-                    manager.MarkFilterDirty();
-                }
+                QuestManagerUI.Instance?.SetEntryStatus(
+                    FishoilQuestEntry.QuestKey, QuestEntryStatus.Suspended);
                 //持久化挂起状态
                 if (Main.LocalPlayer.TryGetOverride<HalibutPlayer>(out var hp)) {
                     hp.ADVSave.FishoilQuestSuspended = true;

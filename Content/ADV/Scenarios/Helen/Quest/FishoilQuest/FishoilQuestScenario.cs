@@ -125,22 +125,13 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Quest.FishoilQuest
 
             //已完成 → 标记完成
             if (save.FishoilQuestCompleted) {
-                if (entry.Status != QuestEntryStatus.Completed) {
-                    var old = entry.Status;
-                    entry.Status = QuestEntryStatus.Completed;
-                    entry.Progress = 1f;
-                    entry.OnStatusChanged(old, QuestEntryStatus.Completed);
-                    manager.MarkFilterDirty();
-                }
+                manager.SetEntryStatus(FishoilQuestEntry.QuestKey, QuestEntryStatus.Completed, 1f);
                 return;
             }
 
             //已挂起 → 恢复挂起状态
             if (save.FishoilQuestSuspended) {
-                if (entry.Status != QuestEntryStatus.Suspended) {
-                    entry.Status = QuestEntryStatus.Suspended;
-                    manager.MarkFilterDirty();
-                }
+                manager.SetEntryStatus(FishoilQuestEntry.QuestKey, QuestEntryStatus.Suspended);
             }
         }
 

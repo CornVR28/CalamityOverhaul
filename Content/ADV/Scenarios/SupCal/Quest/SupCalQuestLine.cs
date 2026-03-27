@@ -165,19 +165,11 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest
                 manager.RegisterQuest(activeEntry);
             }
 
-            if (completed && activeEntry.Status != QuestEntryStatus.Completed) {
-                var old = activeEntry.Status;
-                activeEntry.Status = QuestEntryStatus.Completed;
-                activeEntry.Progress = 1f;
-                activeEntry.OnStatusChanged(old, QuestEntryStatus.Completed);
-                QuestManagerNotification.Notify(activeEntry.Title,
-                    QuestManagerNotification.NotifyKind.Completed);
-                manager.MarkFilterDirty();
+            if (completed) {
+                manager.SetEntryStatus(key, QuestEntryStatus.Completed, 1f);
             }
             else if (!completed && activeEntry.Status == QuestEntryStatus.Completed) {
-                activeEntry.Status = QuestEntryStatus.Active;
-                activeEntry.Progress = 0f;
-                manager.MarkFilterDirty();
+                manager.SetEntryStatus(key, QuestEntryStatus.Active, 0f);
             }
         }
     }
