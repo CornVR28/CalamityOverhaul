@@ -37,7 +37,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest
             : base(key, title, summary, category) { }
 
         public override void OnUpdate() {
-            if (Status == QuestEntryStatus.Completed || Status == QuestEntryStatus.Failed) return;
+            if (Status == QuestEntryStatus.Completed || Status == QuestEntryStatus.Failed
+                || Status == QuestEntryStatus.Suspended) return;
 
             isBossAlive = false;
             for (int i = 0; i < Main.maxNPCs; i++) {

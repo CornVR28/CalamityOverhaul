@@ -1,6 +1,7 @@
 ﻿using CalamityOverhaul.Common;
 using InnoVault.UIHandles;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -131,6 +132,8 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
         private int selectedCategoryIndex;
         /// <summary>过滤列表是否需要重建</summary>
         private bool filterDirty = true;
+        /// <summary>上一帧鼠标中键是否按下，用于检测中键点击</summary>
+        private bool prevMiddleDown;
 
         private readonly string[] categoryKeys = ["All", "Active", "Completed", "Suspended"];
         private string[] categoryNames;
@@ -309,6 +312,9 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
                 HandleScrollInput(panelRect);
                 HandleMouseInput(panelRect);
             }
+
+            //始终更新中键状态，避免跨帧漂移
+            prevMiddleDown = Mouse.GetState().MiddleButton == ButtonState.Pressed;
         }
 
         #endregion
@@ -389,6 +395,29 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
                             entry.Status = QuestEntryStatus.Active;
                         else if (entry.Status == QuestEntryStatus.Active)
                             entry.Status = QuestEntryStatus.Tracked;
+                        else if (entry.Status == QuestEntryStatus.Suspended) {
+                            entry.Status = QuestEntryStatus.Tracked;
+                            entry.OnUnsuspended?.Invoke();
+                        }
+                        if (entry.Status != oldStatus)
+                            entry.OnStatusChanged(oldStatus, entry.Status);
+                        filterDirty = true;
+                        SoundEngine.PlaySound(SoundID.MenuTick with { Volume = 0.4f });
+                    }
+
+                    //中键挂起/恢复
+                    bool middleDown = Mouse.GetState().MiddleButton == ButtonState.Pressed;
+                    bool middleJustPressed = middleDown && !prevMiddleDown;
+                    if (middleJustPressed) {
+                        var entry = filteredEntries[idx];
+                        var oldStatus = entry.Status;
+                        if (entry.Status == QuestEntryStatus.Suspended) {
+                            entry.Status = QuestEntryStatus.Active;
+                            entry.OnUnsuspended?.Invoke();
+                        }
+                        else if (entry.Status == QuestEntryStatus.Active || entry.Status == QuestEntryStatus.Tracked) {
+                            entry.Status = QuestEntryStatus.Suspended;
+                        }
                         if (entry.Status != oldStatus)
                             entry.OnStatusChanged(oldStatus, entry.Status);
                         filterDirty = true;

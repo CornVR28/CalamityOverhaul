@@ -76,27 +76,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Quest.FishoilQuest
         private float elementAlpha; //内部元素整体Alpha
         private float elementYOffset; //内部元素整体Y偏移
 
-        public override bool Active {
-            get {
-                if (!Main.LocalPlayer.TryGetOverride<HalibutPlayer>(out var hp)) {
-                    return false;
-                }
-                //已拒绝直接不显示
-                if (hp.ADVSave.FishoilQuestDeclined) {
-                    return false;
-                }
-                //未接受不显示
-                if (!hp.ADVSave.FishoilQuestAccepted) {
-                    return false;
-                }
-                //已完成后直接隐藏
-                if (hp.ADVSave.FishoilQuestCompleted) {
-                    closing = true;//强行设置开始关闭
-                    return hideProgress < 1f;
-                }
-                return true;
-            }
-        }
+        //已重构至 QuestManager 委托管理系统，此UI不再使用
+        public override bool Active => false;
 
         public override void LoadUIData(TagCompound tag) {
             hideProgress = 1f;//设置一下隐藏，防止进世界时会有一瞬间看到UI

@@ -31,6 +31,7 @@ namespace CalamityOverhaul.Content.ADV
         public bool FishoilQuestDeclined;
         public bool FishoilQuestAccepted;
         public bool FishoilQuestCompleted;
+        public bool FishoilQuestSuspended;
         public bool FirstResurrectionWarning;
         public bool QueenBeeGift;
         public bool SkeletronGift;

@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
+using System;
 using System.Collections.Generic;
 using Terraria.Localization;
 
@@ -107,6 +108,12 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
 
         /// <summary>状态变化时调用，子类可重写以触发音效或动画</summary>
         public virtual void OnStatusChanged(QuestEntryStatus oldStatus, QuestEntryStatus newStatus) { }
+
+        /// <summary>
+        /// 从挂起状态恢复为激活时调用的回调，
+        /// 注册者可设置此委托以同步存档标记（如清除拒绝标记、设置接受标记）
+        /// </summary>
+        public Action OnUnsuspended { get; set; }
 
         #endregion
 

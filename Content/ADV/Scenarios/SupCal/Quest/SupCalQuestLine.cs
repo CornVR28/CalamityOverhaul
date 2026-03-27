@@ -1,4 +1,5 @@
-﻿using CalamityOverhaul.Content.ADV.QuestManager;
+﻿using System;
+using CalamityOverhaul.Content.ADV.QuestManager;
 using CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest.DoGQuest;
 using CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest.PallbearerQuest;
 using CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest.YharonQuest;
@@ -78,7 +79,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest
                 accepted: save.SupCalQuestAccepted,
                 declined: save.SupCalQuestDeclined,
                 completed: save.SupCalQuestReward,
-                priority: 30);
+                priority: 30,
+                onUnsuspended: () => { save.SupCalQuestDeclined = false; save.SupCalQuestAccepted = true; });
 
             SyncQuest(manager, save, DOG_KEY,
                 DoGTitle, DoGSummary,
@@ -88,7 +90,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest
                 accepted: save.SupCalDoGQuestAccepted,
                 declined: save.SupCalDoGQuestDeclined,
                 completed: save.SupCalDoGQuestReward,
-                priority: 20);
+                priority: 20,
+                onUnsuspended: () => { save.SupCalDoGQuestDeclined = false; save.SupCalDoGQuestAccepted = true; });
 
             SyncQuest(manager, save, YHARON_KEY,
                 YharonTitle, YharonSummary,
@@ -98,12 +101,14 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest
                 accepted: save.SupCalYharonQuestAccepted,
                 declined: save.SupCalYharonQuestDeclined,
                 completed: save.SupCalYharonQuestReward,
-                priority: 10);
+                priority: 10,
+                onUnsuspended: () => { save.SupCalYharonQuestDeclined = false; save.SupCalYharonQuestAccepted = true; });
         }
 
         /// <summary>
         /// 同步单条猎杀委托的注册与状态<br/>
-        /// 前置未满足或已拒绝 → 从管理器移除<br/>
+        /// 前置未满足 → 从管理器移除<br/>
+        /// 已拒绝 → 注册为 <see cref="SupCalHuntQuestEntry"/> 并设为 Suspended，允许玩家在管理器中取消挂起<br/>
         /// 已接受 → 注册为 <see cref="SupCalHuntQuestEntry"/> 并设为 Active<br/>
         /// 已完成 → 标记 Completed
         /// </summary>
@@ -112,9 +117,31 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest
             LocalizedText title, LocalizedText summary,
             int targetNpcType, float requiredContribution,
             bool prerequisite, bool accepted, bool declined, bool completed,
-            int priority) {
-            if (!prerequisite || declined) {
+            int priority,
+            Action onUnsuspended = null) {
+            if (!prerequisite) {
                 manager.UnregisterQuest(key);
+                return;
+            }
+
+            //已拒绝 → 以挂起状态注册到管理器，允许玩家手动取消挂起重新接受
+            if (declined) {
+                var entry = manager.GetEntry(key);
+                if (entry == null) {
+                    entry = new SupCalHuntQuestEntry(key, title, summary, QuestCategory) {
+                        Priority = priority,
+                        EntryStyle = new BrimstoneEntryStyle(),
+                        TrackerStyle = new BrimstoneTrackerWidgetStyle(),
+                        TargetNpcType = targetNpcType,
+                        RequiredContribution = requiredContribution,
+                        SummonHintFormat = TrackerSummonHint,
+                        ContributionFormat = TrackerContribution,
+                        RequiredFormat = TrackerRequired,
+                        OnUnsuspended = onUnsuspended
+                    };
+                    entry.Status = QuestEntryStatus.Suspended;
+                    manager.RegisterQuest(entry);
+                }
                 return;
             }
 
@@ -123,9 +150,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest
                 return;
             }
 
-            var entry = manager.GetEntry(key);
-            if (entry == null) {
-                entry = new SupCalHuntQuestEntry(key, title, summary, QuestCategory) {
+            var activeEntry = manager.GetEntry(key);
+            if (activeEntry == null) {
+                activeEntry = new SupCalHuntQuestEntry(key, title, summary, QuestCategory) {
                     Priority = priority,
                     EntryStyle = new BrimstoneEntryStyle(),
                     TrackerStyle = new BrimstoneTrackerWidgetStyle(),
@@ -135,19 +162,19 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest
                     ContributionFormat = TrackerContribution,
                     RequiredFormat = TrackerRequired
                 };
-                manager.RegisterQuest(entry);
+                manager.RegisterQuest(activeEntry);
             }
 
-            if (completed && entry.Status != QuestEntryStatus.Completed) {
-                var old = entry.Status;
-                entry.Status = QuestEntryStatus.Completed;
-                entry.Progress = 1f;
-                entry.OnStatusChanged(old, QuestEntryStatus.Completed);
+            if (completed && activeEntry.Status != QuestEntryStatus.Completed) {
+                var old = activeEntry.Status;
+                activeEntry.Status = QuestEntryStatus.Completed;
+                activeEntry.Progress = 1f;
+                activeEntry.OnStatusChanged(old, QuestEntryStatus.Completed);
                 manager.MarkFilterDirty();
             }
-            else if (!completed && entry.Status == QuestEntryStatus.Completed) {
-                entry.Status = QuestEntryStatus.Active;
-                entry.Progress = 0f;
+            else if (!completed && activeEntry.Status == QuestEntryStatus.Completed) {
+                activeEntry.Status = QuestEntryStatus.Active;
+                activeEntry.Progress = 0f;
                 manager.MarkFilterDirty();
             }
         }

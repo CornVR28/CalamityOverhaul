@@ -1,6 +1,7 @@
 ﻿using CalamityOverhaul.Content.ADV.ADVChoices;
 using CalamityOverhaul.Content.ADV.DialogueBoxs;
 using CalamityOverhaul.Content.ADV.DialogueBoxs.Styles;
+using CalamityOverhaul.Content.ADV.QuestManager;
 using CalamityOverhaul.Content.LegendWeapon.HalibutLegend;
 using System;
 using System.Linq;
@@ -87,10 +88,60 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Quest.FishoilQuest
         private void OnAccept() {
             if (Main.LocalPlayer.TryGetOverride<HalibutPlayer>(out var halibutPlayer)) {
                 halibutPlayer.ADVSave.FishoilQuestAccepted = true;
-                FishoilQuestUI.Instance.OpenPersistent();
             }
+            //注册到委托管理系统
+            RegisterQuestEntry();
             scenarioStarted = false;
             Complete();
+        }
+
+        /// <summary>将鱼油任务注册到委托管理器，如已存在则跳过</summary>
+        internal static void RegisterQuestEntry() {
+            var manager = QuestManagerUI.Instance;
+            if (manager == null) return;
+            if (manager.GetEntry(FishoilQuestEntry.QuestKey) != null) return;
+            var entry = FishoilQuestEntry.Create();
+            manager.RegisterQuest(entry);
+        }
+
+        /// <summary>
+        /// 同步委托管理器中鱼油条目的注册与状态，
+        /// 未接受 → 移除条目；已接受 → 确保注册；已完成 → 标记完成；已挂起 → 标记挂起
+        /// </summary>
+        private static void SyncQuestEntry(ADVSave save) {
+            var manager = QuestManagerUI.Instance;
+            if (manager == null) return;
+
+            //未接受任务 → 确保条目不存在
+            if (!save.FishoilQuestAccepted) {
+                manager.UnregisterQuest(FishoilQuestEntry.QuestKey);
+                return;
+            }
+
+            //已接受 → 确保条目存在
+            RegisterQuestEntry();
+            var entry = manager.GetEntry(FishoilQuestEntry.QuestKey);
+            if (entry == null) return;
+
+            //已完成 → 标记完成
+            if (save.FishoilQuestCompleted) {
+                if (entry.Status != QuestEntryStatus.Completed) {
+                    var old = entry.Status;
+                    entry.Status = QuestEntryStatus.Completed;
+                    entry.Progress = 1f;
+                    entry.OnStatusChanged(old, QuestEntryStatus.Completed);
+                    manager.MarkFilterDirty();
+                }
+                return;
+            }
+
+            //已挂起 → 恢复挂起状态
+            if (save.FishoilQuestSuspended) {
+                if (entry.Status != QuestEntryStatus.Suspended) {
+                    entry.Status = QuestEntryStatus.Suspended;
+                    manager.MarkFilterDirty();
+                }
+            }
         }
 
         private void OnDecline() {
@@ -102,6 +153,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Quest.FishoilQuest
         }
 
         public override void Update(ADVSave save, HalibutPlayer halibutPlayer) {
+            //同步委托管理器条目状态（参照 SupCalQuestLine.SyncQuest 模式）
+            SyncQuestEntry(save);
+
             if (!NPC.downedQueenBee) {
                 Spwand = false;
                 return;

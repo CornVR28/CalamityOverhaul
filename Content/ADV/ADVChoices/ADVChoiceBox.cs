@@ -32,7 +32,7 @@ namespace CalamityOverhaul.Content.ADV.ADVChoices
             Tzeentch,   //奸奇魔法风格
             Sulfsea,    //硫磺海风格
             StarStream,  //星流风格
-            SHPC,
+            SHPC,   //SHPC
         }
 
         private readonly List<Choice> choices = new();
@@ -40,8 +40,6 @@ namespace CalamityOverhaul.Content.ADV.ADVChoices
         private int selectedIndex = -1;
         private bool isSelecting = false;
 
-        //样式系统
-        private ChoiceBoxStyle currentStyleType = ChoiceBoxStyle.Default;
         private IChoiceBoxStyle currentStyle;
         private readonly Dictionary<ChoiceBoxStyle, IChoiceBoxStyle> styleInstances = new();
 
@@ -245,8 +243,6 @@ namespace CalamityOverhaul.Content.ADV.ADVChoices
                 inst.timedRemainingFrames = 0;
             }
 
-            //切换样式
-            inst.currentStyleType = style;
             if (inst.styleInstances.TryGetValue(style, out var styleInstance)) {
                 inst.currentStyle = styleInstance;
                 inst.currentStyle.Reset();
