@@ -170,6 +170,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest
                 activeEntry.Status = QuestEntryStatus.Completed;
                 activeEntry.Progress = 1f;
                 activeEntry.OnStatusChanged(old, QuestEntryStatus.Completed);
+                QuestManagerNotification.Notify(activeEntry.Title,
+                    QuestManagerNotification.NotifyKind.Completed);
                 manager.MarkFilterDirty();
             }
             else if (!completed && activeEntry.Status == QuestEntryStatus.Completed) {

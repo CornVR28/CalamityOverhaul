@@ -156,6 +156,12 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
                 //新注册的进行中任务自动设为关注，使追踪窗口立即显示
                 if (entry.Status == QuestEntryStatus.Active) {
                     entry.Status = QuestEntryStatus.Tracked;
+                    QuestManagerNotification.Notify(entry.Title,
+                        QuestManagerNotification.NotifyKind.NewQuest);
+                }
+                else if (entry.Status == QuestEntryStatus.Suspended) {
+                    QuestManagerNotification.Notify(entry.Title,
+                        QuestManagerNotification.NotifyKind.Suspended);
                 }
                 allEntries.Add(entry);
                 filterDirty = true;
@@ -399,8 +405,10 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
                             entry.Status = QuestEntryStatus.Tracked;
                             entry.OnUnsuspended?.Invoke();
                         }
-                        if (entry.Status != oldStatus)
+                        if (entry.Status != oldStatus) {
                             entry.OnStatusChanged(oldStatus, entry.Status);
+                            EmitStatusNotification(entry, oldStatus, entry.Status);
+                        }
                         filterDirty = true;
                         SoundEngine.PlaySound(SoundID.MenuTick with { Volume = 0.4f });
                     }
@@ -418,12 +426,34 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
                         else if (entry.Status == QuestEntryStatus.Active || entry.Status == QuestEntryStatus.Tracked) {
                             entry.Status = QuestEntryStatus.Suspended;
                         }
-                        if (entry.Status != oldStatus)
+                        if (entry.Status != oldStatus) {
                             entry.OnStatusChanged(oldStatus, entry.Status);
+                            EmitStatusNotification(entry, oldStatus, entry.Status);
+                        }
                         filterDirty = true;
                         SoundEngine.PlaySound(SoundID.MenuTick with { Volume = 0.4f });
                     }
                 }
+            }
+        }
+
+        /// <summary>根据状态变化发射对应的通知弹窗</summary>
+        private static void EmitStatusNotification(QuestEntryData entry,
+            QuestEntryStatus oldStatus, QuestEntryStatus newStatus) {
+            var kind = newStatus switch {
+                QuestEntryStatus.Tracked when oldStatus == QuestEntryStatus.Suspended
+                    => QuestManagerNotification.NotifyKind.Unsuspended,
+                QuestEntryStatus.Tracked => QuestManagerNotification.NotifyKind.Tracked,
+                QuestEntryStatus.Active when oldStatus == QuestEntryStatus.Tracked
+                    => QuestManagerNotification.NotifyKind.Untracked,
+                QuestEntryStatus.Active when oldStatus == QuestEntryStatus.Suspended
+                    => QuestManagerNotification.NotifyKind.Unsuspended,
+                QuestEntryStatus.Suspended => QuestManagerNotification.NotifyKind.Suspended,
+                QuestEntryStatus.Completed => QuestManagerNotification.NotifyKind.Completed,
+                _ => (QuestManagerNotification.NotifyKind?)null,
+            };
+            if (kind.HasValue) {
+                QuestManagerNotification.Notify(entry.Title, kind.Value);
             }
         }
 
@@ -701,16 +731,33 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
             //在面板底部状态栏上方显示操作提示
             Rectangle footerRect = GetFooterRect(panelRect);
             var entry = filteredEntries[hoveredIndex];
+            var font = FontAssets.MouseText.Value;
 
-            string hint = "";
+            float hintY = footerRect.Y - 16f;
+
+            //挂起/恢复提示（所有非完成、非失败状态均可操作）
+            string suspendHint = "";
+            if (entry.Status == QuestEntryStatus.Active || entry.Status == QuestEntryStatus.Tracked
+                || entry.Status == QuestEntryStatus.Suspended)
+                suspendHint = SuspendHintText.Value;
+
+            if (!string.IsNullOrEmpty(suspendHint)) {
+                float suspendW = font.MeasureString(suspendHint).X * 0.55f;
+                Utils.DrawBorderString(sb, suspendHint,
+                    new Vector2(footerRect.Right - suspendW - 10f, hintY),
+                    new Color(200, 180, 100) * (alpha * 0.5f), 0.55f);
+                hintY -= 14f;
+            }
+
+            //关注/取消关注提示
+            string trackHint = "";
             if (entry.Status == QuestEntryStatus.Active || entry.Status == QuestEntryStatus.Tracked)
-                hint = TrackHintText.Value;
+                trackHint = TrackHintText.Value;
 
-            if (!string.IsNullOrEmpty(hint)) {
-                var font = FontAssets.MouseText.Value;
-                float hintW = font.MeasureString(hint).X * 0.55f;
-                Utils.DrawBorderString(sb, hint,
-                    new Vector2(footerRect.Right - hintW - 10f, footerRect.Y - 16f),
+            if (!string.IsNullOrEmpty(trackHint)) {
+                float hintW = font.MeasureString(trackHint).X * 0.55f;
+                Utils.DrawBorderString(sb, trackHint,
+                    new Vector2(footerRect.Right - hintW - 10f, hintY),
                     new Color(140, 210, 255) * (alpha * 0.5f), 0.55f);
             }
         }
