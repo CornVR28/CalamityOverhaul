@@ -1,4 +1,5 @@
 ﻿using CalamityOverhaul.Content.ADV.ADVChoices;
+using CalamityOverhaul.Content.ADV.ADVRewardPopups;
 using CalamityOverhaul.Content.ADV.DialogueBoxs;
 using CalamityOverhaul.Content.ADV.DialogueBoxs.Styles;
 using CalamityOverhaul.Content.ADV.QuestManager;
@@ -8,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Terraria;
+using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
 
@@ -112,7 +114,14 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Quest.FishoilQuest
 
                 //发放鱼油奖励
                 int fishoilType = ModContent.ItemType<Fishoil>();
-                player.QuickSpawnItem(player.GetSource_Misc("FishoilQuestReward"), fishoilType, 5);
+                ADVRewardPopup.ShowReward(fishoilType, 5, "", appearDuration: 24, holdDuration: -1, giveDuration: 16, requireClick: true,
+                    anchorProvider: () => {
+                        var rect = DialogueUIRegistry.Current?.GetPanelRect() ?? Rectangle.Empty;
+                        if (rect == Rectangle.Empty) {
+                            return new Vector2(Main.screenWidth / 2f, Main.screenHeight * 0.45f);
+                        }
+                        return new Vector2(rect.Center.X, rect.Y - 70f);
+                    }, offset: Vector2.Zero);
 
                 //标记任务完成
                 if (player.TryGetOverride<HalibutPlayer>(out var hp)) {
