@@ -53,10 +53,10 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Quest.FishoilQuest
             ProgressFormat = host.GetLocalization(nameof(ProgressFormat), () => "{0}/{1}");
             TrackerCollecting = host.GetLocalization(nameof(TrackerCollecting), () => "还需收集 {0} 条鱼");
             TrackerReady = host.GetLocalization(nameof(TrackerReady), () => "鱼已收集完毕，请关注任务以提交");
-            StatusSuspended = host.GetLocalization(nameof(StatusSuspended), () => "⏸ 已挂起");
-            StatusCompleted = host.GetLocalization(nameof(StatusCompleted), () => "✓ 已完成");
-            StatusSubmittable = host.GetLocalization(nameof(StatusSubmittable), () => "◈ 可提交");
-            StatusCollectingFormat = host.GetLocalization(nameof(StatusCollectingFormat), () => "◇ 收集中 ({0}/{1})");
+            StatusSuspended = host.GetLocalization(nameof(StatusSuspended), () => "已挂起");
+            StatusCompleted = host.GetLocalization(nameof(StatusCompleted), () => "已完成");
+            StatusSubmittable = host.GetLocalization(nameof(StatusSubmittable), () => "可提交");
+            StatusCollectingFormat = host.GetLocalization(nameof(StatusCollectingFormat), () => "收集中 ({0}/{1})");
         }
 
         /// <summary>创建并配置一个新的任务条目实例</summary>
@@ -70,7 +70,14 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Quest.FishoilQuest
             };
             entry.TrackerStyle = entry.oceanStyle;
             entry.EntryStyle = new OceanEntryStyle();
+            entry.OnUnsuspended = entry.ClearSuspendedFlag;
             return entry;
+        }
+
+        private void ClearSuspendedFlag() {
+            if (Main.LocalPlayer.TryGetOverride<HalibutPlayer>(out var hp)) {
+                hp.ADVSave.FishoilQuestSuspended = false;
+            }
         }
 
         public override void OnUpdate() {
@@ -98,6 +105,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Quest.FishoilQuest
                 && currentFishCount >= FishRequired
                 && !submissionActive
                 && !ScenarioManager.IsActive()) {
+                ScenarioManager.Reset<FishoilSubmitScenario>();
                 if (ScenarioManager.Start<FishoilSubmitScenario>()) {
                     submissionActive = true;
                 }
@@ -107,11 +115,10 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Quest.FishoilQuest
         public override void OnStatusChanged(QuestEntryStatus oldStatus, QuestEntryStatus newStatus) {
             //从挂起恢复为关注时，清除持久化挂起标记
             if (oldStatus == QuestEntryStatus.Suspended && newStatus == QuestEntryStatus.Tracked) {
-                if (Main.LocalPlayer.TryGetOverride<HalibutPlayer>(out var hp)) {
-                    hp.ADVSave.FishoilQuestSuspended = false;
-                }
+                ClearSuspendedFlag();
                 //如果鱼够了，重新触发提交场景
                 if (currentFishCount >= FishRequired && !submissionActive && !ScenarioManager.IsActive()) {
+                    ScenarioManager.Reset<FishoilSubmitScenario>();
                     if (ScenarioManager.Start<FishoilSubmitScenario>()) {
                         submissionActive = true;
                     }

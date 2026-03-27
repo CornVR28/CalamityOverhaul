@@ -1,4 +1,4 @@
-using CalamityOverhaul.Content.ADV.ADVChoices;
+﻿using CalamityOverhaul.Content.ADV.ADVChoices;
 using CalamityOverhaul.Content.ADV.DialogueBoxs;
 using CalamityOverhaul.Content.ADV.DialogueBoxs.Styles;
 using CalamityOverhaul.Content.ADV.QuestManager;
@@ -58,10 +58,11 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Quest.FishoilQuest
             AddWithChoices(Rolename.Value, QuestionLine.Value, new List<Choice> {
                 new Choice(ChoiceGive.Value, OnGive),
                 new Choice(ChoiceRefuse.Value, OnRefuse),
-            }, choiceBoxStyle: ADVChoiceBox.ChoiceBoxStyle.Sulfsea);
+            }, choiceBoxStyle: ADVChoiceBox.ChoiceBoxStyle.Default);
         }
 
         private void OnGive() {
+            ScenarioManager.Reset<FishoilSubmit_Give>();
             ScenarioManager.Start<FishoilSubmit_Give>();
             Complete();
         }
@@ -80,6 +81,20 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Quest.FishoilQuest
 
             protected override void OnScenarioComplete() {
                 Player player = Main.LocalPlayer;
+
+                int availableFish = 0;
+                for (int i = 0; i < player.inventory.Length; i++) {
+                    Item item = player.inventory[i];
+                    if (item != null && item.stack > 0 && FishoilQuestScenario.CandidateFishTypes.Contains(item.type)) {
+                        availableFish += item.stack;
+                        if (availableFish >= FishoilQuestEntry.FishRequired) {
+                            break;
+                        }
+                    }
+                }
+                if (availableFish < FishoilQuestEntry.FishRequired) {
+                    return;
+                }
 
                 //从背包中消耗300条候选鱼
                 int remaining = FishoilQuestEntry.FishRequired;
@@ -116,6 +131,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Quest.FishoilQuest
         }
 
         private void OnRefuse() {
+            ScenarioManager.Reset<FishoilSubmit_Refuse>();
             ScenarioManager.Start<FishoilSubmit_Refuse>();
             Complete();
         }

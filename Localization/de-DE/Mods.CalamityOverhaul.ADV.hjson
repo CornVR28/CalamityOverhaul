@@ -1037,3 +1037,24 @@ FirstMetShepel: {
 	// Choice1Response: 了解，正在切换至战术支援模式......武器系统校准完毕，请下达指令
 	// Choice2Response: 收到，将维持待机状态并持续监控周围环境，如有需要请随时呼叫
 }
+
+FishoilSubmitScenario: {
+	// Rolename: 比目鱼
+	// SubmitLine1: 嗯，你收集到了足够的鱼
+	// SubmitLine2: 正好够我提炼一瓶鱼油的量
+	// QuestionLine: 你要把它们交给我吗？
+	// ChoiceGive: 好，拿去吧
+	// ChoiceRefuse: 我再想想
+	// GiveResponse: 很好，稍等...给你，一瓶新鲜的鱼油
+	// RefuseResponse: 好吧，什么时候想好了再来找我
+	// QuestTitle: 鱼油采集
+	// QuestSummary: 收集300条普通鱼交给比目鱼，换取一瓶鱼油
+	// QuestCategory: 比目鱼
+	// ProgressFormat: "{0}/{1}"
+	// TrackerCollecting: 还需收集 {0} 条鱼
+	// TrackerReady: 鱼已收集完毕，请关注任务以提交
+	// StatusSuspended: 已挂起
+	// StatusCompleted: 已完成
+	// StatusSubmittable: 可提交
+	// StatusCollectingFormat: 收集中 ({0}/{1})
+}
