@@ -1,4 +1,4 @@
-using CalamityOverhaul.Content.ADV.MainMenuOvers;
+﻿using CalamityOverhaul.Content.ADV.MainMenuOvers;
 using CalamityOverhaul.Content.ADV.Scenarios;
 using CalamityOverhaul.Content.ADV.Scenarios.SupCal;
 using Terraria;
@@ -12,7 +12,17 @@ namespace CalamityOverhaul.Content.ADV
     /// </summary>
     internal class ADVSavePlayer : ModPlayer
     {
-        public ADVSave ADVSave { get; private set; } = new();
+        public ADVSave ADVSave { get; private set; }
+
+        public override void Initialize() {
+            ADVSave = new ADVSave();
+        }
+
+        public override ModPlayer Clone(Player newEntity) {
+            ADVSavePlayer modPlayer = (ADVSavePlayer)base.Clone(newEntity);
+            modPlayer.ADVSave = ADVSave;
+            return modPlayer;
+        }
 
         public override void SaveData(TagCompound tag) {
             try {
