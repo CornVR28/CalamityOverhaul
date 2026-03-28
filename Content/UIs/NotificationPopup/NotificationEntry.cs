@@ -1,4 +1,4 @@
-using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;
 using Terraria.Audio;
@@ -58,8 +58,8 @@ namespace CalamityOverhaul.Content.UIs.NotificationPopup
             //外层柔和阴影，悬浮感
             for (int s = 3; s >= 1; s--) {
                 Rectangle shadowRect = rect;
-                shadowRect.Inflate(s * 2, s * 2);
-                shadowRect.Offset(s, s + 1);
+                shadowRect.Inflate(s * 1, s * 1);
+                shadowRect.Offset(s, s);
                 sb.Draw(pixel, shadowRect, Color.Black * (0.18f * s / 3f) * alpha);
             }
 
