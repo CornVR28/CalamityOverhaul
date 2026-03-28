@@ -1,12 +1,10 @@
-namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Gifts
+﻿namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Gifts
 {
     /// <summary>
     /// Boss击杀后海伦礼物的存档数据
     /// </summary>
     public class BossGiftADVData : ADVDataModule
     {
-        public override string SaveKey => "BossGift";
-
         public bool QueenBeeGift;
         public bool SkeletronGift;
         public bool EyeOfCthulhuGift;

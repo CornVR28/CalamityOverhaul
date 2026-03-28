@@ -1,12 +1,10 @@
-namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal
+﻿namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal
 {
     /// <summary>
     /// 至高卡拉米蒂剧情线的存档数据
     /// </summary>
     public class SupCalADVData : ADVDataModule
     {
-        public override string SaveKey => "SupCal";
-
         public bool FirstMetSupCal;
         public bool SupCalChoseToFight;
         public bool SupCalMoonLordReward;

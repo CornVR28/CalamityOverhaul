@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using Terraria;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
@@ -11,8 +10,8 @@ namespace CalamityOverhaul.Content.ADV
 {
     /// <summary>
     /// ADV数据聚合器。自动发现并管理所有<see cref="ADVDataModule"/>子类，
-    /// 提供统一的存档读写和旧版兼容能力。
-    /// 新增剧情线只需创建新的ADVDataModule子类，无需修改此处。
+    /// 提供统一的存档读写和旧版兼容能力
+    /// 新增剧情线只需创建新的ADVDataModule子类，无需修改此处
     /// </summary>
     public class ADVSave
     {

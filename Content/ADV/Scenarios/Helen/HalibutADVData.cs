@@ -1,12 +1,10 @@
-namespace CalamityOverhaul.Content.ADV.Scenarios.Helen
+﻿namespace CalamityOverhaul.Content.ADV.Scenarios.Helen
 {
     /// <summary>
     /// 比目鱼/海伦基础剧情线的存档数据
     /// </summary>
     public class HalibutADVData : ADVDataModule
     {
-        public override string SaveKey => "Halibut";
-
         public bool HasCaughtHalibut;
         public bool FirstMet;
         public bool DyeProtest;

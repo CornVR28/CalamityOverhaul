@@ -1,4 +1,4 @@
-namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes
+﻿namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes
 {
     /// <summary>
     /// 老公爵交互状态枚举
@@ -22,8 +22,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes
     /// </summary>
     public class OldDukeADVData : ADVDataModule
     {
-        public override string SaveKey => "OldDuke";
-
         public int OldDukeInteraction;
         public bool OldDukeFirstCampsiteDialogueCompleted;
         public bool OldDukeFindFragmentsQuestTriggered;
