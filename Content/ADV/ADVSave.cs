@@ -15,23 +15,20 @@ namespace CalamityOverhaul.Content.ADV
     /// </summary>
     public class ADVSave
     {
-        private const string VersionKey = "__version";
+        internal const string VersionKey = "__version";
         private const int CurrentVersion = 2;
 
         private readonly Dictionary<Type, ADVDataModule> _modules = [];
         private readonly Dictionary<string, ADVDataModule> _modulesByKey = [];
 
         public ADVSave() {
-            foreach (var type in typeof(ADVDataModule).Assembly.GetTypes()) {
-                if (!type.IsAbstract && type.IsSubclassOf(typeof(ADVDataModule))) {
-                    var module = (ADVDataModule)Activator.CreateInstance(type);
-                    if (_modulesByKey.ContainsKey(module.SaveKey)) {
-                        throw new Exception($"ADVDataModule SaveKey冲突: '{module.SaveKey}' " +
-                            $"(类型 {type.Name} 与 {_modulesByKey[module.SaveKey].GetType().Name})");
-                    }
-                    _modules[type] = module;
-                    _modulesByKey[module.SaveKey] = module;
+            List<ADVDataModule> dataModules = VaultUtils.GetDerivedInstances<ADVDataModule>();
+            foreach(var module in dataModules) {
+                if (_modulesByKey.TryGetValue(module.SaveKey, out ADVDataModule value)) {
+                    throw new Exception($"ADVDataModule SaveKey conflict: '{module.SaveKey}' " + $"(Type {module.GetType().Name} vs {value.GetType().Name})");
                 }
+                _modules[module.GetType()] = module;
+                _modulesByKey[module.SaveKey] = module;
             }
         }
 
@@ -52,18 +49,14 @@ namespace CalamityOverhaul.Content.ADV
         }
 
         public virtual void LoadData(TagCompound tag) {
-            if (tag.ContainsKey(VersionKey)) {
-                //新版分层格式：按模块SaveKey读取各自的子TagCompound
-                foreach (var module in _modules.Values) {
-                    if (tag.TryGet<TagCompound>(module.SaveKey, out var moduleTag)) {
-                        module.LoadFields(moduleTag);
-                    }
-                }
+            //旧版扁平格式（v0/v1）由迁移工具类统一处理
+            if (ADVLegacyMigration.TryLoadFromFlatFormat(tag, _modules.Values)) {
+                return;
             }
-            else {
-                //旧版扁平格式：所有字段在同一层，直接让每个模块从扁平tag中读取自己的字段
-                foreach (var module in _modules.Values) {
-                    module.LoadFields(tag);
+            //当前v2分层格式：按模块SaveKey读取各自的子TagCompound
+            foreach (var module in _modules.Values) {
+                if (tag.TryGet<TagCompound>(module.SaveKey, out var moduleTag)) {
+                    module.LoadFields(moduleTag);
                 }
             }
         }

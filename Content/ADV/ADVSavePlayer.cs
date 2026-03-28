@@ -45,18 +45,10 @@ namespace CalamityOverhaul.Content.ADV
         }
 
         /// <summary>
-        /// 从旧版HalibutSave迁移ADV数据（向后兼容）
+        /// 从旧版HalibutSave迁移ADV数据（向后兼容），委托给<see cref="ADVLegacyMigration"/>处理
         /// </summary>
-        internal void MigrateFromLegacy(TagCompound adcTag, TagCompound fullTag) {
-            ADVSave.LoadData(adcTag);
-
-            if (ADVSave.Get<SupCalADVData>().EternalBlazingNow) {
-                MenuSave.UnlockEternalBlazingNowPortrait(Player);
-            }
-
-            foreach (var scenario in ADVScenarioBase.Instances) {
-                scenario.LoadData(fullTag);
-            }
+        internal void MigrateFromLegacy(TagCompound halibutTag) {
+            ADVLegacyMigration.TryMigrateFromHalibutSave(halibutTag, Player, ADVSave);
         }
     }
 }

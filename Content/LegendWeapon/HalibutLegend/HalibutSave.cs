@@ -144,11 +144,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend
                     if (tag.TryGet<TagCompound>("ResurrectionSystem", out var resurrectionTag)) {
                         halibutPlayer.ResurrectionSystem.LoadData(resurrectionTag);
                     }
-                    //向后兼容：如果旧版ADCSave数据存在于HalibutSave中，迁移到ADVSavePlayer
-                    if (tag.TryGet<TagCompound>("ADCSave", out var adcTag)) {
-                        if (Player.TryGetModPlayer<ADVSavePlayer>(out var advSavePlayer)) {
-                            advSavePlayer.MigrateFromLegacy(adcTag, tag);
-                        }
+                    //向后兼容：如果旧版ADCSave数据存在于HalibutSave中，委托给ADVLegacyMigration迁移
+                    if (tag.ContainsKey("ADCSave") && Player.TryGetModPlayer<ADVSavePlayer>(out var advSavePlayer)) {
+                        advSavePlayer.MigrateFromLegacy(tag);
                     }
                     //加载锁定时间
                     if (tag.TryGet("IsInteractionLockedTime", out int isInteractionLockedTime)) {

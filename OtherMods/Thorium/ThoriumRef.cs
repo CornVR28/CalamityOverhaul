@@ -3,26 +3,50 @@ using System;
 using System.Reflection;
 using Terraria;
 using Terraria.ModLoader;
-using ThoriumMod.Buffs;
-using ThoriumMod.Utilities;
 
 namespace CalamityOverhaul.OtherMods.Thorium
 {
-    [JITWhenModsEnabled("ThoriumMod")]
     internal static class ThoriumRef
     {
+        private static int sheathBuffType = -1;
+        private static MethodInfo getModPlayerMethod;
+        private static FieldInfo sheathTrackerField;
+        private static MethodInfo strikeMethod;
+
         public static void Load() {
             if (!ModLoader.TryGetMod("ThoriumMod", out Mod mod)) {
                 return;
             }
-            var type = CWRUtils.GetTargetTypeInStringKey(CWRUtils.GetModTypes(mod), "SheathData");
-            if (type == null) {
-                return;
+
+            if (mod.TryFind<ModBuff>("SheathBuff", out var sheathBuff)) {
+                sheathBuffType = sheathBuff.Type;
             }
-            var meth = type.GetMethod("MeleeButNotValidItem", BindingFlags.Static | BindingFlags.Public);
-            VaultHook.Add(meth, On_MeleeButNotValidItem);
-            meth = type.GetMethod("ValidItem", BindingFlags.Static | BindingFlags.Public);
-            VaultHook.Add(meth, On_ValidItem);
+
+            Type[] modTypes = CWRUtils.GetModTypes(mod);
+
+            var sheathDataType = CWRUtils.GetTargetTypeInStringKey(modTypes, "SheathData");
+            if (sheathDataType != null) {
+                var meth = sheathDataType.GetMethod("MeleeButNotValidItem", BindingFlags.Static | BindingFlags.Public);
+                VaultHook.Add(meth, On_MeleeButNotValidItem);
+                meth = sheathDataType.GetMethod("ValidItem", BindingFlags.Static | BindingFlags.Public);
+                VaultHook.Add(meth, On_ValidItem);
+            }
+
+            var thoriumPlayerType = CWRUtils.GetTargetTypeInStringKey(modTypes, "ThoriumPlayer");
+            if (thoriumPlayerType != null) {
+                foreach (var m in typeof(Player).GetMethods()) {
+                    if (m.Name == "GetModPlayer" && m.IsGenericMethodDefinition && m.GetParameters().Length == 0) {
+                        getModPlayerMethod = m.MakeGenericMethod(thoriumPlayerType);
+                        break;
+                    }
+                }
+                sheathTrackerField = thoriumPlayerType.GetField("sheathTracker",
+                    BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                if (sheathTrackerField != null) {
+                    strikeMethod = sheathTrackerField.FieldType.GetMethod("Strike",
+                        BindingFlags.Instance | BindingFlags.Public);
+                }
+            }
         }
 
         public static bool On_ValidItem(Func<Item, bool> orig, Item item) {
@@ -34,13 +58,18 @@ namespace CalamityOverhaul.OtherMods.Thorium
         }
 
         public static void ModifyProjBySheath(Player player, ref NPC.HitModifiers modifiers) {
-            if (player.HasBuff<SheathBuff>()) {
+            if (sheathBuffType > 0 && player.HasBuff(sheathBuffType)) {
                 modifiers.SourceDamage *= 2f;
             }
         }
 
         public static void OnHitNPCWithProj(Player player, NPC target, NPC.HitInfo hit, int damageDone) {
-            player.GetThoriumPlayer().sheathTracker.Strike(target, hit, damageDone);
+            if (getModPlayerMethod == null || sheathTrackerField == null || strikeMethod == null) return;
+            var thoriumPlayer = getModPlayerMethod.Invoke(player, null);
+            if (thoriumPlayer == null) return;
+            var sheathTracker = sheathTrackerField.GetValue(thoriumPlayer);
+            if (sheathTracker == null) return;
+            strikeMethod.Invoke(sheathTracker, [target, hit, damageDone]);
         }
     }
 
