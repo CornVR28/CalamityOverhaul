@@ -4,7 +4,6 @@ using CalamityOverhaul.Content.ADV.DialogueBoxs;
 using CalamityOverhaul.Content.ADV.DialogueBoxs.Styles;
 using CalamityOverhaul.Content.ADV.QuestManager;
 using CalamityOverhaul.Content.Items.Tools;
-using CalamityOverhaul.Content.LegendWeapon.HalibutLegend;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -123,9 +122,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Quest.FishoilQuest
                     }, offset: Vector2.Zero);
 
                 //标记任务完成
-                if (player.TryGetOverride<HalibutPlayer>(out var hp)) {
-                    hp.ADVSave.FishoilQuestCompleted = true;
-                    hp.ADVSave.FishoilQuestSuspended = false;
+                if (player.TryGetADVSave(out var save)) {
+                    save.FishoilQuestCompleted = true;
+                    save.FishoilQuestSuspended = false;
                 }
 
                 //更新委托管理器中的条目状态
@@ -157,8 +156,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Quest.FishoilQuest
                 QuestManagerUI.Instance?.SetEntryStatus(
                     FishoilQuestEntry.QuestKey, QuestEntryStatus.Suspended);
                 //持久化挂起状态
-                if (Main.LocalPlayer.TryGetOverride<HalibutPlayer>(out var hp)) {
-                    hp.ADVSave.FishoilQuestSuspended = true;
+                if (Main.LocalPlayer.TryGetADVSave(out var save)) {
+                    save.FishoilQuestSuspended = true;
                 }
             }
         }

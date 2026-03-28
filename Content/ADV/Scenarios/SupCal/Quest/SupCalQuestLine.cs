@@ -2,7 +2,6 @@
 using CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest.DoGQuest;
 using CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest.PallbearerQuest;
 using CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest.YharonQuest;
-using CalamityOverhaul.Content.LegendWeapon.HalibutLegend;
 using System;
 using Terraria;
 using Terraria.Localization;
@@ -68,8 +67,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest
             var manager = QuestManagerUI.Instance;
             if (manager == null) return;
 
-            if (!Main.LocalPlayer.TryGetOverride<HalibutPlayer>(out var hp)) return;
-            var save = hp.ADVSave;
+            if (!Main.LocalPlayer.TryGetADVSave(out var save)) return;
 
             SyncQuest(manager, save, PALLBEARER_KEY,
                 PallbearerTitle, PallbearerSummary,

@@ -1,5 +1,4 @@
-﻿using CalamityOverhaul.Content.ADV.MainMenuOvers;
-using CalamityOverhaul.Content.ADV.Scenarios;
+﻿using CalamityOverhaul.Content.ADV;
 using CalamityOverhaul.Content.LegendWeapon.HalibutLegend.Resurrections;
 using CalamityOverhaul.Content.LegendWeapon.HalibutLegend.UI;
 using System.Collections.Generic;
@@ -94,17 +93,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend
                 if (Player.TryGetOverride<HalibutPlayer>(out var hPlayer)) {
                     //保存深渊复苏系统数据
                     tag["ResurrectionSystem"] = hPlayer.ResurrectionSystem.SaveData();
-                    tag["ADCSave"] = hPlayer.ADVSave.SaveData();
                     tag["IsInteractionLockedTime"] = hPlayer.IsInteractionLockedTime;
-
-                    //检查是否达成永恒燃烧的现在结局并解锁主菜单立绘
-                    if (hPlayer.ADVSave.EternalBlazingNow) {
-                        MenuSave.UnlockEternalBlazingNowPortrait(Player);
-                    }
-                }
-
-                foreach (var scenario in ADVScenarioBase.Instances) {
-                    scenario.SaveData(tag);
                 }
             } catch { }
         }
@@ -155,22 +144,16 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend
                     if (tag.TryGet<TagCompound>("ResurrectionSystem", out var resurrectionTag)) {
                         halibutPlayer.ResurrectionSystem.LoadData(resurrectionTag);
                     }
-                    //加载ADCSave数据
+                    //向后兼容：如果旧版ADCSave数据存在于HalibutSave中，迁移到ADVSavePlayer
                     if (tag.TryGet<TagCompound>("ADCSave", out var adcTag)) {
-                        halibutPlayer.ADVSave.LoadData(adcTag);
-                        //检查是否已达成永恒燃烧的现在结局
-                        if (halibutPlayer.ADVSave.EternalBlazingNow) {
-                            MenuSave.UnlockEternalBlazingNowPortrait(Player);
+                        if (Player.TryGetModPlayer<ADVSavePlayer>(out var advSavePlayer)) {
+                            advSavePlayer.MigrateFromLegacy(adcTag, tag);
                         }
                     }
                     //加载锁定时间
                     if (tag.TryGet("IsInteractionLockedTime", out int isInteractionLockedTime)) {
                         halibutPlayer.IsInteractionLockedTime = isInteractionLockedTime;
                     }
-                }
-
-                foreach (var scenario in ADVScenarioBase.Instances) {
-                    scenario.LoadData(tag);
                 }
             } catch { }
         }

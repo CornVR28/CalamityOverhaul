@@ -1,6 +1,5 @@
 ﻿using CalamityOverhaul.Content.ADV.ADVQuestTracker;
 using CalamityOverhaul.Content.Items.Melee;
-using CalamityOverhaul.Content.LegendWeapon.HalibutLegend;
 using InnoVault.UIHandles;
 using Terraria;
 using Terraria.ModLoader;
@@ -23,38 +22,38 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest.DoGQuest
         }
 
         protected override bool ShouldShowQuest() {
-            if (!Main.LocalPlayer.TryGetOverride<HalibutPlayer>(out var halibutPlayer)) {
+            if (!Main.LocalPlayer.TryGetADVSave(out var save)) {
                 return false;
             }
 
             //如果玩家已经接受/拒绝/完成了任务，就不再显示UI
-            if (halibutPlayer.ADVSave.SupCalDoGQuestReward
-                || halibutPlayer.ADVSave.SupCalDoGQuestAccepted
-                || halibutPlayer.ADVSave.SupCalDoGQuestDeclined) {
+            if (save.SupCalDoGQuestReward
+                || save.SupCalDoGQuestAccepted
+                || save.SupCalDoGQuestDeclined) {
                 return false;
             }
 
             //前置任务必须完成
-            if (!halibutPlayer.ADVSave.SupCalQuestReward) {
+            if (!save.SupCalQuestReward) {
                 return false;
             }
 
             Item heldItem = Main.LocalPlayer.GetItem();
             return heldItem.type == ModContent.ItemType<Heartcarver>()
-                && halibutPlayer.ADVSave.SupCalQuestReward
-                && !halibutPlayer.ADVSave.SupCalDoGQuestReward
-                && !halibutPlayer.ADVSave.SupCalDoGQuestDeclined;
+                && save.SupCalQuestReward
+                && !save.SupCalDoGQuestReward
+                && !save.SupCalDoGQuestDeclined;
         }
 
         protected override void OnQuestAccepted() {
-            if (Main.LocalPlayer.TryGetOverride<HalibutPlayer>(out var halibutPlayer)) {
-                halibutPlayer.ADVSave.SupCalDoGQuestAccepted = true;
+            if (Main.LocalPlayer.TryGetADVSave(out var save)) {
+                save.SupCalDoGQuestAccepted = true;
             }
         }
 
         protected override void OnQuestDeclined() {
-            if (Main.LocalPlayer.TryGetOverride<HalibutPlayer>(out var halibutPlayer)) {
-                halibutPlayer.ADVSave.SupCalDoGQuestDeclined = true;
+            if (Main.LocalPlayer.TryGetADVSave(out var save)) {
+                save.SupCalDoGQuestDeclined = true;
             }
         }
     }

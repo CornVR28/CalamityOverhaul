@@ -140,8 +140,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal
         public override void OnNPCDeath(NPC npc) {
             if (FirstMetSupCal.ThisIsToFight && npc.type == CWRID.NPC_SupremeCalamitas) {
                 Player player = Main.LocalPlayer;
-                if (player.TryGetOverride<HalibutPlayer>(out var halibutPlayer)) {
-                    if (halibutPlayer.ADVSave.SupCalChoseToFight) {
+                if (player.TryGetADVSave(out var save)) {
+                    if (save.SupCalChoseToFight) {
                         Spawned = true;
                         RandomTimer = 60 * Main.rand.Next(2, 4);
                     }

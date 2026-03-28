@@ -1,5 +1,4 @@
-﻿using CalamityOverhaul.Content.LegendWeapon.HalibutLegend;
-using Terraria;
+﻿using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.Localization;
@@ -30,10 +29,10 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.Quest.DeploySignaltowe
         }
 
         public override bool? UseItem(Player player) {
-            if (player.TryGetOverride<HalibutPlayer>(out var halibutPlayer)) {
+            if (player.TryGetADVSave(out var save)) {
                 SoundEngine.PlaySound(SoundID.Item4 with { Volume = 1.5f }, player.Center);
                 int combat;
-                if (halibutPlayer.ADVSave.UseConstructionBlueprint) {
+                if (save.UseConstructionBlueprint) {
                     combat = CombatText.NewText(new Rectangle((int)player.Center.X - 100, (int)player.Center.Y - 100, 200, 50),
                         Color.BlueViolet, L2.Value, true);
                 }
@@ -42,7 +41,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.Quest.DeploySignaltowe
                         Color.Gold, L1.Value, true);
                 }
                 Main.combatText[combat].lifeTime = 300;
-                halibutPlayer.ADVSave.UseConstructionBlueprint = true;
+                save.UseConstructionBlueprint = true;
             }
             ConstructionBlueprintUI.Instance.Show();
             return true;

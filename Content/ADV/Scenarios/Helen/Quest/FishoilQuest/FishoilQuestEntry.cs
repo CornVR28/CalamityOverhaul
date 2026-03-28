@@ -1,5 +1,4 @@
 ﻿using CalamityOverhaul.Content.ADV.QuestManager;
-using CalamityOverhaul.Content.LegendWeapon.HalibutLegend;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
@@ -75,8 +74,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Quest.FishoilQuest
         }
 
         private void ClearSuspendedFlag() {
-            if (Main.LocalPlayer.TryGetOverride<HalibutPlayer>(out var hp)) {
-                hp.ADVSave.FishoilQuestSuspended = false;
+            if (Main.LocalPlayer.TryGetADVSave(out var save)) {
+                save.FishoilQuestSuspended = false;
             }
         }
 

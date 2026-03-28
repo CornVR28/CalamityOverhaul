@@ -161,16 +161,16 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest.PallbearerQuest
         internal override float RequiredContribution => REQUIRED_CONTRIBUTION;
 
         public override bool IsQuestActive(Player player) {
-            if (!player.TryGetOverride<HalibutPlayer>(out var halibutPlayer)) {
+            if (!player.TryGetADVSave(out var save)) {
                 return false;
             }
 
             //检查是否接受了任务
-            if (!halibutPlayer.ADVSave.SupCalQuestAccepted || halibutPlayer.ADVSave.SupCalQuestDeclined) {
+            if (!save.SupCalQuestAccepted || save.SupCalQuestDeclined) {
                 return false;
             }
 
-            if (halibutPlayer.ADVSave.SupCalQuestReward) {
+            if (save.SupCalQuestReward) {
                 return false;//任务已经完成
             }
 
@@ -178,12 +178,12 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest.PallbearerQuest
         }
 
         public override void OnQuestCompleted(Player player, float contribution) {
-            if (!player.TryGetOverride<HalibutPlayer>(out var halibutPlayer)) {
+            if (!player.TryGetADVSave(out var save)) {
                 return;
             }
 
             //标记任务完成
-            halibutPlayer.ADVSave.SupCalQuestReward = true;
+            save.SupCalQuestReward = true;
 
             //延迟触发奖励场景
             SupCalQuestReward.Spawned = true;

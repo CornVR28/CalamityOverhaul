@@ -187,8 +187,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal
                 }
 
                 //标记玩家选择了战斗
-                if (Main.LocalPlayer.TryGetOverride<HalibutPlayer>(out var halibutPlayer)) {
-                    halibutPlayer.ADVSave.SupCalChoseToFight = true;
+                if (Main.LocalPlayer.TryGetADVSave(out var save)) {
+                    save.SupCalChoseToFight = true;
                 }
 
                 ThisIsToFight = true;

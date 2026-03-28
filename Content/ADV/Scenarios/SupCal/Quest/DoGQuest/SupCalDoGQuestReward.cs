@@ -144,17 +144,17 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest.DoGQuest
         internal override float RequiredContribution => REQUIRED_CONTRIBUTION;
 
         public override bool IsQuestActive(Player player) {
-            if (!player.TryGetOverride<HalibutPlayer>(out var halibutPlayer)) {
+            if (!player.TryGetADVSave(out var save)) {
                 return false;
             }
 
-            if (!halibutPlayer.ADVSave.SupCalQuestReward//先完成前置任务
-                || halibutPlayer.ADVSave.SupCalDoGQuestDeclined//且未拒绝当前任务
+            if (!save.SupCalQuestReward//先完成前置任务
+                || save.SupCalDoGQuestDeclined//且未拒绝当前任务
                 ) {
                 return false;
             }
 
-            if (halibutPlayer.ADVSave.SupCalDoGQuestReward) {
+            if (save.SupCalDoGQuestReward) {
                 return false;//任务已经完成
             }
 
@@ -162,12 +162,12 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest.DoGQuest
         }
 
         public override void OnQuestCompleted(Player player, float contribution) {
-            if (!player.TryGetOverride<HalibutPlayer>(out var halibutPlayer)) {
+            if (!player.TryGetADVSave(out var save)) {
                 return;
             }
 
             //标记任务完成
-            halibutPlayer.ADVSave.SupCalDoGQuestReward = true;
+            save.SupCalDoGQuestReward = true;
 
             //延迟触发奖励场景
             SupCalDoGQuestReward.Spawned = true;

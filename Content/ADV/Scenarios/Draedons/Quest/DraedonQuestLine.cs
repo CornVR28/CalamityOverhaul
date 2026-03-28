@@ -1,7 +1,6 @@
 using CalamityOverhaul.Content.ADV.QuestManager;
 using CalamityOverhaul.Content.ADV.Scenarios.Draedons.Quest.DeploySignaltowers;
 using CalamityOverhaul.Content.ADV.Scenarios.Draedons.Quest.DeploySignaltowers.SignalTower;
-using CalamityOverhaul.Content.LegendWeapon.HalibutLegend;
 using Terraria;
 using Terraria.Localization;
 using Terraria.ModLoader;
@@ -58,8 +57,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.Quest
             var manager = QuestManagerUI.Instance;
             if (manager == null) return;
 
-            if (!Main.LocalPlayer.TryGetOverride<HalibutPlayer>(out var hp)) return;
-            var save = hp.ADVSave;
+            if (!Main.LocalPlayer.TryGetADVSave(out var save)) return;
 
             SyncDeployQuest(manager, save);
         }

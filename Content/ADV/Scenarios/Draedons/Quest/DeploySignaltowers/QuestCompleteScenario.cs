@@ -64,8 +64,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.Quest.DeploySignaltowe
             DraedonEffect.Send();
 
             //标记任务完成保存
-            if (Main.LocalPlayer.TryGetOverride<HalibutPlayer>(out var halibutPlayer)) {
-                halibutPlayer.ADVSave.DeploySignaltowerQuestCompleted = true;
+            if (Main.LocalPlayer.TryGetADVSave(out var save)) {
+                save.DeploySignaltowerQuestCompleted = true;
             }
             DSTPlayer.HasDeploySignaltowerQuestByWorld = false;
             //开启与变节者的后续对话

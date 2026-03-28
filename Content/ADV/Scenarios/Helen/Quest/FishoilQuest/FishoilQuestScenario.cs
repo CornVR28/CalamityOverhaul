@@ -86,8 +86,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Quest.FishoilQuest
         }
 
         private void OnAccept() {
-            if (Main.LocalPlayer.TryGetOverride<HalibutPlayer>(out var halibutPlayer)) {
-                halibutPlayer.ADVSave.FishoilQuestAccepted = true;
+            if (Main.LocalPlayer.TryGetADVSave(out var save)) {
+                save.FishoilQuestAccepted = true;
             }
             //注册到委托管理系统
             RegisterQuestEntry();
@@ -136,8 +136,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Quest.FishoilQuest
         }
 
         private void OnDecline() {
-            if (Main.LocalPlayer.TryGetOverride<HalibutPlayer>(out var halibutPlayer)) {
-                halibutPlayer.ADVSave.FishoilQuestDeclined = true;
+            if (Main.LocalPlayer.TryGetADVSave(out var save)) {
+                save.FishoilQuestDeclined = true;
             }
             scenarioStarted = false;
             Complete();

@@ -140,15 +140,15 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal
                     continue;
                 }
 
-                if (!player.TryGetOverride<HalibutPlayer>(out var halibutPlayer)) {
+                if (!player.TryGetADVSave(out var save)) {
                     continue;
                 }
 
-                if (!halibutPlayer.ADVSave.SupCalChoseToFight) {
+                if (!save.SupCalChoseToFight) {
                     continue;
                 }
 
-                if (halibutPlayer.ADVSave.SupCalDefeat) {
+                if (save.SupCalDefeat) {
                     continue;//已经击败过，不再触发
                 }
 

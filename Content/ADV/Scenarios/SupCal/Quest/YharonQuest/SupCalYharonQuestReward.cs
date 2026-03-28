@@ -168,17 +168,17 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest.YharonQuest
         internal override float RequiredContribution => REQUIRED_CONTRIBUTION;
 
         public override bool IsQuestActive(Player player) {
-            if (!player.TryGetOverride<HalibutPlayer>(out var halibutPlayer)) {
+            if (!player.TryGetADVSave(out var save)) {
                 return false;
             }
 
             //检查是否接受了任务
-            if (!halibutPlayer.ADVSave.SupCalYharonQuestAccepted || halibutPlayer.ADVSave.SupCalYharonQuestDeclined) {
+            if (!save.SupCalYharonQuestAccepted || save.SupCalYharonQuestDeclined) {
                 return false;
             }
 
             //检查是否已完成
-            if (halibutPlayer.ADVSave.SupCalYharonQuestReward) {
+            if (save.SupCalYharonQuestReward) {
                 return false;
             }
 
@@ -186,12 +186,12 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest.YharonQuest
         }
 
         public override void OnQuestCompleted(Player player, float contribution) {
-            if (!player.TryGetOverride<HalibutPlayer>(out var halibutPlayer)) {
+            if (!player.TryGetADVSave(out var save)) {
                 return;
             }
 
             //标记任务完成
-            halibutPlayer.ADVSave.SupCalYharonQuestReward = true;
+            save.SupCalYharonQuestReward = true;
 
             //延迟触发奖励场景
             SupCalYharonQuestReward.Spawned = true;

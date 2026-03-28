@@ -1,6 +1,5 @@
 ﻿using CalamityOverhaul.Content.ADV.Scenarios.Draedons.ExoMechdusaSums;
 using CalamityOverhaul.Content.Items.Placeable;
-using CalamityOverhaul.Content.LegendWeapon.HalibutLegend;
 using CalamityOverhaul.Content.PRTTypes;
 using InnoVault.PRT;
 using InnoVault.TileProcessors;
@@ -43,8 +42,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.Quest.DeploySignaltowe
         }
         public static LocalizedText RecipeCondition(out Func<bool> condition) {
             condition = new Func<bool>(() =>
-            Main.LocalPlayer.TryGetOverride<HalibutPlayer>(out var halibutPlayer)
-            && halibutPlayer.ADVSave.UseConstructionBlueprint);
+            Main.LocalPlayer.TryGetADVSave(out var save)
+            && save.UseConstructionBlueprint);
             return UseConstructionBlueprint;
         }
         public override void AddRecipes() {

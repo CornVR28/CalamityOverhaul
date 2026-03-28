@@ -44,11 +44,7 @@ namespace CalamityOverhaul.Content.Items.Tools
             if (player.CountProjectilesOfID<ForgottenTomeEffect>() > 0) {
                 return false;
             }
-            if (!player.TryGetOverride<HalibutPlayer>(out var halibutPlayer)) {
-                return false;
-            }
-            ADVSave save = halibutPlayer.ADVSave;
-            if (save == null) {
+            if (!player.TryGetADVSave(out var save)) {
                 return false;
             }
             return IsAnySaveDataActive(save);
@@ -80,12 +76,7 @@ namespace CalamityOverhaul.Content.Items.Tools
 
         internal static int ResetAllADVData(Player owner) {
             int resetFieldCount = 0;
-            if (!owner.TryGetOverride<HalibutPlayer>(out var halibutPlayer)) {
-                return resetFieldCount;
-            }
-
-            ADVSave save = halibutPlayer.ADVSave;
-            if (save == null) {
+            if (!owner.TryGetADVSave(out var save)) {
                 return resetFieldCount;
             }
 
@@ -137,7 +128,7 @@ namespace CalamityOverhaul.Content.Items.Tools
         }
 
         public override bool? UseItem(Player player) {
-            if (!player.TryGetOverride<HalibutPlayer>(out var halibutPlayer)) {
+            if (!player.TryGetADVSave(out _)) {
                 return false;
             }
             if (Main.myPlayer == player.whoAmI) {

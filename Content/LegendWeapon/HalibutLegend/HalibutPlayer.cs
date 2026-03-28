@@ -92,10 +92,6 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend
         private const float CrashedEyeSideEffectRate = 0.0001f;//死机眼睛的极小副作用
         #endregion
 
-        #region ADV场景数据
-        public ADVSave ADVSave { get; private set; } = new();
-        #endregion
-
         #region 闪光皇后
         /// <summary>
         /// 当前齐射是否激活
@@ -515,8 +511,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend
             }
 
             if (Player.whoAmI == Main.myPlayer) {//关于ADV场景的更新只在本地玩家上进行
+                var advSave = Player.GetModPlayer<ADVSavePlayer>().ADVSave;
                 foreach (var scenario in ADVScenarioBase.Instances) {
-                    scenario.Update(ADVSave, this);
+                    scenario.Update(advSave, this);
                 }
             }
 
@@ -567,7 +564,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend
             HasHalubut = Player.inventory.Any(i => i.Alives() && i.type == HalibutOverride.ID);
 
             if (HasHalubut) {//只要拥有大比目鱼，就标记已经捕获过
-                ADVSave.HasCaughtHalibut = true;
+                if (Player.TryGetADVSave(out var advSave)) {
+                    advSave.HasCaughtHalibut = true;
+                }
             }
 
             if (!HeldHalibut && Main.myPlayer == Player.whoAmI) {

@@ -1,6 +1,5 @@
 ﻿using CalamityOverhaul.Content.ADV.ADVQuestTracker;
 using CalamityOverhaul.Content.Items.Melee;
-using CalamityOverhaul.Content.LegendWeapon.HalibutLegend;
 using InnoVault.UIHandles;
 using Terraria;
 using Terraria.ModLoader;
@@ -23,36 +22,36 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest.YharonQuest
         }
 
         protected override bool ShouldShowQuest() {
-            if (!Main.LocalPlayer.TryGetOverride<HalibutPlayer>(out var halibutPlayer)) {
+            if (!Main.LocalPlayer.TryGetADVSave(out var save)) {
                 return false;
             }
 
             //如果玩家已经接受/拒绝/完成了任务，就不再显示UI
-            if (halibutPlayer.ADVSave.SupCalYharonQuestAccepted) {
+            if (save.SupCalYharonQuestAccepted) {
                 return false;
             }
 
             //前置任务必须完成
-            if (!halibutPlayer.ADVSave.SupCalDoGQuestReward) {
+            if (!save.SupCalDoGQuestReward) {
                 return false;
             }
 
             Item heldItem = Main.LocalPlayer.GetItem();
             return heldItem.type == ModContent.ItemType<OniMachete>()
-                && halibutPlayer.ADVSave.SupCalDoGQuestReward
-                && !halibutPlayer.ADVSave.SupCalYharonQuestReward
-                && !halibutPlayer.ADVSave.SupCalYharonQuestDeclined;
+                && save.SupCalDoGQuestReward
+                && !save.SupCalYharonQuestReward
+                && !save.SupCalYharonQuestDeclined;
         }
 
         protected override void OnQuestAccepted() {
-            if (Main.LocalPlayer.TryGetOverride<HalibutPlayer>(out var halibutPlayer)) {
-                halibutPlayer.ADVSave.SupCalYharonQuestAccepted = true;
+            if (Main.LocalPlayer.TryGetADVSave(out var save)) {
+                save.SupCalYharonQuestAccepted = true;
             }
         }
 
         protected override void OnQuestDeclined() {
-            if (Main.LocalPlayer.TryGetOverride<HalibutPlayer>(out var halibutPlayer)) {
-                halibutPlayer.ADVSave.SupCalYharonQuestDeclined = true;
+            if (Main.LocalPlayer.TryGetADVSave(out var save)) {
+                save.SupCalYharonQuestDeclined = true;
             }
         }
     }

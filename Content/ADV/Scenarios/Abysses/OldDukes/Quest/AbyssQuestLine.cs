@@ -1,6 +1,5 @@
 using CalamityOverhaul.Content.ADV.QuestManager;
 using CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Campsites;
-using CalamityOverhaul.Content.LegendWeapon.HalibutLegend;
 using Terraria;
 using Terraria.Localization;
 using Terraria.ModLoader;
@@ -76,8 +75,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Quest
             var manager = QuestManagerUI.Instance;
             if (manager == null) return;
 
-            if (!Main.LocalPlayer.TryGetOverride<HalibutPlayer>(out var hp)) return;
-            var save = hp.ADVSave;
+            if (!Main.LocalPlayer.TryGetADVSave(out var save)) return;
 
             SyncCampsiteQuest(manager, save);
             SyncFragmentQuest(manager, save);

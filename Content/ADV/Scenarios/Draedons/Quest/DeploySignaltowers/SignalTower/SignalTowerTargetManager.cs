@@ -146,8 +146,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.Quest.DeploySignaltowe
         internal static void SetIsGenerated() {
             IsGenerated = true;
             //标记接受任务
-            if (Main.LocalPlayer.TryGetOverride<HalibutPlayer>(out var halibutPlayer)) {
-                halibutPlayer.ADVSave.DeploySignaltowerQuestAccepted = true;
+            if (Main.LocalPlayer.TryGetADVSave(out var save)) {
+                save.DeploySignaltowerQuestAccepted = true;
             }
         }
 

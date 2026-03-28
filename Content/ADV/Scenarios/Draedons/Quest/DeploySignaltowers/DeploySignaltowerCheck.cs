@@ -1,5 +1,4 @@
 ﻿using CalamityOverhaul.Content.ADV.Scenarios.Draedons.Quest.DeploySignaltowers.SignalTower;
-using CalamityOverhaul.Content.LegendWeapon.HalibutLegend;
 using Terraria;
 using Terraria.ModLoader;
 
@@ -65,12 +64,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.Quest.DeploySignaltowe
         /// 检测是否触发初次搭建场景
         /// </summary>
         private void CheckFirstTowerScenario() {
-            if (!Main.LocalPlayer.TryGetOverride<HalibutPlayer>(out var halibutPlayer)) {
-                return;
-            }
-
-            ADVSave save = halibutPlayer.ADVSave;
-            if (save == null) {
+            if (!Main.LocalPlayer.TryGetADVSave(out var save)) {
                 return;
             }
 
@@ -99,12 +93,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.Quest.DeploySignaltowe
         /// 检测任务完成
         /// </summary>
         private void CheckQuestComplete() {
-            if (!Main.LocalPlayer.TryGetOverride<HalibutPlayer>(out var halibutPlayer)) {
-                return;
-            }
-
-            ADVSave save = halibutPlayer.ADVSave;
-            if (save == null) {
+            if (!Main.LocalPlayer.TryGetADVSave(out var save)) {
                 return;
             }
 
