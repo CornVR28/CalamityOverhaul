@@ -1,4 +1,6 @@
 using Microsoft.Xna.Framework.Graphics;
+using System;
+using Terraria;
 using Terraria.Audio;
 using Terraria.GameContent;
 
@@ -28,6 +30,9 @@ namespace CalamityOverhaul.Content.UIs.NotificationPopup
         /// <summary>弹出时的音效，null则使用系统默认音效</summary>
         public virtual SoundStyle? AppearSound => null;
 
+        /// <summary>当前生命帧计数，由系统写入</summary>
+        public int LifeTimer { get; set; }
+
         /// <summary>
         /// 绘制弹窗内容，由系统在正确的动画位置调用
         /// </summary>
@@ -44,20 +49,33 @@ namespace CalamityOverhaul.Content.UIs.NotificationPopup
         #region 辅助绘制
 
         /// <summary>
-        /// 绘制标准面板背景（半透明黑底 + 上下左边框线）
+        /// 绘制通用面板背景——半透明底色 + 多层阴影 + 四边框线
         /// </summary>
         protected static void DrawPanelBackground(SpriteBatch sb, Rectangle rect,
             Color bgColor, Color borderColor, float alpha) {
-            sb.Draw(TextureAssets.MagicPixel.Value, rect, bgColor * alpha);
-            //上边框
-            sb.Draw(TextureAssets.MagicPixel.Value,
-                new Rectangle(rect.X, rect.Y, rect.Width, 2), borderColor * alpha);
-            //下边框
-            sb.Draw(TextureAssets.MagicPixel.Value,
-                new Rectangle(rect.X, rect.Bottom - 2, rect.Width, 2), borderColor * (alpha * 0.5f));
-            //左边框
-            sb.Draw(TextureAssets.MagicPixel.Value,
-                new Rectangle(rect.X, rect.Y, 2, rect.Height), borderColor * alpha);
+            Texture2D pixel = TextureAssets.MagicPixel.Value;
+
+            // 外层柔和阴影（悬浮感）
+            for (int s = 3; s >= 1; s--) {
+                Rectangle shadowRect = rect;
+                shadowRect.Inflate(s * 2, s * 2);
+                shadowRect.Offset(s, s + 1);
+                sb.Draw(pixel, shadowRect, Color.Black * (0.18f * s / 3f) * alpha);
+            }
+
+            // 主背景
+            sb.Draw(pixel, rect, bgColor * alpha);
+
+            int borderThick = 2;
+            // 上边框
+            sb.Draw(pixel, new Rectangle(rect.X, rect.Y, rect.Width, borderThick), borderColor * (0.95f * alpha));
+            // 下边框
+            Color bottomBorder = Color.Lerp(borderColor, Color.Black, 0.4f);
+            sb.Draw(pixel, new Rectangle(rect.X, rect.Bottom - borderThick, rect.Width, borderThick), bottomBorder * (0.7f * alpha));
+            // 左边框
+            sb.Draw(pixel, new Rectangle(rect.X, rect.Y, borderThick, rect.Height), borderColor * (0.85f * alpha));
+            // 右侧淡边
+            sb.Draw(pixel, new Rectangle(rect.Right - 1, rect.Y, 1, rect.Height), borderColor * (0.15f * alpha));
         }
 
         #endregion

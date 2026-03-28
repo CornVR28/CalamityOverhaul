@@ -18,6 +18,7 @@ namespace CalamityOverhaul.Content.UIs.NotificationPopup
             public NotificationEntry Entry;
             public int Timer;
             public float CurrentY;
+            public float ScaleAnim; // 加入缩放动画状态
 
             public int TotalLifetime => Entry.SlideTime * 2 + Entry.DisplayTime;
         }
@@ -49,7 +50,8 @@ namespace CalamityOverhaul.Content.UIs.NotificationPopup
                 _active.Add(new ActiveEntry {
                     Entry = entry,
                     Timer = 0,
-                    CurrentY = targetY
+                    CurrentY = targetY,
+                    ScaleAnim = 0f
                 });
 
                 SoundStyle sound = entry.AppearSound ?? CWRSound.Rollout with { Volume = 0.5f };
@@ -60,10 +62,15 @@ namespace CalamityOverhaul.Content.UIs.NotificationPopup
             for (int i = _active.Count - 1; i >= 0; i--) {
                 var note = _active[i];
                 note.Timer++;
+                note.Entry.LifeTimer = note.Timer;
 
-                //Y轴平滑堆叠
+                //Y轴平滑堆叠（加速跟踪）
                 float targetY = GetTargetY(i);
-                note.CurrentY = MathHelper.Lerp(note.CurrentY, targetY, 0.1f);
+                note.CurrentY = MathHelper.Lerp(note.CurrentY, targetY, 0.14f);
+
+                //缩放平滑
+                float targetScale = (note.Timer < note.Entry.SlideTime + note.Entry.DisplayTime) ? 1f : 0f;
+                note.ScaleAnim = MathHelper.Lerp(note.ScaleAnim, targetScale, 0.12f);
 
                 //生命周期结束
                 if (note.Timer >= note.TotalLifetime) {
@@ -76,9 +83,12 @@ namespace CalamityOverhaul.Content.UIs.NotificationPopup
             for (int i = _active.Count - 1; i >= 0; i--) {
                 var note = _active[i];
                 float progress = GetProgress(note);
-                float x = Main.screenWidth - note.Entry.Width * progress;
-                Rectangle rect = new((int)x, (int)note.CurrentY,
-                    (int)note.Entry.Width, (int)note.Entry.Height);
+                float scale = note.ScaleAnim;
+                float w = note.Entry.Width * scale;
+                float h = note.Entry.Height * scale;
+                float x = Main.screenWidth - w * progress;
+                float yCenter = note.CurrentY + note.Entry.Height / 2f;
+                Rectangle rect = new((int)x, (int)(yCenter - h / 2f), (int)w, (int)h);
 
                 if (rect.Contains(Main.MouseScreen.ToPoint())) {
                     Main.LocalPlayer.mouseInterface = true;
@@ -100,12 +110,25 @@ namespace CalamityOverhaul.Content.UIs.NotificationPopup
                 float progress = GetProgress(note);
                 if (progress <= 0f) continue;
 
-                float x = Main.screenWidth - note.Entry.Width * progress;
-                Rectangle panelRect = new((int)x, (int)note.CurrentY,
-                    (int)note.Entry.Width, (int)note.Entry.Height);
+                float scale = MathHelper.Clamp(note.ScaleAnim, 0f, 1f);
+                if (scale < 0.05f) continue;
+                float w = note.Entry.Width;
+                float h = note.Entry.Height;
+
+                float x = Main.screenWidth - w * progress;
+                float yCenter = note.CurrentY + h / 2f;
+
+                // 按中心点计算缩放后的绘制矩形
+                float scaledW = w * scale;
+                float scaledH = h * scale;
+                Rectangle panelRect = new(
+                    (int)(x + (w - scaledW) / 2f),
+                    (int)(yCenter - scaledH / 2f),
+                    (int)scaledW,
+                    (int)scaledH);
 
                 //alpha 跟随滑入/滑出衰减
-                float alpha = MathHelper.Clamp(progress, 0f, 1f);
+                float alpha = MathHelper.Clamp(progress, 0f, 1f) * scale;
                 note.Entry.DrawContent(spriteBatch, panelRect, alpha);
             }
         }
@@ -119,23 +142,36 @@ namespace CalamityOverhaul.Content.UIs.NotificationPopup
             return y;
         }
 
-        /// <summary>根据计时器计算滑入/滑出进度（0~1）</summary>
+        /// <summary>根据计时器计算滑入/滑出进度（0~1），使用弹性缓动</summary>
         private static float GetProgress(ActiveEntry note) {
             int timer = note.Timer;
             int slide = note.Entry.SlideTime;
             int display = note.Entry.DisplayTime;
 
             if (timer < slide) {
-                //滑入：ease-out quadratic
+                // 滑入：弹性 ease-out（轻微过冲回弹）
                 float p = timer / (float)slide;
-                return 1f - (1f - p) * (1f - p);
+                return EaseOutBack(p);
             }
             else if (timer > slide + display) {
-                //滑出：ease-out quadratic (反向)
+                // 滑出：加速淡出
                 float p = 1f - (timer - slide - display) / (float)slide;
-                return 1f - (1f - p) * (1f - p);
+                return EaseInCubic(p);
             }
             return 1f;
+        }
+
+        /// <summary>带回弹的ease-out（轻微过冲）</summary>
+        private static float EaseOutBack(float t) {
+            const float c1 = 1.3f; // 过冲系数，较温和
+            const float c3 = c1 + 1f;
+            float t1 = t - 1f;
+            return 1f + c3 * t1 * t1 * t1 + c1 * t1 * t1;
+        }
+
+        /// <summary>三次方ease-in</summary>
+        private static float EaseInCubic(float t) {
+            return t * t * t;
         }
     }
 }
