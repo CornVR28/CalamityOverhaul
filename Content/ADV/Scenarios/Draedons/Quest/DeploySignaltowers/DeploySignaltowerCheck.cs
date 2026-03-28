@@ -69,7 +69,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.Quest.DeploySignaltowe
             }
 
             //检查是否已接受任务但未触发首次场景
-            if (!save.DeploySignaltowerQuestAccepted || save.DeploySignaltowerFirstTowerBuilt) {
+            if (!save.Get<DraedonADVData>().DeploySignaltowerQuestAccepted || save.Get<DraedonADVData>().DeploySignaltowerFirstTowerBuilt) {
                 return;
             }
 
@@ -79,7 +79,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.Quest.DeploySignaltowe
 
                 //延迟2秒后触发场景避免在建造动画时触发
                 if (scenarioCheckTimer >= 120) {
-                    save.DeploySignaltowerFirstTowerBuilt = true;
+                    save.Get<DraedonADVData>().DeploySignaltowerFirstTowerBuilt = true;
                     TriggerFirstTowerScenario();
                     scenarioCheckTimer = 0;
                 }
@@ -98,7 +98,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.Quest.DeploySignaltowe
             }
 
             //检查是否已接受任务但未完成
-            if (!save.DeploySignaltowerQuestAccepted || save.DeploySignaltowerQuestCompleted) {
+            if (!save.Get<DraedonADVData>().DeploySignaltowerQuestAccepted || save.Get<DraedonADVData>().DeploySignaltowerQuestCompleted) {
                 return;
             }
 
@@ -108,7 +108,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.Quest.DeploySignaltowe
 
                 //延迟2秒后触发完成场景
                 if (questCompleteCheckTimer >= 120) {
-                    save.DeploySignaltowerQuestCompleted = true;
+                    save.Get<DraedonADVData>().DeploySignaltowerQuestCompleted = true;
                     DSTPlayer.HasDeploySignaltowerQuestByWorld = false;
                     OnQuestComplete();
                     questCompleteCheckTimer = 0;

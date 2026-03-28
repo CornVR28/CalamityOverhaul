@@ -64,7 +64,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.Quest
 
         private void SyncDeployQuest(QuestManagerUI manager, ADVSave save) {
             //已完成 → 标记完成
-            if (save.DeploySignaltowerQuestCompleted) {
+            if (save.Get<DraedonADVData>().DeploySignaltowerQuestCompleted) {
                 manager.SetEntryStatus(DEPLOY_KEY, QuestEntryStatus.Completed, 1f);
                 return;
             }
@@ -73,7 +73,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.Quest
             //1. 世界中已有目标点（可能是其他玩家接受的）→ 直接显示
             //2. 玩家自己接受了且未拒绝 → 显示
             bool worldHasQuest = DSTPlayer.HasDeploySignaltowerQuestByWorld;
-            bool playerAccepted = save.DeploySignaltowerQuestAccepted && !save.DeploySignaltowerQuestDeclined;
+            bool playerAccepted = save.Get<DraedonADVData>().DeploySignaltowerQuestAccepted && !save.Get<DraedonADVData>().DeploySignaltowerQuestDeclined;
 
             if (!worldHasQuest && !playerAccepted) {
                 manager.UnregisterQuest(DEPLOY_KEY);

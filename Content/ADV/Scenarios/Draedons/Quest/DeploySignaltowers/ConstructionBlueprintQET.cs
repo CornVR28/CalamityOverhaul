@@ -32,7 +32,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.Quest.DeploySignaltowe
             if (player.TryGetADVSave(out var save)) {
                 SoundEngine.PlaySound(SoundID.Item4 with { Volume = 1.5f }, player.Center);
                 int combat;
-                if (save.UseConstructionBlueprint) {
+                if (save.Get<DraedonADVData>().UseConstructionBlueprint) {
                     combat = CombatText.NewText(new Rectangle((int)player.Center.X - 100, (int)player.Center.Y - 100, 200, 50),
                         Color.BlueViolet, L2.Value, true);
                 }
@@ -41,7 +41,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.Quest.DeploySignaltowe
                         Color.Gold, L1.Value, true);
                 }
                 Main.combatText[combat].lifeTime = 300;
-                save.UseConstructionBlueprint = true;
+                save.Get<DraedonADVData>().UseConstructionBlueprint = true;
             }
             ConstructionBlueprintUI.Instance.Show();
             return true;

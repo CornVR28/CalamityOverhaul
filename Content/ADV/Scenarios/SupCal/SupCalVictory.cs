@@ -98,11 +98,11 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal
         }
 
         public override void Update(ADVSave save, HalibutPlayer halibutPlayer) {
-            if (save.SupCalDefeat) {
+            if (save.Get<SupCalADVData>().SupCalDefeat) {
                 return;
             }
 
-            if (!save.SupCalChoseToFight) {
+            if (!save.Get<SupCalADVData>().SupCalChoseToFight) {
                 return;//玩家没有选择战斗
             }
 
@@ -119,7 +119,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal
             }
 
             if (ScenarioManager.Start<SupCalVictory>()) {
-                save.SupCalDefeat = true;
+                save.Get<SupCalADVData>().SupCalDefeat = true;
                 SupCalVictoryNPC.Spawned = false;
             }
         }
@@ -141,7 +141,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal
             if (FirstMetSupCal.ThisIsToFight && npc.type == CWRID.NPC_SupremeCalamitas) {
                 Player player = Main.LocalPlayer;
                 if (player.TryGetADVSave(out var save)) {
-                    if (save.SupCalChoseToFight) {
+                    if (save.Get<SupCalADVData>().SupCalChoseToFight) {
                         Spawned = true;
                         RandomTimer = 60 * Main.rand.Next(2, 4);
                     }

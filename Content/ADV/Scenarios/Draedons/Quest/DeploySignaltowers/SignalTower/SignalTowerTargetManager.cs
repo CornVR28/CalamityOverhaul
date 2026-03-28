@@ -147,7 +147,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.Quest.DeploySignaltowe
             IsGenerated = true;
             //标记接受任务
             if (Main.LocalPlayer.TryGetADVSave(out var save)) {
-                save.DeploySignaltowerQuestAccepted = true;
+                save.Get<DraedonADVData>().DeploySignaltowerQuestAccepted = true;
             }
         }
 

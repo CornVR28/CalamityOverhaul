@@ -1,5 +1,6 @@
 ﻿using CalamityOverhaul.Content.ADV.ADVRewardPopups;
 using CalamityOverhaul.Content.ADV.DialogueBoxs;
+using CalamityOverhaul.Content.ADV.Scenarios.SupCal;
 using Terraria;
 using Terraria.Localization;
 using Terraria.ModLoader;
@@ -27,10 +28,10 @@ namespace CalamityOverhaul.OtherMods.NoxusBoss
             if (!Player.TryGetADVSave(out var save)) {
                 return;
             }
-            if (!save.EternalBlazingNow) {
+            if (!save.Get<SupCalADVData>().EternalBlazingNow) {
                 return;
             }
-            if (save.GiveBlazingBud) {
+            if (save.Get<SupCalADVData>().GiveBlazingBud) {
                 return;
             }
             if (--RandTimer > 0) {
@@ -50,7 +51,7 @@ namespace CalamityOverhaul.OtherMods.NoxusBoss
                     }, offset: Vector2.Zero
                     , styleProvider: () => ADVRewardPopup.RewardStyle.Brimstone);
 
-            save.GiveBlazingBud = true;
+            save.Get<SupCalADVData>().GiveBlazingBud = true;
 
             VaultUtils.Text(MessageText.Value, Color.Orange);
         }

@@ -118,11 +118,11 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest.PallbearerQuest
         }
 
         public override void Update(ADVSave save, HalibutPlayer halibutPlayer) {
-            if (!save.SupCalQuestReward) {
+            if (!save.Get<SupCalADVData>().SupCalQuestReward) {
                 return;
             }
 
-            if (save.SupCalQuestRewardSceneComplete) {
+            if (save.Get<SupCalADVData>().SupCalQuestRewardSceneComplete) {
                 return;
             }
 
@@ -135,7 +135,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest.PallbearerQuest
             }
 
             if (ScenarioManager.Start<SupCalQuestReward>()) {
-                save.SupCalQuestRewardSceneComplete = true;
+                save.Get<SupCalADVData>().SupCalQuestRewardSceneComplete = true;
                 Spawned = false;
             }
         }
@@ -166,11 +166,11 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest.PallbearerQuest
             }
 
             //检查是否接受了任务
-            if (!save.SupCalQuestAccepted || save.SupCalQuestDeclined) {
+            if (!save.Get<SupCalADVData>().SupCalQuestAccepted || save.Get<SupCalADVData>().SupCalQuestDeclined) {
                 return false;
             }
 
-            if (save.SupCalQuestReward) {
+            if (save.Get<SupCalADVData>().SupCalQuestReward) {
                 return false;//任务已经完成
             }
 
@@ -183,7 +183,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest.PallbearerQuest
             }
 
             //标记任务完成
-            save.SupCalQuestReward = true;
+            save.Get<SupCalADVData>().SupCalQuestReward = true;
 
             //延迟触发奖励场景
             SupCalQuestReward.Spawned = true;

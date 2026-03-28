@@ -48,10 +48,10 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Gifts
             }
         }
         protected override bool IsGiftCompleted(ADVSave save) {
-            return save.BrimstoneElementalGift;
+            return save.Get<BossGiftADVData>().BrimstoneElementalGift;
         }
         protected override void MarkGiftCompleted(ADVSave save) {
-            save.BrimstoneElementalGift = true;
+            save.Get<BossGiftADVData>().BrimstoneElementalGift = true;
         }
         protected override bool StartScenarioInternal() {
             return ScenarioManager.Start<BrimstoneElementalGift>();

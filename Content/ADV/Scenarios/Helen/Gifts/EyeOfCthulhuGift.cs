@@ -48,10 +48,10 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Gifts
             }
         }
         protected override bool IsGiftCompleted(ADVSave save) {
-            return save.EyeOfCthulhuGift;
+            return save.Get<BossGiftADVData>().EyeOfCthulhuGift;
         }
         protected override void MarkGiftCompleted(ADVSave save) {
-            save.EyeOfCthulhuGift = true;
+            save.Get<BossGiftADVData>().EyeOfCthulhuGift = true;
         }
         protected override bool StartScenarioInternal() {
             return ScenarioManager.Start<EyeOfCthulhuGift>();

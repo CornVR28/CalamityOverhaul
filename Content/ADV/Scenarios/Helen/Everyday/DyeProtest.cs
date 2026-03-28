@@ -23,13 +23,13 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Everyday
             if (!halibutPlayer.HeldHalibut) {
                 return;//必须持有比目鱼才能触发
             }
-            if (save.DyeProtest) {
+            if (save.Get<HalibutADVData>().DyeProtest) {
                 return;
             }
             Item item = halibutPlayer.Player.GetItem();
             if (item.type == HalibutOverride.ID && item.CWR().DyeItemID > ItemID.None) {
                 StartScenario();
-                save.DyeProtest = true;
+                save.Get<HalibutADVData>().DyeProtest = true;
             }
         }
     }

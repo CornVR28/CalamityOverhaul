@@ -68,11 +68,11 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Gifts
             if (!halibutPlayer.Player.ZoneUnderworldHeight) {
                 return;//必须在地狱区域
             }
-            if (save.HellGift) {
+            if (save.Get<BossGiftADVData>().HellGift) {
                 return;//已经获得过奖励
             }
             if (StartScenario()) {
-                save.HellGift = true;//标记已经获得奖励
+                save.Get<BossGiftADVData>().HellGift = true;//标记已经获得奖励
             }
         }
     }

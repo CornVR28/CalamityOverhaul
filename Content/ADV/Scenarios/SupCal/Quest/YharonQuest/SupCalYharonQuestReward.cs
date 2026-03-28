@@ -2,6 +2,7 @@
 using CalamityOverhaul.Content.ADV.Common;
 using CalamityOverhaul.Content.ADV.DialogueBoxs;
 using CalamityOverhaul.Content.ADV.DialogueBoxs.Styles;
+using CalamityOverhaul.Content.ADV.Scenarios.Helen.Gifts;
 using CalamityOverhaul.Content.Items.Accessories;
 using CalamityOverhaul.Content.Items.Melee;
 using CalamityOverhaul.Content.LegendWeapon.HalibutLegend;
@@ -120,16 +121,16 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest.YharonQuest
         }
 
         public override void Update(ADVSave save, HalibutPlayer halibutPlayer) {
-            if (!save.SupCalYharonQuestReward) {
+            if (!save.Get<SupCalADVData>().SupCalYharonQuestReward) {
                 return;
             }
 
-            if (save.SupCalYharonQuestRewardSceneComplete) {
+            if (save.Get<SupCalADVData>().SupCalYharonQuestRewardSceneComplete) {
                 return;
             }
 
             //如果玩家拿着大比目鱼，则必须先获得过比目鱼小姐给的礼物才能触发，避免这两个场景冲突
-            if (halibutPlayer.HeldHalibut && !save.YharonGift) {
+            if (halibutPlayer.HeldHalibut && !save.Get<BossGiftADVData>().YharonGift) {
                 return;
             }
 
@@ -142,7 +143,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest.YharonQuest
             }
 
             if (ScenarioManager.Start<SupCalYharonQuestReward>()) {
-                save.SupCalYharonQuestRewardSceneComplete = true;
+                save.Get<SupCalADVData>().SupCalYharonQuestRewardSceneComplete = true;
                 Spawned = false;
             }
         }
@@ -173,12 +174,12 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest.YharonQuest
             }
 
             //检查是否接受了任务
-            if (!save.SupCalYharonQuestAccepted || save.SupCalYharonQuestDeclined) {
+            if (!save.Get<SupCalADVData>().SupCalYharonQuestAccepted || save.Get<SupCalADVData>().SupCalYharonQuestDeclined) {
                 return false;
             }
 
             //检查是否已完成
-            if (save.SupCalYharonQuestReward) {
+            if (save.Get<SupCalADVData>().SupCalYharonQuestReward) {
                 return false;
             }
 
@@ -191,7 +192,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest.YharonQuest
             }
 
             //标记任务完成
-            save.SupCalYharonQuestReward = true;
+            save.Get<SupCalADVData>().SupCalYharonQuestReward = true;
 
             //延迟触发奖励场景
             SupCalYharonQuestReward.Spawned = true;

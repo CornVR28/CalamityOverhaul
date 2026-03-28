@@ -2,6 +2,7 @@
 using CalamityOverhaul.Content.ADV.Common;
 using CalamityOverhaul.Content.ADV.DialogueBoxs;
 using CalamityOverhaul.Content.ADV.DialogueBoxs.Styles;
+using CalamityOverhaul.Content.ADV.Scenarios.Helen.Gifts;
 using CalamityOverhaul.Content.Items.Ranged;
 using CalamityOverhaul.Content.LegendWeapon.HalibutLegend;
 using System;
@@ -110,19 +111,19 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest.PallbearerQuest
         }
 
         public override void Update(ADVSave save, HalibutPlayer halibutPlayer) {
-            if (save.SupCalMoonLordReward) {
+            if (save.Get<SupCalADVData>().SupCalMoonLordReward) {
                 return;
             }
             //必须先触发过FirstMetSupCal场景
-            if (!save.FirstMetSupCal) {
+            if (!save.Get<SupCalADVData>().FirstMetSupCal) {
                 return;
             }
             //如果玩家拿着大比目鱼，则必须先获得过比目鱼小姐给的礼物才能触发，避免这两个场景冲突
-            if (halibutPlayer.HeldHalibut && !save.MoonLordGift) {
+            if (halibutPlayer.HeldHalibut && !save.Get<BossGiftADVData>().MoonLordGift) {
                 return;
             }
             //必须选择了Choice1（拔出武器）
-            if (!save.SupCalChoseToFight) {
+            if (!save.Get<SupCalADVData>().SupCalChoseToFight) {
                 return;
             }
             //必须击败了月球领主
@@ -133,7 +134,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest.PallbearerQuest
                 return;
             }
             if (ScenarioManager.Start<SupCalMoonLordReward>()) {
-                save.SupCalMoonLordReward = true;
+                save.Get<SupCalADVData>().SupCalMoonLordReward = true;
                 SupCalMoonLordRewardNPC.Spawned = false;
             }
         }

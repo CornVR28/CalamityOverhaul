@@ -107,7 +107,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes
             if (!target.TryGetADVSave(out var save)) {
                 return false;
             }
-            return save.OldDukeState switch {
+            return save.Get<OldDukeADVData>().OldDukeState switch {
                 OldDukeInteractionState.NotMet => true,
                 OldDukeInteractionState.Met => true,
                 OldDukeInteractionState.DeclinedCooperation => true,
@@ -123,7 +123,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes
             if (!target.TryGetADVSave(out var save)) {
                 return false;
             }
-            return save.OldDukeState == OldDukeInteractionState.AcceptedCooperation;
+            return save.Get<OldDukeADVData>().OldDukeState == OldDukeInteractionState.AcceptedCooperation;
         }
 
         /// <summary>
@@ -288,8 +288,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes
             if (!target.TryGetADVSave(out var save)) {
                 return;
             }
-            if (save.OldDukeState == OldDukeInteractionState.NotMet) {
-                save.OldDukeState = OldDukeInteractionState.Met;
+            if (save.Get<OldDukeADVData>().OldDukeState == OldDukeInteractionState.NotMet) {
+                save.Get<OldDukeADVData>().OldDukeState = OldDukeInteractionState.Met;
             }
         }
 
@@ -414,7 +414,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes
             //状态通过ai[]数组自动同步到其他客户端和服务端
             bool isLocalTarget = !VaultUtils.isServer && npc.target == Main.myPlayer;
             if (isLocalTarget && !ScenarioManager.IsActive() && Timer > 60 && target.TryGetADVSave(out var save)) {
-                OldDukeInteractionState choice = save.OldDukeState;
+                OldDukeInteractionState choice = save.Get<OldDukeADVData>().OldDukeState;
                 switch (choice) {
                     case OldDukeInteractionState.AcceptedCooperation:
                     case OldDukeInteractionState.DeclinedCooperation:

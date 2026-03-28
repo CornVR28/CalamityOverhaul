@@ -43,7 +43,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.Quest.DeploySignaltowe
         public static LocalizedText RecipeCondition(out Func<bool> condition) {
             condition = new Func<bool>(() =>
             Main.LocalPlayer.TryGetADVSave(out var save)
-            && save.UseConstructionBlueprint);
+            && save.Get<DraedonADVData>().UseConstructionBlueprint);
             return UseConstructionBlueprint;
         }
         public override void AddRecipes() {

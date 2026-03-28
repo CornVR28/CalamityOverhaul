@@ -83,13 +83,13 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Quest
 
         private void SyncCampsiteQuest(QuestManagerUI manager, ADVSave save) {
             //已完成首次对话 → 标记完成
-            if (save.OldDukeFirstCampsiteDialogueCompleted) {
+            if (save.Get<OldDukeADVData>().OldDukeFirstCampsiteDialogueCompleted) {
                 manager.SetEntryStatus(CAMPSITE_KEY, QuestEntryStatus.Completed, 1f);
                 return;
             }
 
             //前提条件：玩家接受合作 + 营地已生成
-            if (!save.OldDukeCooperationAccepted || !OldDukeCampsite.IsGenerated) {
+            if (!save.Get<OldDukeADVData>().OldDukeCooperationAccepted || !OldDukeCampsite.IsGenerated) {
                 manager.UnregisterQuest(CAMPSITE_KEY);
                 return;
             }
@@ -114,13 +114,13 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Quest
 
         private void SyncFragmentQuest(QuestManagerUI manager, ADVSave save) {
             //已完成 → 标记完成
-            if (save.OldDukeFindFragmentsQuestCompleted) {
+            if (save.Get<OldDukeADVData>().OldDukeFindFragmentsQuestCompleted) {
                 manager.SetEntryStatus(FRAGMENT_KEY, QuestEntryStatus.Completed, 1f);
                 return;
             }
 
             //前提条件：碎片任务已触发
-            if (!save.OldDukeFindFragmentsQuestTriggered) {
+            if (!save.Get<OldDukeADVData>().OldDukeFindFragmentsQuestTriggered) {
                 manager.UnregisterQuest(FRAGMENT_KEY);
                 return;
             }

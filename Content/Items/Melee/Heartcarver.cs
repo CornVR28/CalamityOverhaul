@@ -1,5 +1,6 @@
 ﻿using CalamityOverhaul.Common;
 using CalamityOverhaul.Content.ADV;
+using CalamityOverhaul.Content.ADV.Scenarios.SupCal;
 using CalamityOverhaul.Content.ADV.Scenarios.SupCal.SupCalDisplayTexts;
 using CalamityOverhaul.Content.MeleeModify.Core;
 using CalamityOverhaul.Content.PRTTypes;
@@ -64,7 +65,7 @@ namespace CalamityOverhaul.Content.Items.Melee
         }
 
         public override void ModifyTooltips(List<TooltipLine> tooltips) {
-            if (Main.LocalPlayer.TryGetADVSave(out ADVSave save) && save.SupCalDoGQuestReward) {
+            if (Main.LocalPlayer.TryGetADVSave(out ADVSave save) && save.Get<SupCalADVData>().SupCalDoGQuestReward) {
                 TooltipLine line = new(Mod, "Story", SupCalDisplayText.Story2.Value);
                 line.OverrideColor = Color.OrangeRed;
                 tooltips.Add(line);

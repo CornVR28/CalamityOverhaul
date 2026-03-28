@@ -37,8 +37,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes
 
             //判断寻找营地任务是否仍在进行中（等价于原 FindCampsiteUI.CanOpne）
             bool campsiteQuestActive = Main.LocalPlayer.TryGetADVSave(out var save)
-                && save.OldDukeCooperationAccepted
-                && !save.OldDukeFirstCampsiteDialogueCompleted
+                && save.Get<OldDukeADVData>().OldDukeCooperationAccepted
+                && !save.Get<OldDukeADVData>().OldDukeFirstCampsiteDialogueCompleted
                 && OldDukeCampsite.IsGenerated;
 
             if (campsiteQuestActive) {

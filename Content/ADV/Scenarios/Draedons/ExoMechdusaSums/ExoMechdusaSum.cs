@@ -102,7 +102,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.ExoMechdusaSums
         protected override void OnScenarioComplete() {
             //标记已观看机甲嘉登的第一次对话场景
             if (Main.LocalPlayer.TryGetADVSave(out var save)) {
-                save.FristExoMechdusaSum = true;//标记已触发机甲嘉登场景
+                save.Get<DraedonADVData>().FristExoMechdusaSum = true;//标记已触发机甲嘉登场景
             }
             SimpleMode = false;
             DraedonEffect.IsActive = false;
@@ -120,7 +120,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.ExoMechdusaSums
             DialogueBoxBase.RegisterPortrait(DraedonName.Value + red, ADVAsset.Draedon2RedADV, silhouette: false);
             DialogueBoxBase.RegisterPortrait(DraedonName.Value + alt, ADVAsset.DraedonADV, silhouette: false);
 
-            if (Main.LocalPlayer.TryGetADVSave(out var save) && save.FristExoMechdusaSum) {
+            if (Main.LocalPlayer.TryGetADVSave(out var save) && save.Get<DraedonADVData>().FristExoMechdusaSum) {
                 SimpleMode = true;//如果是非第一次触发机甲嘉登场景，则启用简洁模式
             }
             //检查是否为简洁模式

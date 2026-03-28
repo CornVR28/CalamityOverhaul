@@ -614,7 +614,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes
 
             OldDukeInteractionState state = OldDukeInteractionState.NotMet;
             if (Main.myPlayer.TryGetPlayer(out var player) && player.TryGetADVSave(out var save)) {
-                state = save.OldDukeState;
+                state = save.Get<OldDukeADVData>().OldDukeState;
             }
 
             packet.Write((byte)state);
@@ -629,7 +629,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes
 
                 OldDukeInteractionState state = (OldDukeInteractionState)reader.ReadByte();
                 if (playerIndex.TryGetPlayer(out var player) && player.TryGetADVSave(out var save)) {
-                    save.OldDukeState = state;
+                    save.Get<OldDukeADVData>().OldDukeState = state;
                 }
 
                 if (VaultUtils.isServer) {

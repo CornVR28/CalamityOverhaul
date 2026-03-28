@@ -3,6 +3,7 @@ using CalamityOverhaul.Content.ADV.ADVRewardPopups;
 using CalamityOverhaul.Content.ADV.Common;
 using CalamityOverhaul.Content.ADV.DialogueBoxs;
 using CalamityOverhaul.Content.ADV.DialogueBoxs.Styles;
+using CalamityOverhaul.Content.ADV.Scenarios.Helen.Gifts;
 using CalamityOverhaul.Content.LegendWeapon.HalibutLegend;
 using System;
 using Terraria;
@@ -188,7 +189,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal
 
                 //标记玩家选择了战斗
                 if (Main.LocalPlayer.TryGetADVSave(out var save)) {
-                    save.SupCalChoseToFight = true;
+                    save.Get<SupCalADVData>().SupCalChoseToFight = true;
                 }
 
                 ThisIsToFight = true;
@@ -226,13 +227,13 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal
         }
 
         public override void Update(ADVSave save, HalibutPlayer halibutPlayer) {
-            if (save.FirstMetSupCal) {
+            if (save.Get<SupCalADVData>().FirstMetSupCal) {
                 return;
             }
             if (InWorldBossPhase.Downed30.Invoke()) {
                 return;//如果已经打过至尊灾厄，则不触发
             }
-            if (halibutPlayer.HeldHalibut && !save.CalamitasCloneGift) {//如果玩家拿着大比目鱼，则必须先获得过比目鱼小姐给的灾厄克隆的礼物才能触发，避免这两个场景冲突
+            if (halibutPlayer.HeldHalibut && !save.Get<BossGiftADVData>().CalamitasCloneGift) {//如果玩家拿着大比目鱼，则必须先获得过比目鱼小姐给的灾厄克隆的礼物才能触发，避免这两个场景冲突
                 return;
             }
             if (!FirstMetSupCalNPC.Spawned) {
@@ -246,7 +247,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal
                 return;
             }
             if (ScenarioManager.Start<FirstMetSupCal>()) {
-                save.FirstMetSupCal = true;
+                save.Get<SupCalADVData>().FirstMetSupCal = true;
                 FirstMetSupCalNPC.Spawned = false;
             }
         }

@@ -173,12 +173,12 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Campsites
             }
 
             //检查玩家是否已经完成碎片任务
-            if (save.OldDukeFindFragmentsQuestTriggered || save.OldDukeFindFragmentsQuestCompleted) {
+            if (save.Get<OldDukeADVData>().OldDukeFindFragmentsQuestTriggered || save.Get<OldDukeADVData>().OldDukeFindFragmentsQuestCompleted) {
                 return true;
             }
 
             //检查玩家是否已经同意合作
-            if (!save.OldDukeCooperationAccepted) {
+            if (!save.Get<OldDukeADVData>().OldDukeCooperationAccepted) {
                 return false;
             }
 
@@ -407,8 +407,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Campsites
             }
 
             //首次营地对话
-            if (!save.OldDukeFirstCampsiteDialogueCompleted) {
-                save.OldDukeFirstCampsiteDialogueCompleted = true;
+            if (!save.Get<OldDukeADVData>().OldDukeFirstCampsiteDialogueCompleted) {
+                save.Get<OldDukeADVData>().OldDukeFirstCampsiteDialogueCompleted = true;
 
                 //触发首次对话场景
                 ScenarioManager.Reset<Quest.FindFragments.FirstCampsiteDialogue>();

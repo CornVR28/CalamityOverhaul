@@ -62,7 +62,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal
         }
 
         public override void Update(ADVSave save, HalibutPlayer halibutPlayer) {
-            if (save.SupCalDefeat) {
+            if (save.Get<SupCalADVData>().SupCalDefeat) {
                 return;
             }
             if (!halibutPlayer.HeldHalibut) {
@@ -78,7 +78,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal
                 return;
             }
             if (ScenarioManager.Start<SupCalDefeat>()) {
-                save.SupCalDefeat = true;
+                save.Get<SupCalADVData>().SupCalDefeat = true;
                 SupCalDefeatNPC.Spawned = false;
             }
         }

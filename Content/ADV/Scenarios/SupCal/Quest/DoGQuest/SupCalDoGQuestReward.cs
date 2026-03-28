@@ -3,6 +3,7 @@ using CalamityOverhaul.Content.ADV.Common;
 using CalamityOverhaul.Content.ADV.DialogueBoxs;
 using CalamityOverhaul.Content.ADV.DialogueBoxs.Styles;
 using CalamityOverhaul.Content.ADV.Scenarios.Helen;
+using CalamityOverhaul.Content.ADV.Scenarios.Helen.Gifts;
 using CalamityOverhaul.Content.Items.Melee;
 using CalamityOverhaul.Content.LegendWeapon.HalibutLegend;
 using System;
@@ -99,14 +100,14 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest.DoGQuest
         }
 
         public override void Update(ADVSave save, HalibutPlayer halibutPlayer) {
-            if (!save.SupCalDoGQuestReward) {
+            if (!save.Get<SupCalADVData>().SupCalDoGQuestReward) {
                 return;
             }
-            if (save.SupCalDoGQuestRewardSceneComplete) {
+            if (save.Get<SupCalADVData>().SupCalDoGQuestRewardSceneComplete) {
                 return;
             }
             //如果玩家拿着大比目鱼，则必须先获得过比目鱼小姐给的礼物才能触发，避免这两个场景冲突
-            if (halibutPlayer.HeldHalibut && !save.DevourerOfGodsGift) {
+            if (halibutPlayer.HeldHalibut && !save.Get<BossGiftADVData>().DevourerOfGodsGift) {
                 return;
             }
             if (!Spawned) {
@@ -116,7 +117,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest.DoGQuest
                 return;
             }
             if (ScenarioManager.Start<SupCalDoGQuestReward>()) {
-                save.SupCalDoGQuestRewardSceneComplete = true;
+                save.Get<SupCalADVData>().SupCalDoGQuestRewardSceneComplete = true;
                 Spawned = false;
             }
         }
@@ -148,13 +149,13 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest.DoGQuest
                 return false;
             }
 
-            if (!save.SupCalQuestReward//先完成前置任务
-                || save.SupCalDoGQuestDeclined//且未拒绝当前任务
+            if (!save.Get<SupCalADVData>().SupCalQuestReward//先完成前置任务
+                || save.Get<SupCalADVData>().SupCalDoGQuestDeclined//且未拒绝当前任务
                 ) {
                 return false;
             }
 
-            if (save.SupCalDoGQuestReward) {
+            if (save.Get<SupCalADVData>().SupCalDoGQuestReward) {
                 return false;//任务已经完成
             }
 
@@ -167,7 +168,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest.DoGQuest
             }
 
             //标记任务完成
-            save.SupCalDoGQuestReward = true;
+            save.Get<SupCalADVData>().SupCalDoGQuestReward = true;
 
             //延迟触发奖励场景
             SupCalDoGQuestReward.Spawned = true;

@@ -84,7 +84,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.ExoMechdusaSums
             DraedonEffect.Send();
             DeploySignaltowerScenario.SetTurnOn();
             if (Main.LocalPlayer.TryGetADVSave(out var save)) {
-                save.ExoMechEndingDialogue = true;//标记已观看结束对话
+                save.Get<DraedonADVData>().ExoMechEndingDialogue = true;//标记已观看结束对话
             }
         }
     }

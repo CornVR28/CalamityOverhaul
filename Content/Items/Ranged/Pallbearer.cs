@@ -1,4 +1,5 @@
 ﻿using CalamityOverhaul.Content.ADV;
+using CalamityOverhaul.Content.ADV.Scenarios.SupCal;
 using CalamityOverhaul.Content.ADV.Scenarios.SupCal.SupCalDisplayTexts;
 using CalamityOverhaul.Content.PRTTypes;
 using InnoVault.GameContent.BaseEntity;
@@ -64,7 +65,7 @@ namespace CalamityOverhaul.Content.Items.Ranged
         }
 
         public override void ModifyTooltips(List<TooltipLine> tooltips) {
-            if (Main.LocalPlayer.TryGetADVSave(out ADVSave save) && save.SupCalQuestReward) {
+            if (Main.LocalPlayer.TryGetADVSave(out ADVSave save) && save.Get<SupCalADVData>().SupCalQuestReward) {
                 TooltipLine line = new(Mod, "Story", SupCalDisplayText.Story1.Value);
                 line.OverrideColor = Color.OrangeRed;
                 tooltips.Add(line);

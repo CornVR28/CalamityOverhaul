@@ -27,26 +27,26 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest.PallbearerQuest
             }
 
             //如果玩家已经接受了任务（通过存档标记），就不再显示UI
-            if (save.SupCalQuestAccepted) {
+            if (save.Get<SupCalADVData>().SupCalQuestAccepted) {
                 return false;
             }
 
             Item heldItem = Main.LocalPlayer.GetItem();
             return heldItem.type == ModContent.ItemType<Pallbearer>()
-                && save.SupCalMoonLordReward
-                && !save.SupCalQuestReward
-                && !save.SupCalQuestDeclined;
+                && save.Get<SupCalADVData>().SupCalMoonLordReward
+                && !save.Get<SupCalADVData>().SupCalQuestReward
+                && !save.Get<SupCalADVData>().SupCalQuestDeclined;
         }
 
         protected override void OnQuestAccepted() {
             if (Main.LocalPlayer.TryGetADVSave(out var save)) {
-                save.SupCalQuestAccepted = true;
+                save.Get<SupCalADVData>().SupCalQuestAccepted = true;
             }
         }
 
         protected override void OnQuestDeclined() {
             if (Main.LocalPlayer.TryGetADVSave(out var save)) {
-                save.SupCalQuestDeclined = true;
+                save.Get<SupCalADVData>().SupCalQuestDeclined = true;
             }
         }
     }

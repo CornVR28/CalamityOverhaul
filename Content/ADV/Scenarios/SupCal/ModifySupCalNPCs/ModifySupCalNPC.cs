@@ -79,7 +79,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.ModifySupCalNPCs
             if (!CWRRef.GetBossRushActive()) {//非BossRush状态下检查永恒燃烧的现在结局，执行位置替换等操作
                 foreach (var p in Main.ActivePlayers) {
                     //如果已经有人达成了永恒燃烧的现在结局，说明女巫已死，玩家替换女巫的位置
-                    if (p.TryGetADVSave(out var save) && save.EternalBlazingNow) {
+                    if (p.TryGetADVSave(out var save) && save.Get<SupCalADVData>().EternalBlazingNow) {
                         p.Teleport(npc.Center, 999);
                         if (BCKRef.Has) {
                             BCKRef.SetActiveNPCEntryFlags(npc.whoAmI, -1);//对于Boss列表的适配，隐藏活跃状态，避免消失时弹出信息破坏氛围

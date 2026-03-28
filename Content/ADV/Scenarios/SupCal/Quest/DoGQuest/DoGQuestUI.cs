@@ -27,33 +27,33 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest.DoGQuest
             }
 
             //如果玩家已经接受/拒绝/完成了任务，就不再显示UI
-            if (save.SupCalDoGQuestReward
-                || save.SupCalDoGQuestAccepted
-                || save.SupCalDoGQuestDeclined) {
+            if (save.Get<SupCalADVData>().SupCalDoGQuestReward
+                || save.Get<SupCalADVData>().SupCalDoGQuestAccepted
+                || save.Get<SupCalADVData>().SupCalDoGQuestDeclined) {
                 return false;
             }
 
             //前置任务必须完成
-            if (!save.SupCalQuestReward) {
+            if (!save.Get<SupCalADVData>().SupCalQuestReward) {
                 return false;
             }
 
             Item heldItem = Main.LocalPlayer.GetItem();
             return heldItem.type == ModContent.ItemType<Heartcarver>()
-                && save.SupCalQuestReward
-                && !save.SupCalDoGQuestReward
-                && !save.SupCalDoGQuestDeclined;
+                && save.Get<SupCalADVData>().SupCalQuestReward
+                && !save.Get<SupCalADVData>().SupCalDoGQuestReward
+                && !save.Get<SupCalADVData>().SupCalDoGQuestDeclined;
         }
 
         protected override void OnQuestAccepted() {
             if (Main.LocalPlayer.TryGetADVSave(out var save)) {
-                save.SupCalDoGQuestAccepted = true;
+                save.Get<SupCalADVData>().SupCalDoGQuestAccepted = true;
             }
         }
 
         protected override void OnQuestDeclined() {
             if (Main.LocalPlayer.TryGetADVSave(out var save)) {
-                save.SupCalDoGQuestDeclined = true;
+                save.Get<SupCalADVData>().SupCalDoGQuestDeclined = true;
             }
         }
     }

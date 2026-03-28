@@ -85,7 +85,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes
             DialogueBoxBase.RegisterPortrait(OldDukeName.Value, OldDukeCampsite.OldDuke, OldDukeCampsite.PortraitRec, null, true);
 
             //检查是否已经拒绝过合作，这里直接跳转到选项部分
-            if (Main.LocalPlayer.TryGetADVSave(out var save) && save.OldDukeCooperationDeclined) {
+            if (Main.LocalPlayer.TryGetADVSave(out var save) && save.Get<OldDukeADVData>().OldDukeCooperationDeclined) {
                 //添加选项
                 AddWithChoices(
                     OldDukeName.Value,
@@ -180,7 +180,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes
         public void Choice1() {
             //保存状态：接受合作
             if (Main.LocalPlayer.TryGetADVSave(out var save)) {
-                save.OldDukeState = OldDukeInteractionState.AcceptedCooperation;
+                save.Get<OldDukeADVData>().OldDukeState = OldDukeInteractionState.AcceptedCooperation;
             }
             //同步OldDukeState到其他端，IsActive由声明式计算自动管理
             OldDukeEffect.Send();
@@ -207,7 +207,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes
         public void Choice2() {
             //保存状态：拒绝合作（但没有战斗，下次还可以选择）
             if (Main.LocalPlayer.TryGetADVSave(out var save)) {
-                save.OldDukeState = OldDukeInteractionState.DeclinedCooperation;
+                save.Get<OldDukeADVData>().OldDukeState = OldDukeInteractionState.DeclinedCooperation;
             }
             OldDukeEffect.Send();
             ScenarioManager.Reset<FirstMetOldDuke_Choice2>();
@@ -221,7 +221,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes
             protected override Func<DialogueBoxBase> DefaultDialogueStyle => () => SulfseaDialogueBox.Instance;
 
             protected override void Build() {
-                if (Main.LocalPlayer.TryGetADVSave(out var save) && save.OldDukeCooperationDeclined) {
+                if (Main.LocalPlayer.TryGetADVSave(out var save) && save.Get<OldDukeADVData>().OldDukeCooperationDeclined) {
                     Add(OldDukeName.Value, B2.Value);
                     return;
                 }
@@ -237,7 +237,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes
         public void Choice3() {
             //保存状态：选择战斗，以后直接进入战斗
             if (Main.LocalPlayer.TryGetADVSave(out var save)) {
-                save.OldDukeState = OldDukeInteractionState.ChoseToFight;
+                save.Get<OldDukeADVData>().OldDukeState = OldDukeInteractionState.ChoseToFight;
             }
             OldDukeEffect.Send();
             ScenarioManager.Reset<FirstMetOldDuke_Choice3>();

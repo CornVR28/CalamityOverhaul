@@ -1,4 +1,5 @@
 ﻿using CalamityOverhaul.Content.ADV.Scenarios;
+using CalamityOverhaul.Content.ADV.Scenarios.Helen;
 using CalamityOverhaul.Content.LegendWeapon.HalibutLegend;
 using System.Collections.Generic;
 using System.Linq;
@@ -87,7 +88,7 @@ namespace CalamityOverhaul.Content.ADV.Common
             if (!halibutPlayer.HeldHalibut) {
                 return;
             }
-            if (!save.FirstMet) {
+            if (!save.Get<HalibutADVData>().FirstMet) {
                 return;//必须先触发过初次见面
             }
             if (IsGiftCompleted(save)) {

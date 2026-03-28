@@ -44,7 +44,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Quest
         public override List<string> GetTrackerDetails() {
             if (!Main.LocalPlayer.TryGetADVSave(out var save)) return [Summary];
 
-            if (save.OldDukeFindFragmentsQuestCompleted) {
+            if (save.Get<OldDukeADVData>().OldDukeFindFragmentsQuestCompleted) {
                 return [QuestCompleteFormat?.Value ?? "Quest Complete!"];
             }
 

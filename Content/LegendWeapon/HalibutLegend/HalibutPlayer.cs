@@ -1,6 +1,7 @@
 ﻿using CalamityOverhaul.Common;
 using CalamityOverhaul.Content.ADV;
 using CalamityOverhaul.Content.ADV.Scenarios;
+using CalamityOverhaul.Content.ADV.Scenarios.Helen;
 using CalamityOverhaul.Content.Items.Tools;
 using CalamityOverhaul.Content.LegendWeapon.HalibutLegend.DomainSkills;
 using CalamityOverhaul.Content.LegendWeapon.HalibutLegend.Resurrections;
@@ -565,7 +566,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend
 
             if (HasHalubut) {//只要拥有大比目鱼，就标记已经捕获过
                 if (Player.TryGetADVSave(out var advSave)) {
-                    advSave.HasCaughtHalibut = true;
+                    advSave.Get<HalibutADVData>().HasCaughtHalibut = true;
                 }
             }
 

@@ -56,11 +56,11 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen
         }
 
         public override void Update(ADVSave save, HalibutPlayer halibutPlayer) {
-            if (!save.FirstMet) {
+            if (!save.Get<HalibutADVData>().FirstMet) {
                 return;
             }
 
-            if (save.FirstResurrectionWarning) {
+            if (save.Get<HalibutADVData>().FirstResurrectionWarning) {
                 return;
             }
 
@@ -75,7 +75,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen
                         HalibutUIHead.Instance.Open = true;//打开比目鱼UI以便展示
                     }
                     halibutPlayer.CloseEyes();
-                    save.FirstResurrectionWarning = true;
+                    save.Get<HalibutADVData>().FirstResurrectionWarning = true;
                 }
             }
         }

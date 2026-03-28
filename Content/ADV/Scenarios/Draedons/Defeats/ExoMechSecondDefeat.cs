@@ -55,7 +55,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.Defeats
             DraedonEffect.IsActive = false;
             DraedonEffect.Send();
             if (Main.LocalPlayer.TryGetADVSave(out var save)) {
-                save.ExoMechSecondDefeat = true;
+                save.Get<DraedonADVData>().ExoMechSecondDefeat = true;
             }
         }
     }

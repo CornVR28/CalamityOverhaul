@@ -61,7 +61,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Quest.FindFrag
         protected override void OnScenarioComplete() {
             //标记任务已触发
             if (Main.LocalPlayer.TryGetADVSave(out var save)) {
-                save.OldDukeFindFragmentsQuestTriggered = true;
+                save.Get<OldDukeADVData>().OldDukeFindFragmentsQuestTriggered = true;
             }
             //OldDukeEffect.IsActive由声明式计算自动管理
         }

@@ -87,7 +87,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Quest.FishoilQuest
 
         private void OnAccept() {
             if (Main.LocalPlayer.TryGetADVSave(out var save)) {
-                save.FishoilQuestAccepted = true;
+                save.Get<HalibutADVData>().FishoilQuestAccepted = true;
             }
             //注册到委托管理系统
             RegisterQuestEntry();
@@ -113,7 +113,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Quest.FishoilQuest
             if (manager == null) return;
 
             //未接受任务 → 确保条目不存在
-            if (!save.FishoilQuestAccepted) {
+            if (!save.Get<HalibutADVData>().FishoilQuestAccepted) {
                 manager.UnregisterQuest(FishoilQuestEntry.QuestKey);
                 return;
             }
@@ -124,20 +124,20 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Quest.FishoilQuest
             if (entry == null) return;
 
             //已完成 → 标记完成
-            if (save.FishoilQuestCompleted) {
+            if (save.Get<HalibutADVData>().FishoilQuestCompleted) {
                 manager.SetEntryStatus(FishoilQuestEntry.QuestKey, QuestEntryStatus.Completed, 1f);
                 return;
             }
 
             //已挂起 → 恢复挂起状态
-            if (save.FishoilQuestSuspended) {
+            if (save.Get<HalibutADVData>().FishoilQuestSuspended) {
                 manager.SetEntryStatus(FishoilQuestEntry.QuestKey, QuestEntryStatus.Suspended);
             }
         }
 
         private void OnDecline() {
             if (Main.LocalPlayer.TryGetADVSave(out var save)) {
-                save.FishoilQuestDeclined = true;
+                save.Get<HalibutADVData>().FishoilQuestDeclined = true;
             }
             scenarioStarted = false;
             Complete();
@@ -151,10 +151,10 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Quest.FishoilQuest
                 Spwand = false;
                 return;
             }
-            if (!save.FirstMet) {
+            if (!save.Get<HalibutADVData>().FirstMet) {
                 return;
             }
-            if (save.FishoilQuestAccepted || save.FishoilQuestDeclined) {
+            if (save.Get<HalibutADVData>().FishoilQuestAccepted || save.Get<HalibutADVData>().FishoilQuestDeclined) {
                 return;
             }
             if (scenarioStarted) {

@@ -131,7 +131,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.End.EternalBlazingNows
                 AchievementToast.ToastStyle.Brimstone
             );
             if (Main.LocalPlayer.TryGetADVSave(out var save)) {
-                save.EternalBlazingNow = true;
+                save.Get<SupCalADVData>().EternalBlazingNow = true;
                 save.SendEbnData(Main.LocalPlayer);
             }
         }

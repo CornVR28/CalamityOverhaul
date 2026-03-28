@@ -33,8 +33,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.End.EternalBlazingNows
         }
         #endregion
 
-        public static bool OnEbn(Player player) => player.TryGetADVSave(out var save) && save.EternalBlazingNow;
-        public static bool IsConquered(Player player) => player.TryGetADVSave(out var save) && save.SupCalYharonQuestReward;
+        public static bool OnEbn(Player player) => player.TryGetADVSave(out var save) && save.Get<SupCalADVData>().EternalBlazingNow;
+        public static bool IsConquered(Player player) => player.TryGetADVSave(out var save) && save.Get<SupCalADVData>().SupCalYharonQuestReward;
 
         public override void ResetEffects() {
             if (!IsEbn) {

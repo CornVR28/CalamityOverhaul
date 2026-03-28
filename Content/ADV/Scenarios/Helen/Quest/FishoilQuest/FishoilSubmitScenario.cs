@@ -123,8 +123,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Quest.FishoilQuest
 
                 //标记任务完成
                 if (player.TryGetADVSave(out var save)) {
-                    save.FishoilQuestCompleted = true;
-                    save.FishoilQuestSuspended = false;
+                    save.Get<HalibutADVData>().FishoilQuestCompleted = true;
+                    save.Get<HalibutADVData>().FishoilQuestSuspended = false;
                 }
 
                 //更新委托管理器中的条目状态
@@ -157,7 +157,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Quest.FishoilQuest
                     FishoilQuestEntry.QuestKey, QuestEntryStatus.Suspended);
                 //持久化挂起状态
                 if (Main.LocalPlayer.TryGetADVSave(out var save)) {
-                    save.FishoilQuestSuspended = true;
+                    save.Get<HalibutADVData>().FishoilQuestSuspended = true;
                 }
             }
         }

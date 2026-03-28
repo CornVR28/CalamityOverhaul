@@ -1,4 +1,5 @@
 ﻿using CalamityOverhaul.Content.ADV;
+using CalamityOverhaul.Content.ADV.Scenarios.SupCal;
 using CalamityOverhaul.Content.ADV.Scenarios.SupCal.SupCalDisplayTexts;
 using InnoVault.GameContent.BaseEntity;
 using Microsoft.Xna.Framework.Graphics;
@@ -43,7 +44,7 @@ namespace CalamityOverhaul.Content.Items.Melee
         }
 
         public override void ModifyTooltips(List<TooltipLine> tooltips) {
-            if (Main.LocalPlayer.TryGetADVSave(out ADVSave save) && save.SupCalYharonQuestReward) {
+            if (Main.LocalPlayer.TryGetADVSave(out ADVSave save) && save.Get<SupCalADVData>().SupCalYharonQuestReward) {
                 TooltipLine line = new(Mod, "Story", SupCalDisplayText.Story3.Value);
                 line.OverrideColor = Color.OrangeRed;
                 tooltips.Add(line);

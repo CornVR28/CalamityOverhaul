@@ -1,5 +1,6 @@
 ﻿using CalamityOverhaul.Common;
 using CalamityOverhaul.Content.ADV;
+using CalamityOverhaul.Content.ADV.Scenarios.SupCal;
 using CalamityOverhaul.Content.ADV.Scenarios.SupCal.SupCalDisplayTexts;
 using CalamityOverhaul.Content.UIs.SupertableUIs;
 using System.Collections.Generic;
@@ -58,7 +59,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
             tooltips.InsertHotkeyBinding(CWRKeySystem.Pandemonium_Q, "PandemoniumQSkill", CWRLocText.Instance.Notbound.Value);
             tooltips.InsertHotkeyBinding(CWRKeySystem.Pandemonium_R, "PandemoniumRSkill", CWRLocText.Instance.Notbound.Value);
 
-            if (Main.LocalPlayer.TryGetADVSave(out ADVSave save) && save.EternalBlazingNow) {
+            if (Main.LocalPlayer.TryGetADVSave(out ADVSave save) && save.Get<SupCalADVData>().EternalBlazingNow) {
                 TooltipLine line = new(Mod, "Story", SupCalDisplayText.Story4.Value);
                 line.OverrideColor = Color.OrangeRed;
                 tooltips.Add(line);

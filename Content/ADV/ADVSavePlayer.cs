@@ -1,5 +1,6 @@
 using CalamityOverhaul.Content.ADV.MainMenuOvers;
 using CalamityOverhaul.Content.ADV.Scenarios;
+using CalamityOverhaul.Content.ADV.Scenarios.SupCal;
 using Terraria;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
@@ -17,7 +18,7 @@ namespace CalamityOverhaul.Content.ADV
             try {
                 tag["ADVSave"] = ADVSave.SaveData();
 
-                if (ADVSave.EternalBlazingNow) {
+                if (ADVSave.Get<SupCalADVData>().EternalBlazingNow) {
                     MenuSave.UnlockEternalBlazingNowPortrait(Player);
                 }
 
@@ -33,7 +34,7 @@ namespace CalamityOverhaul.Content.ADV
                     ADVSave.LoadData(advTag);
                 }
 
-                if (ADVSave.EternalBlazingNow) {
+                if (ADVSave.Get<SupCalADVData>().EternalBlazingNow) {
                     MenuSave.UnlockEternalBlazingNowPortrait(Player);
                 }
 
@@ -49,7 +50,7 @@ namespace CalamityOverhaul.Content.ADV
         internal void MigrateFromLegacy(TagCompound adcTag, TagCompound fullTag) {
             ADVSave.LoadData(adcTag);
 
-            if (ADVSave.EternalBlazingNow) {
+            if (ADVSave.Get<SupCalADVData>().EternalBlazingNow) {
                 MenuSave.UnlockEternalBlazingNowPortrait(Player);
             }
 

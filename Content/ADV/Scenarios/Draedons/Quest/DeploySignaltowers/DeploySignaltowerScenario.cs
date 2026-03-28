@@ -89,7 +89,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.Quest.DeploySignaltowe
             DialogueBoxBase.RegisterPortrait(DraedonName.Value + alt, ADVAsset.DraedonADV, silhouette: false);
 
             if (Main.LocalPlayer.TryGetADVSave(out var save)//获取玩家存档
-                && !save.DeploySignaltowerQuestDeclined//玩家未拒绝过任务
+                && !save.Get<DraedonADVData>().DeploySignaltowerQuestDeclined//玩家未拒绝过任务
                 ) {
                 //构建对话流程
                 Add(DraedonName.Value, IntroLine1.Value);
@@ -122,7 +122,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.Quest.DeploySignaltowe
         }
 
         public override void Update(ADVSave save, HalibutPlayer halibutPlayer) {
-            if (save.DeploySignaltowerQuestCompleted) {
+            if (save.Get<DraedonADVData>().DeploySignaltowerQuestCompleted) {
                 return;//任务已完成，不更新
             }
             if (!Spawn) {
@@ -204,7 +204,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.Quest.DeploySignaltowe
         private void OnDeclineQuest() {
             //标记拒绝任务
             if (Main.LocalPlayer.TryGetADVSave(out var save)) {
-                save.DeploySignaltowerQuestDeclined = true;
+                save.Get<DraedonADVData>().DeploySignaltowerQuestDeclined = true;
             }
 
             //完成当前场景

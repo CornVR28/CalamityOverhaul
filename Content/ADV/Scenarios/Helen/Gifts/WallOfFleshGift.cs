@@ -49,10 +49,10 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Gifts
             }
         }
         protected override bool IsGiftCompleted(ADVSave save) {
-            return save.WallOfFleshGift;
+            return save.Get<BossGiftADVData>().WallOfFleshGift;
         }
         protected override void MarkGiftCompleted(ADVSave save) {
-            save.WallOfFleshGift = true;
+            save.Get<BossGiftADVData>().WallOfFleshGift = true;
         }
         protected override bool StartScenarioInternal() {
             return ScenarioManager.Start<WallOfFleshGift>();

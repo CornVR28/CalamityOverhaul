@@ -48,10 +48,10 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Gifts
             }
         }
         protected override bool IsGiftCompleted(ADVSave save) {
-            return save.AquaticScourgeGift;
+            return save.Get<BossGiftADVData>().AquaticScourgeGift;
         }
         protected override void MarkGiftCompleted(ADVSave save) {
-            save.AquaticScourgeGift = true;
+            save.Get<BossGiftADVData>().AquaticScourgeGift = true;
         }
         protected override bool StartScenarioInternal() {
             return ScenarioManager.Start<AquaticScourgeGift>();

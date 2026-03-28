@@ -68,39 +68,40 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest
             if (manager == null) return;
 
             if (!Main.LocalPlayer.TryGetADVSave(out var save)) return;
+            var sc = save.Get<SupCalADVData>();
 
             SyncQuest(manager, save, PALLBEARER_KEY,
                 PallbearerTitle, PallbearerSummary,
                 CWRID.NPC_Providence,
                 PallbearerQuestTracker.REQUIRED_CONTRIBUTION,
-                prerequisite: save.SupCalMoonLordReward,
-                accepted: save.SupCalQuestAccepted,
-                declined: save.SupCalQuestDeclined,
-                completed: save.SupCalQuestReward,
+                prerequisite: sc.SupCalMoonLordReward,
+                accepted: sc.SupCalQuestAccepted,
+                declined: sc.SupCalQuestDeclined,
+                completed: sc.SupCalQuestReward,
                 priority: 30,
-                onUnsuspended: () => { save.SupCalQuestDeclined = false; save.SupCalQuestAccepted = true; });
+                onUnsuspended: () => { sc.SupCalQuestDeclined = false; sc.SupCalQuestAccepted = true; });
 
             SyncQuest(manager, save, DOG_KEY,
                 DoGTitle, DoGSummary,
                 CWRID.NPC_DevourerofGodsHead,
                 DoGQuestTracker.REQUIRED_CONTRIBUTION,
-                prerequisite: save.SupCalQuestReward,
-                accepted: save.SupCalDoGQuestAccepted,
-                declined: save.SupCalDoGQuestDeclined,
-                completed: save.SupCalDoGQuestReward,
+                prerequisite: sc.SupCalQuestReward,
+                accepted: sc.SupCalDoGQuestAccepted,
+                declined: sc.SupCalDoGQuestDeclined,
+                completed: sc.SupCalDoGQuestReward,
                 priority: 20,
-                onUnsuspended: () => { save.SupCalDoGQuestDeclined = false; save.SupCalDoGQuestAccepted = true; });
+                onUnsuspended: () => { sc.SupCalDoGQuestDeclined = false; sc.SupCalDoGQuestAccepted = true; });
 
             SyncQuest(manager, save, YHARON_KEY,
                 YharonTitle, YharonSummary,
                 CWRID.NPC_Yharon,
                 YharonQuestTracker.REQUIRED_CONTRIBUTION,
-                prerequisite: save.SupCalDoGQuestReward,
-                accepted: save.SupCalYharonQuestAccepted,
-                declined: save.SupCalYharonQuestDeclined,
-                completed: save.SupCalYharonQuestReward,
+                prerequisite: sc.SupCalDoGQuestReward,
+                accepted: sc.SupCalYharonQuestAccepted,
+                declined: sc.SupCalYharonQuestDeclined,
+                completed: sc.SupCalYharonQuestReward,
                 priority: 10,
-                onUnsuspended: () => { save.SupCalYharonQuestDeclined = false; save.SupCalYharonQuestAccepted = true; });
+                onUnsuspended: () => { sc.SupCalYharonQuestDeclined = false; sc.SupCalYharonQuestAccepted = true; });
         }
 
         /// <summary>

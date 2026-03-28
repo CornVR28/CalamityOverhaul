@@ -1,4 +1,5 @@
-﻿using Terraria;
+﻿using CalamityOverhaul.Content.ADV.Scenarios.Helen;
+using Terraria;
 using Terraria.DataStructures;
 using Terraria.ModLoader;
 using static CalamityOverhaul.Content.ADV.Scenarios.SupCal.End.EternalBlazingNows.EternalBlazingNow;
@@ -17,7 +18,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend
                 return;
             }
 
-            if (Player.TryGetADVSave(out var save) && save.HasCaughtHalibut) {
+            if (Player.TryGetADVSave(out var save) && save.Get<HalibutADVData>().HasCaughtHalibut) {
                 if (!Player.HasHalibut() && Main.rand.NextBool(500)) {
                     itemDrop = HalibutOverride.ID;//如果还没有比目鱼，则有较低概率钓到比目鱼
                 }

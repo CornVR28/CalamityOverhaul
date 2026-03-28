@@ -61,10 +61,10 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Gifts
             }
         }
         protected override bool IsGiftCompleted(ADVSave save) {
-            return save.CalamitasCloneGift;
+            return save.Get<BossGiftADVData>().CalamitasCloneGift;
         }
         protected override void MarkGiftCompleted(ADVSave save) {
-            save.CalamitasCloneGift = true;
+            save.Get<BossGiftADVData>().CalamitasCloneGift = true;
         }
         protected override bool StartScenarioInternal() {
             return ScenarioManager.Start<CalamitasCloneGift>();

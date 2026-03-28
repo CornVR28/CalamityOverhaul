@@ -168,7 +168,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.End.EternalBlazingNows
         private void Choice1() {
             //选择1：阻止比目鱼拼命
             if (Main.LocalPlayer.TryGetADVSave(out var save)) {
-                save.EternalBlazingNowChoice1 = true;
+                save.Get<SupCalADVData>().EternalBlazingNowChoice1 = true;
             }
             ScenarioManager.Reset<EternalBlazingNow_Choice1>();
             ScenarioManager.Start<EternalBlazingNow_Choice1>();
@@ -178,7 +178,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.End.EternalBlazingNows
         private void Choice2() {
             //选择2：保持沉默
             if (Main.LocalPlayer.TryGetADVSave(out var save)) {
-                save.EternalBlazingNowChoice2 = true;
+                save.Get<SupCalADVData>().EternalBlazingNowChoice2 = true;
             }
             Complete();
             //停止粒子生成

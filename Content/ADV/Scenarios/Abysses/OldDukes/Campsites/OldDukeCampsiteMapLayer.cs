@@ -22,7 +22,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Campsites
             if (!Main.LocalPlayer.TryGetADVSave(out var save)) {
                 return;//未获取到存档不显示
             }
-            if (!save.OldDukeFirstCampsiteDialogueCompleted) {
+            if (!save.Get<OldDukeADVData>().OldDukeFirstCampsiteDialogueCompleted) {
                 return;//完成首次对话前不显示营地
             }
             var result = context.Draw(OldflagpoleIcon.Value, OldDukeCampsite.CampsitePosition / 16

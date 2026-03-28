@@ -89,7 +89,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes
             //检查任务是否已完成
             bool questCompleted = false;
             if (Main.LocalPlayer.TryGetADVSave(out var save)) {
-                questCompleted = save.OldDukeFindFragmentsQuestCompleted;
+                questCompleted = save.Get<OldDukeADVData>().OldDukeFindFragmentsQuestCompleted;
             }
 
             if (questCompleted) {
@@ -234,7 +234,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes
             private static void Give() {
                 //标记任务完成
                 if (Main.LocalPlayer.TryGetADVSave(out var save)) {
-                    save.OldDukeFindFragmentsQuestCompleted = true;
+                    save.Get<OldDukeADVData>().OldDukeFindFragmentsQuestCompleted = true;
                 }
 
                 //给予奖励

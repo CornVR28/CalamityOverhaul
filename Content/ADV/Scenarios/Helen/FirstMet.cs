@@ -115,7 +115,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen
                 return;
             }
 
-            if (save.FirstMet) {
+            if (save.Get<HalibutADVData>().FirstMet) {
                 return;
             }
 
@@ -129,7 +129,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen
             }
 
             if (ScenarioManager.Start<FirstMet>()) {
-                save.FirstMet = true;
+                save.Get<HalibutADVData>().FirstMet = true;
             }
         }
 

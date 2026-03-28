@@ -15,7 +15,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.OldDukeShops
             //鱼人钓
             shopItems.Add(new OldDukeShopItem(ModContent.ItemType<MermanRod>(), 1, 1));
 
-            if (Main.LocalPlayer.Alives() && Main.LocalPlayer.TryGetADVSave(out var save) && save.OldDukeFindFragmentsQuestCompleted) {
+            if (Main.LocalPlayer.Alives() && Main.LocalPlayer.TryGetADVSave(out var save) && save.Get<OldDukeADVData>().OldDukeFindFragmentsQuestCompleted) {
                 //海洋吞噬者
                 shopItems.Add(new OldDukeShopItem(ModContent.ItemType<OceanRaiders>(), 1, 220));
             }

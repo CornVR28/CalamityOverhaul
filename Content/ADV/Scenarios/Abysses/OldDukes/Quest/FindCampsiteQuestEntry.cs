@@ -37,7 +37,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Quest
 
             if (!Main.LocalPlayer.TryGetADVSave(out var save)) return;
 
-            if (save.OldDukeFirstCampsiteDialogueCompleted) {
+            if (save.Get<OldDukeADVData>().OldDukeFirstCampsiteDialogueCompleted) {
                 Progress = 1f;
                 return;
             }
@@ -53,7 +53,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Quest
         public override List<string> GetTrackerDetails() {
             if (!Main.LocalPlayer.TryGetADVSave(out var save)) return [Summary];
 
-            if (save.OldDukeFirstCampsiteDialogueCompleted) {
+            if (save.Get<OldDukeADVData>().OldDukeFirstCampsiteDialogueCompleted) {
                 return [QuestCompleteFormat?.Value ?? "Quest Complete!"];
             }
 

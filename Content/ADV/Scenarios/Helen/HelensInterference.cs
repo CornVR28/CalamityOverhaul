@@ -1,6 +1,7 @@
 ﻿using CalamityOverhaul.Content.ADV.ADVChoices;
 using CalamityOverhaul.Content.ADV.DialogueBoxs;
 using CalamityOverhaul.Content.ADV.DialogueBoxs.Styles;
+using CalamityOverhaul.Content.ADV.Scenarios.SupCal;
 using CalamityOverhaul.Content.Items.Melee;
 using CalamityOverhaul.Content.LegendWeapon.HalibutLegend;
 using System;
@@ -125,17 +126,17 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen
 
         public override void Update(ADVSave save, HalibutPlayer halibutPlayer) {
             //检查是否接受了神明吞噬者任务
-            if (!save.SupCalDoGQuestAccepted) {
+            if (!save.Get<SupCalADVData>().SupCalDoGQuestAccepted) {
                 return;
             }
 
             //已经触发过此场景
-            if (save.HelenInterferenceTriggered) {
+            if (save.Get<SupCalADVData>().HelenInterferenceTriggered) {
                 return;
             }
 
             //如果任务已完成或已拒绝，不触发
-            if (save.SupCalDoGQuestReward || save.SupCalDoGQuestDeclined) {
+            if (save.Get<SupCalADVData>().SupCalDoGQuestReward || save.Get<SupCalADVData>().SupCalDoGQuestDeclined) {
                 return;
             }
 
@@ -153,7 +154,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen
             }
 
             if (ScenarioManager.Start<HelensInterference>()) {
-                save.HelenInterferenceTriggered = true;
+                save.Get<SupCalADVData>().HelenInterferenceTriggered = true;
             }
         }
 
@@ -334,7 +335,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen
             protected override void OnScenarioComplete() {
                 //标记选择了继续
                 if (Main.LocalPlayer.TryGetADVSave(out var save)) {
-                    save.HelenInterferenceContinue = true;
+                    save.Get<SupCalADVData>().HelenInterferenceContinue = true;
                 }
             }
         }
@@ -367,8 +368,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen
             protected override void OnScenarioComplete() {
                 //标记任务被拒绝
                 if (Main.LocalPlayer.TryGetADVSave(out var save)) {
-                    save.SupCalDoGQuestDeclined = true;
-                    save.HelenInterferenceStop = true;
+                    save.Get<SupCalADVData>().SupCalDoGQuestDeclined = true;
+                    save.Get<SupCalADVData>().HelenInterferenceStop = true;
                 }
 
                 //播放销毁音效

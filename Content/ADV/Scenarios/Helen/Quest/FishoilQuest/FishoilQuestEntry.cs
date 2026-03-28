@@ -75,7 +75,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Quest.FishoilQuest
 
         private void ClearSuspendedFlag() {
             if (Main.LocalPlayer.TryGetADVSave(out var save)) {
-                save.FishoilQuestSuspended = false;
+                save.Get<HalibutADVData>().FishoilQuestSuspended = false;
             }
         }
 

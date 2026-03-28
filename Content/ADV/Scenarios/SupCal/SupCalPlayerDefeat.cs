@@ -84,11 +84,11 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal
 
         public override void Update(ADVSave save, HalibutPlayer halibutPlayer) {
             //这个场景可以重复触发，因为玩家可能会多次尝试
-            if (!save.SupCalChoseToFight) {
+            if (!save.Get<SupCalADVData>().SupCalChoseToFight) {
                 return;//玩家没有选择战斗
             }
 
-            if (save.SupCalDefeat) {
+            if (save.Get<SupCalADVData>().SupCalDefeat) {
                 return;//如果已经击败过至尊灾厄，就不再触发此场景
             }
 
@@ -144,11 +144,11 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal
                     continue;
                 }
 
-                if (!save.SupCalChoseToFight) {
+                if (!save.Get<SupCalADVData>().SupCalChoseToFight) {
                     continue;
                 }
 
-                if (save.SupCalDefeat) {
+                if (save.Get<SupCalADVData>().SupCalDefeat) {
                     continue;//已经击败过，不再触发
                 }
 

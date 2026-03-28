@@ -1,0 +1,34 @@
+namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Gifts
+{
+    /// <summary>
+    /// Boss击杀后海伦礼物的存档数据
+    /// </summary>
+    public class BossGiftADVData : ADVDataModule
+    {
+        public override string SaveKey => "BossGift";
+
+        public bool QueenBeeGift;
+        public bool SkeletronGift;
+        public bool EyeOfCthulhuGift;
+        public bool KingSlimeGift;
+        public bool CrabulonGift;
+        public bool PerforatorGift;
+        public bool HiveMindGift;
+        public bool WallOfFleshGift;
+        public bool SlimeGodGift;
+        public bool CryogenGift;
+        public bool BrimstoneElementalGift;
+        public bool AquaticScourgeGift;
+        public bool CalamitasCloneGift;
+        public bool PlanteraGift;
+        public bool GolemGift;
+        public bool HellGift;
+        public bool MoonLordGift;
+        public bool LeviathanGift;
+        public bool PlaguebringerGift;
+        public bool ProvidenceGift;
+        public bool DevourerOfGodsGift;
+        public bool YharonGift;
+        public bool SupremeCalamitasGift;
+    }
+}

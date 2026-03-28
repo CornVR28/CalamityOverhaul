@@ -48,10 +48,10 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Gifts
             }
         }
         protected override bool IsGiftCompleted(ADVSave save) {
-            return save.PlaguebringerGift;
+            return save.Get<BossGiftADVData>().PlaguebringerGift;
         }
         protected override void MarkGiftCompleted(ADVSave save) {
-            save.PlaguebringerGift = true;
+            save.Get<BossGiftADVData>().PlaguebringerGift = true;
         }
         protected override bool StartScenarioInternal() {
             return ScenarioManager.Start<PlaguebringerGift>();

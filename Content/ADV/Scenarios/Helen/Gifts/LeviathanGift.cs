@@ -52,10 +52,10 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Gifts
             return !NPC.AnyNPCs(CWRID.NPC_Anahita);//确保阿纳希塔也嘎了
         }
         protected override bool IsGiftCompleted(ADVSave save) {
-            return save.LeviathanGift;
+            return save.Get<BossGiftADVData>().LeviathanGift;
         }
         protected override void MarkGiftCompleted(ADVSave save) {
-            save.LeviathanGift = true;
+            save.Get<BossGiftADVData>().LeviathanGift = true;
         }
         protected override bool StartScenarioInternal() {
             return ScenarioManager.Start<LeviathanGift>();
