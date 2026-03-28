@@ -3,6 +3,7 @@ using CalamityOverhaul.Content.ADV.DialogueBoxs.Styles;
 using CalamityOverhaul.Content.LegendWeapon.HalibutLegend;
 using CalamityOverhaul.Content.LegendWeapon.HalibutLegend.UI;
 using System;
+using Terraria;
 using Terraria.Localization;
 using Terraria.ModLoader;
 
@@ -55,7 +56,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen
             Add(Rolename.Value, Line10.Value);
         }
 
-        public override void Update(ADVSave save, HalibutPlayer halibutPlayer) {
+        public override void Update(ADVSave save, Player player) {
             if (!save.Get<HalibutADVData>().FirstMet) {
                 return;
             }
@@ -64,6 +65,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen
                 return;
             }
 
+            var halibutPlayer = player.GetOverride<HalibutPlayer>();
             var resurrectionSystem = halibutPlayer.ResurrectionSystem;
             if (resurrectionSystem == null) {
                 return;

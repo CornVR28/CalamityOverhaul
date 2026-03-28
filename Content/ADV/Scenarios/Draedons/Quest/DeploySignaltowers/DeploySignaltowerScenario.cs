@@ -4,7 +4,6 @@ using CalamityOverhaul.Content.ADV.DialogueBoxs;
 using CalamityOverhaul.Content.ADV.DialogueBoxs.Styles;
 using CalamityOverhaul.Content.ADV.Scenarios.Draedons.Quest.DeploySignaltowers.SignalTower;
 using CalamityOverhaul.Content.ADV.Scenarios.SupCal.End.EternalBlazingNows;
-using CalamityOverhaul.Content.LegendWeapon.HalibutLegend;
 using CalamityOverhaul.OtherMods.SubWorld;
 using System;
 using Terraria;
@@ -121,7 +120,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.Quest.DeploySignaltowe
             RandTimer = Main.rand.Next(60 * 32, 60 * 40);//大概半分钟到一分钟之间触发
         }
 
-        public override void Update(ADVSave save, HalibutPlayer halibutPlayer) {
+        public override void Update(ADVSave save, Player player) {
             if (save.Get<DraedonADVData>().DeploySignaltowerQuestCompleted) {
                 return;//任务已完成，不更新
             }

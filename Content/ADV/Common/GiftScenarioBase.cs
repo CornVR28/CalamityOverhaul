@@ -70,9 +70,9 @@ namespace CalamityOverhaul.Content.ADV.Common
         /// 附加生成条件
         /// </summary>
         /// <param name="save"></param>
-        /// <param name="halibutPlayer"></param>
+        /// <param name="player"></param>
         /// <returns></returns>
-        protected virtual bool AdditionalConditions(ADVSave save, HalibutPlayer halibutPlayer) {
+        protected virtual bool AdditionalConditions(ADVSave save, Player player) {
             return true;
         }
 
@@ -84,7 +84,8 @@ namespace CalamityOverhaul.Content.ADV.Common
             return true;
         }
 
-        public override void Update(ADVSave save, HalibutPlayer halibutPlayer) {
+        public override void Update(ADVSave save, Player player) {
+            var halibutPlayer = player.GetOverride<HalibutPlayer>();
             if (!halibutPlayer.HeldHalibut) {
                 return;
             }
@@ -97,7 +98,7 @@ namespace CalamityOverhaul.Content.ADV.Common
             if (!BossDowned()) {
                 return;
             }
-            if (!AdditionalConditions(save, halibutPlayer)) {
+            if (!AdditionalConditions(save, player)) {
                 return;
             }
             if (!SpawnedDic[this]) {

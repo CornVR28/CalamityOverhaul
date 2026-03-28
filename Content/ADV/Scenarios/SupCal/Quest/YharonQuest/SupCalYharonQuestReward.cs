@@ -120,7 +120,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest.YharonQuest
             }
         }
 
-        public override void Update(ADVSave save, HalibutPlayer halibutPlayer) {
+        public override void Update(ADVSave save, Player player) {
             if (!save.Get<SupCalADVData>().SupCalYharonQuestReward) {
                 return;
             }
@@ -130,6 +130,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest.YharonQuest
             }
 
             //如果玩家拿着大比目鱼，则必须先获得过比目鱼小姐给的礼物才能触发，避免这两个场景冲突
+            var halibutPlayer = player.GetOverride<HalibutPlayer>();
             if (halibutPlayer.HeldHalibut && !save.Get<BossGiftADVData>().YharonGift) {
                 return;
             }

@@ -124,7 +124,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen
             player.QuickSpawnItem(player.GetSource_Misc("HelensInterference"), heartcarverType, 1);
         }
 
-        public override void Update(ADVSave save, HalibutPlayer halibutPlayer) {
+        public override void Update(ADVSave save, Player player) {
             //检查是否接受了神明吞噬者任务
             if (!save.Get<SupCalADVData>().SupCalDoGQuestAccepted) {
                 return;
@@ -145,6 +145,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen
                 return;
             }
 
+            var halibutPlayer = player.GetOverride<HalibutPlayer>();
             if (!halibutPlayer.HasHalubut) {
                 return;
             }

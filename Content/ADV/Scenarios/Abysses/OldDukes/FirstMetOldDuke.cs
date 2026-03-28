@@ -263,7 +263,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes
             //OldDukeEffect.IsActive由声明式计算自动管理
         }
 
-        public override void Update(ADVSave save, HalibutPlayer halibutPlayer) {
+        public override void Update(ADVSave save, Player player) {
             //场景触发逻辑移至ModifyOldDuke中处理
         }
     }

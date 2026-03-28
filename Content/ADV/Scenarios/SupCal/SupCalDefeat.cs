@@ -61,10 +61,11 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal
             Add(Rolename1.Value + " ", Line10.Value);
         }
 
-        public override void Update(ADVSave save, HalibutPlayer halibutPlayer) {
+        public override void Update(ADVSave save, Player player) {
             if (save.Get<SupCalADVData>().SupCalDefeat) {
                 return;
             }
+            var halibutPlayer = player.GetOverride<HalibutPlayer>();
             if (!halibutPlayer.HeldHalibut) {
                 return;//必须持有比目鱼才能触发
             }

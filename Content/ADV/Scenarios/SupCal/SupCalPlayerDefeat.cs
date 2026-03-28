@@ -82,7 +82,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal
             }
         }
 
-        public override void Update(ADVSave save, HalibutPlayer halibutPlayer) {
+        public override void Update(ADVSave save, Player player) {
             //这个场景可以重复触发，因为玩家可能会多次尝试
             if (!save.Get<SupCalADVData>().SupCalChoseToFight) {
                 return;//玩家没有选择战斗

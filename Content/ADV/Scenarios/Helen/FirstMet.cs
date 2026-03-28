@@ -110,7 +110,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen
             });
         }
 
-        public override void Update(ADVSave save, HalibutPlayer halibutPlayer) {//第一次手持大比目鱼时触发对话
+        public override void Update(ADVSave save, Player player) {//第一次手持大比目鱼时触发对话
+            var halibutPlayer = player.GetOverride<HalibutPlayer>();
             if (!halibutPlayer.HeldHalibut) {
                 return;
             }

@@ -511,13 +511,6 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend
                 PlayerLifeMax = (int)MathHelper.Clamp(PlayerLifeMax, Player.statLifeMax2, int.MaxValue - 1);
             }
 
-            if (Player.whoAmI == Main.myPlayer) {//关于ADV场景的更新只在本地玩家上进行
-                var advSave = Player.GetModPlayer<ADVSavePlayer>().ADVSave;
-                foreach (var scenario in ADVScenarioBase.Instances) {
-                    scenario.Update(advSave, this);
-                }
-            }
-
             //克隆技能记录
             if (CloneFishActive) {
                 CloneFrameCounter++;

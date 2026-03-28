@@ -237,7 +237,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.End.EternalBlazingNows
                 Add(Rolename1.Value, EpilogueLine3.Value);
             }
 
-            public override void Update(ADVSave save, HalibutPlayer halibutPlayer) {
+            public override void Update(ADVSave save, Player player) {
+                var halibutPlayer = player.GetOverride<HalibutPlayer>();
                 if (Spwan && halibutPlayer.HasHalubut && StartScenario()) {
                     Spwan = false;
                 }

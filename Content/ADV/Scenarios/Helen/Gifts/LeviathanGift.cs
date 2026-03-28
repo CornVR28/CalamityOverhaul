@@ -1,7 +1,6 @@
 ﻿using CalamityOverhaul.Content.ADV.ADVRewardPopups;
 using CalamityOverhaul.Content.ADV.Common;
 using CalamityOverhaul.Content.ADV.DialogueBoxs;
-using CalamityOverhaul.Content.LegendWeapon.HalibutLegend;
 using Terraria;
 using Terraria.ID;
 using Terraria.Localization;
@@ -48,7 +47,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Gifts
                     }, offset: Vector2.Zero);
             }
         }
-        protected override bool AdditionalConditions(ADVSave save, HalibutPlayer halibutPlayer) {
+        protected override bool AdditionalConditions(ADVSave save, Player player) {
             return !NPC.AnyNPCs(CWRID.NPC_Anahita);//确保阿纳希塔也嘎了
         }
         protected override bool IsGiftCompleted(ADVSave save) {

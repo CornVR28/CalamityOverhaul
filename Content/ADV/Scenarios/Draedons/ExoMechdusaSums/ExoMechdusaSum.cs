@@ -1,7 +1,6 @@
 ﻿using CalamityOverhaul.Content.ADV.ADVChoices;
 using CalamityOverhaul.Content.ADV.DialogueBoxs;
 using CalamityOverhaul.Content.ADV.DialogueBoxs.Styles;
-using CalamityOverhaul.Content.LegendWeapon.HalibutLegend;
 using CalamityOverhaul.OtherMods.InfernumMode;
 using System;
 using Terraria;
@@ -184,7 +183,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.ExoMechdusaSums
             }
         }
 
-        public override void Update(ADVSave save, HalibutPlayer halibutPlayer) {
+        public override void Update(ADVSave save, Player player) {
             //兼容模式下，检测是否已召唤机甲来完成场景
             if (CompatibleMode && DraedonEffect.IsActive && CWRRef.HasExo()) {
                 //完成当前场景

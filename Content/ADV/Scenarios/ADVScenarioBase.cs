@@ -1,8 +1,8 @@
 ﻿using CalamityOverhaul.Content.ADV.ADVChoices;
 using CalamityOverhaul.Content.ADV.DialogueBoxs;
-using CalamityOverhaul.Content.LegendWeapon.HalibutLegend;
 using System;
 using System.Collections.Generic;
+using Terraria;
 using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
@@ -424,9 +424,10 @@ namespace CalamityOverhaul.Content.ADV.Scenarios
         internal void Complete() {
             if (!IsCompleted) {
                 IsCompleted = true;
-                OnComplete();
                 OnScenarioComplete();
             }
+
+            lines.Clear();
 
             var box = DialogueUIRegistry.Current;
             if (box != null && box.PreProcessor == PreProcessSegment) {
@@ -438,9 +439,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios
 
         public virtual void LoadData(TagCompound tag) { }
 
-        public virtual void Update(ADVSave save, HalibutPlayer halibutPlayer) { }
+        public virtual void Update(ADVSave save, Player player) { }
 
-        protected virtual void OnComplete() { }
         public void Reset() => IsCompleted = false;
     }
 }

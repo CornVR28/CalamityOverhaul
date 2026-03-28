@@ -1,7 +1,6 @@
 ﻿using CalamityOverhaul.Content.ADV.ADVChoices;
 using CalamityOverhaul.Content.ADV.DialogueBoxs;
 using CalamityOverhaul.Content.ADV.DialogueBoxs.Styles;
-using CalamityOverhaul.Content.LegendWeapon.HalibutLegend;
 using System;
 using Terraria;
 using Terraria.Localization;
@@ -124,7 +123,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.Tzeentch
             RandTimer = Main.rand.Next(60 * 13, 60 * 20);
         }
 
-        public override void Update(ADVSave save, HalibutPlayer halibutPlayer) {
+        public override void Update(ADVSave save, Player player) {
             if (!Spawn) {
                 return;
             }

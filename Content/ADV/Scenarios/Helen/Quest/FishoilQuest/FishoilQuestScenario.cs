@@ -2,7 +2,6 @@
 using CalamityOverhaul.Content.ADV.DialogueBoxs;
 using CalamityOverhaul.Content.ADV.DialogueBoxs.Styles;
 using CalamityOverhaul.Content.ADV.QuestManager;
-using CalamityOverhaul.Content.LegendWeapon.HalibutLegend;
 using System;
 using System.Linq;
 using Terraria;
@@ -143,7 +142,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Quest.FishoilQuest
             Complete();
         }
 
-        public override void Update(ADVSave save, HalibutPlayer halibutPlayer) {
+        public override void Update(ADVSave save, Player player) {
             //同步委托管理器条目状态（参照 SupCalQuestLine.SyncQuest 模式）
             SyncQuestEntry(save);
 
@@ -161,7 +160,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Quest.FishoilQuest
                 return;
             }
 
-            Player player = halibutPlayer.Player;
             int totalFishCount = 0;
             //统计所有候选鱼的总数量
             for (int i = 0; i < player.inventory.Length; i++) {

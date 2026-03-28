@@ -97,7 +97,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal
                 }, offset: Vector2.Zero, styleProvider: () => ADVRewardPopup.RewardStyle.Brimstone);
         }
 
-        public override void Update(ADVSave save, HalibutPlayer halibutPlayer) {
+        public override void Update(ADVSave save, Player player) {
             if (save.Get<SupCalADVData>().SupCalDefeat) {
                 return;
             }

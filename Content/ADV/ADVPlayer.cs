@@ -1,4 +1,5 @@
-﻿using CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Campsites;
+﻿using CalamityOverhaul.Content.ADV.Scenarios;
+using CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Campsites;
 using CalamityOverhaul.Content.ADV.Scenarios.SupCal;
 using Terraria;
 using Terraria.ModLoader;
@@ -19,6 +20,12 @@ namespace CalamityOverhaul.Content.ADV
         public override void PostUpdate() {
             if (Player.whoAmI != Main.myPlayer) {
                 return;
+            }
+
+            //关于ADV场景的更新只在本地玩家上进行
+            var advSave = Player.GetModPlayer<ADVSavePlayer>().ADVSave;
+            foreach (var scenario in ADVScenarioBase.Instances) {
+                scenario.Update(advSave, Player);
             }
 
             int num = 0;

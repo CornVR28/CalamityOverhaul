@@ -2,7 +2,6 @@
 using CalamityOverhaul.Content.ADV.Common;
 using CalamityOverhaul.Content.ADV.DialogueBoxs;
 using CalamityOverhaul.Content.ADV.Scenarios.SupCal;
-using CalamityOverhaul.Content.LegendWeapon.HalibutLegend;
 using Terraria;
 using Terraria.Localization;
 using Terraria.ModLoader;
@@ -69,7 +68,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Gifts
         protected override bool StartScenarioInternal() {
             return ScenarioManager.Start<CalamitasCloneGift>();
         }
-        protected override bool AdditionalConditions(ADVSave save, HalibutPlayer halibutPlayer) {
+        protected override bool AdditionalConditions(ADVSave save, Player player) {
             return !SupCalEffect.IsActive;//防止冲突
         }
     }

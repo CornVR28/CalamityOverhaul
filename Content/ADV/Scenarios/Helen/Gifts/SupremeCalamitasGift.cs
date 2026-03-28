@@ -2,7 +2,6 @@
 using CalamityOverhaul.Content.ADV.Common;
 using CalamityOverhaul.Content.ADV.DialogueBoxs;
 using CalamityOverhaul.Content.ADV.Scenarios.SupCal.End.EternalBlazingNows;
-using CalamityOverhaul.Content.LegendWeapon.HalibutLegend;
 using Terraria;
 using Terraria.ID;
 using Terraria.Localization;
@@ -59,7 +58,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Gifts
         protected override bool StartScenarioInternal() {
             return ScenarioManager.Start<SupremeCalamitasGift>();
         }
-        protected override bool AdditionalConditions(ADVSave save, HalibutPlayer halibutPlayer) {
+        protected override bool AdditionalConditions(ADVSave save, Player player) {
             return !EbnEffect.IsActive;//防止冲突
         }
         public override bool CanSpawned() {
