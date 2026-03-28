@@ -17,10 +17,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios
         /// </summary>
         public virtual string Key => Name;
         /// <summary>
-        /// 场景是否可以重复触发
-        /// </summary>
-        public virtual bool CanRepeat => true;
-        /// <summary>
         /// 场景是否已完成
         /// </summary>
         public bool IsCompleted { get; private set; }
@@ -313,7 +309,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios
         public DialogueLineBuilder Line(string speaker, string content) => new DialogueLineBuilder(this, speaker, content);
 
         public void Start() {
-            if (IsCompleted && !CanRepeat) return;
             lines.Clear();//清空旧对话
             Build();//每次开始都重新构建对话内容，方便自定义内容
             if (lines.Count == 0) { Complete(); return; }

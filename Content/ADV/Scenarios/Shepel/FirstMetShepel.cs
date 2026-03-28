@@ -12,8 +12,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel
     /// </summary>
     internal class FirstMetShepel : ADVScenarioBase, ILocalizedModType
     {
-        public override bool CanRepeat => true;
-
         //角色名称
         public static LocalizedText RolenameSHPC { get; private set; }
         public static LocalizedText RolenamePlayer { get; private set; }

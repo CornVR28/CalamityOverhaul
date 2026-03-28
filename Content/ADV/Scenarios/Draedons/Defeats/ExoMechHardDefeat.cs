@@ -11,8 +11,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.Defeats
     /// </summary>
     internal class ExoMechHardDefeat : ADVScenarioBase, ILocalizedModType, IWorldInfo
     {
-        public override bool CanRepeat => true;
-
         //角色名称
         public static LocalizedText DraedonName { get; private set; }
 
