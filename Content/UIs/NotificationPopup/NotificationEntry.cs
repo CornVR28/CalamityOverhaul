@@ -49,13 +49,13 @@ namespace CalamityOverhaul.Content.UIs.NotificationPopup
         #region 辅助绘制
 
         /// <summary>
-        /// 绘制通用面板背景——半透明底色 + 多层阴影 + 四边框线
+        /// 绘制通用面板背景，半透明底色、多层阴影、四边框线
         /// </summary>
         protected static void DrawPanelBackground(SpriteBatch sb, Rectangle rect,
             Color bgColor, Color borderColor, float alpha) {
             Texture2D pixel = TextureAssets.MagicPixel.Value;
 
-            // 外层柔和阴影（悬浮感）
+            //外层柔和阴影，悬浮感
             for (int s = 3; s >= 1; s--) {
                 Rectangle shadowRect = rect;
                 shadowRect.Inflate(s * 2, s * 2);
@@ -63,18 +63,18 @@ namespace CalamityOverhaul.Content.UIs.NotificationPopup
                 sb.Draw(pixel, shadowRect, Color.Black * (0.18f * s / 3f) * alpha);
             }
 
-            // 主背景
+            //主背景
             sb.Draw(pixel, rect, bgColor * alpha);
 
             int borderThick = 2;
-            // 上边框
+            //上边框
             sb.Draw(pixel, new Rectangle(rect.X, rect.Y, rect.Width, borderThick), borderColor * (0.95f * alpha));
-            // 下边框
+            //下边框
             Color bottomBorder = Color.Lerp(borderColor, Color.Black, 0.4f);
             sb.Draw(pixel, new Rectangle(rect.X, rect.Bottom - borderThick, rect.Width, borderThick), bottomBorder * (0.7f * alpha));
-            // 左边框
+            //左边框
             sb.Draw(pixel, new Rectangle(rect.X, rect.Y, borderThick, rect.Height), borderColor * (0.85f * alpha));
-            // 右侧淡边
+            //右侧淡边
             sb.Draw(pixel, new Rectangle(rect.Right - 1, rect.Y, 1, rect.Height), borderColor * (0.15f * alpha));
         }
 
