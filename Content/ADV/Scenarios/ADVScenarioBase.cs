@@ -19,7 +19,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios
         /// <summary>
         /// 场景是否可以重复触发
         /// </summary>
-        public virtual bool CanRepeat => false;
+        public virtual bool CanRepeat => true;
         /// <summary>
         /// 场景是否已完成
         /// </summary>
