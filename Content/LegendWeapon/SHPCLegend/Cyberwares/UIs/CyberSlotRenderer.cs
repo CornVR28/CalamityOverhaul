@@ -47,6 +47,26 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
             new(0.76f, 0.82f,  10),  //神经系统
         ];
 
+        private static readonly float[] ConnectorLaneFactors = [
+            0.26f, 0.31f, 0.35f, 0.38f, 0.41f, 0.45f,
+            0.26f, 0.31f, 0.35f, 0.38f, 0.41f, 0.45f,
+        ];
+
+        private static readonly Vector2[] ConnectorNodeOffsets = [
+            new(-12f, -8f),
+            new(-10f, 4f),
+            new(-8f, -2f),
+            new(-7f, 3f),
+            new(-6f, -3f),
+            new(-5f, 3f),
+            new(11f, -5f),
+            new(8f, 2f),
+            new(8f, -2f),
+            new(0f, -7f),
+            new(7f, 2f),
+            new(5f, -3f),
+        ];
+
         #endregion
 
         #region 状态
@@ -59,6 +79,26 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
 
         public int HoveredSlot => hoveredSlot;
         public int SelectedSlot { get => selectedSlot; set => selectedSlot = value; }
+
+        public int FocusedNodeIndex {
+            get {
+                if (selectedSlot >= 0) {
+                    return Definitions[selectedSlot].NodeIndex;
+                }
+
+                return -1;
+            }
+        }
+
+        public float FocusStrength {
+            get {
+                if (selectedSlot >= 0) {
+                    return 1f;
+                }
+
+                return 0f;
+            }
+        }
 
         #endregion
 
@@ -220,6 +260,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
             Texture2D glow = CWRAsset.SoftGlow?.Value;
             if (px == null) return;
 
+            float focusVisualStrength = body.FocusVisualStrength;
+            float passiveHideStrength = MathHelper.Clamp((focusVisualStrength - 0.08f) / 0.22f, 0f, 1f);
+
             for (int i = 0; i < Definitions.Length; i++) {
                 var def = Definitions[i];
                 Rectangle slotRect = GetSlotRect(i, panelRect);
@@ -231,40 +274,181 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
 
                 //连线终点（人体节点位置）
                 Vector2 nodePos = body.GetNodeWorldPosition(def.NodeIndex, bodyOrigin);
+                Vector2 nodeApproach = nodePos + ConnectorNodeOffsets[i];
 
                 bool isActive = i == hoveredSlot || i == selectedSlot;
-                float lineAlpha = isActive ? 0.6f : 0.15f;
-                Color lineColor = isActive ? CyberwareTheme.Accent : CyberwareTheme.Connector;
+                float hover = slotHoverAnim[i];
+                float passiveAlpha = MathHelper.Lerp(0.11f, 0f, passiveHideStrength);
+                float lineAlpha = isActive ? 0.72f : passiveAlpha;
+                if (!isActive && lineAlpha <= 0.002f) {
+                    continue;
+                }
+
+                Color lineColor = isActive
+                    ? Color.Lerp(CyberwareTheme.Accent, CyberwareTheme.AccentGold, 0.14f)
+                    : Color.Lerp(CyberwareTheme.Connector, CyberwareTheme.Accent, 0.18f);
                 lineColor *= alpha * lineAlpha;
 
-                //折线路径：水平→垂直→水平
-                float midX = def.IsLeft
-                    ? slotEdge.X + (nodePos.X - slotEdge.X) * 0.4f
-                    : slotEdge.X - (slotEdge.X - nodePos.X) * 0.4f;
+                //分道折线路径：水平出线→独立竖向通道→节点前汇入
+                float laneFactor = ConnectorLaneFactors[i];
+                float midX = MathHelper.Lerp(slotEdge.X, nodeApproach.X, laneFactor);
+                float laneSpread = (i % 6 - 2.5f) * (def.IsLeft ? -2.6f : 2.6f);
+                midX += laneSpread;
+                float midY = MathHelper.Lerp(slotEdge.Y, nodeApproach.Y, 0.52f) + (i % 2 == 0 ? -4f : 4f);
 
                 Vector2 p1 = slotEdge;
                 Vector2 p2 = new(midX, slotEdge.Y);
-                Vector2 p3 = new(midX, nodePos.Y);
-                Vector2 p4 = nodePos;
+                Vector2 p3 = new(midX, midY);
+                Vector2 p4 = nodeApproach;
+                Vector2 p5 = nodePos;
 
-                CyberwareTheme.DrawLine(sb, px, p1, p2, 1f, lineColor);
-                CyberwareTheme.DrawLine(sb, px, p2, p3, 1f, lineColor);
-                CyberwareTheme.DrawLine(sb, px, p3, p4, 1f, lineColor);
+                Color sheathColor = Color.Lerp(CyberwareTheme.BodyInner, lineColor, isActive ? 0.38f : 0.22f) * (isActive ? 0.34f : 0.18f);
+                Color coreColor = Color.Lerp(lineColor, CyberwareTheme.AccentCyan * alpha, isActive ? 0.24f : 0.08f);
+                Color tracerColor = Color.Lerp(lineColor, CyberwareTheme.AccentGold * alpha, isActive ? 0.22f : 0.06f);
 
-                //活跃连线上的流动光点
-                if (isActive && glow != null) {
-                    float t = (dataStreamPhase / MathHelper.TwoPi) % 1f;
-                    Vector2 flowPos = CyberwareTheme.EvaluatePolyline(t, p1, p2, p3, p4);
-                    Color flowColor = CyberwareTheme.Accent * (alpha * 0.5f);
-                    flowColor.A = 0;
-                    sb.Draw(glow, flowPos, null, flowColor, 0, glow.Size() / 2, 0.05f, SpriteEffects.None, 0);
+                DrawConnectorSegment(sb, px, p1, p2, sheathColor, coreColor, tracerColor, isActive ? 1.9f : 1.3f);
+                DrawConnectorSegment(sb, px, p2, p3, sheathColor, coreColor, tracerColor, isActive ? 1.9f : 1.3f);
+                DrawConnectorSegment(sb, px, p3, p4, sheathColor, coreColor, tracerColor, isActive ? 1.9f : 1.3f);
+                DrawConnectorSegment(sb, px, p4, p5, sheathColor * 0.9f, coreColor, tracerColor, isActive ? 1.7f : 1.15f);
+
+                float sideOffset = def.IsLeft ? 3f : -3f;
+                Color guideColor = Color.Lerp(CyberwareTheme.Connector, CyberwareTheme.AccentGold, 0.08f) * (alpha * (isActive ? 0.16f : 0.03f));
+                DrawOffsetGuide(sb, px, p1, p2, new Vector2(0f, sideOffset * 0.35f), guideColor);
+                DrawOffsetGuide(sb, px, p2, p3, new Vector2(sideOffset * 0.2f, 0f), guideColor * 0.9f);
+                DrawOffsetGuide(sb, px, p3, p4, new Vector2(0f, -sideOffset * 0.3f), guideColor * 0.8f);
+                DrawOffsetGuide(sb, px, p4, p5, new Vector2(sideOffset * 0.18f, 0f), guideColor * 0.65f);
+
+                //沿连接线绘制多颗数据脉冲
+                int packetCount = isActive ? 3 : passiveHideStrength < 0.35f ? 1 : 0;
+                for (int packet = 0; packet < packetCount; packet++) {
+                    float packetPhase = (dataStreamPhase / MathHelper.TwoPi + packet / (float)packetCount + i * 0.037f) % 1f;
+                    Vector2 flowPos = EvaluateConnectorPath(packetPhase, p1, p2, p3, p4, p5);
+                    Vector2 trailPos = EvaluateConnectorPath((packetPhase + 0.9f) % 1f, p1, p2, p3, p4, p5);
+                    Color packetColor = Color.Lerp(CyberwareTheme.Accent, CyberwareTheme.AccentGold, 0.18f) * (alpha * (isActive ? 0.58f : 0.12f));
+                    packetColor.A = 0;
+                    CyberwareTheme.DrawLine(sb, px, trailPos, flowPos, isActive ? 1.5f : 0.9f, packetColor * (isActive ? 0.42f : 0.26f));
+                    sb.Draw(px, flowPos, new Rectangle(0, 0, 1, 1), packetColor,
+                        MathHelper.PiOver4, new Vector2(0.5f), isActive ? 3.2f : 1.8f, SpriteEffects.None, 0f);
+
+                    if (glow != null) {
+                        sb.Draw(glow, flowPos, null, packetColor, 0f, glow.Size() / 2,
+                            isActive ? 0.032f : 0.012f, SpriteEffects.None, 0f);
+                    }
                 }
 
-                //折线拐角的小方块装饰
-                Color dotColor = lineColor * 1.5f;
-                sb.Draw(px, p2, new Rectangle(0, 0, 1, 1), dotColor, 0, new Vector2(0.5f), 2f, SpriteEffects.None, 0);
-                sb.Draw(px, p3, new Rectangle(0, 0, 1, 1), dotColor, 0, new Vector2(0.5f), 2f, SpriteEffects.None, 0);
+                //折线拐角的中继节点
+                Color relayColor = Color.Lerp(lineColor, CyberwareTheme.AccentGold * alpha, isActive ? 0.22f : 0.08f);
+                DrawRelayJunction(sb, px, glow, p2, relayColor, alpha, isActive, dataStreamPhase + i * 0.11f);
+                DrawRelayJunction(sb, px, glow, p3, relayColor, alpha, isActive, dataStreamPhase + i * 0.16f);
+                DrawRelayJunction(sb, px, glow, p4, relayColor * 0.9f, alpha, isActive, dataStreamPhase + i * 0.2f);
+
+                //槽位端与人体端的瞄准锁定标记
+                DrawReticleEndpoint(sb, px, glow, p1, def.IsLeft ? 1f : -1f, lineColor, alpha, isActive, hover, dataStreamPhase + i * 0.13f, true);
+                DrawReticleEndpoint(sb, px, glow, p5, def.IsLeft ? -1f : 1f, lineColor, alpha, isActive, hover, dataStreamPhase + i * 0.17f, false);
             }
+        }
+
+        private static Vector2 EvaluateConnectorPath(float t, Vector2 p1, Vector2 p2, Vector2 p3, Vector2 p4, Vector2 p5) {
+            float d12 = Vector2.Distance(p1, p2);
+            float d23 = Vector2.Distance(p2, p3);
+            float d34 = Vector2.Distance(p3, p4);
+            float d45 = Vector2.Distance(p4, p5);
+            float total = d12 + d23 + d34 + d45;
+            if (total <= 0.001f) {
+                return p1;
+            }
+
+            float dist = t * total;
+            if (dist <= d12) {
+                return Vector2.Lerp(p1, p2, d12 <= 0.001f ? 0f : dist / d12);
+            }
+
+            dist -= d12;
+            if (dist <= d23) {
+                return Vector2.Lerp(p2, p3, d23 <= 0.001f ? 0f : dist / d23);
+            }
+
+            dist -= d23;
+            if (dist <= d34) {
+                return Vector2.Lerp(p3, p4, d34 <= 0.001f ? 0f : dist / d34);
+            }
+
+            dist -= d34;
+            return Vector2.Lerp(p4, p5, d45 <= 0.001f ? 0f : Math.Clamp(dist / d45, 0f, 1f));
+        }
+
+        private static void DrawConnectorSegment(SpriteBatch sb, Texture2D px, Vector2 start, Vector2 end,
+            Color sheathColor, Color coreColor, Color tracerColor, float thickness) {
+            sheathColor.A = 0;
+            CyberwareTheme.DrawLine(sb, px, start, end, thickness + 1.6f, sheathColor);
+            CyberwareTheme.DrawLine(sb, px, start, end, thickness, coreColor);
+            CyberwareTheme.DrawLine(sb, px, start, end, Math.Max(0.7f, thickness * 0.42f), tracerColor);
+        }
+
+        private static void DrawOffsetGuide(SpriteBatch sb, Texture2D px, Vector2 start, Vector2 end, Vector2 offset, Color color) {
+            CyberwareTheme.DrawLine(sb, px, start + offset, end + offset, 0.7f, color);
+        }
+
+        private static void DrawRelayJunction(SpriteBatch sb, Texture2D px, Texture2D glow, Vector2 position,
+            Color color, float alpha, bool isActive, float phase) {
+            Color junctionColor = color * (isActive ? 0.82f : 0.42f);
+            sb.Draw(px, position, new Rectangle(0, 0, 1, 1), junctionColor,
+                MathHelper.PiOver4, new Vector2(0.5f), isActive ? 3f : 2f, SpriteEffects.None, 0f);
+
+            float tickOffset = MathF.Sin(phase * 5.5f) * (isActive ? 4f : 2.5f);
+            CyberwareTheme.DrawLine(sb, px,
+                position + new Vector2(-2f, tickOffset * 0.2f),
+                position + new Vector2(2f, tickOffset * 0.2f),
+                0.8f, junctionColor * 0.7f);
+
+            if (glow != null) {
+                Color glowColor = junctionColor * (isActive ? 0.18f : 0.08f);
+                glowColor.A = 0;
+                sb.Draw(glow, position, null, glowColor, 0f, glow.Size() / 2,
+                    isActive ? 0.018f : 0.012f, SpriteEffects.None, 0f);
+            }
+        }
+
+        private static void DrawReticleEndpoint(SpriteBatch sb, Texture2D px, Texture2D glow, Vector2 center,
+            float horizontalDirection, Color baseColor, float alpha, bool isActive, float hover, float phase, bool isSlotSide) {
+            float stateStrength = isActive ? 1f : Math.Max(0.18f, hover * 0.55f + 0.2f);
+            Color reticleColor = Color.Lerp(baseColor, CyberwareTheme.AccentGold * alpha, isSlotSide ? 0.08f : 0.18f) * stateStrength;
+            float radius = isSlotSide ? 8f : 9f;
+            float sweep = (phase / MathHelper.TwoPi) % 1f;
+            float bracketLen = isSlotSide ? 3.5f : 4.5f;
+            float bracketInset = isSlotSide ? 2.5f : 3f;
+
+            DrawReticleBracket(sb, px, center + new Vector2(horizontalDirection * radius, -radius * 0.7f), horizontalDirection, -1f, bracketLen, reticleColor * 0.72f);
+            DrawReticleBracket(sb, px, center + new Vector2(horizontalDirection * radius, radius * 0.7f), horizontalDirection, 1f, bracketLen, reticleColor * 0.72f);
+            DrawReticleBracket(sb, px, center + new Vector2(-horizontalDirection * bracketInset, -radius), -horizontalDirection, -1f, bracketLen * 0.85f, reticleColor * 0.48f);
+            DrawReticleBracket(sb, px, center + new Vector2(-horizontalDirection * bracketInset, radius), -horizontalDirection, 1f, bracketLen * 0.85f, reticleColor * 0.48f);
+
+            Color coreColor = Color.Lerp(reticleColor, CyberwareTheme.AccentCyan * alpha, isSlotSide ? 0.08f : 0.16f);
+            sb.Draw(px, center, new Rectangle(0, 0, 1, 1), coreColor,
+                MathHelper.PiOver4, new Vector2(0.5f), isSlotSide ? 2.6f : 3.2f, SpriteEffects.None, 0f);
+
+            Vector2 sweepStart = center + new Vector2(horizontalDirection * (radius - 1f), -radius + sweep * radius * 2f);
+            CyberwareTheme.DrawLine(sb, px, sweepStart + new Vector2(0f, -2f), sweepStart + new Vector2(0f, 2f), 0.8f, reticleColor * 0.82f);
+
+            if (!isSlotSide) {
+                CyberwareTheme.DrawLine(sb, px,
+                    center + new Vector2(-2.6f, 0f),
+                    center + new Vector2(2.6f, 0f),
+                    0.85f, reticleColor * 0.4f);
+            }
+
+            if (glow != null) {
+                Color glowColor = reticleColor * (isActive ? 0.18f : 0.08f);
+                glowColor.A = 0;
+                sb.Draw(glow, center, null, glowColor, 0f, glow.Size() / 2,
+                    isSlotSide ? 0.018f : 0.024f, SpriteEffects.None, 0f);
+            }
+        }
+
+        private static void DrawReticleBracket(SpriteBatch sb, Texture2D px, Vector2 corner,
+            float xDir, float yDir, float length, Color color) {
+            CyberwareTheme.DrawLine(sb, px, corner, corner + new Vector2(-xDir * length, 0f), 0.85f, color);
+            CyberwareTheme.DrawLine(sb, px, corner, corner + new Vector2(0f, -yDir * length), 0.85f, color);
         }
 
         /// <summary>

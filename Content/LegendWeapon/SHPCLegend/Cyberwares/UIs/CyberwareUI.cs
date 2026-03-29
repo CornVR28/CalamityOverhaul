@@ -175,6 +175,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
                 panelRenderer.TriggerGlitch(0.3f);
             }
             slotRenderer.UpdateAnimations();
+            bodyRenderer.SetFocusNode(slotRenderer.FocusedNodeIndex, slotRenderer.FocusStrength);
 
             particleSystem.Update(bodyOrigin, openProgress);
 
@@ -246,6 +247,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
             bodyOrigin = panelCenter + new Vector2(0, 5);
 
             //子渲染器继续更新
+            bodyRenderer.SetFocusNode(-1, 0f);
             bodyRenderer.Update();
             panelRenderer.Update();
             particleSystem.Update(bodyOrigin, currentAlpha);
@@ -267,6 +269,21 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
             panelRenderer.DrawGrid(spriteBatch, currentAlpha, panelRect);
             panelRenderer.DrawScanLines(spriteBatch, currentAlpha, panelRect);
 
+            RasterizerState rasterizerState = new RasterizerState { ScissorTestEnable = true };
+            spriteBatch.End();
+
+            int margin = 4;
+            Vector2 clipPos = Vector2.Transform(new Vector2(panelRect.X + margin, panelRect.Y + margin), Main.UIScaleMatrix);
+            Vector2 clipSize = Vector2.Transform(new Vector2(panelRect.Width - margin * 2, panelRect.Height - margin * 2), Main.UIScaleMatrix)
+                - Vector2.Transform(Vector2.Zero, Main.UIScaleMatrix);
+            Rectangle scissorRect = new Rectangle((int)clipPos.X, (int)clipPos.Y, (int)clipSize.X, (int)clipSize.Y);
+            Rectangle originalScissorRect = spriteBatch.GraphicsDevice.ScissorRectangle;
+            scissorRect = Rectangle.Intersect(scissorRect, spriteBatch.GraphicsDevice.Viewport.Bounds);
+
+            spriteBatch.GraphicsDevice.ScissorRectangle = scissorRect;
+            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp,
+                DepthStencilState.None, rasterizerState, null, Main.UIScaleMatrix);
+
             //内容层（人体、槽位、标题）—— 关闭时快速淡出
             if (currentContentAlpha > 0.01f) {
                 bodyRenderer.DrawBody(spriteBatch, currentContentAlpha, bodyOrigin, globalTimer);
@@ -281,6 +298,12 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
             }
 
             particleSystem.Draw(spriteBatch, currentAlpha);
+
+            spriteBatch.End();
+            spriteBatch.GraphicsDevice.ScissorRectangle = originalScissorRect;
+            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp,
+                DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.UIScaleMatrix);
+
             panelRenderer.DrawGlitchEffect(spriteBatch, currentAlpha, panelRect);
 
             //关闭动画的科幻亮线效果
