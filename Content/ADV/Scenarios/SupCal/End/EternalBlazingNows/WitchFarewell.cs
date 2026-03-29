@@ -1,6 +1,7 @@
 ﻿using CalamityOverhaul.Content.ADV.DialogueBoxs;
 using CalamityOverhaul.Content.ADV.DialogueBoxs.Styles;
 using CalamityOverhaul.Content.LegendWeapon.HalibutLegend;
+using CalamityOverhaul.Content.UIs.NotificationPopup;
 using System;
 using Terraria;
 using Terraria.Localization;
@@ -124,15 +125,14 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.End.EternalBlazingNows
 
         private static void Achievement() {
             CWRNpc.SetNPCLoot(CWRID.NPC_SupremeCalamitas);
-            AchievementToast.ShowAchievement(
+            NotificationPopupSystem.Add(new EbnAchievementEntry(
                 CWRAsset.icon_small.Value,
                 AchievementTitle.Value,
-                AchievementTooltip.Value,
-                AchievementToast.ToastStyle.Brimstone
-            );
+                AchievementTooltip.Value
+            ));
             if (Main.LocalPlayer.TryGetADVSave(out var save)) {
                 save.Get<SupCalADVData>().EternalBlazingNow = true;
-                save.SendEbnData(Main.LocalPlayer);
+                EbnPlayer.SendEbnSync(Main.LocalPlayer);
             }
         }
     }

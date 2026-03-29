@@ -389,7 +389,6 @@ SupCalDoGQuestReward: {
 	Line7: ......Я её и правда терпеть не могу.
 }
 
-AchievementToast.AchievementUnlocked: Достижение получено!
 
 SupCalYharonQuestReward: {
 	Rolename1: Серная Ведьма

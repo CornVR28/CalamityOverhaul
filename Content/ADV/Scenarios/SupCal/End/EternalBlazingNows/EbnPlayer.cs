@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
@@ -19,6 +20,10 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.End.EternalBlazingNows
         private float auraPhase = 0f;
         private float pulsePhase = 0f;
         private float wingFlamePhase = 0f;
+        /// <summary>
+        /// 用于 SendClientChanges 变更检测的影子字段
+        /// </summary>
+        private bool _syncIsEbn;
 
         private class AuraParticleData
         {
@@ -35,6 +40,69 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.End.EternalBlazingNows
 
         public static bool OnEbn(Player player) => player.TryGetADVSave(out var save) && save.Get<SupCalADVData>().EternalBlazingNow;
         public static bool IsConquered(Player player) => player.TryGetADVSave(out var save) && save.Get<SupCalADVData>().SupCalYharonQuestReward;
+
+        #region 网络同步
+        /// <summary>
+        /// 进入世界时自动向其他客户端同步 Ebn 状态
+        /// </summary>
+        public override void SyncPlayer(int toWho, int fromWho, bool newPlayer) {
+            SendEbnSync(Player, toWho, fromWho);
+        }
+
+        /// <summary>
+        /// 每帧快照当前状态，用于下一帧变更检测
+        /// </summary>
+        public override void CopySendFields(ModPlayer clientCopy) {
+            ((EbnPlayer)clientCopy)._syncIsEbn = IsEbn;
+        }
+
+        /// <summary>
+        /// 当 Ebn 状态与上一帧快照不同时自动发送同步包
+        /// </summary>
+        public override void SendClientChanges(ModPlayer clientPlayer) {
+            if (((EbnPlayer)clientPlayer)._syncIsEbn != IsEbn) {
+                SendEbnSync(Player);
+            }
+        }
+
+        /// <summary>
+        /// 立即发送 Ebn 状态同步包。在剧情选择等需要即时同步时调用
+        /// </summary>
+        public static void SendEbnSync(Player player, int toWho = -1, int fromWho = -1) {
+            if (VaultUtils.isSinglePlayer) {
+                return;
+            }
+            ModPacket packet = CWRMod.Instance.GetPacket();
+            packet.Write((byte)CWRMessageType.EbnTag);
+            packet.Write((byte)player.whoAmI);
+            packet.Write(OnEbn(player));
+            packet.Send(toWho, fromWho);
+        }
+
+        /// <summary>
+        /// 处理 Ebn 同步网络包
+        /// </summary>
+        internal static void HandleNetSync(BinaryReader reader, int whoAmI) {
+            int playerIndex = reader.ReadByte();
+            bool ebnState = reader.ReadBoolean();
+
+            if (!playerIndex.TryGetPlayer(out var player)
+                || !player.TryGetADVSave(out var save)) {
+                return;
+            }
+
+            save.Get<SupCalADVData>().EternalBlazingNow = ebnState;
+
+            // 服务端转发给其他客户端
+            if (VaultUtils.isServer) {
+                ModPacket packet = CWRMod.Instance.GetPacket();
+                packet.Write((byte)CWRMessageType.EbnTag);
+                packet.Write((byte)playerIndex);
+                packet.Write(ebnState);
+                packet.Send(-1, whoAmI);
+            }
+        }
+        #endregion
 
         public override void ResetEffects() {
             if (!IsEbn) {

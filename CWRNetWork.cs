@@ -1,6 +1,6 @@
 ﻿using CalamityOverhaul.Content;
-using CalamityOverhaul.Content.ADV;
 using CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes;
+using CalamityOverhaul.Content.ADV.Scenarios.SupCal.End.EternalBlazingNows;
 using CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Campsites;
 using CalamityOverhaul.Content.ADV.Scenarios.Draedons;
 using CalamityOverhaul.Content.ADV.Scenarios.Draedons.Quest.DeploySignaltowers.SignalTower;
@@ -97,13 +97,15 @@ namespace CalamityOverhaul
             else if (type == CWRMessageType.SirenMusicalBoxToggle) {
                 SirenMusicalBoxTP.HandleTogglePacket(reader, whoAmI);
             }
+            else if (type == CWRMessageType.EbnTag) {
+                EbnPlayer.HandleNetSync(reader, whoAmI);
+            }
 
             ModifyCrabulon.NetHandle(type, reader, whoAmI);
             HalibutPlayer.NetHandle(type, reader, whoAmI);
             DraedonEffect.NetHandle(type, reader, whoAmI);
             TzeentchEffect.NetHandle(type, reader, whoAmI);
             SignalTowerTargetManager.NetHandle(type, reader, whoAmI);
-            ADVSave.NetHandle(type, reader, whoAmI);
             OldDukeEffect.NetHandle(type, reader, whoAmI);
             MachineEffect.NetHandle(type, reader, whoAmI);
         }
