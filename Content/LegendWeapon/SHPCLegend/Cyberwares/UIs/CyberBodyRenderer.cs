@@ -243,6 +243,31 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
                 CyberwareTheme.DrawLine(sb, px, start, end, 2f, outlineColor);
             }
 
+            //全息投影偏移鬼影——模拟全息色差伪影
+            Color ghostColor = CyberwareTheme.AccentCyan * (alpha * 0.08f);
+            float ghostDx = MathF.Sin(globalTimer * 1.5f) * 2f;
+            float ghostDy = MathF.Cos(globalTimer * 1.8f) * 1f;
+            for (int i = 0; i < OutlineSegments.GetLength(0); i++) {
+                Vector2 gStart = bodyOffset + new Vector2(OutlineSegments[i, 0] * s + ghostDx, OutlineSegments[i, 1] * s + breathe + ghostDy);
+                Vector2 gEnd = bodyOffset + new Vector2(OutlineSegments[i, 2] * s + ghostDx, OutlineSegments[i, 3] * s + breathe + ghostDy);
+                CyberwareTheme.DrawLine(sb, px, gStart, gEnd, 1f, ghostColor);
+            }
+
+            //人体区域扫描线——从头到脚循环扫描
+            float scanWorldY = bodyOffset.Y + scanLineY * s + breathe;
+            if (scanWorldY > bodyOffset.Y && scanWorldY < bodyOffset.Y + 56 * s) {
+                Color bodyScanColor = CyberwareTheme.Accent * (alpha * 0.15f);
+                int scanLeft = (int)(bodyOffset.X + 4 * s);
+                int scanWidth = (int)(24 * s);
+                sb.Draw(px, new Rectangle(scanLeft, (int)scanWorldY, scanWidth, 2),
+                    new Rectangle(0, 0, 1, 1), bodyScanColor);
+                for (int j = 1; j <= 5; j++) {
+                    float tf = 1f - j / 5f;
+                    sb.Draw(px, new Rectangle(scanLeft, (int)scanWorldY - j * 3, scanWidth, 1),
+                        new Rectangle(0, 0, 1, 1), bodyScanColor * (tf * 0.4f));
+                }
+            }
+
             //能量粒子沿脊椎流动
             DrawSpineEnergyFlow(sb, px, bodyOffset, s, alpha, breathe, globalTimer);
 

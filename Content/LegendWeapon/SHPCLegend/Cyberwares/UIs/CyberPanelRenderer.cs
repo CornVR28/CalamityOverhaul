@@ -65,6 +65,21 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
             //面板主背景
             sb.Draw(px, panelRect, new Rectangle(0, 0, 1, 1), CyberwareTheme.BgPanel * (alpha * 0.95f));
 
+            //内侧暗角渐变——营造凹陷深度感
+            Color vignetteColor = CyberwareTheme.InnerShadow * (alpha * 0.8f);
+            int vigSize = 8;
+            for (int i = 0; i < vigSize; i++) {
+                float fade = 1f - (float)i / vigSize;
+                sb.Draw(px, new Rectangle(panelRect.X, panelRect.Y + i, panelRect.Width, 1),
+                    new Rectangle(0, 0, 1, 1), vignetteColor * fade);
+                sb.Draw(px, new Rectangle(panelRect.X, panelRect.Bottom - 1 - i, panelRect.Width, 1),
+                    new Rectangle(0, 0, 1, 1), vignetteColor * fade);
+                sb.Draw(px, new Rectangle(panelRect.X + i, panelRect.Y, 1, panelRect.Height),
+                    new Rectangle(0, 0, 1, 1), vignetteColor * (fade * 0.6f));
+                sb.Draw(px, new Rectangle(panelRect.Right - 1 - i, panelRect.Y, 1, panelRect.Height),
+                    new Rectangle(0, 0, 1, 1), vignetteColor * (fade * 0.6f));
+            }
+
             //面板外发光
             Texture2D glow = CWRAsset.SoftGlow?.Value;
             if (glow != null) {
@@ -89,21 +104,51 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
             sb.Draw(px, new Rectangle(panelRect.Right - 1, panelRect.Y, 1, panelRect.Height),
                 new Rectangle(0, 0, 1, 1), CyberwareTheme.Border * (alpha * 0.5f));
 
-            //四角装饰
+            //四角装饰 —— 双层赛博朋克括号+斜切线
             Color cornerColor = CyberwareTheme.Accent * (alpha * 0.9f);
-            Color cornerDim = cornerColor * 0.6f;
-            //左上
-            sb.Draw(px, new Rectangle(panelRect.X, panelRect.Y, 20, 2), new Rectangle(0, 0, 1, 1), cornerColor);
-            sb.Draw(px, new Rectangle(panelRect.X, panelRect.Y, 2, 16), new Rectangle(0, 0, 1, 1), cornerColor);
+            Color cornerDim = cornerColor * 0.5f;
+            Color cornerInner = CyberwareTheme.Accent * (alpha * 0.25f);
+            int cL = 28, cL2 = 14, cInset = 6;
+            //左上 外+内层
+            sb.Draw(px, new Rectangle(panelRect.X, panelRect.Y, cL, 2), new Rectangle(0, 0, 1, 1), cornerColor);
+            sb.Draw(px, new Rectangle(panelRect.X, panelRect.Y, 2, cL), new Rectangle(0, 0, 1, 1), cornerColor);
+            CyberwareTheme.DrawLine(sb, px, new Vector2(panelRect.X + cL, panelRect.Y + 1),
+                new Vector2(panelRect.X + cL + 5, panelRect.Y + 6), 1f, cornerColor * 0.4f);
+            sb.Draw(px, new Rectangle(panelRect.X + cInset, panelRect.Y + cInset, cL2, 1), new Rectangle(0, 0, 1, 1), cornerInner);
+            sb.Draw(px, new Rectangle(panelRect.X + cInset, panelRect.Y + cInset, 1, cL2), new Rectangle(0, 0, 1, 1), cornerInner);
             //右上
-            sb.Draw(px, new Rectangle(panelRect.Right - 20, panelRect.Y, 20, 2), new Rectangle(0, 0, 1, 1), cornerColor);
-            sb.Draw(px, new Rectangle(panelRect.Right - 2, panelRect.Y, 2, 16), new Rectangle(0, 0, 1, 1), cornerColor);
+            sb.Draw(px, new Rectangle(panelRect.Right - cL, panelRect.Y, cL, 2), new Rectangle(0, 0, 1, 1), cornerColor);
+            sb.Draw(px, new Rectangle(panelRect.Right - 2, panelRect.Y, 2, cL), new Rectangle(0, 0, 1, 1), cornerColor);
+            CyberwareTheme.DrawLine(sb, px, new Vector2(panelRect.Right - cL, panelRect.Y + 1),
+                new Vector2(panelRect.Right - cL - 5, panelRect.Y + 6), 1f, cornerColor * 0.4f);
+            sb.Draw(px, new Rectangle(panelRect.Right - cInset - cL2, panelRect.Y + cInset, cL2, 1), new Rectangle(0, 0, 1, 1), cornerInner);
+            sb.Draw(px, new Rectangle(panelRect.Right - cInset - 1, panelRect.Y + cInset, 1, cL2), new Rectangle(0, 0, 1, 1), cornerInner);
             //左下
-            sb.Draw(px, new Rectangle(panelRect.X, panelRect.Bottom - 2, 20, 2), new Rectangle(0, 0, 1, 1), cornerDim);
-            sb.Draw(px, new Rectangle(panelRect.X, panelRect.Bottom - 16, 2, 16), new Rectangle(0, 0, 1, 1), cornerDim);
+            sb.Draw(px, new Rectangle(panelRect.X, panelRect.Bottom - 2, cL, 2), new Rectangle(0, 0, 1, 1), cornerDim);
+            sb.Draw(px, new Rectangle(panelRect.X, panelRect.Bottom - cL, 2, cL), new Rectangle(0, 0, 1, 1), cornerDim);
+            CyberwareTheme.DrawLine(sb, px, new Vector2(panelRect.X + cL, panelRect.Bottom - 1),
+                new Vector2(panelRect.X + cL + 5, panelRect.Bottom - 6), 1f, cornerDim * 0.4f);
+            sb.Draw(px, new Rectangle(panelRect.X + cInset, panelRect.Bottom - cInset - 1, cL2, 1), new Rectangle(0, 0, 1, 1), cornerInner * 0.7f);
+            sb.Draw(px, new Rectangle(panelRect.X + cInset, panelRect.Bottom - cInset - cL2, 1, cL2), new Rectangle(0, 0, 1, 1), cornerInner * 0.7f);
             //右下
-            sb.Draw(px, new Rectangle(panelRect.Right - 20, panelRect.Bottom - 2, 20, 2), new Rectangle(0, 0, 1, 1), cornerDim);
-            sb.Draw(px, new Rectangle(panelRect.Right - 2, panelRect.Bottom - 16, 2, 16), new Rectangle(0, 0, 1, 1), cornerDim);
+            sb.Draw(px, new Rectangle(panelRect.Right - cL, panelRect.Bottom - 2, cL, 2), new Rectangle(0, 0, 1, 1), cornerDim);
+            sb.Draw(px, new Rectangle(panelRect.Right - 2, panelRect.Bottom - cL, 2, cL), new Rectangle(0, 0, 1, 1), cornerDim);
+            CyberwareTheme.DrawLine(sb, px, new Vector2(panelRect.Right - cL, panelRect.Bottom - 1),
+                new Vector2(panelRect.Right - cL - 5, panelRect.Bottom - 6), 1f, cornerDim * 0.4f);
+            sb.Draw(px, new Rectangle(panelRect.Right - cInset - cL2, panelRect.Bottom - cInset - 1, cL2, 1), new Rectangle(0, 0, 1, 1), cornerInner * 0.7f);
+            sb.Draw(px, new Rectangle(panelRect.Right - cInset - 1, panelRect.Bottom - cInset - cL2, 1, cL2), new Rectangle(0, 0, 1, 1), cornerInner * 0.7f);
+
+            //边缘脉冲光——沿顶部边框移动的亮点
+            float pulsePos = (globalTimer * 0.35f) % 1f;
+            int pulseX = panelRect.X + (int)(pulsePos * panelRect.Width);
+            sb.Draw(px, new Rectangle(pulseX - 20, panelRect.Y, 40, 2),
+                new Rectangle(0, 0, 1, 1), CyberwareTheme.EdgeGlow * (alpha * 0.5f));
+            if (glow != null) {
+                Color pulseGlow = CyberwareTheme.EdgeGlow * (alpha * 0.25f);
+                pulseGlow.A = 0;
+                sb.Draw(glow, new Vector2(pulseX, panelRect.Y), null, pulseGlow, 0,
+                    glow.Size() / 2, new Vector2(0.5f, 0.08f), SpriteEffects.None, 0);
+            }
         }
 
         /// <summary>
@@ -113,18 +158,27 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
             Texture2D px = CWRAsset.Placeholder_White?.Value;
             if (px == null) return;
 
-            Color gridColor = CyberwareTheme.GridLine * (alpha * 0.4f);
             float spacing = 24f;
 
-            //垂直线
+            //极暗全线——隐约的结构感
+            Color faintLine = CyberwareTheme.GridLine * (alpha * 0.15f);
             for (float x = panelRect.X + spacing; x < panelRect.Right; x += spacing) {
                 sb.Draw(px, new Rectangle((int)x, panelRect.Y, 1, panelRect.Height),
-                    new Rectangle(0, 0, 1, 1), gridColor);
+                    new Rectangle(0, 0, 1, 1), faintLine);
             }
-            //水平线
             for (float y = panelRect.Y + spacing; y < panelRect.Bottom; y += spacing) {
                 sb.Draw(px, new Rectangle(panelRect.X, (int)y, panelRect.Width, 1),
-                    new Rectangle(0, 0, 1, 1), gridColor);
+                    new Rectangle(0, 0, 1, 1), faintLine);
+            }
+
+            //交叉点高亮——电路板十字标记
+            Color crossColor = CyberwareTheme.GridLine * (alpha * 0.6f);
+            for (float x = panelRect.X + spacing; x < panelRect.Right; x += spacing) {
+                for (float y = panelRect.Y + spacing; y < panelRect.Bottom; y += spacing) {
+                    int ix = (int)x, iy = (int)y;
+                    sb.Draw(px, new Rectangle(ix - 2, iy, 5, 1), new Rectangle(0, 0, 1, 1), crossColor);
+                    sb.Draw(px, new Rectangle(ix, iy - 2, 1, 5), new Rectangle(0, 0, 1, 1), crossColor);
+                }
             }
         }
 
@@ -163,46 +217,86 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
             Texture2D px = CWRAsset.Placeholder_White?.Value;
             if (px == null) return;
 
-            //标题
+            //标题栏独立背景区——深色区域创造层次分离
+            int headerH = 26;
+            sb.Draw(px, new Rectangle(panelRect.X + 2, panelRect.Y + 2, panelRect.Width - 4, headerH),
+                new Rectangle(0, 0, 1, 1), CyberwareTheme.SectionBg * (alpha * 0.9f));
+
+            //标题栏底部分割线
+            int divY = panelRect.Y + headerH + 3;
+            Color divBright = CyberwareTheme.Accent * (alpha * 0.45f);
+            sb.Draw(px, new Rectangle(panelRect.X + 10, divY, panelRect.Width - 20, 1),
+                new Rectangle(0, 0, 1, 1), divBright);
+
+            //分割线中央菱形缺口装饰
+            int notchW = 8;
+            sb.Draw(px, new Rectangle((int)panelCenter.X - notchW, divY - 2, notchW * 2, 5),
+                new Rectangle(0, 0, 1, 1), CyberwareTheme.BgPanel * alpha);
+            CyberwareTheme.DrawLine(sb, px, new Vector2(panelCenter.X - notchW, divY),
+                new Vector2(panelCenter.X, divY - 2), 1f, divBright);
+            CyberwareTheme.DrawLine(sb, px, new Vector2(panelCenter.X, divY - 2),
+                new Vector2(panelCenter.X + notchW, divY), 1f, divBright);
+            CyberwareTheme.DrawLine(sb, px, new Vector2(panelCenter.X - notchW, divY),
+                new Vector2(panelCenter.X, divY + 2), 1f, divBright * 0.5f);
+            CyberwareTheme.DrawLine(sb, px, new Vector2(panelCenter.X, divY + 2),
+                new Vector2(panelCenter.X + notchW, divY), 1f, divBright * 0.5f);
+
+            //标题文字
             Vector2 titleSize = FontAssets.MouseText.Value.MeasureString(title) * 0.55f;
-            Vector2 titlePos = new(panelCenter.X - titleSize.X / 2f, panelRect.Y + 8);
-
-            //标题发光底色条
-            Color titleGlowBg = CyberwareTheme.Accent * (alpha * 0.1f);
-            sb.Draw(px, new Rectangle((int)(titlePos.X - 10), (int)titlePos.Y - 2,
-                (int)(titleSize.X + 20), (int)(titleSize.Y + 6)),
-                new Rectangle(0, 0, 1, 1), titleGlowBg);
-
+            Vector2 titlePos = new(panelCenter.X - titleSize.X / 2f, panelRect.Y + 9);
             Color titleColor = CyberwareTheme.Accent * (alpha * 0.95f);
             Utils.DrawBorderString(sb, title, titlePos, titleColor, 0.55f);
 
-            //标题下分割线
-            float lineY = titlePos.Y + titleSize.Y + 6;
-            float lineW = CyberwareTheme.PanelWidth * 0.85f;
-            Color divColor = CyberwareTheme.Accent * (alpha * 0.3f);
-            sb.Draw(px, new Rectangle((int)(panelCenter.X - lineW / 2f), (int)lineY, (int)lineW, 1),
-                new Rectangle(0, 0, 1, 1), divColor);
+            //标题两侧对称装饰线+尖括号
+            float sideY = titlePos.Y + titleSize.Y * 0.45f;
+            Color sideColor = CyberwareTheme.Accent * (alpha * 0.35f);
+            float gapFromTitle = 10f;
+            float sideLineLen = 35f;
+            //左侧
+            float lsx = titlePos.X - gapFromTitle - sideLineLen;
+            sb.Draw(px, new Rectangle((int)lsx, (int)sideY, (int)sideLineLen, 1),
+                new Rectangle(0, 0, 1, 1), sideColor);
+            CyberwareTheme.DrawLine(sb, px, new Vector2(lsx - 6, sideY - 4),
+                new Vector2(lsx, sideY), 1f, sideColor * 0.8f);
+            CyberwareTheme.DrawLine(sb, px, new Vector2(lsx - 6, sideY + 4),
+                new Vector2(lsx, sideY), 1f, sideColor * 0.8f);
+            //右侧
+            float rsx = titlePos.X + titleSize.X + gapFromTitle;
+            sb.Draw(px, new Rectangle((int)rsx, (int)sideY, (int)sideLineLen, 1),
+                new Rectangle(0, 0, 1, 1), sideColor);
+            CyberwareTheme.DrawLine(sb, px, new Vector2(rsx + sideLineLen + 6, sideY - 4),
+                new Vector2(rsx + sideLineLen, sideY), 1f, sideColor * 0.8f);
+            CyberwareTheme.DrawLine(sb, px, new Vector2(rsx + sideLineLen + 6, sideY + 4),
+                new Vector2(rsx + sideLineLen, sideY), 1f, sideColor * 0.8f);
 
-            //版本号装饰
+            //版本号
             Color verColor = CyberwareTheme.TextDim * (alpha * 0.5f);
             Utils.DrawBorderString(sb, "v2.077", new Vector2(panelRect.Right - 60, panelRect.Y + 10), verColor, 0.28f);
 
-            //底部状态栏分割线
-            float bottomY = panelRect.Bottom - 18;
-            sb.Draw(px, new Rectangle(panelRect.X + 4, (int)bottomY - 2, panelRect.Width - 8, 1),
-                new Rectangle(0, 0, 1, 1), CyberwareTheme.Border * (alpha * 0.4f));
+            //底部状态栏独立背景区
+            int footerH = 22;
+            int footerTop = panelRect.Bottom - footerH;
+            sb.Draw(px, new Rectangle(panelRect.X + 2, footerTop, panelRect.Width - 4, footerH - 2),
+                new Rectangle(0, 0, 1, 1), CyberwareTheme.SectionBg * (alpha * 0.75f));
+
+            //底部双线分割
+            sb.Draw(px, new Rectangle(panelRect.X + 10, footerTop - 2, panelRect.Width - 20, 1),
+                new Rectangle(0, 0, 1, 1), CyberwareTheme.Accent * (alpha * 0.25f));
+            sb.Draw(px, new Rectangle(panelRect.X + 10, footerTop, panelRect.Width - 20, 1),
+                new Rectangle(0, 0, 1, 1), CyberwareTheme.Border * (alpha * 0.15f));
 
             //运行状态指示灯和文字
+            float bottomTextY = footerTop + 4;
             float statusPulse = MathF.Sin(globalTimer * 3f) > 0 ? 1f : 0.4f;
             Color statusDot = new Color(50, 255, 80) * (alpha * statusPulse);
-            sb.Draw(px, new Vector2(panelRect.X + 10, bottomY + 2), new Rectangle(0, 0, 1, 1),
+            sb.Draw(px, new Vector2(panelRect.X + 10, bottomTextY + 2), new Rectangle(0, 0, 1, 1),
                 statusDot, 0, Vector2.Zero, 4f, SpriteEffects.None, 0);
-            Utils.DrawBorderString(sb, statusText, new Vector2(panelRect.X + 20, bottomY - 2),
+            Utils.DrawBorderString(sb, statusText, new Vector2(panelRect.X + 20, bottomTextY - 2),
                 CyberwareTheme.TextDim * alpha, 0.26f);
 
             //右下角滚动数据标签
             string dataTag = $"NET::0x{((int)(globalTimer * 100) % 0xFFFF):X4}";
-            Utils.DrawBorderString(sb, dataTag, new Vector2(panelRect.Right - 100, bottomY - 2),
+            Utils.DrawBorderString(sb, dataTag, new Vector2(panelRect.Right - 100, bottomTextY - 2),
                 CyberwareTheme.AccentCyan * (alpha * 0.35f), 0.24f);
         }
 

@@ -80,9 +80,9 @@ namespace CalamityOverhaul
             //    GargoyleSwarmPlayer.StartCutscene();
             //}
             //Sandevistan.IsActive = !Sandevistan.IsActive;
-            //CyberwareUI.Instance.Toggle();
-            ScenarioManager.Reset<FirstMetShepel>();
-            ScenarioManager.Start<FirstMetShepel>();
+            CyberwareUI.Instance.Toggle();
+            //ScenarioManager.Reset<FirstMetShepel>();
+            //ScenarioManager.Start<FirstMetShepel>();
             return true;
         }
     }

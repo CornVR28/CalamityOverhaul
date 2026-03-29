@@ -42,6 +42,12 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
         //网格线
         public static readonly Color GridLine = new(25, 25, 35);
 
+        //深度层次
+        public static readonly Color InnerShadow = new(4, 4, 8);
+        public static readonly Color SectionBg = new(10, 10, 16);
+        public static readonly Color SlotInnerBg = new(18, 18, 26);
+        public static readonly Color EdgeGlow = new(255, 65, 65);
+
         //人体轮廓
         public static readonly Color BodyOutline = new(255, 50, 50);
         //人体填充

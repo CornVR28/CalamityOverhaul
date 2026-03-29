@@ -125,6 +125,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
             Texture2D px = CWRAsset.Placeholder_White?.Value;
             if (px == null) return;
 
+            Texture2D slotGlow = CWRAsset.SoftGlow?.Value;
+
             for (int i = 0; i < Definitions.Length; i++) {
                 Rectangle rect = GetSlotRect(i, panelRect);
                 var def = Definitions[i];
@@ -132,13 +134,25 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
                 bool isSelected = i == selectedSlot;
                 bool isHovered = i == hoveredSlot;
 
-                //槽位背景
-                Color bgColor = Color.Lerp(CyberwareTheme.SlotEmpty, CyberwareTheme.BgDark, 0.3f) * (alpha * 0.9f);
-                if (isHovered) bgColor = Color.Lerp(bgColor, CyberwareTheme.Accent, 0.08f * hover);
-                if (isSelected) bgColor = Color.Lerp(bgColor, CyberwareTheme.Accent, 0.12f);
-                sb.Draw(px, rect, new Rectangle(0, 0, 1, 1), bgColor);
+                //槽位外层背景
+                Color outerBg = Color.Lerp(CyberwareTheme.SlotEmpty, CyberwareTheme.BgDark, 0.3f) * (alpha * 0.9f);
+                if (isHovered) outerBg = Color.Lerp(outerBg, CyberwareTheme.Accent, 0.06f * hover);
+                if (isSelected) outerBg = Color.Lerp(outerBg, CyberwareTheme.Accent, 0.08f);
+                sb.Draw(px, rect, new Rectangle(0, 0, 1, 1), outerBg);
 
-                //四边框
+                //内凹区域——比外层更暗，制造深度
+                Rectangle innerArea = new(rect.X + 2, rect.Y + 2, rect.Width - 4, rect.Height - 4);
+                Color innerBg = CyberwareTheme.SlotInnerBg * (alpha * 0.85f);
+                if (isSelected) innerBg = Color.Lerp(innerBg, CyberwareTheme.Accent, 0.05f);
+                sb.Draw(px, innerArea, new Rectangle(0, 0, 1, 1), innerBg);
+
+                //内侧顶部+左侧阴影条——模拟凹陷
+                sb.Draw(px, new Rectangle(innerArea.X, innerArea.Y, innerArea.Width, 2),
+                    new Rectangle(0, 0, 1, 1), CyberwareTheme.InnerShadow * (alpha * 0.6f));
+                sb.Draw(px, new Rectangle(innerArea.X, innerArea.Y, 2, innerArea.Height),
+                    new Rectangle(0, 0, 1, 1), CyberwareTheme.InnerShadow * (alpha * 0.35f));
+
+                //外边框
                 Color borderColor = isSelected ? CyberwareTheme.Accent :
                     isHovered ? Color.Lerp(CyberwareTheme.SlotBorder, CyberwareTheme.Accent, hover * 0.6f) :
                     CyberwareTheme.SlotBorder;
@@ -147,6 +161,26 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
                 sb.Draw(px, new Rectangle(rect.X, rect.Bottom - 1, rect.Width, 1), new Rectangle(0, 0, 1, 1), borderColor * 0.6f);
                 sb.Draw(px, new Rectangle(rect.X, rect.Y, 1, rect.Height), new Rectangle(0, 0, 1, 1), borderColor * 0.7f);
                 sb.Draw(px, new Rectangle(rect.Right - 1, rect.Y, 1, rect.Height), new Rectangle(0, 0, 1, 1), borderColor * 0.7f);
+
+                //斜切角装饰
+                int cutSz = 4;
+                sb.Draw(px, new Rectangle(rect.X, rect.Y, cutSz, cutSz),
+                    new Rectangle(0, 0, 1, 1), CyberwareTheme.BgPanel * alpha);
+                CyberwareTheme.DrawLine(sb, px, new Vector2(rect.X, rect.Y + cutSz),
+                    new Vector2(rect.X + cutSz, rect.Y), 1f, borderColor);
+                sb.Draw(px, new Rectangle(rect.Right - cutSz, rect.Bottom - cutSz, cutSz, cutSz),
+                    new Rectangle(0, 0, 1, 1), CyberwareTheme.BgPanel * alpha);
+                CyberwareTheme.DrawLine(sb, px, new Vector2(rect.Right - cutSz, rect.Bottom),
+                    new Vector2(rect.Right, rect.Bottom - cutSz), 1f, borderColor * 0.6f);
+
+                //选中/悬停外发光
+                if ((isSelected || hover > 0.3f) && slotGlow != null) {
+                    float glowStr = isSelected ? 0.12f : hover * 0.06f;
+                    Color sgColor = CyberwareTheme.Accent * (alpha * glowStr);
+                    sgColor.A = 0;
+                    sb.Draw(slotGlow, new Vector2(rect.Center.X, rect.Center.Y), null, sgColor, 0, slotGlow.Size() / 2,
+                        new Vector2(rect.Width / 40f, rect.Height / 30f), SpriteEffects.None, 0);
+                }
 
                 //侧边强调条
                 if (isSelected || hover > 0.01f) {

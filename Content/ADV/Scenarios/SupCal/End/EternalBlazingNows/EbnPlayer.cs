@@ -55,8 +55,12 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.End.EternalBlazingNows
         public override void SendClientChanges(ModPlayer clientPlayer) {
             if (((EbnPlayer)clientPlayer)._syncIsEbn != IsEbn) {
                 SendEbnSync(Player);
-                ((EbnPlayer)clientPlayer)._syncIsEbn = IsEbn;
+                
             }
+        }
+
+        public override void CopyClientState(ModPlayer targetCopy) {
+            ((EbnPlayer)targetCopy)._syncIsEbn = IsEbn;
         }
 
         /// <summary>
