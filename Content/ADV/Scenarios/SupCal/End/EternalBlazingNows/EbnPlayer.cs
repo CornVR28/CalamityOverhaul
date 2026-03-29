@@ -50,18 +50,12 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.End.EternalBlazingNows
         }
 
         /// <summary>
-        /// 每帧快照当前状态，用于下一帧变更检测
-        /// </summary>
-        public override void CopySendFields(ModPlayer clientCopy) {
-            ((EbnPlayer)clientCopy)._syncIsEbn = IsEbn;
-        }
-
-        /// <summary>
         /// 当 Ebn 状态与上一帧快照不同时自动发送同步包
         /// </summary>
         public override void SendClientChanges(ModPlayer clientPlayer) {
             if (((EbnPlayer)clientPlayer)._syncIsEbn != IsEbn) {
                 SendEbnSync(Player);
+                ((EbnPlayer)clientPlayer)._syncIsEbn = IsEbn;
             }
         }
 
