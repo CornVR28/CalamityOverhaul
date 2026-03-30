@@ -2,6 +2,7 @@
 using CalamityOverhaul.Content.ADV.Scenarios;
 using CalamityOverhaul.Content.ADV.Scenarios.Shepel;
 using CalamityOverhaul.Content.ADV.Scenarios.SupCal.End.EternalBlazingNows;
+using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
 using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
@@ -81,7 +82,9 @@ namespace CalamityOverhaul
             //    GargoyleSwarmPlayer.StartCutscene();
             //}
             //Sandevistan.IsActive = !Sandevistan.IsActive;
-            CyberwareUI.Instance.Toggle();
+            //CyberwareUI.Instance.Toggle();
+            Cyberspace.Activate();   // 展开领域
+            //Cyberspace.Deactivate(); // 收缩关闭
             //ScenarioManager.Reset<FirstMetShepel>();
             //ScenarioManager.Start<FirstMetShepel>();
             return true;
