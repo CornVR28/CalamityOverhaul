@@ -16,7 +16,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         [VaultLoaden(CWRConstant.Masking)]
         public static Texture2D Noise2 = null!;
 
-        [VaultLoaden(CWRConstant.Masking)]
+        [VaultLoaden(CWRConstant.Masking)] 
         public static Texture2D SoftGlow = null!;
 
         public override float Weight => 1.12f;
@@ -48,14 +48,23 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             sb.End();
 
             // 设置着色器参数
+            // 缩放变换围绕屏幕中心进行，UV(0,0)对应的世界坐标不是 Main.screenPosition
+            // 正确的映射：worldPos = worldViewOrigin + worldViewSize * UV
+            // 其中 worldViewOrigin = screenPosition + screenSize * (1 - 1/zoom) / 2
+            Vector2 zoom = Main.GameViewMatrix.Zoom;
+            Vector2 screenPixels = Main.ScreenSize.ToVector2();
+            Vector2 worldViewSize = screenPixels / zoom;
+            Vector2 worldViewOrigin = Main.screenPosition
+                + screenPixels * (Vector2.One - Vector2.One / zoom) * 0.5f;
+
             shader.Parameters["uTime"]?.SetValue(Main.GlobalTimeWrappedHourly);
             shader.Parameters["radius"]?.SetValue(Cyberspace.Radius);
             shader.Parameters["intensity"]?.SetValue(Cyberspace.Intensity);
             shader.Parameters["expandProgress"]?.SetValue(Cyberspace.ExpandProgress);
             shader.Parameters["dimStrength"]?.SetValue(Cyberspace.DimStrength);
             shader.Parameters["setPoint"]?.SetValue(Main.LocalPlayer.Center);
-            shader.Parameters["screenPosition"]?.SetValue(Main.screenPosition);
-            shader.Parameters["screenSize"]?.SetValue(Main.ScreenSize.ToVector2());
+            shader.Parameters["screenPosition"]?.SetValue(worldViewOrigin);
+            shader.Parameters["worldViewSize"]?.SetValue(worldViewSize);
             shader.Parameters["gridSize"]?.SetValue(Cyberspace.GridSize);
 
             // 应用着色器并绘制回主屏幕

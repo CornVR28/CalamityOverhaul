@@ -1,7 +1,8 @@
 // ============================================================================
-// CyberspaceField.fx — 赛博空间领域着色器 v2
+// CyberspaceField.fx — 赛博空间领域着色器 v3
 // 双层架构：场景压暗+去饱和+红染 → 加法叠加赛博特效
 // 风格：赛博朋克2077黑墙AI，深红色系，方形栅格边缘，强压迫感
+// 修正：screenSize 传入缩放修正后的世界可视范围，领域锚定于世界
 // ============================================================================
 
 sampler uImage0 : register(s0);
@@ -14,7 +15,7 @@ float expandProgress;   // 0-1 展开进度
 float dimStrength;      // 压暗强度 (0=不压暗, 1=最大压暗)
 float2 setPoint;        // 领域中心（世界坐标）
 float2 screenPosition;  // 屏幕左上角（世界坐标）
-float2 screenSize;      // 屏幕尺寸（像素）
+float2 worldViewSize;   // 缩放修正后的世界可视范围（非屏幕像素尺寸）
 float gridSize;         // 栅格单元边长（世界像素）
 
 // ---- 工具函数 ----
@@ -26,6 +27,15 @@ float hash21(float2 p)
     return frac((p3.x + p3.y) * p3.z);
 }
 
+// 多八度噪声采样（用低开销的双层混合替代循环）
+float layeredNoise(float2 uv, float timeOff)
+{
+    float n1 = tex2D(noiseTex, frac(uv * 0.37 + float2(timeOff * 0.013, timeOff * 0.009))).r;
+    float n2 = tex2D(noiseTex, frac(uv * 1.13 + float2(timeOff * -0.017, timeOff * 0.021))).g;
+    float n3 = tex2D(noiseTex, frac(uv * 2.71 + float2(timeOff * 0.031, timeOff * -0.011))).b;
+    return n1 * 0.5 + n2 * 0.35 + n3 * 0.15;
+}
+
 float4 PixelShaderFunction(float2 coords : TEXCOORD0) : COLOR0
 {
     float4 original = tex2D(uImage0, coords);
@@ -34,13 +44,16 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0) : COLOR0
         return original;
 
     // ================================================================
-    // 世界坐标与网格基础计算
+    // 世界坐标计算（缩放感知）
     // ================================================================
-    float2 worldPos = screenPosition + screenSize * coords;
+    float2 worldPos = screenPosition + worldViewSize * coords;
     float2 relPos = worldPos - setPoint;
     float worldDist = length(relPos);
     float effectiveRadius = radius * expandProgress;
 
+    // ================================================================
+    // 网格基础
+    // ================================================================
     float2 cellIdx = floor(relPos / gridSize);
     float2 cellCenter = (cellIdx + 0.5) * gridSize;
     float cellDist = length(cellCenter);
@@ -61,7 +74,7 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0) : COLOR0
     bool inside = cellDist < edgeBound;
 
     // ================================================================
-    // 域外溢出光晕 —— 边界外渗透红光 + 隐约栅格暗影
+    // 域外溢出光晕
     // ================================================================
     if (!inside)
     {
@@ -73,11 +86,9 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0) : COLOR0
         if (outerGlow < 0.005)
             return original;
 
-        // 轻微压暗 + 红光渗透
         original.rgb *= lerp(1.0, 0.85, outerGlow);
         original.rgb += float3(0.14, 0.015, 0.02) * outerGlow * 0.4;
 
-        // 外围栅格暗影
         float2 outerCell = frac(relPos / gridSize);
         float ob = min(min(outerCell.x, 1.0 - outerCell.x), min(outerCell.y, 1.0 - outerCell.y));
         float outerGrid = 1.0 - smoothstep(0.0, 0.04, ob);
@@ -97,8 +108,9 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0) : COLOR0
     // 第一层：色差分离（边缘区域，增强数字侵入感）
     // ================================================================
     float2 edgeDir = normalize(relPos + 0.001);
-    float caStrength = edgeFactor * 0.004 * intensity;
-    float2 caOffset = edgeDir * caStrength;
+    // 色差偏移量转为UV空间：世界像素偏移 / 世界可视范围
+    float caWorldPx = edgeFactor * 2.5 * intensity;
+    float2 caOffset = edgeDir * caWorldPx / worldViewSize;
 
     original.r = tex2D(uImage0, coords + caOffset).r;
     original.b = tex2D(uImage0, coords - caOffset).b;
@@ -106,45 +118,83 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0) : COLOR0
     // ================================================================
     // 第二层：场景压暗 + 去饱和 + 红染（核心压迫感来源）
     // ================================================================
-
-    // 压暗：边缘≈55%亮度，中心≈25%亮度
     float targetDim = lerp(0.55, 0.25, centerFactor * 0.3);
     float dimFactor = lerp(1.0, targetDim, intensity * dimStrength);
     float3 processed = original.rgb * dimFactor;
 
-    // 去饱和（将画面推向灰阶）
     float lum = dot(processed, float3(0.299, 0.587, 0.114));
     float3 gray = float3(lum, lum, lum);
     processed = lerp(processed, gray, 0.50 * intensity);
 
-    // 红色调染（灰阶基础上叠加暗红色调）
     float3 redShift = float3(lum * 1.15, lum * 0.50, lum * 0.52);
     processed = lerp(processed, redShift, 0.40 * intensity);
 
-    // 域内暗角——距边缘越近越暗，增加封闭压迫感
     float vignette = 1.0 - normDist * normDist * 0.25;
     processed *= lerp(1.0, vignette, intensity);
 
     // ================================================================
-    // 第三层：加法叠加赛博特效
-    // 在压暗后的画面上，红色发光线条/环/条纹会极为醒目
+    // 第三层：加法叠加赛博特效（全面丰富质感）
     // ================================================================
 
-    // --- 栅格结构线（边缘区域清晰发光，中心极淡）---
+    // --- A. 底层数字暗流（多八度噪声场）---
+    // 域内始终有微妙的深红流动纹理，避免大面积"空洞"感
+    float2 fieldUV = worldPos / (gridSize * 12.0);
+    float fieldNoise = layeredNoise(fieldUV, uTime);
+    float digitalField = smoothstep(0.3, 0.7, fieldNoise);
+    digitalField *= lerp(0.12, 0.05, edgeFactor);
+
+    // --- B. 栅格结构线（噪声调制亮度，模拟电路板走线）---
     float2 cellLocal = frac(relPos / gridSize);
     float bx = min(cellLocal.x, 1.0 - cellLocal.x);
     float by = min(cellLocal.y, 1.0 - cellLocal.y);
     float borderDist = min(bx, by);
+
+    // 每条边独立噪声亮度，模拟"活跃/休眠"电路
+    float traceNoiseH = tex2D(noiseTex, frac(float2(cellIdx.x * 0.13, cellIdx.y * 0.09 + uTime * 0.01))).r;
+    float traceNoiseV = tex2D(noiseTex, frac(float2(cellIdx.y * 0.11, cellIdx.x * 0.07 + uTime * 0.012))).g;
+    float traceBright = (by < bx) ? traceNoiseH : traceNoiseV;
+    traceBright = smoothstep(0.2, 0.8, traceBright);
+
     float gridLine = 1.0 - smoothstep(0.0, 0.05 + edgeFactor * 0.02, borderDist);
-    gridLine *= lerp(0.10, 1.0, edgeFactor);
+    // 边缘区域所有线都亮，内部区域随噪声明灭
+    float gridOpacity = lerp(traceBright * 0.25, 1.0, edgeFactor);
+    gridLine *= gridOpacity;
     gridLine *= 0.7 + 0.3 * breathe;
 
-    // --- 水平扫描线（细密横纹，缓慢下移）---
+    // --- C. 栅格交叉节点亮点 ---
+    float nodeX = 1.0 - smoothstep(0.0, 0.08, bx);
+    float nodeY = 1.0 - smoothstep(0.0, 0.08, by);
+    float node = nodeX * nodeY;
+    float nodePulse = 0.5 + 0.5 * sin(uTime * 2.2 + cellRand * 6.28);
+    node *= lerp(nodePulse * 0.15, 0.6, edgeFactor);
+
+    // --- D. 数据包粒子（沿栅格线运动的亮点）---
+    // 水平行进
+    float packetRowIdx = floor(relPos.y / gridSize);
+    float packetRandH = hash21(float2(packetRowIdx, 5.13));
+    bool packetActiveH = packetRandH > 0.55;
+    float packetSpeedH = 0.15 + packetRandH * 0.3;
+    float packetPosH = frac(relPos.x / (gridSize * 8.0) + uTime * packetSpeedH * (packetRandH > 0.75 ? -1.0 : 1.0));
+    float packetH = exp(-200.0 * (packetPosH - 0.5) * (packetPosH - 0.5));
+    float packetOnLineH = 1.0 - smoothstep(0.0, 0.06, abs(cellLocal.y - 0.5));
+    packetH *= packetOnLineH * (packetActiveH ? 1.0 : 0.0) * (1.0 - edgeFactor) * 0.5;
+
+    // 垂直行进
+    float packetColIdx = floor(relPos.x / gridSize);
+    float packetRandV = hash21(float2(packetColIdx, 9.77));
+    bool packetActiveV = packetRandV > 0.60;
+    float packetSpeedV = 0.12 + packetRandV * 0.25;
+    float packetPosV = frac(relPos.y / (gridSize * 8.0) + uTime * packetSpeedV);
+    float packetV = exp(-200.0 * (packetPosV - 0.5) * (packetPosV - 0.5));
+    float packetOnLineV = 1.0 - smoothstep(0.0, 0.06, abs(cellLocal.x - 0.5));
+    packetV *= packetOnLineV * (packetActiveV ? 1.0 : 0.0) * (1.0 - edgeFactor) * 0.5;
+
+    // --- E. 水平扫描线（细密横纹，缓慢下移）---
     float scanPhase = worldPos.y * 0.015 - uTime * 0.55;
     float scanLine = pow(saturate(sin(scanPhase * 6.28318) * 0.5 + 0.5), 10.0);
-    scanLine *= lerp(0.2, 0.4, centerFactor);
+    scanLine *= lerp(0.15, 0.3, centerFactor);
 
-    // --- 主扫描条（约16秒周期从上至下扫过的高亮光带）---
+    // --- F. 主扫描条（约16秒周期从上至下扫过的高亮光带）---
     float sweepCycle = frac(uTime * 0.06);
     float sweepWorldY = setPoint.y + lerp(-effectiveRadius, effectiveRadius, sweepCycle);
     float sweepDist = abs(worldPos.y - sweepWorldY);
@@ -152,38 +202,42 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0) : COLOR0
     sweepBar = sweepBar * sweepBar * 0.55;
     sweepBar *= step(worldDist, effectiveRadius * 0.95);
 
-    // --- 垂直数据流（部分列出现Matrix式下落的光流）---
-    float colIdx = floor(worldPos.x / (gridSize * 2.0));
-    float colRand = hash21(float2(colIdx, 7.77));
-    float streamPhase = frac(worldPos.y * 0.003 - uTime * (0.15 + colRand * 0.2));
-    float dataStream = pow(streamPhase, 5.0) * step(0.60, colRand) * 0.35;
-    dataStream *= (1.0 - edgeFactor);
+    // --- G. 垂直数据流（部分列Matrix式下落，带渐变拖尾）---
+    float dColIdx = floor(worldPos.x / (gridSize * 2.0));
+    float colRand = hash21(float2(dColIdx, 7.77));
+    float streamActive = step(0.55, colRand);
+    float streamSpeed = 0.15 + colRand * 0.2;
+    float streamPhase = frac(worldPos.y * 0.003 - uTime * streamSpeed);
+    // 带拖尾的渐变（头亮尾暗）
+    float streamHead = smoothstep(0.0, 0.05, streamPhase) * smoothstep(0.3, 0.08, streamPhase);
+    float streamTail = pow(saturate(1.0 - streamPhase / 0.3), 3.0) * 0.4;
+    float dataStream = (streamHead + streamTail) * streamActive * (1.0 - edgeFactor) * 0.30;
 
-    // --- 水平数据传输条（间歇出现的水平滑动亮条）---
-    float barRow = floor(worldPos.y / (gridSize * 4.0));
-    float barRand = hash21(float2(barRow, 13.37));
-    float barPhase = frac(worldPos.x * 0.0008 + uTime * (0.15 + barRand * 0.2));
-    float barLen = 0.08 + barRand * 0.15;
-    float hBar = smoothstep(0, barLen * 0.15, barPhase) * smoothstep(barLen, barLen * 0.85, barPhase);
-    hBar *= step(0.78, barRand) * 0.30;
-    hBar *= (1.0 - edgeFactor);
-
-    // --- 径向脉冲环（从中心向外扩散的能量波纹）---
-    float pulsePhase = (worldDist - uTime * 75.0) * 0.02;
+    // --- H. 径向脉冲环（从中心向外扩散的能量波纹，噪声扰动）---
+    float pulseDistortion = tex2D(noiseTex, frac(worldPos * 0.001 + uTime * 0.008)).r * 15.0;
+    float pulsePhase = (worldDist + pulseDistortion - uTime * 75.0) * 0.02;
     float pulse = pow(saturate(sin(pulsePhase) * 0.5 + 0.5), 16.0);
-    pulse *= saturate(1.0 - normDist * 0.65) * 0.30;
+    pulse *= saturate(1.0 - normDist * 0.65) * 0.25;
 
-    // --- 边缘强光区（边界区域强烈的发光呼吸）---
+    // --- I. 边缘强光区 ---
     float edgeGlow = smoothstep(0.72, 1.0, normDist);
     float edgePulse = 0.55 + 0.45 * sin(uTime * 1.8 + cellRand * 6.28318);
     edgeGlow *= edgePulse;
-    // 边缘单元闪烁块
-    float edgeFlicker = step(0.92, hash21(cellIdx + floor(uTime * 6.0))) * edgeFactor;
 
-    // --- 数字故障（随机单元瞬间亮起）---
-    float glitchPhase = floor(uTime * 5.0);
-    float glitchVal = hash21(cellIdx * 17.31 + glitchPhase);
-    float glitch = step(0.975, glitchVal) * (1.0 - edgeFactor) * 0.6;
+    // --- J. 水平故障撕裂（取代廉价的全单元闪烁）---
+    // 随机的水平错位线段，模拟数字传输故障
+    float tearLine = floor(worldPos.y / 3.0);           // 每3像素一行
+    float tearTime = floor(uTime * 4.0);                // 每0.25秒重新随机
+    float tearRand = hash21(float2(tearLine, tearTime));
+    bool tearActive = tearRand > 0.992;
+    // 撕裂偏移：固定世界像素量 / 可视范围 → 缩放安全的UV偏移
+    float tearShift = (tearRand - 0.5) * 6.0 / worldViewSize.x;
+    float tearBright = 0.0;
+    if (tearActive && edgeFactor < 0.5)
+    {
+        float4 tearSample = tex2D(uImage0, float2(coords.x + tearShift, coords.y));
+        tearBright = dot(tearSample.rgb, float3(0.333, 0.333, 0.333)) * 0.4;
+    }
 
     // --- 赛博色彩面板 ---
     float3 cDeepRed   = float3(0.65, 0.05, 0.07);
@@ -191,18 +245,21 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0) : COLOR0
     float3 cHotRed    = float3(1.0,  0.30, 0.20);
     float3 cDimRed    = float3(0.40, 0.03, 0.04);
     float3 cWhiteRed  = float3(1.0,  0.55, 0.45);
+    float3 cNodeColor = float3(0.90, 0.20, 0.15);
+    float3 cPacketColor = float3(1.0, 0.40, 0.30);
 
     // --- 合成加法层 ---
     float3 additive = float3(0, 0, 0);
-    additive += cDeepRed   * gridLine    * 0.75;
-    additive += cBrightRed * scanLine;
-    additive += cWhiteRed  * sweepBar;
-    additive += cDimRed    * dataStream;
-    additive += cDimRed    * hBar;
-    additive += cBrightRed * pulse;
-    additive += cHotRed    * edgeGlow    * 0.65;
-    additive += cBrightRed * edgeFlicker * 0.50;
-    additive += cBrightRed * glitch;
+    additive += cDimRed     * digitalField;          // A: 底层暗流
+    additive += cDeepRed    * gridLine * 0.75;       // B: 栅格走线
+    additive += cNodeColor  * node;                  // C: 节点亮点
+    additive += cPacketColor * (packetH + packetV);  // D: 数据包粒子
+    additive += cBrightRed  * scanLine;              // E: 扫描线
+    additive += cWhiteRed   * sweepBar;              // F: 主扫描条
+    additive += cDimRed     * dataStream;            // G: 垂直数据流
+    additive += cBrightRed  * pulse;                 // H: 径向脉冲环
+    additive += cHotRed     * edgeGlow * 0.65;       // I: 边缘强光
+    additive += cBrightRed  * tearBright;            // J: 故障撕裂
 
     // ================================================================
     // 最终合成
