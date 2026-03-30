@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using System;
 using Terraria;
+using Terraria.ModLoader;
 
 namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
 {
@@ -15,6 +16,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
     /// </summary>
     internal class CyberspaceRender : RenderHandle
     {
+        private const int MaxEntities = 32;
+        private static readonly Vector4[] entityBuffer = new Vector4[MaxEntities];
+
         [VaultLoaden(CWRConstant.Masking + "Noise2")]
         private static Asset<Texture2D> noise2;
         [VaultLoaden(CWRConstant.Masking + "SoftGlow")]
@@ -73,10 +77,19 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             shader.Parameters["intensity"]?.SetValue(Cyberspace.Intensity);
             shader.Parameters["expandProgress"]?.SetValue(Cyberspace.ExpandProgress);
             shader.Parameters["dimStrength"]?.SetValue(Cyberspace.DimStrength);
-            shader.Parameters["setPoint"]?.SetValue(Main.LocalPlayer.Center);
+            Vector2 domainCenter = Main.LocalPlayer.Center;
+            float effectiveRadius = Cyberspace.Radius * Cyberspace.ExpandProgress;
+            shader.Parameters["setPoint"]?.SetValue(domainCenter);
             shader.Parameters["screenPosition"]?.SetValue(worldViewOrigin);
             shader.Parameters["worldViewSize"]?.SetValue(worldViewSize);
             shader.Parameters["gridSize"]?.SetValue(Cyberspace.GridSize);
+
+            // 收集域内实体数据
+            int entityCount = CollectEntitiesInDomain(domainCenter, effectiveRadius);
+            shader.Parameters["entityCount"]?.SetValue(entityCount);
+            if (entityCount > 0) {
+                shader.Parameters["entities"]?.SetValue(entityBuffer);
+            }
 
             // 应用着色器并绘制回主屏幕
             graphicsDevice.SetRenderTarget(Main.screenTarget);
@@ -144,6 +157,37 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
                 spriteBatch.Draw(glowTex, new Vector2(screenX, screenY), null, glowColor,
                     0f, glowOrigin, glowScale, SpriteEffects.None, 0f);
             }
+        }
+
+        /// <summary>
+        /// 收集域内活跃NPC，将位置和大小写入 entityBuffer。
+        /// 返回收集到的实体数量。
+        /// </summary>
+        private static int CollectEntitiesInDomain(Vector2 domainCenter, float effectiveRadius) {
+            int count = 0;
+            float radiusSq = effectiveRadius * effectiveRadius;
+
+            for (int i = 0; i < Main.maxNPCs && count < MaxEntities; i++) {
+                NPC npc = Main.npc[i];
+                if (!npc.active || npc.friendly || npc.dontTakeDamage) continue;
+
+                Vector2 npcCenter = npc.Center;
+                float dx = npcCenter.X - domainCenter.X;
+                float dy = npcCenter.Y - domainCenter.Y;
+                if (dx * dx + dy * dy > radiusSq) continue;
+
+                float ringRadius = Math.Max(npc.width, npc.height) * 0.8f + 10f;
+                float seed = (i * 0.137f) % 1f;
+                entityBuffer[count] = new Vector4(npcCenter.X, npcCenter.Y, ringRadius, seed);
+                count++;
+            }
+
+            // 清零未使用的槽位
+            for (int i = count; i < MaxEntities; i++) {
+                entityBuffer[i] = Vector4.Zero;
+            }
+
+            return count;
         }
     }
 }

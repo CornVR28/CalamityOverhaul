@@ -18,6 +18,10 @@ float2 screenPosition;  // 屏幕左上角（世界坐标）
 float2 worldViewSize;   // 缩放修正后的世界可视范围（非屏幕像素尺寸）
 float gridSize;         // 栅格单元边长（世界像素）
 
+// 域内实体扫描圆环
+int entityCount;        // 域内实体数量 (最大32)
+float4 entities[32];    // (centerX, centerY, ringRadius, seed)
+
 // ---- 工具函数 ----
 
 float hash21(float2 p)
@@ -218,6 +222,45 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0) : COLOR0
         tearBright = dot(tearSample.rgb, float3(0.333, 0.333, 0.333)) * 0.4;
     }
 
+    // --- K. 实体扫描圆环（标记域内实体位置与大小）---
+    float entityRingTotal = 0;
+    float entityScanTotal = 0;
+    [loop]
+    for (int e = 0; e < entityCount; e++)
+    {
+        float2 eCenter = entities[e].xy;
+        float eRadius = entities[e].z;
+        float eSeed = entities[e].w;
+
+        float2 toEntity = worldPos - eCenter;
+        float eDist = length(toEntity);
+        float ringDist = abs(eDist - eRadius);
+
+        // 主圆环：锐利的薄环线
+        float ring = 1.0 - smoothstep(0.0, 2.0, ringDist);
+
+        // 12段分节（HUD风格分段环）
+        float eAngle = atan2(toEntity.y, toEntity.x);
+        float segFrac = frac(eAngle * 1.9099);  // 12 segments over 2pi
+        float segGap = smoothstep(0.03, 0.08, min(segFrac, 1.0 - segFrac));
+        ring *= lerp(1.0, segGap, 0.45);
+
+        // 外晕：柔和扩散光
+        float halo = 1.0 - smoothstep(0.0, 8.0, ringDist);
+        halo *= halo * 0.2;
+
+        // 旋转扫描弧：~60°高亮弧段绕环旋转
+        float scanAngle = uTime * 1.8 + eSeed * 6.28318;
+        float angleDiff = abs(frac((eAngle - scanAngle) / 6.28318 + 0.5) - 0.5) * 2.0;
+        float scan = smoothstep(0.17, 0.0, angleDiff);
+
+        // 呼吸脉冲
+        float ePulse = 0.7 + 0.3 * sin(uTime * 2.5 + eSeed * 12.56);
+
+        entityRingTotal += (ring * 0.65 + halo) * ePulse;
+        entityScanTotal += ring * scan * ePulse;
+    }
+
     // --- 赛博色彩面板 ---
     float3 cDeepRed   = float3(0.65, 0.05, 0.07);
     float3 cBrightRed = float3(1.0,  0.12, 0.08);
@@ -237,6 +280,8 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0) : COLOR0
     additive += cBrightRed  * pulse;                 // H: 径向脉冲环
     additive += cHotRed     * edgeGlow * 0.65;       // I: 边缘强光
     additive += cBrightRed  * tearBright;            // J: 故障撕裂
+    additive += cBrightRed  * entityRingTotal;       // K: 实体扫描环
+    additive += cWhiteRed   * entityScanTotal * 0.5; // K: 扫描弧高亮
 
     // ================================================================
     // 最终合成
