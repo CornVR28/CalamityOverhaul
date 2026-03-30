@@ -168,28 +168,7 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0) : COLOR0
     float nodePulse = 0.5 + 0.5 * sin(uTime * 2.2 + cellRand * 6.28);
     node *= lerp(nodePulse * 0.15, 0.6, edgeFactor);
 
-    // --- D. 数据包粒子（沿栅格线运动的亮点）---
-    // 水平行进
-    float packetRowIdx = floor(relPos.y / gridSize);
-    float packetRandH = hash21(float2(packetRowIdx, 5.13));
-    bool packetActiveH = packetRandH > 0.55;
-    float packetSpeedH = 0.15 + packetRandH * 0.3;
-    float packetPosH = frac(relPos.x / (gridSize * 8.0) + uTime * packetSpeedH * (packetRandH > 0.75 ? -1.0 : 1.0));
-    float packetH = exp(-200.0 * (packetPosH - 0.5) * (packetPosH - 0.5));
-    float packetOnLineH = 1.0 - smoothstep(0.0, 0.06, abs(cellLocal.y - 0.5));
-    packetH *= packetOnLineH * (packetActiveH ? 1.0 : 0.0) * (1.0 - edgeFactor) * 0.5;
-
-    // 垂直行进
-    float packetColIdx = floor(relPos.x / gridSize);
-    float packetRandV = hash21(float2(packetColIdx, 9.77));
-    bool packetActiveV = packetRandV > 0.60;
-    float packetSpeedV = 0.12 + packetRandV * 0.25;
-    float packetPosV = frac(relPos.y / (gridSize * 8.0) + uTime * packetSpeedV);
-    float packetV = exp(-200.0 * (packetPosV - 0.5) * (packetPosV - 0.5));
-    float packetOnLineV = 1.0 - smoothstep(0.0, 0.06, abs(cellLocal.x - 0.5));
-    packetV *= packetOnLineV * (packetActiveV ? 1.0 : 0.0) * (1.0 - edgeFactor) * 0.5;
-
-    // --- E. 水平扫描线（细密横纹，缓慢下移）---
+    // --- D. 水平扫描线（细密横纹，缓慢下移）---
     float scanPhase = worldPos.y * 0.015 - uTime * 0.55;
     float scanLine = pow(saturate(sin(scanPhase * 6.28318) * 0.5 + 0.5), 10.0);
     scanLine *= lerp(0.15, 0.3, centerFactor);
@@ -246,15 +225,13 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0) : COLOR0
     float3 cDimRed    = float3(0.40, 0.03, 0.04);
     float3 cWhiteRed  = float3(1.0,  0.55, 0.45);
     float3 cNodeColor = float3(0.90, 0.20, 0.15);
-    float3 cPacketColor = float3(1.0, 0.40, 0.30);
 
     // --- 合成加法层 ---
     float3 additive = float3(0, 0, 0);
     additive += cDimRed     * digitalField;          // A: 底层暗流
     additive += cDeepRed    * gridLine * 0.75;       // B: 栅格走线
     additive += cNodeColor  * node;                  // C: 节点亮点
-    additive += cPacketColor * (packetH + packetV);  // D: 数据包粒子
-    additive += cBrightRed  * scanLine;              // E: 扫描线
+    additive += cBrightRed  * scanLine;              // D: 扫描线
     additive += cWhiteRed   * sweepBar;              // F: 主扫描条
     additive += cDimRed     * dataStream;            // G: 垂直数据流
     additive += cBrightRed  * pulse;                 // H: 径向脉冲环
