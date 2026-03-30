@@ -3,7 +3,6 @@ using CalamityOverhaul.Content.ADV.DialogueBoxs;
 using CalamityOverhaul.Content.ADV.MainMenuOvers;
 using CalamityOverhaul.Content.ADV.Scenarios;
 using CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Campsites;
-using CalamityOverhaul.Content.LegendWeapon.HalibutLegend;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;

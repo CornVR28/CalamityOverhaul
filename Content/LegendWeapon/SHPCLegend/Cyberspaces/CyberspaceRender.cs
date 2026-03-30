@@ -1,18 +1,16 @@
 ﻿using CalamityOverhaul.Common;
 using InnoVault.RenderHandles;
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using System;
 using Terraria;
-using Terraria.ModLoader;
 
 namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
 {
     /// <summary>
     /// 赛博空间渲染器。
     /// <br/>在 DrawAfterTiles 时机执行世界层后处理（压暗+去饱和+红染+加法赛博特效），
-    /// <br/>位于物块图层之上、玩家和其他实体图层之下，随后叠加边缘光晕环。
+    /// <br/>位于物块图层之上、玩家和其他实体图层之下，随后叠加边缘光晕环
     /// </summary>
     internal class CyberspaceRender : RenderHandle
     {
@@ -160,8 +158,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         }
 
         /// <summary>
-        /// 收集域内活跃NPC，将位置和大小写入 entityBuffer。
-        /// 返回收集到的实体数量。
+        /// 收集域内活跃NPC，将位置和大小写入 entityBuffer
+        /// 返回收集到的实体数量
         /// </summary>
         private static int CollectEntitiesInDomain(Vector2 domainCenter, float effectiveRadius) {
             int count = 0;

@@ -1,10 +1,10 @@
 ﻿using CalamityOverhaul.Content;
 using CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes;
-using CalamityOverhaul.Content.ADV.Scenarios.SupCal.End.EternalBlazingNows;
 using CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Campsites;
 using CalamityOverhaul.Content.ADV.Scenarios.Draedons;
 using CalamityOverhaul.Content.ADV.Scenarios.Draedons.Quest.DeploySignaltowers.SignalTower;
 using CalamityOverhaul.Content.ADV.Scenarios.Draedons.Tzeentch;
+using CalamityOverhaul.Content.ADV.Scenarios.SupCal.End.EternalBlazingNows;
 using CalamityOverhaul.Content.Industrials.Modifys;
 using CalamityOverhaul.Content.Items.Tools;
 using CalamityOverhaul.Content.LegendWeapon.HalibutLegend;

@@ -1,9 +1,8 @@
-using CalamityOverhaul.Content.ADV.MainMenuOvers;
+﻿using CalamityOverhaul.Content.ADV.MainMenuOvers;
 using CalamityOverhaul.Content.ADV.Scenarios;
 using CalamityOverhaul.Content.ADV.Scenarios.SupCal;
 using System.Collections.Generic;
 using Terraria;
-using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 
 namespace CalamityOverhaul.Content.ADV

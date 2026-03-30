@@ -1,6 +1,4 @@
-﻿using Microsoft.Xna.Framework;
-
-namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
+﻿namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
 {
     /// <summary>
     /// 赛博空间领域系统 —— 状态管理器

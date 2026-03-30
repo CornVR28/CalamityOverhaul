@@ -19,7 +19,7 @@ namespace CalamityOverhaul.Content.ADV
 
         public ADVSave() {
             List<ADVDataModule> dataModules = VaultUtils.GetDerivedInstances<ADVDataModule>();
-            foreach(var module in dataModules) {
+            foreach (var module in dataModules) {
                 if (_modulesByKey.TryGetValue(module.SaveKey, out ADVDataModule value)) {
                     throw new Exception($"ADVDataModule SaveKey conflict: '{module.SaveKey}' " + $"(Type {module.GetType().Name} vs {value.GetType().Name})");
                 }

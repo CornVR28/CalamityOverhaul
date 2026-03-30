@@ -1,4 +1,4 @@
-using CalamityOverhaul.Common;
+﻿using CalamityOverhaul.Common;
 using CalamityOverhaul.Content.QuestLogs.Core;
 using CalamityOverhaul.Content.UIs.NotificationPopup;
 using Microsoft.Xna.Framework.Graphics;
@@ -6,7 +6,6 @@ using System;
 using Terraria;
 using Terraria.Audio;
 using Terraria.GameContent;
-using Terraria.Localization;
 
 namespace CalamityOverhaul.Content.QuestLogs
 {

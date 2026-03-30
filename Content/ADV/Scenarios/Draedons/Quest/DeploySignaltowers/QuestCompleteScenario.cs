@@ -3,7 +3,6 @@ using CalamityOverhaul.Content.ADV.DialogueBoxs;
 using CalamityOverhaul.Content.ADV.DialogueBoxs.Styles;
 using CalamityOverhaul.Content.ADV.Scenarios.Draedons.PQCDs;
 using CalamityOverhaul.Content.ADV.Scenarios.Draedons.Tzeentch;
-using CalamityOverhaul.Content.LegendWeapon.HalibutLegend;
 using System;
 using Terraria;
 using Terraria.Localization;
