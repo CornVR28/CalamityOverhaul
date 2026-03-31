@@ -1,4 +1,4 @@
-using InnoVault.RenderHandles;
+﻿using InnoVault.RenderHandles;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;
@@ -72,7 +72,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
             //设置着色器参数
             shader.Parameters["intensity"]?.SetValue(HackTime.Intensity);
             shader.Parameters["uTime"]?.SetValue(Main.GlobalTimeWrappedHourly);
-            shader.Parameters["vignetteStrength"]?.SetValue(0.55f);
+            shader.Parameters["vignetteStrength"]?.SetValue(0.6f);
             shader.Parameters["tintStrength"]?.SetValue(1.0f);
 
             //应用着色器并绘制回主屏幕
