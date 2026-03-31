@@ -7,13 +7,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
 {
     /// <summary>
     /// 骇客时间渲染器
-    /// <br/>负责屏幕后处理着色器的应用、目标光圈、骇入面板和上传进度的绘制
+    /// <br/>负责屏幕后处理着色器的应用、目标光圈和上传进度环的绘制
+    /// <br/>面板UI由HackTimeUI(UIHandle)负责
     /// </summary>
     internal class HackTimeRender : RenderHandle
     {
-
-        //骇入面板渲染器实例
-        internal static HackPanelRenderer Panel { get; private set; } = new();
         //上传进度覆盖层实例
         internal static HackUploadOverlay UploadOverlay { get; private set; } = new();
 
@@ -22,21 +20,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
         public override void UpdateBySystem(int index) {
             if (Main.gameMenu) {
                 HackTime.Reset();
-                Panel.Hide();
                 return;
             }
 
             HackTime.Update();
-            Panel.Update();
             UploadOverlay.Update();
-
-            //上传完成时自动消费结果（后续可在此处施加debuff等效果）
-            if (Panel.HasUploadCompleted) {
-                var hack = Panel.ConsumeUploadResult();
-                if (hack != null) {
-                    //TODO：对选中目标施加对应的骇入效果
-                }
-            }
         }
 
         public override void EndCaptureDraw(SpriteBatch spriteBatch, GraphicsDevice graphicsDevice, RenderTarget2D screenSwap) {
@@ -58,20 +46,12 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
             DrawHoveredReticle(spriteBatch);
             DrawSelectedReticle(spriteBatch);
 
-            //绘制上传进度环
-            if (Panel.UploadingSlot >= 0 && HackTime.SelectedTargetIndex >= 0) {
+            //绘制上传进度环（通过UIHandle获取面板状态）
+            var panel = HackTimeUI.Instance?.Panel;
+            if (panel != null && panel.UploadingSlot >= 0 && HackTime.SelectedTargetIndex >= 0) {
                 UploadOverlay.Draw(spriteBatch, HackTime.SelectedTargetIndex,
-                    Panel.UploadProgressValue, Panel.HasUploadCompleted, HackTime.Intensity);
+                    panel.UploadProgressValue, panel.HasUploadCompleted, HackTime.Intensity);
             }
-
-            spriteBatch.End();
-
-            //标准混合层：骇入面板UI
-            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp,
-                DepthStencilState.None, RasterizerState.CullNone, null,
-                Main.UIScaleMatrix);
-
-            Panel.Draw(spriteBatch);
 
             spriteBatch.End();
         }

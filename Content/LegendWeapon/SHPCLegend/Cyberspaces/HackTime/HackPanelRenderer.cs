@@ -1,4 +1,4 @@
-using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;
 using Terraria.GameContent;
@@ -155,22 +155,20 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
             NPC npc = Main.npc[selIdx];
             if (!npc.active) return;
 
-            //面板定位在目标右侧，需要将游戏空间坐标转换为UI缩放坐标
-            Vector2 npcScreen = (npc.Center - Main.screenPosition) / Main.UIScale;
-            float scaledWidth = Main.screenWidth / Main.UIScale;
-            float scaledHeight = Main.screenHeight / Main.UIScale;
+            //NPC世界坐标转换为屏幕坐标（考虑游戏缩放）
+            Vector2 npcScreen = WorldToScreen(npc.Center);
             float totalHeight = HeaderHeight + FooterHeight + PaddingV * 2
                 + QuickHackRegistry.All.Length * (SlotHeight + SlotGap);
 
             int px = (int)(npcScreen.X + TargetOffset);
             int py = (int)(npcScreen.Y - totalHeight * 0.5f);
 
-            //确保面板不超出屏幕（使用缩放后的屏幕尺寸）
-            if (px + PanelWidth > scaledWidth - 10)
+            //确保面板不超出屏幕
+            if (px + PanelWidth > Main.screenWidth - 10)
                 px = (int)(npcScreen.X - TargetOffset - PanelWidth);
             if (py < 10) py = 10;
-            if (py + totalHeight > scaledHeight - 10)
-                py = (int)(scaledHeight - 10 - totalHeight);
+            if (py + totalHeight > Main.screenHeight - 10)
+                py = (int)(Main.screenHeight - 10 - totalHeight);
 
             panelRect = new Rectangle(px, py, (int)PanelWidth, (int)totalHeight);
         }
@@ -179,9 +177,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
             hoveredSlot = -1;
             if (openProgress < 0.5f) return;
 
-            //鼠标坐标转换到UI缩放空间
-            int mx = (int)(Main.mouseX / Main.UIScale);
-            int my = (int)(Main.mouseY / Main.UIScale);
+            int mx = Main.mouseX;
+            int my = Main.mouseY;
 
             if (!panelRect.Contains(mx, my)) return;
 
@@ -226,9 +223,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
         /// 判断鼠标是否在面板区域内
         /// </summary>
         public bool ContainsMouse() {
-            int mx = (int)(Main.mouseX / Main.UIScale);
-            int my = (int)(Main.mouseY / Main.UIScale);
-            return visible && panelRect.Contains(mx, my);
+            return visible && panelRect.Contains(Main.mouseX, Main.mouseY);
         }
 
         /// <summary>
@@ -593,7 +588,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
             NPC npc = Main.npc[selIdx];
             if (!npc.active) return;
 
-            Vector2 npcScreen = (npc.Center - Main.screenPosition) / Main.UIScale;
+            Vector2 npcScreen = WorldToScreen(npc.Center);
             //连接线起点为面板左侧中点
             Vector2 lineStart = new(rect.X, rect.Y + rect.Height * 0.5f);
             //如果面板在NPC左边则从右侧连接
@@ -650,6 +645,14 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
             if (length < 1f) return;
             sb.Draw(px, start, new Rectangle(0, 0, 1, 1), color, diff.ToRotation(),
                 Vector2.Zero, new Vector2(length, thickness), SpriteEffects.None, 0f);
+        }
+
+        //将世界坐标转换为屏幕像素坐标，考虑游戏视图缩放
+        private static Vector2 WorldToScreen(Vector2 worldPos) {
+            Vector2 raw = worldPos - Main.screenPosition;
+            Vector2 screenCenter = new Vector2(Main.screenWidth, Main.screenHeight) * 0.5f;
+            float zoom = Main.GameViewMatrix.Zoom.X;
+            return raw - screenCenter / 2 * zoom;
         }
 
         //在折线路径上求值

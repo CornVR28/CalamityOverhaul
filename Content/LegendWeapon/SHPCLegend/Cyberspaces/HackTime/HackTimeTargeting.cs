@@ -7,13 +7,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
 {
     /// <summary>
     /// 骇客时间目标选择系统
-    /// <br/>处理按键切换、光标悬停检测和点击选择逻辑
-    /// <br/>作为ModPlayer运行，每帧检测鼠标下的可骇入NPC
+    /// <br/>处理按键切换、光标悬停检测和运镜缩放
+    /// <br/>点击选择逻辑由HackTimeUI(UIHandle)负责
     /// </summary>
     internal class HackTimeTargeting : ModPlayer
     {
-        //鼠标是否在上一帧处于按下状态，用于检测点击边沿
-        private bool wasMouseDown;
         //是否正在接管缩放控制
         private bool wasHackZoomActive;
         //进入骇客时间前保存的原始缩放目标值
@@ -28,13 +26,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
 
         public override void PostUpdate() {
             if (Player.whoAmI != Main.myPlayer) return;
-            if (!HackTime.Active) {
-                wasMouseDown = false;
-                return;
-            }
+            if (!HackTime.Active) return;
 
             UpdateHoverDetection();
-            UpdateClickSelection();
         }
 
         /// <summary>
@@ -72,43 +66,6 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
             }
 
             HackTime.HoveredTargetIndex = bestIndex;
-        }
-
-        /// <summary>
-        /// 检测点击事件并选中目标
-        /// </summary>
-        private void UpdateClickSelection() {
-            bool mouseDown = Main.mouseLeft;
-            //检测鼠标按下的上升沿（本帧按下且上一帧未按下）
-            bool clicked = mouseDown && !wasMouseDown;
-            wasMouseDown = mouseDown;
-
-            if (!clicked) return;
-
-            var panel = HackTimeRender.Panel;
-
-            //如果鼠标在面板内，优先交给面板处理点击
-            if (panel.ContainsMouse()) {
-                panel.HandleClick();
-                return;
-            }
-
-            int hovered = HackTime.HoveredTargetIndex;
-
-            if (hovered >= 0) {
-                //如果点击了一个新目标
-                if (hovered != HackTime.SelectedTargetIndex) {
-                    HackTime.SelectTarget(hovered);
-                    panel.Show();
-                }
-            }
-            else {
-                //点击空白处取消选中
-                if (HackTime.SelectedTargetIndex >= 0) {
-                    HackTime.DeselectTarget();
-                    panel.Hide();
-                }
-            }
         }
 
         /// <summary>

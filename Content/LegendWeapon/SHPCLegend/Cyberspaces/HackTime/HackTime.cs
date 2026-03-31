@@ -95,7 +95,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
             SelectedTargetIndex = -1;
             HoveredTargetIndex = -1;
             HackTimeFreeze.Deactivate();
-            HackTimeRender.Panel?.Hide();
+            HackTimeUI.Instance?.Panel.Hide();
         }
 
         /// <summary>
@@ -108,7 +108,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
             if (!npc.active) return;
 
             //切换目标时取消正在进行的上传
-            HackTimeRender.Panel?.CancelUpload();
+            HackTimeUI.Instance?.Panel.CancelUpload();
             SelectedTargetIndex = npcIndex;
             CameraProgress = 0f;
             ZoomProgress = 0f;
@@ -123,7 +123,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
             CameraProgress = 0f;
             ZoomProgress = 0f;
             CameraOffset = Vector2.Zero;
-            HackTimeRender.Panel?.Hide();
+            HackTimeUI.Instance?.Panel.Hide();
         }
 
         /// <summary>
