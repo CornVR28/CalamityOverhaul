@@ -129,10 +129,10 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0) : COLOR0
     float warpStr = intensity * 0.0035 * (0.4 + edgeFactor * 1.2);
     float2 warpedCoords = coords + warpDisp * warpStr;
 
-    // 高频小尺度扭曲叠加：局部数字毛刺
-    float2 distUV2 = frac(worldPos * 0.002 + float2(uTime * -0.03, uTime * 0.025));
+    // 高频小尺度扭曲叠加：局部数字毛刺（柔化，避免可见斑纹）
+    float2 distUV2 = frac(worldPos * 0.0012 + float2(uTime * -0.03, uTime * 0.025));
     float2 warpDisp2 = tex2D(noiseTex, distUV2).rg * 2.0 - 1.0;
-    warpedCoords += warpDisp2 * warpStr * 0.25;
+    warpedCoords += warpDisp2 * warpStr * 0.15;
 
     original = tex2D(uImage0, warpedCoords);
 
@@ -179,11 +179,16 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0) : COLOR0
     // 第四层：加法赛博特效
     // ================================================================
 
-    // --- A. 深层数字暗流（大呼吸的暗红噪声场，填充空洞感）---
-    float2 fieldUV = worldPos / (gridSize * 14.0);
-    float fieldNoise = layeredNoise(fieldUV, uTime);
-    float digitalField = smoothstep(0.22, 0.72, fieldNoise);
-    digitalField *= lerp(0.16, 0.06, edgeFactor);
+    // --- A. 深层数字暗流（纵向纤维流动，替代各向同性斑块）---
+    float2 fieldUV = worldPos / (gridSize * 24.0);
+    //纵向拉伸UV产生条纹化流动，避免豹纹感
+    fieldUV.y *= 0.4;
+    float2 flowOff = float2(uTime * 0.015, uTime * 0.008);
+    float fn1 = tex2D(noiseTex, frac(fieldUV + flowOff)).r;
+    float fn2 = tex2D(noiseTex, frac(fieldUV * 1.7 - flowOff * 0.6 + 0.37)).g;
+    float fieldNoise = fn1 * 0.6 + fn2 * 0.4;
+    float digitalField = smoothstep(0.12, 0.88, fieldNoise);
+    digitalField *= lerp(0.10, 0.04, edgeFactor);
     digitalField *= domainBreathe;
 
     // --- B. 栅格结构线（带方向性能量流动）---
