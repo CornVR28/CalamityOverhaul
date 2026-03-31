@@ -12,5 +12,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
         /// </summary>
         [VaultLoaden(CWRConstant.Effects)]
         public static Effect HackTimeScreen { get; private set; }
+
+        /// <summary>
+        /// 骇客时间NPC高亮着色器（描边+赛博滤镜）
+        /// </summary>
+        [VaultLoaden(CWRConstant.Effects)]
+        public static Effect HackTimeNPCHighlight { get; private set; }
     }
 }
