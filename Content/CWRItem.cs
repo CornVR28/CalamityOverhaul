@@ -33,10 +33,6 @@ namespace CalamityOverhaul.Content
         /// </summary>
         public float[] ai = new float[MaxAISlot];
         /// <summary>
-        /// 是否正在真近战
-        /// </summary>
-        public bool closeCombat;
-        /// <summary>
         /// 一般用于近战类武器的充能值
         /// </summary>
         public float MeleeCharge;
@@ -136,7 +132,6 @@ namespace CalamityOverhaul.Content
         public override GlobalItem Clone(Item from, Item to) => CloneCWRItem((CWRItem)base.Clone(from, to));
         public CWRItem CloneCWRItem(CWRItem cwr) {
             cwr.ai = ai;
-            cwr.closeCombat = closeCombat;
             cwr.MeleeCharge = MeleeCharge;
             cwr.isHeldItem = isHeldItem;
             cwr.IsHeldSwing = IsHeldSwing;
