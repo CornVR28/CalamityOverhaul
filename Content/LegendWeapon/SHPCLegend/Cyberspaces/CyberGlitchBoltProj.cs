@@ -1,9 +1,10 @@
+﻿using CalamityOverhaul.Common;
+using InnoVault;
+using InnoVault.Trails;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using ReLogic.Content;
 using System;
 using Terraria;
-using Terraria.GameContent;
 using Terraria.ModLoader;
 
 namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
@@ -11,24 +12,23 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
     /// <summary>
     /// 赛博空间故障闪电弹幕
     /// <br/>领域展开时生成的闪电形黑墙故障线——从中心快速延伸再收缩消失
-    /// <br/>锯齿状折线路径，多层加法辉光绘制，深红色系
+    /// <br/>使用 <see cref="Trail"/> 条带 + CyberGlitchBolt.fx 着色器渲染
+    /// <br/>锯齿折线路径+数字故障方块+裂缝核心+数据条纹+边缘腐蚀
     /// </summary>
-    internal class CyberGlitchBoltProj : ModProjectile
+    internal class CyberGlitchBoltProj : ModProjectile, IPrimitiveDrawable
     {
         public override string Texture => CWRConstant.Placeholder;
 
-        private const int MaxLife = 24;
-        private const int MaxPoints = 14;
+        private const int MaxLife = 30;
         private Vector2[] points;
-        private float[] segBrightness;
         private int pointCount;
         private bool pathReady;
+        private float glitchSeed;
+        private Trail trail;
 
-        private static Asset<Texture2D> softGlowAsset;
-
-        public override void SetStaticDefaults() {
-            softGlowAsset = ModContent.Request<Texture2D>(CWRConstant.Masking + "SoftGlow");
-        }
+        private float visibleStart;
+        private float visibleEnd;
+        private float fadeAlpha;
 
         public override void SetDefaults() {
             Projectile.width = 2;
@@ -51,160 +51,112 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
 
             if (!pathReady) {
                 GeneratePath();
+                glitchSeed = Main.rand.NextFloat();
                 pathReady = true;
             }
+
+            float t = 1f - (float)Projectile.timeLeft / MaxLife;
+            ComputeAnimation(t);
+        }
+
+        private void ComputeAnimation(float t) {
+            if (t < 0.28f) {
+                //快速延伸（缓出）
+                float ext = t / 0.28f;
+                visibleEnd = 1f - MathF.Pow(1f - ext, 3.2f);
+                visibleStart = 0f;
+                fadeAlpha = MathHelper.SmoothStep(0.3f, 1f, ext);
+            }
+            else if (t < 0.40f) {
+                //全亮+闪烁
+                visibleEnd = 1f;
+                visibleStart = 0f;
+                float flash = MathF.Sin((t - 0.28f) / 0.12f * MathF.PI);
+                fadeAlpha = 1f + flash * 0.4f;
+            }
+            else {
+                //从尾部收缩消失
+                float retract = (t - 0.40f) / 0.60f;
+                visibleEnd = 1f;
+                visibleStart = retract;
+                fadeAlpha = 1f - retract;
+            }
+            fadeAlpha = MathHelper.Clamp(fadeAlpha, 0f, 1.4f);
         }
 
         private void GeneratePath() {
             float angle = Projectile.ai[0];
-            pointCount = Main.rand.Next(8, MaxPoints + 1);
-            points = new Vector2[pointCount];
-            segBrightness = new float[pointCount];
-
+            int keyCount = Main.rand.Next(10, 17);
+            Vector2[] keys = new Vector2[keyCount];
             Vector2 current = Projectile.Center;
-            points[0] = current;
-            segBrightness[0] = 1f;
+            keys[0] = current;
 
-            float domainRadius = Cyberspace.Radius;
+            for (int i = 1; i < keyCount; i++) {
+                float distFactor = (float)i / keyCount;
+                float jag = Main.rand.NextFloat(-0.5f, 0.5f) * (0.6f + distFactor * 0.9f);
 
-            for (int i = 1; i < pointCount; i++) {
-                //越远离中心，锯齿偏转越大
-                float distFactor = (float)i / pointCount;
-                float jag = Main.rand.NextFloat(-0.55f, 0.55f) * (0.6f + distFactor * 0.8f);
-
-                //段长度：越远越长（加速感）
-                float segLen = Main.rand.NextFloat(28f, 50f) * (0.8f + distFactor * 0.5f);
-
-                //偶尔出现分叉式大偏转
+                //15%概率出现大偏转（数字电路般的急拐）
                 if (Main.rand.NextFloat() < 0.15f)
-                    jag += (Main.rand.NextBool() ? 1f : -1f) * 0.8f;
+                    jag = (Main.rand.NextBool() ? 1f : -1f) * 1.1f;
 
+                //段长度：越远越长（加速扩张感）
+                float segLen = Main.rand.NextFloat(25f, 55f) * (0.7f + distFactor * 0.6f);
                 Vector2 step = (angle + jag).ToRotationVector2() * segLen;
                 current += step;
-                points[i] = current;
-                segBrightness[i] = Main.rand.NextFloat(0.55f, 1.0f);
+                keys[i] = current;
             }
+
+            //细分：每对关键帧间插入1个带垂直抖动的中间点
+            pointCount = keyCount * 2 - 1;
+            points = new Vector2[pointCount];
+            for (int i = 0; i < keyCount - 1; i++) {
+                points[i * 2] = keys[i];
+                Vector2 mid = (keys[i] + keys[i + 1]) * 0.5f;
+                Vector2 dir = keys[i + 1] - keys[i];
+                Vector2 perp = new Vector2(-dir.Y, dir.X);
+                if (perp.LengthSquared() > 0.01f)
+                    perp.Normalize();
+                mid += perp * Main.rand.NextFloat(-5f, 5f);
+                points[i * 2 + 1] = mid;
+            }
+            points[(keyCount - 1) * 2] = keys[keyCount - 1];
         }
 
-        public override bool PreDraw(ref Color lightColor) {
-            if (!pathReady || points == null || Projectile.ai[1] > 0)
-                return false;
-
-            float t = 1f - (float)Projectile.timeLeft / MaxLife;
-
-            //阶段：快速延伸(0→0.3) → 短暂全亮(0.3→0.42) → 收缩消失(0.42→1.0)
-            float visibleFrac;
-            float alpha;
-            if (t < 0.30f) {
-                //延伸：缓出曲线
-                float extend = t / 0.30f;
-                visibleFrac = 1f - MathF.Pow(1f - extend, 2.5f);
-                alpha = MathHelper.SmoothStep(0.4f, 1f, extend);
-            }
-            else if (t < 0.42f) {
-                visibleFrac = 1f;
-                //全亮阶段闪烁
-                float flash = MathF.Sin((t - 0.30f) / 0.12f * MathF.PI);
-                alpha = 1f + flash * 0.5f;
-            }
-            else {
-                float retract = (t - 0.42f) / 0.58f;
-                visibleFrac = 1f - retract;
-                alpha = 1f - retract;
-            }
-
-            visibleFrac = MathHelper.Clamp(visibleFrac, 0f, 1f);
-            alpha = MathHelper.Clamp(alpha, 0f, 1.5f);
-            if (alpha < 0.01f) return false;
-
-            Main.spriteBatch.End();
-            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive,
-                SamplerState.PointWrap, DepthStencilState.None, RasterizerState.CullNone,
-                null, Main.GameViewMatrix.TransformationMatrix);
-
-            DrawBolt(visibleFrac, alpha);
-
-            Main.spriteBatch.End();
-            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullNone,
-                null, Main.GameViewMatrix.TransformationMatrix);
-
-            return false;
+        private float WidthFunction(float progress) {
+            //两端收窄，中间最宽
+            float taper = MathF.Sin(progress * MathF.PI);
+            taper = MathF.Max(taper, 0.06f);
+            return 36f * taper;
         }
 
-        private void DrawBolt(float visibleFrac, float alpha) {
-            Texture2D pixel = TextureAssets.MagicPixel.Value;
-            if (pixel == null) return;
+        private Color ColorFunction(Vector2 _) => Color.White;
 
-            float visibleCount = visibleFrac * (pointCount - 1);
-            int fullSegs = (int)visibleCount;
-            float partial = visibleCount - fullSegs;
+        public override bool PreDraw(ref Color lightColor) => false;
 
-            Vector2 pixelOrigin = new Vector2(0f, 0.5f);
+        void IPrimitiveDrawable.DrawPrimitives() {
+            if (!pathReady || points == null || fadeAlpha < 0.01f || Projectile.ai[1] > 0)
+                return;
 
-            for (int i = 0; i < fullSegs && i < pointCount - 1; i++) {
-                float segAlpha = alpha * segBrightness[i];
-                DrawSegment(pixel, points[i], points[i + 1], segAlpha, pixelOrigin);
-            }
+            Effect shader = EffectLoader.CyberGlitchBolt?.Value;
+            if (shader == null) return;
+            Texture2D noise = CWRAsset.Extra_193?.Value;
+            if (noise == null) return;
 
-            //局部最后一段
-            if (fullSegs < pointCount - 1 && partial > 0.01f) {
-                Vector2 partEnd = Vector2.Lerp(points[fullSegs], points[fullSegs + 1], partial);
-                float segAlpha = alpha * segBrightness[fullSegs] * partial;
-                DrawSegment(pixel, points[fullSegs], partEnd, segAlpha, pixelOrigin);
-            }
+            trail ??= new Trail(points, WidthFunction, ColorFunction);
+            trail.TrailPositions = points;
 
-            //尖端辉光点
-            DrawTipGlow(visibleFrac, alpha);
-        }
+            shader.Parameters["transformMatrix"]?.SetValue(VaultUtils.GetTransfromMatrix());
+            shader.Parameters["uTime"]?.SetValue(Main.GlobalTimeWrappedHourly);
+            shader.Parameters["fadeAlpha"]?.SetValue(MathHelper.Clamp(fadeAlpha, 0f, 1f));
+            shader.Parameters["visibleStart"]?.SetValue(visibleStart);
+            shader.Parameters["visibleEnd"]?.SetValue(visibleEnd);
+            shader.Parameters["glitchSeed"]?.SetValue(glitchSeed);
+            shader.Parameters["uNoiseTex"]?.SetValue(noise);
 
-        private void DrawSegment(Texture2D pixel, Vector2 from, Vector2 to, float alpha, Vector2 origin) {
-            Vector2 dir = to - from;
-            float len = dir.Length();
-            if (len < 0.5f) return;
-            float rot = dir.ToRotation();
-
-            Vector2 screenFrom = from - Main.screenPosition;
-
-            //外层辉光（宽，暗）
-            Color outerColor = new Color(0.45f, 0.025f, 0.03f) * (alpha * 0.55f);
-            Main.spriteBatch.Draw(pixel, screenFrom, null, outerColor,
-                rot, origin, new Vector2(len, 10f), SpriteEffects.None, 0f);
-
-            //中层主体
-            Color midColor = new Color(0.85f, 0.10f, 0.07f) * alpha;
-            Main.spriteBatch.Draw(pixel, screenFrom, null, midColor,
-                rot, origin, new Vector2(len, 4f), SpriteEffects.None, 0f);
-
-            //核心高亮
-            Color coreColor = new Color(1f, 0.50f, 0.35f) * (alpha * 0.75f);
-            Main.spriteBatch.Draw(pixel, screenFrom, null, coreColor,
-                rot, origin, new Vector2(len, 1.8f), SpriteEffects.None, 0f);
-        }
-
-        private void DrawTipGlow(float visibleFrac, float alpha) {
-            Texture2D glow = softGlowAsset?.Value;
-            if (glow == null) return;
-
-            //计算当前尖端位置
-            float idx = visibleFrac * (pointCount - 1);
-            int segIdx = Math.Clamp((int)idx, 0, pointCount - 2);
-            float segFrac = idx - segIdx;
-            Vector2 tipWorld = Vector2.Lerp(points[segIdx], points[segIdx + 1], segFrac);
-            Vector2 tipScreen = tipWorld - Main.screenPosition;
-
-            Vector2 glowOrigin = glow.Size() * 0.5f;
-            float glowSize = 40f / glow.Width;
-
-            //暗红大辉光
-            Color outerGlow = new Color(0.5f, 0.03f, 0.03f) * (alpha * 0.5f);
-            Main.spriteBatch.Draw(glow, tipScreen, null, outerGlow,
-                0f, glowOrigin, glowSize * 1.8f, SpriteEffects.None, 0f);
-
-            //明亮核心
-            Color coreGlow = new Color(1f, 0.35f, 0.2f) * (alpha * 0.7f);
-            Main.spriteBatch.Draw(glow, tipScreen, null, coreGlow,
-                0f, glowOrigin, glowSize * 0.7f, SpriteEffects.None, 0f);
+            GraphicsDevice device = Main.graphics.GraphicsDevice;
+            device.BlendState = BlendState.Additive;
+            trail.DrawTrail(shader);
+            device.BlendState = BlendState.AlphaBlend;
         }
 
         public override bool ShouldUpdatePosition() => false;
