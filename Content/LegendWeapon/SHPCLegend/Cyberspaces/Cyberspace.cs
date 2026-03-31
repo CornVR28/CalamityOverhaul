@@ -45,6 +45,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         /// </summary>
         public static float DimStrength = 0.85f;
 
+        /// <summary>
+        /// 着色器专用累计时间，骇客时间期间以1/10速率推进
+        /// </summary>
+        public static float EffectTime { get; private set; }
+
         private static float targetIntensity;
         private static float targetExpand;
 
@@ -75,6 +80,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         /// 每帧逻辑更新，驱动展开/收缩过渡
         /// </summary>
         public static void Update() {
+            //累计效果时间：骇客时间期间放缓10倍
+            float dt = 1f / 60f;
+            float timeSpeed = HackTime.HackTime.Active ? 0.1f : 1f;
+            EffectTime += dt * timeSpeed;
+
             if (burstTimer > 0) {
                 //爆发阶段：极速展开+强度拉满
                 burstTimer--;
@@ -106,6 +116,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             Active = false;
             Intensity = 0f;
             ExpandProgress = 0f;
+            EffectTime = 0f;
             targetIntensity = 0f;
             targetExpand = 0f;
             burstTimer = 0;

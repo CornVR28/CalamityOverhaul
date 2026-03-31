@@ -146,7 +146,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             trail.TrailPositions = points;
 
             shader.Parameters["transformMatrix"]?.SetValue(VaultUtils.GetTransfromMatrix());
-            shader.Parameters["uTime"]?.SetValue(Main.GlobalTimeWrappedHourly);
+            shader.Parameters["uTime"]?.SetValue(Cyberspace.EffectTime);
             shader.Parameters["fadeAlpha"]?.SetValue(MathHelper.Clamp(fadeAlpha, 0f, 1f));
             shader.Parameters["visibleStart"]?.SetValue(visibleStart);
             shader.Parameters["visibleEnd"]?.SetValue(visibleEnd);

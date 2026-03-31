@@ -72,7 +72,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             Vector2 worldViewOrigin = Main.screenPosition
                 + screenPixels * (Vector2.One - Vector2.One / zoom) * 0.5f;
 
-            shader.Parameters["uTime"]?.SetValue(Main.GlobalTimeWrappedHourly);
+            shader.Parameters["uTime"]?.SetValue(Cyberspace.EffectTime);
             shader.Parameters["radius"]?.SetValue(Cyberspace.Radius);
             shader.Parameters["intensity"]?.SetValue(Cyberspace.Intensity);
             shader.Parameters["expandProgress"]?.SetValue(Cyberspace.ExpandProgress);
@@ -108,7 +108,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             Vector2 center = Main.LocalPlayer.Center;
             float r = Cyberspace.Radius * Cyberspace.ExpandProgress;
             float gs = Cyberspace.GridSize;
-            float time = Main.GlobalTimeWrappedHourly;
+            float time = Cyberspace.EffectTime;
             float effectIntensity = Cyberspace.Intensity;
 
             if (r < gs * 2) return;
@@ -172,7 +172,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
 
             Texture2D canvas = CWRAsset.Placeholder_White.Value;
             Texture2D noise = CWRAsset.Extra_193.Value;
-            float time = Main.GlobalTimeWrappedHourly;
+            float time = Cyberspace.EffectTime;
 
             float effectiveRadius = Cyberspace.Radius * Cyberspace.ExpandProgress;
             //四边形半宽要留出足够余量给外侧碎片拖尾

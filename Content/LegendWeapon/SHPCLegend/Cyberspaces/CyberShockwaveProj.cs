@@ -57,7 +57,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             fadeAlpha = MathHelper.Clamp(fadeAlpha, 0f, 1f);
 
             //设置着色器参数
-            shader.Parameters["uTime"]?.SetValue(Main.GlobalTimeWrappedHourly);
+            shader.Parameters["uTime"]?.SetValue(Cyberspace.EffectTime);
             shader.Parameters["ringProgress"]?.SetValue(ringProgress);
             shader.Parameters["ringThickness"]?.SetValue(0.065f + (1f - t) * 0.04f);
             shader.Parameters["fadeAlpha"]?.SetValue(fadeAlpha);
