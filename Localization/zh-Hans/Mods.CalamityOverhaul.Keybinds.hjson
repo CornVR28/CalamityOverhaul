@@ -1,4 +1,4 @@
-﻿ADS_Key.DisplayName: 打开瞄准镜
+ADS_Key.DisplayName: 打开瞄准镜
 QuestLog_Key.DisplayName: 任务书:开关主界面
 QuestManager_Key.DisplayName: 委托任务:开关管理面板
 HeavenfallLongbowSkillKey.DisplayName: 天堂陨落长弓:万象审判
@@ -20,3 +20,4 @@ AriaofTheCosmos_R.DisplayName: 寰宇咏叹调:伽马射线爆
 JusticeUnveiled.DisplayName: 正义的显现:裁决触发
 EmblemOfDread_Dash.DisplayName: 惧亡者之证:重力突刺
 EyeOfSingularity_QuantumLeap.DisplayName: 奇点视界:量子跃迁
+// HackTime_Toggle.DisplayName: Hack Time_ Toggle

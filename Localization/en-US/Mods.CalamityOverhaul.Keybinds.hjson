@@ -1,4 +1,4 @@
-﻿ADS_Key.DisplayName: Firearms:Open the scope
+ADS_Key.DisplayName: Firearms:Open the scope
 QuestLog_Key.DisplayName: Quest Book: Toggle Main Interface
 QuestManager_Key.DisplayName: Quest Manager: Toggle Panel
 HeavenfallLongbowSkillKey.DisplayName: HeavenfallLongbow Skill Key
@@ -20,3 +20,4 @@ AriaofTheCosmos_R.DisplayName: Aria of the Cosmos: Gamma Ray Burst
 JusticeUnveiled.DisplayName: Justice Unveiled: Trigger Judgment
 EmblemOfDread_Dash.DisplayName: Emblem of Dread: Gravity Dash
 EyeOfSingularity_QuantumLeap.DisplayName: Eye of Singularity: Quantum Leap
+HackTime_Toggle.DisplayName: Hack Time_ Toggle
