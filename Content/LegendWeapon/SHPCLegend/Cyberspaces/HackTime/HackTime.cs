@@ -116,20 +116,24 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
 
             //切换目标时取消正在进行的上传
             HackTimeUI.Instance?.Panel.CancelUpload();
+
+            bool freshSelect = SelectedTargetIndex < 0;
             SelectedTargetIndex = npcIndex;
-            CameraProgress = 0f;
-            ZoomProgress = 0f;
             cameraTo = npc.Center;
+
+            //首次选中时从零开始推进；切换目标时保持当前进度，让偏移量平滑重定向
+            if (freshSelect) {
+                CameraProgress = 0f;
+                ZoomProgress = 0f;
+            }
         }
 
         /// <summary>
-        /// 取消选中目标
+        /// 取消选中目标，运镜平滑回归
         /// </summary>
         public static void DeselectTarget() {
             SelectedTargetIndex = -1;
-            CameraProgress = 0f;
-            ZoomProgress = 0f;
-            CameraOffset = Vector2.Zero;
+            //不立即归零CameraProgress/CameraOffset，由UpdateCamera平滑回归
             HackTimeUI.Instance?.Panel.Hide();
         }
 
@@ -171,25 +175,25 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
                     return;
                 }
 
-                //更新运镜目标位置（NPC可能在移动，但时停下基本静止）
+                //更新运镜目标位置
                 cameraTo = target.Center;
 
-                //平滑推进运镜和缩放
+                //平滑推进运镜进度和缩放
                 CameraProgress = MathHelper.Lerp(CameraProgress, 1f, CameraLerpSpeed);
                 ZoomProgress = MathHelper.Lerp(ZoomProgress, 1f, CameraLerpSpeed * 0.8f);
 
-                //计算屏幕中心到目标的偏移
-                Vector2 playerScreenCenter = Main.LocalPlayer.Center;
-                Vector2 desiredOffset = cameraTo - playerScreenCenter;
-                CameraOffset = desiredOffset * CameraProgress;
+                //偏移量独立平滑插值到目标位置（切换目标时从当前偏移重定向，而非瞬跳）
+                Vector2 desiredOffset = cameraTo - Main.LocalPlayer.Center;
+                CameraOffset = Vector2.Lerp(CameraOffset, desiredOffset, CameraLerpSpeed);
             }
             else {
-                //无目标时回归
-                CameraProgress = MathHelper.Lerp(CameraProgress, 0f, CameraLerpSpeed * 1.5f);
-                ZoomProgress = MathHelper.Lerp(ZoomProgress, 0f, CameraLerpSpeed * 1.5f);
-                CameraOffset = Vector2.Lerp(CameraOffset, Vector2.Zero, CameraLerpSpeed * 1.5f);
+                //无目标时平滑回归
+                float returnSpeed = CameraLerpSpeed * 1.5f;
+                CameraProgress = MathHelper.Lerp(CameraProgress, 0f, returnSpeed);
+                ZoomProgress = MathHelper.Lerp(ZoomProgress, 0f, returnSpeed);
+                CameraOffset = Vector2.Lerp(CameraOffset, Vector2.Zero, returnSpeed);
 
-                if (CameraProgress < 0.005f) {
+                if (CameraProgress < 0.005f && CameraOffset.LengthSquared() < 0.5f) {
                     CameraProgress = 0f;
                     ZoomProgress = 0f;
                     CameraOffset = Vector2.Zero;
