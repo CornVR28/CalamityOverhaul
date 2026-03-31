@@ -51,6 +51,7 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0) : COLOR0
     // 世界坐标计算（缩放感知）
     // ================================================================
     float2 worldPos = screenPosition + worldViewSize * coords;
+    float2 screenUV = worldViewSize * coords; //屏幕相对坐标（不随摄像机滚动）
     float2 relPos = worldPos - setPoint;
     float worldDist = length(relPos);
     float effectiveRadius = radius * expandProgress;
@@ -90,8 +91,8 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0) : COLOR0
         if (outerGlow < 0.005)
             return original;
 
-        // 域外UV微扭曲（被黑墙侵蚀的不安感）
-        float2 outerDistUV = frac(worldPos * 0.0004 + float2(uTime * 0.012, uTime * 0.008));
+        // 域外UV微扭曲（屏幕相对，不随摄像机滚动）
+        float2 outerDistUV = frac(screenUV * 0.0004 + float2(uTime * 0.012, uTime * 0.008));
         float2 outerWarp = tex2D(noiseTex, outerDistUV).rg * 2.0 - 1.0;
         float2 outerWarpCoords = coords + outerWarp * 0.0012 * outerGlow;
         float3 warpedOuter = tex2D(uImage0, outerWarpCoords).rgb;
@@ -123,14 +124,14 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0) : COLOR0
     // ================================================================
     // 第一层：现实扭曲（黑墙侵蚀现实——核心新增效果）
     // ================================================================
-    // 低频大尺度扭曲：整体空间弯曲
-    float2 distUV1 = frac(worldPos * 0.0005 + float2(uTime * 0.022, uTime * 0.016));
+    // 低频大尺度扭曲：整体空间弯曲（屏幕相对，不随摄像机滚动）
+    float2 distUV1 = frac(screenUV * 0.0005 + float2(uTime * 0.022, uTime * 0.016));
     float2 warpDisp = tex2D(noiseTex, distUV1).rg * 2.0 - 1.0;
     float warpStr = intensity * 0.0035 * (0.4 + edgeFactor * 1.2);
     float2 warpedCoords = coords + warpDisp * warpStr;
 
-    // 高频小尺度扭曲叠加：局部数字毛刺（柔化，避免可见斑纹）
-    float2 distUV2 = frac(worldPos * 0.0012 + float2(uTime * -0.03, uTime * 0.025));
+    // 高频小尺度扭曲叠加：局部数字毛刺（柔化，屏幕相对）
+    float2 distUV2 = frac(screenUV * 0.0012 + float2(uTime * -0.03, uTime * 0.025));
     float2 warpDisp2 = tex2D(noiseTex, distUV2).rg * 2.0 - 1.0;
     warpedCoords += warpDisp2 * warpStr * 0.15;
 
@@ -179,8 +180,8 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0) : COLOR0
     // 第四层：加法赛博特效
     // ================================================================
 
-    // --- A. 深层数字暗流（纵向纤维流动，替代各向同性斑块）---
-    float2 fieldUV = worldPos / (gridSize * 24.0);
+    // --- A. 深层数字暗流（纵向纤维流动，屏幕相对）---
+    float2 fieldUV = screenUV / (gridSize * 24.0);
     //纵向拉伸UV产生条纹化流动，避免豹纹感
     fieldUV.y *= 0.4;
     float2 flowOff = float2(uTime * 0.015, uTime * 0.008);
@@ -225,18 +226,18 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0) : COLOR0
     // --- D. [已移除横向扫描线] ---
     // --- E. [已移除主扫描条] ---
 
-    // --- F. 垂直数据流（增强清晰度，更多列）---
-    float dColIdx = floor(worldPos.x / (gridSize * 2.0));
+    // --- F. 垂直数据流（屏幕相对，不随摄像机滚动）---
+    float dColIdx = floor(screenUV.x / (gridSize * 2.0));
     float colRand = hash21(float2(dColIdx, 7.77));
     float streamActive = step(0.48, colRand);
     float streamSpeed = 0.12 + colRand * 0.22;
-    float streamPhase = frac(worldPos.y * 0.003 - uTime * streamSpeed);
+    float streamPhase = frac(screenUV.y * 0.003 - uTime * streamSpeed);
     float streamHead = smoothstep(0.0, 0.06, streamPhase) * smoothstep(0.35, 0.1, streamPhase);
     float streamTail = pow(saturate(1.0 - streamPhase / 0.35), 3.0) * 0.45;
     float dataStream = (streamHead + streamTail) * streamActive * (1.0 - edgeFactor) * 0.35;
 
     // --- G. 径向脉冲环（双频干涉波纹，更立体）---
-    float pulseDistortion = tex2D(noiseTex, frac(worldPos * 0.001 + uTime * 0.008)).r * 15.0;
+    float pulseDistortion = tex2D(noiseTex, frac(screenUV * 0.001 + uTime * 0.008)).r * 15.0;
     float basePhaseDist = worldDist + pulseDistortion;
     float pulse1 = pow(saturate(sin((basePhaseDist - uTime * 68.0) * 0.02) * 0.5 + 0.5), 14.0);
     float pulse2 = pow(saturate(sin((basePhaseDist - uTime * 42.0) * 0.015) * 0.5 + 0.5), 18.0);
@@ -245,8 +246,8 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0) : COLOR0
 
     // --- H. 边缘能量裂纹（替换原简单辉光——高频噪声裂纹图案）---
     float edgeGlow = smoothstep(0.65, 1.0, normDist);
-    // 高频噪声裂纹
-    float2 crackUV = frac(worldPos * 0.003 + float2(uTime * 0.04, uTime * -0.03));
+    // 高频噪声裂纹（屏幕相对）
+    float2 crackUV = frac(screenUV * 0.003 + float2(uTime * 0.04, uTime * -0.03));
     float crackNoise = tex2D(noiseTex, crackUV).r;
     float crack = smoothstep(0.42, 0.48, crackNoise) * smoothstep(0.56, 0.49, crackNoise);
     float edgeCrack = crack * edgeGlow * 2.2;
@@ -255,21 +256,10 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0) : COLOR0
     float edgeBase = edgeGlow * edgePulse * 0.55;
     float edgeTotal = edgeBase + edgeCrack;
 
-    // --- I. 水平故障撕裂 ---
-    float tearLine = floor(worldPos.y / 3.0);
-    float tearTime = floor(uTime * 4.0);
-    float tearRand = hash21(float2(tearLine, tearTime));
-    bool tearActive = tearRand > 0.992;
-    float tearShift = (tearRand - 0.5) * 6.0 / worldViewSize.x;
-    float tearBright = 0.0;
-    if (tearActive && edgeFactor < 0.5)
-    {
-        float4 tearSample = tex2D(uImage0, float2(warpedCoords.x + tearShift, warpedCoords.y));
-        tearBright = dot(tearSample.rgb, float3(0.333, 0.333, 0.333)) * 0.45;
-    }
+    // --- I. [已移除水平故障撕裂] ---
 
     // --- J. 辉光粒子（漂浮的余烬微粒）---
-    float2 particleUV = frac(worldPos * 0.008 + float2(uTime * 0.035, -uTime * 0.028));
+    float2 particleUV = frac(screenUV * 0.008 + float2(uTime * 0.035, -uTime * 0.028));
     float particleNoise = tex2D(noiseTex, particleUV).r;
     float particle = smoothstep(0.87, 0.92, particleNoise);
     float particleSeed = floor(particleNoise * 50.0);
@@ -325,7 +315,6 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0) : COLOR0
     additive += cAbyssRed   * dataStream;             // F: 垂直数据流
     additive += cBrightRed  * pulse;                  // G: 双频脉冲环
     additive += cCrackGlow  * edgeTotal;              // H: 边缘能量裂纹
-    additive += cBrightRed  * tearBright;             // I: 故障撕裂
     additive += cHotAmber   * particle;               // J: 辉光粒子
     additive += cBrightRed  * entityRingTotal;        // K: 实体扫描环
     additive += cWhiteRed   * entityScanTotal * 0.55; // K: 扫描弧高亮
