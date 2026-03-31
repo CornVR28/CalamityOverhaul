@@ -56,9 +56,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
         //每个条目之间的飞入间隔(秒)
         private const float EntryStagger = 0.07f;
         //===== 字体尺寸 =====
-        private const float FontName = 0.62f;
-        private const float FontDesc = 0.46f;
-        private const float FontIndex = 0.36f;
+        private const float FontName = 0.8f;
+        private const float FontDesc = 0.62f;
+        private const float FontIndex = 0.4f;
         private const float FontTime = 0.40f;
         private const float FontStatus = 0.36f;
 
