@@ -1,4 +1,10 @@
-﻿namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
+﻿using Microsoft.Xna.Framework;
+using System;
+using Terraria;
+using Terraria.DataStructures;
+using Terraria.ModLoader;
+
+namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
 {
     /// <summary>
     /// 赛博空间领域系统 —— 状态管理器
@@ -42,13 +48,19 @@
         private static float targetIntensity;
         private static float targetExpand;
 
+        //爆发阶段：激活后的前N帧用更高的lerp速率实现快速展开
+        private const int BurstDuration = 14;
+        private static int burstTimer;
+
         /// <summary>
-        /// 激活赛博空间领域
+        /// 激活赛博空间领域（带爆发式展开+视觉特效）
         /// </summary>
-        public static void Activate() {
+        public static void Activate(Player owner) {
             Active = true;
             targetIntensity = 1f;
             targetExpand = 1f;
+            burstTimer = BurstDuration;
+            SpawnActivationVFX(owner);
         }
 
         /// <summary>
@@ -63,12 +75,23 @@
         /// 每帧逻辑更新，驱动展开/收缩过渡
         /// </summary>
         public static void Update() {
-            // 展开时稍慢，收缩时稍快
-            float intensityLerp = Active ? 0.045f : 0.06f;
-            Intensity = MathHelper.Lerp(Intensity, targetIntensity, intensityLerp);
-            ExpandProgress = MathHelper.Lerp(ExpandProgress, targetExpand, 0.035f);
+            if (burstTimer > 0) {
+                //爆发阶段：极速展开+强度拉满
+                burstTimer--;
+                float burstFactor = (float)burstTimer / BurstDuration; //1→0，越往后越接近目标
+                float expandLerp = MathHelper.Lerp(0.06f, 0.22f, burstFactor);
+                float intensityLerp = MathHelper.Lerp(0.08f, 0.25f, burstFactor);
+                ExpandProgress = MathHelper.Lerp(ExpandProgress, targetExpand, expandLerp);
+                Intensity = MathHelper.Lerp(Intensity, targetIntensity, intensityLerp);
+            }
+            else {
+                //常规阶段：平滑过渡
+                float intensityLerp = Active ? 0.045f : 0.06f;
+                Intensity = MathHelper.Lerp(Intensity, targetIntensity, intensityLerp);
+                ExpandProgress = MathHelper.Lerp(ExpandProgress, targetExpand, 0.035f);
+            }
 
-            // 收缩完毕后彻底关闭
+            //收缩完毕后彻底关闭
             if (targetExpand <= 0f && ExpandProgress < 0.005f) {
                 ExpandProgress = 0f;
                 Intensity = 0f;
@@ -85,6 +108,33 @@
             ExpandProgress = 0f;
             targetIntensity = 0f;
             targetExpand = 0f;
+            burstTimer = 0;
+        }
+
+        /// <summary>
+        /// 生成领域激活时的视觉特效弹幕（冲击波+故障闪电）
+        /// </summary>
+        private static void SpawnActivationVFX(Player owner) {
+            if (Main.myPlayer != owner.whoAmI) return;
+
+            IEntitySource source = owner.GetSource_FromThis();
+            Vector2 center = owner.Center;
+
+            //环形冲击波
+            Projectile.NewProjectile(source, center, Vector2.Zero,
+                ModContent.ProjectileType<CyberShockwaveProj>(), 0, 0, owner.whoAmI);
+
+            //故障闪电（6~8条，均匀分布+随机偏移+延迟交错）
+            int boltCount = Main.rand.Next(6, 9);
+            float baseAngle = Main.rand.NextFloat() * MathHelper.TwoPi;
+            for (int i = 0; i < boltCount; i++) {
+                float angle = baseAngle + MathHelper.TwoPi * i / boltCount
+                    + Main.rand.NextFloat(-0.28f, 0.28f);
+                int delay = Main.rand.Next(0, 5);
+                Projectile.NewProjectile(source, center, Vector2.Zero,
+                    ModContent.ProjectileType<CyberGlitchBoltProj>(), 0, 0, owner.whoAmI,
+                    ai0: angle, ai1: delay);
+            }
         }
     }
 }

@@ -82,7 +82,7 @@ namespace CalamityOverhaul
             //Sandevistan.IsActive = !Sandevistan.IsActive;
             //CyberwareUI.Instance.Toggle();
             if (player.altFunctionUse == 0) {
-                Cyberspace.Activate();   // 展开领域
+                Cyberspace.Activate(player);   // 展开领域
             }
             else {
                 Cyberspace.Deactivate(); // 收缩关闭
