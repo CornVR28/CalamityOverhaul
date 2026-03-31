@@ -42,6 +42,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
 
             ApplyFullScreenShader(spriteBatch, graphicsDevice, screenSwap);
 
+            DrawBoundaryShockwaveRing(spriteBatch);
+
             spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive, SamplerState.PointWrap,
                 DepthStencilState.None, RasterizerState.CullNone, null,
                 Main.GameViewMatrix.TransformationMatrix);
@@ -155,6 +157,55 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
                 spriteBatch.Draw(glowTex, new Vector2(screenX, screenY), null, glowColor,
                     0f, glowOrigin, glowScale, SpriteEffects.None, 0f);
             }
+        }
+
+        /// <summary>
+        /// 在领域边界绘制常驻冲击波光环——复用CyberShockwave着色器
+        /// <br/>固定半径，环位于领域外缘，带呼吸脉动
+        /// </summary>
+        private static void DrawBoundaryShockwaveRing(SpriteBatch spriteBatch) {
+            Effect shader = EffectLoader.CyberShockwave?.Value;
+            if (shader == null) return;
+            if (CWRAsset.Placeholder_White?.Value == null) return;
+            if (CWRAsset.Extra_193?.Value == null) return;
+            if (Cyberspace.Intensity < 0.02f || Cyberspace.ExpandProgress < 0.3f) return;
+
+            Texture2D canvas = CWRAsset.Placeholder_White.Value;
+            Texture2D noise = CWRAsset.Extra_193.Value;
+            float time = Main.GlobalTimeWrappedHourly;
+
+            float effectiveRadius = Cyberspace.Radius * Cyberspace.ExpandProgress;
+            //四边形半宽要留出足够余量给外侧碎片拖尾
+            float quadHalf = effectiveRadius * 1.1f;
+            //环在归一化空间中的位置 = 实际半径 / 四边形半宽
+            float ringPos = effectiveRadius / quadHalf;
+
+            //ringThickness随呼吸微调
+            float thickness = 0.045f + 0.012f * MathF.Sin(time * 0.8f + 1.2f);
+
+            shader.Parameters["uTime"]?.SetValue(time);
+            shader.Parameters["ringProgress"]?.SetValue(ringPos);
+            shader.Parameters["ringThickness"]?.SetValue(thickness);
+            shader.Parameters["fadeAlpha"]?.SetValue(Cyberspace.Intensity);
+
+            Vector2 center = Main.LocalPlayer.Center;
+            Vector2 drawPos = center - Main.screenPosition;
+            float drawDiameter = quadHalf * 2f * 0.98f;
+
+            spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
+                SamplerState.LinearWrap, DepthStencilState.None, RasterizerState.CullNone,
+                null, Main.GameViewMatrix.TransformationMatrix);
+
+            Main.graphics.GraphicsDevice.Textures[1] = noise;
+            Main.graphics.GraphicsDevice.SamplerStates[1] = SamplerState.LinearWrap;
+            shader.CurrentTechnique.Passes[0].Apply();
+
+            Color ringTint = new Color(1f, 0.80f, 0.65f);
+            spriteBatch.Draw(canvas, drawPos, null, ringTint,
+                0f, canvas.Size() * 0.5f, new Vector2(drawDiameter, drawDiameter),
+                SpriteEffects.None, 0f);
+
+            spriteBatch.End();
         }
 
         /// <summary>
