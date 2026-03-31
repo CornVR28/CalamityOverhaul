@@ -42,25 +42,25 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
         //故障带激活倒计时
         private float glitchBandCooldown;
 
-        //===== 条目布局常量(加大) =====
-        private const float ItemWidth = 380f;
-        private const float ItemHeight = 62f;
-        private const float ItemGap = 6f;
+        //===== 条目布局常量 =====
+        private const float ItemWidth = 420f;
+        private const float ItemHeight = 78f;
+        private const float ItemGap = 5f;
         private const float RightMargin = 36f;
         //左侧斜切宽度（平行四边形切角效果）
-        private const float SlashWidth = 20f;
+        private const float SlashWidth = 22f;
         //电路树主干距条目左边缘的偏移
-        private const float TrunkOffsetX = 50f;
+        private const float TrunkOffsetX = 56f;
         //首个条目飞入前的基础延迟(秒)
         private const float BaseEntryDelay = 0.2f;
         //每个条目之间的飞入间隔(秒)
         private const float EntryStagger = 0.07f;
         //===== 字体尺寸 =====
-        private const float FontName = 0.50f;
-        private const float FontDesc = 0.34f;
-        private const float FontIndex = 0.30f;
-        private const float FontTime = 0.32f;
-        private const float FontStatus = 0.30f;
+        private const float FontName = 0.62f;
+        private const float FontDesc = 0.46f;
+        private const float FontIndex = 0.36f;
+        private const float FontTime = 0.40f;
+        private const float FontStatus = 0.36f;
 
         public int UploadingSlot => uploadingSlot;
         public float UploadProgressValue => uploadProgress;
@@ -410,37 +410,55 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
         private void DrawSingleItem(SpriteBatch sb, Texture2D px, float alpha, Rectangle rect,
             QuickHackDef hack, int index, float hover, bool isUploading, bool isCompleted) {
 
-            //=== 背景 ===
+            //=== 背景（双层渐变） ===
             Color bgColor = Color.Lerp(HackTheme.BgSlot, HackTheme.BgSlotHover, hover * 0.6f);
             if (isUploading) bgColor = Color.Lerp(bgColor, HackTheme.Uploading, 0.08f);
             if (isCompleted) {
                 float flash = MathF.Sin(uploadFlashTimer * 10f) * 0.5f + 0.5f;
                 bgColor = Color.Lerp(bgColor, HackTheme.Accent, flash * 0.15f);
             }
-            sb.Draw(px, rect, new Rectangle(0, 0, 1, 1), bgColor * (alpha * 0.90f));
+            sb.Draw(px, rect, new Rectangle(0, 0, 1, 1), bgColor * (alpha * 0.92f));
+            //底部渐变亮带（条目底部1/3区域微微亮起）
+            int gradH = rect.Height / 3;
+            sb.Draw(px, new Rectangle(rect.X, rect.Bottom - gradH, rect.Width, gradH),
+                new Rectangle(0, 0, 1, 1), HackTheme.BgSlotHover * (alpha * 0.25f));
 
             //斜切遮罩
             DrawSlashCut(sb, px, rect, alpha);
 
-            //=== CRT扫描线纹理覆盖（每隔2px一条暗线） ===
-            DrawCRTOverlay(sb, px, rect, alpha * 0.06f);
+            //=== CRT扫描线纹理覆盖 ===
+            DrawCRTOverlay(sb, px, rect, alpha * 0.05f);
 
-            //=== 类别色条（呼吸脉冲） ===
+            //=== 内侧顶部高光线（模拟光泽） ===
+            Color highlightLine = Color.Lerp(HackTheme.Border, HackTheme.Accent, hover * 0.3f);
+            sb.Draw(px, new Rectangle(rect.X + (int)SlashWidth + 4, rect.Y + 1, rect.Width - (int)SlashWidth - 8, 1),
+                new Rectangle(0, 0, 1, 1), highlightLine * (alpha * 0.18f));
+
+            //=== 类别色条（加粗+呼吸脉冲+渐变） ===
             Color catColor = GetCategoryColor(hack.Category);
             float breathe = MathF.Sin(timer * 2.5f + index * 0.8f) * 0.15f + 0.85f;
-            float barGlow = isUploading ? 1f : (0.4f + hover * 0.6f);
+            float barGlow = isUploading ? 1f : (0.45f + hover * 0.55f);
             barGlow *= breathe;
             int barX = rect.X + (int)SlashWidth;
-            sb.Draw(px, new Rectangle(barX, rect.Y + 4, 3, rect.Height - 8),
+            //主色条（加粗到4px）
+            sb.Draw(px, new Rectangle(barX, rect.Y + 3, 4, rect.Height - 6),
                 new Rectangle(0, 0, 1, 1), catColor * (alpha * barGlow));
+            //色条向右的渐变扩散（半透明宽带）
+            sb.Draw(px, new Rectangle(barX + 4, rect.Y + 3, 16, rect.Height - 6),
+                new Rectangle(0, 0, 1, 1), catColor * (alpha * barGlow * 0.08f));
             //色条发光
             Texture2D glow = CWRAsset.SoftGlow?.Value;
-            if (glow != null && barGlow > 0.5f) {
-                Color barGlowCol = catColor * (alpha * barGlow * 0.08f);
+            if (glow != null && barGlow > 0.4f) {
+                Color barGlowCol = catColor * (alpha * barGlow * 0.12f);
                 barGlowCol.A = 0;
-                sb.Draw(glow, new Vector2(barX + 1, rect.Center.Y), null, barGlowCol,
-                    0, glow.Size() / 2, new Vector2(0.04f, rect.Height / 40f), SpriteEffects.None, 0);
+                sb.Draw(glow, new Vector2(barX + 2, rect.Center.Y), null, barGlowCol,
+                    0, glow.Size() / 2, new Vector2(0.06f, rect.Height / 35f), SpriteEffects.None, 0);
             }
+
+            //=== 类别符号（色条旁的小标识） ===
+            string catSymbol = GetCategorySymbol(hack.Category);
+            Color symColor = catColor * (alpha * (0.35f + hover * 0.3f));
+            Utils.DrawBorderString(sb, catSymbol, new Vector2(barX + 8, rect.Y + rect.Height * 0.5f - 6), symColor, 0.28f);
 
             //=== 扫描线（悬停/上传时横扫） ===
             if (hover > 0.1f || isUploading) {
@@ -481,30 +499,37 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
 
             //=== 序号 ===
             string idxStr = $"{index + 1:D2}";
-            Color idxColor = Color.Lerp(HackTheme.TextDim, catColor, hover * 0.5f) * (alpha * 0.5f);
-            Vector2 idxPos = new(rect.X + SlashWidth + 10, rect.Y + 9);
+            Color idxColor = Color.Lerp(HackTheme.TextNormal, catColor, hover * 0.6f) * (alpha * 0.6f);
+            Vector2 idxPos = new(rect.X + SlashWidth + 10, rect.Y + 10);
             Utils.DrawBorderString(sb, idxStr, idxPos, idxColor, FontIndex);
 
             //=== 协议名称（带色散效果） ===
-            float nameX = rect.X + SlashWidth + 42;
+            float nameX = rect.X + SlashWidth + 48;
             float nameY = rect.Y + 8;
-            Color nameColor = Color.Lerp(HackTheme.TextNormal, HackTheme.TextBright, hover);
+            Color nameColor = Color.Lerp(HackTheme.TextBright, Color.White, hover * 0.3f);
             if (isUploading) nameColor = Color.Lerp(nameColor, HackTheme.Uploading, 0.35f);
             if (isCompleted) nameColor = HackTheme.Accent;
             //色散：悬停时在偏移位置画红/蓝色副本
             if (hover > 0.2f) {
-                float aberration = hover * 1.5f;
-                Color redGhost = new Color(200, 40, 40) * (alpha * hover * 0.18f);
-                Color blueGhost = new Color(40, 80, 200) * (alpha * hover * 0.18f);
+                float aberration = hover * 1.8f;
+                Color redGhost = new Color(220, 40, 40) * (alpha * hover * 0.2f);
+                Color blueGhost = new Color(40, 80, 220) * (alpha * hover * 0.2f);
                 Utils.DrawBorderString(sb, hack.Name, new Vector2(nameX - aberration, nameY), redGhost, FontName);
                 Utils.DrawBorderString(sb, hack.Name, new Vector2(nameX + aberration, nameY + 0.5f), blueGhost, FontName);
             }
             Utils.DrawBorderString(sb, hack.Name, new Vector2(nameX, nameY), nameColor * alpha, FontName);
 
-            //=== 效果描述 ===
-            Vector2 descPos = new(rect.X + SlashWidth + 42, rect.Y + 36);
-            Color descColor = Color.Lerp(HackTheme.TextDim, HackTheme.TextNormal, hover * 0.3f);
-            Utils.DrawBorderString(sb, hack.Desc, descPos, descColor * (alpha * 0.65f), FontDesc);
+            //=== 名称下方分隔虚线 ===
+            float sepY = rect.Y + 38;
+            for (float dx = 0; dx < rect.Width - SlashWidth - 60; dx += 8) {
+                sb.Draw(px, new Rectangle((int)(rect.X + SlashWidth + 48 + dx), (int)sepY, 4, 1),
+                    new Rectangle(0, 0, 1, 1), HackTheme.Border * (alpha * (0.15f + hover * 0.15f)));
+            }
+
+            //=== 效果描述（明亮可读） ===
+            Vector2 descPos = new(rect.X + SlashWidth + 48, rect.Y + 44);
+            Color descColor = Color.Lerp(HackTheme.TextNormal, HackTheme.TextBright, 0.3f + hover * 0.4f);
+            Utils.DrawBorderString(sb, hack.Desc, descPos, descColor * (alpha * 0.85f), FontDesc);
 
             //=== 右侧状态区 ===
             if (isUploading) {
@@ -512,17 +537,23 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
             }
             else if (isCompleted) {
                 float flash = MathF.Sin(uploadFlashTimer * 8f) * 0.3f + 0.7f;
-                Vector2 okSize = FontAssets.MouseText.Value.MeasureString("DONE") * 0.36f;
-                Vector2 okPos = new(rect.Right - okSize.X - 12, rect.Y + (rect.Height - okSize.Y) * 0.5f);
-                Utils.DrawBorderString(sb, "DONE", okPos, HackTheme.Accent * (alpha * flash), 0.36f);
+                Vector2 okSize = FontAssets.MouseText.Value.MeasureString("DONE") * 0.42f;
+                Vector2 okPos = new(rect.Right - okSize.X - 14, rect.Y + (rect.Height - okSize.Y) * 0.5f);
+                Utils.DrawBorderString(sb, "DONE", okPos, HackTheme.Accent * (alpha * flash), 0.42f);
             }
             else {
-                //上传耗时
+                //上传耗时（右上角）
                 float sec = hack.UploadTime / 60f;
                 string timeStr = $"{sec:F1}s";
                 Vector2 ts = FontAssets.MouseText.Value.MeasureString(timeStr) * FontTime;
-                Vector2 tp = new(rect.Right - ts.X - 12, rect.Y + (rect.Height - ts.Y) * 0.5f);
-                Utils.DrawBorderString(sb, timeStr, tp, HackTheme.TextDim * (alpha * 0.45f), FontTime);
+                Vector2 tp = new(rect.Right - ts.X - 14, rect.Y + 10);
+                Utils.DrawBorderString(sb, timeStr, tp, HackTheme.TextNormal * (alpha * 0.55f), FontTime);
+
+                //类别标签（右下角）
+                string catLabel = GetCategoryLabel(hack.Category);
+                Vector2 cls = FontAssets.MouseText.Value.MeasureString(catLabel) * 0.26f;
+                Vector2 clp = new(rect.Right - cls.X - 14, rect.Bottom - cls.Y - 8);
+                Utils.DrawBorderString(sb, catLabel, clp, catColor * (alpha * 0.35f), 0.26f);
             }
 
             //=== 上传时底部进度光带（贯穿条目底边） ===
@@ -856,6 +887,22 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
             QuickHackCategory.Covert => HackTheme.AccentAlt,
             QuickHackCategory.Contagion => new Color(160, 40, 200),
             _ => HackTheme.Accent,
+        };
+
+        private static string GetCategorySymbol(QuickHackCategory cat) => cat switch {
+            QuickHackCategory.Lethal => "◆",
+            QuickHackCategory.Control => "◇",
+            QuickHackCategory.Covert => "○",
+            QuickHackCategory.Contagion => "◈",
+            _ => "·",
+        };
+
+        private static string GetCategoryLabel(QuickHackCategory cat) => cat switch {
+            QuickHackCategory.Lethal => "LETHAL",
+            QuickHackCategory.Control => "CONTROL",
+            QuickHackCategory.Covert => "COVERT",
+            QuickHackCategory.Contagion => "CONTAGION",
+            _ => "UNKNOWN",
         };
 
         private static void DrawLine(SpriteBatch sb, Texture2D px, Vector2 start, Vector2 end, float thickness, Color color) {
