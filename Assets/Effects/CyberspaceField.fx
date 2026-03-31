@@ -117,8 +117,8 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0) : COLOR0
     float edgeFactor = smoothstep(0.7, 1.0, normDist);
     float centerFactor = 1.0 - normDist;
 
-    // 全域呼吸节奏
-    float domainBreathe = 0.85 + 0.15 * sin(uTime * 0.6);
+    // 全域呼吸节奏（振幅收窄，全程偏暗）
+    float domainBreathe = 0.92 + 0.08 * sin(uTime * 0.6);
 
     // ================================================================
     // 第一层：现实扭曲（黑墙侵蚀现实——核心新增效果）
@@ -148,13 +148,13 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0) : COLOR0
     // ================================================================
     // 第三层：三阶色彩映射（深邃丰富的红色光谱）
     // ================================================================
-    float targetDim = lerp(0.52, 0.24, centerFactor * 0.3);
+    float targetDim = lerp(0.40, 0.18, centerFactor * 0.3);
     float dimFactor = lerp(1.0, targetDim, intensity * dimStrength);
     float3 processed = original.rgb * dimFactor;
 
     float lum = dot(processed, float3(0.299, 0.587, 0.114));
     float3 gray = float3(lum, lum, lum);
-    processed = lerp(processed, gray, 0.52 * intensity);
+    processed = lerp(processed, gray, 0.58 * intensity);
 
     // 三阶映射：深渊酒红→血红→炽热琥珀
     float3 shadowRed  = float3(0.14, 0.02, 0.05);
@@ -218,19 +218,7 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0) : COLOR0
     node *= lerp(nodePulse * 0.18, 0.7, edgeFactor);
 
     // --- D. [已移除横向扫描线] ---
-
-    // --- E. 主扫描条（更宽更醒目，带拖尾渐隐）---
-    float sweepCycle = frac(uTime * 0.055);
-    float sweepWorldY = setPoint.y + lerp(-effectiveRadius, effectiveRadius, sweepCycle);
-    float sweepDist = abs(worldPos.y - sweepWorldY);
-    float sweepBar = saturate(1.0 - sweepDist / (gridSize * 2.0));
-    sweepBar = sweepBar * sweepBar;
-    // 向下拖尾
-    float sweepTrailDist = max(0, worldPos.y - sweepWorldY);
-    float sweepTrail = saturate(1.0 - sweepTrailDist / (gridSize * 6.0));
-    sweepTrail = sweepTrail * sweepTrail * 0.2;
-    float sweepTotal = (sweepBar * 0.6 + sweepTrail);
-    sweepTotal *= step(worldDist, effectiveRadius * 0.95);
+    // --- E. [已移除主扫描条] ---
 
     // --- F. 垂直数据流（增强清晰度，更多列）---
     float dColIdx = floor(worldPos.x / (gridSize * 2.0));
@@ -329,7 +317,6 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0) : COLOR0
     additive += cAbyssRed   * digitalField;           // A: 底层暗流
     additive += cBloodRed   * gridLine * 0.8;         // B: 栅格走线+能量流
     additive += cNodeColor  * node;                   // C: 节点亮点
-    additive += cWhiteRed   * sweepTotal;             // E: 主扫描条+拖尾
     additive += cAbyssRed   * dataStream;             // F: 垂直数据流
     additive += cBrightRed  * pulse;                  // G: 双频脉冲环
     additive += cCrackGlow  * edgeTotal;              // H: 边缘能量裂纹
