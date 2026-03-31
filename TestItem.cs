@@ -81,7 +81,13 @@ namespace CalamityOverhaul
             //}
             //Sandevistan.IsActive = !Sandevistan.IsActive;
             //CyberwareUI.Instance.Toggle();
-            Cyberspace.Activate();   // 展开领域
+            if (player.altFunctionUse == 0) {
+                Cyberspace.Activate();   // 展开领域
+            }
+            else {
+                Cyberspace.Deactivate(); // 收缩关闭
+            }
+            
             //Cyberspace.Deactivate(); // 收缩关闭
             //ScenarioManager.Reset<FirstMetShepel>();
             //ScenarioManager.Start<FirstMetShepel>();
