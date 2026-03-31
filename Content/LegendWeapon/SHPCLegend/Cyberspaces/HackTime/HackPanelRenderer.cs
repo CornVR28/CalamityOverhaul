@@ -599,11 +599,12 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
             float lineAlpha = alpha * openProgress * 0.6f;
             Color lineColor = HackTheme.Accent * lineAlpha;
 
-            //折线连接：水平段+转角+指向目标段
-            Vector2 midPoint = new(
-                (lineStart.X + npcScreen.X) * 0.5f,
-                lineStart.Y
-            );
+            //折线连接：从面板边缘水平延伸一段，再垂直转向NPC高度，最后水平连到NPC
+            //水平延伸距离：面板到NPC距离的30%，至少20px
+            float hExtend = Math.Max(Math.Abs(npcScreen.X - lineStart.X) * 0.3f, 20f);
+            //判断面板在NPC哪一侧来决定延伸方向
+            float dir = (lineStart.X < npcScreen.X) ? -1f : 1f;
+            Vector2 midPoint = new(lineStart.X, lineStart.Y + dir * hExtend);
             Vector2 turnPoint = new(midPoint.X, npcScreen.Y);
 
             DrawLine(sb, px, lineStart, midPoint, 1f, lineColor);
@@ -650,9 +651,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
         //将世界坐标转换为屏幕像素坐标，考虑游戏视图缩放
         private static Vector2 WorldToScreen(Vector2 worldPos) {
             Vector2 raw = worldPos - Main.screenPosition;
-            Vector2 screenCenter = new Vector2(Main.screenWidth, Main.screenHeight) * 0.5f;
+            Vector2 screenCenter = new Vector2(Main.screenWidth, Main.screenHeight) / 5;
             float zoom = Main.GameViewMatrix.Zoom.X;
-            return raw - screenCenter / 2 * zoom;
+            return raw - screenCenter * zoom;
         }
 
         //在折线路径上求值

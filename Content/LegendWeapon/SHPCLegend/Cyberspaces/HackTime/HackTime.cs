@@ -65,6 +65,12 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
             if (Active) {
                 Deactivate();
             }
+            else if (Intensity > 0.001f) {
+                //正在淡出中，直接反转回来，无需重置状态
+                Active = true;
+                targetIntensity = 1f;
+                HackTimeFreeze.Activate();
+            }
             else {
                 Activate();
             }
@@ -91,6 +97,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
         /// 退出骇客时间
         /// </summary>
         public static void Deactivate() {
+            Active = false;
             targetIntensity = 0f;
             SelectedTargetIndex = -1;
             HoveredTargetIndex = -1;
@@ -139,10 +146,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
             float fadeSpeed = Active ? FadeInSpeed : FadeOutSpeed;
             Intensity = MathHelper.Lerp(Intensity, targetIntensity, fadeSpeed);
 
-            //淡出完毕后彻底关闭
-            if (targetIntensity <= 0f && Intensity < 0.005f) {
+            //淡出完毕后彻底清理残余状态
+            if (!Active && targetIntensity <= 0f && Intensity < 0.005f) {
                 Intensity = 0f;
-                Active = false;
                 CameraOffset = Vector2.Zero;
                 CameraProgress = 0f;
                 ZoomProgress = 0f;
