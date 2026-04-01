@@ -105,8 +105,18 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             Texture2D glowTex = softGlow?.Value;
             if (glowTex == null || Cyberspace.Intensity < 0.01f) return;
 
+            //逐层绘制边缘光晕
+            for (int layer = 0; layer < Cyberspace.CurrentLayer; layer++) {
+                float expand = Cyberspace.GetLayerExpand(layer);
+                if (expand < 0.1f) continue;
+                DrawSingleEdgeGlowRing(spriteBatch, glowTex, layer, expand);
+            }
+        }
+
+        private static void DrawSingleEdgeGlowRing(SpriteBatch spriteBatch, Texture2D glowTex,
+            int layer, float expand) {
             Vector2 center = Main.LocalPlayer.Center;
-            float r = Cyberspace.Radius * Cyberspace.ExpandProgress;
+            float r = Cyberspace.GetLayerRadius(layer) * expand;
             float gs = Cyberspace.GridSize;
             float time = Cyberspace.EffectTime;
             float effectIntensity = Cyberspace.Intensity;
@@ -150,62 +160,81 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
                 float cellHash = MathF.Abs(MathF.Sin(snapX * 0.137f + snapY * 0.251f));
                 float pulse = 0.3f + 0.7f * MathF.Sin(time * 1.8f + cellHash * MathF.PI * 2f);
                 pulse = MathF.Max(pulse, 0f);
-                float alpha = pulse * effectIntensity * 0.4f;
+                //外层亮度递增
+                float layerMult = 1f + layer * 0.25f;
+                float alpha = pulse * effectIntensity * 0.4f * layerMult;
 
-                Color glowColor = new Color(0.80f * alpha, 0.05f * alpha, 0.04f * alpha, 0f);
+                Color glowColor = GetLayerGlowColor(layer, alpha);
 
                 spriteBatch.Draw(glowTex, new Vector2(screenX, screenY), null, glowColor,
                     0f, glowOrigin, glowScale, SpriteEffects.None, 0f);
             }
         }
 
+        private static Color GetLayerGlowColor(int layer, float alpha) {
+            return layer switch {
+                0 => new Color(0.80f * alpha, 0.05f * alpha, 0.04f * alpha, 0f),
+                1 => new Color(0.90f * alpha, 0.10f * alpha, 0.06f * alpha, 0f),
+                _ => new Color(1.0f * alpha, 0.18f * alpha, 0.08f * alpha, 0f),
+            };
+        }
+
         /// <summary>
-        /// 在领域边界绘制常驻边界环——使用专用CyberBoundaryRing着色器
-        /// <br/>固定半径，环位于领域外缘，带呼吸脉动，无内侧压缩波
+        /// 在每层领域边界绘制常驻边界环——使用专用CyberBoundaryRing着色器
+        /// <br/>逐层绘制，呼吸脉动带层间时间偏移，颜色随层数递升
         /// </summary>
         private static void DrawBoundaryShockwaveRing(SpriteBatch spriteBatch) {
             Effect shader = EffectLoader.CyberBoundaryRing?.Value;
             if (shader == null) return;
             if (CWRAsset.Placeholder_White?.Value == null) return;
             if (CWRAsset.Extra_193?.Value == null) return;
-            if (Cyberspace.Intensity < 0.02f || Cyberspace.ExpandProgress < 0.3f) return;
+            if (Cyberspace.Intensity < 0.02f) return;
 
             Texture2D canvas = CWRAsset.Placeholder_White.Value;
             Texture2D noise = CWRAsset.Extra_193.Value;
-            float time = Cyberspace.EffectTime * 0.75f;
-
-            float effectiveRadius = Cyberspace.Radius * Cyberspace.ExpandProgress;
-            //四边形半宽要留出足够余量给外侧碎片拖尾
-            float quadHalf = effectiveRadius * 1.1f;
-            //环在归一化空间中的位置 = 实际半径 / 四边形半宽
-            float ringPos = effectiveRadius / quadHalf;
-
-            //ringThickness随呼吸微调
-            float thickness = 0.15f + 0.012f * MathF.Sin(time * 0.8f + 1.2f);
-
-            shader.Parameters["uTime"]?.SetValue(time);
-            shader.Parameters["ringProgress"]?.SetValue(ringPos);
-            shader.Parameters["ringThickness"]?.SetValue(thickness);
-            shader.Parameters["fadeAlpha"]?.SetValue(Cyberspace.Intensity);
-
             Vector2 center = Main.LocalPlayer.Center;
             Vector2 drawPos = center - Main.screenPosition;
-            float drawDiameter = quadHalf * 2f * 0.8f;//0.8f是为了让环位于外圈内侧，属于一个魔法数字
 
             spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
                 SamplerState.LinearWrap, DepthStencilState.None, RasterizerState.CullNone,
                 null, Main.GameViewMatrix.TransformationMatrix);
-
             Main.graphics.GraphicsDevice.Textures[1] = noise;
             Main.graphics.GraphicsDevice.SamplerStates[1] = SamplerState.LinearWrap;
-            shader.CurrentTechnique.Passes[0].Apply();
 
-            Color ringTint = new Color(1f, 0.80f, 0.65f);
-            spriteBatch.Draw(canvas, drawPos, null, ringTint,
-                0f, canvas.Size() * 0.5f, new Vector2(drawDiameter, drawDiameter),
-                SpriteEffects.None, 0f);
+            for (int layer = 0; layer < Cyberspace.CurrentLayer; layer++) {
+                float expand = Cyberspace.GetLayerExpand(layer);
+                if (expand < 0.3f) continue;
+
+                float time = Cyberspace.EffectTime * 0.75f;
+                float layerRadius = Cyberspace.GetLayerRadius(layer);
+                float effectiveRadius = layerRadius * expand;
+                float quadHalf = effectiveRadius * 1.1f;
+                float ringPos = effectiveRadius / quadHalf;
+                float thickness = 0.15f + 0.012f * MathF.Sin(time * 0.8f + 1.2f + layer * 2.1f);
+
+                //每层用不同的时间偏移，避免同步呼吸
+                shader.Parameters["uTime"]?.SetValue(time + layer * 7.3f);
+                shader.Parameters["ringProgress"]?.SetValue(ringPos);
+                shader.Parameters["ringThickness"]?.SetValue(thickness);
+                shader.Parameters["fadeAlpha"]?.SetValue(Cyberspace.Intensity);
+                shader.CurrentTechnique.Passes[0].Apply();
+
+                float drawDiameter = quadHalf * 2f * 0.8f;
+                Color ringTint = GetLayerRingTint(layer);
+                spriteBatch.Draw(canvas, drawPos, null, ringTint,
+                    0f, canvas.Size() * 0.5f, new Vector2(drawDiameter, drawDiameter),
+                    SpriteEffects.None, 0f);
+            }
 
             spriteBatch.End();
+        }
+
+        private static Color GetLayerRingTint(int layer) {
+            return layer switch {
+                0 => new Color(1f, 0.80f, 0.65f),
+                1 => new Color(1f, 0.65f, 0.50f),
+                _ => new Color(1f, 0.50f, 0.35f),
+            };
         }
 
         /// <summary>

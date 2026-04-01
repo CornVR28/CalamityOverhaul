@@ -7,14 +7,16 @@ using Terraria.ModLoader;
 namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
 {
     /// <summary>
-    /// 赛博空间领域系统 —— 状态管理器
+    /// 赛博空间领域系统 —— 多层状态管理器
     /// <br/>主题风格：赛博朋克2077黑墙AI，深红色系，方块栅格边缘，内部波形特效
-    /// <br/>通过 <see cref="Activate"/> / <see cref="Deactivate"/> 控制开关，
-    /// 展开与收缩带有平滑过渡动画
+    /// <br/>支持最多 <see cref="MaxLayerCount"/> 层嵌套领域，层层递进，越发震撼
+    /// <br/>通过 <see cref="Activate"/> 开启第一层，<see cref="SetLayer"/> 升层，
+    /// <see cref="Deactivate"/> 收缩关闭
     /// </summary>
     internal class Cyberspace : ICWRLoader
     {
         void ICWRLoader.UnLoadData() => Reset();
+
         /// <summary>
         /// 赛博空间是否处于激活状态
         /// </summary>
@@ -25,15 +27,73 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         /// </summary>
         public static float Intensity { get; set; }
 
-        /// <summary>
-        /// 展开进度 (0=完全收起, 1=完全展开)
-        /// </summary>
-        public static float ExpandProgress { get; set; }
+        // ====== 多层领域配置 ======
 
         /// <summary>
-        /// 领域半径，单位为世界像素
+        /// 最大支持层数
         /// </summary>
-        public static float Radius = 600f;
+        public const int MaxLayerCount = 3;
+
+        /// <summary>
+        /// 每层半径相对于基础半径的倍率
+        /// </summary>
+        private static readonly float[] LayerRadiusScale = { 1.0f, 1.7f, 2.6f };
+
+        /// <summary>
+        /// 每层独立展开进度 (0~1)
+        /// </summary>
+        private static readonly float[] layerExpand = new float[MaxLayerCount];
+        private static readonly int[] layerBurstTimer = new int[MaxLayerCount];
+
+        /// <summary>
+        /// 当前领域层数 (1~MaxLayerCount)，0表示正在收缩/未激活
+        /// </summary>
+        public static int CurrentLayer { get; private set; }
+
+        /// <summary>
+        /// 基础半径（第一层领域半径），单位为世界像素
+        /// </summary>
+        public static float BaseRadius = 600f;
+
+        /// <summary>
+        /// 当前最外层的目标半径（着色器使用）
+        /// </summary>
+        public static float Radius => CurrentLayer > 0 ? GetLayerRadius(CurrentLayer - 1) : BaseRadius;
+
+        /// <summary>
+        /// 全局展开进度 = 有效外半径 / 目标外半径（着色器使用）
+        /// </summary>
+        public static float ExpandProgress {
+            get {
+                float r = Radius;
+                if (r <= 0f) return 0f;
+                return MathHelper.Clamp(EffectiveOuterRadius / r, 0f, 1f);
+            }
+        }
+
+        /// <summary>
+        /// 当前实际有效的最外层半径（所有层中最大的有效半径）
+        /// </summary>
+        public static float EffectiveOuterRadius {
+            get {
+                float maxR = 0f;
+                for (int i = 0; i < MaxLayerCount; i++) {
+                    float r = GetLayerRadius(i) * layerExpand[i];
+                    if (r > maxR) maxR = r;
+                }
+                return maxR;
+            }
+        }
+
+        /// <summary>
+        /// 获取指定层(0-indexed)的完整半径
+        /// </summary>
+        public static float GetLayerRadius(int layerIndex) => BaseRadius * LayerRadiusScale[layerIndex];
+
+        /// <summary>
+        /// 获取指定层(0-indexed)的展开进度
+        /// </summary>
+        public static float GetLayerExpand(int layerIndex) => layerExpand[layerIndex];
 
         /// <summary>
         /// 方形栅格单元边长，控制边缘方块的大小
@@ -51,33 +111,55 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         public static float EffectTime { get; private set; }
 
         private static float targetIntensity;
-        private static float targetExpand;
 
         //爆发阶段：激活后的前N帧用更高的lerp速率实现快速展开
         private const int BurstDuration = 14;
-        private static int burstTimer;
+
+        //环境故障闪电计时器（二层以上生效）
+        private static int ambientBoltTimer;
 
         /// <summary>
-        /// 激活赛博空间领域（带爆发式展开+视觉特效）
+        /// 激活赛博空间领域第一层（带爆发式展开+视觉特效）
         /// </summary>
         public static void Activate(Player owner) {
             Active = true;
+            CurrentLayer = 1;
             targetIntensity = 1f;
-            targetExpand = 1f;
-            burstTimer = BurstDuration;
+            layerBurstTimer[0] = BurstDuration;
             SpawnActivationVFX(owner);
         }
 
         /// <summary>
-        /// 关闭赛博空间领域（带收缩动画）
+        /// 提升领域层数（带展开特效）
         /// </summary>
-        public static void Deactivate() {
-            targetIntensity = 0f;
-            targetExpand = 0f;
+        public static void SetLayer(int layer, Player owner = null) {
+            layer = Math.Clamp(layer, 1, MaxLayerCount);
+            if (!Active || layer <= CurrentLayer) return;
+
+            int oldLayer = CurrentLayer;
+            CurrentLayer = layer;
+
+            //新层爆发展开
+            for (int i = oldLayer; i < layer; i++) {
+                layerBurstTimer[i] = BurstDuration;
+            }
+
+            //升层视觉特效
+            if (owner != null) {
+                SpawnLayerVFX(owner, oldLayer, layer);
+            }
         }
 
         /// <summary>
-        /// 每帧逻辑更新，驱动展开/收缩过渡
+        /// 关闭赛博空间领域（所有层带收缩动画）
+        /// </summary>
+        public static void Deactivate() {
+            targetIntensity = 0f;
+            CurrentLayer = 0;
+        }
+
+        /// <summary>
+        /// 每帧逻辑更新，驱动多层展开/收缩过渡
         /// </summary>
         public static void Update() {
             //累计效果时间：骇客时间期间放缓10倍
@@ -85,27 +167,45 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             float timeSpeed = HackTime.HackTime.Active ? 0.1f : 1f;
             EffectTime += dt * timeSpeed;
 
-            if (burstTimer > 0) {
-                //爆发阶段：极速展开+强度拉满
-                burstTimer--;
-                float burstFactor = (float)burstTimer / BurstDuration; //1→0，越往后越接近目标
-                float expandLerp = MathHelper.Lerp(0.06f, 0.22f, burstFactor);
-                float intensityLerp = MathHelper.Lerp(0.08f, 0.25f, burstFactor);
-                ExpandProgress = MathHelper.Lerp(ExpandProgress, targetExpand, expandLerp);
-                Intensity = MathHelper.Lerp(Intensity, targetIntensity, intensityLerp);
+            //强度过渡
+            float intensityLerp = Active ? 0.045f : 0.06f;
+            if (layerBurstTimer[0] > 0) {
+                float burstFactor = (float)layerBurstTimer[0] / BurstDuration;
+                intensityLerp = MathHelper.Lerp(0.08f, 0.25f, burstFactor);
             }
-            else {
-                //常规阶段：平滑过渡
-                float intensityLerp = Active ? 0.045f : 0.06f;
-                Intensity = MathHelper.Lerp(Intensity, targetIntensity, intensityLerp);
-                ExpandProgress = MathHelper.Lerp(ExpandProgress, targetExpand, 0.035f);
+            Intensity = MathHelper.Lerp(Intensity, targetIntensity, intensityLerp);
+
+            //逐层展开/收缩
+            for (int i = 0; i < MaxLayerCount; i++) {
+                float target = (i < CurrentLayer) ? 1f : 0f;
+
+                if (layerBurstTimer[i] > 0) {
+                    layerBurstTimer[i]--;
+                    float burstFactor = (float)layerBurstTimer[i] / BurstDuration;
+                    float expandLerp = MathHelper.Lerp(0.06f, 0.22f, burstFactor);
+                    layerExpand[i] = MathHelper.Lerp(layerExpand[i], target, expandLerp);
+                }
+                else {
+                    float expandLerp = target > 0f ? 0.035f : 0.05f;
+                    layerExpand[i] = MathHelper.Lerp(layerExpand[i], target, expandLerp);
+                }
+
+                if (target <= 0f && layerExpand[i] < 0.005f)
+                    layerExpand[i] = 0f;
             }
 
-            //收缩完毕后彻底关闭
-            if (targetExpand <= 0f && ExpandProgress < 0.005f) {
-                ExpandProgress = 0f;
-                Intensity = 0f;
-                Active = false;
+            //二层以上：周期性从外环释放环境故障闪电
+            if (CurrentLayer >= 2 && Intensity > 0.5f) {
+                ambientBoltTimer--;
+                if (ambientBoltTimer <= 0) {
+                    SpawnAmbientBolts();
+                    ambientBoltTimer = 40 + Main.rand.Next(-8, 12);
+                }
+            }
+
+            //所有层收缩完毕后彻底关闭
+            if (CurrentLayer == 0 && layerExpand[0] < 0.005f) {
+                Reset();
             }
         }
 
@@ -115,15 +215,18 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         public static void Reset() {
             Active = false;
             Intensity = 0f;
-            ExpandProgress = 0f;
             EffectTime = 0f;
+            CurrentLayer = 0;
             targetIntensity = 0f;
-            targetExpand = 0f;
-            burstTimer = 0;
+            ambientBoltTimer = 0;
+            for (int i = 0; i < MaxLayerCount; i++) {
+                layerExpand[i] = 0f;
+                layerBurstTimer[i] = 0;
+            }
         }
 
         /// <summary>
-        /// 生成领域激活时的视觉特效弹幕（冲击波+故障闪电）
+        /// 生成第一层领域激活时的视觉特效弹幕（冲击波+故障闪电）
         /// </summary>
         private static void SpawnActivationVFX(Player owner) {
             if (Main.myPlayer != owner.whoAmI) return;
@@ -144,6 +247,56 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
                 int delay = Main.rand.Next(0, 5);
                 Projectile.NewProjectile(source, center, Vector2.Zero,
                     ModContent.ProjectileType<CyberGlitchBoltProj>(), 0, 0, owner.whoAmI,
+                    ai0: angle, ai1: delay);
+            }
+        }
+
+        /// <summary>
+        /// 升层时生成冲击波+故障闪电（数量随层数递增）
+        /// </summary>
+        private static void SpawnLayerVFX(Player owner, int oldLayer, int newLayer) {
+            if (Main.myPlayer != owner.whoAmI) return;
+
+            IEntitySource source = owner.GetSource_FromThis();
+            Vector2 center = owner.Center;
+
+            //新层冲击波
+            Projectile.NewProjectile(source, center, Vector2.Zero,
+                ModContent.ProjectileType<CyberShockwaveProj>(), 0, 0, owner.whoAmI);
+
+            //故障闪电数量随层数增多
+            int boltCount = Main.rand.Next(4 + newLayer * 2, 7 + newLayer * 2);
+            float baseAngle = Main.rand.NextFloat() * MathHelper.TwoPi;
+            for (int i = 0; i < boltCount; i++) {
+                float angle = baseAngle + MathHelper.TwoPi * i / boltCount
+                    + Main.rand.NextFloat(-0.28f, 0.28f);
+                int delay = Main.rand.Next(0, 4);
+                Projectile.NewProjectile(source, center, Vector2.Zero,
+                    ModContent.ProjectileType<CyberGlitchBoltProj>(), 0, 0, owner.whoAmI,
+                    ai0: angle, ai1: delay);
+            }
+        }
+
+        /// <summary>
+        /// 从最外层边缘周期性释放环境故障闪电（仅二层以上触发）
+        /// </summary>
+        private static void SpawnAmbientBolts() {
+            Player player = Main.LocalPlayer;
+            if (player == null || !player.active) return;
+            if (Main.myPlayer != player.whoAmI) return;
+
+            IEntitySource source = player.GetSource_FromThis();
+            float outerR = EffectiveOuterRadius;
+            Vector2 center = player.Center;
+
+            //1~(1+层数)条闪电从外环随机位置向外射出
+            int count = Main.rand.Next(1, 1 + CurrentLayer);
+            for (int i = 0; i < count; i++) {
+                float angle = Main.rand.NextFloat() * MathHelper.TwoPi;
+                Vector2 spawnPos = center + angle.ToRotationVector2() * outerR;
+                int delay = Main.rand.Next(0, 6);
+                Projectile.NewProjectile(source, spawnPos, Vector2.Zero,
+                    ModContent.ProjectileType<CyberGlitchBoltProj>(), 0, 0, player.whoAmI,
                     ai0: angle, ai1: delay);
             }
         }
