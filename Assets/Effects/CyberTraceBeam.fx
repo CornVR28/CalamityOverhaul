@@ -7,11 +7,9 @@
 float4x4 transformMatrix;
 float uTime;
 float fadeAlpha;        // 整体透明度 0~1.4
-float headProgress;     // 头部在拖尾上的位置 0~1（along轴）
 float3 coreColor;       // 主题内层亮色（由C#端按主题传入）
 float3 glowColor;       // 主题中层辉光色
 float3 auraColor;       // 主题外层光晕色
-float trailLength;      // 拖尾可见长度 0~1（从头部往后）
 
 texture uNoiseTex;
 sampler noiseSamp = sampler_state
@@ -62,15 +60,9 @@ float4 PixelShaderFunction(PSInput input) : COLOR0
     float cross_ = uv.y;         // 0=上边 1=下边
     float crossDist = abs(cross_ - 0.5) * 2.0; // 0=中心 1=边缘
 
-    // ---- 拖尾可见遮罩：头部所在位置向后延伸 trailLength ----
-    float tailStart = headProgress - trailLength;
-    float visMask = smoothstep(tailStart - 0.03, tailStart + 0.05, along)
-                  * smoothstep(headProgress + 0.03, headProgress - 0.01, along);
-    if (visMask < 0.001)
-        return float4(0, 0, 0, 0);
-
-    // 离头部的相对距离 0=头部 1=尾端
-    float distFromHead = saturate((headProgress - along) / max(trailLength, 0.01));
+    // along: 0=头部(当前位置), 1=尾端(最远历史位置)
+    // 沿拖尾方向的自然衰减
+    float distFromHead = along;
 
     // ---- 噪声采样 ----
     float n1 = tex2D(noiseSamp, frac(float2(along * 4.0 + uTime * 1.5, cross_ * 0.8))).r;
@@ -130,14 +122,13 @@ float4 PixelShaderFunction(PSInput input) : COLOR0
     // ============================================================
     // F. 头部光球 —— 圆形高亮辐射
     // ============================================================
-    float headDist = abs(along - headProgress);
-    float headOrb = 1.0 - smoothstep(0.0, 0.05, headDist);
+    float headOrb = 1.0 - smoothstep(0.0, 0.05, along);
     headOrb *= (1.0 - crossDist * 0.6);
     // 光球呼吸脉冲
     float orbPulse = 0.8 + 0.2 * sin(uTime * 12.0);
     headOrb *= orbPulse;
     // 光球外圈柔和光晕
-    float headGlow = 1.0 - smoothstep(0.02, 0.12, headDist);
+    float headGlow = 1.0 - smoothstep(0.02, 0.12, along);
     headGlow *= (1.0 - crossDist * 0.8) * 0.4;
 
     // ============================================================
@@ -149,7 +140,7 @@ float4 PixelShaderFunction(PSInput input) : COLOR0
     // ============================================================
     // H. 尾端渐隐 —— 拖尾末端平滑消失
     // ============================================================
-    float tailFade = smoothstep(0.0, 0.25, 1.0 - distFromHead);
+    float tailFade = 1.0 - smoothstep(0.7, 1.0, along);
 
     // ============================================================
     // 颜色合成
@@ -173,7 +164,7 @@ float4 PixelShaderFunction(PSInput input) : COLOR0
         + streams * 0.2
         + gridLine * 0.1
     );
-    alpha *= fadeAlpha * visMask * tailFade;
+    alpha *= fadeAlpha * tailFade;
 
     return float4(color * alpha, alpha) * input.Color;
 }

@@ -186,12 +186,12 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         #region Trail绘制
 
         private float WidthFunction(float progress) {
-            // progress: 0=当前头部, 1=最远尾部
-            // 头部圆弧收窄 + 中段饱满 + 尾端渐细
-            float headTaper = MathF.Pow(MathF.Sin(MathHelper.Clamp(progress * 8f, 0f, MathHelper.Pi)), 0.5f);
-            float bodyFade = 1f - MathF.Pow(progress, 2.5f);
-            float width = headTaper * bodyFade;
-            return MathHelper.Clamp(width, 0.02f, 1f) * 28f;
+            // progress: 0=当前头部(最宽), 1=最远尾部(渐细消失)
+            // 头部饱满圆弧 + 尾端平滑渐细
+            float headShape = 1f - MathF.Pow(progress, 0.15f) * 0.05f; // 头部接近满宽，极缓起步衰减
+            float tailTaper = 1f - MathF.Pow(progress, 2.0f);          // 尾部加速收窄
+            float width = headShape * tailTaper;
+            return MathF.Max(width, 0f) * 30f;
         }
 
         private Color ColorFunction(Vector2 _) => Color.White;
@@ -230,11 +230,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             shader.Parameters["transformMatrix"]?.SetValue(VaultUtils.GetTransfromMatrix());
             shader.Parameters["uTime"]?.SetValue(Cyberspace.Active ? Cyberspace.EffectTime : (float)Main.timeForVisualEffects * 0.04f);
             shader.Parameters["fadeAlpha"]?.SetValue(MathHelper.Clamp(fadeAlpha, 0f, 1f));
-            shader.Parameters["headProgress"]?.SetValue(0f); // 头部在along=0的位置（oldPos[0]是当前位置）
             shader.Parameters["coreColor"]?.SetValue(theme.CoreVec);
             shader.Parameters["glowColor"]?.SetValue(theme.GlowVec);
             shader.Parameters["auraColor"]?.SetValue(theme.AuraVec);
-            shader.Parameters["trailLength"]?.SetValue(MathHelper.Clamp(validCount / (float)TrailCacheLen, 0.1f, 1f));
             shader.Parameters["uNoiseTex"]?.SetValue(noise);
 
             GraphicsDevice device = Main.graphics.GraphicsDevice;
