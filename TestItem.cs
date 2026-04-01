@@ -88,7 +88,7 @@ namespace CalamityOverhaul
             else {
                 Cyberspace.Deactivate(); // 收缩关闭
             }
-            Cyberspace.SetLayer(2, player);
+            Cyberspace.SetLayer(3, player);
             //Cyberspace.Deactivate(); // 收缩关闭
             //ScenarioManager.Reset<FirstMetShepel>();
             //ScenarioManager.Start<FirstMetShepel>();

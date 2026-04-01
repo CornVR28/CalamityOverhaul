@@ -112,8 +112,12 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
 
         private static float targetIntensity;
 
-        //爆发阶段：激活后的前N帧用更高的lerp速率实现快速展开
-        private const int BurstDuration = 14;
+        //爆发阶段：每层持续帧数递增（高层领域大，过渡更久）
+        private static readonly int[] BurstDurations = { 14, 24, 36 };
+        //常规展开lerp速率：高层更缓
+        private static readonly float[] ExpandLerps = { 0.035f, 0.020f, 0.013f };
+        //收缩lerp速率：高层更缓
+        private static readonly float[] ContractLerps = { 0.050f, 0.030f, 0.020f };
 
         //环境故障闪电计时器（二层以上生效）
         private static int ambientBoltTimer;
@@ -122,10 +126,16 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         /// 激活赛博空间领域第一层（带爆发式展开+视觉特效）
         /// </summary>
         public static void Activate(Player owner) {
+            //重置所有层展开进度，确保每次激活都从零开始展开
+            for (int i = 0; i < MaxLayerCount; i++) {
+                layerExpand[i] = 0f;
+                layerBurstTimer[i] = 0;
+            }
             Active = true;
             CurrentLayer = 1;
             targetIntensity = 1f;
-            layerBurstTimer[0] = BurstDuration;
+            Intensity = 0f;
+            layerBurstTimer[0] = BurstDurations[0];
             SpawnActivationVFX(owner);
         }
 
@@ -140,9 +150,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             CurrentLayer = layer;
 
             if (layer > oldLayer) {
-                //升层：新层爆发展开
+                //升层：新层爆发展开（高层持续更久）
                 for (int i = oldLayer; i < layer; i++) {
-                    layerBurstTimer[i] = BurstDuration;
+                    layerBurstTimer[i] = BurstDurations[i];
                 }
                 //升层视觉特效
                 if (owner != null) {
@@ -172,23 +182,27 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             //强度过渡
             float intensityLerp = Active ? 0.045f : 0.06f;
             if (layerBurstTimer[0] > 0) {
-                float burstFactor = (float)layerBurstTimer[0] / BurstDuration;
+                float burstFactor = (float)layerBurstTimer[0] / BurstDurations[0];
                 intensityLerp = MathHelper.Lerp(0.08f, 0.25f, burstFactor);
             }
             Intensity = MathHelper.Lerp(Intensity, targetIntensity, intensityLerp);
 
-            //逐层展开/收缩
+            //逐层展开/收缩（高层用更缓的lerp，过渡更平滑可见）
             for (int i = 0; i < MaxLayerCount; i++) {
                 float target = (i < CurrentLayer) ? 1f : 0f;
+                int burstDur = BurstDurations[i];
 
                 if (layerBurstTimer[i] > 0) {
                     layerBurstTimer[i]--;
-                    float burstFactor = (float)layerBurstTimer[i] / BurstDuration;
-                    float expandLerp = MathHelper.Lerp(0.06f, 0.22f, burstFactor);
+                    float burstFactor = (float)layerBurstTimer[i] / burstDur;
+                    //爆发lerp：高层起始更小、结束更小，整体更缓
+                    float burstLerpMin = MathHelper.Lerp(0.06f, 0.025f, (float)i / (MaxLayerCount - 1));
+                    float burstLerpMax = MathHelper.Lerp(0.22f, 0.10f, (float)i / (MaxLayerCount - 1));
+                    float expandLerp = MathHelper.Lerp(burstLerpMin, burstLerpMax, burstFactor);
                     layerExpand[i] = MathHelper.Lerp(layerExpand[i], target, expandLerp);
                 }
                 else {
-                    float expandLerp = target > 0f ? 0.035f : 0.05f;
+                    float expandLerp = target > 0f ? ExpandLerps[i] : ContractLerps[i];
                     layerExpand[i] = MathHelper.Lerp(layerExpand[i], target, expandLerp);
                 }
 
