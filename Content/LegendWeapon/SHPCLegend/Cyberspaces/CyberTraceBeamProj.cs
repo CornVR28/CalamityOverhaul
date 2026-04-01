@@ -118,8 +118,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             }
 
             // 微追踪：寻找最近NPC并柔和偏转
-            NPC target = Projectile.Center.FindClosestNPC(HomingRange);
-            if (target != null) {
+            NPC target = Projectile.Center.FindClosestNPC(120f);
+            if (target != null && Projectile.numHits == 0) {
                 Vector2 desired = (target.Center - Projectile.Center).SafeNormalize(Projectile.velocity.SafeNormalize(Vector2.UnitX));
                 float currentAngle = Projectile.velocity.ToRotation();
                 float targetAngle = desired.ToRotation();

@@ -126,6 +126,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             // 蓄力阶段不移动
             Projectile.velocity = Vector2.Zero;
             Projectile.timeLeft = 600; // 重置timeLeft防止蓄力超时消失
+            owner.itemTime = 2;
+            owner.itemAnimation = 2;
 
             // 淡入
             fadeAlpha = MathHelper.Clamp(chargeTime / 15f, 0f, 1f);
