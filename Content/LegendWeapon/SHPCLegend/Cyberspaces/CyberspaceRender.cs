@@ -190,7 +190,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
 
             Vector2 center = Main.LocalPlayer.Center;
             Vector2 drawPos = center - Main.screenPosition;
-            float drawDiameter = quadHalf * 2f * 0.8f;
+            float drawDiameter = quadHalf * 2f * 0.8f;//0.8f是为了让环位于外圈内侧，属于一个魔法数字
 
             spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
                 SamplerState.LinearWrap, DepthStencilState.None, RasterizerState.CullNone,
