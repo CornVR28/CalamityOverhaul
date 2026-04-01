@@ -1,4 +1,4 @@
-using CalamityOverhaul.Common;
+﻿using CalamityOverhaul.Common;
 using CalamityOverhaul.Content.PRTTypes;
 using InnoVault;
 using InnoVault.PRT;
@@ -186,11 +186,13 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         #region Trail绘制
 
         private float WidthFunction(float progress) {
-            // progress: 0=当前头部(最宽), 1=最远尾部(渐细消失)
-            // 头部饱满圆弧 + 尾端平滑渐细
-            float headShape = 1f - MathF.Pow(progress, 0.15f) * 0.05f; // 头部接近满宽，极缓起步衰减
-            float tailTaper = 1f - MathF.Pow(progress, 2.0f);          // 尾部加速收窄
-            float width = headShape * tailTaper;
+            // progress: 0=头部, 1=尾端
+            // 头部从0快速展开形成锥形鼻（配合光球覆盖产生圆头效果）
+            // 尾端逐渐收窄消失
+            float noseRise = MathF.Min(progress / 0.06f, 1f); // 前6%从0→满宽，形成锥形鼻
+            noseRise = MathF.Sin(noseRise * MathHelper.PiOver2); // 缓入让过渡更圆润
+            float tailTaper = 1f - MathF.Pow(progress, 2.0f);
+            float width = noseRise * tailTaper;
             return MathF.Max(width, 0f) * 30f;
         }
 
@@ -258,27 +260,31 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             Vector2 drawPos = Projectile.Center - Main.screenPosition;
             float pulse = 0.85f + 0.15f * MathF.Sin((float)Main.timeForVisualEffects * 0.15f);
             float alpha = fadeAlpha * pulse;
+            Vector2 glowOrigin = glow.Size() * 0.5f;
 
-            // 外层柔和光晕（大范围、低不透明度）
-            float outerScale = 1.8f * Projectile.scale;
-            Color outerColor = theme.Aura * alpha * 0.3f;
-            outerColor.A = 0;
+            // 最外层大范围光晕（营造能量辐射感）
+            float outerScale = 3.5f * Projectile.scale;
+            Color outerColor = theme.Aura * alpha * 0.25f;
             spriteBatch.Draw(glow, drawPos, null, outerColor, 0f,
-                glow.Size() * 0.5f, outerScale, SpriteEffects.None, 0f);
+                glowOrigin, outerScale, SpriteEffects.None, 0f);
 
-            // 中层辉光
-            float midScale = 1.0f * Projectile.scale;
-            Color midColor = theme.Core * alpha * 0.6f;
-            midColor.A = 0;
+            // 中层主题色辉光
+            float midScale = 2.0f * Projectile.scale;
+            Color midColor = theme.Glow * alpha * 0.5f;
             spriteBatch.Draw(glow, drawPos, null, midColor, 0f,
-                glow.Size() * 0.5f, midScale, SpriteEffects.None, 0f);
+                glowOrigin, midScale, SpriteEffects.None, 0f);
+
+            // 内层明亮核心（与拖尾宽度匹配，覆盖锥形鼻区域）
+            float innerScale = 1.2f * Projectile.scale;
+            Color innerColor = theme.Core * alpha * 0.7f;
+            spriteBatch.Draw(glow, drawPos, null, innerColor, 0f,
+                glowOrigin, innerScale, SpriteEffects.None, 0f);
 
             // 核心白热点
-            float coreScale = 0.4f * Projectile.scale;
-            Color coreColor = Color.White * alpha * 0.8f;
-            coreColor.A = 0;
+            float coreScale = 0.55f * Projectile.scale;
+            Color coreColor = Color.White * alpha * 0.9f;
             spriteBatch.Draw(glow, drawPos, null, coreColor, 0f,
-                glow.Size() * 0.5f, coreScale, SpriteEffects.None, 0f);
+                glowOrigin, coreScale, SpriteEffects.None, 0f);
         }
 
         #endregion

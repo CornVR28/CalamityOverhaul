@@ -55,7 +55,7 @@ namespace CalamityOverhaul
         }
 
         public override void UpdateInventory(Player player) {
-            player.GetDamage(DamageClass.Generic) += 100f;
+            //player.GetDamage(DamageClass.Generic) += 100f;
         }
 
         public override bool PreDrawInWorld(SpriteBatch spriteBatch, Color lightColor, Color alphaColor, ref float rotation, ref float scale, int whoAmI) {
