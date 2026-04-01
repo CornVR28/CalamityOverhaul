@@ -3,10 +3,12 @@ using CalamityOverhaul.Content.ADV.Scenarios;
 using CalamityOverhaul.Content.ADV.Scenarios.SupCal.End.EternalBlazingNows;
 using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
 using Microsoft.Xna.Framework.Graphics;
+using Mono.Cecil;
 using Terraria;
 using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace CalamityOverhaul
 {
@@ -81,14 +83,20 @@ namespace CalamityOverhaul
             //}
             //Sandevistan.IsActive = !Sandevistan.IsActive;
             //CyberwareUI.Instance.Toggle();
-            
-            if (player.altFunctionUse == 0) {
-                Cyberspace.Activate(player);   // 展开领域
-                Cyberspace.SetLayer(3, player);
-            }
-            else {
-                Cyberspace.Deactivate(); // 收缩关闭
-            }
+
+            //if (player.altFunctionUse == 0) {
+            //    Cyberspace.Activate(player);   // 展开领域
+            //    Cyberspace.SetLayer(3, player);
+            //}
+            //else {
+            //    Cyberspace.Deactivate(); // 收缩关闭
+            //}
+
+            // 生成光束，ai[0] = 颜色主题 (0=蓝, 1=黄, 2=青)
+            Projectile.NewProjectile(player.FromObjectGetParent(), player.Center, player.Center.To(Main.MouseWorld).UnitVector() * 12,
+                ModContent.ProjectileType<CyberTraceBeamProj>(),
+                20, 1, player.whoAmI, ai0: Main.rand.Next(3));
+
             //Cyberspace.SetLayer(3, player);
             //Cyberspace.Deactivate(); // 收缩关闭
             //ScenarioManager.Reset<FirstMetShepel>();
