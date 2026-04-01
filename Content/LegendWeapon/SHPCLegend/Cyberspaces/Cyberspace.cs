@@ -51,14 +51,33 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         public static int CurrentLayer { get; private set; }
 
         /// <summary>
+        /// 收缩前的层数，用于收缩动画期间仍继续渲染各层边界环
+        /// </summary>
+        public static int RenderLayerCount {
+            get {
+                //返回展开进度大于阈值的最高层数
+                int count = 0;
+                for (int i = 0; i < MaxLayerCount; i++) {
+                    if (layerExpand[i] > 0.01f) count = i + 1;
+                }
+                return count;
+            }
+        }
+
+        /// <summary>
         /// 基础半径（第一层领域半径），单位为世界像素
         /// </summary>
         public static float BaseRadius = 600f;
 
         /// <summary>
-        /// 当前最外层的目标半径（着色器使用）
+        /// 当前最外层的目标半径（着色器使用，收缩期仍返回正在收缩的最高层半径）
         /// </summary>
-        public static float Radius => CurrentLayer > 0 ? GetLayerRadius(CurrentLayer - 1) : BaseRadius;
+        public static float Radius {
+            get {
+                int rLayer = Math.Max(CurrentLayer, RenderLayerCount);
+                return rLayer > 0 ? GetLayerRadius(rLayer - 1) : BaseRadius;
+            }
+        }
 
         /// <summary>
         /// 全局展开进度 = 有效外半径 / 目标外半径（着色器使用）
@@ -88,12 +107,18 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         /// <summary>
         /// 获取指定层(0-indexed)的完整半径
         /// </summary>
-        public static float GetLayerRadius(int layerIndex) => BaseRadius * LayerRadiusScale[layerIndex];
+        public static float GetLayerRadius(int layerIndex) {
+            layerIndex = Math.Clamp(layerIndex, 0, MaxLayerCount - 1);
+            return BaseRadius * LayerRadiusScale[layerIndex];
+        }
 
         /// <summary>
         /// 获取指定层(0-indexed)的展开进度
         /// </summary>
-        public static float GetLayerExpand(int layerIndex) => layerExpand[layerIndex];
+        public static float GetLayerExpand(int layerIndex) {
+            layerIndex = Math.Clamp(layerIndex, 0, MaxLayerCount - 1);
+            return layerExpand[layerIndex];
+        }
 
         /// <summary>
         /// 方形栅格单元边长，控制边缘方块的大小
@@ -179,11 +204,18 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             float timeSpeed = HackTime.HackTime.Active ? 0.1f : 1f;
             EffectTime += dt * timeSpeed;
 
-            //强度过渡
-            float intensityLerp = Active ? 0.045f : 0.06f;
-            if (layerBurstTimer[0] > 0) {
-                float burstFactor = (float)layerBurstTimer[0] / BurstDurations[0];
-                intensityLerp = MathHelper.Lerp(0.08f, 0.25f, burstFactor);
+            //强度过渡：关闭时Intensity收缩要比layerExpand更慢，确保收缩动画可见
+            float intensityLerp;
+            if (Active && CurrentLayer > 0) {
+                intensityLerp = 0.045f;
+                if (layerBurstTimer[0] > 0) {
+                    float burstFactor = (float)layerBurstTimer[0] / BurstDurations[0];
+                    intensityLerp = MathHelper.Lerp(0.08f, 0.25f, burstFactor);
+                }
+            }
+            else {
+                //关闭阶段：Intensity最后消失，速率极慢
+                intensityLerp = 0.015f;
             }
             Intensity = MathHelper.Lerp(Intensity, targetIntensity, intensityLerp);
 
@@ -219,9 +251,18 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
                 }
             }
 
-            //所有层收缩完毕后彻底关闭
-            if (CurrentLayer == 0 && layerExpand[0] < 0.005f) {
-                Reset();
+            //所有层收缩完毕且Intensity足够低后彻底关闭
+            if (CurrentLayer == 0) {
+                bool allCollapsed = true;
+                for (int i = 0; i < MaxLayerCount; i++) {
+                    if (layerExpand[i] >= 0.005f) {
+                        allCollapsed = false;
+                        break;
+                    }
+                }
+                if (allCollapsed && Intensity < 0.005f) {
+                    Reset();
+                }
             }
         }
 

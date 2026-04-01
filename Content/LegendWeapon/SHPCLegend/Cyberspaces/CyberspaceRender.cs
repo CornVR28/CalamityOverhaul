@@ -105,8 +105,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             Texture2D glowTex = softGlow?.Value;
             if (glowTex == null || Cyberspace.Intensity < 0.01f) return;
 
-            //逐层绘制边缘光晕
-            for (int layer = 0; layer < Cyberspace.CurrentLayer; layer++) {
+            //逐层绘制边缘光晕（包含收缩中的层）
+            for (int layer = 0; layer < Cyberspace.RenderLayerCount; layer++) {
                 float expand = Cyberspace.GetLayerExpand(layer);
                 if (expand < 0.1f) continue;
                 DrawSingleEdgeGlowRing(spriteBatch, glowTex, layer, expand);
@@ -201,7 +201,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             Main.graphics.GraphicsDevice.Textures[1] = noise;
             Main.graphics.GraphicsDevice.SamplerStates[1] = SamplerState.LinearWrap;
 
-            for (int layer = 0; layer < Cyberspace.CurrentLayer; layer++) {
+            for (int layer = 0; layer < Cyberspace.RenderLayerCount; layer++) {
                 float expand = Cyberspace.GetLayerExpand(layer);
                 if (expand < 0.3f) continue;
 
