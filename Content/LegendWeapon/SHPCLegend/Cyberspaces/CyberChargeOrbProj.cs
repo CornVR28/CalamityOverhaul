@@ -99,6 +99,13 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             Projectile.DamageType = DamageClass.Magic;
         }
 
+        public override bool? CanDamage() {
+            if (State == OrbState.Charging) {
+                return false;
+            }
+            return base.CanDamage();
+        }
+
         public override void AI() {
             Player owner = Main.player[Projectile.owner];
             if (!owner.active || owner.dead) {
@@ -213,8 +220,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         }
 
         private void LaunchOrb(Player owner) {
-            // 释放时销毁手持弹幕
-            KillHeldProj();
+            // 释放时触发手持弹幕后坐力动画
+            NotifyHeldRecoil();
 
             State = OrbState.Flying;
             Vector2 aimDir = (Main.MouseWorld - owner.Center).SafeNormalize(Vector2.UnitX);
@@ -406,6 +413,18 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
                 && Main.projectile[idx].active
                 && Main.projectile[idx].ModProjectile is SHPCChargeHeldProj) {
                 Main.projectile[idx].Kill();
+            }
+        }
+
+        /// <summary>
+        /// 通知手持弹幕进入后坐力动画，动画结束后自动消亡
+        /// </summary>
+        private void NotifyHeldRecoil() {
+            int idx = HeldProjIndex;
+            if (idx >= 0 && idx < Main.maxProjectiles
+                && Main.projectile[idx].active
+                && Main.projectile[idx].ModProjectile is SHPCChargeHeldProj held) {
+                held.TriggerRecoil();
             }
         }
     }

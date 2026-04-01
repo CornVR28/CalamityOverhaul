@@ -29,11 +29,27 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         /// </summary>
         private const float TipDistance = 90f;
 
+        /// <summary>后坐力最大后退距离（像素）</summary>
+        private const float RecoilMaxOffset = 18f;
+        /// <summary>后坐力动画总帧数</summary>
+        private const int RecoilDuration = 22;
+        /// <summary>后退阶段占比（快速后退）</summary>
+        private const float RecoilKickRatio = 0.25f;
+
+        /// <summary>是否处于后坐力阶段</summary>
+        private bool recoiling;
+        /// <summary>后坐力计时器</summary>
+        private int recoilTimer;
+        /// <summary>触发后坐力时的瞄准方向（锁定）</summary>
+        private Vector2 recoilDir;
+        /// <summary>当前后坐力偏移量</summary>
+        private float recoilOffset;
+
         /// <summary>
         /// 枪口世界坐标，供 CyberChargeOrbProj 查询
         /// </summary>
         public Vector2 TipPosition => Projectile.Center
-            + Vector2.UnitX.RotatedBy(Projectile.rotation) * TipDistance
+            + Vector2.UnitX.RotatedBy(Projectile.rotation) * (TipDistance - recoilOffset)
             + Vector2.UnitY * GunOffset.Y;
 
         public override void SetDefaults() {
@@ -49,12 +65,31 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
 
         public override bool? CanDamage() => false;
 
+        /// <summary>
+        /// 外部调用：触发后坐力动画，之后自动消亡
+        /// </summary>
+        public void TriggerRecoil() {
+            if (recoiling) return;
+            recoiling = true;
+            recoilTimer = 0;
+            recoilDir = (Main.MouseWorld - Owner.Center).SafeNormalize(Vector2.UnitX);
+        }
+
         public override void AI() {
             if (!Owner.active || Owner.dead) {
                 Projectile.Kill();
                 return;
             }
 
+            if (recoiling) {
+                AI_Recoil();
+            }
+            else {
+                AI_Charging();
+            }
+        }
+
+        private void AI_Charging() {
             // 右键持续按住时保持存活
             if (Owner.PressKey(false)) {
                 Projectile.timeLeft = 60;
@@ -62,33 +97,65 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
 
             // 瞄准方向
             Vector2 aimDir = (Main.MouseWorld - Owner.Center).SafeNormalize(Vector2.UnitX);
+            UpdateGunState(aimDir, 0f);
+        }
+
+        private void AI_Recoil() {
+            recoilTimer++;
+
+            // 后坐力曲线：快速后退 → 缓慢回弹
+            int kickFrames = (int)(RecoilDuration * RecoilKickRatio);
+            if (recoilTimer <= kickFrames) {
+                // 后退阶段：使用缓出插值快速到达最大偏移
+                float t = (float)recoilTimer / kickFrames;
+                float ease = 1f - (1f - t) * (1f - t); // easeOutQuad
+                recoilOffset = RecoilMaxOffset * ease;
+            }
+            else {
+                // 回弹阶段：缓慢回到原位
+                float t = (float)(recoilTimer - kickFrames) / (RecoilDuration - kickFrames);
+                float ease = t * t; // easeInQuad
+                recoilOffset = RecoilMaxOffset * (1f - ease);
+            }
+
+            if (recoilTimer >= RecoilDuration) {
+                Projectile.Kill();
+                return;
+            }
+
+            Projectile.timeLeft = 10;
+            UpdateGunState(recoilDir, recoilOffset);
+        }
+
+        private void UpdateGunState(Vector2 aimDir, float backOffset) {
             float rotation = aimDir.ToRotation();
 
-            // 更新弹幕状态
             Projectile.rotation = rotation;
             Projectile.velocity = Vector2.Zero;
             Projectile.Center = Owner.Center;
 
             // 玩家手臂与朝向
             Owner.ChangeDir(Math.Sign(aimDir.X));
+            // 手臂方向需要考虑后坐力偏移：手臂跟随枪身后退
+            Vector2 armTarget = Owner.Center + aimDir * (40f - backOffset);
             Owner.SetCompositeArmFront(true, Player.CompositeArmStretchAmount.Full,
-                (Owner.Center - Main.MouseWorld).ToRotation() * Owner.gravDir + MathHelper.PiOver2);
+                (Owner.Center - armTarget).ToRotation() * Owner.gravDir + MathHelper.PiOver2);
             Owner.heldProj = Projectile.whoAmI;
             Owner.itemTime = 2;
             Owner.itemAnimation = 2;
         }
 
         public override bool PreDraw(ref Color lightColor) {
-            // 手动绘制 SHPC 武器贴图
             Texture2D weaponTex = TextureAssets.Item[CWRID.Item_SHPC].Value;
             if (weaponTex == null) return false;
 
             float rotation = Projectile.rotation;
+            // 绘制位置沿瞄准方向后退 recoilOffset
             Vector2 position = Owner.Center - Main.screenPosition
-                + Vector2.UnitX.RotatedBy(rotation) * GunOffset.X
+                + Vector2.UnitX.RotatedBy(rotation) * (GunOffset.X - recoilOffset)
                 + Vector2.UnitY * GunOffset.Y;
 
-            SpriteEffects sp = Main.MouseWorld.X < Owner.Center.X
+            SpriteEffects sp = Owner.direction < 0
                 ? SpriteEffects.FlipVertically
                 : SpriteEffects.None;
 

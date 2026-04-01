@@ -188,8 +188,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
                 item.noUseGraphic = true;
                 item.UseSound = null;
                 item.useAnimation = item.useTime = 10;
-                return player.ownedProjectileCounts[ModContent.ProjectileType<CyberChargeOrbProj>()] <= 0
-                    && player.ownedProjectileCounts[ModContent.ProjectileType<SHPCChargeHeldProj>()] <= 0;
+                return player.ownedProjectileCounts[ModContent.ProjectileType<SHPCChargeHeldProj>()] <= 0;
             }
             else {
                 // 左键射击模式
@@ -240,7 +239,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
                 // 左键：发射三发追踪光束，带小幅散射
                 SoundEngine.PlaySound(SoundID.Item92, player.Center);
                 Vector2 baseVel = velocity.SafeNormalize(Vector2.UnitX) * 14f;
-
+                Vector2 dir = velocity.UnitVector();
+                position += new Vector2(dir.X * 20, -8);
                 for (int i = 0; i < BeamCount; i++) {
                     // 均匀散射 + 少量随机偏移
                     float spreadOffset = (i - (BeamCount - 1) / 2f) * BeamSpreadAngle;
@@ -265,7 +265,6 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
             Item.useAnimation = Item.useTime = LeftClickUseTime;
             Item.autoReuse = true;
             Item.mana = 8;
-            Item.channel = true;
             Item.CWR().LegendData = new SHPCData();
         }
 
