@@ -15,15 +15,22 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
 
         //骇入面板渲染器
         internal HackPanelRenderer Panel { get; private set; } = new();
+        //左侧上传队列渲染器
+        internal HackQueueRenderer Queue { get; private set; } = new();
 
         public override bool Active => HackTime.Active || HackTime.Intensity >= 0.001f;
 
+        public override void Load() {
+            Panel.Queue = Queue;
+        }
+
         public override void Update() {
             Panel.Update();
+            Queue.Update();
 
             //上传完成时消费结果
-            if (Panel.HasUploadCompleted) {
-                var hack = Panel.ConsumeUploadResult();
+            if (Queue.HasCompleted) {
+                var hack = Queue.ConsumeCompleted();
                 if (hack != null) {
                     //TODO：对选中目标施加对应的骇入效果
                 }
@@ -43,6 +50,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
         public override void Draw(SpriteBatch spriteBatch) {
             //脱离UIScaleMatrix，面板使用原始像素坐标绘制
             Panel.Draw(spriteBatch);
+            //左侧上传队列
+            Queue.Draw(spriteBatch);
         }
 
         //处理点击选择逻辑
@@ -76,6 +85,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
 
         public override void UnLoad() {
             Panel = null;
+            Queue = null;
         }
     }
 }

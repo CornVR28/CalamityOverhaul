@@ -46,11 +46,13 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
             DrawHoveredReticle(spriteBatch);
             DrawSelectedReticle(spriteBatch);
 
-            //绘制上传进度环（通过UIHandle获取面板状态）
-            var panel = HackTimeUI.Instance?.Panel;
-            if (panel != null && panel.UploadingSlot >= 0 && HackTime.SelectedTargetIndex >= 0) {
-                UploadOverlay.Draw(spriteBatch, HackTime.SelectedTargetIndex,
-                    panel.UploadProgressValue, panel.HasUploadCompleted, HackTime.Intensity);
+            //绘制上传进度环（通过UIHandle获取队列状态）
+            var queue = HackTimeUI.Instance?.Queue;
+            if (queue != null && !queue.IsEmpty && HackTime.SelectedTargetIndex >= 0) {
+                if (queue.TryGetActiveEntry(out float headProgress, out bool headCompleted)) {
+                    UploadOverlay.Draw(spriteBatch, HackTime.SelectedTargetIndex,
+                        headProgress, headCompleted, HackTime.Intensity);
+                }
             }
 
             spriteBatch.End();

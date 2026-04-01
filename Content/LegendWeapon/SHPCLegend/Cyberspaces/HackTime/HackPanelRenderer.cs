@@ -23,18 +23,12 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
         private readonly Rectangle[] slotRects = new Rectangle[QuickHackRegistry.All.Length];
         //当前悬停的槽位索引
         private int hoveredSlot = -1;
-        //当前正在上传的槽位索引
-        private int uploadingSlot = -1;
-        //上传进度(0到1)
-        private float uploadProgress;
-        //上传完成后的闪烁计时
-        private float uploadFlashTimer;
         //全局计时器
         private float timer;
         //是否显示
         private bool visible;
-        //上传完成标记
-        private bool uploadComplete;
+        //左侧队列渲染器引用
+        internal HackQueueRenderer Queue;
         //列表展开计时(秒)，Show()时归零
         private float revealTime;
         //全局故障带Y坐标（周期性横扫列表区域的色偏带）
@@ -62,17 +56,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
         private const float FontTime = 0.40f;
         private const float FontStatus = 0.36f;
 
-        public int UploadingSlot => uploadingSlot;
-        public float UploadProgressValue => uploadProgress;
-        public bool HasUploadCompleted => uploadComplete;
-
         public void Show() {
             visible = true;
             hoveredSlot = -1;
-            uploadingSlot = -1;
-            uploadProgress = 0f;
-            uploadFlashTimer = 0f;
-            uploadComplete = false;
             revealTime = 0f;
             glitchBandY = -100f;
             glitchBandCooldown = 0.5f;
@@ -89,19 +75,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
         }
 
         public void CancelUpload() {
-            uploadingSlot = -1;
-            uploadProgress = 0f;
-            uploadFlashTimer = 0f;
-            uploadComplete = false;
-        }
-
-        public QuickHackDef ConsumeUploadResult() {
-            if (!uploadComplete || uploadingSlot < 0) return null;
-            var hack = QuickHackRegistry.All[uploadingSlot];
-            uploadComplete = false;
-            uploadingSlot = -1;
-            uploadProgress = 0f;
-            return hack;
+            Queue?.Clear();
         }
 
         public void Update() {
@@ -125,20 +99,6 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
                 slotFlyIn[i] = MathHelper.Lerp(slotFlyIn[i], 1f, Math.Min(speed, 0.22f));
                 if (slotFlyIn[i] > 0.995f) slotFlyIn[i] = 1f;
             }
-
-            //上传进度
-            if (uploadingSlot >= 0 && !uploadComplete) {
-                var hack = QuickHackRegistry.All[uploadingSlot];
-                uploadProgress += 1f / hack.UploadTime;
-                if (uploadProgress >= 1f) {
-                    uploadProgress = 1f;
-                    uploadComplete = true;
-                    uploadFlashTimer = 0f;
-                }
-            }
-
-            if (uploadComplete)
-                uploadFlashTimer += 0.016f;
 
             //故障带更新：周期性从上到下快速横扫
             glitchBandCooldown -= 0.016f;
@@ -171,18 +131,15 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
             for (int i = 0; i < slotHoverAnim.Length; i++) {
                 float target = 0f;
                 if (i == hoveredSlot) target = 1f;
-                else if (i == uploadingSlot) target = 0.5f;
+                else if (Queue != null && Queue.GetSlotState(i) == QueueSlotState.Uploading) target = 0.5f;
                 slotHoverAnim[i] = MathHelper.Lerp(slotHoverAnim[i], target, 0.2f);
             }
         }
 
         public void HandleClick() {
             if (!visible) return;
-            if (hoveredSlot >= 0 && hoveredSlot != uploadingSlot) {
-                uploadingSlot = hoveredSlot;
-                uploadProgress = 0f;
-                uploadComplete = false;
-                uploadFlashTimer = 0f;
+            if (hoveredSlot >= 0 && Queue != null) {
+                Queue.Enqueue(QuickHackRegistry.All[hoveredSlot], hoveredSlot);
             }
         }
 
@@ -311,7 +268,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
                     float branchEnd = MathHelper.Lerp(trunkX, baseX - 4, fly);
                     Color branchColor = wireColor * 0.5f;
                     if (i == hoveredSlot) branchColor = HackTheme.Accent * (wireAlpha * 1f);
-                    if (i == uploadingSlot) branchColor = HackTheme.Uploading * (wireAlpha * 0.8f);
+                    if (Queue != null) {
+                        var qs = Queue.GetSlotState(i);
+                        if (qs == QueueSlotState.Uploading) branchColor = HackTheme.Uploading * (wireAlpha * 0.8f);
+                        else if (qs == QueueSlotState.Queued) branchColor = HackTheme.Uploading * (wireAlpha * 0.4f);
+                    }
                     DrawLine(sb, px, new Vector2(trunkX, itemCY), new Vector2(branchEnd, itemCY), 1f, branchColor);
 
                     //分支节点（菱形感：两层）
@@ -353,13 +314,16 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
             }
 
             //上传时在对应分支上有额外脉冲
-            if (uploadingSlot >= 0 && glow != null && wireProgress > 0.3f) {
-                float itemCY = listStartY + uploadingSlot * (ItemHeight + ItemGap) + ItemHeight * 0.5f;
-                float pulseT = (timer * 2f) % 1f;
-                float pulseX = MathHelper.Lerp(trunkX, baseX - 4, pulseT);
-                Color pulseCol = HackTheme.Uploading * (alpha * 0.4f * (1f - pulseT));
-                pulseCol.A = 0;
-                sb.Draw(glow, new Vector2(pulseX, itemCY), null, pulseCol, 0, glow.Size() / 2, 0.06f, SpriteEffects.None, 0);
+            if (Queue != null && glow != null && wireProgress > 0.3f) {
+                for (int i = 0; i < count; i++) {
+                    if (Queue.GetSlotState(i) != QueueSlotState.Uploading) continue;
+                    float itemCY = listStartY + i * (ItemHeight + ItemGap) + ItemHeight * 0.5f;
+                    float pulseT = (timer * 2f) % 1f;
+                    float pulseX = MathHelper.Lerp(trunkX, baseX - 4, pulseT);
+                    Color pulseCol = HackTheme.Uploading * (alpha * 0.4f * (1f - pulseT));
+                    pulseCol.A = 0;
+                    sb.Draw(glow, new Vector2(pulseX, itemCY), null, pulseCol, 0, glow.Size() / 2, 0.06f, SpriteEffects.None, 0);
+                }
             }
         }
 
@@ -400,21 +364,26 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
                 slotRects[i] = rect;
 
                 float itemAlpha = alpha * Math.Min(fly * 2.5f, 1f);
-                bool isUploading = (i == uploadingSlot && !uploadComplete);
-                bool isCompleted = (i == uploadingSlot && uploadComplete);
+                QueueSlotState queueState = Queue?.GetSlotState(i) ?? QueueSlotState.None;
+                float queueProgress = Queue?.GetSlotProgress(i) ?? 0f;
 
-                DrawSingleItem(sb, px, itemAlpha, rect, hack, i, hover, isUploading, isCompleted);
+                DrawSingleItem(sb, px, itemAlpha, rect, hack, i, hover, queueState, queueProgress);
             }
         }
 
         private void DrawSingleItem(SpriteBatch sb, Texture2D px, float alpha, Rectangle rect,
-            QuickHackDef hack, int index, float hover, bool isUploading, bool isCompleted) {
+            QuickHackDef hack, int index, float hover, QueueSlotState queueState, float queueProgress) {
+
+            bool isUploading = queueState == QueueSlotState.Uploading;
+            bool isQueued = queueState == QueueSlotState.Queued;
+            bool isCompleted = queueState == QueueSlotState.Completed;
 
             //=== 背景（双层渐变） ===
             Color bgColor = Color.Lerp(HackTheme.BgSlot, HackTheme.BgSlotHover, hover * 0.6f);
             if (isUploading) bgColor = Color.Lerp(bgColor, HackTheme.Uploading, 0.08f);
+            if (isQueued) bgColor = Color.Lerp(bgColor, HackTheme.Uploading, 0.03f);
             if (isCompleted) {
-                float flash = MathF.Sin(uploadFlashTimer * 10f) * 0.5f + 0.5f;
+                float flash = MathF.Sin(timer * 10f) * 0.5f + 0.5f;
                 bgColor = Color.Lerp(bgColor, HackTheme.Accent, flash * 0.15f);
             }
             sb.Draw(px, rect, new Rectangle(0, 0, 1, 1), bgColor * (alpha * 0.92f));
@@ -460,17 +429,20 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
             Color symColor = catColor * (alpha * (0.35f + hover * 0.3f));
             Utils.DrawBorderString(sb, catSymbol, new Vector2(barX + 8, rect.Y + rect.Height * 0.5f - 6), symColor, 0.28f);
 
-            //=== 扫描线（悬停/上传时横扫） ===
-            if (hover > 0.1f || isUploading) {
+            //=== 扫描线（悬停/上传/队列中时横扫） ===
+            if (hover > 0.1f || isUploading || isQueued) {
                 float scanSpeed = isUploading ? 2.5f : 1.8f;
+                float scanAlpha = isUploading ? 0.3f : (isQueued ? 0.15f : hover * 0.22f);
                 float scanPos = ((timer * scanSpeed + index * 0.4f) % 1.4f) - 0.2f;
-                DrawScanLine(sb, px, rect, scanPos, alpha * (isUploading ? 0.3f : hover * 0.22f));
+                DrawScanLine(sb, px, rect, scanPos, alpha * scanAlpha);
             }
 
             //=== 边框线 ===
             Color borderCol = isUploading
                 ? Color.Lerp(HackTheme.Border, HackTheme.Uploading, 0.5f)
-                : Color.Lerp(HackTheme.Border, HackTheme.Accent, hover * 0.5f);
+                : isQueued
+                    ? Color.Lerp(HackTheme.Border, HackTheme.Uploading, 0.25f)
+                    : Color.Lerp(HackTheme.Border, HackTheme.Accent, hover * 0.5f);
             //顶边
             sb.Draw(px, new Rectangle(rect.X + (int)SlashWidth, rect.Y, rect.Width - (int)SlashWidth, 1),
                 new Rectangle(0, 0, 1, 1), borderCol * (alpha * 0.55f));
@@ -508,6 +480,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
             float nameY = rect.Y + 8;
             Color nameColor = Color.Lerp(HackTheme.TextBright, Color.White, hover * 0.3f);
             if (isUploading) nameColor = Color.Lerp(nameColor, HackTheme.Uploading, 0.35f);
+            if (isQueued) nameColor = Color.Lerp(nameColor, HackTheme.Uploading, 0.15f);
             if (isCompleted) nameColor = HackTheme.Accent;
             //色散：悬停时在偏移位置画红/蓝色副本
             if (hover > 0.2f) {
@@ -533,13 +506,19 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
 
             //=== 右侧状态区 ===
             if (isUploading) {
-                DrawUploadIndicator(sb, px, alpha, rect);
+                DrawUploadIndicator(sb, px, alpha, rect, queueProgress);
             }
             else if (isCompleted) {
-                float flash = MathF.Sin(uploadFlashTimer * 8f) * 0.3f + 0.7f;
+                float flash = MathF.Sin(timer * 8f) * 0.3f + 0.7f;
                 Vector2 okSize = FontAssets.MouseText.Value.MeasureString("DONE") * 0.42f;
                 Vector2 okPos = new(rect.Right - okSize.X - 14, rect.Y + (rect.Height - okSize.Y) * 0.5f);
                 Utils.DrawBorderString(sb, "DONE", okPos, HackTheme.Accent * (alpha * flash), 0.42f);
+            }
+            else if (isQueued) {
+                Vector2 qSize = FontAssets.MouseText.Value.MeasureString("QUEUED") * 0.38f;
+                Vector2 qPos = new(rect.Right - qSize.X - 14, rect.Y + (rect.Height - qSize.Y) * 0.5f);
+                float qPulse = MathF.Sin(timer * 3f) * 0.15f + 0.85f;
+                Utils.DrawBorderString(sb, "QUEUED", qPos, HackTheme.Uploading * (alpha * 0.6f * qPulse), 0.38f);
             }
             else {
                 //上传耗时（右上角）
@@ -558,7 +537,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
 
             //=== 上传时底部进度光带（贯穿条目底边） ===
             if (isUploading) {
-                int fillW = (int)(rect.Width * uploadProgress);
+                int fillW = (int)(rect.Width * queueProgress);
                 sb.Draw(px, new Rectangle(rect.X, rect.Bottom - 2, fillW, 2),
                     new Rectangle(0, 0, 1, 1), HackTheme.Uploading * (alpha * 0.5f));
                 if (glow != null && fillW > 4) {
@@ -638,7 +617,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
         }
 
         //上传进度指示器（右上角百分比+底部进度条+粒子拖尾）
-        private void DrawUploadIndicator(SpriteBatch sb, Texture2D px, float alpha, Rectangle rect) {
+        private void DrawUploadIndicator(SpriteBatch sb, Texture2D px, float alpha, Rectangle rect, float progress) {
             int barW = 80;
             int barH = 5;
             int barX = rect.Right - barW - 14;
@@ -647,7 +626,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
             //背景槽
             sb.Draw(px, new Rectangle(barX, barY, barW, barH),
                 new Rectangle(0, 0, 1, 1), HackTheme.ProgressBg * alpha);
-            int fillW = (int)(barW * uploadProgress);
+            int fillW = (int)(barW * progress);
             if (fillW > 0) {
                 //填充
                 sb.Draw(px, new Rectangle(barX, barY, fillW, barH),
@@ -666,7 +645,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
             }
 
             //百分比文字
-            string pct = $"{(int)(uploadProgress * 100)}%";
+            string pct = $"{(int)(progress * 100)}%";
             Vector2 ps = FontAssets.MouseText.Value.MeasureString(pct) * FontTime;
             Vector2 pp = new(rect.Right - ps.X - 10, rect.Y + 8);
             Utils.DrawBorderString(sb, pct, pp, HackTheme.Uploading * alpha, FontTime);
@@ -695,7 +674,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
 
             //状态脉冲灯
             float pulse = (MathF.Sin(timer * 3.5f) + 1f) * 0.5f;
-            Color dotColor = uploadingSlot >= 0
+            bool hasActive = Queue != null && !Queue.IsEmpty;
+            Color dotColor = hasActive
                 ? Color.Lerp(HackTheme.Uploading * 0.4f, HackTheme.Uploading, pulse) * alpha
                 : Color.Lerp(new Color(20, 100, 50), new Color(40, 200, 100), pulse) * alpha;
             sb.Draw(px, new Vector2(baseX, bottomY + 3),
@@ -711,8 +691,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
             }
 
             //状态文字
-            string status = uploadingSlot >= 0 ? "UPLOADING..." : "BREACH PROTOCOL // READY";
-            if (uploadComplete) status = ">> UPLOAD COMPLETE <<";
+            string status = hasActive ? "UPLOADING..." : "BREACH PROTOCOL // READY";
+            if (Queue != null && Queue.HasCompleted) status = ">> UPLOAD COMPLETE <<";
             Utils.DrawBorderString(sb, status, new Vector2(baseX + 14, bottomY),
                 HackTheme.TextDim * alpha, FontStatus);
 
