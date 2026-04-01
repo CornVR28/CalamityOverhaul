@@ -2,6 +2,7 @@
 using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
 using InnoVault.GameSystem;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -73,6 +74,10 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
             Action<object, Player, float, float> orig,
             object self, Player player, ref float reduce, ref float mult) { }
 
+        private delegate void OnSHPC_PostDrawInInventory_Delegate(object self, SpriteBatch spriteBatch, Vector2 position, Rectangle frame, Color drawColor, Color itemColor, Vector2 origin, float scale);
+
+        private static void OnPostDrawInInventoryFunc(OnSHPC_PostDrawInInventory_Delegate orig, object self, SpriteBatch spriteBatch, Vector2 position, Rectangle frame, Color drawColor, Color itemColor, Vector2 origin, float scale) { }   
+
         #endregion
 
         void ICWRLoader.LoadData() {
@@ -112,6 +117,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
                 methodInfo = type.GetMethod("ModifyManaCost", BindingFlags.Public | BindingFlags.Instance);
                 if (methodInfo != null) {
                     VaultHook.Add(methodInfo, OnSHPCModifyManaCostFunc);
+                }
+
+                methodInfo = type.GetMethod("PostDrawInInventory", BindingFlags.Public | BindingFlags.Instance);
+                if (methodInfo != null) {
+                    VaultHook.Add(methodInfo, OnPostDrawInInventoryFunc);
                 }
             }
         }
