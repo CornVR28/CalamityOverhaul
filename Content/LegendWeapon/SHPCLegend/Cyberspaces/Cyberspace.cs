@@ -130,24 +130,26 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         }
 
         /// <summary>
-        /// 提升领域层数（带展开特效）
+        /// 自由设置领域层数（可升可降，带展开/收缩过渡）
         /// </summary>
         public static void SetLayer(int layer, Player owner = null) {
             layer = Math.Clamp(layer, 1, MaxLayerCount);
-            if (!Active || layer <= CurrentLayer) return;
+            if (!Active || layer == CurrentLayer) return;
 
             int oldLayer = CurrentLayer;
             CurrentLayer = layer;
 
-            //新层爆发展开
-            for (int i = oldLayer; i < layer; i++) {
-                layerBurstTimer[i] = BurstDuration;
+            if (layer > oldLayer) {
+                //升层：新层爆发展开
+                for (int i = oldLayer; i < layer; i++) {
+                    layerBurstTimer[i] = BurstDuration;
+                }
+                //升层视觉特效
+                if (owner != null) {
+                    SpawnLayerVFX(owner, oldLayer, layer);
+                }
             }
-
-            //升层视觉特效
-            if (owner != null) {
-                SpawnLayerVFX(owner, oldLayer, layer);
-            }
+            //降层：超出的层会在Update中自然收缩（target=0），无需额外处理
         }
 
         /// <summary>
@@ -289,11 +291,13 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             float outerR = EffectiveOuterRadius;
             Vector2 center = player.Center;
 
-            //1~(1+层数)条闪电从外环随机位置向外射出
+            //1~(1+层数)条闪电从领域内部随机位置向外射出
             int count = Main.rand.Next(1, 1 + CurrentLayer);
             for (int i = 0; i < count; i++) {
                 float angle = Main.rand.NextFloat() * MathHelper.TwoPi;
-                Vector2 spawnPos = center + angle.ToRotationVector2() * outerR;
+                //生成在领域内部(40%~85%半径处)，而不是边缘
+                float spawnDist = outerR * Main.rand.NextFloat(0.4f, 0.85f);
+                Vector2 spawnPos = center + angle.ToRotationVector2() * spawnDist;
                 int delay = Main.rand.Next(0, 6);
                 Projectile.NewProjectile(source, spawnPos, Vector2.Zero,
                     ModContent.ProjectileType<CyberGlitchBoltProj>(), 0, 0, player.whoAmI,
