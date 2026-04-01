@@ -49,29 +49,20 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
 
         private static void OnSHPCToolFunc(On_ModItem_ModifyTooltips_Delegate orig, object obj, List<TooltipLine> list) { }
 
-        private delegate bool OnSHPC_CanUseItem_Delegate(Func<object, Player, bool> orig, object self, Player player);
         private static bool OnSHPCCanUseItemFunc(Func<object, Player, bool> orig, object self, Player player) => true;
 
-        private delegate bool? OnSHPC_UseItem_Delegate(Func<object, Player, bool?> orig, object self, Player player);
         private static bool? OnSHPCUseItemFunc(Func<object, Player, bool?> orig, object self, Player player) => null;
 
-        private delegate bool OnSHPC_Shoot_Delegate(
-            Func<object, Player, EntitySource_ItemUse_WithAmmo, Vector2, Vector2, int, int, float, bool> orig,
-            object self, Player player, EntitySource_ItemUse_WithAmmo source,
-            Vector2 position, Vector2 velocity, int type, int damage, float knockback);
         private static bool OnSHPCShootFunc(
             Func<object, Player, EntitySource_ItemUse_WithAmmo, Vector2, Vector2, int, int, float, bool> orig,
             object self, Player player, EntitySource_ItemUse_WithAmmo source,
             Vector2 position, Vector2 velocity, int type, int damage, float knockback) => false;
 
-        private delegate float OnSHPC_UseSpeedMultiplier_Delegate(Func<object, Player, float> orig, object self, Player player);
         private static float OnSHPCUseSpeedMultiplierFunc(Func<object, Player, float> orig, object self, Player player) => 1f;
 
-        private delegate void OnSHPC_ModifyManaCost_Delegate(
-            Action<object, Player, float, float> orig,
-            object self, Player player, ref float reduce, ref float mult);
+        private delegate void OnSHPC_ModifyManaCost_Delegate(object self, Player player, ref float reduce, ref float mult);
         private static void OnSHPCModifyManaCostFunc(
-            Action<object, Player, float, float> orig,
+            OnSHPC_ModifyManaCost_Delegate orig,
             object self, Player player, ref float reduce, ref float mult) { }
 
         private delegate void OnSHPC_PostDrawInInventory_Delegate(object self, SpriteBatch spriteBatch, Vector2 position, Rectangle frame, Color drawColor, Color itemColor, Vector2 origin, float scale);
