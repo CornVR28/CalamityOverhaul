@@ -258,33 +258,49 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             theme = Themes[themeIndex];
 
             Vector2 drawPos = Projectile.Center - Main.screenPosition;
-            float pulse = 0.85f + 0.15f * MathF.Sin((float)Main.timeForVisualEffects * 0.15f);
+            float pulse = 0.9f + 0.1f * MathF.Sin((float)Main.timeForVisualEffects * 0.15f);
             float alpha = fadeAlpha * pulse;
             Vector2 glowOrigin = glow.Size() * 0.5f;
 
-            // 最外层大范围光晕（营造能量辐射感）
-            float outerScale = 3.5f * Projectile.scale;
+            // 外层柔和bloom光晕（普通绘制，不需要着色器）
+            float outerScale = 2.0f * Projectile.scale;
             Color outerColor = theme.Aura * alpha * 0.25f;
             spriteBatch.Draw(glow, drawPos, null, outerColor, 0f,
                 glowOrigin, outerScale, SpriteEffects.None, 0f);
 
-            // 中层主题色辉光
-            float midScale = 2.0f * Projectile.scale;
-            Color midColor = theme.Glow * alpha * 0.5f;
-            spriteBatch.Draw(glow, drawPos, null, midColor, 0f,
-                glowOrigin, midScale, SpriteEffects.None, 0f);
+            // 结束当前批次，切换到Immediate模式应用能量球着色器
+            spriteBatch.End();
 
-            // 内层明亮核心（与拖尾宽度匹配，覆盖锥形鼻区域）
-            float innerScale = 1.2f * Projectile.scale;
-            Color innerColor = theme.Core * alpha * 0.7f;
-            spriteBatch.Draw(glow, drawPos, null, innerColor, 0f,
-                glowOrigin, innerScale, SpriteEffects.None, 0f);
+            Effect orbShader = EffectLoader.CyberEnergyOrb?.Value;
+            Texture2D noise = CWRAsset.Extra_193?.Value;
+            if (orbShader != null && noise != null) {
+                float timeVal = Cyberspace.Active
+                    ? Cyberspace.EffectTime
+                    : (float)Main.timeForVisualEffects * 0.04f;
 
-            // 核心白热点
-            float coreScale = 0.55f * Projectile.scale;
-            Color coreColor = Color.White * alpha * 0.9f;
-            spriteBatch.Draw(glow, drawPos, null, coreColor, 0f,
-                glowOrigin, coreScale, SpriteEffects.None, 0f);
+                orbShader.Parameters["uTime"]?.SetValue(timeVal);
+                orbShader.Parameters["fadeAlpha"]?.SetValue(alpha);
+                orbShader.Parameters["coreColor"]?.SetValue(theme.CoreVec);
+                orbShader.Parameters["glowColor"]?.SetValue(theme.GlowVec);
+                orbShader.Parameters["auraColor"]?.SetValue(theme.AuraVec);
+                orbShader.Parameters["orbScale"]?.SetValue(pulse);
+                orbShader.Parameters["uNoiseTex"]?.SetValue(noise);
+
+                spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive, SamplerState.LinearClamp,
+                    DepthStencilState.None, RasterizerState.CullNone, null, Main.GameViewMatrix.TransformationMatrix);
+
+                orbShader.CurrentTechnique.Passes[0].Apply();
+
+                float orbDrawScale = 1.1f * Projectile.scale;
+                spriteBatch.Draw(glow, drawPos, null, Color.White, 0f,
+                    glowOrigin, orbDrawScale, SpriteEffects.None, 0f);
+
+                spriteBatch.End();
+            }
+
+            // 恢复调用者期望的批次状态（Additive + Deferred）
+            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive, SamplerState.PointWrap,
+                DepthStencilState.None, RasterizerState.CullNone, null, Main.GameViewMatrix.TransformationMatrix);
         }
 
         #endregion
