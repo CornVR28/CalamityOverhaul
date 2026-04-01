@@ -28,6 +28,7 @@ namespace CalamityOverhaul.Common
         public static Asset<Effect> DropPodFlame { get; set; }
         public static Asset<Effect> DropPodShockwave { get; set; }
         public static Asset<Effect> CyberShockwave { get; set; }
+        public static Asset<Effect> CyberBoundaryRing { get; set; }
         public static Asset<Effect> CyberGlitchBolt { get; set; }
         public static Asset<Effect> CyberspaceField { get; set; }
         public override float Weight => 1.2f;

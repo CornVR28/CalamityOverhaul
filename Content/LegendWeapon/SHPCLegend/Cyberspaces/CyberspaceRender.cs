@@ -160,11 +160,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         }
 
         /// <summary>
-        /// 在领域边界绘制常驻冲击波光环——复用CyberShockwave着色器
-        /// <br/>固定半径，环位于领域外缘，带呼吸脉动
+        /// 在领域边界绘制常驻边界环——使用专用CyberBoundaryRing着色器
+        /// <br/>固定半径，环位于领域外缘，带呼吸脉动，无内侧压缩波
         /// </summary>
         private static void DrawBoundaryShockwaveRing(SpriteBatch spriteBatch) {
-            Effect shader = EffectLoader.CyberShockwave?.Value;
+            Effect shader = EffectLoader.CyberBoundaryRing?.Value;
             if (shader == null) return;
             if (CWRAsset.Placeholder_White?.Value == null) return;
             if (CWRAsset.Extra_193?.Value == null) return;
@@ -172,7 +172,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
 
             Texture2D canvas = CWRAsset.Placeholder_White.Value;
             Texture2D noise = CWRAsset.Extra_193.Value;
-            float time = Cyberspace.EffectTime;
+            float time = Cyberspace.EffectTime * 0.75f;
 
             float effectiveRadius = Cyberspace.Radius * Cyberspace.ExpandProgress;
             //四边形半宽要留出足够余量给外侧碎片拖尾
@@ -181,7 +181,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             float ringPos = effectiveRadius / quadHalf;
 
             //ringThickness随呼吸微调
-            float thickness = 0.045f + 0.012f * MathF.Sin(time * 0.8f + 1.2f);
+            float thickness = 0.15f + 0.012f * MathF.Sin(time * 0.8f + 1.2f);
 
             shader.Parameters["uTime"]?.SetValue(time);
             shader.Parameters["ringProgress"]?.SetValue(ringPos);
@@ -190,7 +190,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
 
             Vector2 center = Main.LocalPlayer.Center;
             Vector2 drawPos = center - Main.screenPosition;
-            float drawDiameter = quadHalf * 2f * 0.98f;
+            float drawDiameter = quadHalf * 2f * 0.8f;
 
             spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
                 SamplerState.LinearWrap, DepthStencilState.None, RasterizerState.CullNone,
