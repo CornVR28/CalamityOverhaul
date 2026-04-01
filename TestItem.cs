@@ -52,6 +52,7 @@ namespace CalamityOverhaul
             Item.shoot = ProjectileID.PurificationPowder;
             Item.value = 7;
             Item.rare = ItemRarityID.Yellow;
+            Item.channel = true;
         }
 
         public override void UpdateInventory(Player player) {
@@ -94,8 +95,8 @@ namespace CalamityOverhaul
 
             // 生成光束，ai[0] = 颜色主题 (0=蓝, 1=黄, 2=青)
             Projectile.NewProjectile(player.FromObjectGetParent(), player.Center, player.Center.To(Main.MouseWorld).UnitVector() * 12,
-                ModContent.ProjectileType<CyberTraceBeamProj>(),
-                20, 1, player.whoAmI, ai0: Main.rand.Next(3));
+                ModContent.ProjectileType<CyberChargeOrbProj>(),
+                20, 1, player.whoAmI, 0);
 
             //Cyberspace.SetLayer(3, player);
             //Cyberspace.Deactivate(); // 收缩关闭

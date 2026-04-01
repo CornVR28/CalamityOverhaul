@@ -1,0 +1,151 @@
+// ============================================================================
+// CyberDetonation.fx — 赛博科技爆破着色器
+// 扩展冲击环 + 内部能量扭曲 + 六边形网格碎裂 + 数据流残影
+// 环形爆破：从中心向外扩展的多层科技感冲击波
+// 使用 SpriteBatch.Immediate + register(s0) + register(s1)
+// ============================================================================
+
+sampler baseSamp : register(s0);
+sampler noiseSamp : register(s1);
+
+float uTime;
+float ringProgress;     // 0~1 环扩张进度
+float fadeAlpha;        // 整体透明度 0~1
+float3 coreColor;       // 核心色（白青）
+float3 ringColor;       // 环色（亮青/黄）
+float3 fragColor;       // 碎片色（暗色调）
+
+float hash21(float2 p)
+{
+    float3 p3 = frac(float3(p.xyx) * float3(0.1031, 0.1030, 0.0973));
+    p3 += dot(p3, p3.yzx + 33.33);
+    return frac((p3.x + p3.y) * p3.z);
+}
+
+float4 PixelShaderFunction(float2 coords : TEXCOORD0, float4 vertexColor : COLOR0) : COLOR0
+{
+    float2 centered = coords * 2.0 - 1.0;
+    float dist = length(centered);
+    float angle = atan2(centered.y, centered.x);
+    float normAngle = (angle + 3.14159) / 6.28318; // 0~1
+
+    // ============================================================
+    // A. 主冲击环 —— 核心扩展环
+    // ============================================================
+    // 噪声扰动环边缘
+    float n1 = tex2D(noiseSamp, float2(normAngle * 5.0 + uTime * 2.5, ringProgress * 3.0)).r;
+    float n2 = tex2D(noiseSamp, float2(normAngle * 9.0 - uTime * 1.8, ringProgress + 0.7)).g;
+    float noiseDisp = (n1 * 0.55 + n2 * 0.45 - 0.5) * 0.06;
+    float adjDist = dist + noiseDisp;
+
+    // 主环遮罩
+    float thickness = 0.07 + (1.0 - ringProgress) * 0.03;
+    float ringDist = abs(adjDist - ringProgress);
+    float mainRing = 1.0 - smoothstep(0.0, thickness, ringDist);
+
+    // 内侧压缩面更亮
+    float innerBias = smoothstep(ringProgress, ringProgress - thickness * 0.7, adjDist);
+
+    // ============================================================
+    // B. 次级环 —— 稍领先主环的细线前驱波
+    // ============================================================
+    float precursorPos = ringProgress * 1.12 + 0.02;
+    float precursorDist = abs(adjDist - precursorPos);
+    float precursor = 1.0 - smoothstep(0.0, 0.015, precursorDist);
+    precursor *= smoothstep(0.95, 0.7, ringProgress); // 后期衰减
+
+    // ============================================================
+    // C. 六边形网格碎裂 —— 科技感核心视觉
+    // ============================================================
+    // 六边形网格坐标
+    float hexScale = 18.0;
+    float2 hexUV = centered * hexScale;
+    float2 hexID = floor(hexUV);
+    float2 hexFrac = frac(hexUV) - 0.5;
+
+    // 简化六边形距离
+    float hexDist = max(abs(hexFrac.x) + abs(hexFrac.y) * 0.577, abs(hexFrac.y) * 1.155);
+    float hexEdge = smoothstep(0.45, 0.48, hexDist);
+
+    // 每个网格单元的随机碎裂时序
+    float cellHash = hash21(hexID + float2(7.31, 13.17));
+    float cellActivate = smoothstep(cellHash * 0.8, cellHash * 0.8 + 0.15, ringProgress);
+    float cellFade = 1.0 - smoothstep(cellHash * 0.5 + 0.5, 1.0, ringProgress);
+
+    // 网格只在环内区域显示
+    float gridZone = smoothstep(ringProgress + 0.05, ringProgress - 0.2, dist);
+    float gridIntensity = hexEdge * cellActivate * cellFade * gridZone * 0.35;
+
+    // 单元格内闪烁
+    float cellFlicker = step(0.6, hash21(hexID + floor(uTime * 8.0)));
+    float cellFill = (1.0 - hexDist * 2.0) * cellFlicker * cellActivate * cellFade * gridZone * 0.2;
+
+    // ============================================================
+    // D. 内部能量扭曲残余 —— 环通过后的涟漪
+    // ============================================================
+    float innerZone = smoothstep(ringProgress - thickness, 0.0, adjDist);
+    float ripple = sin((dist - ringProgress * 0.5) * 60.0 + uTime * 10.0) * 0.5 + 0.5;
+    ripple = pow(ripple, 6.0) * innerZone * 0.12;
+    ripple *= 1.0 - ringProgress; // 环扩大后涟漪减弱
+
+    // ============================================================
+    // E. 数据流拖尾 —— 环外侧的数字碎片
+    // ============================================================
+    float trailing = smoothstep(ringProgress + thickness * 2.5, ringProgress, adjDist);
+    trailing *= trailing;
+    float trailNoise = tex2D(noiseSamp, float2(normAngle * 20.0 + uTime * 1.2, dist * 4.0)).r;
+    trailing *= step(0.45, trailNoise) * 0.4;
+
+    // ============================================================
+    // F. 中心闪光 —— 爆破瞬间的核心白闪
+    // ============================================================
+    float centerFlash = pow(saturate(1.0 - dist / 0.15), 3.0);
+    centerFlash *= pow(saturate(1.0 - ringProgress / 0.25), 2.0); // 极早期迅速消退
+
+    // ============================================================
+    // 颜色合成
+    // ============================================================
+    float3 cWhite = float3(1.0, 0.98, 0.95);
+
+    // 主环颜色：内侧偏核心色，外侧偏环色
+    float mainBrightness = mainRing * (0.7 + innerBias * 0.8);
+    float3 mainColor = lerp(ringColor, coreColor, innerBias * 0.6) * mainBrightness;
+
+    // 环上微观网格纹理
+    float gridA = frac(normAngle * 60.0);
+    float gridR = frac(dist * 35.0);
+    float microGrid = smoothstep(0.025, 0.0, min(gridA, 1.0 - gridA));
+    microGrid += smoothstep(0.012, 0.0, min(gridR, 1.0 - gridR));
+    microGrid = saturate(microGrid);
+    mainColor += ringColor * 0.15 * microGrid * mainRing;
+
+    float3 finalColor = float3(0, 0, 0);
+    finalColor += mainColor;                                    // A: 主冲击环
+    finalColor += coreColor * precursor * 0.6;                  // B: 前驱波
+    finalColor += ringColor * gridIntensity;                    // C: 六边形网格边
+    finalColor += fragColor * cellFill;                         // C: 单元格闪烁
+    finalColor += coreColor * ripple;                           // D: 内部涟漪
+    finalColor += fragColor * trailing;                         // E: 数据流拖尾
+    finalColor += cWhite * centerFlash;                         // F: 中心白闪
+
+    float alpha = saturate(
+        mainBrightness
+        + precursor * 0.5
+        + gridIntensity
+        + cellFill
+        + ripple
+        + trailing * 0.5
+        + centerFlash
+    );
+    alpha *= fadeAlpha;
+
+    return float4(finalColor * alpha, alpha) * vertexColor;
+}
+
+technique Technique1
+{
+    pass CyberDetonationPass
+    {
+        PixelShader = compile ps_3_0 PixelShaderFunction();
+    }
+}

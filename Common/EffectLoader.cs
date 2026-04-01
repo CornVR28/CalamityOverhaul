@@ -32,6 +32,7 @@ namespace CalamityOverhaul.Common
         public static Asset<Effect> CyberGlitchBolt { get; set; }
         public static Asset<Effect> CyberTraceBeam { get; set; }
         public static Asset<Effect> CyberEnergyOrb { get; set; }
+        public static Asset<Effect> CyberDetonation { get; set; }
         public static Asset<Effect> CyberspaceField { get; set; }
         public override float Weight => 1.2f;
         public override void EndCaptureDraw(SpriteBatch spriteBatch, GraphicsDevice graphicsDevice, RenderTarget2D screenSwap) {
