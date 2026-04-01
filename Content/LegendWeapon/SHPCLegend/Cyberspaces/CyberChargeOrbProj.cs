@@ -77,6 +77,14 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             set => Projectile.ai[0] = (float)value;
         }
 
+        /// <summary>
+        /// 关联的手持弹幕索引（ai[1]），用于蓄力阶段定位枪口
+        /// </summary>
+        private int HeldProjIndex {
+            get => (int)Projectile.ai[1];
+            set => Projectile.ai[1] = value;
+        }
+
         #endregion
 
         public override void SetDefaults() {
@@ -111,9 +119,22 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         #region 蓄力阶段
 
         private void AI_Charging(Player owner) {
-            // 锁定位置在玩家前方
+            // 尝试从手持弹幕获取枪口位置
+            Vector2 targetPos;
+            int heldIdx = HeldProjIndex;
+            if (heldIdx >= 0 && heldIdx < Main.maxProjectiles
+                && Main.projectile[heldIdx].active
+                && Main.projectile[heldIdx].ModProjectile is SHPCChargeHeldProj heldProj) {
+                targetPos = heldProj.TipPosition;
+            }
+            else {
+                // 后备：直接用玩家前方偏移
+                Vector2 fallbackDir = (Main.MouseWorld - owner.Center).SafeNormalize(Vector2.UnitX);
+                targetPos = owner.Center + fallbackDir * ChargeOffsetDist;
+            }
+
+            Projectile.Center = targetPos;
             Vector2 aimDir = (Main.MouseWorld - owner.Center).SafeNormalize(Vector2.UnitX);
-            Projectile.Center = owner.Center + aimDir * ChargeOffsetDist;
             Projectile.rotation = aimDir.ToRotation();
 
             // 玩家面向光球方向
@@ -192,6 +213,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         }
 
         private void LaunchOrb(Player owner) {
+            // 释放时销毁手持弹幕
+            KillHeldProj();
+
             State = OrbState.Flying;
             Vector2 aimDir = (Main.MouseWorld - owner.Center).SafeNormalize(Vector2.UnitX);
             Projectile.velocity = aimDir * FlySpeed;
@@ -265,6 +289,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         }
 
         public override void OnKill(int timeLeft) {
+            // 确保手持弹幕被清理
+            KillHeldProj();
             // 消散粒子
             if (Main.netMode == NetmodeID.Server) return;
             Color mainCol = Color.Lerp(ChargeCore, FullCore, chargeRatio);
@@ -370,5 +396,17 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         #endregion
 
         public override bool ShouldUpdatePosition() => State == OrbState.Flying;
+
+        /// <summary>
+        /// 销毁关联的手持弹幕
+        /// </summary>
+        private void KillHeldProj() {
+            int idx = HeldProjIndex;
+            if (idx >= 0 && idx < Main.maxProjectiles
+                && Main.projectile[idx].active
+                && Main.projectile[idx].ModProjectile is SHPCChargeHeldProj) {
+                Main.projectile[idx].Kill();
+            }
+        }
     }
 }

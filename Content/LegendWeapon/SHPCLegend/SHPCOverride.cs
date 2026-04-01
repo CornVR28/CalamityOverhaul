@@ -188,7 +188,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
                 item.noUseGraphic = true;
                 item.UseSound = null;
                 item.useAnimation = item.useTime = 10;
-                return player.ownedProjectileCounts[ModContent.ProjectileType<CyberChargeOrbProj>()] <= 0;
+                return player.ownedProjectileCounts[ModContent.ProjectileType<CyberChargeOrbProj>()] <= 0
+                    && player.ownedProjectileCounts[ModContent.ProjectileType<SHPCChargeHeldProj>()] <= 0;
             }
             else {
                 // 左键射击模式
@@ -223,11 +224,17 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
             Vector2 position, Vector2 velocity, int type, int damage, float knockback) {
 
             if (player.altFunctionUse == 2) {
-                // 右键：生成蓄力能量球
+                // 右键：先生成手持弹幕（绘制武器 + 控制手臂动画）
+                int heldIdx = Projectile.NewProjectile(source, player.Center, Vector2.Zero,
+                    ModContent.ProjectileType<SHPCChargeHeldProj>(),
+                    0, 0f, player.whoAmI);
+
+                // 再生成蓄力能量球，ai[1] 传递手持弹幕索引以定位枪口
                 Vector2 spawnPos = player.Center + velocity.SafeNormalize(Vector2.UnitX) * 70f;
                 Projectile.NewProjectile(source, spawnPos, Vector2.Zero,
                     ModContent.ProjectileType<CyberChargeOrbProj>(),
-                    damage, knockback, player.whoAmI);
+                    damage, knockback, player.whoAmI,
+                    ai1: heldIdx);
             }
             else {
                 // 左键：发射三发追踪光束，带小幅散射
