@@ -18,5 +18,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.DomainFre
         /// </summary>
         [VaultLoaden(CWRConstant.Effects)]
         public static Effect CyberFreezeEntity { get; private set; }
+
+        /// <summary>
+        /// 冻结实体六角能量罩着色器
+        /// </summary>
+        [VaultLoaden(CWRConstant.Effects)]
+        public static Effect CyberFreezeCage { get; private set; }
     }
 }

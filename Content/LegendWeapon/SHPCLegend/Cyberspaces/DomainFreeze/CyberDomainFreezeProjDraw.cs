@@ -51,13 +51,29 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.DomainFre
         }
 
         public override void PostDraw(Projectile proj, Color lightColor) {
-            if (!_shaderActive) return;
-            _shaderActive = false;
+            bool wasFrozen = _shaderActive;
+            if (_shaderActive) {
+                _shaderActive = false;
 
-            Main.spriteBatch.End();
-            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer,
-                null, Main.GameViewMatrix.TransformationMatrix);
+                Main.spriteBatch.End();
+                Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                    Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer,
+                    null, Main.GameViewMatrix.TransformationMatrix);
+            }
+
+            // 绘制六角能量罩覆盖层
+            if (wasFrozen) {
+                float progress = CyberDomainFreeze.GetProjectileFreezeProgress(proj.whoAmI);
+                float seed = 0f;
+                for (int i = 0; i < CyberDomainFreeze.FrozenProjectiles.Count; i++) {
+                    if (CyberDomainFreeze.FrozenProjectiles[i].EntityIndex == proj.whoAmI) {
+                        seed = CyberDomainFreeze.FrozenProjectiles[i].Seed;
+                        break;
+                    }
+                }
+                CyberDomainFreezeNPCDraw.DrawCageOverlay(Main.spriteBatch, proj.Center,
+                    Main.screenPosition, progress, seed, proj.width, proj.height);
+            }
         }
 
         public override bool PreAI(Projectile proj) {

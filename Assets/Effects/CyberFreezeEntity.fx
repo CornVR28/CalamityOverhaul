@@ -68,41 +68,42 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0) : COLOR0
     // ================================================================
     float timeHash = floor(uTime * 8.0 + seed * 50.0);
 
-    // 冻结状态下故障强度较低但持续存在
-    float glitchBase = 0.2 + 0.15 * sin(uTime * 2.0 + seed * 10.0);
+    // 冻结状态下故障强度明显且持续存在
+    float glitchBase = 0.45 + 0.25 * sin(uTime * 2.5 + seed * 10.0);
+    // 周期性故障尖峰 (每隔几秒一次剧烈抽搐)
+    float spikeCycle = sin(uTime * 0.8 + seed * 3.0);
+    float spike = smoothstep(0.85, 1.0, spikeCycle) * 0.4;
     // 解冻前故障加剧
-    float thawGlitch = smoothstep(0.8, 1.0, progress) * 0.6;
-    float glitchStrength = glitchBase + thawGlitch;
+    float thawGlitch = smoothstep(0.75, 1.0, progress) * 0.5;
+    float glitchStrength = glitchBase + spike + thawGlitch;
 
     // 水平行撕裂
     float rowIdx = floor(coords.y / (texelSize.y * 10.0));
     float rowRand = hash21(float2(rowIdx, timeHash));
-    bool rowActive = rowRand > lerp(0.88, 0.6, glitchStrength);
-    float rowShift = (rowRand - 0.5) * 2.0 * texelSize.x * 20.0 * glitchStrength;
+    bool rowActive = rowRand > lerp(0.72, 0.35, glitchStrength);
+    float rowShift = (rowRand - 0.5) * 2.0 * texelSize.x * 40.0 * glitchStrength;
     if (!rowActive) rowShift = 0.0;
 
-    // 块状故障
+    // 块状故障（仅水平偏移，避免序列图垂直采样越界）
     float2 blockIdx = floor(coords / (texelSize * 25.0));
     float blockRand = hash21(blockIdx + timeHash);
-    bool blockActive = blockRand > lerp(0.93, 0.7, glitchStrength);
-    float2 blockShift = float2(0, 0);
+    bool blockActive = blockRand > lerp(0.80, 0.45, glitchStrength);
+    float blockShiftX = 0.0;
     if (blockActive)
     {
-        blockShift.x = (hash11(blockRand * 5.17) - 0.5) * texelSize.x * 18.0 * glitchStrength;
-        blockShift.y = (hash11(blockRand * 2.93) - 0.5) * texelSize.y * 10.0 * glitchStrength;
+        blockShiftX = (hash11(blockRand * 5.17) - 0.5) * texelSize.x * 35.0 * glitchStrength;
     }
 
     float2 distorted = coords;
-    distorted.x += rowShift;
-    distorted += blockShift;
+    distorted.x += rowShift + blockShiftX;
 
     // ================================================================
     // RGB通道分离
     // ================================================================
-    float channelSplit = lerp(1.5, 6.0, glitchStrength) * texelSize.x;
-    float splitAngle = uTime * 2.0 + seed * 6.28;
-    float2 rOff = float2(cos(splitAngle), sin(splitAngle)) * channelSplit;
-    float2 bOff = float2(cos(splitAngle + 2.09), sin(splitAngle + 2.09)) * channelSplit;
+    // RGB通道分离（仅水平方向，避免序列图垂直采样越界）
+    float channelSplit = lerp(3.5, 10.0, glitchStrength) * texelSize.x;
+    float2 rOff = float2(channelSplit, 0.0);
+    float2 bOff = float2(-channelSplit, 0.0);
 
     float4 colR = tex2D(uImage0, distorted + rOff);
     float4 colG = tex2D(uImage0, distorted);
@@ -133,10 +134,14 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0) : COLOR0
     // ================================================================
     // 扫描线干扰
     // ================================================================
-    float scanFreq = 120.0;
+    float scanFreq = 80.0;
     float scanLine = sin(coords.y * scanFreq + uTime * 5.0) * 0.5 + 0.5;
-    scanLine = pow(scanLine, 6.0);
-    filtered -= scanLine * 0.12 * freezeStr;
+    scanLine = pow(scanLine, 4.0);
+    filtered -= scanLine * 0.22 * freezeStr;
+    // 粗扫描带 (间隔较大的明暗条纹)
+    float thickScan = sin(coords.y * 20.0 + uTime * 2.0) * 0.5 + 0.5;
+    thickScan = smoothstep(0.4, 0.6, thickScan);
+    filtered *= 1.0 - thickScan * 0.15 * freezeStr;
 
     // ================================================================
     // 六角能量网格覆盖
