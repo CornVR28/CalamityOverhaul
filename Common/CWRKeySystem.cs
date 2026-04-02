@@ -27,6 +27,7 @@ namespace CalamityOverhaul.Common
         public static ModKeybind EmblemOfDread_Dash { get; private set; }
         public static ModKeybind EyeOfSingularity_QuantumLeap { get; private set; }
         public static ModKeybind HackTime_Toggle { get; private set; }
+        public static ModKeybind CyberBanish_Key { get; private set; }
 
         void ICWRLoader.LoadData() {
             Mod mod = CWRMod.Instance;
@@ -53,6 +54,7 @@ namespace CalamityOverhaul.Common
             EmblemOfDread_Dash = KeybindLoader.RegisterKeybind(mod, "EmblemOfDread_Dash", "V");
             EyeOfSingularity_QuantumLeap = KeybindLoader.RegisterKeybind(mod, "EyeOfSingularity_QuantumLeap", "B");
             HackTime_Toggle = KeybindLoader.RegisterKeybind(mod, "HackTime_Toggle", "N");
+            CyberBanish_Key = KeybindLoader.RegisterKeybind(mod, "CyberBanish_Key", "Y");
         }
 
         void ICWRLoader.UnLoadData() {
@@ -79,6 +81,7 @@ namespace CalamityOverhaul.Common
             EmblemOfDread_Dash = null;
             EyeOfSingularity_QuantumLeap = null;
             HackTime_Toggle = null;
+            CyberBanish_Key = null;
         }
     }
 }

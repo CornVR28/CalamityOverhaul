@@ -1,4 +1,5 @@
 ﻿using CalamityOverhaul.Common;
+using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Banish;
 using InnoVault.RenderHandles;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
@@ -25,10 +26,12 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         public override void UpdateBySystem(int index) {
             if (Main.gameMenu) {
                 Cyberspace.Reset();
+                CyberBanish.Reset();
                 return;
             }
 
             Cyberspace.Update();
+            CyberBanish.Update();
         }
 
         public override void DrawNPCsOverTiles(SpriteBatch spriteBatch, GraphicsDevice graphicsDevice, RenderTarget2D screenSwap) {

@@ -56,6 +56,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
 
         private static bool ShouldApplyEffect(NPC npc) {
             if (!HackTime.Active && HackTime.Intensity < 0.01f) return false;
+            // 正在被放逐的NPC由放逐着色器处理，不叠加HackTime高亮
+            if (Banish.CyberBanish.IsBanishing(npc.whoAmI)) return false;
             return npc.whoAmI == HackTime.SelectedTargetIndex
                 || npc.whoAmI == HackTime.HoveredTargetIndex;
         }

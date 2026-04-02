@@ -85,18 +85,18 @@ namespace CalamityOverhaul
             //Sandevistan.IsActive = !Sandevistan.IsActive;
             //CyberwareUI.Instance.Toggle();
 
-            //if (player.altFunctionUse == 0) {
-            //    Cyberspace.Activate(player);   // 展开领域
-            //    Cyberspace.SetLayer(3, player);
-            //}
-            //else {
-            //    Cyberspace.Deactivate(); // 收缩关闭
-            //}
+            if (player.altFunctionUse == 0) {
+                Cyberspace.Activate(player);   // 展开领域
+                Cyberspace.SetLayer(3, player);
+            }
+            else {
+                Cyberspace.Deactivate(); // 收缩关闭
+            }
 
             // 生成光束，ai[0] = 颜色主题 (0=蓝, 1=黄, 2=青)
-            Projectile.NewProjectile(player.FromObjectGetParent(), player.Center, player.Center.To(Main.MouseWorld).UnitVector() * 12,
-                ModContent.ProjectileType<CyberChargeOrbProj>(),
-                20, 1, player.whoAmI, 0);
+            //Projectile.NewProjectile(player.FromObjectGetParent(), player.Center, player.Center.To(Main.MouseWorld).UnitVector() * 12,
+            //    ModContent.ProjectileType<CyberChargeOrbProj>(),
+            //    20, 1, player.whoAmI, 0);
 
             //Cyberspace.SetLayer(3, player);
             //Cyberspace.Deactivate(); // 收缩关闭
