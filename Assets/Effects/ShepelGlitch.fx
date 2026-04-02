@@ -1,0 +1,111 @@
+// ShepelGlitch.fx - CP2077-style glitch distortion for Shepel full body portrait
+// Horizontal slice displacement + RGB chromatic aberration + block corruption + brightness flicker
+
+float uTime;
+float uIntensity; // 0~1
+
+sampler2D uImage : register(s0);
+
+float hash11(float p)
+{
+    p = frac(p * 0.1031);
+    p *= p + 33.33;
+    p *= p + p;
+    return frac(p);
+}
+
+float4 PixelShaderFunction(float2 uv : TEXCOORD0, float4 color : COLOR0) : COLOR0
+{
+    if (uIntensity <= 0.001)
+    {
+        return tex2D(uImage, uv) * color;
+    }
+
+    float time = uTime * 10.0;
+    float it = uIntensity;
+
+    // --- 1. Horizontal slice displacement ---
+    // Variable-height slices that shift horizontally
+    float sliceH = 0.015 + hash11(floor(time * 2.7)) * 0.06;
+    float sliceIdx = floor(uv.y / sliceH);
+    float sliceRand = hash11(sliceIdx + floor(time * 6.0) * 137.0);
+    float displace = 0.0;
+    // Only some slices displace; more slices at higher intensity
+    if (sliceRand > 1.0 - it * 0.55)
+    {
+        displace = (hash11(sliceIdx * 7.13 + time * 1.3) - 0.5) * it * 0.18;
+    }
+
+    // --- 2. Block corruption ---
+    // Block A
+    float2 bSizeA = float2(0.12 + hash11(time + 0.1) * 0.18, 0.025 + hash11(time + 0.2) * 0.055);
+    float2 bPosA = float2(hash11(floor(time * 3.5) + 10.0), hash11(floor(time * 3.5) + 20.0));
+    float2 bUvA = (uv - bPosA) / bSizeA;
+    float inA = step(0.0, bUvA.x) * step(bUvA.x, 1.0) * step(0.0, bUvA.y) * step(bUvA.y, 1.0);
+    float blockD = inA * (hash11(time * 2.7 + 5.0) - 0.5) * it * 0.22;
+
+    // Block B
+    float2 bSizeB = float2(0.08 + hash11(time + 3.0) * 0.14, 0.02 + hash11(time + 4.0) * 0.04);
+    float2 bPosB = float2(hash11(floor(time * 2.8) + 30.0), hash11(floor(time * 2.8) + 40.0));
+    float2 bUvB = (uv - bPosB) / bSizeB;
+    float inB = step(0.0, bUvB.x) * step(bUvB.x, 1.0) * step(0.0, bUvB.y) * step(bUvB.y, 1.0);
+    blockD += inB * (hash11(time * 1.9 + 8.0) - 0.5) * it * 0.16;
+
+    // Block C (smaller, fast)
+    float2 bSizeC = float2(0.05 + hash11(time + 6.0) * 0.1, 0.015 + hash11(time + 7.0) * 0.03);
+    float2 bPosC = float2(hash11(floor(time * 5.0) + 50.0), hash11(floor(time * 5.0) + 60.0));
+    float2 bUvC = (uv - bPosC) / bSizeC;
+    float inC = step(0.0, bUvC.x) * step(bUvC.x, 1.0) * step(0.0, bUvC.y) * step(bUvC.y, 1.0);
+    blockD += inC * (hash11(time * 3.3 + 12.0) - 0.5) * it * 0.12;
+
+    float totalDX = displace + blockD;
+
+    // --- 3. RGB chromatic aberration ---
+    float chromaOff = it * 0.025;
+    float2 uvR = float2(uv.x + totalDX + chromaOff, uv.y);
+    float2 uvG = float2(uv.x + totalDX, uv.y);
+    float2 uvB = float2(uv.x + totalDX - chromaOff, uv.y);
+
+    // Clamp to valid range
+    uvR = saturate(uvR);
+    uvG = saturate(uvG);
+    uvB = saturate(uvB);
+
+    float4 colR = tex2D(uImage, uvR);
+    float4 colG = tex2D(uImage, uvG);
+    float4 colB = tex2D(uImage, uvB);
+
+    float4 result;
+    result.r = colR.r;
+    result.g = colG.g;
+    result.b = colB.b;
+    result.a = max(max(colR.a, colG.a), colB.a);
+
+    // --- 4. Scanline interference ---
+    float scanline = sin(uv.y * 600.0 + time * 18.0) * 0.05 * it;
+    result.rgb -= scanline;
+
+    // --- 5. Brightness flicker ---
+    float flicker = 1.0 + (hash11(floor(time * 9.0)) - 0.5) * it * 0.35;
+    result.rgb *= flicker;
+
+    // --- 6. Occasional color tint flash ---
+    float tintChance = hash11(floor(time * 4.0) + 99.0);
+    if (tintChance > 0.85 && it > 0.3)
+    {
+        // Brief cyan or magenta tint
+        float tintType = hash11(floor(time * 4.0) + 77.0);
+        float3 tintColor = tintType > 0.5 ? float3(0.1, 0.3, 0.4) : float3(0.3, 0.05, 0.2);
+        result.rgb += tintColor * it * 0.25;
+    }
+
+    return result * color;
+}
+
+technique Technique1
+{
+    pass GlitchPass
+    {
+        PixelShader = compile ps_3_0 PixelShaderFunction();
+    }
+}

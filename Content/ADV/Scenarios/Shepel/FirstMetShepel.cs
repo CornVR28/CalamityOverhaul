@@ -1,4 +1,6 @@
-﻿using CalamityOverhaul.Content.ADV.DialogueBoxs;
+﻿using CalamityOverhaul.Content.ADV.ADVChoices;
+using CalamityOverhaul.Content.ADV.Common;
+using CalamityOverhaul.Content.ADV.DialogueBoxs;
 using CalamityOverhaul.Content.ADV.DialogueBoxs.Styles;
 using System;
 using Terraria.Localization;
@@ -7,7 +9,7 @@ using Terraria.ModLoader;
 namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel
 {
     /// <summary>
-    /// 初遇SHPC演示场景（占位符台词，用于展示赛博女仆对话框风格）
+    /// 初遇SHPC场景
     /// </summary>
     internal class FirstMetShepel : ADVScenarioBase, ILocalizedModType
     {
@@ -15,14 +17,11 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel
         public static LocalizedText RolenameSHPC { get; private set; }
         //对话文本
         public static LocalizedText Line1 { get; private set; }
-        public static LocalizedText Line2 { get; private set; }
 
         //选择分支
-        public static LocalizedText QuestionLine { get; private set; }
         public static LocalizedText Choice1Text { get; private set; }
         public static LocalizedText Choice2Text { get; private set; }
         public static LocalizedText Choice1Response { get; private set; }
-        public static LocalizedText Choice2Response { get; private set; }
 
         //使用SHPC专属赛博女仆风格
         protected override Func<DialogueBoxBase> DefaultDialogueStyle
@@ -30,20 +29,55 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel
 
         public override void SetStaticDefaults() {
             RolenameSHPC = this.GetLocalization(nameof(RolenameSHPC), () => "SHPC");
-            Line1 = this.GetLocalization(nameof(Line1), () => "......检测到生物信号接近，启动交互协议");
-            Line2 = this.GetLocalization(nameof(Line2), () => "您好，我是超级家庭个人计算机，编号S.H.P.C");
+            Line1 = this.GetLocalization(nameof(Line1), () => "主人！很高兴再见到您！");
+            Choice1Text = this.GetLocalization(nameof(Choice1Text), () => "你认错人了吧？");
+            Choice2Text = this.GetLocalization(nameof(Choice2Text), () => "...好久不见");
+            Choice1Response = this.GetLocalization(nameof(Choice1Response), () => "...是的，只要是您，我每次都愿意认错");
         }
 
         protected override void Build() {
             DialogueBoxBase.RegisterPortrait(RolenameSHPC.Value, texture: null);
             DialogueBoxBase.SetPortraitStyle(RolenameSHPC.Value, silhouette: false);
 
-            //对话序列
-            Add(RolenameSHPC.Value, Line1.Value);
-            Add(RolenameSHPC.Value, Line2.Value);
+            //对话 + 选择
+            AddWithChoices(RolenameSHPC.Value, Line1.Value, [
+                new Choice(Choice1Text.Value, Choice1),
+                new Choice(Choice2Text.Value, Choice2),
+            ], choiceBoxStyle: ADVChoiceBox.ChoiceBoxStyle.SHPC);
         }
+
         protected override void OnScenarioStart() {
             SHPCDialogueBox.Instance?.ShowFullBodyPortrait<ShepelFullBodyPortrait>();
+            if (SHPCDialogueBox.Instance?.GetActiveFullBodyPortrait() is ShepelFullBodyPortrait portrait) {
+                portrait.SkipFadeIn();
+                portrait.currentFace = ShepelFullBodyPortrait.Face.None;
+            }
+        }
+
+        public void Choice1() {
+            ScenarioManager.Start<FirstMetShepel_Choice1>();
+            Complete();
+        }
+
+        private class FirstMetShepel_Choice1 : ADVScenarioBase
+        {
+            public override string Key => nameof(FirstMetShepel_Choice1);
+            protected override Func<DialogueBoxBase> DefaultDialogueStyle
+                => () => SHPCDialogueBox.Instance;
+            protected override void Build() => Add(RolenameSHPC.Value, Choice1Response.Value);
+            protected override void OnScenarioStart() {
+                SHPCDialogueBox.Instance?.ShowFullBodyPortrait<ShepelFullBodyPortrait>();
+                if (SHPCDialogueBox.Instance?.GetActiveFullBodyPortrait() is ShepelFullBodyPortrait portrait) {
+                    portrait.SkipFadeIn();
+                    portrait.currentFace = ShepelFullBodyPortrait.Face.None;
+                    portrait.TriggerGlitch(1f, 1f);
+                }
+            }
+        }
+
+        public void Choice2() {
+            //TODO: 选择2的后续场景
+            Complete();
         }
     }
 }
