@@ -24,20 +24,12 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
         private const float FontStatus = 0.30f;
         //完成后闪烁持续时间（秒）
         private const float CompletedDuration = 1.2f;
-        //无限骇入模式参数
-        private const float InfiniteUploadSpeed = 1f / 18f;
-        private const float InfiniteCompletedFade = 0.25f;
-        private const float InfiniteEnqueueInterval = 0.12f;
-        private const int InfiniteMaxQueue = 8;
 
         #endregion
 
         //队列数据
         private readonly List<HackQueueEntry> queue = new();
         private float timer;
-        //无限骇入循环状态
-        private int infiniteCycleIndex;
-        private float infiniteEnqueueTimer;
 
         #region 公共接口
 
@@ -64,8 +56,6 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
         //清空队列
         public void Clear() {
             queue.Clear();
-            infiniteCycleIndex = 0;
-            infiniteEnqueueTimer = 0f;
         }
 
         //查询某个hack slot在队列中的状态（重复时优先级：Uploading > Queued > Completed）
@@ -174,39 +164,19 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
 
                     case HackQueueState.Uploading:
                         hasUploading = true;
-                        //推进上传进度（无限模式使用加速速率）
-                        float uploadStep = HackTime.InfiniteHack
-                            ? InfiniteUploadSpeed
-                            : (entry.Hack.UploadTime > 0 ? 1f / entry.Hack.UploadTime : 1f);
-                        entry.UploadProgress += uploadStep;
+                        //推进上传进度
+                        if (entry.Hack.UploadTime > 0)
+                            entry.UploadProgress += 1f / entry.Hack.UploadTime;
                         if (entry.UploadProgress >= 1f) {
                             entry.UploadProgress = 1f;
                             entry.State = HackQueueState.Completed;
-                            entry.CompletedTimer = HackTime.InfiniteHack ? InfiniteCompletedFade : CompletedDuration;
+                            entry.CompletedTimer = CompletedDuration;
                         }
                         break;
 
                     case HackQueueState.Completed:
                         entry.CompletedTimer -= 0.016f;
                         break;
-                }
-            }
-
-            //无限骇入模式：自动投入并快速循环
-            if (HackTime.InfiniteHack && HackTime.SelectedTargetIndex >= 0) {
-                //自动移除已淡出的完成条目
-                for (int i = queue.Count - 1; i >= 0; i--) {
-                    if (queue[i].State == HackQueueState.Completed && queue[i].CompletedTimer <= 0f)
-                        queue.RemoveAt(i);
-                }
-                //定时自动投入下一个协议
-                infiniteEnqueueTimer -= 0.016f;
-                if (infiniteEnqueueTimer <= 0f && queue.Count < InfiniteMaxQueue) {
-                    var all = QuickHackRegistry.All;
-                    int idx = infiniteCycleIndex % all.Length;
-                    queue.Add(new HackQueueEntry(all[idx], idx));
-                    infiniteCycleIndex++;
-                    infiniteEnqueueTimer = InfiniteEnqueueInterval;
                 }
             }
         }
@@ -256,8 +226,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
             //完成态淡出
             float fadeAlpha = 1f;
             if (entry.State == HackQueueState.Completed) {
-                float fadeDuration = HackTime.InfiniteHack ? InfiniteCompletedFade : CompletedDuration;
-                fadeAlpha = Math.Clamp(entry.CompletedTimer / fadeDuration, 0f, 1f);
+                fadeAlpha = Math.Clamp(entry.CompletedTimer / CompletedDuration, 0f, 1f);
             }
 
             float itemAlpha = alpha * Math.Min(fly * 2.5f, 1f) * fadeAlpha;
@@ -405,8 +374,6 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
 
         private float GetStartY() {
             float totalH = queue.Count * (ItemHeight + ItemGap) - ItemGap;
-            if (HackTime.InfiniteHack)
-                return Math.Max(120f, (Main.screenHeight - totalH) * 0.35f);
             return (Main.screenHeight - totalH) * 0.5f;
         }
 

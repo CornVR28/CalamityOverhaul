@@ -23,6 +23,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
         private readonly Rectangle[] slotRects = new Rectangle[QuickHackRegistry.All.Length];
         //当前悬停的槽位索引
         private int hoveredSlot = -1;
+        //当前是否有悬停槽位（供外部查询）
+        public bool HasHoveredSlot => hoveredSlot >= 0;
         //全局计时器
         private float timer;
         //是否显示
