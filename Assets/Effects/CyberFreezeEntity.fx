@@ -1,0 +1,226 @@
+// ============================================================================
+// CyberFreezeEntity.fx — 赛博领域冻结实体着色器
+// 双效果叠加：故障滤镜 + 六角能量网格覆盖
+// 应用于被冻结的NPC和弹幕，表现"被赛博黑墙冻结"的状态
+// ============================================================================
+
+sampler uImage0 : register(s0);
+
+float uTime;
+float progress;        // 冻结进度 0(刚冻结)→1(即将解冻)
+float intensity;       // 赛博空间效果强度
+float seed;            // 每个实体独立的随机种子
+float2 texelSize;      // 1/texWidth, 1/texHeight
+
+// ---- 工具函数 ----
+
+float hash11(float p)
+{
+    p = frac(p * 0.1031);
+    p *= p + 33.33;
+    p *= p + p;
+    return frac(p);
+}
+
+float hash21(float2 p)
+{
+    float3 p3 = frac(float3(p.xyx) * float3(0.1031, 0.1030, 0.0973));
+    p3 += dot(p3, p3.yzx + 33.33);
+    return frac((p3.x + p3.y) * p3.z);
+}
+
+// 六角网格边缘距离
+float hexDist(float2 p)
+{
+    p = abs(p);
+    float c = dot(p, normalize(float2(1.0, 1.7320508)));
+    c = max(c, p.x);
+    return c;
+}
+
+// 六角网格UV映射
+float4 hexGrid(float2 uv, float scale)
+{
+    float sqrt3 = 1.7320508;
+    float2 r = float2(1.0, sqrt3);
+    float2 h = r * 0.5;
+
+    float2 a = fmod(uv, r) - h;
+    float2 b = fmod(uv - h, r) - h;
+
+    float2 gv;
+    if (length(a) < length(b))
+        gv = a;
+    else
+        gv = b;
+
+    float edgeDist = hexDist(gv);
+    float2 id = uv - gv;
+
+    // x = edge distance, y = cell id hash, zw = cell center
+    return float4(edgeDist, hash21(id), id.x, id.y);
+}
+
+float4 PixelShaderFunction(float2 coords : TEXCOORD0) : COLOR0
+{
+    // ================================================================
+    // 故障扭曲偏移计算
+    // ================================================================
+    float timeHash = floor(uTime * 8.0 + seed * 50.0);
+
+    // 冻结状态下故障强度较低但持续存在
+    float glitchBase = 0.2 + 0.15 * sin(uTime * 2.0 + seed * 10.0);
+    // 解冻前故障加剧
+    float thawGlitch = smoothstep(0.8, 1.0, progress) * 0.6;
+    float glitchStrength = glitchBase + thawGlitch;
+
+    // 水平行撕裂
+    float rowIdx = floor(coords.y / (texelSize.y * 10.0));
+    float rowRand = hash21(float2(rowIdx, timeHash));
+    bool rowActive = rowRand > lerp(0.88, 0.6, glitchStrength);
+    float rowShift = (rowRand - 0.5) * 2.0 * texelSize.x * 20.0 * glitchStrength;
+    if (!rowActive) rowShift = 0.0;
+
+    // 块状故障
+    float2 blockIdx = floor(coords / (texelSize * 25.0));
+    float blockRand = hash21(blockIdx + timeHash);
+    bool blockActive = blockRand > lerp(0.93, 0.7, glitchStrength);
+    float2 blockShift = float2(0, 0);
+    if (blockActive)
+    {
+        blockShift.x = (hash11(blockRand * 5.17) - 0.5) * texelSize.x * 18.0 * glitchStrength;
+        blockShift.y = (hash11(blockRand * 2.93) - 0.5) * texelSize.y * 10.0 * glitchStrength;
+    }
+
+    float2 distorted = coords;
+    distorted.x += rowShift;
+    distorted += blockShift;
+
+    // ================================================================
+    // RGB通道分离
+    // ================================================================
+    float channelSplit = lerp(1.5, 6.0, glitchStrength) * texelSize.x;
+    float splitAngle = uTime * 2.0 + seed * 6.28;
+    float2 rOff = float2(cos(splitAngle), sin(splitAngle)) * channelSplit;
+    float2 bOff = float2(cos(splitAngle + 2.09), sin(splitAngle + 2.09)) * channelSplit;
+
+    float4 colR = tex2D(uImage0, distorted + rOff);
+    float4 colG = tex2D(uImage0, distorted);
+    float4 colB = tex2D(uImage0, distorted + bOff);
+
+    float4 color;
+    color.r = colR.r;
+    color.g = colG.g;
+    color.b = colB.b;
+    color.a = (colR.a + colG.a + colB.a) / 3.0;
+
+    if (color.a < 0.01)
+        return float4(0, 0, 0, 0);
+
+    // ================================================================
+    // 冻结色调：去饱和 + 青色/深蓝偏移
+    // ================================================================
+    float lum = dot(color.rgb, float3(0.299, 0.587, 0.114));
+    float freezeStr = lerp(0.7, 0.3, progress) * intensity;
+
+    float3 filtered = color.rgb;
+    // 去饱和
+    filtered = lerp(filtered, float3(lum, lum, lum), freezeStr * 0.7);
+    // 青色/蓝色偏移
+    float3 cyanTint = float3(lum * 0.4, lum * 0.9, lum * 1.2);
+    filtered = lerp(filtered, cyanTint, freezeStr * 0.6);
+
+    // ================================================================
+    // 扫描线干扰
+    // ================================================================
+    float scanFreq = 120.0;
+    float scanLine = sin(coords.y * scanFreq + uTime * 5.0) * 0.5 + 0.5;
+    scanLine = pow(scanLine, 6.0);
+    filtered -= scanLine * 0.12 * freezeStr;
+
+    // ================================================================
+    // 六角能量网格覆盖
+    // ================================================================
+    float hexScale = 12.0; // 控制六角网格大小
+    float2 hexUV = coords * float2(1.0 / texelSize.x, 1.0 / texelSize.y) / hexScale;
+
+    float4 hex = hexGrid(hexUV, 1.0);
+    float hexEdge = hex.x;
+    float hexId = hex.y;
+
+    // 六角边缘线
+    float edgeWidth = 0.08;
+    float hexLine = 1.0 - smoothstep(edgeWidth - 0.02, edgeWidth, hexEdge);
+
+    // 六角网格颜色
+    float3 hexCyan = float3(0.0, 0.7, 0.9);
+    float3 hexDark = float3(0.0, 0.3, 0.5);
+
+    // 网格呼吸脉冲
+    float pulse = 0.6 + 0.4 * sin(uTime * 3.0 + hexId * 6.28 + seed * 10.0);
+
+    // 部分格子随机闪烁
+    float cellFlicker = step(0.7, hash11(hexId * 100.0 + floor(uTime * 4.0 + seed * 20.0)));
+    float cellGlow = pulse * (0.3 + cellFlicker * 0.5);
+
+    // 六角覆盖强度：刚冻结时最强，解冻前减弱
+    float hexOverlayStr = lerp(0.5, 0.15, progress) * intensity;
+
+    // 叠加六角边缘光
+    float3 hexColor = lerp(hexDark, hexCyan, pulse) * hexLine * hexOverlayStr;
+    // 格子内部微弱发光
+    float3 cellFillColor = hexDark * (1.0 - hexLine) * cellGlow * hexOverlayStr * 0.2;
+
+    filtered += hexColor + cellFillColor;
+
+    // ================================================================
+    // 数字噪点
+    // ================================================================
+    float pixelNoise = hash21(coords * 400.0 + uTime * 8.0 + seed);
+    filtered += (pixelNoise - 0.5) * 0.08 * freezeStr;
+
+    // ================================================================
+    // 解冻阶段 (>0.85): 故障加剧 + 闪烁
+    // ================================================================
+    float thawPhase = smoothstep(0.85, 1.0, progress);
+    if (thawPhase > 0.0)
+    {
+        float thawFlicker = sin(uTime * 25.0 + seed * 15.0) * 0.5 + 0.5;
+        // 闪烁恢复原色
+        filtered = lerp(filtered, color.rgb, thawPhase * thawFlicker * 0.5);
+        // 偶尔全屏白闪
+        float whiteFlash = step(0.9, hash11(floor(uTime * 15.0) + seed)) * thawPhase;
+        filtered = lerp(filtered, float3(0.6, 0.9, 1.0), whiteFlash * 0.3);
+    }
+
+    // ================================================================
+    // 边缘发光
+    // ================================================================
+    float4 sampleUp    = tex2D(uImage0, coords + float2(0, -texelSize.y * 2.0));
+    float4 sampleDown  = tex2D(uImage0, coords + float2(0,  texelSize.y * 2.0));
+    float4 sampleLeft  = tex2D(uImage0, coords + float2(-texelSize.x * 2.0, 0));
+    float4 sampleRight = tex2D(uImage0, coords + float2( texelSize.x * 2.0, 0));
+    float neighborAlpha = (sampleUp.a + sampleDown.a + sampleLeft.a + sampleRight.a) * 0.25;
+    float edgeGlow = saturate(neighborAlpha - color.a * 0.5) * 2.0;
+    float edgePulse = 0.5 + 0.5 * sin(uTime * 4.0 + coords.y * 20.0 + seed * 8.0);
+    edgeGlow *= edgePulse * 0.5 * freezeStr;
+
+    filtered += float3(0.0, 0.5, 0.7) * edgeGlow;
+
+    // ================================================================
+    // 全局透明度控制
+    // ================================================================
+    float globalFlicker = 0.85 + 0.15 * sin(uTime * 5.0 + seed * 20.0);
+    color.a *= globalFlicker;
+
+    color.rgb = saturate(filtered);
+    return color * intensity;
+}
+
+technique Technique1
+{
+    pass FreezePass
+    {
+        PixelShader = compile ps_3_0 PixelShaderFunction();
+    }
+}

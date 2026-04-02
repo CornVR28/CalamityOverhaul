@@ -28,6 +28,7 @@ namespace CalamityOverhaul.Common
         public static ModKeybind EyeOfSingularity_QuantumLeap { get; private set; }
         public static ModKeybind HackTime_Toggle { get; private set; }
         public static ModKeybind CyberBanish_Key { get; private set; }
+        public static ModKeybind CyberFreeze_Key { get; private set; }
 
         void ICWRLoader.LoadData() {
             Mod mod = CWRMod.Instance;
@@ -55,6 +56,7 @@ namespace CalamityOverhaul.Common
             EyeOfSingularity_QuantumLeap = KeybindLoader.RegisterKeybind(mod, "EyeOfSingularity_QuantumLeap", "B");
             HackTime_Toggle = KeybindLoader.RegisterKeybind(mod, "HackTime_Toggle", "N");
             CyberBanish_Key = KeybindLoader.RegisterKeybind(mod, "CyberBanish_Key", "Y");
+            CyberFreeze_Key = KeybindLoader.RegisterKeybind(mod, "CyberFreeze_Key", "U");
         }
 
         void ICWRLoader.UnLoadData() {
@@ -82,6 +84,7 @@ namespace CalamityOverhaul.Common
             EyeOfSingularity_QuantumLeap = null;
             HackTime_Toggle = null;
             CyberBanish_Key = null;
+            CyberFreeze_Key = null;
         }
     }
 }

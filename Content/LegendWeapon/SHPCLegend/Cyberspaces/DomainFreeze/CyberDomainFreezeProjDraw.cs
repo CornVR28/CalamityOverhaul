@@ -1,0 +1,80 @@
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using Terraria;
+using Terraria.ModLoader;
+
+namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.DomainFreeze
+{
+    /// <summary>
+    /// 赛博领域冻结弹幕绘制拦截器
+    /// <br/>冻结弹幕的AI并应用冻结着色器效果
+    /// </summary>
+    internal class CyberDomainFreezeProjDraw : GlobalProjectile
+    {
+        private static bool _shaderActive;
+
+        public override bool PreDraw(Projectile proj, ref Color lightColor) {
+            if (!CyberDomainFreeze.IsProjectileFrozen(proj.whoAmI)) return true;
+
+            Effect shader = CyberDomainFreezeAssets.CyberFreezeEntity;
+            if (shader == null) return true;
+
+            float progress = CyberDomainFreeze.GetProjectileFreezeProgress(proj.whoAmI);
+            if (progress < 0f) return true;
+
+            // 获取种子
+            float seed = 0f;
+            for (int i = 0; i < CyberDomainFreeze.FrozenProjectiles.Count; i++) {
+                if (CyberDomainFreeze.FrozenProjectiles[i].EntityIndex == proj.whoAmI) {
+                    seed = CyberDomainFreeze.FrozenProjectiles[i].Seed;
+                    break;
+                }
+            }
+
+            // 弹幕纹理的texelSize
+            Texture2D tex = Terraria.GameContent.TextureAssets.Projectile[proj.type].Value;
+
+            shader.Parameters["texelSize"]?.SetValue(new Vector2(1f / tex.Width, 1f / tex.Height));
+            shader.Parameters["uTime"]?.SetValue(Main.GlobalTimeWrappedHourly);
+            shader.Parameters["progress"]?.SetValue(progress);
+            shader.Parameters["intensity"]?.SetValue(Cyberspace.Intensity);
+            shader.Parameters["seed"]?.SetValue(seed);
+
+            Main.spriteBatch.End();
+            Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend,
+                Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer,
+                null, Main.GameViewMatrix.TransformationMatrix);
+            shader.CurrentTechnique.Passes[0].Apply();
+
+            _shaderActive = true;
+            return true;
+        }
+
+        public override void PostDraw(Projectile proj, Color lightColor) {
+            if (!_shaderActive) return;
+            _shaderActive = false;
+
+            Main.spriteBatch.End();
+            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer,
+                null, Main.GameViewMatrix.TransformationMatrix);
+        }
+
+        public override bool PreAI(Projectile proj) {
+            if (!CyberDomainFreeze.IsProjectileFrozen(proj.whoAmI)) return true;
+
+            // 获取冻结位置快照
+            for (int i = 0; i < CyberDomainFreeze.FrozenProjectiles.Count; i++) {
+                if (CyberDomainFreeze.FrozenProjectiles[i].EntityIndex == proj.whoAmI) {
+                    proj.Center = CyberDomainFreeze.FrozenProjectiles[i].FreezePosition;
+                    break;
+                }
+            }
+
+            // 冻结弹幕的AI
+            proj.velocity = Vector2.Zero;
+            proj.timeLeft++;
+            return false;
+        }
+    }
+}
