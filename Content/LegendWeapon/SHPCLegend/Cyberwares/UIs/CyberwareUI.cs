@@ -42,11 +42,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
                 this.GetLocalization("Slot_LeftLeg", () => "LEFT LEG"),
                 this.GetLocalization("Slot_Feet", () => "FEET"),
                 this.GetLocalization("Slot_OperatingSystem", () => "OPERATING SYSTEM"),
-                this.GetLocalization("Slot_CirculatorySystem", () => "CIRCULATORY SYS"),
-                this.GetLocalization("Slot_RightArm", () => "RIGHT ARM"),
-                this.GetLocalization("Slot_Skeleton", () => "SKELETON"),
-                this.GetLocalization("Slot_RightLeg", () => "RIGHT LEG"), 
                 this.GetLocalization("Slot_NervousSystem", () => "NERVOUS SYSTEM"),
+                this.GetLocalization("Slot_RightArm", () => "RIGHT ARM"),
+                this.GetLocalization("Slot_CirculatorySystem", () => "CIRCULATORY SYS"),
+                this.GetLocalization("Slot_Skeleton", () => "SKELETON"),
+                this.GetLocalization("Slot_RightLeg", () => "RIGHT LEG"),
             ];
         }
 

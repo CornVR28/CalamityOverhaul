@@ -16,11 +16,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.CyberItems
         LeftLeg,          // 4 左腿
         Feet,             // 5 足部
         OperatingSystem,  // 6 操作系统
-        CirculatorySystem,// 7 循环系统
+        NervousSystem,    // 7 神经系统
         RightArm,         // 8 右臂
-        Skeleton,         // 9 骨骼
-        RightLeg,         // 10 右腿
-        NervousSystem,    // 11 神经系统
+        CirculatorySystem,// 9 循环系统
+        Skeleton,         // 10 骨骼
+        RightLeg,         // 11 右腿
     }
 
     /// <summary>

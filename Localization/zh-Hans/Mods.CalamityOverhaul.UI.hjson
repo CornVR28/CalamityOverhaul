@@ -1,4 +1,4 @@
-ItemFilterUI: {
+﻿ItemFilterUI: {
 	HintText: 左键点击可添加项目
 	HintText2: 左键点击可移除项目
 	CloseHint: "[ESC]键或[右键点击]可关闭"
@@ -379,22 +379,22 @@ QuestManagerUI: {
 }
 
 CyberwareUI: {
-	// TitleText: CYBERWARE
-	// StatusText: SYSTEM STATUS: OPERATIONAL
-	// SlotSelectedText: "[ SELECTED ]"
-	// SlotEmptyText: EMPTY
-	// Slot_FrontalCortex: FRONTAL CORTEX
-	// Slot_OcularSystem: OCULAR SYSTEM
-	// Slot_LeftArm: LEFT ARM
-	// Slot_Hands: HANDS
-	// Slot_LeftLeg: LEFT LEG
-	// Slot_Feet: FEET
-	// Slot_OperatingSystem: OPERATING SYSTEM
-	// Slot_CirculatorySystem: CIRCULATORY SYS
-	// Slot_RightArm: RIGHT ARM
-	// Slot_Skeleton: SKELETON
-	// Slot_RightLeg: RIGHT LEG
-	// Slot_NervousSystem: NERVOUS SYSTEM
+	TitleText: 赛博义体
+	StatusText: 系统状态：运行中
+	SlotSelectedText: "[ 已选择 ]"
+	SlotEmptyText: 空置
+	Slot_FrontalCortex: 额叶皮层
+	Slot_OcularSystem: 视觉系统
+	Slot_LeftArm: 左臂
+	Slot_Hands: 手部
+	Slot_LeftLeg: 左腿
+	Slot_Feet: 足部
+	Slot_OperatingSystem: 操作系统
+	Slot_CirculatorySystem: 循环系统
+	Slot_RightArm: 右臂
+	Slot_Skeleton: 骨架
+	Slot_RightLeg: 右腿
+	Slot_NervousSystem: 神经系统
 }
 
 SHPCDialogueBox: {

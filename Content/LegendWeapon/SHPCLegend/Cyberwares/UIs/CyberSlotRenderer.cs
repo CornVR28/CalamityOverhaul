@@ -33,19 +33,19 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
         /// </summary>
         public static readonly SlotDef[] Definitions = [
             //左侧槽位
-            new(0.04f, 0.08f,  0),   //额叶皮层
-            new(0.04f, 0.18f,  0),   //光学系统
-            new(0.04f, 0.36f,  2),   //左臂
-            new(0.04f, 0.50f,  4),   //手部
-            new(0.04f, 0.68f,  7),   //左腿
-            new(0.04f, 0.82f,  9),   //足部
+            new(0.04f, 0.08f,  0),   //额叶皮层 → 头部
+            new(0.04f, 0.18f,  0),   //光学系统 → 头部(眼)
+            new(0.04f, 0.36f,  2),   //左臂 → 左臂
+            new(0.04f, 0.50f,  4),   //手部 → 左手
+            new(0.04f, 0.68f,  7),   //左腿 → 左腿
+            new(0.04f, 0.82f,  9),   //足部 → 左足
             //右侧槽位
-            new(0.76f, 0.08f,  0),   //操作系统
-            new(0.76f, 0.18f,  1),   //循环系统
-            new(0.76f, 0.36f,  3),   //右臂
-            new(0.76f, 0.50f,  6),   //骨骼
-            new(0.76f, 0.68f,  8),   //右腿
-            new(0.76f, 0.82f,  10),  //神经系统
+            new(0.76f, 0.08f,  0),   //操作系统 → 头部
+            new(0.76f, 0.18f,  1),   //神经系统 → 胸腔(脊椎)
+            new(0.76f, 0.36f,  3),   //右臂 → 右臂
+            new(0.76f, 0.50f,  1),   //循环系统 → 胸腔(心脏)
+            new(0.76f, 0.68f,  6),   //骨骼 → 腰椎
+            new(0.76f, 0.82f,  8),   //右腿 → 右腿
         ];
 
         private static readonly float[] ConnectorLaneFactors = [
@@ -54,18 +54,18 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
         ];
 
         private static readonly Vector2[] ConnectorNodeOffsets = [
-            new(-12f, -8f),
-            new(-10f, 4f),
-            new(-8f, -2f),
-            new(-7f, 3f),
-            new(-6f, -3f),
-            new(-5f, 3f),
-            new(11f, -5f),
-            new(8f, 2f),
-            new(8f, -2f),
-            new(0f, -7f),
-            new(7f, 2f),
-            new(5f, -3f),
+            new(-12f, -8f),   //0 额叶皮层 → 头部
+            new(-10f, 4f),    //1 光学系统 → 头部
+            new(-8f, -2f),    //2 左臂 → 左臂
+            new(-7f, 3f),     //3 手部 → 左手
+            new(-6f, -3f),    //4 左腿 → 左腿
+            new(-5f, 3f),     //5 足部 → 左足
+            new(11f, -5f),    //6 操作系统 → 头部
+            new(8f, 4f),      //7 神经系统 → 胸腔(脊椎)
+            new(8f, -2f),     //8 右臂 → 右臂
+            new(8f, 2f),      //9 循环系统 → 胸腔(心脏)
+            new(0f, -7f),     //10 骨骼 → 腰椎
+            new(7f, 2f),      //11 右腿 → 右腿
         ];
 
         #endregion
