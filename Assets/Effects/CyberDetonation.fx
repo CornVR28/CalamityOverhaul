@@ -3,6 +3,7 @@
 // 扩展冲击环 + 内部能量扭曲 + 六边形网格碎裂 + 数据流残影
 // 环形爆破：从中心向外扩展的多层科技感冲击波
 // 使用 SpriteBatch.Immediate + register(s0) + register(s1)
+// 支持领域超驱模式：高温红炽故障爆破
 // ============================================================================
 
 sampler baseSamp : register(s0);
@@ -14,6 +15,7 @@ float fadeAlpha;        // 整体透明度 0~1
 float3 coreColor;       // 核心色（白青）
 float3 ringColor;       // 环色（亮青/黄）
 float3 fragColor;       // 碎片色（暗色调）
+float overdriveAmount;  // 0=正常 1=完全超驱
 
 float hash21(float2 p)
 {
@@ -138,6 +140,52 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0, float4 vertexColor : COLOR
         + centerFlash
     );
     alpha *= fadeAlpha;
+
+    // ============================================================
+    // G. 超驱故障叠加 —— 爆破的黑墙撕裂效果
+    // ============================================================
+    if (overdriveAmount > 0.01)
+    {
+        float od = overdriveAmount;
+        // 爆破进度作为内在burst强度（初期最强，扩散后减弱）
+        float detonBurst = pow(saturate(1.0 - ringProgress), 1.5);
+
+        // G-1. RGB通道偏移（径向方向分离）
+        float2 radDir = normalize(centered + 0.001);
+        float splitAmt = od * (0.01 + detonBurst * 0.03);
+        float2 splitOff = radDir * splitAmt;
+        float rShift = tex2D(noiseSamp, float2(normAngle * 3.0 + 0.1, dist * 2.0) + splitOff).r;
+        float bShift = tex2D(noiseSamp, float2(normAngle * 3.0 + 0.1, dist * 2.0) - splitOff).b;
+        finalColor.r *= 0.7 + rShift * 0.6;
+        finalColor.b *= 0.7 + bShift * 0.6;
+
+        // G-2. 方块腐蚀（爆破内区域闪烁）
+        float2 blkUV = floor(coords * (12.0 + detonBurst * 8.0)) / (12.0 + detonBurst * 8.0);
+        float blockH = hash21(blkUV + float2(floor(uTime * 15.0), 0.0));
+        float blockOn = step(0.82 - detonBurst * 0.25, blockH);
+        float blockZone = smoothstep(ringProgress + 0.05, ringProgress - 0.15, dist);
+        finalColor += coreColor * blockOn * od * blockZone * (0.4 + detonBurst * 0.8);
+        alpha += blockOn * od * blockZone * 0.12;
+
+        // G-3. 扫描线干扰（环及内部）
+        float scanD = frac(dist * 60.0 + uTime * 3.0);
+        scanD = step(0.93, scanD);
+        finalColor += coreColor * scanD * od * 0.6;
+
+        // G-4. 角向撕裂带（随机扇形黑带）
+        float tearA = floor(normAngle * 12.0);
+        float tearH = hash21(float2(tearA, floor(uTime * 12.0)));
+        float tearOn = step(0.88 - detonBurst * 0.15, tearH) * od;
+        finalColor *= 1.0 - tearOn * 0.5;
+
+        // G-5. 全局亮度暴走
+        float flickG = hash21(float2(floor(uTime * 20.0), 7.7));
+        float flickAmt = detonBurst * (flickG - 0.3) * 2.5 * od;
+        finalColor *= 1.0 + flickAmt;
+
+        // G-6. alpha增强
+        alpha *= 1.0 + od * 0.3;
+    }
 
     return float4(finalColor * alpha, alpha) * vertexColor;
 }

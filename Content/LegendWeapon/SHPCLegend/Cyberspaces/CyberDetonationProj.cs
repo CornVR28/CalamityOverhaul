@@ -29,6 +29,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         private float chargeRatio;
         private float explosionRadius;
         private bool hasDealtDamage;
+        /// <summary>继承自充能球的超驱量 0-1</summary>
+        private float overdriveAmount;
 
         public override void SetDefaults() {
             Projectile.width = 2;
@@ -48,6 +50,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             // 初始帧：读取蓄力比例，计算爆炸范围
             if (Projectile.localAI[0] == 0f) {
                 chargeRatio = MathHelper.Clamp(Projectile.ai[0], 0f, 1f);
+                overdriveAmount = MathHelper.Clamp(Projectile.ai[1], 0f, 1f);
                 explosionRadius = MathHelper.Lerp(BaseExplosionRadius, MaxExplosionRadius, chargeRatio);
                 Projectile.localAI[0] = 1f;
 
@@ -69,38 +72,59 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             // 阻止弹幕移动
             Projectile.velocity = Vector2.Zero;
 
-            // 光照
+            // 光照（超驱时红炽光照）
             float t = 1f - (float)Projectile.timeLeft / Lifetime;
             float lightIntensity = MathF.Pow(1f - t, 2f);
-            Color lightCol = Color.Lerp(new Color(255, 220, 80), new Color(80, 230, 220), chargeRatio);
-            Lighting.AddLight(Projectile.Center, lightCol.ToVector3() * lightIntensity * 1.2f);
+            float od = overdriveAmount;
+            Color lightCol = Color.Lerp(
+                Color.Lerp(new Color(255, 220, 80), new Color(80, 230, 220), chargeRatio),
+                new Color(255, 80, 20), od);
+            Lighting.AddLight(Projectile.Center, lightCol.ToVector3() * lightIntensity * (1.2f + od * 0.8f));
         }
 
         private void SpawnExplosionParticles() {
-            Color mainCol = Color.Lerp(new Color(255, 220, 80), new Color(220, 255, 255), chargeRatio);
-            Color edgeCol = Color.Lerp(new Color(230, 170, 30), new Color(80, 230, 220), chargeRatio);
+            float od = overdriveAmount;
+            Color mainCol = Color.Lerp(
+                Color.Lerp(new Color(255, 220, 80), new Color(220, 255, 255), chargeRatio),
+                new Color(255, 200, 50), od);
+            Color edgeCol = Color.Lerp(
+                Color.Lerp(new Color(230, 170, 30), new Color(80, 230, 220), chargeRatio),
+                new Color(255, 30, 5), od);
 
-            // 径向爆发粒子
-            int count = 20 + (int)(chargeRatio * 15f);
+            // 径向爆发粒子（超驱时更多更大）
+            int count = 20 + (int)(chargeRatio * 15f) + (int)(od * 25f);
             for (int i = 0; i < count; i++) {
                 float angle = MathHelper.TwoPi * i / count + Main.rand.NextFloat(-0.1f, 0.1f);
-                float speed = Main.rand.NextFloat(4f, 10f) * (0.6f + chargeRatio * 0.4f);
+                float speed = Main.rand.NextFloat(4f, 10f + od * 6f) * (0.6f + chargeRatio * 0.4f);
                 Vector2 vel = angle.ToRotationVector2() * speed;
                 PRTLoader.AddParticle(new PRT_CyberSquare(
                     Projectile.Center + vel * 2f, vel,
                     mainCol, edgeCol,
-                    Main.rand.NextFloat(1.0f, 2.2f), Main.rand.Next(25, 50)
+                    Main.rand.NextFloat(1.0f, 2.5f + od * 1.5f), Main.rand.Next(25, 55)
                 ));
             }
 
-            // 内环密集小粒子
-            for (int i = 0; i < 12; i++) {
-                Vector2 vel = Main.rand.NextVector2CircularEdge(3f, 3f);
+            // 内环密集小粒子（超驱时更多）
+            int innerCount = 12 + (int)(od * 12f);
+            for (int i = 0; i < innerCount; i++) {
+                Vector2 vel = Main.rand.NextVector2CircularEdge(3f + od * 3f, 3f + od * 3f);
                 PRTLoader.AddParticle(new PRT_CyberSquare(
                     Projectile.Center, vel,
                     Color.White, mainCol,
-                    Main.rand.NextFloat(0.4f, 0.8f), Main.rand.Next(15, 30)
+                    Main.rand.NextFloat(0.4f, 1.0f + od * 0.6f), Main.rand.Next(15, 35)
                 ));
+            }
+
+            // 超驱时额外红炽碎片爆发
+            if (od > 0.3f) {
+                for (int i = 0; i < 20; i++) {
+                    Vector2 vel = Main.rand.NextVector2CircularEdge(8f, 8f) * Main.rand.NextFloat(0.5f, 1.2f);
+                    PRTLoader.AddParticle(new PRT_CyberSquare(
+                        Projectile.Center, vel,
+                        new Color(255, 30, 5), new Color(255, 200, 50),
+                        Main.rand.NextFloat(1.2f, 2.8f), Main.rand.Next(20, 45)
+                    ));
+                }
             }
         }
 
@@ -142,10 +166,15 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
                 fadeAlpha = 1f;
             fadeAlpha = MathHelper.Clamp(fadeAlpha, 0f, 1f);
 
-            // 颜色根据蓄力比例过渡
-            Vector3 coreCol = Vector3.Lerp(new Vector3(1f, 0.86f, 0.31f), new Vector3(0.86f, 1f, 1f), chargeRatio);
-            Vector3 ringCol = Vector3.Lerp(new Vector3(0.9f, 0.67f, 0.12f), new Vector3(0.31f, 0.9f, 0.86f), chargeRatio);
-            Vector3 fragCol = Vector3.Lerp(new Vector3(0.59f, 0.39f, 0.06f), new Vector3(0.08f, 0.55f, 0.51f), chargeRatio);
+            // 颜色根据蓄力比例过渡，超驱时偏向红炽
+            float od = overdriveAmount;
+            Vector3 baseCoreCol = Vector3.Lerp(new Vector3(1f, 0.86f, 0.31f), new Vector3(0.86f, 1f, 1f), chargeRatio);
+            Vector3 baseRingCol = Vector3.Lerp(new Vector3(0.9f, 0.67f, 0.12f), new Vector3(0.31f, 0.9f, 0.86f), chargeRatio);
+            Vector3 baseFragCol = Vector3.Lerp(new Vector3(0.59f, 0.39f, 0.06f), new Vector3(0.08f, 0.55f, 0.51f), chargeRatio);
+
+            Vector3 coreCol = Vector3.Lerp(baseCoreCol, new Vector3(1f, 0.97f, 0.82f), od);
+            Vector3 ringCol = Vector3.Lerp(baseRingCol, new Vector3(1f, 0.12f, 0.03f), od);
+            Vector3 fragCol = Vector3.Lerp(baseFragCol, new Vector3(0.75f, 0.04f, 0f), od);
 
             // 设置着色器参数
             shader.Parameters["uTime"]?.SetValue(
@@ -155,9 +184,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             shader.Parameters["coreColor"]?.SetValue(coreCol);
             shader.Parameters["ringColor"]?.SetValue(ringCol);
             shader.Parameters["fragColor"]?.SetValue(fragCol);
+            // 超驱故障参数
+            shader.Parameters["overdriveAmount"]?.SetValue(od);
 
             Vector2 drawPos = Projectile.Center - Main.screenPosition;
-            float drawDiameter = explosionRadius * 2.2f; // 稍大于碰撞范围
+            float drawDiameter = explosionRadius * (2.2f + od * 1.0f); // 超驱时视觉更大
 
             Main.spriteBatch.End();
             Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
