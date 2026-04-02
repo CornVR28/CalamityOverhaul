@@ -1,18 +1,17 @@
 // ============================================================================
-// CyberPanel.fx v2 — SHPC赛博朋克対話框面板着色器
-// 深暗紫底色 + 六角蜂窝结构边框(非矩形alpha遮罩) + 蓝色能量流高光
-// 边缘溢出 + 故障闪烁 + CRT扫描线 + 扫掠光 + 暗角
-// AlphaBlend模式 —— C#绘制扩展矩形，shader控制alpha形状
+// CyberPanel.fx v3 — SHPC赛博朋克面板着色器
+// 深暗紫底 + 波浪蜂窝轮廓 + 能量脉冲传导 + 故障位移块 + 数据流粒子
+// + CRT扫描线 + 全息扫掠光 + 暗角
+// AlphaBlend模式 —— shader控制alpha形状与动态效果
 // ============================================================================
 
 sampler uImage0 : register(s0);
 
-float uTime;        // 全局动画时间（单调递增）
-float uAlpha;       // 面板整体透明度 (0~1)
-float2 uResolution; // 包含边距的完整绘制区域像素尺寸
-float uEdgePad;     // 面板向四周扩展的像素数（用于六角溢出）
+float uTime;
+float uAlpha;
+float2 uResolution;
+float uEdgePad;
 
-// ── 程序化噪声工具 ──
 float hash11(float p) {
     p = frac(p * 0.1031);
     p *= p + 33.33;
@@ -26,47 +25,69 @@ float hash21(float2 p) {
     return frac((p3.x + p3.y) * p3.z);
 }
 
-// 2D value noise（带双线性插值）
 float valueNoise(float2 p) {
     float2 i = floor(p);
     float2 f = frac(p);
     f = f * f * (3.0 - 2.0 * f);
-
     float a = hash21(i);
     float b = hash21(i + float2(1.0, 0.0));
     float c = hash21(i + float2(0.0, 1.0));
     float d = hash21(i + float2(1.0, 1.0));
-
     return lerp(lerp(a, b, f.x), lerp(c, d, f.x), f.y);
 }
 
-// floor-based mod（正确处理负值，等价于GLSL mod）
 float2 hmod(float2 a, float2 b) { return a - b * floor(a / b); }
 
 float4 PixelShaderFunction(float2 coords : TEXCOORD0, float4 vertexColor : COLOR0) : COLOR0
 {
     float2 pixelPos = coords * uResolution;
-
-    // ═══ 面板SDF（正值=在内部，负值=在外部） ═══
     float2 innerMin = float2(uEdgePad, uEdgePad);
     float2 innerMax = uResolution - float2(uEdgePad, uEdgePad);
+    float2 innerSize = innerMax - innerMin;
+
     float panelSDF = min(
         min(pixelPos.x - innerMin.x, innerMax.x - pixelPos.x),
         min(pixelPos.y - innerMin.y, innerMax.y - pixelPos.y)
     );
-
-    // 远离面板的像素直接丢弃
     if (panelSDF < -(uEdgePad + 2.0)) return float4(0, 0, 0, 0);
 
-    // ═══ 六角网格（内联计算，需要cellCenter） ═══
+    // ═══ A. 故障位移块（shader独有——水平带内容错位+RGB色散） ═══
+    float normY0 = saturate((pixelPos.y - innerMin.y) / innerSize.y);
+    float glitchMask = 0.0;
+    float gt = floor(uTime * 3.5);
+    float gr = hash11(gt * 17.3);
+    float gt2 = floor(uTime * 6.0);
+    float gr2 = hash11(gt2 * 23.7);
+
+    if (gr > 0.65)
+    {
+        float bc = hash11(gt * 31.7);
+        float bw = 0.012 + hash11(gt * 53.1) * 0.025;
+        float ib = smoothstep(0.0, 0.004, normY0 - (bc - bw))
+                 * smoothstep(0.0, 0.004, (bc + bw) - normY0);
+        float shift = (hash11(gt * 71.3) - 0.5) * 16.0;
+        glitchMask = ib;
+        pixelPos.x += shift * ib;
+    }
+    if (gr2 > 0.78)
+    {
+        float bc2 = hash11(gt2 * 47.1);
+        float bw2 = 0.005 + hash11(gt2 * 67.3) * 0.010;
+        float ib2 = smoothstep(0.0, 0.003, normY0 - (bc2 - bw2))
+                  * smoothstep(0.0, 0.003, (bc2 + bw2) - normY0);
+        float shift2 = (hash11(gt2 * 83.1) - 0.5) * 10.0;
+        glitchMask = max(glitchMask, ib2);
+        pixelPos.x += shift2 * ib2;
+    }
+
+    // ═══ B. 六角网格 ═══
     float hexScale = 0.065;
     float2 hexUV = pixelPos;
-    // 微弱UV扰动（让网格呼吸/扭曲）
-    float distortT = uTime * 0.4;
+    float distT = uTime * 0.35;
     float2 ds = pixelPos * 0.008;
-    float ddxV = valueNoise(ds + float2(distortT, 0.0)) - 0.5;
-    float ddyV = valueNoise(ds + float2(0.0, distortT * 0.7)) - 0.5;
-    hexUV += float2(ddxV, ddyV) * 2.5;
+    float dx = valueNoise(ds + float2(distT, 0.0)) - 0.5;
+    float dy = valueNoise(ds + float2(0.0, distT * 0.7)) - 0.5;
+    hexUV += float2(dx, dy) * 2.0;
 
     float2 hp = hexUV * hexScale;
     float2 hr = float2(1.0, 1.7320508);
@@ -88,158 +109,129 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0, float4 vertexColor : COLOR
     float hexEdge = 1.0 - smoothstep(0.36, 0.44, hexDist);
     float hexLine = smoothstep(0.38, 0.42, hexDist) * (1.0 - smoothstep(0.42, 0.50, hexDist));
 
-    // ═══ 单元格中心SDF（决定边缘alpha遮罩） ═══
+    // ═══ C. 波浪推进式边缘（有节奏感，非随机） ═══
     float cellSDF = min(
         min(cellCenterPx.x - innerMin.x, innerMax.x - cellCenterPx.x),
         min(cellCenterPx.y - innerMin.y, innerMax.y - cellCenterPx.y)
     );
 
-    // 每个六角格随机"外伸"量（部分格子向外生长，形成蜂窝轮廓）
-    float protrusion = (cellHash - 0.35) * 28.0;
-    // ~20%的格子有动态伸缩动画
-    float protAnim = sin(uTime * 1.2 + cellHash2 * 30.0) * 0.5 + 0.5;
-    protrusion += step(0.8, cellHash2) * protAnim * 8.0;
+    float w1 = sin(cellCenterPx.x * 0.05 + uTime * 1.5);
+    float w2 = sin(cellCenterPx.y * 0.07 - uTime * 1.0);
+    float w3 = sin((cellCenterPx.x + cellCenterPx.y) * 0.04 + uTime * 0.8);
+    float protrusion = 4.0 + (w1 + w2 * 0.7 + w3 * 0.5) * 5.5;
 
     float effectiveBound = cellSDF + protrusion;
 
-    // ═══ Alpha遮罩（非矩形六角蜂窝轮廓） ═══
+    // ═══ D. Alpha遮罩 ═══
     float cellAlpha;
-    if (panelSDF > 18.0) {
+    if (panelSDF > 18.0)
         cellAlpha = 1.0;
-    } else {
-        cellAlpha = smoothstep(-2.0, 2.0, effectiveBound);
-        // 确保面板内部仍保持不透明
+    else
+    {
+        cellAlpha = smoothstep(-2.0, 3.0, effectiveBound);
         cellAlpha = max(cellAlpha, smoothstep(10.0, 18.0, panelSDF));
     }
-
     if (cellAlpha < 0.01) return float4(0, 0, 0, 0);
 
-    // 内面板坐标（0-1），用于渐变/暗角等效果
-    float2 innerSize = innerMax - innerMin;
     float2 innerCoords = saturate((pixelPos - innerMin) / innerSize);
 
-    // ═══ 1. 基础渐变背景（深暗紫色） ═══
-    float3 bgTop = float3(0.045, 0.018, 0.078);
-    float3 bgBot = float3(0.020, 0.010, 0.048);
-    float3 bg = lerp(bgTop, bgBot, innerCoords.y);
+    // ═══ 1. 深暗紫色渐变 ═══
+    float3 bg = lerp(float3(0.045, 0.018, 0.078), float3(0.020, 0.010, 0.048), innerCoords.y);
 
-    // ═══ 2. 噪声表面（紫色调金属质感） ═══
-    float n1 = valueNoise(pixelPos * 0.08);
-    float n2 = valueNoise(pixelPos * 0.035 + 100.0);
-    float surfVar = n1 * 0.6 + n2 * 0.4;
-    bg *= 0.78 + surfVar * 0.44;
-    bg += float3(0.010, -0.004, 0.016) * (surfVar - 0.5);
+    // ═══ 2. 噪声表面 ═══
+    float sn1 = valueNoise(pixelPos * 0.08);
+    float sn2 = valueNoise(pixelPos * 0.035 + 100.0);
+    float sv = sn1 * 0.6 + sn2 * 0.4;
+    bg *= 0.78 + sv * 0.44;
+    bg += float3(0.010, -0.004, 0.016) * (sv - 0.5);
 
-    // ═══ 3. 六角网格叠层（紫色骨架 + 蓝色能量流高光） ═══
-    // 能量流方向波
+    // ═══ 3. 六角网格线（紫色底+蓝色能量流） ═══
     float2 flowDir = normalize(float2(1.0, 0.8));
     float flowPhase = dot(pixelPos * 0.012, flowDir) - uTime * 1.8;
-    float flowWave = sin(flowPhase) * 0.5 + 0.5;
-    float flowWave2 = sin(flowPhase * 0.6 + 1.2) * 0.5 + 0.5;
-    float flowIntensity = flowWave * 0.7 + flowWave2 * 0.3;
+    float flowInt = sin(flowPhase) * 0.5 + 0.5;
 
-    // 脉冲扫描波
-    float2 ctr = uResolution * 0.5;
-    float dfc = length(pixelPos - ctr);
-    float md = length(uResolution * 0.5);
-    float pp = dfc / md * 6.2832 - uTime * 2.0;
-    float pulseScan = pow(max(sin(pp), 0.0), 4.0);
+    float lg = 0.85 + flowInt * 0.6;
+    bg += float3(0.050, 0.020, 0.100) * hexLine * lg * 0.7;
+    bg += float3(0.015, 0.050, 0.120) * hexLine * lg * flowInt;
 
-    // 六角网格线 — 紫色基底 + 蓝色能量流
-    float lineGlow = 0.85 + flowIntensity * 0.5 + pulseScan * 0.4;
-    bg += float3(0.050, 0.020, 0.100) * hexLine * lineGlow * 0.7;
-    bg += float3(0.015, 0.050, 0.120) * hexLine * lineGlow * flowIntensity;
+    bg += float3(0.030, 0.012, 0.060) * step(0.55, cellHash) * 0.25 * hexEdge;
+    bg += float3(0.015, 0.025, 0.085) * step(0.72, cellHash)
+        * (sin(uTime * 1.8 + cellHash * 40.0) * 0.5 + 0.5) * hexEdge;
 
-    // 六角单元格填充
-    float cellFill = step(0.55, cellHash) * 0.25;
-    bg += float3(0.030, 0.012, 0.060) * cellFill * hexEdge;
-    bg += float3(0.008, 0.025, 0.055) * flowIntensity * step(0.4, cellHash2) * 0.18 * hexEdge;
+    // ═══ 4. 能量脉冲传导（可见脉冲从角落沿六角网格传播） ═══
+    float p1D = length((cellCenterPx - innerMin) * 0.01);
+    float p1P = frac(uTime * 0.4) * 6.5;
+    float p1B = exp(-(p1D - p1P) * (p1D - p1P) * 15.0);
+    bg += float3(0.025, 0.08, 0.22) * p1B * hexLine * 3.0;
+    bg += float3(0.015, 0.05, 0.14) * p1B * hexEdge * 0.6;
 
-    // 活跃格子脉动
-    float cellPulse = sin(uTime * 1.8 + cellHash * 40.0) * 0.5 + 0.5;
-    float activeCells = step(0.72, cellHash);
-    float activeGlow = cellPulse * (0.7 + pulseScan * 0.6);
-    bg += float3(0.015, 0.025, 0.085) * activeCells * activeGlow * hexEdge;
+    float p2D = length((cellCenterPx - innerMax) * 0.01);
+    float p2P = frac(uTime * 0.3 + 0.5) * 6.5;
+    float p2B = exp(-(p2D - p2P) * (p2D - p2P) * 15.0);
+    bg += float3(0.06, 0.025, 0.18) * p2B * hexLine * 2.5;
+    bg += float3(0.04, 0.015, 0.10) * p2B * hexEdge * 0.5;
 
-    // 能量节点高亮
-    float nodeCell = step(0.93, cellHash);
-    float nodeGlow = 0.6 + sin(uTime * 3.0 + cellHash2 * 20.0) * 0.4;
-    bg += float3(0.010, 0.040, 0.110) * nodeCell * nodeGlow * hexEdge;
+    // ═══ 5. 数据流粒子（亮点沿六角边缘移动） ═══
+    float cAngle = atan2(hg.y, hg.x);
+    float pPhase = frac(cAngle / 6.2832 + uTime * 0.5 + cellHash);
+    float pDot = 1.0 - smoothstep(0.0, 0.06, abs(pPhase - 0.5));
+    bg += float3(0.06, 0.16, 0.32) * pDot * hexLine * step(0.45, cellHash) * 2.5;
 
-    // ═══ 4. 蜂窝边框辉光（边界处六角线条发光） ═══
-    float borderProx = exp(-abs(cellSDF) * 0.06);
-    // 紫色基底辉光
-    bg += float3(0.055, 0.022, 0.110) * hexLine * borderProx * 2.0;
-    // 蓝色能量流在边框上的叠加
-    bg += float3(0.012, 0.045, 0.120) * hexLine * borderProx * flowIntensity * 1.5;
-    // 有效边界处的锐利高光带
-    float edgeHL = smoothstep(3.0, 0.0, abs(effectiveBound)) * hexEdge;
-    bg += float3(0.035, 0.055, 0.140) * edgeHL;
+    float pPhase2 = frac(cAngle / 6.2832 - uTime * 0.3 + cellHash2);
+    float pDot2 = 1.0 - smoothstep(0.0, 0.05, abs(pPhase2 - 0.5));
+    bg += float3(0.10, 0.03, 0.20) * pDot2 * hexLine * step(0.65, cellHash2) * 1.8;
 
-    // ═══ 5. CRT扫描线 ═══
-    float scanline = frac(pixelPos.y / 3.0);
-    float scanDark = smoothstep(0.0, 0.18, scanline) * smoothstep(1.0, 0.82, scanline);
-    bg *= 0.82 + 0.18 * scanDark;
+    // ═══ 6. 波浪边框辉光 ═══
+    float bProx = exp(-abs(cellSDF) * 0.06);
+    bg += float3(0.050, 0.020, 0.100) * hexLine * bProx * 1.5;
+    bg += float3(0.012, 0.045, 0.120) * hexLine * bProx * flowInt;
+    float eHL = smoothstep(3.0, 0.0, abs(effectiveBound)) * hexEdge;
+    float waveT = (w1 + w2 * 0.7 + w3 * 0.5) / 4.4 + 0.5;
+    bg += lerp(float3(0.045, 0.020, 0.120), float3(0.020, 0.060, 0.150), waveT) * eHL;
 
-    // ═══ 6. 面板分段线（紫色调） ═══
+    // ═══ 7. CRT扫描线 ═══
+    float scl = frac(pixelPos.y / 3.0);
+    bg *= 0.82 + 0.18 * smoothstep(0.0, 0.18, scl) * smoothstep(1.0, 0.82, scl);
+
+    // ═══ 8. 面板分段线 ═══
     float hSeg = frac(pixelPos.y / 60.0);
-    float hLineSeg = 1.0 - smoothstep(0.0, 0.025, hSeg);
-    float hReflect = smoothstep(0.025, 0.06, hSeg) * (1.0 - smoothstep(0.06, 0.10, hSeg));
-    bg *= 1.0 - hLineSeg * 0.50;
-    bg += float3(0.020, 0.012, 0.045) * hReflect * 0.40;
+    bg *= 1.0 - (1.0 - smoothstep(0.0, 0.025, hSeg)) * 0.50;
+    float hRef = smoothstep(0.025, 0.06, hSeg) * (1.0 - smoothstep(0.06, 0.10, hSeg));
+    bg += float3(0.020, 0.012, 0.045) * hRef * 0.40;
+    float vL1 = 1.0 - smoothstep(0.0, 0.005, abs(innerCoords.x - 0.28));
+    float vL2 = 1.0 - smoothstep(0.0, 0.005, abs(innerCoords.x - 0.76));
+    bg += float3(0.018, 0.012, 0.050) * (vL1 + vL2) * 0.35;
 
-    float vLine1 = 1.0 - smoothstep(0.0, 0.005, abs(innerCoords.x - 0.28));
-    float vLine2 = 1.0 - smoothstep(0.0, 0.005, abs(innerCoords.x - 0.76));
-    bg += float3(0.018, 0.012, 0.050) * (vLine1 + vLine2) * 0.35;
+    // ═══ 9. 全息扫掠光 ═══
+    float swP = frac(uTime * 0.07);
+    float swD = innerCoords.y - swP;
+    if (swD < -0.5) swD += 1.0;
+    if (swD > 0.5) swD -= 1.0;
+    float swC = exp(-abs(swD) * 30.0);
+    float swG = exp(-abs(swD) * 10.0);
+    bg += float3(0.028, 0.015, 0.070) * swC * 0.6;
+    bg += float3(0.010, 0.012, 0.035) * swG * 0.25;
+    bg += float3(0.008, 0.025, 0.060) * swG * hexLine * 1.5;
 
-    // ═══ 7. 扫掠光带（紫色全息光束） ═══
-    float sweepPos = frac(uTime * 0.07);
-    float sd = innerCoords.y - sweepPos;
-    if (sd < -0.5) sd += 1.0;
-    if (sd > 0.5) sd -= 1.0;
-    float sweepCore = exp(-abs(sd) * 30.0);
-    float sweepGlw = exp(-abs(sd) * 10.0);
-    bg += float3(0.028, 0.015, 0.070) * sweepCore * 0.6;
-    bg += float3(0.010, 0.012, 0.035) * sweepGlw * 0.25;
-    // 扫掠经过时增亮六角网格
-    bg += float3(0.008, 0.025, 0.060) * sweepGlw * hexLine * (1.5 + flowIntensity * 1.5);
-
-    // ═══ 8. 暗角渐变 ═══
+    // ═══ 10. 暗角 ═══
     float2 vig = innerCoords * 2.0 - 1.0;
-    float vigMask = 1.0 - dot(vig * float2(0.45, 0.55), vig * float2(0.45, 0.55));
-    vigMask = saturate(vigMask) * 0.35 + 0.65;
-    bg *= vigMask;
+    bg *= saturate(1.0 - dot(vig * float2(0.45, 0.55), vig * float2(0.45, 0.55))) * 0.35 + 0.65;
 
-    // ═══ 9. 故障闪烁（内部微故障 + 边缘强故障） ═══
-    float edgeZone = smoothstep(15.0, 0.0, panelSDF) * step(-uEdgePad, panelSDF);
-    float g1 = sin(uTime * 5.7);
-    float g2 = sin(uTime * 11.3);
-    float g3 = sin(uTime * 3.1);
-    float glitchTrigger = g1 * g2 * g3;
-    if (abs(glitchTrigger) > 0.85)
+    // ═══ 11. 故障块着色（RGB色散+亮块） ═══
+    if (glitchMask > 0.01)
     {
-        float seed = floor(uTime * 25.0);
-        float gy = frac(sin(seed * 127.1 + 311.7) * 43758.5453);
-        float gd = abs(innerCoords.y - gy);
-        float gm = 1.0 - smoothstep(0.0, 0.015, gd);
-        // 内部微故障（紫色调）
-        bg += float3(0.025, 0.015, 0.065) * gm * 0.5;
-        bg.r += gm * 0.005;
-        bg.b -= gm * 0.003;
-        // 边缘强故障（RGB色散 + alpha闪烁）
-        if (edgeZone > 0.1)
-        {
-            float eg = gm * edgeZone;
-            bg.r += eg * 0.08;
-            bg.g -= eg * 0.03;
-            bg.b += eg * 0.05;
-            cellAlpha *= 1.0 - eg * 0.4 * step(0.5, cellHash2);
-        }
+        float bx = hash11(gt * 91.3 + gt2 * 13.7);
+        float bw = 0.06 + hash11(gt * 113.7) * 0.12;
+        float ib = step(bx, innerCoords.x) * step(innerCoords.x, bx + bw);
+        float bv = ib * glitchMask;
+        bg += float3(0.08, 0.02, 0.10) * bv;
+        bg.r += glitchMask * 0.05;
+        bg.b += glitchMask * 0.03;
+        cellAlpha *= 1.0 - bv * 0.12;
     }
 
-    // ═══ 10. 顶部高光 ═══
-    float topGrad = 1.0 - smoothstep(0.0, 0.12, innerCoords.y);
-    bg += float3(0.018, 0.010, 0.035) * topGrad * 0.3;
+    // ═══ 12. 顶部高光 ═══
+    bg += float3(0.018, 0.010, 0.035) * (1.0 - smoothstep(0.0, 0.12, innerCoords.y)) * 0.3;
 
     float fa = uAlpha * cellAlpha;
     return float4(bg * fa, fa) * vertexColor;
