@@ -89,7 +89,7 @@ namespace CalamityOverhaul
 
             if (player.altFunctionUse == 0) {
                 Cyberspace.Activate(player);   // 展开领域
-                Cyberspace.SetLayer(3, player);
+                Cyberspace.SetLayer(1, player);
             }
             else {
                 Cyberspace.Deactivate(); // 收缩关闭
