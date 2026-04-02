@@ -79,5 +79,23 @@ namespace CalamityOverhaul.Content.ADV
         public static Texture2D FUJI = null;
         [VaultLoaden(CWRConstant.ADV + "Abysse/")]
         public static Texture2D Floatsland = null;
+        [VaultLoaden(CWRConstant.ADV + "Shepel/")]
+        public static Texture2D Shepel = null;
+        [VaultLoaden(CWRConstant.ADV + "Shepel/")]
+        public static Texture2D Shepel_Blank = null;
+        [VaultLoaden(CWRConstant.ADV + "Shepel/")]
+        public static Texture2D Shepel_Happy = null;
+        [VaultLoaden(CWRConstant.ADV + "Shepel/")]
+        public static Texture2D Shepel_Pain = null;
+        [VaultLoaden(CWRConstant.ADV + "Shepel/")]
+        public static Texture2D Shepel_Sad = null;
+        [VaultLoaden(CWRConstant.ADV + "Shepel/")]
+        public static Texture2D Shepel_Serious = null;
+        [VaultLoaden(CWRConstant.ADV + "Shepel/")]
+        public static Texture2D Shepel_Shocked = null;
+        [VaultLoaden(CWRConstant.ADV + "Shepel/")]
+        public static Texture2D Shepel_Sleep = null;
+        [VaultLoaden(CWRConstant.ADV + "Shepel/")]
+        public static Texture2D Shepel_Smirk = null;
     }
 }

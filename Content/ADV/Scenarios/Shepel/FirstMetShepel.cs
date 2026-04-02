@@ -1,6 +1,7 @@
 ﻿using CalamityOverhaul.Content.ADV.ADVChoices;
 using CalamityOverhaul.Content.ADV.DialogueBoxs;
 using CalamityOverhaul.Content.ADV.DialogueBoxs.Styles;
+using CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.ApolliaActors;
 using System;
 using Terraria.Localization;
 using Terraria.ModLoader;
@@ -80,6 +81,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel
                 new Choice(Choice2Text.Value, OnChoice2),
             ], styleOverride: () => SHPCDialogueBox.Instance,
                choiceBoxStyle: ADVChoiceBox.ChoiceBoxStyle.SHPC);
+        }
+        protected override void OnScenarioStart() {
+            SHPCDialogueBox.Instance?.ShowFullBodyPortrait<ShepelFullBodyPortrait>();
         }
 
         private void OnChoice1() {
