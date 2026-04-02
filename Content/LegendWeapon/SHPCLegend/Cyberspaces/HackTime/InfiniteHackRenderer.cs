@@ -133,6 +133,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
                     if (popups.Count == 0 && modeActiveTime > 0f)
                         modeActiveTime = 0f;
                     spawnTimer = 0f;
+                    //衰减残留撕裂带，避免冻结在屏幕上
+                    for (int i = 0; i < GlitchTearCount; i++)
+                        tearLife[i] = Math.Max(tearLife[i] - 0.016f, 0f);
                     break;
             }
 
@@ -170,7 +173,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
             DrawGlitchTears(sb, px, alpha);
 
             //标题
-            DrawHeader(sb, alpha);
+            DrawHeader(sb, px, alpha);
 
             //所有弹窗
             for (int i = 0; i < popups.Count; i++)
@@ -212,6 +215,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
             y = Math.Clamp(y, 30f, Main.screenHeight - BaseHeight - 10f);
 
             float widthMult = 0.85f + Main.rand.NextFloat() * 0.35f;
+            float life = PopupLifetimeBase + Main.rand.NextFloat() * PopupLifetimeRand;
 
             popups.Add(new HackPopup {
                 Hack = hack,
@@ -221,8 +225,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
                     (Main.rand.NextFloat() - 0.5f) * 30f),
                 Rotation = (Main.rand.NextFloat() - 0.5f) * 0.10f,
                 Scale = 0.70f + Main.rand.NextFloat() * 0.40f,
-                Lifetime = PopupLifetimeBase + Main.rand.NextFloat() * PopupLifetimeRand,
-                MaxLifetime = PopupLifetimeBase + Main.rand.NextFloat() * PopupLifetimeRand,
+                Lifetime = life,
+                MaxLifetime = life,
                 UploadProgress = 0f,
                 GlitchSeed = Main.rand.NextFloat() * 100f,
                 PopIn = 0f,
@@ -457,7 +461,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
 
         #region 全局效果
 
-        private void DrawHeader(SpriteBatch sb, float alpha) {
+        private void DrawHeader(SpriteBatch sb, Texture2D px, float alpha) {
             if (modeActiveTime < 0.1f) return;
             float headerAlpha = Math.Min(modeActiveTime * 2f, 1f);
             float glitch = MathF.Sin(timer * 25f) * 2f;
@@ -484,10 +488,10 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
                 float warnPulse = MathF.Sin(timer * 4f) * 0.5f + 0.5f;
                 float maxX = MathHelper.Lerp(320f, Main.screenWidth * 0.50f,
                     Math.Min(modeActiveTime / ZoneExpandDuration, 1f));
-                sb.Draw(CWRAsset.Placeholder_White?.Value,
+                sb.Draw(px,
                     new Rectangle(0, 74, (int)maxX, 1),
                     new Rectangle(0, 0, 1, 1), HackTheme.Danger * (alpha * 0.25f * warnPulse));
-                sb.Draw(CWRAsset.Placeholder_White?.Value,
+                sb.Draw(px,
                     new Rectangle(0, 120, (int)maxX, 1),
                     new Rectangle(0, 0, 1, 1), HackTheme.Danger * (alpha * 0.15f * warnPulse));
             }
