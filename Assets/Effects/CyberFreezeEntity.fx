@@ -118,7 +118,7 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0) : COLOR0
         return float4(0, 0, 0, 0);
 
     // ================================================================
-    // 冻结色调：去饱和 + 青色/深蓝偏移
+    // 冻结色调：去饱和 + 暗红晶偏移（黑墙风格）
     // ================================================================
     float lum = dot(color.rgb, float3(0.299, 0.587, 0.114));
     float freezeStr = lerp(0.7, 0.3, progress) * intensity;
@@ -126,9 +126,9 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0) : COLOR0
     float3 filtered = color.rgb;
     // 去饱和
     filtered = lerp(filtered, float3(lum, lum, lum), freezeStr * 0.7);
-    // 青色/蓝色偏移
-    float3 cyanTint = float3(lum * 0.4, lum * 0.9, lum * 1.2);
-    filtered = lerp(filtered, cyanTint, freezeStr * 0.6);
+    // 暗红/品红偏移（偏冷红，与领域暖橙红区分）
+    float3 crimsonTint = float3(lum * 1.2, lum * 0.15, lum * 0.35);
+    filtered = lerp(filtered, crimsonTint, freezeStr * 0.6);
 
     // ================================================================
     // 扫描线干扰
@@ -152,9 +152,9 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0) : COLOR0
     float edgeWidth = 0.08;
     float hexLine = 1.0 - smoothstep(edgeWidth - 0.02, edgeWidth, hexEdge);
 
-    // 六角网格颜色
-    float3 hexCyan = float3(0.0, 0.7, 0.9);
-    float3 hexDark = float3(0.0, 0.3, 0.5);
+    // 六角网格颜色（暗红晶风格）
+    float3 hexCrimson = float3(0.9, 0.06, 0.2);
+    float3 hexDark = float3(0.45, 0.02, 0.12);
 
     // 网格呼吸脉冲
     float pulse = 0.6 + 0.4 * sin(uTime * 3.0 + hexId * 6.28 + seed * 10.0);
@@ -167,7 +167,7 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0) : COLOR0
     float hexOverlayStr = lerp(0.5, 0.15, progress) * intensity;
 
     // 叠加六角边缘光
-    float3 hexColor = lerp(hexDark, hexCyan, pulse) * hexLine * hexOverlayStr;
+    float3 hexColor = lerp(hexDark, hexCrimson, pulse) * hexLine * hexOverlayStr;
     // 格子内部微弱发光
     float3 cellFillColor = hexDark * (1.0 - hexLine) * cellGlow * hexOverlayStr * 0.2;
 
@@ -190,7 +190,7 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0) : COLOR0
         filtered = lerp(filtered, color.rgb, thawPhase * thawFlicker * 0.5);
         // 偶尔全屏白闪
         float whiteFlash = step(0.9, hash11(floor(uTime * 15.0) + seed)) * thawPhase;
-        filtered = lerp(filtered, float3(0.6, 0.9, 1.0), whiteFlash * 0.3);
+        filtered = lerp(filtered, float3(1.0, 0.5, 0.5), whiteFlash * 0.3);
     }
 
     // ================================================================
@@ -205,7 +205,7 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0) : COLOR0
     float edgePulse = 0.5 + 0.5 * sin(uTime * 4.0 + coords.y * 20.0 + seed * 8.0);
     edgeGlow *= edgePulse * 0.5 * freezeStr;
 
-    filtered += float3(0.0, 0.5, 0.7) * edgeGlow;
+    filtered += float3(0.85, 0.06, 0.2) * edgeGlow;
 
     // ================================================================
     // 全局透明度控制

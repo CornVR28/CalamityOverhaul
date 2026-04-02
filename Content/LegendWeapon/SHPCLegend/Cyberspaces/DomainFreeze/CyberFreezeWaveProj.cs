@@ -81,8 +81,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.DomainFre
             Main.graphics.GraphicsDevice.SamplerStates[1] = SamplerState.LinearWrap;
             shader.CurrentTechnique.Passes[0].Apply();
 
-            // 青白色调
-            Color waveTint = new Color(0.7f, 0.95f, 1f);
+            // 暗红晶色调（黑墙风格）
+            Color waveTint = new Color(1f, 0.3f, 0.35f);
             Main.spriteBatch.Draw(canvas, drawPos, null, waveTint,
                 0f, canvas.Size() * 0.5f, new Vector2(drawDiameter, drawDiameter),
                 SpriteEffects.None, 0f);

@@ -132,38 +132,38 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0, float4 vertexColor : COLOR
     // 颜色合成 —— 赛博黑墙风格
     // ================================================================
 
-    // 黑墙主色调：深黑蓝底 + 青色能量边缘
-    float3 blackWallBase = float3(0.02, 0.03, 0.06);
-    float3 edgeCyan     = float3(0.0, 0.85, 1.0);
-    float3 edgeTeal     = float3(0.0, 0.6, 0.7);
-    float3 flashWhite   = float3(0.7, 0.95, 1.0);
-    float3 innerDark    = float3(0.01, 0.04, 0.08);
+    // 黑墙主色调：深暗红黑底 + 红晶能量边缘（偏冷红/品红，避开领域的暖橙红）
+    float3 blackWallBase = float3(0.06, 0.01, 0.04);
+    float3 edgeCrimson  = float3(0.95, 0.08, 0.25);
+    float3 edgeMaroon   = float3(0.65, 0.04, 0.18);
+    float3 flashWhite   = float3(1.0, 0.55, 0.55);
+    float3 innerDark    = float3(0.08, 0.01, 0.05);
 
     // 波前主亮度
     float brightness = ringMask * (0.5 + innerBias * 0.8);
 
     // 六角边缘光：在波前和已激活区域显示
     float edgeIntensity = hexEdge * (hexActivation * 0.6 + waveFrontHit * 1.2);
-    float3 edgeColor = lerp(edgeTeal, edgeCyan, waveFrontHit) * edgeIntensity;
+    float3 edgeColor = lerp(edgeMaroon, edgeCrimson, waveFrontHit) * edgeIntensity;
 
     // 格子内部暗色填充（已激活区域）
     float3 cellColor = blackWallBase * cellDepth * hexActivation * 0.4;
 
     // 凸起格子的额外光泽
-    float3 raiseColor = edgeCyan * raiseGlow * hexActivation * 0.3;
+    float3 raiseColor = edgeCrimson * raiseGlow * hexActivation * 0.3;
 
     // 波前经过时的闪烁白光
     float3 flashColor = flashWhite * hexFlash * 0.8;
 
     // 波前环的核心发光
-    float3 ringGlow = lerp(edgeTeal, edgeCyan, innerBias * 0.6) * brightness;
+    float3 ringGlow = lerp(edgeMaroon, edgeCrimson, innerBias * 0.6) * brightness;
 
     // 外侧数字碎片拖尾
     float trailing = smoothstep(ringProgress + ringThickness * 2.5, ringProgress, adjDist);
     trailing *= trailing;
     float trailNoise = tex2D(noiseTex, float2(normAngle * 14.0 + uTime * 1.2, dist * 2.5)).r;
     trailing *= step(0.45, trailNoise) * 0.4;
-    float3 trailColor = edgeTeal * 0.3 * trailing;
+    float3 trailColor = edgeMaroon * 0.3 * trailing;
 
     // 内侧已冻结区域暗色余波
     float innerWave = smoothstep(ringProgress - ringThickness * 0.5, ringProgress - ringThickness * 4.0, adjDist);
