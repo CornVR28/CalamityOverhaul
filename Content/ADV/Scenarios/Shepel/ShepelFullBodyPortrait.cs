@@ -58,14 +58,14 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel
         public bool IsGlitching => glitchTimer > 0f;
 
         protected override void OnInitialize() {
-            scale = 1f;
+            scale = 1.2f;
             glitchTimer = 0f;
             glitchIntensity = 0f;
             glitchTimeAccum = 0f;
         }
 
         protected override void OnUpdate() {
-            scale = 1f;
+            scale = 1.2f;
             drawColor = Color.White;
 
             if (glitchTimer > 0f) {
@@ -102,7 +102,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel
             }
 
             spriteBatch.Draw(portrait, position, rectangle, color, rotation, Vector2.Zero, scale, SpriteEffects.None, 0f);
-            position.X += 18;
+            position.X += 18 * scale;
 
             Texture2D faceTexture = currentFace switch {
                 Face.Blank => ADVAsset.Shepel_Blank,

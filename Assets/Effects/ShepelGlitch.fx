@@ -66,20 +66,25 @@ float4 PixelShaderFunction(float2 uv : TEXCOORD0, float4 color : COLOR0) : COLOR
     float2 uvG = float2(uv.x + totalDX, uv.y);
     float2 uvB = float2(uv.x + totalDX - chromaOff, uv.y);
 
-    // Clamp to valid range
-    uvR = saturate(uvR);
-    uvG = saturate(uvG);
-    uvB = saturate(uvB);
+    // Out-of-bounds -> transparent (prevent texture rectangle from showing)
+    float4 colR = (uvR.x >= 0.0 && uvR.x <= 1.0 && uvR.y >= 0.0 && uvR.y <= 1.0)
+        ? tex2D(uImage, uvR) : float4(0, 0, 0, 0);
+    float4 colG = (uvG.x >= 0.0 && uvG.x <= 1.0 && uvG.y >= 0.0 && uvG.y <= 1.0)
+        ? tex2D(uImage, uvG) : float4(0, 0, 0, 0);
+    float4 colB = (uvB.x >= 0.0 && uvB.x <= 1.0 && uvB.y >= 0.0 && uvB.y <= 1.0)
+        ? tex2D(uImage, uvB) : float4(0, 0, 0, 0);
 
-    float4 colR = tex2D(uImage, uvR);
-    float4 colG = tex2D(uImage, uvG);
-    float4 colB = tex2D(uImage, uvB);
+    // Use alpha from the center (green) channel as primary;
+    // only blend in R/B alpha where center has content, preserving silhouette shape
+    float baseAlpha = colG.a;
+    float chromaAlpha = max(colR.a, colB.a);
+    float resultAlpha = lerp(baseAlpha, max(baseAlpha, chromaAlpha), baseAlpha > 0.01 ? 1.0 : 0.0);
 
     float4 result;
-    result.r = colR.r;
+    result.r = colR.a > 0.01 ? colR.r : colG.r;
     result.g = colG.g;
-    result.b = colB.b;
-    result.a = max(max(colR.a, colG.a), colB.a);
+    result.b = colB.a > 0.01 ? colB.b : colG.b;
+    result.a = resultAlpha;
 
     // --- 4. Scanline interference ---
     float scanline = sin(uv.y * 600.0 + time * 18.0) * 0.05 * it;

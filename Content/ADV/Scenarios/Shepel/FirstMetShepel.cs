@@ -21,6 +21,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel
         //选择分支
         public static LocalizedText Choice1Text { get; private set; }
         public static LocalizedText Choice2Text { get; private set; }
+        public static LocalizedText Choice1Silence { get; private set; }
         public static LocalizedText Choice1Response { get; private set; }
 
         //使用SHPC专属赛博女仆风格
@@ -32,6 +33,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel
             Line1 = this.GetLocalization(nameof(Line1), () => "主人！很高兴再见到您！");
             Choice1Text = this.GetLocalization(nameof(Choice1Text), () => "你认错人了吧？");
             Choice2Text = this.GetLocalization(nameof(Choice2Text), () => "...好久不见");
+            Choice1Silence = this.GetLocalization(nameof(Choice1Silence), () => "......");
             Choice1Response = this.GetLocalization(nameof(Choice1Response), () => "...是的，只要是您，我每次都愿意认错");
         }
 
@@ -64,13 +66,23 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel
             public override string Key => nameof(FirstMetShepel_Choice1);
             protected override Func<DialogueBoxBase> DefaultDialogueStyle
                 => () => SHPCDialogueBox.Instance;
-            protected override void Build() => Add(RolenameSHPC.Value, Choice1Response.Value);
+            protected override void Build() {
+                Add(RolenameSHPC.Value, Choice1Silence.Value, onStart: () => {
+                    if (SHPCDialogueBox.Instance?.GetActiveFullBodyPortrait() is ShepelFullBodyPortrait portrait) {
+                        portrait.TriggerGlitch(1f, 1f);
+                    }
+                });
+                Add(RolenameSHPC.Value, Choice1Response.Value, onStart: () => {
+                    if (SHPCDialogueBox.Instance?.GetActiveFullBodyPortrait() is ShepelFullBodyPortrait portrait) {
+                        portrait.currentFace = ShepelFullBodyPortrait.Face.Smirk;
+                    }
+                });
+            }
             protected override void OnScenarioStart() {
                 SHPCDialogueBox.Instance?.ShowFullBodyPortrait<ShepelFullBodyPortrait>();
                 if (SHPCDialogueBox.Instance?.GetActiveFullBodyPortrait() is ShepelFullBodyPortrait portrait) {
                     portrait.SkipFadeIn();
                     portrait.currentFace = ShepelFullBodyPortrait.Face.None;
-                    portrait.TriggerGlitch(1f, 1f);
                 }
             }
         }

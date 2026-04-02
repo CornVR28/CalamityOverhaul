@@ -1045,4 +1045,5 @@ FirstMetShepel: {
 	// Choice1Text: 你认错人了吧？
 	// Choice2Text: ...好久不见
 	// Choice1Response: ...是的，只要是您，我每次都愿意认错
+	// Choice1Silence: ......
 }
