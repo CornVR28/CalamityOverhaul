@@ -11,10 +11,10 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
     {
         #region 面板尺寸
 
-        public const float PanelWidth = 620f;
-        public const float PanelHeight = 420f;
-        public const float SlotSize = 36f;
-        public const float SlotPadding = 4f;
+        public const float PanelWidth = 800f;
+        public const float PanelHeight = 540f;
+        public const float SlotSize = 46f;
+        public const float SlotPadding = 5f;
 
         #endregion
 

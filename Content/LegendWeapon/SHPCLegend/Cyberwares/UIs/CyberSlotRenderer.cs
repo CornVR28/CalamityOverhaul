@@ -242,7 +242,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
                 labelColor *= alpha;
                 float textX = rect.X + CyberwareTheme.SlotPadding + (def.IsLeft ? 4 : 0);
                 string label = i < slotLabels.Length ? slotLabels[i] : "";
-                Utils.DrawBorderString(sb, label, new Vector2(textX, rect.Y + 4), labelColor, 0.32f);
+                Utils.DrawBorderString(sb, label, new Vector2(textX, rect.Y + 5), labelColor, 0.40f);
 
                 //检查是否有装备的义体
                 Item equippedItem = cyberPlayer?.EquippedCyberwares[i];
@@ -253,24 +253,24 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
                     Texture2D itemTex = TextureAssets.Item[equippedItem.type]?.Value;
                     if (itemTex != null) {
                         float maxDim = Math.Max(itemTex.Width, itemTex.Height);
-                        float iconScale = maxDim > 20 ? 20f / maxDim : 1f;
-                        Vector2 iconPos = new(rect.X + rect.Width - 18, rect.Y + rect.Height / 2f);
+                        float iconScale = maxDim > 24 ? 24f / maxDim : 1f;
+                        Vector2 iconPos = new(rect.X + rect.Width - 22, rect.Y + rect.Height / 2f);
                         sb.Draw(itemTex, iconPos, null, Color.White * alpha, 0f,
                             itemTex.Size() / 2f, iconScale, SpriteEffects.None, 0f);
                     }
 
                     //状态文字：显示义体名称
                     string itemName = equippedItem.Name ?? "???";
-                    if (itemName.Length > 12) itemName = itemName[..11] + "…";
+                    if (itemName.Length > 14) itemName = itemName[..13] + "…";
                     Color nameColor = CyberwareTheme.AccentGold * (alpha * 0.7f);
-                    Utils.DrawBorderString(sb, itemName, new Vector2(textX, rect.Y + 18), nameColor, 0.26f);
+                    Utils.DrawBorderString(sb, itemName, new Vector2(textX, rect.Y + 24), nameColor, 0.32f);
                 }
                 else {
                     //状态文字
                     string statusStr = isSelected ? selectedText : emptyText;
                     Color statusColor = isSelected ? CyberwareTheme.AccentGold : CyberwareTheme.TextDim;
                     statusColor *= alpha * 0.6f;
-                    Utils.DrawBorderString(sb, statusStr, new Vector2(textX, rect.Y + 18), statusColor, 0.28f);
+                    Utils.DrawBorderString(sb, statusStr, new Vector2(textX, rect.Y + 24), statusColor, 0.34f);
                 }
             }
         }

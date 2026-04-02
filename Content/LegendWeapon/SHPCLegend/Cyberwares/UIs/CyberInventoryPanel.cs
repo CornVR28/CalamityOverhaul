@@ -15,12 +15,12 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
     {
         #region 常量
 
-        private const float PanelWidth = 180f;
-        private const float PanelPadding = 8f;
-        private const float ItemRowHeight = 40f;
-        private const float HeaderHeight = 32f;
-        private const float CapacityBarHeight = 18f;
-        private const float ScrollBarWidth = 4f;
+        private const float PanelWidth = 240f;
+        private const float PanelPadding = 10f;
+        private const float ItemRowHeight = 50f;
+        private const float HeaderHeight = 40f;
+        private const float CapacityBarHeight = 22f;
+        private const float ScrollBarWidth = 5f;
 
         #endregion
 
@@ -72,6 +72,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
         public bool ActionThisFrame { get; private set; }
 
         /// <summary>
+        /// 当前悬停的义体物品（供自定义Tooltip绘制用）
+        /// </summary>
+        private Item hoveredCyberItem;
+
+        /// <summary>
         /// 面板是否处于可见状态
         /// </summary>
         public bool IsVisible => boundSlot >= 0 || openProgress > 0.01f;
@@ -96,6 +101,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
         /// </summary>
         public void Unbind() {
             boundSlot = -1;
+            hasEquippedItem = false;
         }
 
         /// <summary>
@@ -210,6 +216,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
 
             // 可选列表
             DrawItemList(sb, px, contentAlpha, cyberPlayer, yOffset);
+
+            // 自定义义体Tooltip
+            if (hoveredCyberItem != null && !hoveredCyberItem.IsAir) {
+                CyberTooltipRenderer.DrawTooltip(sb, hoveredCyberItem, new Vector2(Main.mouseX, Main.mouseY));
+            }
         }
 
         #endregion
@@ -218,6 +229,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
 
         private void UpdateInteraction(CyberwarePlayer cyberPlayer) {
             hoveredItemRow = -1;
+            hoveredCyberItem = null;
             Vector2 mouse = new(Main.mouseX, Main.mouseY);
 
             if (!panelRect.Contains((int)mouse.X, (int)mouse.Y)) return;
@@ -250,11 +262,10 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
                     if (Main.mouseLeft && Main.mouseLeftRelease) {
                         DoUnequip(cyberPlayer);
                     }
-                    // 显示已装备义体的tooltip
+                    // 记录悬停义体用于自定义Tooltip
                     Item equipped = cyberPlayer.EquippedCyberwares[boundSlot];
                     if (equipped != null && !equipped.IsAir) {
-                        Main.HoverItem = equipped.Clone();
-                        Main.hoverItemName = equipped.Name;
+                        hoveredCyberItem = equipped;
                     }
                     return;
                 }
@@ -279,12 +290,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
                 if (itemRect.Contains((int)mouse.X, (int)mouse.Y)) {
                     hoveredItemRow = i;
 
-                    // 显示tooltip
+                    // 记录悬停义体用于自定义Tooltip
                     int invIndex = compatibleItems[i];
                     Item item = Main.LocalPlayer.inventory[invIndex];
                     if (item != null && !item.IsAir) {
-                        Main.HoverItem = item.Clone();
-                        Main.hoverItemName = item.Name;
+                        hoveredCyberItem = item;
                     }
 
                     // 左键点击装备
@@ -354,14 +364,14 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
                 title = CyberwareUI.Instance?.GetSlotLabel(boundSlot) ?? "CYBERWARE";
             }
             Utils.DrawBorderString(sb, title,
-                new Vector2(panelRect.X + PanelPadding, panelRect.Y + 6),
-                CyberwareTheme.Accent * alpha, 0.38f);
+                new Vector2(panelRect.X + PanelPadding, panelRect.Y + 8),
+                CyberwareTheme.Accent * alpha, 0.48f);
 
             // 可选物品数量
             string countText = $"{compatibleItems.Count} AVAILABLE";
             Utils.DrawBorderString(sb, countText,
-                new Vector2(panelRect.X + PanelPadding, panelRect.Y + 18),
-                CyberwareTheme.TextDim * alpha, 0.28f);
+                new Vector2(panelRect.X + PanelPadding, panelRect.Y + 24),
+                CyberwareTheme.TextDim * alpha, 0.34f);
         }
 
         private void DrawCapacityBar(SpriteBatch sb, Texture2D px, float alpha, CyberwarePlayer cyberPlayer) {
@@ -382,7 +392,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
             string capText = $"CAPACITY {used}/{max}";
             Utils.DrawBorderString(sb, capText,
                 new Vector2(barBgRect.X + 4, barBgRect.Y + 2),
-                CyberwareTheme.TextNormal * alpha, 0.28f);
+                CyberwareTheme.TextNormal * alpha, 0.34f);
 
             // 进度条
             float ratio = max > 0 ? (float)used / max : 0;
@@ -399,13 +409,14 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
         }
 
         private float DrawEquippedSection(SpriteBatch sb, Texture2D px, float alpha, CyberwarePlayer cyberPlayer, float yOffset) {
+            if (boundSlot < 0 || boundSlot >= CyberwarePlayer.SlotCount) return yOffset;
             Item equipped = cyberPlayer.EquippedCyberwares[boundSlot];
             if (equipped == null || equipped.IsAir) return yOffset;
 
             // "INSTALLED" 标签
             Utils.DrawBorderString(sb, "[ INSTALLED ]",
                 new Vector2(panelRect.X + PanelPadding, panelRect.Y + yOffset - 2),
-                CyberwareTheme.AccentGold * (alpha * 0.7f), 0.26f);
+                CyberwareTheme.AccentGold * (alpha * 0.7f), 0.32f);
 
             yOffset += 12;
 
@@ -433,17 +444,17 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
 
             // 物品名称
             string name = equipped.Name ?? "???";
-            if (name.Length > 16) name = name[..15] + "…";
+            if (name.Length > 18) name = name[..17] + "…";
             Utils.DrawBorderString(sb, name,
-                new Vector2(eqRect.X + 38, eqRect.Y + 4),
-                CyberwareTheme.TextBright * alpha, 0.32f);
+                new Vector2(eqRect.X + 44, eqRect.Y + 6),
+                CyberwareTheme.TextBright * alpha, 0.38f);
 
             // 卸载提示
             string hint = isHoveredUnequip ? "> UNINSTALL <" : "CLICK TO UNINSTALL";
             Color hintColor = isHoveredUnequip ? CyberwareTheme.Accent : CyberwareTheme.TextDim;
             Utils.DrawBorderString(sb, hint,
-                new Vector2(eqRect.X + 38, eqRect.Y + 22),
-                hintColor * (alpha * 0.65f), 0.24f);
+                new Vector2(eqRect.X + 44, eqRect.Y + 28),
+                hintColor * (alpha * 0.65f), 0.30f);
 
             return yOffset + ItemRowHeight + 4;
         }
@@ -452,18 +463,18 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
             if (compatibleItems.Count == 0) {
                 Utils.DrawBorderString(sb, "NO COMPATIBLE",
                     new Vector2(panelRect.X + PanelPadding, panelRect.Y + yOffset + 8),
-                    CyberwareTheme.TextDim * (alpha * 0.5f), 0.30f);
+                    CyberwareTheme.TextDim * (alpha * 0.5f), 0.36f);
                 Utils.DrawBorderString(sb, "CYBERWARE FOUND",
-                    new Vector2(panelRect.X + PanelPadding, panelRect.Y + yOffset + 22),
-                    CyberwareTheme.TextDim * (alpha * 0.5f), 0.30f);
+                    new Vector2(panelRect.X + PanelPadding, panelRect.Y + yOffset + 24),
+                    CyberwareTheme.TextDim * (alpha * 0.5f), 0.36f);
                 return;
             }
 
             // 列表标签
             Utils.DrawBorderString(sb, "AVAILABLE",
                 new Vector2(panelRect.X + PanelPadding, panelRect.Y + yOffset - 2),
-                CyberwareTheme.AccentCyan * (alpha * 0.6f), 0.26f);
-            yOffset += 14;
+                CyberwareTheme.AccentCyan * (alpha * 0.6f), 0.32f);
+            yOffset += 16;
 
             float listTop = panelRect.Y + yOffset;
             float listBottom = panelRect.Bottom - PanelPadding;
@@ -501,28 +512,28 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
                 }
 
                 // 物品图标
-                DrawItemIcon(sb, item, new Vector2(itemRect.X + 4, itemRect.Y + 3), alpha);
+                DrawItemIcon(sb, item, new Vector2(itemRect.X + 5, itemRect.Y + 4), alpha);
 
                 // 物品名称
                 string name = item.Name ?? "???";
-                if (name.Length > 14) name = name[..13] + "…";
+                if (name.Length > 16) name = name[..15] + "…";
                 Color nameColor = canEquip ? CyberwareTheme.TextBright : CyberwareTheme.TextDim;
                 Utils.DrawBorderString(sb, name,
-                    new Vector2(itemRect.X + 38, itemRect.Y + 3),
-                    nameColor * alpha, 0.30f);
+                    new Vector2(itemRect.X + 44, itemRect.Y + 4),
+                    nameColor * alpha, 0.36f);
 
                 // 容量消耗提示
                 if (item.ModItem is BaseCyberware cyber) {
                     string costText = $"CAP: {cyber.CapacityCost}";
                     Color costColor = canEquip ? CyberwareTheme.AccentCyan : CyberwareTheme.Accent;
                     Utils.DrawBorderString(sb, costText,
-                        new Vector2(itemRect.X + 38, itemRect.Y + 20),
-                        costColor * (alpha * 0.55f), 0.24f);
+                        new Vector2(itemRect.X + 44, itemRect.Y + 26),
+                        costColor * (alpha * 0.55f), 0.30f);
 
                     if (!canEquip) {
                         Utils.DrawBorderString(sb, "OVER CAP",
-                            new Vector2(itemRect.X + 100, itemRect.Y + 20),
-                            CyberwareTheme.Accent * (alpha * 0.5f), 0.22f);
+                            new Vector2(itemRect.X + 120, itemRect.Y + 26),
+                            CyberwareTheme.Accent * (alpha * 0.5f), 0.28f);
                     }
                 }
             }
@@ -547,10 +558,10 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
             Texture2D tex = TextureAssets.Item[item.type]?.Value;
             if (tex == null) return;
 
-            // 适配到32x32的范围内
+            // 适配券38x38的范围内
             float maxDim = Math.Max(tex.Width, tex.Height);
-            float scale = maxDim > 32 ? 32f / maxDim : 1f;
-            Vector2 iconCenter = position + new Vector2(16, 16);
+            float scale = maxDim > 38 ? 38f / maxDim : 1f;
+            Vector2 iconCenter = position + new Vector2(19, 19);
 
             sb.Draw(tex, iconCenter, null, Color.White * alpha,
                 0f, tex.Size() / 2f, scale, SpriteEffects.None, 0f);

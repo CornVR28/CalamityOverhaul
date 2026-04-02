@@ -1595,4 +1595,5 @@ MechanizedWood: {
 SandevistansItem: {
 	// DisplayName: Sandevistans Item
 	// Tooltip: ""
+	// CyberDescription: Militech Sandevistan Mk.5 — Slows perceived time by 70% for 3.5 seconds. Cooldown 15s.
 }
