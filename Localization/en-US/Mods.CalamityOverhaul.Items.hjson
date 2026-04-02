@@ -1587,3 +1587,8 @@ MechanizedWood: {
 	DisplayName: Mechanized Wood
 	Tooltip: ""
 }
+
+SandevistansItem: {
+	DisplayName: Sandevistans Item
+	Tooltip: ""
+}

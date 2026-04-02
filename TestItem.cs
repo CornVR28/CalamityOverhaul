@@ -4,6 +4,7 @@ using CalamityOverhaul.Content.ADV.Scenarios.Shepel;
 using CalamityOverhaul.Content.ADV.Scenarios.SupCal.End.EternalBlazingNows;
 using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
 using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime;
+using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs;
 using Microsoft.Xna.Framework.Graphics;
 using Mono.Cecil;
 using Terraria;
@@ -85,7 +86,7 @@ namespace CalamityOverhaul
             //    GargoyleSwarmPlayer.StartCutscene();
             //}
             //Sandevistan.IsActive = !Sandevistan.IsActive;
-            //CyberwareUI.Instance.Toggle();
+            CyberwareUI.Instance.Toggle();
 
             //if (player.altFunctionUse == 0) {
             //    Cyberspace.Activate(player);   // 展开领域
@@ -104,8 +105,8 @@ namespace CalamityOverhaul
 
             //Cyberspace.SetLayer(3, player);
             //Cyberspace.Deactivate(); // 收缩关闭
-            ScenarioManager.Reset<FirstMetShepel>();
-            ScenarioManager.Start<FirstMetShepel>();
+            //ScenarioManager.Reset<FirstMetShepel>();
+            //ScenarioManager.Start<FirstMetShepel>();
             return true;
         }
     }

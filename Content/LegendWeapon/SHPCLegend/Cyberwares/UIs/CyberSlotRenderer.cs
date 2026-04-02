@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;
+using Terraria.GameContent;
 
 namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
 {
@@ -161,7 +162,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
         ///绘制所有义体槽位的背景、边框和文字标签
         /// </summary>
         public void DrawSlots(SpriteBatch sb, float alpha, Rectangle panelRect,
-            string[] slotLabels, string selectedText, string emptyText) {
+            string[] slotLabels, string selectedText, string emptyText, CyberwarePlayer cyberPlayer = null) {
             Texture2D px = CWRAsset.Placeholder_White?.Value;
             if (px == null) return;
 
@@ -243,11 +244,34 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
                 string label = i < slotLabels.Length ? slotLabels[i] : "";
                 Utils.DrawBorderString(sb, label, new Vector2(textX, rect.Y + 4), labelColor, 0.32f);
 
-                //状态文字
-                string statusStr = isSelected ? selectedText : emptyText;
-                Color statusColor = isSelected ? CyberwareTheme.AccentGold : CyberwareTheme.TextDim;
-                statusColor *= alpha * 0.6f;
-                Utils.DrawBorderString(sb, statusStr, new Vector2(textX, rect.Y + 18), statusColor, 0.28f);
+                //检查是否有装备的义体
+                Item equippedItem = cyberPlayer?.EquippedCyberwares[i];
+                bool hasEquipped = equippedItem != null && !equippedItem.IsAir;
+
+                if (hasEquipped) {
+                    //绘制已装备义体的图标
+                    Texture2D itemTex = TextureAssets.Item[equippedItem.type]?.Value;
+                    if (itemTex != null) {
+                        float maxDim = Math.Max(itemTex.Width, itemTex.Height);
+                        float iconScale = maxDim > 20 ? 20f / maxDim : 1f;
+                        Vector2 iconPos = new(rect.X + rect.Width - 18, rect.Y + rect.Height / 2f);
+                        sb.Draw(itemTex, iconPos, null, Color.White * alpha, 0f,
+                            itemTex.Size() / 2f, iconScale, SpriteEffects.None, 0f);
+                    }
+
+                    //状态文字：显示义体名称
+                    string itemName = equippedItem.Name ?? "???";
+                    if (itemName.Length > 12) itemName = itemName[..11] + "…";
+                    Color nameColor = CyberwareTheme.AccentGold * (alpha * 0.7f);
+                    Utils.DrawBorderString(sb, itemName, new Vector2(textX, rect.Y + 18), nameColor, 0.26f);
+                }
+                else {
+                    //状态文字
+                    string statusStr = isSelected ? selectedText : emptyText;
+                    Color statusColor = isSelected ? CyberwareTheme.AccentGold : CyberwareTheme.TextDim;
+                    statusColor *= alpha * 0.6f;
+                    Utils.DrawBorderString(sb, statusStr, new Vector2(textX, rect.Y + 18), statusColor, 0.28f);
+                }
             }
         }
 

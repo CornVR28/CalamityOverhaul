@@ -45,7 +45,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
                 this.GetLocalization("Slot_CirculatorySystem", () => "CIRCULATORY SYS"),
                 this.GetLocalization("Slot_RightArm", () => "RIGHT ARM"),
                 this.GetLocalization("Slot_Skeleton", () => "SKELETON"),
-                this.GetLocalization("Slot_RightLeg", () => "RIGHT LEG"),
+                this.GetLocalization("Slot_RightLeg", () => "RIGHT LEG"), 
                 this.GetLocalization("Slot_NervousSystem", () => "NERVOUS SYSTEM"),
             ];
         }
@@ -58,6 +58,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
         private readonly CyberPanelRenderer panelRenderer = new();
         private readonly CyberSlotRenderer slotRenderer = new();
         private readonly CyberDataParticleSystem particleSystem = new();
+        private readonly CyberInventoryPanel inventoryPanel = new();
 
         #endregion
 
@@ -87,6 +88,16 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
         public static CyberwareUI Instance => UIHandleLoader.GetUIHandleOfType<CyberwareUI>();
 
         public override bool Active => isOpen || openProgress > 0.01f || isClosing;
+
+        /// <summary>
+        /// 获取指定槽位的本地化标签
+        /// </summary>
+        public string GetSlotLabel(int slotIndex) {
+            if (slotIndex >= 0 && slotIndex < slotLabelCache.Length) {
+                return slotLabelCache[slotIndex];
+            }
+            return "CYBERWARE";
+        }
 
         #endregion
 
@@ -178,6 +189,13 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
             bodyRenderer.SetFocusNode(slotRenderer.FocusedNodeIndex, slotRenderer.FocusStrength);
 
             particleSystem.Update(bodyOrigin, openProgress);
+
+            //更新义体背包面板
+            var cyberPlayer = player.GetModPlayer<CyberwarePlayer>();
+            inventoryPanel.Update(panelRect, slotRenderer.SelectedSlot, cyberPlayer);
+            if (inventoryPanel.ActionThisFrame) {
+                panelRenderer.TriggerGlitch(0.5f);
+            }
 
             //拦截面板区域内的游戏输入
             if (isOpen && panelRect.Contains(Main.mouseX, Main.mouseY)) {
@@ -290,8 +308,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
                 bodyRenderer.DrawNodes(spriteBatch, currentContentAlpha, bodyOrigin, slotRenderer.ComputeNodeStates());
 
                 slotRenderer.DrawConnectors(spriteBatch, currentContentAlpha, panelRect, bodyRenderer, bodyOrigin, dataStreamPhase);
+                var cyberPlayer = player.GetModPlayer<CyberwarePlayer>();
                 slotRenderer.DrawSlots(spriteBatch, currentContentAlpha, panelRect, slotLabelCache,
-                    SlotSelectedText.Value, SlotEmptyText.Value);
+                    SlotSelectedText.Value, SlotEmptyText.Value, cyberPlayer);
 
                 panelRenderer.DrawTitleAndDecor(spriteBatch, currentContentAlpha, panelRect, panelCenter,
                     globalTimer, TitleText.Value, StatusText.Value);
@@ -305,6 +324,12 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
                 DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.UIScaleMatrix);
 
             panelRenderer.DrawGlitchEffect(spriteBatch, currentAlpha, panelRect);
+
+            //义体选择背包面板——在ScissorTest之外绘制，因为侧面板在主面板外侧
+            if (currentContentAlpha > 0.01f) {
+                var cyberPlayer = player.GetModPlayer<CyberwarePlayer>();
+                inventoryPanel.Draw(spriteBatch, currentContentAlpha, cyberPlayer);
+            }
 
             //关闭动画的科幻亮线效果
             if (isClosing && closeLineGlow > 0.01f) {
