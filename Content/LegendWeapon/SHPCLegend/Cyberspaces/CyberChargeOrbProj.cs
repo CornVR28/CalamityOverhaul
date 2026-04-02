@@ -63,6 +63,13 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         private static readonly Color FullGlow = new(80, 230, 220);
         private static readonly Color FullAura = new(20, 140, 130);
 
+        // 超驱颜色（白热金+品红）
+        private static readonly Color ODCore = new(255, 250, 220);
+        private static readonly Color ODGlow = new(255, 80, 200);
+        private static readonly Color ODAura = new(200, 30, 140);
+        private static readonly Color ODParticleMain = new(255, 220, 130);
+        private static readonly Color ODParticleEdge = new(255, 60, 180);
+
         #endregion
 
         #region 实例字段
@@ -71,6 +78,13 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         private float chargeRatio; // 0~1
         private float fadeAlpha;
         private int particleTimer;
+
+        /// <summary>超驱混合量 0-1</summary>
+        private float overdriveAmount;
+        /// <summary>故障爆发计时器</summary>
+        private int glitchBurstTimer;
+        /// <summary>当前故障爆发强度</summary>
+        private float glitchBurstIntensity;
 
         private OrbState State {
             get => (OrbState)Projectile.ai[0];
@@ -112,6 +126,29 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
                 Projectile.Kill();
                 return;
             }
+
+            // 超驱检测与过渡
+            bool insideDomain = Cyberspace.IsInsideDomain(Projectile.Center);
+            float targetOD = insideDomain ? 1f : 0f;
+            float prevOD = overdriveAmount;
+            overdriveAmount = MathHelper.Lerp(overdriveAmount, targetOD, 0.055f);
+            if (overdriveAmount < 0.005f) overdriveAmount = 0f;
+
+            // 首次进入超驱阈值时，给 burstTimer 一个随机初始值，避免立即触发
+            if (prevOD <= 0.3f && overdriveAmount > 0.3f) {
+                glitchBurstTimer = Main.rand.Next(25, 50);
+            }
+
+            // 间歇性故障爆发
+            if (overdriveAmount > 0.3f) {
+                glitchBurstTimer--;
+                if (glitchBurstTimer <= 0) {
+                    glitchBurstIntensity = 1f;
+                    glitchBurstTimer = Main.rand.Next(45, 80);
+                }
+            }
+            glitchBurstIntensity *= 0.91f;
+            if (glitchBurstIntensity < 0.01f) glitchBurstIntensity = 0f;
 
             switch (State) {
                 case OrbState.Charging:
@@ -158,27 +195,32 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             // 淡入
             fadeAlpha = MathHelper.Clamp(chargeTime / 15f, 0f, 1f);
 
-            // 光照
-            Color currentCore = Color.Lerp(ChargeCore, FullCore, chargeRatio);
-            Lighting.AddLight(Projectile.Center, currentCore.ToVector3() * 0.5f * fadeAlpha * (0.3f + chargeRatio * 0.7f));
+            // 光照（超驱时更亮）
+            Color currentCore = Color.Lerp(
+                Color.Lerp(ChargeCore, FullCore, chargeRatio),
+                ODCore, overdriveAmount);
+            Lighting.AddLight(Projectile.Center, currentCore.ToVector3() * (0.5f + overdriveAmount * 0.4f) * fadeAlpha * (0.3f + chargeRatio * 0.7f));
 
-            // 汇聚粒子
+            // 汇聚粒子（超驱时更密集）
+            int interval = overdriveAmount > 0.5f ? 2 : ConvergeParticleInterval;
             particleTimer++;
-            if (particleTimer >= ConvergeParticleInterval && Main.netMode != NetmodeID.Server) {
+            if (particleTimer >= interval && Main.netMode != NetmodeID.Server) {
                 particleTimer = 0;
                 SpawnConvergeParticles();
             }
 
             // 满蓄脉冲提示
             if (chargeRatio >= 1f && chargeTime % 20 == 0) {
-                // 每20帧一个小脉冲粒子爆发
                 if (Main.netMode != NetmodeID.Server) {
-                    for (int i = 0; i < 4; i++) {
-                        Vector2 vel = Main.rand.NextVector2CircularEdge(3f, 3f);
+                    Color pulseMain = overdriveAmount > 0.3f ? ODCore : FullCore;
+                    Color pulseEdge = overdriveAmount > 0.3f ? ODGlow : FullGlow;
+                    int pulseCount = overdriveAmount > 0.5f ? 8 : 4;
+                    for (int i = 0; i < pulseCount; i++) {
+                        Vector2 vel = Main.rand.NextVector2CircularEdge(3f + overdriveAmount * 3f, 3f + overdriveAmount * 3f);
                         PRTLoader.AddParticle(new PRT_CyberSquare(
                             Projectile.Center, vel,
-                            FullCore, FullGlow,
-                            Main.rand.NextFloat(0.6f, 1.0f), Main.rand.Next(15, 25)
+                            pulseMain, pulseEdge,
+                            Main.rand.NextFloat(0.6f, 1.0f + overdriveAmount * 0.5f), Main.rand.Next(15, 25)
                         ));
                     }
                 }
@@ -197,12 +239,16 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         }
 
         private void SpawnConvergeParticles() {
-            // 从周围随机方向汇聚到球体中心
-            float spawnRadius = 80f + (1f - chargeRatio) * 120f; // 蓄力越满，粒子从越近处生成
-            int count = 1 + (int)(chargeRatio * 2f); // 蓄力越满粒子越多
+            float spawnRadius = 80f + (1f - chargeRatio) * 120f;
+            float od = overdriveAmount;
+            int count = 1 + (int)(chargeRatio * 2f) + (od > 0.5f ? 2 : 0);
 
-            Color mainCol = Color.Lerp(ChargeCore, FullCore, chargeRatio);
-            Color edgeCol = Color.Lerp(ChargeGlow, FullGlow, chargeRatio);
+            Color mainCol = Color.Lerp(
+                Color.Lerp(ChargeCore, FullCore, chargeRatio),
+                ODParticleMain, od);
+            Color edgeCol = Color.Lerp(
+                Color.Lerp(ChargeGlow, FullGlow, chargeRatio),
+                ODParticleEdge, od);
 
             for (int i = 0; i < count; i++) {
                 float angle = Main.rand.NextFloat(MathHelper.TwoPi);
@@ -231,12 +277,16 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
 
             // 发射时粒子爆发
             if (Main.netMode != NetmodeID.Server) {
-                for (int i = 0; i < 12; i++) {
-                    Vector2 vel = Main.rand.NextVector2CircularEdge(5f, 5f);
+                float od = overdriveAmount;
+                Color launchMain = od > 0.3f ? Color.Lerp(FullCore, ODCore, od) : FullCore;
+                Color launchEdge = od > 0.3f ? Color.Lerp(FullGlow, ODGlow, od) : FullGlow;
+                int burstCount = od > 0.5f ? 20 : 12;
+                for (int i = 0; i < burstCount; i++) {
+                    Vector2 vel = Main.rand.NextVector2CircularEdge(5f + od * 3f, 5f + od * 3f);
                     PRTLoader.AddParticle(new PRT_CyberSquare(
                         Projectile.Center, vel + Projectile.velocity * 0.3f,
-                        FullCore, FullGlow,
-                        Main.rand.NextFloat(0.8f, 1.5f), Main.rand.Next(20, 35)
+                        launchMain, launchEdge,
+                        Main.rand.NextFloat(0.8f, 1.5f + od * 0.5f), Main.rand.Next(20, 35)
                     ));
                 }
             }
@@ -253,31 +303,40 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             Projectile.rotation = Projectile.velocity.ToRotation();
             fadeAlpha = 1f;
 
-            // 飞行发光
-            Color flyCore = Color.Lerp(ChargeCore, FullCore, chargeRatio);
-            Lighting.AddLight(Projectile.Center, flyCore.ToVector3() * 0.7f);
+            // 飞行发光（超驱时更亮）
+            Color flyCore = Color.Lerp(
+                Color.Lerp(ChargeCore, FullCore, chargeRatio),
+                ODCore, overdriveAmount);
+            Lighting.AddLight(Projectile.Center, flyCore.ToVector3() * (0.7f + overdriveAmount * 0.4f));
 
-            // 拖尾粒子
+            // 拖尾粒子（超驱时更密集）
+            int interval = overdriveAmount > 0.5f ? 1 : TrailParticleInterval;
             particleTimer++;
-            if (particleTimer >= TrailParticleInterval && Main.netMode != NetmodeID.Server) {
+            if (particleTimer >= interval && Main.netMode != NetmodeID.Server) {
                 particleTimer = 0;
                 SpawnTrailParticles();
             }
         }
 
         private void SpawnTrailParticles() {
-            Color mainCol = Color.Lerp(ChargeCore, FullCore, chargeRatio);
-            Color edgeCol = Color.Lerp(ChargeGlow, FullGlow, chargeRatio);
+            float od = overdriveAmount;
+            Color mainCol = Color.Lerp(
+                Color.Lerp(ChargeCore, FullCore, chargeRatio),
+                ODParticleMain, od);
+            Color edgeCol = Color.Lerp(
+                Color.Lerp(ChargeGlow, FullGlow, chargeRatio),
+                ODParticleEdge, od);
 
             Vector2 perpDir = Projectile.velocity.SafeNormalize(Vector2.UnitX).RotatedBy(MathHelper.PiOver2);
-            for (int i = 0; i < 3; i++) {
-                Vector2 offset = perpDir * Main.rand.NextFloat(-10f, 10f);
-                Vector2 vel = -Projectile.velocity.SafeNormalize(Vector2.Zero) * Main.rand.NextFloat(2f, 5f)
-                    + perpDir * Main.rand.NextFloat(-2f, 2f);
+            int count = od > 0.5f ? 5 : 3;
+            for (int i = 0; i < count; i++) {
+                Vector2 offset = perpDir * Main.rand.NextFloat(-10f - od * 6f, 10f + od * 6f);
+                Vector2 vel = -Projectile.velocity.SafeNormalize(Vector2.Zero) * Main.rand.NextFloat(2f, 5f + od * 3f)
+                    + perpDir * Main.rand.NextFloat(-2f - od, 2f + od);
                 PRTLoader.AddParticle(new PRT_CyberSquare(
                     Projectile.Center + offset, vel,
                     mainCol, edgeCol,
-                    Main.rand.NextFloat(0.6f, 1.2f), Main.rand.Next(15, 30)
+                    Main.rand.NextFloat(0.6f, 1.2f + od * 0.6f), Main.rand.Next(15, 30)
                 ));
             }
         }
@@ -298,16 +357,22 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         public override void OnKill(int timeLeft) {
             // 确保手持弹幕被清理
             KillHeldProj();
-            // 消散粒子
+            // 消散粒子（超驱时更多更亮）
             if (Main.netMode == NetmodeID.Server) return;
-            Color mainCol = Color.Lerp(ChargeCore, FullCore, chargeRatio);
-            Color edgeCol = Color.Lerp(ChargeGlow, FullGlow, chargeRatio);
-            for (int i = 0; i < 16; i++) {
-                Vector2 vel = Main.rand.NextVector2CircularEdge(6f, 6f);
+            float od = overdriveAmount;
+            Color mainCol = Color.Lerp(
+                Color.Lerp(ChargeCore, FullCore, chargeRatio),
+                ODParticleMain, od);
+            Color edgeCol = Color.Lerp(
+                Color.Lerp(ChargeGlow, FullGlow, chargeRatio),
+                ODParticleEdge, od);
+            int count = od > 0.5f ? 24 : 16;
+            for (int i = 0; i < count; i++) {
+                Vector2 vel = Main.rand.NextVector2CircularEdge(6f + od * 4f, 6f + od * 4f);
                 PRTLoader.AddParticle(new PRT_CyberSquare(
                     Projectile.Center, vel,
                     mainCol, edgeCol,
-                    Main.rand.NextFloat(0.8f, 1.8f), Main.rand.Next(25, 45)
+                    Main.rand.NextFloat(0.8f, 1.8f + od * 0.6f), Main.rand.Next(25, 45)
                 ));
             }
         }
@@ -350,18 +415,24 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
                 : 1f;
             float orbDiameterPx = MaxOrbDiameter * sizeRatio;
 
-            // 当前颜色（黄金→白青过渡）
-            Color currentCore = Color.Lerp(ChargeCore, FullCore, chargeRatio);
-            Color currentGlow = Color.Lerp(ChargeGlow, FullGlow, chargeRatio);
-            Color currentAura = Color.Lerp(ChargeAura, FullAura, chargeRatio);
+            // 当前颜色（黄金→白青过渡，超驱时混合品红）
+            float od = overdriveAmount;
+            Color currentCore = Color.Lerp(
+                Color.Lerp(ChargeCore, FullCore, chargeRatio), ODCore, od);
+            Color currentGlow = Color.Lerp(
+                Color.Lerp(ChargeGlow, FullGlow, chargeRatio), ODGlow, od);
+            Color currentAura = Color.Lerp(
+                Color.Lerp(ChargeAura, FullAura, chargeRatio), ODAura, od);
 
             float pulse = 0.92f + 0.08f * MathF.Sin((float)Main.timeForVisualEffects * 0.12f + chargeRatio * 5f);
+            // 超驱时脉冲更剧烈
+            pulse += od * 0.12f * MathF.Sin((float)Main.timeForVisualEffects * 0.3f);
             float alpha = fadeAlpha * pulse;
             Vector2 glowOrigin = glow.Size() * 0.5f;
 
-            // 外层柔和bloom
-            float outerScale = (orbDiameterPx / glow.Width) * 2.5f;
-            Color outerColor = currentAura * alpha * 0.2f;
+            // 外层柔和bloom（超驱时更大更亮）
+            float outerScale = (orbDiameterPx / glow.Width) * (2.5f + od * 1.0f);
+            Color outerColor = currentAura * alpha * (0.2f + od * 0.15f);
             spriteBatch.Draw(glow, drawPos, null, outerColor, 0f,
                 glowOrigin, outerScale, SpriteEffects.None, 0f);
 
@@ -382,13 +453,19 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
                 orbShader.Parameters["auraColor"]?.SetValue(currentAura.ToVector3());
                 orbShader.Parameters["orbScale"]?.SetValue(pulse);
                 orbShader.Parameters["uNoiseTex"]?.SetValue(noise);
+                // 超驱参数
+                orbShader.Parameters["overdriveAmount"]?.SetValue(od);
+                orbShader.Parameters["glitchBurst"]?.SetValue(glitchBurstIntensity);
+                orbShader.Parameters["odCoreColor"]?.SetValue(ODCore.ToVector3());
+                orbShader.Parameters["odGlowColor"]?.SetValue(ODGlow.ToVector3());
+                orbShader.Parameters["odAuraColor"]?.SetValue(ODAura.ToVector3());
 
                 spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive, SamplerState.LinearClamp,
                     DepthStencilState.None, RasterizerState.CullNone, null, Main.GameViewMatrix.TransformationMatrix);
 
                 orbShader.CurrentTechnique.Passes[0].Apply();
 
-                float orbDrawScale = (orbDiameterPx / glow.Width) * 1.2f;
+                float orbDrawScale = (orbDiameterPx / glow.Width) * (1.2f + od * 0.3f);
                 spriteBatch.Draw(glow, drawPos, null, Color.White, 0f,
                     glowOrigin, orbDrawScale, SpriteEffects.None, 0f);
 

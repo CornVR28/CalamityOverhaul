@@ -336,6 +336,16 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         }
 
         /// <summary>
+        /// 判断指定世界坐标是否处于当前赛博空间领域内
+        /// </summary>
+        public static bool IsInsideDomain(Vector2 worldPos) {
+            if (!Active || Intensity < 0.01f) return false;
+            float dx = worldPos.X - Main.LocalPlayer.Center.X;
+            float dy = worldPos.Y - Main.LocalPlayer.Center.Y;
+            return dx * dx + dy * dy <= EffectiveOuterRadius * EffectiveOuterRadius;
+        }
+
+        /// <summary>
         /// 从最外层边缘周期性释放环境故障闪电（仅二层以上触发）
         /// </summary>
         private static void SpawnAmbientBolts() {

@@ -2,6 +2,7 @@
 // CyberTraceBeam.fx — 赛博追踪能量光束着色器
 // 蓝/黄/青三色主题 · 流动能量纹理 · 科幻光球头部
 // Trail条带渲染，配合 CyberTraceBeamProj 使用
+// 支持领域超驱模式：黑墙故障风格 + 白热金/品红配色
 // ============================================================================
 
 float4x4 transformMatrix;
@@ -10,6 +11,13 @@ float fadeAlpha;        // 整体透明度 0~1.4
 float3 coreColor;       // 主题内层亮色（由C#端按主题传入）
 float3 glowColor;       // 主题中层辉光色
 float3 auraColor;       // 主题外层光晕色
+
+// ---- 超驱参数 ----
+float overdriveAmount;  // 0=正常 1=完全超驱（领域内）
+float glitchBurst;      // 0-1 间歇性故障爆发强度
+float3 odCoreColor;     // 超驱核心色（白热金）
+float3 odGlowColor;     // 超驱辉光色（品红）
+float3 odAuraColor;     // 超驱光晕色（深品红）
 
 texture uNoiseTex;
 sampler noiseSamp = sampler_state
@@ -64,83 +72,111 @@ float4 PixelShaderFunction(PSInput input) : COLOR0
     // 沿拖尾方向的自然衰减
     float distFromHead = along;
 
+    // ---- 超驱色彩混合 ----
+    float od = overdriveAmount;
+    float3 effCore = lerp(coreColor, odCoreColor, od);
+    float3 effGlow = lerp(glowColor, odGlowColor, od);
+    float3 effAura = lerp(auraColor, odAuraColor, od);
+
+    // ---- 超驱UV扰动：行位移故障 ----
+    float2 renderUV = uv;
+    if (od > 0.01)
+    {
+        float rowID = floor(cross_ * 30.0);
+        float rowHash = hash21(float2(rowID, floor(uTime * 6.0 + glitchBurst * 15.0)));
+        // 间歇性行位移：burst时大量行偏移，平时少量
+        float rowThreshold = 0.92 - glitchBurst * 0.35;
+        float rowShift = step(rowThreshold, rowHash) * (rowHash - 0.5) * 0.12 * od;
+        rowShift *= (1.0 + glitchBurst * 3.0);
+        renderUV.x += rowShift;
+    }
+
+    float rAlong = renderUV.x;
+    float rCross = renderUV.y;
+    float rCrossDist = abs(rCross - 0.5) * 2.0;
+
     // ---- 噪声采样 ----
-    float n1 = tex2D(noiseSamp, frac(float2(along * 4.0 + uTime * 1.5, cross_ * 0.8))).r;
-    float n2 = tex2D(noiseSamp, frac(float2(along * 8.0 - uTime * 2.2, cross_ * 1.5 + 0.4))).g;
-    float n3 = tex2D(noiseSamp, frac(float2(along * 2.5 + uTime * 0.8, cross_ * 3.0 + 0.7))).b;
+    float n1 = tex2D(noiseSamp, frac(float2(rAlong * 4.0 + uTime * 1.5, rCross * 0.8))).r;
+    float n2 = tex2D(noiseSamp, frac(float2(rAlong * 8.0 - uTime * 2.2, rCross * 1.5 + 0.4))).g;
+    float n3 = tex2D(noiseSamp, frac(float2(rAlong * 2.5 + uTime * 0.8, rCross * 3.0 + 0.7))).b;
 
     // ============================================================
     // A. 白热能量核心 —— 光束中心最亮的通道
     // ============================================================
     float coreWidth = 0.08 + n1 * 0.04;
-    // 核心随离头部距离逐渐变窄
+    // 超驱时核心更宽更亮
+    coreWidth += od * 0.04;
     coreWidth *= lerp(1.0, 0.3, distFromHead);
-    float core = 1.0 - smoothstep(0.0, coreWidth, crossDist);
+    float core = 1.0 - smoothstep(0.0, coreWidth, rCrossDist);
     core = pow(saturate(core), 1.2);
-    // 流动闪烁
-    float corePulse = 0.85 + 0.15 * sin(uTime * 18.0 + along * 40.0);
+    float corePulse = 0.85 + 0.15 * sin(uTime * 18.0 + rAlong * 40.0);
+    // 超驱时脉冲更激进
+    corePulse += od * 0.2 * sin(uTime * 35.0 + rAlong * 80.0);
     core *= corePulse;
 
     // ============================================================
     // B. 内层辉光 —— 主题色明亮层
     // ============================================================
     float innerW = 0.25 + n2 * 0.08;
+    innerW += od * 0.06;
     innerW *= lerp(1.0, 0.5, distFromHead);
-    float inner = 1.0 - smoothstep(coreWidth * 0.4, innerW, crossDist);
-    inner *= 0.7;
+    float inner = 1.0 - smoothstep(coreWidth * 0.4, innerW, rCrossDist);
+    inner *= 0.7 + od * 0.2;
 
     // ============================================================
     // C. 外层光晕 —— 柔和的主题色扩散
     // ============================================================
-    float outerFade = 1.0 - smoothstep(0.15, 0.95, crossDist);
+    float outerFade = 1.0 - smoothstep(0.15, 0.95, rCrossDist);
     outerFade *= lerp(0.4, 0.1, distFromHead);
+    outerFade *= (1.0 + od * 0.5);
 
     // ============================================================
     // D. 纵向能量流纹 —— 沿光束方向的流动条纹
     // ============================================================
-    float streamUV1 = frac(along * 10.0 - uTime * 4.0);
+    float streamSpeed = 4.0 + od * 4.0;
+    float streamUV1 = frac(rAlong * 10.0 - uTime * streamSpeed);
     float stream1 = smoothstep(0.0, 0.06, streamUV1) * smoothstep(0.22, 0.10, streamUV1);
-    float streamUV2 = frac(along * 16.0 - uTime * 6.5 + 0.33);
+    float streamUV2 = frac(rAlong * 16.0 - uTime * (streamSpeed + 2.5) + 0.33);
     float stream2 = smoothstep(0.0, 0.04, streamUV2) * smoothstep(0.15, 0.07, streamUV2);
-    float streams = (stream1 + stream2 * 0.6) * (1.0 - crossDist * 0.7) * 0.35;
+    float streams = (stream1 + stream2 * 0.6) * (1.0 - rCrossDist * 0.7) * 0.35;
     streams *= lerp(1.0, 0.2, distFromHead);
+    streams *= (1.0 + od * 0.6);
 
     // ============================================================
     // E. 微弱数字网格 —— 赛博科幻质感
     // ============================================================
-    float gridX = frac(along * 30.0);
-    float gridY = frac(cross_ * 6.0);
+    float gridX = frac(rAlong * 30.0);
+    float gridY = frac(rCross * 6.0);
     float gridLine = step(gridX, 0.04) + step(gridY, 0.06);
     gridLine = saturate(gridLine);
-    // 网格闪烁（只有部分格子亮）
-    float cellID = floor(along * 30.0) + floor(cross_ * 6.0) * 37.0;
+    float cellID = floor(rAlong * 30.0) + floor(rCross * 6.0) * 37.0;
     float cellFlicker = hash21(float2(cellID, floor(uTime * 5.0)));
-    gridLine *= step(0.82, cellFlicker) * 0.15;
-    gridLine *= (1.0 - crossDist * 0.6);
+    // 超驱时网格更多闪烁
+    float gridThreshold = 0.82 - od * 0.2;
+    gridLine *= step(gridThreshold, cellFlicker) * (0.15 + od * 0.2);
+    gridLine *= (1.0 - rCrossDist * 0.6);
     gridLine *= lerp(0.8, 0.1, distFromHead);
 
     // ============================================================
     // F. 头部光球 —— 圆形高亮辐射
     // ============================================================
-    float headOrb = 1.0 - smoothstep(0.0, 0.05, along);
-    headOrb *= (1.0 - crossDist * 0.6);
-    // 光球呼吸脉冲
+    float headOrb = 1.0 - smoothstep(0.0, 0.05, rAlong);
+    headOrb *= (1.0 - rCrossDist * 0.6);
     float orbPulse = 0.8 + 0.2 * sin(uTime * 12.0);
     headOrb *= orbPulse;
-    // 光球外圈柔和光晕
-    float headGlow = 1.0 - smoothstep(0.02, 0.12, along);
-    headGlow *= (1.0 - crossDist * 0.8) * 0.4;
+    float headGlow = 1.0 - smoothstep(0.02, 0.12, rAlong);
+    headGlow *= (1.0 - rCrossDist * 0.8) * 0.4;
 
     // ============================================================
     // G. 边缘腐蚀 —— 噪声驱动的有机能量边界
     // ============================================================
     float edgeNoise = n2 * 0.20 + n3 * 0.15;
-    float edgeMask = 1.0 - smoothstep(0.45 - edgeNoise, 0.92, crossDist);
+    float edgeMask = 1.0 - smoothstep(0.45 - edgeNoise, 0.92, rCrossDist);
 
     // ============================================================
     // H. 尾端渐隐 —— 拖尾末端平滑消失
     // ============================================================
-    float tailFade = 1.0 - smoothstep(0.7, 1.0, along);
+    float tailFade = 1.0 - smoothstep(0.7, 1.0, rAlong);
 
     // ============================================================
     // 颜色合成
@@ -148,14 +184,14 @@ float4 PixelShaderFunction(PSInput input) : COLOR0
     float3 cWhite = float3(1.0, 0.97, 0.92);
 
     float3 color = float3(0, 0, 0);
-    color += cWhite     * core;                              // A: 白热核心
-    color += coreColor  * inner;                             // B: 主题内层
-    color += glowColor  * outerFade;                         // C: 主题外层
-    color += glowColor  * streams;                           // D: 能量流纹
-    color += coreColor  * gridLine;                          // E: 数字网格
-    color += cWhite     * headOrb * 0.8;                     // F: 光球核心
-    color += coreColor  * headGlow;                          // F: 光球辉光
-    color += auraColor  * headGlow * 0.3;                    // F: 光球光晕
+    color += cWhite     * core;
+    color += effCore    * inner;
+    color += effGlow    * outerFade;
+    color += effGlow    * streams;
+    color += effCore    * gridLine;
+    color += cWhite     * headOrb * 0.8;
+    color += effCore    * headGlow;
+    color += effAura    * headGlow * 0.3;
 
     float alpha = saturate(
         edgeMask
@@ -165,6 +201,52 @@ float4 PixelShaderFunction(PSInput input) : COLOR0
         + gridLine * 0.1
     );
     alpha *= fadeAlpha * tailFade;
+
+    // ============================================================
+    // I. 超驱故障叠加 —— 间歇性黑墙撕裂效果
+    // ============================================================
+    if (od > 0.01)
+    {
+        float burst = glitchBurst;
+
+        // I-1. 扫描线干扰（持续的细亮线）
+        float scanFreq = 80.0 + burst * 60.0;
+        float scanline = frac(rCross * scanFreq + uTime * 2.5);
+        scanline = step(0.95, scanline);
+        color += effCore * scanline * od * 0.5;
+        alpha += scanline * od * 0.15;
+
+        // I-2. 方块腐蚀（burst时大面积高亮方块闪烁）
+        float blockW = 0.06 + burst * 0.08;
+        float blockID2 = floor(rAlong / blockW) + floor(rCross / (blockW * 2.0)) * 23.0;
+        float blockFlash = hash21(float2(blockID2, floor(uTime * 10.0 + burst * 25.0)));
+        float blockThresh = 0.88 - burst * 0.3;
+        float blockOn = step(blockThresh, blockFlash);
+        float3 blockColor = lerp(effGlow, float3(1.0, 0.95, 0.85), burst * 0.7);
+        color += blockColor * blockOn * od * (0.3 + burst * 0.6);
+        alpha += blockOn * od * 0.1;
+
+        // I-3. 边缘品红辉光增强
+        float magentaEdge = smoothstep(0.3, 0.55, rCrossDist) * (1.0 - smoothstep(0.55, 0.85, rCrossDist));
+        color += effGlow * magentaEdge * od * (0.4 + burst * 0.5);
+        alpha += magentaEdge * od * 0.1;
+
+        // I-4. 色彩通道偏移模拟（伪RGB分离）
+        float channelShift = od * (0.03 + burst * 0.08);
+        float3 shiftedColor;
+        shiftedColor.r = color.r * (1.0 + channelShift * sin(uTime * 25.0 + rAlong * 50.0));
+        shiftedColor.g = color.g;
+        shiftedColor.b = color.b * (1.0 + channelShift * cos(uTime * 30.0 + rAlong * 60.0));
+        color = shiftedColor;
+
+        // I-5. 全局闪烁（burst期间整体亮度随机抖动）
+        float globalFlicker = hash21(float2(floor(uTime * 25.0), 13.7));
+        float flickerAmount = burst * (globalFlicker - 0.3) * 1.8;
+        color *= 1.0 + flickerAmount;
+
+        // I-6. 超驱时整体alpha增强
+        alpha *= 1.0 + od * 0.2;
+    }
 
     return float4(color * alpha, alpha) * input.Color;
 }

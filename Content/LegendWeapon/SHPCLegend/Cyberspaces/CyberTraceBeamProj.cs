@@ -77,6 +77,18 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
 
         #endregion
 
+        #region 超驱配色（白热金+品红）
+
+        private static readonly ColorTheme OverdriveTheme = new() {
+            Core = new Color(255, 250, 220),
+            Glow = new Color(255, 80, 200),
+            Aura = new Color(200, 30, 140),
+            ParticleMain = new Color(255, 220, 130),
+            ParticleEdge = new Color(255, 60, 180),
+        };
+
+        #endregion
+
         #region 实例字段
 
         private Trail trail;
@@ -85,6 +97,13 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         private ColorTheme theme;
         private float fadeAlpha;
         private int particleTimer;
+
+        /// <summary>超驱混合量 0-1，在领域内平滑过渡到1</summary>
+        private float overdriveAmount;
+        /// <summary>故障爆发计时器（帧），到0时触发爆发</summary>
+        private int glitchBurstTimer;
+        /// <summary>当前故障爆发强度 0-1，触发后指数衰减</summary>
+        private float glitchBurstIntensity;
 
         #endregion
 
@@ -151,12 +170,39 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
                 fadeAlpha = 1f;
             }
 
-            // 飞行发光
-            Lighting.AddLight(Projectile.Center, theme.Core.ToVector3() * 0.6f * fadeAlpha);
+            // ---- 超驱检测与过渡
+            bool insideDomain = Cyberspace.IsInsideDomain(Projectile.Center);
+            float targetOD = insideDomain ? 1f : 0f;
+            float prevOD = overdriveAmount;
+            overdriveAmount = MathHelper.Lerp(overdriveAmount, targetOD, 0.055f); // ~0.4s过渡
+            if (overdriveAmount < 0.005f) overdriveAmount = 0f;
 
-            // 方形科幻粒子
+            // 首次进入超驱阈值时，给 burstTimer 一个随机初始值，避免立即触发
+            if (prevOD <= 0.3f && overdriveAmount > 0.3f) {
+                glitchBurstTimer = Main.rand.Next(30, 60);
+            }
+
+            // 间歇性故障爆发
+            if (overdriveAmount > 0.3f) {
+                glitchBurstTimer--;
+                if (glitchBurstTimer <= 0) {
+                    glitchBurstIntensity = 1f;
+                    glitchBurstTimer = Main.rand.Next(50, 90);
+                }
+            }
+            glitchBurstIntensity *= 0.91f;
+            if (glitchBurstIntensity < 0.01f) glitchBurstIntensity = 0f;
+
+            // 飞行发光（超驱时更亮）
+            Color lightCol = overdriveAmount > 0.1f
+                ? Color.Lerp(theme.Core, OverdriveTheme.Core, overdriveAmount)
+                : theme.Core;
+            Lighting.AddLight(Projectile.Center, lightCol.ToVector3() * (0.6f + overdriveAmount * 0.4f) * fadeAlpha);
+
+            // 方形科幻粒子（超驱时更密集）
+            int interval = overdriveAmount > 0.5f ? 1 : ParticleInterval;
             particleTimer++;
-            if (particleTimer >= ParticleInterval && Main.netMode != NetmodeID.Server) {
+            if (particleTimer >= interval && Main.netMode != NetmodeID.Server) {
                 particleTimer = 0;
                 SpawnCyberParticles();
             }
@@ -164,22 +210,41 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
 
         private void SpawnCyberParticles() {
             Vector2 perpDir = Projectile.velocity.SafeNormalize(Vector2.UnitX).RotatedBy(MathHelper.PiOver2);
-            float spread = 8f;
+            float od = overdriveAmount;
+            float spread = 8f + od * 8f;
+            int count = od > 0.5f ? 4 : 2;
 
-            for (int i = 0; i < 2; i++) {
+            // 超驱时混合配色
+            Color mainCol = Color.Lerp(theme.ParticleMain, OverdriveTheme.ParticleMain, od);
+            Color edgeCol = Color.Lerp(theme.ParticleEdge, OverdriveTheme.ParticleEdge, od);
+
+            for (int i = 0; i < count; i++) {
                 Vector2 offset = perpDir * Main.rand.NextFloat(-spread, spread);
                 Vector2 spawnPos = Projectile.Center + offset;
-                Vector2 particleVel = -Projectile.velocity.SafeNormalize(Vector2.Zero) * Main.rand.NextFloat(1f, 3f)
-                    + perpDir * Main.rand.NextFloat(-1.5f, 1.5f);
+                Vector2 particleVel = -Projectile.velocity.SafeNormalize(Vector2.Zero) * Main.rand.NextFloat(1f, 3f + od * 2f)
+                    + perpDir * Main.rand.NextFloat(-1.5f - od, 1.5f + od);
 
-                float scale = Main.rand.NextFloat(0.6f, 1.2f);
-                int lifeTime = Main.rand.Next(15, 35);
+                float scale = Main.rand.NextFloat(0.6f, 1.2f + od * 0.6f);
+                int lifeTime = Main.rand.Next(15, 35 + (int)(od * 15f));
 
                 PRTLoader.AddParticle(new PRT_CyberSquare(
                     spawnPos, particleVel,
-                    theme.ParticleMain, theme.ParticleEdge,
+                    mainCol, edgeCol,
                     scale, lifeTime
                 ));
+            }
+
+            // 超驱时额外横向散射粒子（品红强调）
+            if (od > 0.4f && glitchBurstIntensity > 0.2f) {
+                for (int i = 0; i < 3; i++) {
+                    Vector2 burstVel = perpDir * Main.rand.NextFloat(-6f, 6f)
+                        + Projectile.velocity.SafeNormalize(Vector2.Zero) * Main.rand.NextFloat(-1f, 1f);
+                    PRTLoader.AddParticle(new PRT_CyberSquare(
+                        Projectile.Center, burstVel,
+                        OverdriveTheme.ParticleEdge, OverdriveTheme.ParticleMain,
+                        Main.rand.NextFloat(0.8f, 1.8f), Main.rand.Next(10, 22)
+                    ));
+                }
             }
         }
 
@@ -236,6 +301,12 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             shader.Parameters["glowColor"]?.SetValue(theme.GlowVec);
             shader.Parameters["auraColor"]?.SetValue(theme.AuraVec);
             shader.Parameters["uNoiseTex"]?.SetValue(noise);
+            // 超驱参数
+            shader.Parameters["overdriveAmount"]?.SetValue(overdriveAmount);
+            shader.Parameters["glitchBurst"]?.SetValue(glitchBurstIntensity);
+            shader.Parameters["odCoreColor"]?.SetValue(OverdriveTheme.CoreVec);
+            shader.Parameters["odGlowColor"]?.SetValue(OverdriveTheme.GlowVec);
+            shader.Parameters["odAuraColor"]?.SetValue(OverdriveTheme.AuraVec);
 
             GraphicsDevice device = Main.graphics.GraphicsDevice;
             device.BlendState = BlendState.Additive;
@@ -257,14 +328,20 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             if (Projectile.localAI[0] == 0f) return;
             theme = Themes[themeIndex];
 
+            // 超驱混合色
+            float od = overdriveAmount;
+            Color drawAura = Color.Lerp(theme.Aura, OverdriveTheme.Aura, od);
+
             Vector2 drawPos = Projectile.Center - Main.screenPosition;
             float pulse = 0.9f + 0.1f * MathF.Sin((float)Main.timeForVisualEffects * 0.15f);
+            // 超驱时脉冲更剧烈
+            pulse += od * 0.15f * MathF.Sin((float)Main.timeForVisualEffects * 0.35f);
             float alpha = fadeAlpha * pulse;
             Vector2 glowOrigin = glow.Size() * 0.5f;
 
-            // 外层柔和bloom光晕（普通绘制，不需要着色器）
-            float outerScale = 2.0f * Projectile.scale;
-            Color outerColor = theme.Aura * alpha * 0.25f;
+            // 外层柔和bloom光晕（超驱时更大更亮）
+            float outerScale = (2.0f + od * 1.0f) * Projectile.scale;
+            Color outerColor = drawAura * alpha * (0.25f + od * 0.2f);
             spriteBatch.Draw(glow, drawPos, null, outerColor, 0f,
                 glowOrigin, outerScale, SpriteEffects.None, 0f);
 
@@ -280,18 +357,28 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
 
                 orbShader.Parameters["uTime"]?.SetValue(timeVal);
                 orbShader.Parameters["fadeAlpha"]?.SetValue(alpha);
-                orbShader.Parameters["coreColor"]?.SetValue(theme.CoreVec);
-                orbShader.Parameters["glowColor"]?.SetValue(theme.GlowVec);
-                orbShader.Parameters["auraColor"]?.SetValue(theme.AuraVec);
+                // 传入超驱预混合色（与CyberChargeOrbProj保持一致）
+                Color orbCore = Color.Lerp(theme.Core, OverdriveTheme.Core, od);
+                Color orbGlow = Color.Lerp(theme.Glow, OverdriveTheme.Glow, od);
+                Color orbAura = Color.Lerp(theme.Aura, OverdriveTheme.Aura, od);
+                orbShader.Parameters["coreColor"]?.SetValue(orbCore.ToVector3());
+                orbShader.Parameters["glowColor"]?.SetValue(orbGlow.ToVector3());
+                orbShader.Parameters["auraColor"]?.SetValue(orbAura.ToVector3());
                 orbShader.Parameters["orbScale"]?.SetValue(pulse);
                 orbShader.Parameters["uNoiseTex"]?.SetValue(noise);
+                // 超驱参数
+                orbShader.Parameters["overdriveAmount"]?.SetValue(od);
+                orbShader.Parameters["glitchBurst"]?.SetValue(glitchBurstIntensity);
+                orbShader.Parameters["odCoreColor"]?.SetValue(OverdriveTheme.CoreVec);
+                orbShader.Parameters["odGlowColor"]?.SetValue(OverdriveTheme.GlowVec);
+                orbShader.Parameters["odAuraColor"]?.SetValue(OverdriveTheme.AuraVec);
 
                 spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive, SamplerState.LinearClamp,
                     DepthStencilState.None, RasterizerState.CullNone, null, Main.GameViewMatrix.TransformationMatrix);
 
                 orbShader.CurrentTechnique.Passes[0].Apply();
 
-                float orbDrawScale = 1.1f * Projectile.scale;
+                float orbDrawScale = (1.1f + od * 0.3f) * Projectile.scale;
                 spriteBatch.Draw(glow, drawPos, null, Color.White, 0f,
                     glowOrigin, orbDrawScale, SpriteEffects.None, 0f);
 
@@ -308,28 +395,34 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         public override bool PreDraw(ref Color lightColor) => false;
 
         public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone) {
-            // 命中时爆发粒子
             if (Main.netMode == NetmodeID.Server) return;
-            for (int i = 0; i < 8; i++) {
-                Vector2 vel = Main.rand.NextVector2CircularEdge(4f, 4f);
-                float scale = Main.rand.NextFloat(0.8f, 1.6f);
+            float od = overdriveAmount;
+            int count = od > 0.5f ? 14 : 8;
+            Color mainCol = Color.Lerp(theme.ParticleMain, OverdriveTheme.ParticleMain, od);
+            Color edgeCol = Color.Lerp(theme.ParticleEdge, OverdriveTheme.ParticleEdge, od);
+            for (int i = 0; i < count; i++) {
+                Vector2 vel = Main.rand.NextVector2CircularEdge(4f + od * 3f, 4f + od * 3f);
+                float scale = Main.rand.NextFloat(0.8f, 1.6f + od * 0.8f);
                 PRTLoader.AddParticle(new PRT_CyberSquare(
                     target.Center + vel * 2f, vel,
-                    theme.ParticleMain, theme.ParticleEdge,
+                    mainCol, edgeCol,
                     scale, Main.rand.Next(20, 40)
                 ));
             }
         }
 
         public override void OnKill(int timeLeft) {
-            // 消散时的最终粒子爆发
             if (Main.netMode == NetmodeID.Server) return;
-            for (int i = 0; i < 12; i++) {
-                Vector2 vel = Main.rand.NextVector2CircularEdge(3f, 3f) + Projectile.velocity * 0.2f;
-                float scale = Main.rand.NextFloat(0.5f, 1.3f);
+            float od = overdriveAmount;
+            int count = od > 0.5f ? 20 : 12;
+            Color mainCol = Color.Lerp(theme.ParticleMain, OverdriveTheme.ParticleMain, od);
+            Color edgeCol = Color.Lerp(theme.ParticleEdge, OverdriveTheme.ParticleEdge, od);
+            for (int i = 0; i < count; i++) {
+                Vector2 vel = Main.rand.NextVector2CircularEdge(3f + od * 3f, 3f + od * 3f) + Projectile.velocity * 0.2f;
+                float scale = Main.rand.NextFloat(0.5f, 1.3f + od * 0.8f);
                 PRTLoader.AddParticle(new PRT_CyberSquare(
                     Projectile.Center, vel,
-                    theme.ParticleMain, theme.ParticleEdge,
+                    mainCol, edgeCol,
                     scale, Main.rand.Next(25, 50)
                 ));
             }
