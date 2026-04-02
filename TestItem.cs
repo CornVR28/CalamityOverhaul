@@ -1,5 +1,6 @@
 ﻿#if DEBUG
 using CalamityOverhaul.Content.ADV.Scenarios;
+using CalamityOverhaul.Content.ADV.Scenarios.Shepel;
 using CalamityOverhaul.Content.ADV.Scenarios.SupCal.End.EternalBlazingNows;
 using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
 using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime;
@@ -86,15 +87,15 @@ namespace CalamityOverhaul
             //Sandevistan.IsActive = !Sandevistan.IsActive;
             //CyberwareUI.Instance.Toggle();
 
-            if (player.altFunctionUse == 0) {
-                Cyberspace.Activate(player);   // 展开领域
-                Cyberspace.SetLayer(3, player);
-            }
-            else {
-                Cyberspace.Deactivate(); // 收缩关闭
-            }
+            //if (player.altFunctionUse == 0) {
+            //    Cyberspace.Activate(player);   // 展开领域
+            //    Cyberspace.SetLayer(3, player);
+            //}
+            //else {
+            //    Cyberspace.Deactivate(); // 收缩关闭
+            //}
 
-            HackTime.InfiniteHack = true;
+            //HackTime.InfiniteHack = true;
 
             // 生成光束，ai[0] = 颜色主题 (0=蓝, 1=黄, 2=青)
             //Projectile.NewProjectile(player.FromObjectGetParent(), player.Center, player.Center.To(Main.MouseWorld).UnitVector() * 12,
@@ -103,8 +104,8 @@ namespace CalamityOverhaul
 
             //Cyberspace.SetLayer(3, player);
             //Cyberspace.Deactivate(); // 收缩关闭
-            //ScenarioManager.Reset<FirstMetShepel>();
-            //ScenarioManager.Start<FirstMetShepel>();
+            ScenarioManager.Reset<FirstMetShepel>();
+            ScenarioManager.Start<FirstMetShepel>();
             return true;
         }
     }
