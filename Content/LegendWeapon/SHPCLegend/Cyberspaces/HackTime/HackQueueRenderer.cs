@@ -24,12 +24,20 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
         private const float FontStatus = 0.30f;
         //完成后闪烁持续时间（秒）
         private const float CompletedDuration = 1.2f;
+        //无限骇入模式参数
+        private const float InfiniteUploadSpeed = 1f / 18f;
+        private const float InfiniteCompletedFade = 0.25f;
+        private const float InfiniteEnqueueInterval = 0.12f;
+        private const int InfiniteMaxQueue = 8;
 
         #endregion
 
         //队列数据
         private readonly List<HackQueueEntry> queue = new();
         private float timer;
+        //无限骇入循环状态
+        private int infiniteCycleIndex;
+        private float infiniteEnqueueTimer;
 
         #region 公共接口
 
@@ -56,29 +64,40 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
         //清空队列
         public void Clear() {
             queue.Clear();
+            infiniteCycleIndex = 0;
+            infiniteEnqueueTimer = 0f;
         }
 
-        //查询某个hack slot在队列中的状态
+        //查询某个hack slot在队列中的状态（重复时优先级：Uploading > Queued > Completed）
         public QueueSlotState GetSlotState(int slotIndex) {
+            QueueSlotState best = QueueSlotState.None;
             for (int i = 0; i < queue.Count; i++) {
                 if (queue[i].SlotIndex != slotIndex) continue;
-                return queue[i].State switch {
-                    HackQueueState.Waiting => QueueSlotState.Queued,
-                    HackQueueState.Uploading => QueueSlotState.Uploading,
-                    HackQueueState.Completed => QueueSlotState.Completed,
-                    _ => QueueSlotState.None,
-                };
+                var s = queue[i].State;
+                if (s == HackQueueState.Uploading) return QueueSlotState.Uploading;
+                if (s == HackQueueState.Waiting && best != QueueSlotState.Queued)
+                    best = QueueSlotState.Queued;
+                else if (s == HackQueueState.Completed && best == QueueSlotState.None)
+                    best = QueueSlotState.Completed;
             }
-            return QueueSlotState.None;
+            return best;
         }
 
-        //获取某个hack slot的上传进度
+        //获取某个hack slot的上传进度（重复时取最活跃的那个）
         public float GetSlotProgress(int slotIndex) {
+            float best = 0f;
+            bool found = false;
             for (int i = 0; i < queue.Count; i++) {
-                if (queue[i].SlotIndex == slotIndex)
+                if (queue[i].SlotIndex != slotIndex) continue;
+                //优先返回Uploading的进度
+                if (queue[i].State == HackQueueState.Uploading)
                     return queue[i].UploadProgress;
+                if (!found || queue[i].UploadProgress > best) {
+                    best = queue[i].UploadProgress;
+                    found = true;
+                }
             }
-            return 0f;
+            return best;
         }
 
         //消费已完成的队列头部（返回hack定义，调用方施加效果）
@@ -155,20 +174,39 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
 
                     case HackQueueState.Uploading:
                         hasUploading = true;
-                        //推进上传进度
-                        if (entry.Hack.UploadTime > 0) {
-                            entry.UploadProgress += 1f / entry.Hack.UploadTime;
-                        }
+                        //推进上传进度（无限模式使用加速速率）
+                        float uploadStep = HackTime.InfiniteHack
+                            ? InfiniteUploadSpeed
+                            : (entry.Hack.UploadTime > 0 ? 1f / entry.Hack.UploadTime : 1f);
+                        entry.UploadProgress += uploadStep;
                         if (entry.UploadProgress >= 1f) {
                             entry.UploadProgress = 1f;
                             entry.State = HackQueueState.Completed;
-                            entry.CompletedTimer = CompletedDuration;
+                            entry.CompletedTimer = HackTime.InfiniteHack ? InfiniteCompletedFade : CompletedDuration;
                         }
                         break;
 
                     case HackQueueState.Completed:
                         entry.CompletedTimer -= 0.016f;
                         break;
+                }
+            }
+
+            //无限骇入模式：自动投入并快速循环
+            if (HackTime.InfiniteHack && HackTime.SelectedTargetIndex >= 0) {
+                //自动移除已淡出的完成条目
+                for (int i = queue.Count - 1; i >= 0; i--) {
+                    if (queue[i].State == HackQueueState.Completed && queue[i].CompletedTimer <= 0f)
+                        queue.RemoveAt(i);
+                }
+                //定时自动投入下一个协议
+                infiniteEnqueueTimer -= 0.016f;
+                if (infiniteEnqueueTimer <= 0f && queue.Count < InfiniteMaxQueue) {
+                    var all = QuickHackRegistry.All;
+                    int idx = infiniteCycleIndex % all.Length;
+                    queue.Add(new HackQueueEntry(all[idx], idx));
+                    infiniteCycleIndex++;
+                    infiniteEnqueueTimer = InfiniteEnqueueInterval;
                 }
             }
         }
@@ -218,7 +256,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
             //完成态淡出
             float fadeAlpha = 1f;
             if (entry.State == HackQueueState.Completed) {
-                fadeAlpha = Math.Clamp(entry.CompletedTimer / CompletedDuration, 0f, 1f);
+                float fadeDuration = HackTime.InfiniteHack ? InfiniteCompletedFade : CompletedDuration;
+                fadeAlpha = Math.Clamp(entry.CompletedTimer / fadeDuration, 0f, 1f);
             }
 
             float itemAlpha = alpha * Math.Min(fly * 2.5f, 1f) * fadeAlpha;
@@ -366,6 +405,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
 
         private float GetStartY() {
             float totalH = queue.Count * (ItemHeight + ItemGap) - ItemGap;
+            if (HackTime.InfiniteHack)
+                return Math.Max(120f, (Main.screenHeight - totalH) * 0.35f);
             return (Main.screenHeight - totalH) * 0.5f;
         }
 

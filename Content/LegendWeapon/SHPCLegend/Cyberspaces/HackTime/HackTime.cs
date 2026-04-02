@@ -45,6 +45,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
         /// </summary>
         public static Vector2 CameraOffset { get; set; }
 
+        //无限骇入模式（无限袭击终态演出用）
+        public static bool InfiniteHack { get; set; }
+
         private static float targetIntensity;
         //运镜目标位置（选中NPC的中心世界坐标）
         private static Vector2 cameraTo;
@@ -236,6 +239,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
             ReticleTimer = 0f;
             CameraOffset = Vector2.Zero;
             cameraTo = Vector2.Zero;
+            InfiniteHack = false;
             HackTimeFreeze.Deactivate();
         }
     }

@@ -386,6 +386,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
                 float flash = MathF.Sin(timer * 10f) * 0.5f + 0.5f;
                 bgColor = Color.Lerp(bgColor, HackTheme.Accent, flash * 0.15f);
             }
+            //无限骇入：背景红色脉冲
+            if (HackTime.InfiniteHack) {
+                float rPulse = MathF.Sin(timer * 18f + slotGlitchSeed[index] * 5f) * 0.3f + 0.7f;
+                bgColor = Color.Lerp(bgColor, HackTheme.Danger, 0.12f * rPulse);
+            }
             sb.Draw(px, rect, new Rectangle(0, 0, 1, 1), bgColor * (alpha * 0.92f));
             //底部渐变亮带（条目底部1/3区域微微亮起）
             int gradH = rect.Height / 3;
@@ -405,6 +410,12 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
 
             //=== 类别色条（加粗+呼吸脉冲+渐变） ===
             Color catColor = GetCategoryColor(hack.Category);
+            //无限骇入：红色闪烁覆盖
+            if (HackTime.InfiniteHack) {
+                float rFlicker = MathF.Sin(timer * 15f + slotGlitchSeed[index] * 3f) * 0.35f
+                    + MathF.Sin(timer * 23f + slotGlitchSeed[index] * 7f) * 0.15f + 0.5f;
+                catColor = Color.Lerp(HackTheme.Danger, new Color(255, 60, 30), rFlicker * 0.3f);
+            }
             float breathe = MathF.Sin(timer * 2.5f + index * 0.8f) * 0.15f + 0.85f;
             float barGlow = isUploading ? 1f : (0.45f + hover * 0.55f);
             barGlow *= breathe;
@@ -430,9 +441,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
             Utils.DrawBorderString(sb, catSymbol, new Vector2(barX + 8, rect.Y + rect.Height * 0.5f - 6), symColor, 0.28f);
 
             //=== 扫描线（悬停/上传/队列中时横扫） ===
-            if (hover > 0.1f || isUploading || isQueued) {
-                float scanSpeed = isUploading ? 2.5f : 1.8f;
-                float scanAlpha = isUploading ? 0.3f : (isQueued ? 0.15f : hover * 0.22f);
+            if (hover > 0.1f || isUploading || isQueued || HackTime.InfiniteHack) {
+                float scanSpeed = HackTime.InfiniteHack ? 3.5f : (isUploading ? 2.5f : 1.8f);
+                float scanAlpha = HackTime.InfiniteHack ? 0.35f : (isUploading ? 0.3f : (isQueued ? 0.15f : hover * 0.22f));
                 float scanPos = ((timer * scanSpeed + index * 0.4f) % 1.4f) - 0.2f;
                 DrawScanLine(sb, px, rect, scanPos, alpha * scanAlpha);
             }
@@ -443,6 +454,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
                 : isQueued
                     ? Color.Lerp(HackTheme.Border, HackTheme.Uploading, 0.25f)
                     : Color.Lerp(HackTheme.Border, HackTheme.Accent, hover * 0.5f);
+            //无限骇入：边框红色闪烁
+            if (HackTime.InfiniteHack) {
+                float rBorder = MathF.Sin(timer * 20f + slotGlitchSeed[index] * 6f) * 0.3f + 0.7f;
+                borderCol = Color.Lerp(borderCol, HackTheme.Danger, 0.5f * rBorder);
+            }
             //顶边
             sb.Draw(px, new Rectangle(rect.X + (int)SlashWidth, rect.Y, rect.Width - (int)SlashWidth, 1),
                 new Rectangle(0, 0, 1, 1), borderCol * (alpha * 0.55f));
@@ -482,6 +498,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
             if (isUploading) nameColor = Color.Lerp(nameColor, HackTheme.Uploading, 0.35f);
             if (isQueued) nameColor = Color.Lerp(nameColor, HackTheme.Uploading, 0.15f);
             if (isCompleted) nameColor = HackTheme.Accent;
+            //无限骇入：名称红色闪烁
+            if (HackTime.InfiniteHack) {
+                float rName = MathF.Sin(timer * 12f + slotGlitchSeed[index] * 4.3f) * 0.25f + 0.75f;
+                nameColor = Color.Lerp(nameColor, HackTheme.Danger, 0.5f * rName);
+            }
             //色散：悬停时在偏移位置画红/蓝色副本
             if (hover > 0.2f) {
                 float aberration = hover * 1.8f;
