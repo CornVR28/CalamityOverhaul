@@ -181,15 +181,17 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0) : COLOR0
     // ================================================================
 
     // --- A. 深层数字暗流（纵向纤维流动，屏幕相对）---
-    float2 fieldUV = screenUV / (gridSize * 24.0);
-    //纵向拉伸UV产生条纹化流动，避免豹纹感
-    fieldUV.y *= 0.4;
-    float2 flowOff = float2(uTime * 0.015, uTime * 0.008);
+    // 增大UV尺度避免豹纹，加大频率差拉开层次
+    float2 fieldUV = screenUV / (gridSize * 48.0);
+    //纵向拉伸UV产生条纹化流动
+    fieldUV.y *= 0.25;
+    float2 flowOff = float2(uTime * 0.01, uTime * 0.006);
     float fn1 = tex2D(noiseTex, frac(fieldUV + flowOff)).r;
-    float fn2 = tex2D(noiseTex, frac(fieldUV * 1.7 - flowOff * 0.6 + 0.37)).g;
-    float fieldNoise = fn1 * 0.6 + fn2 * 0.4;
-    float digitalField = smoothstep(0.12, 0.88, fieldNoise);
-    digitalField *= lerp(0.10, 0.04, edgeFactor);
+    float fn2 = tex2D(noiseTex, frac(fieldUV * 3.1 - flowOff * 0.4 + 0.37)).g;
+    float fieldNoise = fn1 * 0.75 + fn2 * 0.25;
+    // 柔化对比度：更宽的smoothstep过渡
+    float digitalField = smoothstep(0.25, 0.75, fieldNoise);
+    digitalField *= lerp(0.08, 0.03, edgeFactor);
     digitalField *= domainBreathe;
 
     // --- B. 栅格结构线（带方向性能量流动）---
@@ -207,12 +209,12 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0) : COLOR0
     float gridOpacity = lerp(traceBright * 0.3, 1.0, edgeFactor);
     gridLine *= gridOpacity;
 
-    // 能量流动：沿网格线方向的移动高亮光斑
-    float flowH = frac(cellLocal.x + uTime * 0.15 + cellIdx.y * 0.37);
-    float flowV = frac(cellLocal.y - uTime * 0.12 + cellIdx.x * 0.29);
+    // 能量流动：沿网格线方向的移动高亮光斑（柔化+减密）
+    float flowH = frac(cellLocal.x + uTime * 0.10 + cellIdx.y * 0.37);
+    float flowV = frac(cellLocal.y - uTime * 0.08 + cellIdx.x * 0.29);
     float flow = (by < bx) ? flowH : flowV;
-    float flowPulse = smoothstep(0.0, 0.12, flow) * smoothstep(0.35, 0.2, flow);
-    gridLine += flowPulse * gridOpacity * 0.5 * (1.0 - smoothstep(0.0, 0.06, borderDist));
+    float flowPulse = smoothstep(0.0, 0.18, flow) * smoothstep(0.30, 0.18, flow);
+    gridLine += flowPulse * gridOpacity * 0.3 * (1.0 - smoothstep(0.0, 0.08, borderDist));
 
     gridLine *= 0.65 + 0.35 * breathe;
 
@@ -236,35 +238,37 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0) : COLOR0
     float streamTail = pow(saturate(1.0 - streamPhase / 0.35), 3.0) * 0.45;
     float dataStream = (streamHead + streamTail) * streamActive * (1.0 - edgeFactor) * 0.35;
 
-    // --- G. 径向脉冲环（双频干涉波纹，更立体）---
-    float pulseDistortion = tex2D(noiseTex, frac(screenUV * 0.001 + uTime * 0.008)).r * 15.0;
+    // --- G. 径向脉冲环（柔化宽带波纹，降低尖锐度）---
+    float pulseDistortion = tex2D(noiseTex, frac(screenUV * 0.0008 + uTime * 0.006)).r * 12.0;
     float basePhaseDist = worldDist + pulseDistortion;
-    float pulse1 = pow(saturate(sin((basePhaseDist - uTime * 68.0) * 0.02) * 0.5 + 0.5), 14.0);
-    float pulse2 = pow(saturate(sin((basePhaseDist - uTime * 42.0) * 0.015) * 0.5 + 0.5), 18.0);
+    // 降低频率系数+指数，环更宽更柔
+    float pulse1 = pow(saturate(sin((basePhaseDist - uTime * 45.0) * 0.012) * 0.5 + 0.5), 6.0);
+    float pulse2 = pow(saturate(sin((basePhaseDist - uTime * 28.0) * 0.009) * 0.5 + 0.5), 8.0);
     float pulse = (pulse1 * 0.6 + pulse2 * 0.4);
-    pulse *= saturate(1.0 - normDist * 0.6) * 0.3;
+    pulse *= saturate(1.0 - normDist * 0.6) * 0.22;
 
-    // --- H. 边缘能量裂纹（替换原简单辉光——高频噪声裂纹图案）---
-    float edgeGlow = smoothstep(0.65, 1.0, normDist);
-    // 高频噪声裂纹（屏幕相对）
-    float2 crackUV = frac(screenUV * 0.003 + float2(uTime * 0.04, uTime * -0.03));
+    // --- H. 边缘能量裂纹（柔化裂纹图案，降低高频碎片感）---
+    float edgeGlow = smoothstep(0.70, 1.0, normDist);
+    // 降低噪声频率，加宽裂纹过渡带
+    float2 crackUV = frac(screenUV * 0.0018 + float2(uTime * 0.025, uTime * -0.02));
     float crackNoise = tex2D(noiseTex, crackUV).r;
-    float crack = smoothstep(0.42, 0.48, crackNoise) * smoothstep(0.56, 0.49, crackNoise);
-    float edgeCrack = crack * edgeGlow * 2.2;
+    float crack = smoothstep(0.38, 0.47, crackNoise) * smoothstep(0.60, 0.50, crackNoise);
+    float edgeCrack = crack * edgeGlow * 1.5;
     // 基础辉光
-    float edgePulse = 0.5 + 0.5 * sin(uTime * 1.5 + cellRand * 6.28318);
-    float edgeBase = edgeGlow * edgePulse * 0.55;
+    float edgePulse = 0.5 + 0.5 * sin(uTime * 1.2 + cellRand * 6.28318);
+    float edgeBase = edgeGlow * edgePulse * 0.45;
     float edgeTotal = edgeBase + edgeCrack;
 
     // --- I. [已移除水平故障撕裂] ---
 
-    // --- J. 辉光粒子（漂浮的余烬微粒）---
-    float2 particleUV = frac(screenUV * 0.008 + float2(uTime * 0.035, -uTime * 0.028));
+    // --- J. 辉光粒子（漂浮余烬，减少密度提升质感）---
+    float2 particleUV = frac(screenUV * 0.005 + float2(uTime * 0.025, -uTime * 0.02));
     float particleNoise = tex2D(noiseTex, particleUV).r;
-    float particle = smoothstep(0.87, 0.92, particleNoise);
+    // 提高阈值：粒子更稀疏但更突出
+    float particle = smoothstep(0.91, 0.96, particleNoise);
     float particleSeed = floor(particleNoise * 50.0);
-    float particlePulse = 0.5 + 0.5 * sin(uTime * 3.0 + particleSeed * 2.7);
-    particle *= particlePulse * (1.0 - edgeFactor * 0.5) * 0.5;
+    float particlePulse = 0.5 + 0.5 * sin(uTime * 2.2 + particleSeed * 2.7);
+    particle *= particlePulse * (1.0 - edgeFactor * 0.5) * 0.55;
 
     // --- K. 实体扫描圆环 ---
     float entityRingTotal = 0;
