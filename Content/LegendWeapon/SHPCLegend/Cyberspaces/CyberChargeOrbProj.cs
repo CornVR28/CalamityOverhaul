@@ -195,7 +195,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             // 蓄力音效：从开始蓄力即播放，pitch 随蓄力比例递增，超驱时额外升调+抖动
             if (chargeTime == 1 && Main.netMode != NetmodeID.Server) {
                 SoundStyle chargeSound = "CalamityMod/Sounds/Item/NorfleetRecharge".GetSound();
-                chargeSoundSlot = SoundEngine.PlaySound(chargeSound with { Volume = 0.8f }, Projectile.Center);
+                chargeSoundSlot = SoundEngine.PlaySound(chargeSound with { Volume = 0.8f, Pitch = -0.6f }, Projectile.Center);
             }
             if (SoundEngine.TryGetActiveSound(chargeSoundSlot, out var activeChargeSound)) {
                 activeChargeSound.Position = Projectile.Center;

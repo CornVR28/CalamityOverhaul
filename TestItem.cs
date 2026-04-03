@@ -125,7 +125,10 @@ namespace CalamityOverhaul
         }
 
         public static void TestContent() {
-            
+            if (Main.LocalPlayer.altFunctionUse == 0) {
+                Cyberspace.Activate(Main.LocalPlayer);   // 展开领域
+                Cyberspace.SetLayer(3, Main.LocalPlayer);
+            }
         }
     }
 }

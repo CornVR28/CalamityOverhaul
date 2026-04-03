@@ -249,11 +249,10 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
                     Vector2 shotVel = baseVel.RotatedBy(spreadOffset + randomOffset);
 
                     // ai[0] 传递颜色主题索引（0=蓝, 1=黄, 2=青）
-                    int themeIndex = i % 3;
                     Projectile.NewProjectile(source, position + shotVel * 2f, shotVel,
                         ModContent.ProjectileType<CyberTraceBeamProj>(),
                         damage, knockback, player.whoAmI,
-                        ai0: themeIndex);
+                        ai0: Main.rand.Next(3));
                 }
             }
 
