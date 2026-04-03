@@ -15,17 +15,17 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         public override float RenderPriority => 2;
         public override bool Active => true;
         public override void Update() {
-            var current = Main.keyState;
-            var previous = Main.oldKeyState;
-            if (current.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.D1)
-                && !previous.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.D1)) {
-                if (TransitionScene.IsShowing) {
-                    TransitionScene.Hide();
-                }
-                else {
-                    TransitionScene.Show();
-                }
-            }
+            //var current = Main.keyState;
+            //var previous = Main.oldKeyState;
+            //if (current.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.D1)
+            //    && !previous.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.D1)) {
+            //    if (TransitionScene.IsShowing) {
+            //        TransitionScene.Hide();
+            //    }
+            //    else {
+            //        TransitionScene.Show();
+            //    }
+            //}
         }
     }
 
