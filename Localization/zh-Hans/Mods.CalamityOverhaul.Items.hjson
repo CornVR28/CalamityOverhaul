@@ -1,4 +1,4 @@
-ElementWhip: {
+﻿ElementWhip: {
 	DisplayName: 元素长鞭
 	Tooltip:
 		'''
@@ -1569,7 +1569,7 @@ MechanizedWood: {
 }
 
 SandevistansItem: {
-	DisplayName: 军用型斯安维斯坦 Mk.5
+	DisplayName: 斯安维斯坦Mk5
 	Tooltip: ""
-	CyberDescription: 军用型斯安维斯坦 Mk.5 —— 减缓感知时间流速70%，持续3.5秒。冷却15秒。
+	CyberDescription: 减缓感知时间流速70%，持续5秒。冷却15秒。
 }

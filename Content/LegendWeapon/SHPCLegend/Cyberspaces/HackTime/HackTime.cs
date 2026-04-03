@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Terraria;
 
 namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
@@ -216,7 +216,6 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
         /// </summary>
         public static bool IsHackableTarget(NPC npc) {
             if (npc == null || !npc.active) return false;
-            if (npc.friendly || npc.townNPC || npc.dontTakeDamage) return false;
             //在赛博空间范围内的敌对生物为可骇入目标
             if (!Cyberspace.Active) return true;
             float dx = npc.Center.X - Main.LocalPlayer.Center.X;

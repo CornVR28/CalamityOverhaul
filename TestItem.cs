@@ -125,10 +125,18 @@ namespace CalamityOverhaul
         }
 
         public static void TestContent() {
-            if (Main.LocalPlayer.altFunctionUse == 0) {
+            if (Cyberspace.Active) {
+                Cyberspace.Deactivate(); // 收缩关闭
+            }
+            else {
+                HackTime.InfiniteHack = true;
                 Cyberspace.Activate(Main.LocalPlayer);   // 展开领域
                 Cyberspace.SetLayer(3, Main.LocalPlayer);
             }
+            //ScenarioManager.Reset<FirstMetShepel>();
+            //ScenarioManager.Start<FirstMetShepel>();
+            //CyberwareUI.Instance.Toggle();
+            //Sandevistan.IsActive = !Sandevistan.IsActive;
         }
     }
 }
