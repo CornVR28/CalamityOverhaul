@@ -242,10 +242,10 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
                 new Vector2(panelCenter.X + notchW, divY), 1f, divBright * 0.5f);
 
             //标题文字
-            Vector2 titleSize = FontAssets.MouseText.Value.MeasureString(title) * 0.55f;
-            Vector2 titlePos = new(panelCenter.X - titleSize.X / 2f, panelRect.Y + 9);
+            Vector2 titleSize = FontAssets.MouseText.Value.MeasureString(title) * 0.65f;
+            Vector2 titlePos = new(panelCenter.X - titleSize.X / 2f, panelRect.Y + 7);
             Color titleColor = CyberwareTheme.Accent * (alpha * 0.95f);
-            Utils.DrawBorderString(sb, title, titlePos, titleColor, 0.55f);
+            Utils.DrawBorderString(sb, title, titlePos, titleColor, 0.65f);
 
             //标题两侧对称装饰线+尖括号
             float sideY = titlePos.Y + titleSize.Y * 0.45f;
@@ -271,7 +271,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
 
             //版本号
             Color verColor = CyberwareTheme.TextDim * (alpha * 0.5f);
-            Utils.DrawBorderString(sb, "v2.077", new Vector2(panelRect.Right - 60, panelRect.Y + 10), verColor, 0.28f);
+            Utils.DrawBorderString(sb, "v2.077", new Vector2(panelRect.Right - 70, panelRect.Y + 10), verColor, 0.36f);
 
             //底部状态栏独立背景区
             int footerH = 22;
@@ -291,13 +291,13 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
             Color statusDot = new Color(50, 255, 80) * (alpha * statusPulse);
             sb.Draw(px, new Vector2(panelRect.X + 10, bottomTextY + 2), new Rectangle(0, 0, 1, 1),
                 statusDot, 0, Vector2.Zero, 4f, SpriteEffects.None, 0);
-            Utils.DrawBorderString(sb, statusText, new Vector2(panelRect.X + 20, bottomTextY - 2),
-                CyberwareTheme.TextDim * alpha, 0.26f);
+            Utils.DrawBorderString(sb, statusText, new Vector2(panelRect.X + 22, bottomTextY - 2),
+                CyberwareTheme.TextDim * alpha, 0.34f);
 
             //右下角滚动数据标签
             string dataTag = $"NET::0x{((int)(globalTimer * 100) % 0xFFFF):X4}";
-            Utils.DrawBorderString(sb, dataTag, new Vector2(panelRect.Right - 100, bottomTextY - 2),
-                CyberwareTheme.AccentCyan * (alpha * 0.35f), 0.24f);
+            Utils.DrawBorderString(sb, dataTag, new Vector2(panelRect.Right - 115, bottomTextY - 2),
+                CyberwareTheme.AccentCyan * (alpha * 0.35f), 0.32f);
         }
 
         /// <summary>

@@ -364,14 +364,14 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
                 title = CyberwareUI.Instance?.GetSlotLabel(boundSlot) ?? "CYBERWARE";
             }
             Utils.DrawBorderString(sb, title,
-                new Vector2(panelRect.X + PanelPadding, panelRect.Y + 8),
-                CyberwareTheme.Accent * alpha, 0.48f);
+                new Vector2(panelRect.X + PanelPadding, panelRect.Y + 6),
+                CyberwareTheme.Accent * alpha, 0.58f);
 
             // 可选物品数量
             string countText = $"{compatibleItems.Count} AVAILABLE";
             Utils.DrawBorderString(sb, countText,
-                new Vector2(panelRect.X + PanelPadding, panelRect.Y + 24),
-                CyberwareTheme.TextDim * alpha, 0.34f);
+                new Vector2(panelRect.X + PanelPadding, panelRect.Y + 26),
+                CyberwareTheme.TextDim * alpha, 0.42f);
         }
 
         private void DrawCapacityBar(SpriteBatch sb, Texture2D px, float alpha, CyberwarePlayer cyberPlayer) {
@@ -391,8 +391,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
             int max = cyberPlayer.MaxCapacity;
             string capText = $"CAPACITY {used}/{max}";
             Utils.DrawBorderString(sb, capText,
-                new Vector2(barBgRect.X + 4, barBgRect.Y + 2),
-                CyberwareTheme.TextNormal * alpha, 0.34f);
+                new Vector2(barBgRect.X + 4, barBgRect.Y + 1),
+                CyberwareTheme.TextNormal * alpha, 0.42f);
 
             // 进度条
             float ratio = max > 0 ? (float)used / max : 0;
@@ -416,7 +416,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
             // "INSTALLED" 标签
             Utils.DrawBorderString(sb, "[ INSTALLED ]",
                 new Vector2(panelRect.X + PanelPadding, panelRect.Y + yOffset - 2),
-                CyberwareTheme.AccentGold * (alpha * 0.7f), 0.32f);
+                CyberwareTheme.AccentGold * (alpha * 0.7f), 0.40f);
 
             yOffset += 12;
 
@@ -446,15 +446,15 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
             string name = equipped.Name ?? "???";
             if (name.Length > 18) name = name[..17] + "…";
             Utils.DrawBorderString(sb, name,
-                new Vector2(eqRect.X + 44, eqRect.Y + 6),
-                CyberwareTheme.TextBright * alpha, 0.38f);
+                new Vector2(eqRect.X + 44, eqRect.Y + 4),
+                CyberwareTheme.TextBright * alpha, 0.48f);
 
             // 卸载提示
             string hint = isHoveredUnequip ? "> UNINSTALL <" : "CLICK TO UNINSTALL";
             Color hintColor = isHoveredUnequip ? CyberwareTheme.Accent : CyberwareTheme.TextDim;
             Utils.DrawBorderString(sb, hint,
                 new Vector2(eqRect.X + 44, eqRect.Y + 28),
-                hintColor * (alpha * 0.65f), 0.30f);
+                hintColor * (alpha * 0.65f), 0.38f);
 
             return yOffset + ItemRowHeight + 4;
         }
@@ -463,17 +463,17 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
             if (compatibleItems.Count == 0) {
                 Utils.DrawBorderString(sb, "NO COMPATIBLE",
                     new Vector2(panelRect.X + PanelPadding, panelRect.Y + yOffset + 8),
-                    CyberwareTheme.TextDim * (alpha * 0.5f), 0.36f);
+                    CyberwareTheme.TextDim * (alpha * 0.5f), 0.44f);
                 Utils.DrawBorderString(sb, "CYBERWARE FOUND",
-                    new Vector2(panelRect.X + PanelPadding, panelRect.Y + yOffset + 24),
-                    CyberwareTheme.TextDim * (alpha * 0.5f), 0.36f);
+                    new Vector2(panelRect.X + PanelPadding, panelRect.Y + yOffset + 28),
+                    CyberwareTheme.TextDim * (alpha * 0.5f), 0.44f);
                 return;
             }
 
             // 列表标签
             Utils.DrawBorderString(sb, "AVAILABLE",
                 new Vector2(panelRect.X + PanelPadding, panelRect.Y + yOffset - 2),
-                CyberwareTheme.AccentCyan * (alpha * 0.6f), 0.32f);
+                CyberwareTheme.AccentCyan * (alpha * 0.6f), 0.40f);
             yOffset += 16;
 
             float listTop = panelRect.Y + yOffset;
@@ -519,8 +519,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
                 if (name.Length > 16) name = name[..15] + "…";
                 Color nameColor = canEquip ? CyberwareTheme.TextBright : CyberwareTheme.TextDim;
                 Utils.DrawBorderString(sb, name,
-                    new Vector2(itemRect.X + 44, itemRect.Y + 4),
-                    nameColor * alpha, 0.36f);
+                    new Vector2(itemRect.X + 44, itemRect.Y + 2),
+                    nameColor * alpha, 0.44f);
 
                 // 容量消耗提示
                 if (item.ModItem is BaseCyberware cyber) {
@@ -528,12 +528,12 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
                     Color costColor = canEquip ? CyberwareTheme.AccentCyan : CyberwareTheme.Accent;
                     Utils.DrawBorderString(sb, costText,
                         new Vector2(itemRect.X + 44, itemRect.Y + 26),
-                        costColor * (alpha * 0.55f), 0.30f);
+                        costColor * (alpha * 0.55f), 0.38f);
 
                     if (!canEquip) {
                         Utils.DrawBorderString(sb, "OVER CAP",
-                            new Vector2(itemRect.X + 120, itemRect.Y + 26),
-                            CyberwareTheme.Accent * (alpha * 0.5f), 0.28f);
+                            new Vector2(itemRect.X + 130, itemRect.Y + 26),
+                            CyberwareTheme.Accent * (alpha * 0.5f), 0.36f);
                     }
                 }
             }
