@@ -7,7 +7,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Skills.Sandevistans
     /// <summary>
     /// 斯安威斯坦屏幕级渲染器。
     /// 在 EndCaptureDraw 中对整个屏幕画面应用赛博朋克2077风格的后处理效果：
-    /// 色差分离、青色调去饱和、暗角、扫描线、数字噪点、边缘辉光。
+    /// 径向模糊、色差分离、轻度去饱和、暗角、边缘辉光、神经脉冲。
     /// </summary>
     internal class SandevistanRender : RenderHandle
     {
@@ -42,12 +42,13 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Skills.Sandevistans
             );
             playerUV = Vector2.Clamp(playerUV, Vector2.Zero, Vector2.One);
 
-            //设置着色器参数
+            //设置着色器参数（基准值由着色器内部乘以intensity，避免双重缩放）
             shader.Parameters["intensity"]?.SetValue(effectIntensity);
             shader.Parameters["uTime"]?.SetValue(Main.GlobalTimeWrappedHourly);
-            shader.Parameters["chromaticOffset"]?.SetValue(0.004f * effectIntensity);
-            shader.Parameters["vignetteStrength"]?.SetValue(0.45f);
+            shader.Parameters["chromaticOffset"]?.SetValue(0.005f);
+            shader.Parameters["vignetteStrength"]?.SetValue(0.4f);
             shader.Parameters["playerCenter"]?.SetValue(playerUV);
+            shader.Parameters["radialBlurStrength"]?.SetValue(0.04f);
 
             //应用着色器并绘制回主屏幕
             gd.SetRenderTarget(Main.screenTarget);

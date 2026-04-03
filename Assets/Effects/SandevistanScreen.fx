@@ -2,22 +2,16 @@ sampler uImage0 : register(s0);
 
 //效果强度（0=无效果，1=完整效果）
 float intensity;
-//时间，用于动态扫描线和噪声
+//时间，用于神经脉冲呼吸动画
 float uTime;
-//色差偏移量
+//色差偏移基准量
 float chromaticOffset;
 //暗角强度
 float vignetteStrength;
-//以玩家为中心的屏幕归一化坐标（0.5, 0.5 = 屏幕中央）
+//玩家在屏幕上的归一化坐标（0.5, 0.5 = 屏幕中央）
 float2 playerCenter;
-
-//简单的伪随机hash
-float hash(float2 p)
-{
-    float3 p3 = frac(float3(p.xyx) * 0.1031);
-    p3 += dot(p3, p3.yzx + 33.33);
-    return frac((p3.x + p3.y) * p3.z);
-}
+//径向模糊扩散强度
+float radialBlurStrength;
 
 float4 SandevistanScreenPass(float2 coords : TEXCOORD0) : COLOR0
 {
@@ -25,53 +19,61 @@ float4 SandevistanScreenPass(float2 coords : TEXCOORD0) : COLOR0
     if (intensity < 0.001)
         return original;
 
-    // === 1. 色差分离（Chromatic Aberration）===
-    //从玩家中心向外的方向做RGB偏移，赛博朋克标志性效果
     float2 toEdge = coords - playerCenter;
     float distFromCenter = length(toEdge);
-    float2 aberrationDir = normalize(toEdge + 0.001) * chromaticOffset * intensity;
+    float2 blurDir = toEdge * radialBlurStrength;
+    float2 caDir = normalize(toEdge + 0.0001) * chromaticOffset;
 
-    float r = tex2D(uImage0, coords + aberrationDir).r;
-    float g = original.g;
-    float b = tex2D(uImage0, coords - aberrationDir).b;
-    float a = original.a;
+    // === 1. 径向模糊 + 色差分离（Radial Blur + Chromatic Aberration）===
+    //沿径向方向多次采样，同时对RGB三通道施加不同偏移实现色差
+    //模拟"极速运动中世界向外拉伸"的感知扭曲——赛博朋克2077斯安威斯坦的标志性效果
+    float3 accumulated = float3(0, 0, 0);
+    const int SAMPLES = 8;
 
-    float3 aberrated = float3(r, g, b);
+    for (int i = 0; i < SAMPLES; i++)
+    {
+        float t = ((float) i / (SAMPLES - 1.0)) - 0.5;
+        float2 sampleOffset = blurDir * t * intensity;
 
-    // === 2. 青色调去饱和（Cyan Desaturation）===
-    //提取亮度，混合到青色调的去饱和
-    float lum = dot(aberrated, float3(0.299, 0.587, 0.114));
-    //目标：低饱和度的冷青色调
-    float3 coldTint = float3(lum * 0.7, lum * 0.95, lum * 1.0);
-    float desatAmount = 0.4 * intensity;
-    float3 tinted = lerp(aberrated, coldTint, desatAmount);
+        //R通道向外偏移，B通道向内偏移，实现与径向模糊融合的色差
+        accumulated.r += tex2D(uImage0, coords + sampleOffset + caDir * intensity).r;
+        accumulated.g += tex2D(uImage0, coords + sampleOffset).g;
+        accumulated.b += tex2D(uImage0, coords + sampleOffset - caDir * intensity).b;
+    }
+    accumulated /= (float) SAMPLES;
+
+    //模糊遮罩：屏幕中心保持清晰，边缘逐渐模糊，形成隧道视觉
+    float blurMask = smoothstep(0.05, 0.55, distFromCenter);
+    float3 result = lerp(original.rgb, accumulated, blurMask);
+
+    // === 2. 轻度去饱和 + 对比度增强 ===
+    //不做重度青色偏移，仅轻微冷色调去饱和，保持画面力度
+    //赛博朋克2077中义体加速是神经层面的感知变化，不是数字信号干扰
+    float lum = dot(result, float3(0.299, 0.587, 0.114));
+    float3 desaturated = float3(lum * 0.96, lum * 0.98, lum * 1.03);
+    result = lerp(result, desaturated, 0.2 * intensity);
+
+    //对比度：让暗处更暗、亮处更亮，增强"时间凝固"的视觉张力
+    result = saturate((result - 0.5) * (1.0 + 0.18 * intensity) + 0.5);
 
     // === 3. 暗角（Vignette）===
     //从屏幕边缘向中心的渐变遮罩
-    float2 vignetteCoords = (coords - 0.5) * 2.0;
-    float vignetteDist = dot(vignetteCoords, vignetteCoords);
-    float vignette = 1.0 - vignetteDist * vignetteStrength * intensity;
-    vignette = saturate(vignette);
-    tinted *= vignette;
+    float2 vc = (coords - 0.5) * 2.0;
+    float vd = dot(vc, vc);
+    float vignette = 1.0 - vd * vignetteStrength * intensity;
+    result *= saturate(vignette);
 
-    // === 4. 扫描线（Scanlines）===
-    //水平扫描线 + 缓慢滚动，模拟赛博朋克义体接口的视觉噪声
-    float scanline = sin((coords.y * 800.0) + uTime * 3.0) * 0.5 + 0.5;
-    scanline = lerp(1.0, scanline, 0.06 * intensity);
-    tinted *= scanline;
+    // === 4. 边缘冷色辉光 ===
+    //在暗角边缘添加极轻微的冷色调辉光，营造义体HUD边缘感
+    float edgeGlow = smoothstep(0.5, 1.1, vd) * intensity * 0.06;
+    result += float3(edgeGlow * 0.2, edgeGlow * 0.5, edgeGlow * 0.7);
 
-    // === 5. 细微噪声（Digital Noise）===
-    //高频数字噪点，模拟神经接口干扰
-    float noise = hash(coords * 500.0 + uTime * 7.0);
-    noise = lerp(1.0, noise, 0.04 * intensity);
-    tinted *= noise;
+    // === 5. 神经脉冲（Neural Pulse）===
+    //极轻微的亮度呼吸，模拟义体与神经系统的同步节律
+    float pulse = sin(uTime * 2.5) * 0.015 * intensity;
+    result *= (1.0 + pulse);
 
-    // === 6. 青色边缘高光（Edge Highlight）===
-    //在暗角边缘添加淡青色辉光
-    float edgeGlow = smoothstep(0.4, 0.9, vignetteDist) * intensity * 0.15;
-    tinted += float3(0.0, edgeGlow * 0.8, edgeGlow);
-
-    return float4(tinted, a);
+    return float4(result, original.a);
 }
 
 technique Technique1
