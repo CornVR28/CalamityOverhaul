@@ -3,6 +3,7 @@ using CalamityOverhaul.Content.PRTTypes;
 using InnoVault.PRT;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using ReLogic.Utilities;
 using System;
 using Terraria;
 using Terraria.Audio;
@@ -85,6 +86,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         private int glitchBurstTimer;
         /// <summary>当前故障爆发强度</summary>
         private float glitchBurstIntensity;
+
+        /// <summary>蓄力循环音效跟踪</summary>
+        private SlotId chargeSoundSlot;
 
         private OrbState State {
             get => (OrbState)Projectile.ai[0];
@@ -188,6 +192,21 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             chargeTime++;
             chargeRatio = MathHelper.Clamp((float)chargeTime / MaxChargeFrames, 0f, 1f);
 
+            // 蓄力音效：从开始蓄力即播放，pitch 随蓄力比例递增，超驱时额外升调+抖动
+            if (chargeTime == 1 && Main.netMode != NetmodeID.Server) {
+                SoundStyle chargeSound = "CalamityMod/Sounds/Item/NorfleetRecharge".GetSound();
+                chargeSoundSlot = SoundEngine.PlaySound(chargeSound with { Volume = 0.8f }, Projectile.Center);
+            }
+            if (SoundEngine.TryGetActiveSound(chargeSoundSlot, out var activeChargeSound)) {
+                activeChargeSound.Position = Projectile.Center;
+                float basePitch = MathHelper.Lerp(-0.3f, 0.5f, chargeRatio);
+                float odPitch = overdriveAmount * 0.2f;
+                float odFlutter = overdriveAmount > 0.3f
+                    ? overdriveAmount * 0.15f * MathF.Sin((float)Main.timeForVisualEffects * 0.8f)
+                    : 0f;
+                activeChargeSound.Pitch = basePitch + odPitch + odFlutter;
+            }
+
             // 蓄力阶段不移动
             Projectile.velocity = Vector2.Zero;
             Projectile.timeLeft = 600; // 重置timeLeft防止蓄力超时消失
@@ -266,6 +285,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         }
 
         private void LaunchOrb(Player owner) {
+            // 停止蓄力音效
+            StopChargeSound();
             // 释放时触发手持弹幕后坐力动画
             NotifyHeldRecoil();
 
@@ -291,7 +312,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
                 }
             }
 
-            SoundEngine.PlaySound(SoundID.Item92, Projectile.Center);
+            SoundEngine.PlaySound("CalamityMod/Sounds/Item/NorfleetFire".GetSound() with { Pitch = -0.62f, Volume = 0.85f }, Projectile.Center);
             Projectile.netUpdate = true;
         }
 
@@ -357,6 +378,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         public override void OnKill(int timeLeft) {
             // 确保手持弹幕被清理
             KillHeldProj();
+            StopChargeSound();
             // 消散粒子（超驱时更多更亮）
             if (Main.netMode == NetmodeID.Server) return;
             float od = overdriveAmount;
@@ -504,6 +526,15 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
                 && Main.projectile[idx].active
                 && Main.projectile[idx].ModProjectile is SHPCChargeHeldProj held) {
                 held.TriggerRecoil();
+            }
+        }
+
+        /// <summary>
+        /// 停止蓄力循环音效
+        /// </summary>
+        private void StopChargeSound() {
+            if (SoundEngine.TryGetActiveSound(chargeSoundSlot, out var sound)) {
+                sound.Stop();
             }
         }
     }

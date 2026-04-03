@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;
+using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
 
@@ -396,6 +397,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
 
         public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone) {
             if (Main.netMode == NetmodeID.Server) return;
+            SoundEngine.PlaySound(SoundID.Item62 with { Volume = 0.5f, Pitch = 0.3f }, target.Center);
             float od = overdriveAmount;
             int count = od > 0.3f ? 22 : 8;
             Color mainCol = Color.Lerp(theme.ParticleMain, OverdriveTheme.ParticleMain, od);
