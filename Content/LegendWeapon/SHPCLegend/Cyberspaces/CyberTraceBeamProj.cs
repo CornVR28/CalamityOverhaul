@@ -106,6 +106,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         /// <summary>当前故障爆发强度 0-1，触发后指数衰减</summary>
         private float glitchBurstIntensity;
 
+        /// <summary>当前帧有效拖尾顶点数，供 WidthFunction 使用</summary>
+        private int currentValidCount;
+
         #endregion
 
         public override void SetStaticDefaults() {
@@ -253,9 +256,14 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         #region Trail绘制
 
         private float WidthFunction(float progress) {
-            float noseRise = MathF.Min(progress / 0.06f, 1f);
+            // 将 tailTaper 的衰减范围压缩至有效顶点区间，
+            // 使拖尾在实际末端处自然收为 0，避免刚发射时的断尾切口
+            float validRatio = MathF.Max((float)currentValidCount / TrailCacheLen, 0.05f);
+            float tailProgress = MathHelper.Clamp(progress / validRatio, 0f, 1f);
+
+            float noseRise = MathF.Min(tailProgress / 0.06f, 1f);
             noseRise = MathF.Sin(noseRise * MathHelper.PiOver2);
-            float tailTaper = 1f - MathF.Pow(progress, 2.0f);
+            float tailTaper = 1f - MathF.Pow(tailProgress, 2.0f);
             float width = noseRise * tailTaper;
             // 超驱时光束更粗壮（30→50像素宽）
             return MathF.Max(width, 0f) * (30f + overdriveAmount * 20f);
@@ -272,18 +280,21 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             Texture2D noise = CWRAsset.Extra_193?.Value;
             if (noise == null) return;
 
-            // 构建拖尾位置数组
+            // 构建拖尾位置数组，无效位置用最后有效位置填充（尾部收束）
             trailPositions ??= new Vector2[TrailCacheLen];
             int validCount = 0;
+            Vector2 lastValidPos = Projectile.Center;
             for (int i = 0; i < TrailCacheLen; i++) {
                 if (Projectile.oldPos[i] == Vector2.Zero) {
-                    trailPositions[i] = Projectile.Center;
+                    trailPositions[i] = lastValidPos;
                 }
                 else {
                     trailPositions[i] = Projectile.oldPos[i] + Projectile.Size * 0.5f;
+                    lastValidPos = trailPositions[i];
                     validCount++;
                 }
             }
+            currentValidCount = validCount;
 
             if (validCount < 3) return;
 
