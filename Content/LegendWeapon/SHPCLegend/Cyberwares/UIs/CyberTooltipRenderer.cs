@@ -29,7 +29,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
             Texture2D px = CWRAsset.Placeholder_White?.Value;
             if (px == null) return;
 
-            scanPhase += 0.016f * ScanLineSpeed;
+            scanPhase += (float)Main.gameTimeCache.ElapsedGameTime.TotalSeconds * ScanLineSpeed;
             if (scanPhase > MathHelper.TwoPi) scanPhase -= MathHelper.TwoPi;
 
             // 收集文本行
@@ -43,10 +43,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
             float smallScale = 0.52f;
             float descScale = 0.50f;
 
-            Vector2 nameSize = Utils.DrawBorderString(sb, name, Vector2.Zero, Color.Transparent, textScale, anchorx: 0, anchory: 0) 
-                is var _ ? MeasureString(name, textScale) : Vector2.Zero;
+            Vector2 nameSize = MeasureString(name, textScale);
             Vector2 slotSize = MeasureString(slotName, smallScale);
-            Vector2 capSize = MeasureString(capText, smallScale);
 
             // 计算描述文本行
             string[] descLines = WrapText(desc, 220f, descScale);
