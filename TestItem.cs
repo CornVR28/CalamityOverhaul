@@ -1,5 +1,6 @@
 ﻿#if DEBUG
 using CalamityOverhaul.Content.ADV.Scenarios;
+using CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machines;
 using CalamityOverhaul.Content.ADV.Scenarios.Shepel;
 using CalamityOverhaul.Content.ADV.Scenarios.SupCal.End.EternalBlazingNows;
 using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
@@ -86,7 +87,7 @@ namespace CalamityOverhaul
             //else {
             //    GargoyleSwarmPlayer.StartCutscene();
             //}
-            Sandevistan.IsActive = !Sandevistan.IsActive;
+            //Sandevistan.IsActive = !Sandevistan.IsActive;
             //CyberwareUI.Instance.Toggle();
 
             //if (player.altFunctionUse == 0) {
@@ -109,6 +110,22 @@ namespace CalamityOverhaul
             //ScenarioManager.Reset<FirstMetShepel>();
             //ScenarioManager.Start<FirstMetShepel>();
             return true;
+        }
+    }
+
+    internal class TestSystem : ModSystem
+    {
+        public override void PostUpdatePlayers() {
+            var current = Main.keyState;
+            var previous = Main.oldKeyState;
+            if (current.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.D1)
+                && !previous.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.D1)) {
+                TestContent();
+            }
+        }
+
+        public static void TestContent() {
+
         }
     }
 }
