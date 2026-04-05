@@ -1,5 +1,6 @@
-using CalamityOverhaul.Common;
+﻿using CalamityOverhaul.Common;
 using CalamityOverhaul.Content.ADV.QuestManager;
+using CalamityOverhaul.Content.ADV.Scenarios.Helen.Quest;
 using CalamityOverhaul.Content.ADV.Scenarios.Helen.Quest.FishoilQuest;
 using Terraria;
 using Terraria.ID;
@@ -94,6 +95,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend.Quest
             trialTargetNpcs[12] = [CWRID.NPC_AresBody, CWRID.NPC_Apollo,
                 CWRID.NPC_Artemis, CWRID.NPC_ThanatosHead, CWRID.NPC_SupremeCalamitas];
             //试炼13 (等级13→14): 始源妖龙
+            //Halibut_Level()用 Downed31 || Downed32，Boss Rush无可追踪NPC
+            //但完成Boss Rush后level直接变14，试炼13会被立即标记为Completed
             trialTargetNpcs[13] = [CWRID.NPC_PrimordialWyrmHead];
         }
 
