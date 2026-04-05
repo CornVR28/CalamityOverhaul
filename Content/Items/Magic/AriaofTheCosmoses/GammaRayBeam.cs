@@ -89,10 +89,10 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
             //能量粒子特效
             SpawnEnergyParticles();
 
-            //发光效果
+            //伽马射线辐射光 - 紫蓝色调
             Lighting.AddLight(Projectile.Center,
                 0.6f * coreIntensity,
-                0.9f * coreIntensity,
+                0.35f * coreIntensity,
                 1.2f * coreIntensity);
 
             //音效
@@ -117,37 +117,38 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
                 return;
             }
 
-            //星光闪烁
-            if (Main.rand.NextBool(6)) {
-                Vector2 sparkPos = Projectile.Center + Main.rand.NextVector2Circular(beamWidth * 0.4f, beamWidth * 0.4f);
-                Vector2 sparkVel = Main.rand.NextVector2Circular(1f, 1f);
+            //电离闪烁火花 - 沿光束方向散射
+            if (Main.rand.NextBool(4)) {
+                float along = Main.rand.NextFloat(0.1f, 0.9f);
+                Vector2 beamDir = Projectile.rotation.ToRotationVector2();
+                Vector2 sparkPos = Projectile.Center + beamDir * beamLength * along
+                    + beamDir.RotatedBy(MathHelper.PiOver2) * Main.rand.NextFloat(-beamWidth * 0.3f, beamWidth * 0.3f);
+                Vector2 sparkVel = beamDir.RotatedBy(Main.rand.NextFloat(-0.8f, 0.8f)) * Main.rand.NextFloat(1f, 3f);
 
-                BasePRT spark = new PRT_Spark(
+                PRTLoader.AddParticle(new PRT_Spark(
                     sparkPos,
                     sparkVel,
                     false,
-                    Main.rand.Next(10, 18),
-                    Main.rand.NextFloat(0.8f, 1.3f),
-                    Color.White,
+                    Main.rand.Next(8, 15),
+                    Main.rand.NextFloat(0.6f, 1.1f),
+                    Color.Lerp(new Color(180, 140, 255), Color.White, Main.rand.NextFloat(0.3f, 0.7f)),
                     Owner
-                );
-                PRTLoader.AddParticle(spark);
+                ));
             }
 
-            //能量流动线条
+            //高能射线流线 - 紫蓝色调
             if (Main.rand.NextBool(5)) {
-                Vector2 lineStart = Projectile.Center + Main.rand.NextVector2Circular(beamWidth * 0.3f, beamWidth * 0.3f);
-                Vector2 lineVel = Projectile.rotation.ToRotationVector2() * Main.rand.NextFloat(4f, 8f);
+                Vector2 lineStart = Projectile.Center + Main.rand.NextVector2Circular(beamWidth * 0.2f, beamWidth * 0.2f);
+                Vector2 lineVel = Projectile.rotation.ToRotationVector2() * Main.rand.NextFloat(5f, 10f);
 
-                BasePRT line = new PRT_Line(
+                PRTLoader.AddParticle(new PRT_Line(
                     lineStart,
                     lineVel,
                     false,
-                    Main.rand.Next(12, 20),
-                    Main.rand.NextFloat(0.5f, 1f),
-                    Color.Lerp(Color.Cyan, new Color(150, 220, 255), Main.rand.NextFloat())
-                );
-                PRTLoader.AddParticle(line);
+                    Main.rand.Next(10, 18),
+                    Main.rand.NextFloat(0.4f, 0.9f),
+                    Color.Lerp(new Color(140, 100, 255), new Color(80, 180, 255), Main.rand.NextFloat())
+                ));
             }
         }
 
@@ -163,59 +164,54 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
             }, Projectile.Center);
 
             if (!VaultUtils.isServer) {
-                //爆发冲击粒子
-                for (int i = 0; i < 12; i++) {
-                    float angle = MathHelper.TwoPi * i / 12f;
-                    Vector2 velocity = angle.ToRotationVector2() * Main.rand.NextFloat(4f, 9f);
+                //电离散射 - 锐利紫蓝短线段从命中点放射
+                for (int i = 0; i < 16; i++) {
+                    float angle = MathHelper.TwoPi * i / 16f + Main.rand.NextFloat(-0.15f, 0.15f);
+                    Vector2 velocity = angle.ToRotationVector2() * Main.rand.NextFloat(5f, 12f);
 
-                    BasePRT impactBurst = new PRT_GammaImpact(
-                        target.Center,
+                    PRTLoader.AddParticle(new PRT_GammaIonize(
+                        target.Center + Main.rand.NextVector2Circular(8f, 8f),
                         velocity,
-                        Color.Lerp(Color.Cyan, Color.White, Main.rand.NextFloat()),
-                        Main.rand.NextFloat(0.2f, 1.2f),
-                        Main.rand.Next(20, 35),
-                        Main.rand.NextFloat(-0.3f, 0.3f),
-                        false,
-                        0.25f
-                    );
-                    PRTLoader.AddParticle(impactBurst);
+                        Color.Lerp(new Color(160, 120, 255), Color.White, Main.rand.NextFloat(0.2f, 0.6f)),
+                        Main.rand.NextFloat(0.4f, 1.0f),
+                        Main.rand.Next(12, 22),
+                        Main.rand.NextFloat(MathHelper.TwoPi)
+                    ));
                 }
 
-                float rand = Main.rand.NextFloat(MathHelper.TwoPi);
-                //光芒粒子
-                for (int i = 0; i < 15; i++) {
-                    float angle = MathHelper.TwoPi * i / 15f + rand;
-                    Vector2 velocity = angle.ToRotationVector2() * Main.rand.NextFloat(23f, 37f);
+                //伽马冲击残影 - 较大的Flashimpact动画
+                for (int i = 0; i < 6; i++) {
+                    float angle = MathHelper.TwoPi * i / 6f;
+                    Vector2 velocity = angle.ToRotationVector2() * Main.rand.NextFloat(3f, 7f);
 
-                    BasePRT light = new PRT_Light(
+                    PRTLoader.AddParticle(new PRT_GammaImpact(
                         target.Center,
                         velocity,
-                        Main.rand.NextFloat(0.8f, 1.5f),
-                        Color.Lerp(Color.Cyan, Color.White, Main.rand.NextFloat()),
-                        Main.rand.Next(25, 40),
+                        Color.Lerp(new Color(140, 100, 255), new Color(80, 180, 255), Main.rand.NextFloat()),
+                        Main.rand.NextFloat(0.3f, 0.8f),
+                        Main.rand.Next(15, 28),
+                        Main.rand.NextFloat(-0.2f, 0.2f),
+                        false,
+                        0.3f
+                    ));
+                }
+
+                //辐射光线 - 从命中点向外的高速光束
+                float rand = Main.rand.NextFloat(MathHelper.TwoPi);
+                for (int i = 0; i < 10; i++) {
+                    float angle = MathHelper.TwoPi * i / 10f + rand;
+                    Vector2 velocity = angle.ToRotationVector2() * Main.rand.NextFloat(20f, 35f);
+
+                    PRTLoader.AddParticle(new PRT_Light(
+                        target.Center,
+                        velocity,
+                        Main.rand.NextFloat(0.6f, 1.2f),
+                        Color.Lerp(new Color(160, 130, 255), new Color(200, 200, 255), Main.rand.NextFloat()),
+                        Main.rand.Next(18, 32),
                         1.5f,
                         2f,
-                        hueShift: 0.02f
-                    );
-                    PRTLoader.AddParticle(light);
-                }
-
-                //冲击波环
-                for (int i = 0; i < 20; i++) {
-                    float angle = MathHelper.TwoPi * i / 20f;
-                    Vector2 offset = angle.ToRotationVector2() * 30f;
-                    Vector2 velocity = offset.SafeNormalize(Vector2.Zero) * 5f;
-
-                    BasePRT shock = new PRT_Spark(
-                        target.Center + offset,
-                        velocity,
-                        false,
-                        Main.rand.Next(15, 25),
-                        Main.rand.NextFloat(1f, 1.5f),
-                        new Color(100, 200, 255),
-                        Owner
-                    );
-                    PRTLoader.AddParticle(shock);
+                        hueShift: 0.015f
+                    ));
                 }
             }
 
@@ -224,55 +220,53 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
         }
 
         public override void OnKill(int timeLeft) {
-            //消失爆炸效果
+            //伽马射线消散效果
             if (!VaultUtils.isServer) {
                 SoundEngine.PlaySound(SoundID.Item62 with {
                     Volume = 0.5f,
-                    Pitch = 0.3f
+                    Pitch = 0.5f
                 }, Projectile.Center);
 
-                //放射状冲击粒子
-                for (int i = 0; i < 24; i++) {
-                    float angle = MathHelper.TwoPi * i / 24f;
-                    Vector2 velocity = angle.ToRotationVector2() * Main.rand.NextFloat(6f, 13f);
+                //辐射残留电离线段 - 放射状散开
+                for (int i = 0; i < 18; i++) {
+                    float angle = MathHelper.TwoPi * i / 18f;
+                    Vector2 velocity = angle.ToRotationVector2() * Main.rand.NextFloat(4f, 11f);
+
+                    PRTLoader.AddParticle(new PRT_GammaIonize(
+                        Projectile.Center,
+                        velocity,
+                        Color.Lerp(new Color(140, 100, 255), new Color(80, 160, 255), Main.rand.NextFloat()),
+                        Main.rand.NextFloat(0.5f, 0.9f),
+                        Main.rand.Next(15, 30),
+                        Main.rand.NextFloat(MathHelper.TwoPi)
+                    ));
+                }
+
+                //伽马冲击残影
+                for (int i = 0; i < 10; i++) {
+                    float angle = MathHelper.TwoPi * i / 10f;
+                    Vector2 velocity = angle.ToRotationVector2() * Main.rand.NextFloat(5f, 10f);
 
                     PRT_GammaImpact burst = new PRT_GammaImpact(
                         Projectile.Center,
                         velocity,
-                        Color.Lerp(Color.Cyan, Color.White, Main.rand.NextFloat()),
-                        Main.rand.NextFloat(0.5f, 0.75f),
-                        Main.rand.Next(30, 45),
-                        Main.rand.NextFloat(-0.4f, 0.4f),
+                        Color.Lerp(new Color(160, 130, 255), Color.White, Main.rand.NextFloat(0.3f, 0.7f)),
+                        Main.rand.NextFloat(0.4f, 0.7f),
+                        Main.rand.Next(20, 35),
+                        Main.rand.NextFloat(-0.3f, 0.3f),
                         false,
-                        0.3f
+                        0.25f
                     );
                     burst.inOwner = Owner.whoAmI;
                     PRTLoader.AddParticle(burst);
-                }
-
-                //内爆收缩粒子
-                for (int i = 0; i < 15; i++) {
-                    Vector2 spawnPos = Projectile.Center + Main.rand.NextVector2Circular(90f, 90f);
-                    Vector2 velocity = (Projectile.Center - spawnPos).SafeNormalize(Vector2.Zero) * Main.rand.NextFloat(10f, 18f);
-
-                    BasePRT implosion = new PRT_Spark(
-                        spawnPos,
-                        velocity,
-                        false,
-                        Main.rand.Next(20, 30),
-                        Main.rand.NextFloat(1f, 1.8f),
-                        Color.White,
-                        Owner
-                    );
-                    PRTLoader.AddParticle(implosion);
                 }
             }
         }
 
         public override Color? GetAlpha(Color lightColor) {
-            //动态颜色变化
+            //伽马射线动态紫蓝色变化
             float colorShift = (float)Math.Sin(Main.GlobalTimeWrappedHourly * 6f) * 0.5f + 0.5f;
-            return Color.Lerp(Color.Cyan, Color.White, colorShift * coreIntensity);
+            return Color.Lerp(new Color(140, 100, 255), new Color(220, 200, 255), colorShift * coreIntensity);
         }
 
         public override bool PreDraw(ref Color lightColor) {
@@ -320,7 +314,7 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
                 beamTexture,
                 Projectile.Center - Main.screenPosition,
                 null,
-                new Color(255, 200, 100) * (1f - Projectile.alpha / 255f),
+                new Color(180, 140, 255) * (1f - Projectile.alpha / 255f),
                 Projectile.rotation,
                 beamOrigin,
                 beamScale,
@@ -338,15 +332,18 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
         }
 
         private void DrawCoreHighlight(SpriteBatch sb) {
-            //绘制额外的核心发光层
+            //绘制伽马射线核心发光层 - 紫蓝白色调
             Texture2D glowTexture = CWRAsset.StarTexture.Value;
             Vector2 drawPos = Projectile.Center - Main.screenPosition;
 
-            for (int i = 0; i < 13; i++) {
-                float scale = (beamWidth / glowTexture.Width) * (1.2f - i * 0.2f) * coreIntensity;
-                float alpha = (1f - i * 0.3f) * pulseIntensity;
+            for (int i = 0; i < 4; i++) {
+                float scale = (beamWidth / glowTexture.Width) * (1.3f - i * 0.25f) * coreIntensity;
+                float a = (1f - i * 0.25f) * pulseIntensity;
 
-                Color glowColor = Color.Lerp(new Color(255, 200, 100), new Color(255, 120, 50), i / 3f) * alpha;
+                //核心层：白紫 → 外层：蓝紫
+                Color glowColor = Color.Lerp(
+                    new Color(220, 190, 255),
+                    new Color(100, 60, 220), i / 3f) * a;
 
                 sb.Draw(
                     glowTexture,
@@ -355,11 +352,26 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
                     glowColor,
                     Projectile.rotation,
                     new Vector2(0, glowTexture.Height / 2f),
-                    new Vector2(beamLength / glowTexture.Width * 0.8f, scale),
+                    new Vector2(beamLength / glowTexture.Width * 0.85f, scale),
                     SpriteEffects.None,
                     0f
                 );
             }
+
+            //切伦科夫辐射光晕层 - 薄蓝光
+            float cherenkovAlpha = pulseIntensity * 0.3f;
+            float cherenkovScale = (beamWidth / glowTexture.Width) * 1.8f * coreIntensity;
+            sb.Draw(
+                glowTexture,
+                drawPos,
+                null,
+                new Color(80, 160, 255) * cherenkovAlpha,
+                Projectile.rotation,
+                new Vector2(0, glowTexture.Height / 2f),
+                new Vector2(beamLength / glowTexture.Width * 0.9f, cherenkovScale),
+                SpriteEffects.None,
+                0f
+            );
         }
     }
 }

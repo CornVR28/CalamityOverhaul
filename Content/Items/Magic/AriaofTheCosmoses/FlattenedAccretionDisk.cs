@@ -161,23 +161,25 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
                 Projectile.owner
             );
 
-            //生成射线特效
-            for (int i = 0; i < 12; i++) {
-                Vector2 sparkVel = shootDirection.RotatedByRandom(0.4f) * Main.rand.NextFloat(4f, 10f);
-                Dust spark = Dust.NewDustPerfect(Projectile.Center, DustID.Electric, sparkVel, 100,
-                    Color.Cyan, Main.rand.NextFloat(1.2f, 2f));
-                spark.noGravity = true;
-            }
+            //发射伽马射线电离闪光
+            if (!VaultUtils.isServer) {
+                for (int i = 0; i < 8; i++) {
+                    Vector2 sparkVel = shootDirection.RotatedByRandom(0.5f) * Main.rand.NextFloat(5f, 12f);
+                    Dust spark = Dust.NewDustPerfect(Projectile.Center, DustID.PurpleTorch, sparkVel, 100,
+                        new Color(160, 120, 255), Main.rand.NextFloat(1.2f, 2f));
+                    spark.noGravity = true;
+                }
 
-            //冲击波
-            for (int i = 0; i < 16; i++) {
-                float angle = MathHelper.TwoPi * i / 16f;
-                Vector2 offset = angle.ToRotationVector2() * 40f;
+                //辐射环
+                for (int i = 0; i < 10; i++) {
+                    float angle = MathHelper.TwoPi * i / 10f;
+                    Vector2 offset = angle.ToRotationVector2() * 30f;
 
-                Dust shockwave = Dust.NewDustPerfect(Projectile.Center + offset, DustID.BlueTorch,
-                    offset.SafeNormalize(Vector2.Zero) * 3f, 100,
-                    Color.DeepSkyBlue, Main.rand.NextFloat(1.5f, 2f));
-                shockwave.noGravity = true;
+                    Dust shockwave = Dust.NewDustPerfect(Projectile.Center + offset, DustID.PurpleTorch,
+                        offset.SafeNormalize(Vector2.Zero) * 2f, 100,
+                        new Color(100, 60, 200), Main.rand.NextFloat(1.2f, 1.8f));
+                    shockwave.noGravity = true;
+                }
             }
         }
 
@@ -243,7 +245,7 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
                 shader.Parameters["uTime"]?.SetValue(time);
                 shader.Parameters["rotationSpeed"]?.SetValue(RotationSpeed);
                 shader.Parameters["flattenRatio"]?.SetValue(FlattenAngle);
-                shader.Parameters["brightness"]?.SetValue(brightness * 1.0f);
+                shader.Parameters["brightness"]?.SetValue(brightness * 1.5f);
                 shader.Parameters["distortionStrength"]?.SetValue(distortionStrength * 1.2f);
                 shader.Parameters["pulseIntensity"]?.SetValue(pulseIntensity);
                 shader.Parameters["dopplerStrength"]?.SetValue(0.6f);
@@ -261,7 +263,7 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
                 //外层辉光
                 for (int i = 0; i < 2; i++) {
                     float s = 1.6f + i * 0.5f;
-                    float a = alpha * (0.15f - i * 0.05f);
+                    float a = alpha * (0.2f - i * 0.06f);
                     spriteBatch.Draw(TransverseTwill, drawPos, null,
                         Color.White * a,
                         Projectile.rotation + i * 0.12f + MathHelper.PiOver2,
@@ -269,11 +271,11 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
                 }
 
                 //核心盘面层
-                for (int i = 0; i < 2; i++) {
-                    float s = 0.9f + i * 0.15f;
+                for (int i = 0; i < 3; i++) {
+                    float s = 0.85f + i * 0.12f;
                     spriteBatch.Draw(TransverseTwill, drawPos, null,
-                        Color.White * alpha * 0.75f,
-                        Projectile.rotation + i * 0.04f + MathHelper.PiOver2,
+                        Color.White * alpha * 0.85f,
+                        Projectile.rotation + i * 0.03f + MathHelper.PiOver2,
                         texHalf, diskScale * s, SpriteEffects.None, 0);
                 }
 
@@ -293,7 +295,7 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
                 shader.Parameters["rotationSpeed"]?.SetValue(RotationSpeed * 1.2f);
                 shader.Parameters["innerRadius"]?.SetValue(0.12f);
                 shader.Parameters["outerRadius"]?.SetValue(0.85f);
-                shader.Parameters["brightness"]?.SetValue(brightness * 1.2f);
+                shader.Parameters["brightness"]?.SetValue(brightness * 1.5f);
                 shader.Parameters["distortionStrength"]?.SetValue(distortionStrength * 0.3f);
                 shader.Parameters["noiseTexture"]?.SetValue(TransverseTwill);
                 shader.Parameters["centerPos"]?.SetValue(screenCenter);
@@ -309,10 +311,10 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
                 Vector2 orbDrawPos = drawPos + Projectile.rotation.ToRotationVector2() * 8f * Projectile.scale;
                 Vector2 orbScale = new Vector2(orbSize / TransverseTwill.Width, orbSize / TransverseTwill.Height);
 
-                for (int i = 0; i < 2; i++) {
-                    float s = 0.8f + i * 0.25f;
+                for (int i = 0; i < 3; i++) {
+                    float s = 0.75f + i * 0.2f;
                     spriteBatch.Draw(TransverseTwill, orbDrawPos, null,
-                        Color.White * alpha * 0.8f,
+                        Color.White * alpha * 0.85f,
                         Projectile.rotation + i * 0.1f,
                         texHalf, orbScale * s, SpriteEffects.None, 0);
                 }

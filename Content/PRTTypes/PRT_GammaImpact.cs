@@ -74,9 +74,9 @@ namespace CalamityOverhaul.Content.PRTTypes
             float lifeProgress = LifetimeCompletion;
             Scale = initialScale * (float)Math.Sin(lifeProgress * MathHelper.Pi);
 
-            //颜色渐变和淡出
+            //颜色渐变：向深靛蓝消散
             float fadeProgress = (float)Math.Pow(lifeProgress, 2);
-            Color = Color.Lerp(initialColor, Color.Transparent, fadeProgress);
+            Color = Color.Lerp(initialColor, new Color(50, 30, 120, 0), fadeProgress);
 
             //添加亮度脉冲
             float pulse = (float)Math.Sin(Time * 0.3f) * 0.3f + 0.7f;

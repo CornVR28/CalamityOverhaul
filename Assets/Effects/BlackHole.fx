@@ -55,21 +55,50 @@ VertexShaderOutput VertexShaderFunction(VertexShaderInput input)
 
 //=== 事件视界像素着色器 ===
 //输出纯黑色+alpha遮罩，配合AlphaBlend吞噬背景光
+//圆形渐隐+3D凹陷+边缘扰动
 float4 EventHorizonPS(VertexShaderOutput input) : COLOR0
 {
     float2 coords = input.TexCoords;
     float2 center = float2(0.5, 0.5);
-    float dist = length(coords - center);
+    float2 toCenter = coords - center;
+    float dist = length(toCenter);
+    float angle = atan2(toCenter.y, toCenter.x);
+
+    //圆形边界渐隐（纹理空间0.48处彻底透明，杜绝方形边框）
+    float circleFade = 1.0 - smoothstep(0.36, 0.48, dist);
 
     float ehR = eventHorizonRadius;
 
-    //事件视界核心：完全不透明黑色
-    float coreAlpha = 1.0 - smoothstep(ehR * 0.5, ehR * 1.1, dist);
+    //=== 事件视界边缘噪声扰动（非完美圆，有撕裂感）===
+    float edgeNoise = tex2D(noiseTex, float2(angle / 6.283 + uTime * 0.04, dist * 3.0 + uTime * 0.02)).r;
+    float edgeDistort = (edgeNoise - 0.5) * 0.02;
+    float distortedDist = dist + edgeDistort;
 
-    //外围引力暗化（模拟光线弯曲吸收）
-    float gravDarken = exp(-max(dist - ehR, 0.0) * 8.0) * 0.3;
+    //核心黑暗区域
+    float coreAlpha = 1.0 - smoothstep(ehR * 0.4, ehR * 1.15, distortedDist);
 
-    float totalAlpha = saturate(coreAlpha + gravDarken);
+    //=== 3D球体凹陷深度模拟 ===
+    //将黑洞视为一个「凹进屏幕」的暗球
+    float normD = saturate(dist / (ehR * 1.2));
+    float sphereZ = sqrt(max(1.0 - normD * normD, 0.0));
+
+    //光照暗角：让核心呈现凹陷球面感，而非平面圆
+    float2 lightDir = float2(0.3, -0.25);
+    float lightDot = dot(normalize(toCenter + 0.001), lightDir);
+    //核心区域内部有轻微的明暗变化（半球凹陷）
+    float depthShade = 0.7 + lightDot * 0.3 * (1.0 - sphereZ * 0.5);
+
+    //视界边缘光晕（薄大气层被引力弯曲发出的最后一点光）
+    float rimGlow = pow(max(1.0 - abs(normD - 0.95) * 12.0, 0.0), 2.0) * 0.15;
+    //rim是微弱的暗紫色光而不是纯黑，但在AlphaBlend下体现为黑暗减弱
+    float rimReduce = rimGlow * smoothstep(ehR * 0.8, ehR * 1.2, dist);
+
+    //引力暗化带
+    float gravDim = exp(-max(dist - ehR, 0.0) * 12.0) * 0.3;
+
+    //合算
+    float totalAlpha = saturate(coreAlpha * depthShade + gravDim - rimReduce);
+    totalAlpha *= circleFade;
 
     return float4(0, 0, 0, totalAlpha * input.Color.a);
 }
@@ -85,6 +114,9 @@ float4 AccretionPS(VertexShaderOutput input) : COLOR0
     float angle = atan2(toCenter.y, toCenter.x);
 
     float ehR = eventHorizonRadius;
+
+    //圆形边界渐隐（杜绝方形纹理边框）
+    float circleFade = 1.0 - smoothstep(0.36, 0.48, dist);
 
     //事件视界遮罩（中心不发光）
     float horizonMask = smoothstep(ehR * 0.85, ehR * 1.4, dist);
@@ -209,7 +241,9 @@ float4 AccretionPS(VertexShaderOutput input) : COLOR0
     //alpha
     finalColor.a = saturate(diskBright * 1.5 + photonRing * 0.3 + einsteinRing * 0.3 + innerEdge + jetMask + outerHalo);
     finalColor.a *= horizonMask;
+    finalColor.a *= circleFade;
     finalColor.a *= input.Color.a;
+    finalColor.rgb *= circleFade;
 
     return finalColor * input.Color;
 }
