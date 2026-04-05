@@ -81,7 +81,7 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 
     //=== 临边增亮（limb brightening，像恒星大气） ===
     //球体边缘因视线路径穿透更多发光大气，所以更亮
-    float limbBright = 1.0 + (1.0 - sphereZ) * 2.5;
+    float limbBright = 1.0 + (1.0 - sphereZ) * 1.5;
 
     //=== 多层差分旋转等离子体 ===
     //三层以不同速度旋转的噪声，模拟深浅不同的等离子体层
@@ -114,15 +114,15 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
     {
         //核心区域：非常热，趋向白色
         float4 hotWhite = float4(1.0, 0.95, 0.85, 1.0);
-        baseColor = lerp(hotWhite, innerColor * 1.5, normD / 0.4);
+        baseColor = lerp(hotWhite, innerColor * 1.1, normD / 0.4);
     }
     else if (normD < 0.75)
     {
-        baseColor = lerp(innerColor * 1.5, midColor, (normD - 0.4) / 0.35);
+        baseColor = lerp(innerColor * 1.1, midColor, (normD - 0.4) / 0.35);
     }
     else
     {
-        baseColor = lerp(midColor, outerColor * 1.3, (normD - 0.75) / 0.25);
+        baseColor = lerp(midColor, outerColor, (normD - 0.75) / 0.25);
     }
 
     //=== 能量脉动（呼吸感） ===
@@ -132,7 +132,7 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
     //=== 日珥/射线（沿径向的高亮条纹） ===
     float rays = sin(angle * 6.0 + uTime * 2.0 + plasma * 5.0);
     rays = max(rays, 0.0); //只取正向
-    rays = rays * rays * 0.6; //锐化
+    rays = rays * rays * 0.35; //锐化
     float rayMask = smoothstep(0.5, 0.9, normD); //只在外缘显示
 
     //=== 核心合算 ===
@@ -149,25 +149,25 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
     //=== 叠加效果层 ===
 
     //表面射线
-    finalColor.rgb += innerColor.rgb * rays * rayMask * sphereMask * brightness * 1.5;
+    finalColor.rgb += innerColor.rgb * rays * rayMask * sphereMask * brightness * 0.7;
 
     //核心白热辉光（中心区域极亮）
     float coreGlow = pow(max(1.0 - normD * 1.8, 0.0), 3.0);
-    finalColor.rgb += float3(1.0, 0.97, 0.92) * coreGlow * brightness * 2.0 * sphereMask;
+    finalColor.rgb += float3(1.0, 0.97, 0.92) * coreGlow * brightness * 1.0 * sphereMask;
 
     //边缘辉光（球体外部的散射光晕）
     float edgeGlow = exp(-(dist - sR) * (dist - sR) * 120.0);
     float3 glowCol = lerp(midColor.rgb, innerColor.rgb, 0.4);
-    finalColor.rgb += glowCol * edgeGlow * brightness * 1.8;
+    finalColor.rgb += glowCol * edgeGlow * brightness * 0.8;
 
     //外层大范围柔光（远距离可见的光晕）
-    float farGlow = exp(-dist * 3.0) * 0.35;
+    float farGlow = exp(-dist * 3.0) * 0.15;
     finalColor.rgb += innerColor.rgb * farGlow * brightness;
 
     //=== 热点闪烁 ===
     float hotspot = p1.g * p2.r;
     hotspot = hotspot * hotspot;
-    finalColor.rgb += baseColor.rgb * hotspot * sphereMask * brightness * 0.5;
+    finalColor.rgb += baseColor.rgb * hotspot * sphereMask * brightness * 0.3;
 
     //=== alpha通道（确保实体感） ===
     finalColor.a = saturate(baseBright * lit * 2.0 + edgeGlow + farGlow * 0.5 + coreGlow) * input.Color.a;

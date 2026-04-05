@@ -87,17 +87,16 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
     float2 warpOff = (n4.xy - 0.5) * distortionStrength;
     float4 nW = tex2D(noiseTex, (rotUV + warpOff) * 6.0 + float2(uTime * 0.08, -uTime * 0.04));
 
-    //湍流合成：保持在0.3~1.0范围，不要太暗
+    //湍流合成（范围0.4~0.95，高下限保证基底亮度）
     float turb = n1.r * 0.35 + n2.g * 0.28 + n3.b * 0.17 + nW.r * 0.20;
-    turb = turb * 0.7 + 0.3; //下限0.3，确保基底亮度
+    turb = turb * 0.55 + 0.4;
 
-    //=== 螺旋臂 ===
-    float spiral = sin(rotAngle * 2.0 - dist * 180.0 + uTime * 0.8);
+    //=== 螺旋臂（3臂，宽调制让结构清晰可见）===
+    float spiral = sin(rotAngle * 3.0 - dist * 30.0 + uTime * 0.6);
     spiral = spiral * 0.5 + 0.5;
-    //螺旋只做轻微调制，不大幅压暗
-    float spiralMod = 0.7 + spiral * 0.3;
+    float spiralMod = 0.45 + spiral * 0.55;
 
-    //=== 盘面遮罩（宽过渡带，避免生硬剪切） ===
+    //=== 盘面遮罩（宽过渡带） ===
     float diskMask = smoothstep(iR - 0.02, iR + 0.06, dist);
     diskMask *= 1.0 - smoothstep(oR - 0.06, oR + 0.04, dist);
 
@@ -105,68 +104,66 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
     float dopplerPhase = cos(angle + uTime * rotationSpeed * 0.2 + 1.57);
     float doppler = 1.0 + dopplerPhase * dopplerStrength;
 
-    //=== 温度梯度颜色 ===
+    //=== 温度梯度颜色（降低内部增益保色） ===
     float4 baseColor;
     if (normDist < 0.3)
     {
-        baseColor = lerp(innerColor * 1.8, midColor * 1.2, normDist / 0.3);
+        baseColor = lerp(innerColor * 1.1, midColor, normDist / 0.3);
     }
     else if (normDist < 0.7)
     {
-        baseColor = lerp(midColor * 1.2, outerColor, (normDist - 0.3) / 0.4);
+        baseColor = lerp(midColor, outerColor, (normDist - 0.3) / 0.4);
     }
     else
     {
-        baseColor = outerColor * (1.2 - (normDist - 0.7) * 0.6);
+        baseColor = outerColor * (0.9 - (normDist - 0.7) * 0.3);
     }
 
-    //=== 纤维丝（轻微调制） ===
+    //=== 纤维丝（增强调制） ===
     float filaments = sin(rotAngle * 12.0 + dist * 55.0 + turb * 8.0);
     filaments = filaments * 0.5 + 0.5;
-    float filaMod = 0.75 + filaments * 0.25;
+    float filaMod = 0.6 + filaments * 0.4;
 
     //=== 脉动 ===
     float pulse = 1.0 + sin(uTime * 2.5 + dist * 8.0) * pulseIntensity;
 
-    //=== 核心强度：只用遮罩和湍流，减少乘法链 ===
-    //基础亮度 = 遮罩 × 湍流 × 亮度参数 × 脉动
+    //=== 核心强度 ===
     float baseBright = diskMask * turb * brightness * pulse;
-    //细节调制只做微调
     float detail = spiralMod * filaMod * doppler;
 
-    //=== 径向亮度梯度（内圈亮2倍） ===
-    float radGrad = 1.0 + (1.0 - normDist) * 1.2;
+    //=== 径向亮度梯度 ===
+    float radGrad = 1.0 + (1.0 - normDist) * 0.5;
 
     //=== 最终盘面颜色 ===
     float4 finalColor;
     finalColor.rgb = baseColor.rgb * baseBright * detail * radGrad;
 
-    //=== 光子环：ISCO处的极亮锐利环 ===
+    //=== 光子环 ===
     float photonDist = abs(dist - iR) * 22.0;
-    float photonRing = exp(-photonDist * photonDist) * 4.5;
+    float photonRing = exp(-photonDist * photonDist) * 2.0;
     float3 photonCol = lerp(innerColor.rgb, float3(1, 1, 1), 0.6);
     finalColor.rgb += photonCol * photonRing * brightness * doppler * diskMask;
 
     //=== 内缘高温辐射 ===
     float innerHeat = exp(-max(dist - iR, 0.0) * 12.0) * diskMask;
-    finalColor.rgb += innerColor.rgb * innerHeat * brightness * 2.5;
+    finalColor.rgb += innerColor.rgb * innerHeat * brightness * 1.0;
 
-    //=== 外缘柔和光晕（让盘面边缘不突然消失） ===
+    //=== 外缘柔和光晕 ===
     float outerHalo = exp(-(dist - oR) * (dist - oR) * 80.0) * 0.5;
-    finalColor.rgb += outerColor.rgb * outerHalo * brightness;
+    finalColor.rgb += outerColor.rgb * outerHalo * brightness * 0.5;
 
     //=== 热点闪烁 ===
     float hotspot = n1.g * n2.b;
-    hotspot = hotspot * hotspot; //增强对比
-    finalColor.rgb += baseColor.rgb * hotspot * diskMask * brightness * 0.8;
+    hotspot = hotspot * hotspot;
+    finalColor.rgb += baseColor.rgb * hotspot * diskMask * brightness * 0.4;
 
-    //=== RT不稳定性：内缘火焰状突起 ===
+    //=== RT不稳定性 ===
     float rtWave = sin(angle * 14.0 + uTime * 3.5 + turb * 6.0);
-    rtWave = max(rtWave, 0.0); //只取正向波峰
+    rtWave = max(rtWave, 0.0);
     float rtZone = exp(-max(dist - iR - 0.03, 0.0) * 20.0);
-    finalColor.rgb += innerColor.rgb * rtWave * rtZone * brightness * 1.5;
+    finalColor.rgb += innerColor.rgb * rtWave * rtZone * brightness * 0.7;
 
-    //=== alpha：让盘面实体感更强 ===
+    //=== alpha ===
     finalColor.a = saturate(baseBright * detail * 2.5 + photonRing * 0.5 + innerHeat + outerHalo) * input.Color.a;
 
     return finalColor * input.Color;

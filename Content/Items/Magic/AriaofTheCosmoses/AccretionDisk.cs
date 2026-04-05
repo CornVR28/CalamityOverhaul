@@ -340,97 +340,75 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
             Vector2 drawPos = Projectile.Center - Main.screenPosition;
             float actualSize = Projectile.width * Projectile.scale;
             Vector2 texHalf = TransverseTwill.Size() * 0.5f;
+            float bhScale = actualSize / TransverseTwill.Width;
+            Vector2 drawScale = new Vector2(bhScale, bhScale); //1:1圆形
 
             Matrix finalMatrix = Matrix.Identity
                 * Main.GameViewMatrix.TransformationMatrix
                 * Matrix.CreateOrthographicOffCenter(0, Main.screenWidth, Main.screenHeight, 0, -1, 1);
 
-            //绘制吸积盘结构（使用FlattenedDisk着色器）
+            Effect bhShader = EffectLoader.BlackHole.Value;
+
+            //设置着色器参数
+            bhShader.Parameters["transformMatrix"]?.SetValue(finalMatrix);
+            bhShader.Parameters["uTime"]?.SetValue(time);
+            bhShader.Parameters["rotationSpeed"]?.SetValue(RotationSpeed);
+            bhShader.Parameters["eventHorizonRadius"]?.SetValue(0.1f);
+            bhShader.Parameters["diskInnerRadius"]?.SetValue(0.14f);
+            bhShader.Parameters["diskOuterRadius"]?.SetValue(0.42f);
+            bhShader.Parameters["brightness"]?.SetValue(brightness * 1.0f);
+            bhShader.Parameters["dopplerStrength"]?.SetValue(0.45f);
+            bhShader.Parameters["distortionStrength"]?.SetValue(0.6f);
+            bhShader.Parameters["noiseTexture"]?.SetValue(TransverseTwill);
+            bhShader.Parameters["centerPos"]?.SetValue(drawPos);
+            bhShader.Parameters["innerColor"]?.SetValue(innerColor.ToVector4());
+            bhShader.Parameters["midColor"]?.SetValue(midColor.ToVector4());
+            bhShader.Parameters["outerColor"]?.SetValue(outerColor.ToVector4());
+
+            Main.graphics.GraphicsDevice.Textures[1] = TransverseTwill;
+            Main.graphics.GraphicsDevice.SamplerStates[1] = SamplerState.LinearWrap;
+
+            //Phase1: 事件视界（AlphaBlend模式吞噬背景光）
             {
-                spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive, SamplerState.LinearWrap,
+                spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.LinearWrap,
                     DepthStencilState.None, RasterizerState.CullNone, null, Main.GameViewMatrix.TransformationMatrix);
 
-                Effect diskShader = EffectLoader.FlattenedDisk.Value;
+                bhShader.CurrentTechnique = bhShader.Techniques["EventHorizon"];
+                bhShader.CurrentTechnique.Passes[0].Apply();
 
-                float diskWidth = actualSize * 1.6f;
-                float diskHeight = actualSize * 1.6f * 0.55f; //稍微压扁模拟透视
-                Vector2 diskScale = new Vector2(diskWidth / TransverseTwill.Width, diskHeight / TransverseTwill.Height);
-
-                diskShader.Parameters["transformMatrix"]?.SetValue(finalMatrix);
-                diskShader.Parameters["uTime"]?.SetValue(time);
-                diskShader.Parameters["rotationSpeed"]?.SetValue(RotationSpeed);
-                diskShader.Parameters["flattenRatio"]?.SetValue(0.55f);
-                diskShader.Parameters["brightness"]?.SetValue(brightness * 3.0f);
-                diskShader.Parameters["distortionStrength"]?.SetValue(distortionStrength * 1.5f);
-                diskShader.Parameters["pulseIntensity"]?.SetValue(0.1f);
-                diskShader.Parameters["dopplerStrength"]?.SetValue(0.35f);
-                diskShader.Parameters["noiseTexture"]?.SetValue(TransverseTwill);
-                diskShader.Parameters["centerPos"]?.SetValue(drawPos);
-                diskShader.Parameters["innerColor"]?.SetValue(innerColor.ToVector4());
-                diskShader.Parameters["midColor"]?.SetValue(midColor.ToVector4());
-                diskShader.Parameters["outerColor"]?.SetValue(outerColor.ToVector4());
-
-                Main.graphics.GraphicsDevice.Textures[1] = TransverseTwill;
-                Main.graphics.GraphicsDevice.SamplerStates[1] = SamplerState.LinearWrap;
-
-                diskShader.CurrentTechnique.Passes["FlattenedDiskPass"].Apply();
-
-                //外层辉光
-                for (int i = 0; i < 3; i++) {
-                    float s = 1.8f + i * 0.6f;
-                    float a = alpha * (0.4f - i * 0.1f);
-                    spriteBatch.Draw(TransverseTwill, drawPos, null,
-                        Color.White * a,
-                        Projectile.rotation + i * 0.12f + MathHelper.PiOver2,
-                        texHalf, diskScale * s, SpriteEffects.None, 0);
-                }
-
-                //盘面核心层
-                for (int i = 0; i < 4; i++) {
-                    float s = 0.85f + i * 0.15f;
-                    spriteBatch.Draw(TransverseTwill, drawPos, null,
-                        Color.White * alpha,
-                        Projectile.rotation + i * 0.04f + MathHelper.PiOver2,
-                        texHalf, diskScale * s, SpriteEffects.None, 0);
-                }
+                spriteBatch.Draw(TransverseTwill, drawPos, null,
+                    Color.White * alpha,
+                    0f,
+                    texHalf, drawScale * 1.3f, SpriteEffects.None, 0);
 
                 spriteBatch.End();
             }
 
-            //绘制中央能量核心（使用AccretionDisk着色器）
+            //Phase2: 吸积盘+光子环（Additive模式叠加光效）
             {
                 spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive, SamplerState.LinearWrap,
                     DepthStencilState.None, RasterizerState.CullNone, null, Main.GameViewMatrix.TransformationMatrix);
 
-                Effect orbShader = EffectLoader.AccretionDisk.Value;
-                float orbSize = actualSize * 0.35f; //核心比盘面小很多
-                Vector2 orbScale = new Vector2(orbSize / TransverseTwill.Width, orbSize / TransverseTwill.Height);
+                bhShader.CurrentTechnique = bhShader.Techniques["Accretion"];
+                bhShader.CurrentTechnique.Passes[0].Apply();
 
-                orbShader.Parameters["transformMatrix"]?.SetValue(finalMatrix);
-                orbShader.Parameters["uTime"]?.SetValue(time);
-                orbShader.Parameters["rotationSpeed"]?.SetValue(RotationSpeed * 1.3f);
-                orbShader.Parameters["innerRadius"]?.SetValue(InnerRadius);
-                orbShader.Parameters["outerRadius"]?.SetValue(OuterRadius);
-                orbShader.Parameters["brightness"]?.SetValue(brightness * 4.0f);
-                orbShader.Parameters["distortionStrength"]?.SetValue(distortionStrength * 0.3f);
-                orbShader.Parameters["noiseTexture"]?.SetValue(TransverseTwill);
-                orbShader.Parameters["centerPos"]?.SetValue(drawPos);
-                orbShader.Parameters["innerColor"]?.SetValue(innerColor.ToVector4());
-                orbShader.Parameters["midColor"]?.SetValue(midColor.ToVector4());
-                orbShader.Parameters["outerColor"]?.SetValue(outerColor.ToVector4());
+                //外围柔光
+                spriteBatch.Draw(TransverseTwill, drawPos, null,
+                    Color.White * alpha * 0.25f,
+                    Projectile.rotation * 0.08f,
+                    texHalf, drawScale * 1.6f, SpriteEffects.None, 0);
 
-                Main.graphics.GraphicsDevice.Textures[1] = TransverseTwill;
-                Main.graphics.GraphicsDevice.SamplerStates[1] = SamplerState.LinearWrap;
+                //主体吸积盘
+                spriteBatch.Draw(TransverseTwill, drawPos, null,
+                    Color.White * alpha * 0.7f,
+                    Projectile.rotation * 0.05f,
+                    texHalf, drawScale * 1.15f, SpriteEffects.None, 0);
 
-                orbShader.CurrentTechnique.Passes["AccretionDiskPass"].Apply();
-
-                for (int i = 0; i < 4; i++) {
-                    float s = 0.7f + i * 0.2f;
-                    spriteBatch.Draw(TransverseTwill, drawPos, null,
-                        Color.White * alpha,
-                        Projectile.rotation + i * 0.08f,
-                        texHalf, orbScale * s, SpriteEffects.None, 0);
-                }
+                //第二层（轻微偏移增加质感）
+                spriteBatch.Draw(TransverseTwill, drawPos, null,
+                    Color.White * alpha * 0.5f,
+                    Projectile.rotation * 0.03f + 0.2f,
+                    texHalf, drawScale * 1.05f, SpriteEffects.None, 0);
 
                 spriteBatch.End();
             }
