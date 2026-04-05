@@ -1,4 +1,5 @@
-﻿using CalamityOverhaul.Content.QuestLogs.Core;
+﻿using CalamityOverhaul.Common;
+using CalamityOverhaul.Content.QuestLogs.Core;
 using System.Collections.Generic;
 using Terraria;
 using Terraria.ID;
@@ -428,6 +429,19 @@ namespace CalamityOverhaul.Content.QuestLogs.QLNodes
         public override void UpdateByPlayer() {
             //这里的任务完成会交给 ShadowOrbTP 来更新
             if (Objectives[0].IsCompleted && !IsCompleted) IsCompleted = true;
+        }
+    }
+
+    internal class CheckShadowOrbByKill : GlobalTile
+    {
+        public override void KillTile(int i, int j, int type, ref bool fail, ref bool effectOnly, ref bool noItem) {
+            Tile tile = Framing.GetTileSafely(i, j);
+            if (CWRServerConfig.Instance.QuestLog && tile.TileFrameX <= 0 && tile.TileFrameY <= 0) {
+                var node = QuestNode.GetQuest<FindShadowOrb>();
+                if (node is not null && node.IsUnlocked && node.Objectives?.Count > 0) {
+                    node.Objectives[0].CurrentProgress = 1;
+                }
+            }
         }
     }
 
