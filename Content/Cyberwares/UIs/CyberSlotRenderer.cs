@@ -1,9 +1,10 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using CalamityOverhaul.Content.Cyberwares;
+using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;
 using Terraria.GameContent;
 
-namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
+namespace CalamityOverhaul.Content.Cyberwares.UIs
 {
     /// <summary>
     ///赛博义体界面的槽位渲染器
@@ -135,7 +136,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
         /// </summary>
         public void UpdateAnimations() {
             for (int i = 0; i < slotHoverAnim.Length; i++) {
-                float target = i == hoveredSlot ? 1f : (i == selectedSlot ? 0.6f : 0f);
+                float target = i == hoveredSlot ? 1f : i == selectedSlot ? 0.6f : 0f;
                 slotHoverAnim[i] += (target - slotHoverAnim[i]) * 0.15f;
             }
         }
@@ -438,7 +439,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
             float stateStrength = isActive ? 1f : Math.Max(0.18f, hover * 0.55f + 0.2f);
             Color reticleColor = Color.Lerp(baseColor, CyberwareTheme.AccentGold * alpha, isSlotSide ? 0.08f : 0.18f) * stateStrength;
             float radius = isSlotSide ? 8f : 9f;
-            float sweep = (phase / MathHelper.TwoPi) % 1f;
+            float sweep = phase / MathHelper.TwoPi % 1f;
             float bracketLen = isSlotSide ? 3.5f : 4.5f;
             float bracketInset = isSlotSide ? 2.5f : 3f;
 

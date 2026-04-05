@@ -3,7 +3,7 @@ using System;
 using Terraria;
 using Terraria.GameContent;
 
-namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
+namespace CalamityOverhaul.Content.Cyberwares.UIs
 {
     /// <summary>
     ///赛博义体界面的面板渲染器
@@ -139,7 +139,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
             sb.Draw(px, new Rectangle(panelRect.Right - cInset - 1, panelRect.Bottom - cInset - cL2, 1, cL2), new Rectangle(0, 0, 1, 1), cornerInner * 0.7f);
 
             //边缘脉冲光——沿顶部边框移动的亮点
-            float pulsePos = (globalTimer * 0.35f) % 1f;
+            float pulsePos = globalTimer * 0.35f % 1f;
             int pulseX = panelRect.X + (int)(pulsePos * panelRect.Width);
             sb.Draw(px, new Rectangle(pulseX - 20, panelRect.Y, 40, 2),
                 new Rectangle(0, 0, 1, 1), CyberwareTheme.EdgeGlow * (alpha * 0.5f));
@@ -295,7 +295,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
                 CyberwareTheme.TextDim * alpha, 0.34f);
 
             //右下角滚动数据标签
-            string dataTag = $"NET::0x{((int)(globalTimer * 100) % 0xFFFF):X4}";
+            string dataTag = $"NET::0x{(int)(globalTimer * 100) % 0xFFFF:X4}";
             Utils.DrawBorderString(sb, dataTag, new Vector2(panelRect.Right - 115, bottomTextY - 2),
                 CyberwareTheme.AccentCyan * (alpha * 0.35f), 0.32f);
         }

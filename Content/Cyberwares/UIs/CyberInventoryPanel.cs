@@ -1,4 +1,5 @@
-using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.CyberItems;
+﻿using CalamityOverhaul.Content.Cyberwares;
+using CalamityOverhaul.Content.LegendWeapon.SHPCLegend;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
@@ -6,7 +7,7 @@ using System.Collections.Generic;
 using Terraria;
 using Terraria.GameContent;
 
-namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
+namespace CalamityOverhaul.Content.Cyberwares.UIs
 {
     /// <summary>
     /// 义体选择背包面板，在主面板侧面显示可装入当前槽位的义体物品列表

@@ -1,7 +1,7 @@
-using Terraria;
+﻿using Terraria;
 using Terraria.ModLoader;
 
-namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Skills.Sandevistans
+namespace CalamityOverhaul.Content.Cyberwares.Implementation.Sandevistans
 {
     /// <summary>
     /// 独立的GlobalProjectile，专门处理斯安威斯坦时缓对弹幕的影响。

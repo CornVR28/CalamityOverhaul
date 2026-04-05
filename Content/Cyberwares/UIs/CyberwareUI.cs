@@ -1,11 +1,12 @@
-﻿using InnoVault.UIHandles;
+﻿using CalamityOverhaul.Content.Cyberwares;
+using InnoVault.UIHandles;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;
 using Terraria.Localization;
 using Terraria.ModLoader;
 
-namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
+namespace CalamityOverhaul.Content.Cyberwares.UIs
 {
     /// <summary>
     ///赛博朋克2077风格义体管理界面

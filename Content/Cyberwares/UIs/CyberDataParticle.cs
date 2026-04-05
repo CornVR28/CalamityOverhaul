@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using Terraria;
 
-namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
+namespace CalamityOverhaul.Content.Cyberwares.UIs
 {
     /// <summary>
     ///赛博界面的数据流粒子，在人体周围飘动营造数据传输氛围
@@ -40,7 +40,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
             if (glow == null) return;
 
             float progress = 1f - Life / MaxLife;
-            float fadeAlpha = progress < 0.2f ? progress / 0.2f : (progress > 0.7f ? (1f - progress) / 0.3f : 1f);
+            float fadeAlpha = progress < 0.2f ? progress / 0.2f : progress > 0.7f ? (1f - progress) / 0.3f : 1f;
             float scale = 0.04f + MathF.Sin(progress * MathHelper.Pi) * 0.03f;
             Color drawColor = BaseColor * (alpha * fadeAlpha * 0.5f);
             drawColor.A = 0;
@@ -69,7 +69,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
                 Vector2 vel = new(Main.rand.NextFloat(-0.3f, 0.3f), -0.5f - Main.rand.NextFloat(0.5f));
                 Color c = Main.rand.NextBool(3)
                     ? CyberwareTheme.Accent
-                    : (Main.rand.NextBool() ? CyberwareTheme.AccentGold : CyberwareTheme.AccentCyan);
+                    : Main.rand.NextBool() ? CyberwareTheme.AccentGold : CyberwareTheme.AccentCyan;
                 particles.Add(new CyberDataParticle(pos, vel, c * 0.6f));
             }
 

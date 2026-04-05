@@ -2,7 +2,7 @@
 using System;
 using Terraria;
 
-namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
+namespace CalamityOverhaul.Content.Cyberwares.UIs
 {
     /// <summary>
     ///赛博义体界面的像素人体渲染器
@@ -795,7 +795,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
                 DrawCurvePath(sb, px, bodyOffset, s, breathe, curve, curve.Thickness, ribColor, 12, 0.18f, 0.08f);
                 DrawCurvePath(sb, px, bodyOffset, s, breathe, curve, Math.Max(0.52f, curve.Thickness * 0.42f), Color.Lerp(ribColor, CyberwareTheme.AccentGold * alpha, 0.1f), 10, 0.14f, 0.08f);
 
-                if (glow != null && (i % 2 == 0)) {
+                if (glow != null && i % 2 == 0) {
                     Vector2 tip = ToWorld(bodyOffset, s, breathe, curve.End);
                     DrawGlowOrb(sb, glow, tip, ribColor * 0.045f, 0.01f);
                 }

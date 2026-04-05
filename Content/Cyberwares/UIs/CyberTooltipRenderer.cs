@@ -1,10 +1,10 @@
-﻿using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.CyberItems;
+﻿using CalamityOverhaul.Content.LegendWeapon.SHPCLegend;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;
 using Terraria.GameContent;
 
-namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
+namespace CalamityOverhaul.Content.Cyberwares.UIs
 {
     /// <summary>
     /// 赛博朋克风格的义体信息提示框渲染器
@@ -109,7 +109,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs
             sb.Draw(px, new Rectangle(panelRect.Right - cut, panelRect.Y, cut, cut), new Rectangle(0, 0, 1, 1), CyberwareTheme.BgDark);
 
             // 微扫描线
-            float scanY = panelRect.Y + ((scanPhase / MathHelper.TwoPi) % 1f) * panelRect.Height;
+            float scanY = panelRect.Y + scanPhase / MathHelper.TwoPi % 1f * panelRect.Height;
             sb.Draw(px, new Rectangle(panelRect.X + 1, (int)scanY, panelRect.Width - 2, 1),
                 new Rectangle(0, 0, 1, 1), CyberwareTheme.Accent * 0.06f);
 

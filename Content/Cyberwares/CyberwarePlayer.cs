@@ -1,11 +1,11 @@
-using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.CyberItems;
+﻿using CalamityOverhaul.Content.LegendWeapon.SHPCLegend;
 using System;
 using System.Collections.Generic;
 using Terraria;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 
-namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares
+namespace CalamityOverhaul.Content.Cyberwares
 {
     /// <summary>
     /// 管理玩家义体装备数据的ModPlayer
