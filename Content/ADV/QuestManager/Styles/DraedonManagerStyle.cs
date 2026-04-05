@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using Terraria;
 using Terraria.GameContent;
 
-namespace CalamityOverhaul.Content.ADV.QuestManager
+namespace CalamityOverhaul.Content.ADV.QuestManager.Styles
 {
     /// <summary>
     /// 嘉登·战术数据链风格，任务管理器默认样式，
@@ -167,13 +167,13 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
             int rows = (int)(rect.Height / cellH) + 2;
             for (int row = 0; row < rows; row++) {
                 for (int col = 0; col < cols; col++) {
-                    float ox = (row % 2 == 0) ? 0f : cellW * 0.5f;
+                    float ox = row % 2 == 0 ? 0f : cellW * 0.5f;
                     float px2 = rect.X + col * cellW + ox;
                     float py = rect.Y + row * cellH;
                     if (px2 < rect.X || px2 >= rect.Right || py < rect.Y || py >= rect.Bottom) continue;
 
                     //等高线式明暗起伏
-                    float topo = MathF.Sin((col * 0.5f + row * 0.3f) + hexGridPhase * 0.7f);
+                    float topo = MathF.Sin(col * 0.5f + row * 0.3f + hexGridPhase * 0.7f);
                     float brightness = 0.3f + topo * 0.25f;
                     Color c = PrimaryDim * (alpha * brightness);
                     sb.Draw(Px, new Rectangle((int)px2, (int)py, 2, 2), new Rectangle(0, 0, 1, 1), c);
@@ -234,7 +234,7 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
             for (int i = 0; i < marks; i++) {
                 float t = (float)i / marks;
                 float flow = MathF.Sin((t + dataFlowTimer * 0.3f) * MathHelper.TwoPi) * 0.3f + 0.4f;
-                int mLen = (i % 5 == 0) ? 6 : 3;
+                int mLen = i % 5 == 0 ? 6 : 3;
                 Color mc = PrimaryDim * (alpha * flow);
                 HLine(sb, rx - mLen, rect.Y + 10 + i * spacing, mLen, mc);
             }
@@ -301,12 +301,12 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
             int dashW = 4, gapW = 2;
             float flow = dataFlowTimer * 18f;
             int period = dashW + gapW;
-            float cx = x - (flow % period);
+            float cx = x - flow % period;
             while (cx < x + w) {
                 float segStart = Math.Max(cx, x);
                 float segEnd = Math.Min(cx + dashW, x + w);
                 if (segEnd > segStart) {
-                    float bright = 0.5f + MathF.Sin((segStart - x) / (float)w * MathHelper.Pi) * 0.4f;
+                    float bright = 0.5f + MathF.Sin((segStart - x) / w * MathHelper.Pi) * 0.4f;
                     HLine(sb, (int)segStart, y, (int)(segEnd - segStart),
                         PrimaryMid * (alpha * bright));
                 }
@@ -493,12 +493,80 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
                     summary = summary[..^1];
                 summary += "...";
             }
-            Utils.DrawBorderString(sb, summary, new Vector2(titleX, summaryY), summaryColor, 0.65f);
+            //未展开时显示截断摘要，展开后摘要淡出
+            float collapsedAlpha = 1f - entry.ExpandProgress;
+            if (collapsedAlpha > 0.01f) {
+                Utils.DrawBorderString(sb, summary, new Vector2(titleX, summaryY),
+                    summaryColor * collapsedAlpha, 0.65f);
+            }
+
+            //展开指示器（标题行右端，▼/▲）
+            if (!string.IsNullOrEmpty(entry.Summary)) {
+                string expandIcon = entry.IsExpanded ? "▲" : "▼";
+                float iconAlpha = isHovered ? 0.7f : 0.35f;
+                float iconX = entryRect.Right - 18f;
+                Utils.DrawBorderString(sb, expandIcon, new Vector2(iconX, titleY + 2f),
+                    PrimaryMid * (alpha * iconAlpha), 0.6f);
+            }
+
+            // 展开内容区域（动画插值）
+            if (entry.ExpandProgress > 0.01f) {
+                int baseH = GetEntryHeight();
+                float expandAlpha = alpha * entry.ExpandProgress;
+                float descY = entryRect.Y + baseH - 4f;
+
+                //展开区域半透明背景
+                int expandAreaH = entryRect.Height - baseH;
+                if (expandAreaH > 0) {
+                    Rectangle expandBg = new(entryRect.X + 34, (int)descY - 2, entryRect.Width - 38, expandAreaH + 2);
+                    FillRect(sb, expandBg, new Color(6, 12, 28) * (expandAlpha * 0.35f));
+                }
+
+                //分隔虚线
+                Color sepColor = PrimaryDim * (expandAlpha * 0.4f);
+                float sepX = titleX;
+                float sepEndX = entryRect.Right - 14f;
+                int dashW = 3, gapW = 3;
+                float cx = sepX;
+                while (cx < sepEndX) {
+                    float segEnd = Math.Min(cx + dashW, sepEndX);
+                    if (segEnd > cx) {
+                        HLine(sb, (int)cx, (int)descY, (int)(segEnd - cx), sepColor);
+                    }
+                    cx += dashW + gapW;
+                }
+                descY += 5f;
+
+                //自动换行的完整描述文本
+                string fullText = entry.Summary ?? "";
+                float descScale = 0.62f;
+                int wrapWidth = (int)((entryRect.Width - 50f) / descScale);
+                Color descColor = new Color(170, 200, 220) * (expandAlpha * 0.75f);
+
+                //先按换行符拆分，再对每段做自动换行
+                string[] paragraphs = fullText.Split('\n');
+                foreach (string paragraph in paragraphs) {
+                    string trimmedPara = paragraph.Trim();
+                    if (string.IsNullOrEmpty(trimmedPara)) continue;
+                    string[] wrapped = Utils.WordwrapString(trimmedPara, font, wrapWidth, 99, out _);
+                    foreach (string wl in wrapped) {
+                        if (string.IsNullOrEmpty(wl)) continue;
+                        if (descY > entryRect.Bottom - 4f) break;
+                        string trimmed = wl.TrimEnd('-', ' ');
+                        Utils.DrawBorderString(sb, trimmed, new Vector2(titleX, descY), descColor, descScale);
+                        descY += (int)(font.MeasureString(trimmed).Y * descScale) + 2;
+                    }
+                }
+            }
 
             // 进度条（如果有进度数据）
             if (entry.Progress > 0f && entry.Status != QuestEntryStatus.Completed) {
+                //展开时进度条靠近条目底部，折叠时紧跟摘要下方
+                float barY = entry.ExpandProgress > 0.5f
+                    ? entryRect.Bottom - 14f
+                    : summaryY + 18f;
                 int barW = Math.Min(120, entryRect.Width - 60);
-                Rectangle barRect = new((int)titleX, (int)(summaryY + 18f), barW, 5);
+                Rectangle barRect = new((int)titleX, (int)barY, barW, 5);
                 DrawProgressBar(sb, barRect, entry.Progress,
                     new Color(8, 16, 32) * alpha,
                     PrimaryMid * alpha, AccentCyan * alpha,
@@ -614,7 +682,7 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
             // 偶发故障横条（低频，约1/6触发）
             float gf = MathF.Sin(glitchTimer * 2.6f);
             if (gf > 0.95f) {
-                float gy = panelRect.Y + (glitchTimer * 113f % panelRect.Height);
+                float gy = panelRect.Y + glitchTimer * 113f % panelRect.Height;
                 HLine(sb, panelRect.X + 4, (int)gy, panelRect.Width - 8, 2,
                     PrimaryBright * (alpha * (gf - 0.95f) * 4f));
             }

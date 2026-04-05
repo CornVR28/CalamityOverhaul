@@ -1,10 +1,10 @@
-using CalamityOverhaul.Content.ADV.QuestManager;
+﻿using CalamityOverhaul.Content.ADV.QuestManager;
 using System;
 using System.Collections.Generic;
 using Terraria;
 using Terraria.Localization;
 
-namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend.Quest
+namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend.TrialQuests
 {
     /// <summary>
     /// 比目鱼传奇武器的单条试炼委托条目——<see cref="QuestEntryData"/> 子类，

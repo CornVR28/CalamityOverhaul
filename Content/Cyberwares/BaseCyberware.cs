@@ -2,7 +2,7 @@
 using Terraria.ID;
 using Terraria.ModLoader;
 
-namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
+namespace CalamityOverhaul.Content.Cyberwares
 {
     /// <summary>
     /// 义体槽位分类，对应12个槽位

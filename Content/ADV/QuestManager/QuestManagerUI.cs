@@ -64,6 +64,7 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
         public static LocalizedText TrackHintText { get; private set; }
         public static LocalizedText SuspendHintText { get; private set; }
         public static LocalizedText OpenHintText { get; private set; }
+        public static LocalizedText ExpandHintText { get; private set; }
         public static LocalizedText HeaderStatusTag { get; private set; }
         public static LocalizedText FooterStatsFormat { get; private set; }
 
@@ -77,6 +78,7 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
             TrackHintText = this.GetLocalization(nameof(TrackHintText), () => "[右键] 关注/取消关注");
             SuspendHintText = this.GetLocalization(nameof(SuspendHintText), () => "[中键] 挂起/恢复");
             OpenHintText = this.GetLocalization(nameof(OpenHintText), () => "按 [L] 打开任务管理");
+            ExpandHintText = this.GetLocalization(nameof(ExpandHintText), () => "[左键] 展开/收起详情");
             HeaderStatusTag = this.GetLocalization(nameof(HeaderStatusTag), () => "◈ ACTIVE");
             FooterStatsFormat = this.GetLocalization(nameof(FooterStatsFormat), () => "TOTAL: {0}  |  ACTIVE: {1}");
         }
@@ -316,6 +318,12 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
             foreach (var entry in allEntries) {
                 entry.OnUpdate();
                 entry.EntryStyle?.Update();
+
+                //展开/折叠动画插值
+                float expandTarget = entry.IsExpanded ? 1f : 0f;
+                entry.ExpandProgress = MathHelper.Lerp(entry.ExpandProgress, expandTarget, 0.14f);
+                if (entry.ExpandProgress < 0.005f) entry.ExpandProgress = 0f;
+                if (entry.ExpandProgress > 0.995f) entry.ExpandProgress = 1f;
             }
 
             //面板碰撞区域
@@ -371,7 +379,6 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
 
         private void HandleMouseInput(Rectangle panelRect) {
             Rectangle contentRect = GetContentRect(panelRect);
-            int entryH = currentStyle?.GetEntryHeight() ?? 62;
             int padding = currentStyle?.GetEntryPadding() ?? 4;
 
             //分类选项卡点击（按实际文字宽度匹配）
@@ -402,14 +409,44 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
             hoveredIndex = -1;
             if (contentRect.Contains(Main.mouseX, Main.mouseY)) {
                 float relativeY = Main.mouseY - contentRect.Y + scrollOffset;
-                int idx = (int)(relativeY / (entryH + padding));
+                //遍历累积高度来确定悬停的条目索引
+                int idx = -1;
+                float accY = 0f;
+                for (int i = 0; i < filteredEntries.Count; i++) {
+                    float entryH = GetDynamicEntryHeight(filteredEntries[i]) + padding;
+                    if (relativeY >= accY && relativeY < accY + entryH - padding) {
+                        idx = i;
+                        break;
+                    }
+                    accY += entryH;
+                }
 
                 if (idx >= 0 && idx < filteredEntries.Count) {
                     hoveredIndex = idx;
 
-                    //左键选中
+                    //左键展开/折叠
                     if (keyLeftPressState == KeyPressState.Pressed) {
-                        selectedIndex = (selectedIndex == idx) ? -1 : idx;
+                        var entry = filteredEntries[idx];
+                        //折叠其他已展开的条目
+                        foreach (var other in filteredEntries) {
+                            if (other != entry && other.IsExpanded)
+                                other.IsExpanded = false;
+                        }
+                        entry.IsExpanded = !entry.IsExpanded;
+                        selectedIndex = entry.IsExpanded ? idx : -1;
+
+                        //展开时自动滚动确保展开内容可见
+                        if (entry.IsExpanded) {
+                            float entryTop = GetEntryYOffset(idx);
+                            int expandedH = (currentStyle?.GetEntryHeight() ?? 62) + CalcExpandedContentHeight(entry);
+                            float entryBottom = entryTop + expandedH;
+                            float visibleBottom = scrollTarget + contentRect.Height;
+                            if (entryBottom > visibleBottom) {
+                                scrollTarget += entryBottom - visibleBottom + 10f;
+                                ClampScroll(panelRect);
+                            }
+                        }
+
                         SoundEngine.PlaySound(SoundID.MenuTick with { Volume = 0.3f });
                     }
 
@@ -493,14 +530,78 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
 
         private void ClampScroll(Rectangle panelRect) {
             Rectangle contentRect = GetContentRect(panelRect);
-            int entryH = currentStyle?.GetEntryHeight() ?? 62;
-            int padding = currentStyle?.GetEntryPadding() ?? 4;
-            float totalH = filteredEntries.Count * (entryH + padding);
+            float totalH = GetTotalEntriesHeight();
             float maxScroll = Math.Max(0f, totalH - contentRect.Height);
             scrollTarget = MathHelper.Clamp(scrollTarget, 0f, maxScroll);
         }
 
+        /// <summary>
+        /// 计算单个条目的动态高度，含展开内容区域
+        /// </summary>
+        private int GetDynamicEntryHeight(QuestEntryData entry) {
+            int baseH = currentStyle?.GetEntryHeight() ?? 62;
+            if (entry.ExpandProgress <= 0.001f) return baseH;
+
+            int expandedContentH = CalcExpandedContentHeight(entry);
+            int expandedH = baseH + expandedContentH;
+            return (int)MathHelper.Lerp(baseH, expandedH, entry.ExpandProgress);
+        }
+
+        /// <summary>
+        /// 计算条目展开后描述文本区域需要的额外高度
+        /// </summary>
+        private int CalcExpandedContentHeight(QuestEntryData entry) {
+            string summary = entry.Summary ?? "";
+            if (string.IsNullOrEmpty(summary)) return 0;
+
+            var font = FontAssets.MouseText.Value;
+            Rectangle panelRect = GetPanelRect();
+            Rectangle contentRect = GetContentRect(panelRect);
+            //展开区域的可用宽度（与条目内文本对齐，减去左侧偏移）
+            float textScale = 0.62f;
+            int wrapPixelWidth = (int)((contentRect.Width - 50f) / textScale);
+
+            //按换行符拆分后逐段换行，与绘制逻辑一致
+            int totalLineH = 0;
+            string[] paragraphs = summary.Split('\n');
+            foreach (string paragraph in paragraphs) {
+                string trimmedPara = paragraph.Trim();
+                if (string.IsNullOrEmpty(trimmedPara)) continue;
+                string[] wrapped = Utils.WordwrapString(trimmedPara, font, wrapPixelWidth, 99, out _);
+                foreach (string wl in wrapped) {
+                    if (string.IsNullOrEmpty(wl)) continue;
+                    totalLineH += (int)(font.MeasureString(wl.TrimEnd('-', ' ')).Y * textScale) + 2;
+                }
+            }
+            //展开区域 = 分隔线(6) + 文本行高 + 底部边距(8)
+            return 6 + totalLineH + 8;
+        }
+
+        /// <summary>获取过滤列表中所有条目的动态高度总和（含间距）</summary>
+        private float GetTotalEntriesHeight() {
+            int padding = currentStyle?.GetEntryPadding() ?? 4;
+            float total = 0f;
+            foreach (var entry in filteredEntries) {
+                total += GetDynamicEntryHeight(entry) + padding;
+            }
+            return total;
+        }
+
+        /// <summary>获取指定过滤列表索引处条目的Y偏移（相对于内容区顶部）</summary>
+        private float GetEntryYOffset(int targetIndex) {
+            int padding = currentStyle?.GetEntryPadding() ?? 4;
+            float y = 0f;
+            for (int i = 0; i < targetIndex && i < filteredEntries.Count; i++) {
+                y += GetDynamicEntryHeight(filteredEntries[i]) + padding;
+            }
+            return y;
+        }
+
         private void RebuildFilteredEntries() {
+            //重建过滤列表时折叠所有展开的条目
+            foreach (var entry in allEntries) {
+                entry.IsExpanded = false;
+            }
             filteredEntries.Clear();
 
             IEnumerable<QuestEntryData> source = allEntries;
@@ -669,7 +770,6 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
 
         private void DrawQuestEntries(SpriteBatch sb, Rectangle panelRect, float alpha) {
             Rectangle contentRect = GetContentRect(panelRect);
-            int entryH = currentStyle?.GetEntryHeight() ?? 62;
             int padding = currentStyle?.GetEntryPadding() ?? 4;
 
             if (filteredEntries.Count == 0) {
@@ -693,11 +793,16 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
             sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.AnisotropicClamp,
                 DepthStencilState.None, ScissorRaster, null, Main.UIScaleMatrix);
 
+            float accumulatedY = 0f;
             for (int i = 0; i < filteredEntries.Count; i++) {
-                float entryY = contentRect.Y + i * (entryH + padding) - scrollOffset;
+                int entryH = GetDynamicEntryHeight(filteredEntries[i]);
+                float entryY = contentRect.Y + accumulatedY - scrollOffset;
 
                 //视锥裁剪
-                if (entryY + entryH < contentRect.Y - 10f) continue;
+                if (entryY + entryH < contentRect.Y - 10f) {
+                    accumulatedY += entryH + padding;
+                    continue;
+                }
                 if (entryY > contentRect.Bottom + 10f) break;
 
                 Rectangle entryRect = new(contentRect.X, (int)entryY, contentRect.Width, entryH);
@@ -723,6 +828,8 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
                     Vector2 sepEnd = new(contentRect.Right - 12f, sepStart.Y);
                     currentStyle?.DrawEntrySeparator(sb, sepStart, sepEnd, alpha * 0.5f);
                 }
+
+                accumulatedY += entryH + padding;
             }
 
             sb.End();
@@ -734,10 +841,8 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
         private void DrawScrollbarArea(SpriteBatch sb, Rectangle panelRect, float alpha) {
             Rectangle scrollRect = GetScrollbarRect(panelRect);
             Rectangle contentRect = GetContentRect(panelRect);
-            int entryH = currentStyle?.GetEntryHeight() ?? 62;
-            int padding = currentStyle?.GetEntryPadding() ?? 4;
 
-            float totalH = filteredEntries.Count * (entryH + padding);
+            float totalH = GetTotalEntriesHeight();
             if (totalH <= contentRect.Height) return; //不需要滚动条
 
             float viewRatio = contentRect.Height / totalH;
@@ -779,6 +884,16 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
                 Utils.DrawBorderString(sb, trackHint,
                     new Vector2(footerRect.Right - hintW - 10f, hintY),
                     new Color(140, 210, 255) * (alpha * 0.5f), 0.55f);
+                hintY -= 14f;
+            }
+
+            //展开/折叠提示
+            string expandHint = ExpandHintText.Value;
+            if (!string.IsNullOrEmpty(expandHint)) {
+                float expandW = font.MeasureString(expandHint).X * 0.55f;
+                Utils.DrawBorderString(sb, expandHint,
+                    new Vector2(footerRect.Right - expandW - 10f, hintY),
+                    new Color(120, 200, 180) * (alpha * 0.5f), 0.55f);
             }
         }
 

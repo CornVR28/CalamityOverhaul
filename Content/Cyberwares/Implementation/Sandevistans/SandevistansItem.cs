@@ -1,6 +1,4 @@
-﻿using CalamityOverhaul.Content.LegendWeapon.SHPCLegend;
-
-namespace CalamityOverhaul.Content.Cyberwares.Implementation.Sandevistans
+﻿namespace CalamityOverhaul.Content.Cyberwares.Implementation.Sandevistans
 {
     internal class SandevistansItem : BaseCyberware
     {

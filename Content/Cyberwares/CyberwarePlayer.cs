@@ -1,5 +1,4 @@
-﻿using CalamityOverhaul.Content.LegendWeapon.SHPCLegend;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Terraria;
 using Terraria.ModLoader;

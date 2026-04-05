@@ -7,14 +7,14 @@ using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
 
-namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend.Quest
+namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend.TrialQuests
 {
     /// <summary>
     /// 比目鱼传奇试炼线——将14段试炼注册到 <see cref="QuestManagerUI"/>，
     /// 并根据 <see cref="InWorldBossPhase.Halibut_Level"/> 实时同步状态。<br/>
     /// 同时仅显示当前进行中的试炼和上一个已完成的试炼
     /// </summary>
-    internal class HalibutQuestLine : ModSystem, ILocalizedModType
+    internal class HalibutTrialQuestLine : ModSystem, ILocalizedModType
     {
         public string LocalizationCategory => "Legend";
 
@@ -42,21 +42,23 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend.Quest
             TrackerFighting = this.GetLocalization(nameof(TrackerFighting), () => "{0}: {1:0%}");
 
             TrialTitles = new LocalizedText[TRIAL_COUNT];
+
+            //标题风格参考赛博朋克2077，以比目鱼伙伴的口吻暗示目标
             string[] defaultTitles = [
-                "试炼 1",
-                "试炼 2",
-                "试炼 3",
-                "试炼 4",
-                "试炼 5",
-                "试炼 6",
-                "试炼 7",
-                "试炼 8",
-                "试炼 9",
-                "试炼 10",
-                "试炼 11",
-                "试炼 12",
-                "试炼 13",
-                "试炼 14",
+                "开胃菜",           //0 史莱姆王
+                "不速之瞳",         //1 克苏鲁之眼
+                "丛林拜访",         //2 蜂后
+                "安息与启程",       //3 骷髅王+血肉墙
+                "钢铁潮汐",         //4 机械Boss/渊海灾虫
+                "拙劣的复制品",     //5 灾厄之影/世纪之花
+                "给遗迹塞电池",     //6 石巨人
+                "月球背面",         //7 月球领主
+                "冷水澡",           //8 亵渎天神
+                "不屈亡魂",         //9 噬魂幽花
+                "弑神者",           //10 神明吞噬者
+                "升温",             //11 丛林龙
+                "造物巅峰",         //12 星流巨械+至尊灾厄
+                "回到海里",         //13 始源妖龙
             ];
             for (int i = 0; i < TRIAL_COUNT; i++) {
                 int idx = i;
@@ -152,9 +154,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend.Quest
         }
 
         private HalibutTrialQuestEntry CreateTrialEntry(int trialIndex) {
-            LocalizedText summary = CWRLocText.GetText($"Halibut_TextDictionary_Content_{trialIndex}");
+            //使用CWRLocText中已有的长叙事文本作为摘要，
+            //在管理器面板中折叠时自动截断，展开后显示完整描述
+            var summaryText = CWRLocText.GetText($"Halibut_TextDictionary_Content_{trialIndex}");
             return new HalibutTrialQuestEntry(KEY_PREFIX + trialIndex,
-                TrialTitles[trialIndex], summary, QuestCategory) {
+                TrialTitles[trialIndex], summaryText, QuestCategory) {
                 Priority = TRIAL_COUNT - trialIndex,
                 EntryStyle = new OceanEntryStyle(),
                 TrackerStyle = new OceanTrackerWidgetStyle(),

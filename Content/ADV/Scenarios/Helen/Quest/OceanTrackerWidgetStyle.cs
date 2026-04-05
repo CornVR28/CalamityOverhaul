@@ -1,9 +1,10 @@
+﻿using CalamityOverhaul.Content.ADV.QuestManager;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;
 using Terraria.GameContent;
 
-namespace CalamityOverhaul.Content.ADV.QuestManager
+namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Quest
 {
     /// <summary>
     /// 海洋风格追踪窗口样式——深海蓝渐变背景、波浪边框脉冲、

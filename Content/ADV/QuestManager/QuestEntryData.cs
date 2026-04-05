@@ -65,6 +65,15 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
 
         #endregion
 
+        #region 展开状态（由QuestManagerUI管理）
+
+        /// <summary>条目在管理器列表中是否展开显示完整描述</summary>
+        public bool IsExpanded;
+        /// <summary>展开/折叠动画进度 0~1，由管理器每帧插值</summary>
+        public float ExpandProgress;
+
+        #endregion
+
         #region 样式系统
 
         /// <summary>
