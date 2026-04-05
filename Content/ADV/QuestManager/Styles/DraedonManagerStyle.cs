@@ -428,25 +428,26 @@ namespace CalamityOverhaul.Content.ADV.QuestManager.Styles
 
                 Color statusBarColor = GetStatusColor(entry.Status, alpha);
                 VLine(sb, entryRect.X + 4, entryRect.Y + 4, entryRect.Height - 8, 3, statusBarColor);
-            }
 
-            // 时间线脊柱上的菱形节点 
-            int spineX = entryRect.X + 28;
-            int spineNodeY = entryRect.Y + entryRect.Height / 2;
-            DrawDiamondNode(sb, new Vector2(spineX, spineNodeY), entry.Status, alpha, entryIndex);
+                //时间线脊柱上的菱形节点（嘉登科技专属装饰，自定义样式接管时跳过）
+                int spineX = entryRect.X + 28;
+                int spineNodeY = entryRect.Y + entryRect.Height / 2;
+                DrawDiamondNode(sb, new Vector2(spineX, spineNodeY), entry.Status, alpha, entryIndex);
 
-            // 连接线（到下一条目的虚线，在条目绘制时只画下半段）
-            Color spineLineC = PrimaryDim * (alpha * 0.3f);
-            for (int ly = spineNodeY + 6; ly < entryRect.Bottom; ly += 3) {
-                FillRect(sb, new Rectangle(spineX, ly, 1, 1), spineLineC);
-            }
-            //上半段
-            for (int ly = entryRect.Y; ly < spineNodeY - 5; ly += 3) {
-                FillRect(sb, new Rectangle(spineX, ly, 1, 1), spineLineC);
+                //连接线（到下一条目的虚线，在条目绘制时只画下半段）
+                Color spineLineC = PrimaryDim * (alpha * 0.3f);
+                for (int ly = spineNodeY + 6; ly < entryRect.Bottom; ly += 3) {
+                    FillRect(sb, new Rectangle(spineX, ly, 1, 1), spineLineC);
+                }
+                //上半段
+                for (int ly = entryRect.Y; ly < spineNodeY - 5; ly += 3) {
+                    FillRect(sb, new Rectangle(spineX, ly, 1, 1), spineLineC);
+                }
             }
 
             // === 图标 + 标题 ===
-            float titleX = entryRect.X + 42f;
+            //有脊柱时标题从X+42开始（脊柱在X+28），自定义背景无脊柱时从X+10开始
+            float titleX = entryRect.X + (bgHandled ? 10f : 42f);
             float titleY = entryRect.Y + 6f;
 
             //自定义图标（可能右移标题位置）
@@ -518,7 +519,8 @@ namespace CalamityOverhaul.Content.ADV.QuestManager.Styles
                 //展开区域半透明背景
                 int expandAreaH = entryRect.Height - baseH;
                 if (expandAreaH > 0) {
-                    Rectangle expandBg = new(entryRect.X + 34, (int)descY - 2, entryRect.Width - 38, expandAreaH + 2);
+                    int bgLeftPad = bgHandled ? 4 : 34;
+                    Rectangle expandBg = new(entryRect.X + bgLeftPad, (int)descY - 2, entryRect.Width - bgLeftPad - 4, expandAreaH + 2);
                     FillRect(sb, expandBg, new Color(6, 12, 28) * (expandAlpha * 0.35f));
                 }
 

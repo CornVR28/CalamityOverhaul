@@ -1,7 +1,6 @@
 ﻿using CalamityOverhaul.Common;
 using CalamityOverhaul.Content.ADV.QuestManager;
 using CalamityOverhaul.Content.ADV.Scenarios.Helen.Quest;
-using CalamityOverhaul.Content.ADV.Scenarios.Helen.Quest.FishoilQuest;
 using Terraria;
 using Terraria.ID;
 using Terraria.Localization;
@@ -104,6 +103,10 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend.TrialQuests
 
         public override void PostUpdateWorld() {
             if (Main.dedServ || Main.gameMenu) return;
+
+            if (!Main.LocalPlayer.HasHalibut()) {
+                return;//未获得比目鱼前不显示任何试炼
+            }
 
             var manager = QuestManagerUI.Instance;
             if (manager == null) return;

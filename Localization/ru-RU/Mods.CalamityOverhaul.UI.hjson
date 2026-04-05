@@ -376,6 +376,7 @@ QuestManagerUI: {
 	// OpenHintText: 按 [L] 打开任务管理
 	// HeaderStatusTag: ◈ ACTIVE
 	// FooterStatsFormat: TOTAL: {0}  |  ACTIVE: {1}
+	// ExpandHintText: "[左键] 展开/收起详情"
 }
 
 CyberwareUI: {

@@ -1,4 +1,4 @@
-﻿HalibutText: {
+HalibutText: {
 	FishByStudied:
 		'''
 		[i:CalamityMod/HalibutCannon]:
@@ -227,4 +227,24 @@ MuraText: {
 		That witch who plunged into chaos has a deformed clone sister. 
 		Slaughter that aberration; offer its blood and flames to the blade.
 		'''
+}
+
+HalibutTrialQuestLine: {
+	QuestCategory: 比目鱼传说
+	TrackerWaiting: 目标不在场，等待召唤...
+	TrackerFighting: "{0}: {1:0%}"
+	Trial_0: 开胃菜
+	Trial_1: 不速之瞳
+	Trial_2: 丛林拜访
+	Trial_3: 安息与启程
+	Trial_4: 钢铁潮汐
+	Trial_5: 拙劣的复制品
+	Trial_6: 给遗迹塞电池
+	Trial_7: 月球背面
+	Trial_8: 冷水澡
+	Trial_9: 不屈亡魂
+	Trial_10: 弑神者
+	Trial_11: 升温
+	Trial_12: 造物巅峰
+	Trial_13: 回到海里
 }
