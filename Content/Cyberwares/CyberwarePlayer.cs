@@ -143,8 +143,7 @@ namespace CalamityOverhaul.Content.Cyberwares
                         tag[$"Cyber_{i}"] = ItemIO.Save(item);
                     }
                 }
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
                 CWRMod.Instance.Logger.Error($"CyberwarePlayer.SaveData Error: {ex.Message}");
             }
         }
@@ -162,8 +161,7 @@ namespace CalamityOverhaul.Content.Cyberwares
                         EquippedCyberwares[i] = new Item();
                     }
                 }
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
                 CWRMod.Instance.Logger.Error($"CyberwarePlayer.LoadData Error: {ex.Message}");
             }
         }

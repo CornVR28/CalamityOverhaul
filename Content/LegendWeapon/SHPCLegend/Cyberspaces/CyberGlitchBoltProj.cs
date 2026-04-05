@@ -1,7 +1,5 @@
 ﻿using CalamityOverhaul.Common;
-using InnoVault;
 using InnoVault.Trails;
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;

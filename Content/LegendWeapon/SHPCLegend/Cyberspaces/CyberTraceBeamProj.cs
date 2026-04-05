@@ -1,9 +1,7 @@
 ﻿using CalamityOverhaul.Common;
 using CalamityOverhaul.Content.PRTTypes;
-using InnoVault;
 using InnoVault.PRT;
 using InnoVault.Trails;
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;

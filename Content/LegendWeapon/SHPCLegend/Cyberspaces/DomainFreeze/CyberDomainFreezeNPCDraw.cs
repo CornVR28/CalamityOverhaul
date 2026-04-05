@@ -1,5 +1,4 @@
-using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Banish;
-using Microsoft.Xna.Framework;
+﻿using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Banish;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;

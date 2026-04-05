@@ -1,3 +1,9 @@
+//=============================================================================
+//AccretionDisk.fx - ä¸­å¤®å¤©ä½“ç€è‰²å™¨ï¼ˆé»‘æ´/èƒ½é‡æ ¸å¿ƒï¼‰
+//ç‰¹æ€§: å¼•åŠ›é€é•œæ‰­æ›²ã€å¤šå±‚ç­‰ç¦»å­ä½“æ—‹è½¬ã€äº‹ä»¶è§†ç•Œæš—åŒºã€
+//      å…‰å­ç¯ã€æ—¥å†•è¾å°„ã€ä¸´è¾¹å¢äº®ã€èƒ½é‡è„‰åŠ¨
+//=============================================================================
+
 sampler uImage0 : register(s0);
 sampler uImage1 : register(s1);
 texture noiseTexture;
@@ -19,7 +25,7 @@ float2 centerPos;
 float brightness;
 float distortionStrength;
 
-//Îü»ıÅÌÑÕÉ«ÅäÖÃ
+//ä¸‰å±‚æ¸å˜é¢œè‰²
 float4 innerColor;
 float4 midColor;
 float4 outerColor;
@@ -49,77 +55,119 @@ VertexShaderOutput VertexShaderFunction(VertexShaderInput input)
 
 float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 {
-    //¼ÆËãÏà¶ÔÓÚÖĞĞÄµÄ×ø±ê
     float2 coords = input.TexCoords;
     float2 center = float2(0.5, 0.5);
     float2 toCenter = coords - center;
-    
-    //¼ÆËã¾àÀëºÍ½Ç¶È
+
     float dist = length(toCenter);
     float angle = atan2(toCenter.y, toCenter.x);
-    
-    //»ùÓÚ¾àÀëµÄĞı×ªËÙ¶È£¨ÄÚÈ¦×ªµÃ¿ì£¬ÍâÈ¦×ªµÃÂı£©
-    float rotSpeed = rotationSpeed * (1.0 / (dist + 0.1));
-    
-    //Ó¦ÓÃĞı×ª
-    float rotatedAngle = angle + uTime * rotSpeed;
-    
-    //½«Ğı×ªºóµÄ×ø±êÓ³Éäµ½ÔëÉùÎÆÀí
-    float2 rotatedCoords = float2(
-        cos(rotatedAngle) * dist,
-        sin(rotatedAngle) * dist
-    ) + center;
-    
-    //²ÉÑùÔëÉùÎÆÀí
-    float4 noise = tex2D(noiseTex, rotatedCoords * 2.0 + float2(uTime * 0.1, 0));
-    
-    //´´½¨¶à²ãÔëÉùÅ¤Çú
-    float2 distortedCoords = rotatedCoords;
-    distortedCoords += (noise.xy - 0.5) * distortionStrength * (1.0 - dist);
-    
-    //ÔÙ´Î²ÉÑùÅ¤ÇúºóµÄÔëÉù
-    float4 detailNoise = tex2D(noiseTex, distortedCoords * 4.0 + float2(uTime * 0.15, uTime * 0.08));
-    
-    //¼ÆËãÎü»ıÅÌµÄ»·ĞÎÇ¿¶È
-    float diskMask = 1.0 - smoothstep(innerRadius, innerRadius + 0.05, dist);
-    diskMask *= smoothstep(outerRadius, outerRadius - 0.1, dist);
-    
-    //»ùÓÚ¾àÀëµÄÑÕÉ«½¥±ä
-    float colorLerp = (dist - innerRadius) / (outerRadius - innerRadius);
-    colorLerp = saturate(colorLerp);
-    
-    float4 baseColor;
-    if (colorLerp < 0.5)
+
+    //=== å¼•åŠ›é€é•œæ‰­æ›² ===
+    //æ¨¡æ‹Ÿå…‰çº¿è¢«å¼ºå¼•åŠ›åœºå¼¯æ›²
+    float lensStr = 0.025;
+    float2 lensed = toCenter;
+    if (dist > 0.001)
     {
-        baseColor = lerp(innerColor, midColor, colorLerp * 2.0);
+        float lensFactor = lensStr / (dist * dist + 0.008);
+        lensed = toCenter * (1.0 + lensFactor);
+    }
+    float lDist = length(lensed);
+    float lAngle = atan2(lensed.y, lensed.x);
+
+    //=== ä¸‰å±‚å·®åˆ†é€Ÿç‡ç­‰ç¦»å­ä½“æ—‹è½¬ ===
+    //æ¨¡æ‹Ÿç­‰ç¦»å­ä½“åœ¨ä¸åŒæ·±åº¦ä»¥ä¸åŒé€Ÿç‡æ—‹è½¬
+    float rA1 = lAngle + uTime * rotationSpeed * 1.0;
+    float rA2 = lAngle + uTime * rotationSpeed * 0.55 + 2.094; //120åº¦åç§»
+    float rA3 = lAngle + uTime * rotationSpeed * 1.7 + 4.189;  //240åº¦åç§»
+
+    float2 pUV1 = float2(cos(rA1), sin(rA1)) * lDist * 2.0;
+    float2 pUV2 = float2(cos(rA2), sin(rA2)) * lDist * 3.5;
+    float2 pUV3 = float2(cos(rA3), sin(rA3)) * lDist * 6.0;
+
+    float4 p1 = tex2D(noiseTex, pUV1 + float2(uTime * 0.04, uTime * 0.025));
+    float4 p2 = tex2D(noiseTex, pUV2 + float2(-uTime * 0.035, uTime * 0.05));
+    float4 p3 = tex2D(noiseTex, pUV3 + float2(uTime * 0.07, -uTime * 0.03));
+
+    //ç­‰ç¦»å­ä½“å¼ºåº¦åˆæˆ
+    float plasma = p1.r * 0.48 + p2.g * 0.32 + p3.b * 0.20;
+
+    //=== äº‹ä»¶è§†ç•Œæš—åŒº ===
+    //æç«¯å¼•åŠ›å¯¼è‡´å…‰çº¿æ— æ³•é€ƒé€¸çš„æ ¸å¿ƒæš—åŒº
+    float eventH = 0.055;
+    float horizonMask = smoothstep(eventH - 0.015, eventH + 0.04, dist);
+
+    //=== å…‰å­çƒ/å…‰å­ç¯ ===
+    //å…‰çº¿åœ¨ä¸´ç•Œè½¨é“ä¸Šçš„ç§¯ç´¯å½¢æˆæäº®çš„ç¯
+    float photonR = eventH + 0.035;
+    float photonRing = exp(-pow((dist - photonR) * 45.0, 2.0));
+    float3 photonCol = lerp(innerColor.rgb, float3(1.0, 0.97, 0.93), 0.65);
+
+    //=== æ¸©åº¦æ¢¯åº¦é¢œè‰² ===
+    float sphereR = outerRadius * 0.42;
+    float normD = saturate((dist - eventH) / (sphereR - eventH));
+    float4 baseColor;
+    if (normD < 0.35)
+    {
+        baseColor = lerp(innerColor * 1.6, midColor, normD / 0.35);
     }
     else
     {
-        baseColor = lerp(midColor, outerColor, (colorLerp - 0.5) * 2.0);
+        baseColor = lerp(midColor, outerColor, (normD - 0.35) / 0.65);
     }
-    
-    //Ìí¼ÓÔëÉùÏ¸½Ú
-    float noiseDetail = noise.r * 0.7 + detailNoise.r * 0.3;
-    
-    //´´½¨ÈÈµãºÍ°µ´øĞ§¹û
-    float bands = sin(dist * 30.0 + uTime * 2.0) * 0.5 + 0.5;
-    bands = pow(bands, 2.0);
-    
-    //»ìºÏËùÓĞĞ§¹û
-    float intensity = diskMask * noiseDetail * bands;
+
+    //=== æ—¥å†•æ•ˆæœ ===
+    //é«˜æ¸©ç­‰ç¦»å­ä½“å¤§æ°”å±‚çš„æ•£å°„è¾å°„
+    float corona = exp(-dist * 3.8) * plasma;
+    float3 coronaCol = innerColor.rgb * 1.6;
+
+    //=== åŒé¢‘èƒ½é‡è„‰åŠ¨ ===
+    float ePulse1 = sin(uTime * 2.5 + dist * 12.0) * 0.18 + 0.82;
+    float ePulse2 = sin(uTime * 4.2 - dist * 18.0 + plasma * 5.0) * 0.12 + 0.88;
+
+    //=== æ”¾å°„çŠ¶å°„çº¿ ===
+    //ç£åœºçº¦æŸä¸‹çš„é«˜èƒ½ç²’å­æŸ
+    float rays = sin(angle * 8.0 + uTime * 1.5 + plasma * 4.0);
+    rays = pow(abs(rays), 3.5) * 0.35;
+
+    //=== çƒä½“é®ç½© ===
+    float sphereMask = 1.0 - smoothstep(sphereR - 0.04, sphereR + 0.015, dist);
+
+    //=== æœ€ç»ˆåˆæˆ ===
+    float intensity = sphereMask * plasma * horizonMask * ePulse1 * ePulse2;
     intensity *= brightness;
-    
-    //Ìí¼Ó¾¶ÏòÁÁ¶È±ä»¯£¨ÄÚ²¿¸üÁÁ£©
-    float radialBrightness = 1.0 - smoothstep(innerRadius, outerRadius, dist);
-    radialBrightness = pow(radialBrightness, 1.5);
-    
-    float4 finalColor = baseColor * intensity * (1.0 + radialBrightness * 0.5);
-    finalColor.a = intensity * input.Color.a;
-    
-    //Ìí¼Ó·¢¹âĞ§¹û
-    float glow = pow(1.0 - dist, 3.0) * diskMask;
-    finalColor.rgb += innerColor.rgb * glow * 0.8;
-    
+
+    float4 finalColor;
+    finalColor.rgb = baseColor.rgb * intensity;
+
+    //æ—¥å†•è¾å°„
+    finalColor.rgb += coronaCol * corona * brightness * 0.9;
+
+    //å…‰å­ç¯
+    finalColor.rgb += photonCol * photonRing * brightness * 3.5;
+
+    //æ”¾å°„çŠ¶å°„çº¿
+    finalColor.rgb += innerColor.rgb * rays * sphereMask * brightness * 0.45;
+
+    //ä¸´è¾¹å¢äº®ï¼ˆçƒä½“è¾¹ç¼˜å› è§†çº¿ç©¿è¿‡æ›´å¤šå¤§æ°”è€Œæ›´äº®ï¼‰
+    float limbSq = max(1.0 - pow(dist / sphereR, 2.0), 0.0);
+    float limbBright = (1.0 - sqrt(limbSq)) * sphereMask;
+    finalColor.rgb += innerColor.rgb * limbBright * 0.55 * brightness;
+
+    //æ ¸å¿ƒç™½çƒ­å…‰
+    float coreGlow = pow(saturate(1.0 - dist / eventH), 2.5) * (1.0 - horizonMask);
+    finalColor.rgb += float3(1.0, 0.96, 0.91) * coreGlow * brightness * 0.25;
+
+    //å¤–éƒ¨æ•£å°„å…‰æ™•
+    float outerGlw = exp(-dist * 2.2) * 0.28;
+    finalColor.rgb += midColor.rgb * outerGlw * brightness;
+
+    //alphaé€šé“
+    finalColor.a = saturate(intensity + corona * 0.5 + photonRing * 0.7 + outerGlw) * input.Color.a;
+
+    //ç­‰ç¦»å­ä½“é—ªçƒ
+    float flicker = p1.g * p2.r;
+    finalColor.rgb *= 0.88 + flicker * 0.24;
+
     return finalColor * input.Color;
 }
 

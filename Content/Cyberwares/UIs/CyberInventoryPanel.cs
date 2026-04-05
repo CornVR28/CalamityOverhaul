@@ -1,5 +1,4 @@
-﻿using CalamityOverhaul.Content.Cyberwares;
-using CalamityOverhaul.Content.LegendWeapon.SHPCLegend;
+﻿using CalamityOverhaul.Content.LegendWeapon.SHPCLegend;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;

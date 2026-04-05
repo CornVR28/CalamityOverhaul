@@ -334,148 +334,105 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
 
         private void DrawAccretionDisk() {
             SpriteBatch spriteBatch = Main.spriteBatch;
+            float alpha = 1f - Projectile.alpha / 255f;
+            if (alpha <= 0f) return;
 
+            Vector2 drawPos = Projectile.Center - Main.screenPosition;
+            float actualSize = Projectile.width * Projectile.scale;
+            Vector2 texHalf = TransverseTwill.Size() * 0.5f;
+
+            Matrix finalMatrix = Matrix.Identity
+                * Main.GameViewMatrix.TransformationMatrix
+                * Matrix.CreateOrthographicOffCenter(0, Main.screenWidth, Main.screenHeight, 0, -1, 1);
+
+            //绘制吸积盘结构（使用FlattenedDisk着色器）
             {
-                //准备渲染状态
                 spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive, SamplerState.LinearWrap,
                     DepthStencilState.None, RasterizerState.CullNone, null, Main.GameViewMatrix.TransformationMatrix);
 
-                Effect shader = EffectLoader.AccretionDisk.Value;
+                Effect diskShader = EffectLoader.FlattenedDisk.Value;
 
-                //计算实际渲染尺寸
-                float actualWidth = Projectile.width * Projectile.scale;
-                float actualHeight = Projectile.height * Projectile.scale;
+                float diskWidth = actualSize * 1.6f;
+                float diskHeight = actualSize * 1.6f * 0.55f; //稍微压扁模拟透视
+                Vector2 diskScale = new Vector2(diskWidth / TransverseTwill.Width, diskHeight / TransverseTwill.Height);
 
-                //世界空间到屏幕空间的变换矩阵
-                //这里不需要复杂的矩阵变换，shader中会处理纹理坐标
-                Matrix world = Matrix.Identity;
-                Matrix view = Main.GameViewMatrix.TransformationMatrix;
-                Matrix projection = Matrix.CreateOrthographicOffCenter(
-                    0, Main.screenWidth,
-                    Main.screenHeight, 0,
-                    -1, 1);
+                diskShader.Parameters["transformMatrix"]?.SetValue(finalMatrix);
+                diskShader.Parameters["uTime"]?.SetValue(time);
+                diskShader.Parameters["rotationSpeed"]?.SetValue(RotationSpeed);
+                diskShader.Parameters["flattenRatio"]?.SetValue(0.55f);
+                diskShader.Parameters["brightness"]?.SetValue(brightness * 1.2f);
+                diskShader.Parameters["distortionStrength"]?.SetValue(distortionStrength);
+                diskShader.Parameters["pulseIntensity"]?.SetValue(0.1f);
+                diskShader.Parameters["dopplerStrength"]?.SetValue(0.35f);
+                diskShader.Parameters["noiseTexture"]?.SetValue(TransverseTwill);
+                diskShader.Parameters["centerPos"]?.SetValue(drawPos);
+                diskShader.Parameters["innerColor"]?.SetValue(innerColor.ToVector4());
+                diskShader.Parameters["midColor"]?.SetValue(midColor.ToVector4());
+                diskShader.Parameters["outerColor"]?.SetValue(outerColor.ToVector4());
 
-                //组合矩阵
-                Matrix finalMatrix = world * view * projection;
-
-                shader.Parameters["transformMatrix"]?.SetValue(finalMatrix);
-                shader.Parameters["uTime"]?.SetValue(time);
-                shader.Parameters["rotationSpeed"]?.SetValue(RotationSpeed);
-                shader.Parameters["innerRadius"]?.SetValue(InnerRadius);
-                shader.Parameters["outerRadius"]?.SetValue(OuterRadius);
-                shader.Parameters["brightness"]?.SetValue(brightness);
-                shader.Parameters["distortionStrength"]?.SetValue(distortionStrength);
-                shader.Parameters["noiseTexture"]?.SetValue(VaultAsset.placeholder2.Value);
-
-                //设置中心位置
-                Vector2 screenCenter = Projectile.Center - Main.screenPosition;
-                shader.Parameters["centerPos"]?.SetValue(screenCenter);
-
-                //设置颜色
-                shader.Parameters["innerColor"]?.SetValue(innerColor.ToVector4());
-                shader.Parameters["midColor"]?.SetValue(midColor.ToVector4());
-                shader.Parameters["outerColor"]?.SetValue(outerColor.ToVector4());
-
-                //设置噪声纹理
                 Main.graphics.GraphicsDevice.Textures[1] = TransverseTwill;
                 Main.graphics.GraphicsDevice.SamplerStates[1] = SamplerState.LinearWrap;
 
-                shader.CurrentTechnique.Passes["AccretionDiskPass"].Apply();
+                diskShader.CurrentTechnique.Passes["FlattenedDiskPass"].Apply();
 
-                //计算绘制区域（屏幕空间）
-                Vector2 drawPosition = Projectile.Center - Main.screenPosition;
-                Vector2 drawOrigin = new Vector2(actualWidth, actualHeight) * 0.5f;
-                Rectangle sourceRect = new Rectangle(0, 0, (int)actualWidth, (int)actualHeight);
-
-                for (int i = 0; i < 6; i++) {
-                    //绘制一个简单的四边形，shader会处理所有的视觉效果
-                    //使用TransverseTwill作为基础纹理，但实际效果由shader生成
-                    spriteBatch.Draw(
-                        TransverseTwill,
-                        drawPosition,
-                        null, //使用完整纹理
-                        Color.White * (1f - Projectile.alpha / 255f),
-                        Projectile.rotation + i * 0.1f,
-                        TransverseTwill.Size() * 0.5f, //使用纹理中心作为原点
-                        new Vector2(actualWidth / TransverseTwill.Width, actualHeight / TransverseTwill.Height) * (0.6f + 1 * 1.2f), //缩放到目标大小
-                        SpriteEffects.None,
-                        0
-                    );
+                //外层辉光
+                for (int i = 0; i < 2; i++) {
+                    float s = 2.2f + i * 0.8f;
+                    spriteBatch.Draw(TransverseTwill, drawPos, null,
+                        Color.White * alpha * (0.12f - i * 0.03f),
+                        Projectile.rotation + i * 0.15f + MathHelper.PiOver2,
+                        texHalf, diskScale * s, SpriteEffects.None, 0);
                 }
 
-                //恢复默认渲染状态
+                //盘面核心层
+                for (int i = 0; i < 4; i++) {
+                    float s = 0.85f + i * 0.22f;
+                    float a = alpha * (0.75f - i * 0.12f);
+                    spriteBatch.Draw(TransverseTwill, drawPos, null,
+                        Color.White * a,
+                        Projectile.rotation + i * 0.05f + MathHelper.PiOver2,
+                        texHalf, diskScale * s, SpriteEffects.None, 0);
+                }
+
                 spriteBatch.End();
             }
 
+            //绘制中央能量核心（使用AccretionDisk着色器）
             {
-                //准备渲染状态
                 spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive, SamplerState.LinearWrap,
                     DepthStencilState.None, RasterizerState.CullNone, null, Main.GameViewMatrix.TransformationMatrix);
 
-                Effect shader = EffectLoader.AccretionDisk.Value;
+                Effect orbShader = EffectLoader.AccretionDisk.Value;
+                float orbSize = actualSize * 0.35f; //核心比盘面小很多
+                Vector2 orbScale = new Vector2(orbSize / TransverseTwill.Width, orbSize / TransverseTwill.Height);
 
-                //计算实际渲染尺寸
-                float actualWidth = Projectile.width * Projectile.scale;
-                float actualHeight = Projectile.height * Projectile.scale;
+                orbShader.Parameters["transformMatrix"]?.SetValue(finalMatrix);
+                orbShader.Parameters["uTime"]?.SetValue(time);
+                orbShader.Parameters["rotationSpeed"]?.SetValue(RotationSpeed * 1.3f);
+                orbShader.Parameters["innerRadius"]?.SetValue(InnerRadius);
+                orbShader.Parameters["outerRadius"]?.SetValue(OuterRadius);
+                orbShader.Parameters["brightness"]?.SetValue(brightness * 1.5f);
+                orbShader.Parameters["distortionStrength"]?.SetValue(distortionStrength * 0.5f);
+                orbShader.Parameters["noiseTexture"]?.SetValue(TransverseTwill);
+                orbShader.Parameters["centerPos"]?.SetValue(drawPos);
+                orbShader.Parameters["innerColor"]?.SetValue(innerColor.ToVector4());
+                orbShader.Parameters["midColor"]?.SetValue(midColor.ToVector4());
+                orbShader.Parameters["outerColor"]?.SetValue(outerColor.ToVector4());
 
-                //世界空间到屏幕空间的变换矩阵
-                //这里不需要复杂的矩阵变换，shader中会处理纹理坐标
-                Matrix world = Matrix.Identity;
-                Matrix view = Main.GameViewMatrix.TransformationMatrix;
-                Matrix projection = Matrix.CreateOrthographicOffCenter(
-                    0, Main.screenWidth,
-                    Main.screenHeight, 0,
-                    -1, 1);
-
-                //组合矩阵
-                Matrix finalMatrix = world * view * projection;
-
-                shader.Parameters["transformMatrix"]?.SetValue(finalMatrix);
-                shader.Parameters["uTime"]?.SetValue(time);
-                shader.Parameters["rotationSpeed"]?.SetValue(RotationSpeed);
-                shader.Parameters["innerRadius"]?.SetValue(InnerRadius);
-                shader.Parameters["outerRadius"]?.SetValue(OuterRadius);
-                shader.Parameters["brightness"]?.SetValue(brightness);
-                shader.Parameters["distortionStrength"]?.SetValue(distortionStrength);
-                shader.Parameters["noiseTexture"]?.SetValue(TransverseTwill);
-
-                //设置中心位置
-                Vector2 screenCenter = Projectile.Center - Main.screenPosition;
-                shader.Parameters["centerPos"]?.SetValue(screenCenter);
-
-                //设置颜色
-                shader.Parameters["innerColor"]?.SetValue(innerColor.ToVector4());
-                shader.Parameters["midColor"]?.SetValue(midColor.ToVector4());
-                shader.Parameters["outerColor"]?.SetValue(outerColor.ToVector4());
-
-                //设置噪声纹理
                 Main.graphics.GraphicsDevice.Textures[1] = TransverseTwill;
                 Main.graphics.GraphicsDevice.SamplerStates[1] = SamplerState.LinearWrap;
 
-                shader.CurrentTechnique.Passes["AccretionDiskPass"].Apply();
+                orbShader.CurrentTechnique.Passes["AccretionDiskPass"].Apply();
 
-                //计算绘制区域（屏幕空间）
-                Vector2 drawPosition = Projectile.Center - Main.screenPosition;
-                Vector2 drawOrigin = new Vector2(actualWidth, actualHeight) * 0.5f;
-                Rectangle sourceRect = new Rectangle(0, 0, (int)actualWidth, (int)actualHeight);
-
-                for (int i = 0; i < 6; i++) {
-                    //绘制一个简单的四边形，shader会处理所有的视觉效果
-                    //使用TransverseTwill作为基础纹理，但实际效果由shader生成
-                    spriteBatch.Draw(
-                        TransverseTwill,
-                        drawPosition,
-                        null, //使用完整纹理
-                        Color.White * (1f - Projectile.alpha / 255f),
+                for (int i = 0; i < 3; i++) {
+                    float s = 0.85f + i * 0.2f;
+                    float a = alpha * (0.85f - i * 0.15f);
+                    spriteBatch.Draw(TransverseTwill, drawPos, null,
+                        Color.White * a,
                         Projectile.rotation + i * 0.1f,
-                        TransverseTwill.Size() * 0.5f, //使用纹理中心作为原点
-                        new Vector2(actualWidth / TransverseTwill.Width, actualHeight / TransverseTwill.Height) * (0.8f + 1 * 0.2f), //缩放到目标大小
-                        SpriteEffects.None,
-                        0
-                    );
+                        texHalf, orbScale * s, SpriteEffects.None, 0);
                 }
 
-                //恢复默认渲染状态
                 spriteBatch.End();
             }
         }

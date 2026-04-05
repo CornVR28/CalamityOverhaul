@@ -1,8 +1,6 @@
+﻿using CalamityOverhaul.Content.PRTTypes;
 using InnoVault.PRT;
-using Microsoft.Xna.Framework;
-using System;
 using Terraria;
-using CalamityOverhaul.Content.PRTTypes;
 
 namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.DomainFreeze
 {

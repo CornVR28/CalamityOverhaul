@@ -1,19 +1,13 @@
 ﻿#if DEBUG
 using CalamityOverhaul.Content.ADV.Scenarios;
-using CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machines;
-using CalamityOverhaul.Content.ADV.Scenarios.Shepel;
 using CalamityOverhaul.Content.ADV.Scenarios.SupCal.End.EternalBlazingNows;
 using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
 using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime;
-using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberwares.UIs;
-using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Skills.Sandevistans;
 using Microsoft.Xna.Framework.Graphics;
-using Mono.Cecil;
 using Terraria;
 using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace CalamityOverhaul
 {
