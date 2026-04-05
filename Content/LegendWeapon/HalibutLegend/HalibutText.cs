@@ -1,5 +1,4 @@
 ﻿using CalamityOverhaul.Common;
-using System;
 using System.Collections.Generic;
 using System.Reflection;
 using Terraria;
@@ -34,19 +33,10 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend
         }
 
         public static void SetTooltip(Item item, ref List<TooltipLine> tooltips) {
-            int index = InWorldBossPhase.Halibut_Level();
-            string newContent = index >= 0 && index <= 14 ? CWRLocText.GetTextValue($"Halibut_TextDictionary_Content_{index}") : "ERROR";
-            string num = (index + 1).ToString();
-            if (index == 14) {
-                num = CWRLocText.GetTextValue("Murasama_Text_Lang_End");
-            }
-
-            string text = LegendData.GetLevelTrialPreText(item.CWR(), "Murasama_Text_Lang_0", num);
-
-            tooltips.ReplacePlaceholder("[Lang4]", text, "");
+            //试炼文本已迁移至委托系统(HalibutQuestLine)，此处仅保留传奇状态文本
             tooltips.ReplacePlaceholder("legend_Text", CWRLocText.GetTextValue("Halibut_No_legend_Content_3"), "");
-            Color newColor = Color.Lerp(Color.IndianRed, Color.White, 0.5f + (float)Math.Sin(Main.GlobalTimeWrappedHourly) * 0.5f);
-            tooltips.ReplacePlaceholder("[Text]", VaultUtils.FormatColorTextMultiLine(newContent, newColor), "");
+            tooltips.ReplacePlaceholder("[Lang4]", "", "");
+            tooltips.ReplacePlaceholder("[Text]", "", "");
         }
     }
 }
