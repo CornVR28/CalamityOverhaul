@@ -243,10 +243,10 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
                 shader.Parameters["uTime"]?.SetValue(time);
                 shader.Parameters["rotationSpeed"]?.SetValue(RotationSpeed);
                 shader.Parameters["flattenRatio"]?.SetValue(FlattenAngle);
-                shader.Parameters["brightness"]?.SetValue(brightness * 1.4f);
-                shader.Parameters["distortionStrength"]?.SetValue(distortionStrength);
+                shader.Parameters["brightness"]?.SetValue(brightness * 3.0f);
+                shader.Parameters["distortionStrength"]?.SetValue(distortionStrength * 1.5f);
                 shader.Parameters["pulseIntensity"]?.SetValue(pulseIntensity);
-                shader.Parameters["dopplerStrength"]?.SetValue(0.5f);
+                shader.Parameters["dopplerStrength"]?.SetValue(0.6f);
                 shader.Parameters["noiseTexture"]?.SetValue(TransverseTwill);
                 shader.Parameters["centerPos"]?.SetValue(screenCenter);
                 shader.Parameters["innerColor"]?.SetValue(innerColor.ToVector4());
@@ -260,21 +260,20 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
 
                 //外层辉光（大尺度柔光晕，让盘面在伽马射线中依然可见）
                 for (int i = 0; i < 3; i++) {
-                    float s = 2.0f + i * 0.8f;
-                    float a = alpha * (0.2f - i * 0.05f);
+                    float s = 1.8f + i * 0.6f;
+                    float a = alpha * (0.45f - i * 0.1f);
                     spriteBatch.Draw(TransverseTwill, drawPos, null,
                         Color.White * a,
-                        Projectile.rotation + i * 0.15f + MathHelper.PiOver2,
+                        Projectile.rotation + i * 0.12f + MathHelper.PiOver2,
                         texHalf, diskScale * s, SpriteEffects.None, 0);
                 }
 
                 //核心盘面层（主要视觉细节）
-                for (int i = 0; i < 5; i++) {
-                    float s = 0.85f + i * 0.2f;
-                    float a = alpha * (0.9f - i * 0.12f);
+                for (int i = 0; i < 4; i++) {
+                    float s = 0.85f + i * 0.15f;
                     spriteBatch.Draw(TransverseTwill, drawPos, null,
-                        Color.White * a,
-                        Projectile.rotation + i * 0.05f + MathHelper.PiOver2,
+                        Color.White * alpha,
+                        Projectile.rotation + i * 0.04f + MathHelper.PiOver2,
                         texHalf, diskScale * s, SpriteEffects.None, 0);
                 }
 
@@ -294,8 +293,8 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
                 shader.Parameters["rotationSpeed"]?.SetValue(RotationSpeed * 1.2f);
                 shader.Parameters["innerRadius"]?.SetValue(0.12f);
                 shader.Parameters["outerRadius"]?.SetValue(0.85f);
-                shader.Parameters["brightness"]?.SetValue(brightness * 2.0f);
-                shader.Parameters["distortionStrength"]?.SetValue(distortionStrength * 0.5f);
+                shader.Parameters["brightness"]?.SetValue(brightness * 4.0f);
+                shader.Parameters["distortionStrength"]?.SetValue(distortionStrength * 0.3f);
                 shader.Parameters["noiseTexture"]?.SetValue(TransverseTwill);
                 shader.Parameters["centerPos"]?.SetValue(screenCenter);
                 shader.Parameters["innerColor"]?.SetValue(innerColor.ToVector4());
@@ -311,11 +310,10 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
                 Vector2 orbScale = new Vector2(orbSize / TransverseTwill.Width, orbSize / TransverseTwill.Height);
 
                 for (int i = 0; i < 4; i++) {
-                    float s = 0.8f + i * 0.25f;
-                    float a = alpha * (0.9f - i * 0.15f);
+                    float s = 0.7f + i * 0.2f;
                     spriteBatch.Draw(TransverseTwill, orbDrawPos, null,
-                        Color.White * a,
-                        Projectile.rotation + i * 0.12f,
+                        Color.White * alpha,
+                        Projectile.rotation + i * 0.1f,
                         texHalf, orbScale * s, SpriteEffects.None, 0);
                 }
 

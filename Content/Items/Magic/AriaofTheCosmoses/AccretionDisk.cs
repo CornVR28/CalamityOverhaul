@@ -360,8 +360,8 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
                 diskShader.Parameters["uTime"]?.SetValue(time);
                 diskShader.Parameters["rotationSpeed"]?.SetValue(RotationSpeed);
                 diskShader.Parameters["flattenRatio"]?.SetValue(0.55f);
-                diskShader.Parameters["brightness"]?.SetValue(brightness * 1.2f);
-                diskShader.Parameters["distortionStrength"]?.SetValue(distortionStrength);
+                diskShader.Parameters["brightness"]?.SetValue(brightness * 3.0f);
+                diskShader.Parameters["distortionStrength"]?.SetValue(distortionStrength * 1.5f);
                 diskShader.Parameters["pulseIntensity"]?.SetValue(0.1f);
                 diskShader.Parameters["dopplerStrength"]?.SetValue(0.35f);
                 diskShader.Parameters["noiseTexture"]?.SetValue(TransverseTwill);
@@ -376,21 +376,21 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
                 diskShader.CurrentTechnique.Passes["FlattenedDiskPass"].Apply();
 
                 //外层辉光
-                for (int i = 0; i < 2; i++) {
-                    float s = 2.2f + i * 0.8f;
+                for (int i = 0; i < 3; i++) {
+                    float s = 1.8f + i * 0.6f;
+                    float a = alpha * (0.4f - i * 0.1f);
                     spriteBatch.Draw(TransverseTwill, drawPos, null,
-                        Color.White * alpha * (0.12f - i * 0.03f),
-                        Projectile.rotation + i * 0.15f + MathHelper.PiOver2,
+                        Color.White * a,
+                        Projectile.rotation + i * 0.12f + MathHelper.PiOver2,
                         texHalf, diskScale * s, SpriteEffects.None, 0);
                 }
 
                 //盘面核心层
                 for (int i = 0; i < 4; i++) {
-                    float s = 0.85f + i * 0.22f;
-                    float a = alpha * (0.75f - i * 0.12f);
+                    float s = 0.85f + i * 0.15f;
                     spriteBatch.Draw(TransverseTwill, drawPos, null,
-                        Color.White * a,
-                        Projectile.rotation + i * 0.05f + MathHelper.PiOver2,
+                        Color.White * alpha,
+                        Projectile.rotation + i * 0.04f + MathHelper.PiOver2,
                         texHalf, diskScale * s, SpriteEffects.None, 0);
                 }
 
@@ -411,8 +411,8 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
                 orbShader.Parameters["rotationSpeed"]?.SetValue(RotationSpeed * 1.3f);
                 orbShader.Parameters["innerRadius"]?.SetValue(InnerRadius);
                 orbShader.Parameters["outerRadius"]?.SetValue(OuterRadius);
-                orbShader.Parameters["brightness"]?.SetValue(brightness * 1.5f);
-                orbShader.Parameters["distortionStrength"]?.SetValue(distortionStrength * 0.5f);
+                orbShader.Parameters["brightness"]?.SetValue(brightness * 4.0f);
+                orbShader.Parameters["distortionStrength"]?.SetValue(distortionStrength * 0.3f);
                 orbShader.Parameters["noiseTexture"]?.SetValue(TransverseTwill);
                 orbShader.Parameters["centerPos"]?.SetValue(drawPos);
                 orbShader.Parameters["innerColor"]?.SetValue(innerColor.ToVector4());
@@ -424,12 +424,11 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
 
                 orbShader.CurrentTechnique.Passes["AccretionDiskPass"].Apply();
 
-                for (int i = 0; i < 3; i++) {
-                    float s = 0.85f + i * 0.2f;
-                    float a = alpha * (0.85f - i * 0.15f);
+                for (int i = 0; i < 4; i++) {
+                    float s = 0.7f + i * 0.2f;
                     spriteBatch.Draw(TransverseTwill, drawPos, null,
-                        Color.White * a,
-                        Projectile.rotation + i * 0.1f,
+                        Color.White * alpha,
+                        Projectile.rotation + i * 0.08f,
                         texHalf, orbScale * s, SpriteEffects.None, 0);
                 }
 
