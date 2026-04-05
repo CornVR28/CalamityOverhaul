@@ -4,7 +4,7 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.ModLoader;
 
-namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Skills.Sandevistans
+namespace CalamityOverhaul.Content.Cyberwares.Implementation.Sandevistans
 {
     /// <summary>
     /// 斯安威斯坦技能
