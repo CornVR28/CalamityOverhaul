@@ -1,8 +1,8 @@
-using CalamityOverhaul.Content.ADV.QuestManager;
+﻿using CalamityOverhaul.Content.ADV.QuestManager;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 
-namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Quest.FishoilQuest
+namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Quest
 {
     /// <summary>
     /// 比目鱼委托在管理器列表中的自定义条目样式——
@@ -46,7 +46,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Quest.FishoilQuest
                 int y2 = entryRect.Y + (int)(t2 * entryRect.Height);
 
                 float wave = MathF.Sin(pulseTimer * 1.2f + t * 3f) * 0.5f + 0.5f;
-                Color bg = isSelected ? BgSelected : (isHovered ? BgHover : BgDeep);
+                Color bg = isSelected ? BgSelected : isHovered ? BgHover : BgDeep;
                 Color c = Color.Lerp(bg, Color.Lerp(bg, new Color(20, 60, 90), 0.3f), wave * 0.3f) * (alpha * 0.92f);
 
                 sb.Draw(px, new Rectangle(entryRect.X, y1, entryRect.Width, Math.Max(1, y2 - y1)),
