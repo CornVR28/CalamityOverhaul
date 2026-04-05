@@ -486,7 +486,8 @@ namespace CalamityOverhaul.Content.ADV.QuestManager.Styles
             // 摘要文本 
             float summaryY = titleY + 20f;
             Color summaryColor = PrimaryMid * (alpha * 0.6f);
-            string summary = entry.Summary ?? "";
+            //折叠态只显示单行，将换行符替换为空格并去除首尾空白
+            string summary = (entry.Summary ?? "").Replace("\r", "").Replace("\n", " ").Trim();
             //截断过长的摘要
             float maxSummaryW = entryRect.Width - 60f - iconOffset;
             if (font.MeasureString(summary).X * 0.65f > maxSummaryW) {

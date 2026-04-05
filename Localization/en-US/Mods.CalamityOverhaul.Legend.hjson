@@ -248,3 +248,23 @@ HalibutTrialQuestLine: {
 	Trial_12: 造物巅峰
 	Trial_13: 回到海里
 }
+
+MurasamaTrialQuestLine: {
+	QuestCategory: 鬼妖村正·试炼
+	TrackerWaiting: 目标不在场，等待召唤...
+	TrackerFighting: "{0}: {1:0%}"
+	Trial_0: 沙地幽影
+	Trial_1: 入侵之者
+	Trial_2: 腐化清除
+	Trial_3: 寄生威胁
+	Trial_4: 通向地狱
+	Trial_5: 钢铁齿轮
+	Trial_6: 灾影行动
+	Trial_7: 石化阵线
+	Trial_8: 月球坠落
+	Trial_9: 幻影制裁
+	Trial_10: 弑神之蛇
+	Trial_11: 丛林之炎
+	Trial_12: 核心终结
+	Trial_13: 原初回归
+}
