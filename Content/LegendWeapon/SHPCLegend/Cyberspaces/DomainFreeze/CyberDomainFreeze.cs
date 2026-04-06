@@ -1,6 +1,8 @@
-﻿using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Banish;
+﻿using CalamityOverhaul.Common;
+using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Banish;
 using System.Collections.Generic;
 using Terraria;
+using Terraria.Audio;
 using Terraria.DataStructures;
 using Terraria.ModLoader;
 
@@ -183,6 +185,12 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.DomainFre
                     npc.position += new Vector2(
                         Main.rand.NextFloat(-jitter, jitter),
                         Main.rand.NextFloat(-jitter, jitter));
+                }
+
+                if (entry.Timer == MathHelper.Max(0, entry.Duration - 90)) {
+                    if (!VaultUtils.isServer) {
+                        SoundEngine.PlaySound(CWRSound.FaultTransition, npc.Center);
+                    }
                 }
 
                 // 冻结时间结束 → 解冻

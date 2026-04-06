@@ -1,6 +1,8 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using CalamityOverhaul.Common;
+using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;
+using Terraria.Audio;
 using Terraria.ModLoader;
 
 namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.DomainFreeze
@@ -30,6 +32,10 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.DomainFre
         public override void AI() {
             Projectile.Center = Main.LocalPlayer.Center;
             if (Projectile.localAI[0] == 0f) {
+                if (!VaultUtils.isServer) {
+                    SoundEngine.PlaySound(CWRSound.FaultOccurred, Projectile.Center);
+                    SoundEngine.PlaySound(CWRSound.Faultrelease, Projectile.Center);
+                }
                 maxDrawRadius = Cyberspace.Radius * 1.15f;
                 Projectile.localAI[0] = 1f;
             }

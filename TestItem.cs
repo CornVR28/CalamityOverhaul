@@ -1,6 +1,8 @@
 ﻿#if DEBUG
 using CalamityOverhaul.Content.ADV.Scenarios;
+using CalamityOverhaul.Content.ADV.Scenarios.Shepel;
 using CalamityOverhaul.Content.ADV.Scenarios.SupCal.End.EternalBlazingNows;
+using CalamityOverhaul.Content.Cyberwares.UIs;
 using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
 using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime;
 using Microsoft.Xna.Framework.Graphics;
@@ -84,13 +86,13 @@ namespace CalamityOverhaul
             //Sandevistan.IsActive = !Sandevistan.IsActive;
             //CyberwareUI.Instance.Toggle();
 
-            //if (player.altFunctionUse == 0) {
-            //    Cyberspace.Activate(player);   // 展开领域
-            //    Cyberspace.SetLayer(3, player);
-            //}
-            //else {
-            //    Cyberspace.Deactivate(); // 收缩关闭
-            //}
+            if (player.altFunctionUse == 0) {
+                Cyberspace.Activate(player);   // 展开领域
+                Cyberspace.SetLayer(3, player);
+            }
+            else {
+                Cyberspace.Deactivate(); // 收缩关闭
+            }
 
             //HackTime.InfiniteHack = true;
 
@@ -110,12 +112,12 @@ namespace CalamityOverhaul
     internal class TestSystem : ModSystem
     {
         public override void PostUpdatePlayers() {
-            var current = Main.keyState;
-            var previous = Main.oldKeyState;
-            if (current.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.D1)
-                && !previous.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.D1)) {
-                TestContent();
-            }
+            //var current = Main.keyState;
+            //var previous = Main.oldKeyState;
+            //if (current.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.D1)
+            //    && !previous.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.D1)) {
+            //    TestContent();
+            //}
         }
 
         public static void TestContent() {

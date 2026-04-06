@@ -1,5 +1,7 @@
-﻿using System;
+﻿using CalamityOverhaul.Common;
+using System;
 using Terraria;
+using Terraria.Audio;
 using Terraria.DataStructures;
 using Terraria.ModLoader;
 
@@ -161,6 +163,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             Intensity = 0f;
             layerBurstTimer[0] = BurstDurations[0];
             SpawnActivationVFX(owner);
+
+            if (!VaultUtils.isServer) {
+                SoundEngine.PlaySound(CWRSound.FailureCurrent, owner.Center);
+                SoundEngine.PlaySound(CWRSound.Faultrelease, owner.Center);
+            }
         }
 
         /// <summary>
@@ -192,6 +199,10 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         public static void Deactivate() {
             targetIntensity = 0f;
             CurrentLayer = 0;
+
+            if (!VaultUtils.isServer) {
+                SoundEngine.PlaySound(CWRSound.Faultrelease, Main.LocalPlayer.Center);
+            }
         }
 
         /// <summary>

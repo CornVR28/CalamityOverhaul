@@ -1,4 +1,6 @@
-﻿using Terraria;
+﻿using CalamityOverhaul.Common;
+using Terraria;
+using Terraria.Audio;
 
 namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
 {
@@ -93,6 +95,10 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
             CameraOffset = Vector2.Zero;
             cameraTo = Vector2.Zero;
             HackTimeFreeze.Activate();
+
+            if (!VaultUtils.isServer) {
+                SoundEngine.PlaySound(CWRSound.Scanning, Main.LocalPlayer.Center);
+            }
         }
 
         /// <summary>
@@ -127,6 +133,10 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
             if (freshSelect) {
                 CameraProgress = 0f;
                 ZoomProgress = 0f;
+            }
+
+            if (!VaultUtils.isServer) {
+                SoundEngine.PlaySound(CWRSound.Hacker, Main.LocalPlayer.Center);
             }
         }
 

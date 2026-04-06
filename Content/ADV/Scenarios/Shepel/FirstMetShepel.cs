@@ -1,7 +1,10 @@
-﻿using CalamityOverhaul.Content.ADV.ADVChoices;
+﻿using CalamityOverhaul.Common;
+using CalamityOverhaul.Content.ADV.ADVChoices;
 using CalamityOverhaul.Content.ADV.DialogueBoxs;
 using CalamityOverhaul.Content.ADV.DialogueBoxs.Styles;
 using System;
+using Terraria;
+using Terraria.Audio;
 using Terraria.Localization;
 using Terraria.ModLoader;
 
@@ -69,6 +72,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel
                 Add(RolenameSHPC.Value, Choice1Silence.Value, onStart: () => {
                     if (SHPCDialogueBox.Instance?.GetActiveFullBodyPortrait() is ShepelFullBodyPortrait portrait) {
                         portrait.TriggerGlitch(1f, 1f);
+                        if (!VaultUtils.isServer) {
+                            SoundEngine.PlaySound(CWRSound.Fault);
+                        }
                     }
                 });
                 Add(RolenameSHPC.Value, Choice1Response.Value, onStart: () => {

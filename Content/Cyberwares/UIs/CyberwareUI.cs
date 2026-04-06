@@ -1,7 +1,9 @@
-﻿using InnoVault.UIHandles;
+﻿using CalamityOverhaul.Common;
+using InnoVault.UIHandles;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;
+using Terraria.Audio;
 using Terraria.Localization;
 using Terraria.ModLoader;
 
@@ -115,6 +117,10 @@ namespace CalamityOverhaul.Content.Cyberwares.UIs
                     closeAnimTimer = 0f;
                 }
                 panelRenderer.TriggerGlitch(0.8f);
+
+                if (!VaultUtils.isServer) {
+                    SoundEngine.PlaySound(CWRSound.Scanning, Main.LocalPlayer.Center);
+                }
             }
         }
 
@@ -127,6 +133,10 @@ namespace CalamityOverhaul.Content.Cyberwares.UIs
                 isClosing = true;
                 closeAnimTimer = 0f;
                 panelRenderer.TriggerGlitch(0.6f);
+
+                if (!VaultUtils.isServer) {
+                    SoundEngine.PlaySound(CWRSound.Scanning, Main.LocalPlayer.Center);
+                }
             }
         }
 

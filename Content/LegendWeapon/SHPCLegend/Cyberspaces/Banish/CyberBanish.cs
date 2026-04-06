@@ -1,6 +1,8 @@
-﻿using System;
+﻿using CalamityOverhaul.Common;
+using System;
 using System.Collections.Generic;
 using Terraria;
+using Terraria.Audio;
 
 namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Banish
 {
@@ -106,6 +108,10 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Banish
 
             // 冻结NPC运动
             npc.velocity = Vector2.Zero;
+
+            if (!VaultUtils.isServer) {
+                SoundEngine.PlaySound(CWRSound.Fault, Main.LocalPlayer.Center);
+            }
         }
 
         /// <summary>
