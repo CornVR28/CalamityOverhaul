@@ -29,6 +29,7 @@ namespace CalamityOverhaul.Common
         public static ModKeybind HackTime_Toggle { get; private set; }
         public static ModKeybind CyberBanish_Key { get; private set; }
         public static ModKeybind CyberFreeze_Key { get; private set; }
+        public static ModKeybind CyberwareSkill_Key { get; private set; }
 
         void ICWRLoader.LoadData() {
             Mod mod = CWRMod.Instance;
@@ -57,6 +58,7 @@ namespace CalamityOverhaul.Common
             HackTime_Toggle = KeybindLoader.RegisterKeybind(mod, "HackTime_Toggle", "N");
             CyberBanish_Key = KeybindLoader.RegisterKeybind(mod, "CyberBanish_Key", "Y");
             CyberFreeze_Key = KeybindLoader.RegisterKeybind(mod, "CyberFreeze_Key", "U");
+            CyberwareSkill_Key = KeybindLoader.RegisterKeybind(mod, "CyberwareSkill_Key", "V");
         }
 
         void ICWRLoader.UnLoadData() {
@@ -85,6 +87,7 @@ namespace CalamityOverhaul.Common
             HackTime_Toggle = null;
             CyberBanish_Key = null;
             CyberFreeze_Key = null;
+            CyberwareSkill_Key = null;
         }
     }
 }

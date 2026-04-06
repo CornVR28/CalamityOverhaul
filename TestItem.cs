@@ -112,26 +112,26 @@ namespace CalamityOverhaul
     internal class TestSystem : ModSystem
     {
         public override void PostUpdatePlayers() {
-            //var current = Main.keyState;
-            //var previous = Main.oldKeyState;
-            //if (current.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.D1)
-            //    && !previous.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.D1)) {
-            //    TestContent();
-            //}
+            var current = Main.keyState;
+            var previous = Main.oldKeyState;
+            if (current.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.D1)
+                && !previous.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.D1)) {
+                TestContent();
+            }
         }
 
         public static void TestContent() {
-            if (Cyberspace.Active) {
-                Cyberspace.Deactivate(); // 收缩关闭
-            }
-            else {
-                HackTime.InfiniteHack = true;
-                Cyberspace.Activate(Main.LocalPlayer);   // 展开领域
-                Cyberspace.SetLayer(3, Main.LocalPlayer);
-            }
+            //if (Cyberspace.Active) {
+            //    Cyberspace.Deactivate(); // 收缩关闭
+            //}
+            //else {
+            //    HackTime.InfiniteHack = true;
+            //    Cyberspace.Activate(Main.LocalPlayer);   // 展开领域
+            //    Cyberspace.SetLayer(3, Main.LocalPlayer);
+            //}
             //ScenarioManager.Reset<FirstMetShepel>();
             //ScenarioManager.Start<FirstMetShepel>();
-            //CyberwareUI.Instance.Toggle();
+            CyberwareUI.Instance.Toggle();
             //Sandevistan.IsActive = !Sandevistan.IsActive;
         }
     }
