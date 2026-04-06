@@ -52,9 +52,13 @@ namespace CalamityOverhaul.Content.Cyberwares.Implementation.Sandevistans
         private static bool wasActiveLastFrame;
         //用于检测装备变化，首次装备或切换型号时初始化冷却
         private static int trackedEquipType = -1;
+        //停用后恢复延迟计时器，防止反复按键卡加速
+        private static int recoveryDelay;
 
         private const float FadeInSpeed = 0.05f;
         private const float FadeOutSpeed = 0.01f;
+        //停用后需要等多少帧才能开始恢复冷却（2秒 = 120帧）
+        private const int RecoveryDelayTicks = 120;
 
         /// <summary>
         /// 每隔多少帧生成一个残影（越小残影越密集）
@@ -140,9 +144,17 @@ namespace CalamityOverhaul.Content.Cyberwares.Implementation.Sandevistans
                     CurrentCooldown = 0;
                     IsActive = false;
                 }
+                //激活期间重置恢复延迟
+                recoveryDelay = RecoveryDelayTicks;
             }
             else {
-                CurrentCooldown = MathHelper.Min(CurrentCooldown + RecoveryRate, MaxCooldown);
+                //停用后需要等待延迟结束才能开始恢复
+                if (recoveryDelay > 0) {
+                    recoveryDelay--;
+                }
+                else {
+                    CurrentCooldown = MathHelper.Min(CurrentCooldown + RecoveryRate, MaxCooldown);
+                }
             }
 
             //音效触发（基于状态变化边沿检测）

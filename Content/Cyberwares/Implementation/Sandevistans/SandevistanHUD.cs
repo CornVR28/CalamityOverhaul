@@ -1,5 +1,6 @@
 using InnoVault.UIHandles;
 using Microsoft.Xna.Framework.Graphics;
+using ReLogic.Content;
 using ReLogic.Graphics;
 using System;
 using System.Collections.Generic;
@@ -221,7 +222,7 @@ namespace CalamityOverhaul.Content.Cyberwares.Implementation.Sandevistans
             }
         }
 
-        //多层填充弧：外辉光 → 色差偏移 → 主弧 → 内核心亮线
+        //多层填充弧：外辉光 → 色差偏移 → 主弧 → 内核心亮线 → SoftGlow光晕
         private void DrawFilledArc(SpriteBatch sb, Texture2D px, Vector2 c, float ratio, bool active) {
             if (ratio <= 0.001f) return;
             Color arcColor = GetArcColor(ratio);
@@ -250,6 +251,9 @@ namespace CalamityOverhaul.Content.Cyberwares.Implementation.Sandevistans
 
                 //内核心高亮
                 DrawArc(sb, px, c, R_Main, segStart, sweep, T_Core, Color.White * (0.6f * pulse), segs);
+
+                //沿弧SoftGlow光晕，让弧线有真实的光溢出感
+                DrawArcGlowDots(sb, c, segStart, sweep, arcColor * (0.08f * pulse), 5);
             }
 
             //临界值抖动（<20%）
@@ -268,7 +272,7 @@ namespace CalamityOverhaul.Content.Cyberwares.Implementation.Sandevistans
             }
         }
 
-        //弧末端光标：多层同心圆模拟柔和辉光
+        //弧末端光标：用SoftGlow贴图绘制真实柔和圆形辉光
         private void DrawArcCap(SpriteBatch sb, Texture2D px, Vector2 c, float ratio, bool active) {
             if (ratio <= 0.001f || ratio >= 0.999f) return;
             float fillAngle = GetFillAngle(ratio);
@@ -276,11 +280,10 @@ namespace CalamityOverhaul.Content.Cyberwares.Implementation.Sandevistans
             Color arcCol = GetArcColor(ratio);
             float flutter = 0.7f + MathF.Sin(capFlutter) * 0.3f;
 
-            //多层由外到内递增亮度的圆形辉光
-            DrawSoftDot(sb, px, capPos, active ? 14f : 10f, arcCol * (0.06f * flutter));
-            DrawSoftDot(sb, px, capPos, active ? 8f : 6f, arcCol * (0.2f * flutter));
-            DrawSoftDot(sb, px, capPos, active ? 4.5f : 3f, arcCol * (0.55f * flutter));
-            DrawSoftDot(sb, px, capPos, active ? 2.2f : 1.5f, Color.White * (0.9f * flutter));
+            //SoftGlow多层辉光
+            DrawGlow(sb, capPos, active ? 0.5f : 0.35f, arcCol * (0.1f * flutter));
+            DrawGlow(sb, capPos, active ? 0.22f : 0.14f, arcCol * (0.35f * flutter));
+            DrawGlow(sb, capPos, active ? 0.08f : 0.05f, Color.White * (0.8f * flutter));
         }
 
         //32个刻度标记
@@ -313,7 +316,7 @@ namespace CalamityOverhaul.Content.Cyberwares.Implementation.Sandevistans
             }
         }
 
-        //旋转扫描线（带拖尾渐隐），双层辉光+实线
+        //旋转扫描线（带拖尾渐隐），双层辉光+实线，头部用SoftGlow
         private void DrawScanSweep(SpriteBatch sb, Texture2D px, Vector2 c, bool active) {
             float alpha = active ? 0.5f : 0.12f;
             int tailCount = active ? 8 : 3;
@@ -329,13 +332,13 @@ namespace CalamityOverhaul.Content.Cyberwares.Implementation.Sandevistans
                 //实线
                 DrawLine(sb, px, inner, outer, 1.2f, CyanHi * (alpha * fadeSq));
             }
-            //扫描头亮点
+            //扫描头亮点：SoftGlow柔光
             Vector2 headDir = new(MathF.Cos(scanAngle), MathF.Sin(scanAngle));
             Vector2 headPos = c + headDir * (R_TickOut + 3);
-            DrawSoftDot(sb, px, headPos, active ? 4f : 2f, CyanHi * (alpha * 0.8f));
+            DrawGlow(sb, headPos, active ? 0.18f : 0.08f, CyanHi * (alpha * 0.6f));
         }
 
-        //神经脉冲：激活/停用瞬间从中心放射的线条，多层叠加增加厚度
+        //神经脉冲：激活/停用瞬间从中心放射的线条，多层叠加 + SoftGlow末端亮点
         private void DrawNeuralPulse(SpriteBatch sb, Texture2D px, Vector2 c) {
             if (neuralBurst < 0.02f) return;
             int rays = 12;
@@ -352,9 +355,11 @@ namespace CalamityOverhaul.Content.Cyberwares.Implementation.Sandevistans
                 DrawLine(sb, px, start, end, 2f, CyanHi * (alpha * 0.5f));
                 //核心亮线
                 DrawLine(sb, px, start, end, 0.8f, Color.White * (alpha * 0.6f));
-                //射线末端亮点
-                DrawSoftDot(sb, px, end, 3f * neuralBurst, CyanHi * (alpha * 0.6f));
+                //射线末端SoftGlow亮点
+                DrawGlow(sb, end, 0.1f * neuralBurst, CyanHi * (alpha * 0.5f));
             }
+            //中心SoftGlow爆发
+            DrawGlow(sb, c, 0.35f * neuralBurst, CyanHi * (neuralBurst * 0.15f));
         }
 
         //故障碎片绘制
@@ -368,7 +373,7 @@ namespace CalamityOverhaul.Content.Cyberwares.Implementation.Sandevistans
             }
         }
 
-        //轨道数据粒子，带辉光和拖尾
+        //轨道数据粒子，带SoftGlow辉光和拖尾
         private void DrawDataParticles(SpriteBatch sb, Texture2D px, Vector2 c) {
             foreach (var d in dots) {
                 Vector2 pos = c + new Vector2(MathF.Cos(d.Angle), MathF.Sin(d.Angle)) * d.Radius;
@@ -376,10 +381,11 @@ namespace CalamityOverhaul.Content.Cyberwares.Implementation.Sandevistans
                 float tailAngle = d.Angle - d.Speed * 6f;
                 Vector2 tailPos = c + new Vector2(MathF.Cos(tailAngle), MathF.Sin(tailAngle)) * d.Radius;
                 DrawLine(sb, px, tailPos, pos, 1f, CyanHi * (d.Alpha * 0.3f));
-                //辉光
-                DrawSoftDot(sb, px, pos, d.Size + 3f, CyanHi * (d.Alpha * 0.15f));
-                //核心
-                DrawSoftDot(sb, px, pos, d.Size, CyanHi * d.Alpha);
+                //SoftGlow辉光
+                DrawGlow(sb, pos, (d.Size + 3f) / 32f, CyanHi * (d.Alpha * 0.12f));
+                //像素核心（保持锐利感）
+                int sz = Math.Max(1, (int)d.Size);
+                sb.Draw(px, new Rectangle((int)(pos.X - sz * 0.5f), (int)(pos.Y - sz * 0.5f), sz, sz), CyanHi * d.Alpha);
             }
         }
 
@@ -458,33 +464,38 @@ namespace CalamityOverhaul.Content.Cyberwares.Implementation.Sandevistans
             //细实线
             DrawLine(sb, px, a, b, 1.5f, traceCol);
             DrawLine(sb, px, b, d, 1.5f, traceCol);
-            //拐角亮点
-            DrawSoftDot(sb, px, b, 3f, traceCol * 0.6f);
-            //末端焊点：多层柔和
-            DrawSoftDot(sb, px, d, 5f, traceCol * 0.3f);
-            DrawSoftDot(sb, px, d, 2.5f, traceCol * 1.5f);
+            //拐角SoftGlow亮点
+            DrawGlow(sb, b, 0.08f, traceCol * 0.5f);
+            //末端焊点
+            DrawGlow(sb, d, 0.12f, traceCol * 0.3f);
+            DrawGlow(sb, d, 0.05f, traceCol * 1.2f);
         }
 
-        //激活/停用闪光：多层同心圆环由外到内递增亮度，模拟径向柔和衰减
+        //激活/停用闪光：用DiffusionCircle做径向扩散环 + SoftGlow做中心柔光
         private void DrawTransitionFlash(SpriteBatch sb, Texture2D px, Vector2 c) {
             if (transitionFlash < 0.01f) return;
-            float baseAlpha = transitionFlash * 0.25f;
-            Color flashCol = Color.Lerp(CyanHi, Color.White, 0.5f);
-            //从外向内绘制递减透明度的圆环，模拟径向高斯衰减
-            int layers = 8;
-            float maxR = R_TickOut + 18f;
-            for (int i = 0; i < layers; i++) {
-                float t = (float)i / (layers - 1);
-                float radius = MathHelper.Lerp(maxR, 0, t);
-                //高斯衰减曲线 e^(-3*t^2)
-                float falloff = MathF.Exp(-3f * t * t);
-                float alpha = baseAlpha * (0.1f + 0.9f * (1f - falloff));
-                //用多段弧绘制圆环
-                DrawArc(sb, px, c, radius, 0, MathHelper.TwoPi, radius * 0.3f, flashCol * alpha, 24);
+            Color flashCol = Color.Lerp(CyanHi, Color.White, 0.4f);
+
+            //DiffusionCircle扩散环
+            Texture2D diffTex = CWRAsset.DiffusionCircle?.Value;
+            if (diffTex != null) {
+                //外层扩散环：较大、较淡
+                float outerScale = (1.2f + (1f - transitionFlash) * 0.8f) * (R_TickOut + 8f) / (diffTex.Width * 0.5f);
+                Color outerCol = flashCol * (transitionFlash * 0.2f);
+                outerCol.A = 0;
+                sb.Draw(diffTex, c, null, outerCol, timer * 2f,
+                    diffTex.Size() / 2f, outerScale, SpriteEffects.None, 0f);
+                //内层扩散环：较小、较亮
+                float innerScale = outerScale * 0.5f;
+                Color innerCol = flashCol * (transitionFlash * 0.35f);
+                innerCol.A = 0;
+                sb.Draw(diffTex, c, null, innerCol, -timer * 3f,
+                    diffTex.Size() / 2f, innerScale, SpriteEffects.None, 0f);
             }
-            //中心亮核心
-            DrawSoftDot(sb, px, c, 10f * transitionFlash, Color.White * (transitionFlash * 0.35f));
-            DrawSoftDot(sb, px, c, 4f * transitionFlash, Color.White * (transitionFlash * 0.6f));
+
+            //SoftGlow中心柔光
+            DrawGlow(sb, c, 0.4f * transitionFlash, Color.White * (transitionFlash * 0.25f));
+            DrawGlow(sb, c, 0.15f * transitionFlash, Color.White * (transitionFlash * 0.5f));
         }
 
         #endregion
@@ -514,15 +525,27 @@ namespace CalamityOverhaul.Content.Cyberwares.Implementation.Sandevistans
                 new Vector2(0, 0.5f), new Vector2(length, thickness), SpriteEffects.None, 0f);
         }
 
-        //多层同心矩形模拟柔和圆点
-        private static void DrawSoftDot(SpriteBatch sb, Texture2D px, Vector2 pos, float radius, Color color) {
-            if (radius < 0.5f) return;
-            //3层由外到内递增不透明度
-            for (int i = 2; i >= 0; i--) {
-                float r = radius * (1f - i * 0.28f);
-                float a = (i == 0) ? 1f : (i == 1) ? 0.45f : 0.15f;
-                sb.Draw(px, new Rectangle((int)(pos.X - r), (int)(pos.Y - r),
-                    (int)(r * 2), (int)(r * 2)), color * a);
+        //用SoftGlow灰度图绘制真实的圆形柔光，scale是相对于原图(64x64)的缩放比
+        private static void DrawGlow(SpriteBatch sb, Vector2 pos, float scale, Color color) {
+            Texture2D glow = CWRAsset.SoftGlow?.Value;
+            if (glow == null || scale < 0.01f) return;
+            Color c = color;
+            c.A = 0;
+            sb.Draw(glow, pos, null, c, 0f, glow.Size() / 2f, scale, SpriteEffects.None, 0f);
+        }
+
+        //沿弧线等距离放置SoftGlow光晕，创造真实的Bloom溢出感
+        private static void DrawArcGlowDots(SpriteBatch sb, Vector2 center,
+            float startAngle, float sweepAngle, Color color, int count) {
+            Texture2D glow = CWRAsset.SoftGlow?.Value;
+            if (glow == null || count <= 0) return;
+            Color c = color;
+            c.A = 0;
+            float step = sweepAngle / count;
+            for (int i = 0; i <= count; i++) {
+                float angle = startAngle + step * i;
+                Vector2 pos = center + new Vector2(MathF.Cos(angle), MathF.Sin(angle)) * R_Main;
+                sb.Draw(glow, pos, null, c, 0f, glow.Size() / 2f, 0.25f, SpriteEffects.None, 0f);
             }
         }
 
