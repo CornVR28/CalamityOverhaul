@@ -21,6 +21,11 @@ namespace CalamityOverhaul.Content.ADV.Scenarios
         /// </summary>
         public bool IsCompleted { get; private set; }
         /// <summary>
+        /// 声明式触发策略，由<see cref="ADVScenarioScheduler"/>统一评估。
+        /// 返回null表示该场景使用传统的<see cref="Update"/>手写逻辑
+        /// </summary>
+        public ScenarioPolicy Policy { get; private set; }
+        /// <summary>
         /// 对话行列表
         /// </summary>
         private readonly List<DialogueLine> lines = new();
@@ -62,7 +67,16 @@ namespace CalamityOverhaul.Content.ADV.Scenarios
 
         public override void VaultSetup() {
             SetStaticDefaults();
+            Policy = ConfigurePolicy();
         }
+
+        /// <summary>
+        /// 重写此方法返回<see cref="ScenarioPolicy"/>来声明触发条件，
+        /// 由<see cref="ADVScenarioScheduler"/>统一调度。
+        /// 返回null（默认）表示不参与调度器的触发评估。
+        /// <see cref="Update"/>始终被调用，与Policy独立
+        /// </summary>
+        protected virtual ScenarioPolicy ConfigurePolicy() => null;
 
         public override void Unload() { }
 

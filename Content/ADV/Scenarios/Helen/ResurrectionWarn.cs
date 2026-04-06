@@ -56,30 +56,23 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen
             Add(Rolename.Value, Line10.Value);
         }
 
-        public override void Update(ADVSave save, Player player) {
-            if (!save.Get<HalibutADVData>().FirstMet) {
-                return;
-            }
-
-            if (save.Get<HalibutADVData>().FirstResurrectionWarning) {
-                return;
-            }
-
-            var halibutPlayer = player.GetOverride<HalibutPlayer>();
-            var resurrectionSystem = halibutPlayer.ResurrectionSystem;
-            if (resurrectionSystem == null) {
-                return;
-            }
-
-            if (resurrectionSystem.Ratio >= 0.7f) {
-                if (ScenarioManager.Start<ResurrectionWarn>()) {
-                    if (!HalibutUIHead.Instance.Open) {
-                        HalibutUIHead.Instance.Open = true;//打开比目鱼UI以便展示
-                    }
-                    halibutPlayer.CloseEyes();
-                    save.Get<HalibutADVData>().FirstResurrectionWarning = true;
+        protected override ScenarioPolicy ConfigurePolicy() => new() {
+            IsCompleted = save => save.Get<HalibutADVData>().FirstResurrectionWarning,
+            MarkCompleted = save => save.Get<HalibutADVData>().FirstResurrectionWarning = true,
+            CanTrigger = (save, player) => {
+                if (!save.Get<HalibutADVData>().FirstMet) {
+                    return false;
                 }
-            }
-        }
+                var resurrectionSystem = player.GetOverride<HalibutPlayer>().ResurrectionSystem;
+                return resurrectionSystem != null && resurrectionSystem.Ratio >= 0.7f;
+            },
+            OnStarted = (save, player) => {
+                if (!HalibutUIHead.Instance.Open) {
+                    HalibutUIHead.Instance.Open = true;
+                }
+                player.GetOverride<HalibutPlayer>().CloseEyes();
+            },
+            BlockedBy = ScenarioBlockers.Boss | ScenarioBlockers.ActiveScenario,
+        };
     }
 }

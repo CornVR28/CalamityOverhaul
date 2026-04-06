@@ -239,7 +239,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.MurasamaLegend.TrialQuests
         public int? GetMinHeight() => 80;
         public int? GetIdleCompactHeight(QuestEntryData entry) {
             if (entry.Progress <= 0f && entry.Status != QuestEntryStatus.Completed)
-                return 38;
+                return 46;
             return null;
         }
     }

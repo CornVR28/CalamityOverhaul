@@ -56,6 +56,12 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
         /// <summary>拖拽起始时鼠标与 widgetYOffset 的差</summary>
         private float dragAnchor;
 
+        /// <summary>玩家静止帧数计数</summary>
+        private float playerStillTimer;
+
+        /// <summary>紧凑条目的可见度（0=隐藏 1=完全可见），玩家移动时渐出</summary>
+        private float compactVisibility = 1f;
+
         #endregion
 
         #region UIHandle 生命周期
@@ -80,6 +86,8 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
             overlappingAlpha = 1f;
             trackedEntries.Clear();
             isDragging = false;
+            playerStillTimer = 0f;
+            compactVisibility = 1f;
             //widgetYOffset 保留存档值，-1 在首次 Update 中初始化为屏幕中部
         }
 
@@ -147,6 +155,21 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
                 dragAnchor = Main.mouseY - widgetYOffset;
             }
 
+            //紧凑条目在玩家移动时自动滑回隐藏，静止片刻后重新显示
+            var localPlayer = Main.LocalPlayer;
+            bool isMoving = localPlayer.velocity.LengthSquared() > 0.25f;
+            if (isMoving) {
+                playerStillTimer = 0f;
+            }
+            else {
+                playerStillTimer += 1f;
+            }
+            //静止约0.5秒（30帧）后才重新出现
+            float compactTarget = playerStillTimer > 30f ? 1f : 0f;
+            compactVisibility = MathHelper.Lerp(compactVisibility, compactTarget, 0.1f);
+            if (compactVisibility < 0.005f) compactVisibility = 0f;
+            if (compactVisibility > 0.995f) compactVisibility = 1f;
+
             //每帧夹持 Y 偏移到当前屏幕范围内（应对分辨率变化）
             int totalH = 0;
             for (int i = 0; i < trackedEntries.Count; i++) {
@@ -184,6 +207,16 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
             float eased = CWRUtils.EaseOutCubic(MathHelper.Clamp(slideProgress, 0f, 1f));
             int w = GetWidgetWidth(index);
             int x = (int)MathHelper.Lerp(-w - 10f, WidgetMarginLeft, eased);
+
+            //紧凑条目在玩家移动时滑回屏幕外
+            if (index < trackedEntries.Count) {
+                var entry = trackedEntries[index];
+                int? compactH = entry.TrackerStyle?.GetIdleCompactHeight(entry);
+                if (compactH.HasValue) {
+                    float cv = CWRUtils.EaseOutCubic(MathHelper.Clamp(compactVisibility, 0f, 1f));
+                    x = (int)MathHelper.Lerp(-w - 10f, x, cv);
+                }
+            }
 
             //纵向排列，从 widgetYOffset 开始
             int y = (int)widgetYOffset;

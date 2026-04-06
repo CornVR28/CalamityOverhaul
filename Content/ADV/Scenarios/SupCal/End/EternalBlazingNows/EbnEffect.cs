@@ -584,6 +584,11 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.End.EternalBlazingNows
             ResetEffects();
         }
 
+        public override void PostSetupContent() {
+            ADVScenarioScheduler.RegisterBlocker(() =>
+                IsActive ? ScenarioBlockers.Cutscene : ScenarioBlockers.None);
+        }
+
         public override void Unload() {
             IsActive = false;
             ResetEffects();

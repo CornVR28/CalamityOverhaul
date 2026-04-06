@@ -55,26 +55,15 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Gifts
                         return new Vector2(rect.Center.X, rect.Y - 70f);
                     }, offset: Vector2.Zero);
         }
-        public override void Update(ADVSave save, Player player) {
-            if (!NPC.downedMoonlord) {
-                return;//月球领主后才触发
-            }
-            if (CWRWorld.HasBoss) {
-                return;//避免在不合适的时候触发
-            }
-            var halibutPlayer = player.GetOverride<HalibutPlayer>();
-            if (!halibutPlayer.HasHalubut) {
-                return;//必须有比目鱼
-            }
-            if (!player.ZoneUnderworldHeight) {
-                return;//必须在地狱区域
-            }
-            if (save.Get<BossGiftADVData>().HellGift) {
-                return;//已经获得过奖励
-            }
-            if (StartScenario()) {
-                save.Get<BossGiftADVData>().HellGift = true;//标记已经获得奖励
-            }
-        }
+        protected override ScenarioPolicy ConfigurePolicy() => new() {
+            IsCompleted = save => save.Get<BossGiftADVData>().HellGift,
+            MarkCompleted = save => save.Get<BossGiftADVData>().HellGift = true,
+            CanTrigger = (save, player) => {
+                if (!NPC.downedMoonlord) return false;
+                var halibutPlayer = player.GetOverride<HalibutPlayer>();
+                return halibutPlayer.HasHalubut && player.ZoneUnderworldHeight;
+            },
+            BlockedBy = ScenarioBlockers.Boss | ScenarioBlockers.ActiveScenario,
+        };
     }
 }
