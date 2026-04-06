@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Terraria;
 
@@ -31,6 +31,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios
             foreach (var provider in blockerProviders) {
                 currentBlockers |= provider();
             }
+
 
             //2.遍历所有场景实例
             ADVScenarioBase bestCandidate = null;

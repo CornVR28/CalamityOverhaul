@@ -2,6 +2,7 @@
 
 namespace CalamityOverhaul.Common
 {
+    [VaultLoaden(CWRConstant.Asset + "Sounds")]
     public static class CWRSound
     {
         public static SoundStyle loadTheRounds = new SoundStyle(CWRConstant.Asset + "Sounds/loadTheRounds");
@@ -93,5 +94,12 @@ namespace CalamityOverhaul.Common
         public static SoundStyle Thunder = new SoundStyle(CWRConstant.Asset + "Sounds/Thunder");
         public static SoundStyle SandevistanEnd = new SoundStyle(CWRConstant.Asset + "Sounds/SandevistanEnd");
         public static SoundStyle SandevistanStart = new SoundStyle(CWRConstant.Asset + "Sounds/SandevistanStart");
+        public static SoundStyle FailureCurrent;
+        public static SoundStyle Fault;
+        public static SoundStyle FaultOccurred;
+        public static SoundStyle Faultrelease;
+        public static SoundStyle FaultTransition;
+        public static SoundStyle Hacker;
+        public static SoundStyle Scanning;
     }
 }
