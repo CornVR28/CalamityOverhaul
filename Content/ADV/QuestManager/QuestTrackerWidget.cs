@@ -172,9 +172,17 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
 
         #region 矩形计算
 
+        private int GetWidgetWidth(int index) {
+            if (index < trackedEntries.Count) {
+                int? preferred = trackedEntries[index].TrackerStyle?.GetPreferredWidth();
+                if (preferred.HasValue) return preferred.Value;
+            }
+            return WidgetWidth;
+        }
+
         private Rectangle GetWidgetRect(int index) {
             float eased = CWRUtils.EaseOutCubic(MathHelper.Clamp(slideProgress, 0f, 1f));
-            int w = WidgetWidth;
+            int w = GetWidgetWidth(index);
             int x = (int)MathHelper.Lerp(-w - 10f, WidgetMarginLeft, eased);
 
             //纵向排列，从 widgetYOffset 开始
@@ -199,10 +207,17 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
             int? custom = entry.TrackerStyle?.GetMinHeight();
             int baseH = custom ?? WidgetMinHeight;
 
+            //紧凑模式：由样式自行判定是否启用并返回紧凑高度
+            int? compactH = entry.TrackerStyle?.GetIdleCompactHeight(entry);
+            if (compactH.HasValue) {
+                return compactH.Value;
+            }
+
             //根据内容行数动态调整高度（考虑换行）
             var details = entry.GetTrackerDetails();
             var font = FontAssets.MouseText.Value;
-            int wrapWidth = (int)((WidgetWidth - WidgetPadding * 2) / 0.6f);
+            int w = GetWidgetWidth(index);
+            int wrapWidth = (int)((w - WidgetPadding * 2) / 0.6f);
             int contentH = 30;
             foreach (string line in details) {
                 string[] wrapped = Utils.WordwrapString(line, font, wrapWidth, 99, out _);

@@ -334,9 +334,12 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
 
             if (!isOpen || openProgress < 0.3f) return;
 
-            //如果玩家在面板打开期间通过其他方式打开了背包，强制关闭
+            //如果玩家在面板打开期间试图打开背包（如按下Escape/背包键），
+            //直接关闭委托面板让出UI控制权，避免强制屏蔽导致的按键无效闪烁感
             if (Main.playerInventory) {
-                Main.playerInventory = false;
+                isOpen = false;
+                SoundEngine.PlaySound(SoundID.MenuClose with { Volume = 0.5f });
+                return;
             }
 
             player.CWR().DontSwitchWeaponTime = 2;

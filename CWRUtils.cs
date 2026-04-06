@@ -249,15 +249,7 @@ namespace CalamityOverhaul
         #endregion
 
         #region GameUtils
-        /// <summary>
-        /// 是否处于入侵期间
-        /// </summary>
-        public static bool Invasion => Main.invasionType > 0 || Main.pumpkinMoon
-                || Main.snowMoon || DD2Event.Ongoing || CWRRef.GetAcidRainEventIsOngoing();
-
         public static bool IsTool(this Item item) => item.pick > 0 || item.axe > 0 || item.hammer > 0;
-
-        public static void GiveMeleeType(this Item item, bool isGiveTrueMelee = false) => item.DamageType = GiveMeleeType(isGiveTrueMelee);
 
         public static DamageClass GiveMeleeType(bool isGiveTrueMelee = false) => isGiveTrueMelee ? CWRRef.GetTrueMeleeDamageClass() : DamageClass.Melee;
 
@@ -326,23 +318,6 @@ namespace CalamityOverhaul
                 num += player.bank4.item.InquireItem(itemTypes);
             }
             return num;
-        }
-
-        /// <summary>
-        /// 目标弹药是否应该判定为一个木箭
-        /// </summary>
-        /// <param name="player"></param>
-        /// <param name="ammoType"></param>
-        /// <returns></returns>
-        public static bool IsWoodenAmmo(this Player player, int ammoType) {
-            if (player.hasMoltenQuiver && ammoType == ProjectileID.FireArrow) {
-                return true;
-            }
-            if (ammoType == ProjectileID.WoodenArrowFriendly) {
-                return true;
-            }
-
-            return false;
         }
 
         /// <summary>

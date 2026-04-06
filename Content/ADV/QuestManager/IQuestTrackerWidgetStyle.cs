@@ -62,6 +62,13 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
         /// <summary>获取追踪窗口的最小高度（null 则使用默认 90px）</summary>
         int? GetMinHeight();
 
+        /// <summary>
+        /// 根据条目当前状态返回紧凑高度（null 则不使用紧凑模式）。<br/>
+        /// 由样式自行判定何时启用紧凑模式（如待机/已完成/冷却中等），
+        /// 框架不预设空闲条件，完全交由样式决定
+        /// </summary>
+        int? GetIdleCompactHeight(QuestEntryData entry) => null;
+
         #endregion
     }
 }
