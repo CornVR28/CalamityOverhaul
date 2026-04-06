@@ -57,5 +57,14 @@ namespace CalamityOverhaul.Content.ADV
             }
         }
 
+        /// <summary>
+        /// 创建当前ADVSave的深拷贝（通过序列化往返实现，所有模块数据独立）
+        /// </summary>
+        public ADVSave DeepCopy() {
+            var copy = new ADVSave();
+            copy.LoadData(SaveData());
+            return copy;
+        }
+
     }
 }

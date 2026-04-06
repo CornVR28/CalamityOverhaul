@@ -1,5 +1,6 @@
 ﻿using CalamityOverhaul.Common;
 using CalamityOverhaul.Content.ADV.QuestManager;
+using CalamityOverhaul.Content.ADV.Scenarios.Helen;
 using CalamityOverhaul.Content.ADV.Scenarios.Helen.Quest;
 using Terraria;
 using Terraria.ID;
@@ -104,7 +105,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend.TrialQuests
         public override void PostUpdateWorld() {
             if (Main.dedServ || Main.gameMenu) return;
 
-            if (!Main.LocalPlayer.HasHalibut()) {
+            if (!Main.LocalPlayer.TryGetADVSave(out var save)) {
+                return;
+            }
+
+            if (!Main.LocalPlayer.HasHalibut() && save.Get<HalibutADVData>().FirstMet) {
                 return;//未获得比目鱼前不显示任何试炼
             }
 

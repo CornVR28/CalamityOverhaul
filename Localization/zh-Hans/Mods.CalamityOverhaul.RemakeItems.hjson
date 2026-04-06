@@ -1,12 +1,6 @@
 HalibutOverride: {
 	DisplayName: 大比目鱼炮
-	Tooltip:
-		'''
-		火枪子弹会被转化为海洋射流
-		legend_Text
-		[Lang4]
-		[Text]
-		'''
+	Tooltip: 火枪子弹会被转化为海洋射流
 }
 
 MurasamaOverride: {
@@ -18,10 +12,7 @@ MurasamaOverride: {
 		当剑之能量蓄满后，按下[KEY1]发射刀身。在刀身飞行过程中，按下左键执行升龙斩击 [Lang1]
 		升龙斩击命中敌人后会为武器1充能。按下[KEY2]消耗1点武器充能值，进行一次下砸攻击 [Lang2]
 		当武器充能值达到最大值10点后，再次用升龙斩击命中敌人将触发终结技  [Lang3]
-		legend_Text
 		[c/ff4500:"如果有链锯剑会更好"]
-		[Lang4]
-		[Text]
 		'''
 }
 

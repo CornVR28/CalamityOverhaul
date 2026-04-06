@@ -93,5 +93,13 @@ namespace CalamityOverhaul.Content.ADV.Scenarios
                 sc.Reset();
             active = null;
         }
+
+        /// <summary>
+        /// 世界切换时清理运行状态，防止跨世界场景阻塞。
+        /// 仅清理运行时状态（active引用），不清除已注册的场景定义
+        /// </summary>
+        internal static void OnWorldCleanup() {
+            active = null;
+        }
     }
 }

@@ -20,7 +20,8 @@ namespace CalamityOverhaul.Content.ADV
 
         public override ModPlayer Clone(Player newEntity) {
             ADVSavePlayer modPlayer = (ADVSavePlayer)base.Clone(newEntity);
-            modPlayer.ADVSave = ADVSave;
+            //深拷贝ADVSave，避免克隆体与原始玩家共享同一数据实例
+            modPlayer.ADVSave = ADVSave?.DeepCopy() ?? new ADVSave();
             return modPlayer;
         }
 

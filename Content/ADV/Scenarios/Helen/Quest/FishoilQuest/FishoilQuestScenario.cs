@@ -56,6 +56,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Quest.FishoilQuest
         void IWorldInfo.OnWorldLoad() {
             Spwand = false;
             scenarioStarted = false;
+            spawnDelayTimer = 0;
         }
 
         public override void SetStaticDefaults() {

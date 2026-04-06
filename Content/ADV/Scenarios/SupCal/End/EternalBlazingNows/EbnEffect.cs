@@ -576,6 +576,14 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.End.EternalBlazingNows
             }
         }
 
+        public override void OnWorldLoad() {
+            IsActive = false;
+            CekTimer = 0;
+            Sengs = 0f;
+            particleTimer = 0;
+            ResetEffects();
+        }
+
         public override void Unload() {
             IsActive = false;
             ResetEffects();
