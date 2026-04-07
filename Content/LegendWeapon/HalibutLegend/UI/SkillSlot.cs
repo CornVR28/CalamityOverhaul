@@ -164,7 +164,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend.UI
                 return;
             }
             //兜底校验：如果面板已关闭、正在拖拽、或鼠标实际不在此槽位上，强制清除
-            if (!hoverInMainPage || beingDragged || HalibutUIPanel.Instance.Sengs <= 0f || HalibutUIPanel.Instance.IsDragging) {
+            if (!hoverInMainPage || beingDragged || HalibutUIPanel.Instance.OpenProgress <= 0f || HalibutUIPanel.Instance.IsDragging) {
                 ClearHoveredState();
                 return;
             }

@@ -188,7 +188,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend.UI
         ///<summary>
         ///是否应该显示面板
         ///</summary>
-        public static bool ShouldShow => HalibutUIPanel.Instance.Sengs >= 1f;
+        public static bool ShouldShow => HalibutUIPanel.Instance.OpenProgress >= 1f;
 
         /// <summary>
         /// 逻辑更新，用于处理不应受帧率影响的动画和状态更新

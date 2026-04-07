@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CalamityOverhaul.Common;
+using System;
 using Terraria;
 using Terraria.ModLoader;
 
@@ -43,6 +44,7 @@ namespace CalamityOverhaul.Content.Cyberwares.Implementation.Sandevistans
                 return;
             }
             IsActive = true;
+            TimeGear.Register("Sandevistan", SlowFactor);
             SnapshotAllEntities();
         }
 
@@ -52,6 +54,7 @@ namespace CalamityOverhaul.Content.Cyberwares.Implementation.Sandevistans
                 return;
             }
             IsActive = false;
+            TimeGear.Unregister("Sandevistan");
             ClearAllCache();
         }
 

@@ -29,6 +29,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         private const float HomingStrength = 0.025f;
         private const float HomingRange = 900f;
         private const int ParticleInterval = 3;
+        private const int ExtraUpdates = 2;
+        private const int TotalAICalls = MaxLife * (1 + ExtraUpdates);
+        private const float MinTrailSpacing = 10f;
 
         #endregion
 
@@ -96,6 +99,10 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         private ColorTheme theme;
         private float fadeAlpha;
         private int particleTimer;
+        private float age;
+        private float flyAngle;
+        private Vector2[] trailHistory;
+        private int trailHistoryCount;
 
         /// <summary>超驱混合量 0-1，在领域内平滑过渡到1</summary>
         private float overdriveAmount;
@@ -112,6 +119,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         public override void SetStaticDefaults() {
             ProjectileID.Sets.TrailCacheLength[Projectile.type] = TrailCacheLen;
             ProjectileID.Sets.TrailingMode[Projectile.type] = 2;
+            CWRLoad.ProjValue.ImmuneFrozen[Type] = true;
         }
 
         public override void SetDefaults() {
@@ -125,52 +133,59 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             Projectile.timeLeft = MaxLife;
             Projectile.usesLocalNPCImmunity = true;
             Projectile.localNPCHitCooldown = 12;
-            Projectile.extraUpdates = 2;
+            Projectile.extraUpdates = ExtraUpdates;
             Projectile.DamageType = DamageClass.Magic;
         }
 
         public override void AI() {
-            // 初始化颜色主题（仅第一帧）
+            //初始化（仅第一帧）
             if (Projectile.localAI[0] == 0f) {
                 themeIndex = (int)Projectile.ai[0] % Themes.Length;
                 if (themeIndex < 0) themeIndex = 0;
                 theme = Themes[themeIndex];
+                flyAngle = Projectile.velocity.ToRotation();
                 Projectile.localAI[0] = 1f;
             }
 
-            // 微追踪：寻找最近NPC并柔和偏转
-            NPC target = Projectile.Center.FindClosestNPC(120f);
-            if (target != null && Projectile.numHits == 0) {
-                Vector2 desired = (target.Center - Projectile.Center).SafeNormalize(Projectile.velocity.SafeNormalize(Vector2.UnitX));
-                float currentAngle = Projectile.velocity.ToRotation();
-                float targetAngle = desired.ToRotation();
-                float newAngle = MathHelper.Lerp(currentAngle, targetAngle, HomingStrength);
-                // 限制单帧最大偏转角度，确保弧度自然
-                float angleDiff = MathHelper.WrapAngle(targetAngle - currentAngle);
-                float maxTurn = 0.04f;
-                float clampedDiff = MathHelper.Clamp(angleDiff, -maxTurn, maxTurn);
-                newAngle = currentAngle + clampedDiff;
-                Projectile.velocity = newAngle.ToRotationVector2() * Projectile.velocity.Length();
+            float timeScale = TimeGear.TimeScale;
+            float effectiveSpeed = Speed * timeScale;
+
+            //微追踪：仅在有运动时执行，方向存入flyAngle，冻结时保留原方向
+            if (effectiveSpeed > 0.01f) {
+                NPC target = Projectile.Center.FindClosestNPC(120f);
+                if (target != null && Projectile.numHits == 0) {
+                    float targetAngle = (target.Center - Projectile.Center).ToRotation();
+                    float angleDiff = MathHelper.WrapAngle(targetAngle - flyAngle);
+                    float maxTurn = 0.04f;
+                    flyAngle += MathHelper.Clamp(angleDiff, -maxTurn, maxTurn);
+                }
             }
 
-            // 维持速度
-            if (Projectile.velocity.Length() < Speed) {
-                Projectile.velocity = Projectile.velocity.SafeNormalize(Vector2.UnitX) * Speed;
+            Projectile.velocity = flyAngle.ToRotationVector2() * effectiveSpeed;
+            Projectile.rotation = flyAngle;
+
+            //自管理生命周期：age按timeScale推进，时缓期间等比延长寿命
+            age += timeScale;
+            Projectile.timeLeft = MaxLife;
+            if (age >= TotalAICalls) {
+                Projectile.Kill();
+                return;
             }
 
-            Projectile.rotation = Projectile.velocity.ToRotation();
-
-            // 淡入/淡出
-            float life = 1f - (float)Projectile.timeLeft / MaxLife;
-            if (life < 0.08f) {
-                fadeAlpha = life / 0.08f;
+            //渐变：基于age比例，不依赖timeLeft
+            float lifeRatio = age / TotalAICalls;
+            if (lifeRatio < 0.08f) {
+                fadeAlpha = lifeRatio / 0.08f;
             }
-            else if (Projectile.timeLeft < 20) {
-                fadeAlpha = Projectile.timeLeft / 20f;
+            else if (lifeRatio > 0.9f) {
+                fadeAlpha = (1f - lifeRatio) / 0.1f;
             }
             else {
                 fadeAlpha = 1f;
             }
+
+            //自管理拖尾位置：以最小间距记录，避免时缓下拖尾坍缩
+            UpdateTrailHistory();
 
             // ---- 超驱检测与过渡
             bool insideDomain = Cyberspace.IsInsideDomain(Projectile.Center);
@@ -201,12 +216,30 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
                 : theme.Core;
             Lighting.AddLight(Projectile.Center, lightCol.ToVector3() * (0.6f + overdriveAmount * 0.8f) * fadeAlpha);
 
-            // 方形科幻粒子（超驱时极密集）
-            int interval = overdriveAmount > 0.3f ? 1 : ParticleInterval;
-            particleTimer++;
-            if (particleTimer >= interval && Main.netMode != NetmodeID.Server) {
-                particleTimer = 0;
-                SpawnCyberParticles();
+            //方形科幻粒子（冻结时不生成）
+            if (timeScale > 0.01f) {
+                int baseInterval = overdriveAmount > 0.3f ? 1 : ParticleInterval;
+                int interval = (int)MathHelper.Max(baseInterval / timeScale, baseInterval);
+                particleTimer++;
+                if (particleTimer >= interval && Main.netMode != NetmodeID.Server) {
+                    particleTimer = 0;
+                    SpawnCyberParticles();
+                }
+            }
+        }
+
+        private void UpdateTrailHistory() {
+            trailHistory ??= new Vector2[TrailCacheLen];
+            Vector2 center = Projectile.Center;
+            if (trailHistoryCount == 0) {
+                trailHistory[0] = center;
+                trailHistoryCount = 1;
+            }
+            else if (Vector2.DistanceSquared(center, trailHistory[0]) >= MinTrailSpacing * MinTrailSpacing) {
+                int copyLen = Math.Min(trailHistoryCount, TrailCacheLen - 1);
+                Array.Copy(trailHistory, 0, trailHistory, 1, copyLen);
+                trailHistory[0] = center;
+                if (trailHistoryCount < TrailCacheLen) trailHistoryCount++;
             }
         }
 
@@ -270,7 +303,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         private Color ColorFunction(Vector2 _) => Color.White;
 
         void IPrimitiveDrawable.DrawPrimitives() {
-            if (Projectile.oldPos == null || fadeAlpha < 0.01f)
+            if (trailHistory == null || fadeAlpha < 0.01f)
                 return;
 
             Effect shader = EffectLoader.CyberTraceBeam?.Value;
@@ -278,23 +311,18 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             Texture2D noise = CWRAsset.Extra_193?.Value;
             if (noise == null) return;
 
-            // 构建拖尾位置数组，无效位置用最后有效位置填充（尾部收束）
+            //构建拖尾位置：头部为当前位置，后续从自管理历史取
             trailPositions ??= new Vector2[TrailCacheLen];
-            int validCount = 0;
-            Vector2 lastValidPos = Projectile.Center;
-            for (int i = 0; i < TrailCacheLen; i++) {
-                if (Projectile.oldPos[i] == Vector2.Zero) {
-                    trailPositions[i] = lastValidPos;
-                }
-                else {
-                    trailPositions[i] = Projectile.oldPos[i] + Projectile.Size * 0.5f;
-                    lastValidPos = trailPositions[i];
-                    validCount++;
-                }
+            trailPositions[0] = Projectile.Center;
+            for (int i = 1; i < TrailCacheLen; i++) {
+                int histIdx = i - 1;
+                trailPositions[i] = histIdx < trailHistoryCount
+                    ? trailHistory[histIdx]
+                    : trailPositions[i - 1];
             }
-            currentValidCount = validCount;
+            currentValidCount = Math.Min(trailHistoryCount + 1, TrailCacheLen);
 
-            if (validCount < 3) return;
+            if (currentValidCount < 3) return;
 
             trail ??= new Trail(trailPositions, WidthFunction, ColorFunction);
             trail.TrailPositions = trailPositions;

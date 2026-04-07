@@ -78,6 +78,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         private float chargeRatio; // 0~1
         private float fadeAlpha;
         private int particleTimer;
+        private float flyAngle;
 
         /// <summary>超驱混合量 0-1</summary>
         private float overdriveAmount;
@@ -103,6 +104,10 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         }
 
         #endregion
+
+        public override void SetStaticDefaults() {
+            CWRLoad.ProjValue.ImmuneFrozen[Type] = true;
+        }
 
         public override void SetDefaults() {
             Projectile.width = 30;
@@ -291,7 +296,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
 
             State = OrbState.Flying;
             Vector2 aimDir = (Main.MouseWorld - owner.Center).SafeNormalize(Vector2.UnitX);
-            Projectile.velocity = aimDir * FlySpeed;
+            flyAngle = aimDir.ToRotation();
+            float timeScale = TimeGear.TimeScale;
+            Projectile.velocity = aimDir * FlySpeed * timeScale;
             Projectile.tileCollide = true;
             Projectile.timeLeft = 300; // 飞行最多5秒
 
@@ -320,7 +327,12 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         #region 飞行阶段
 
         private void AI_Flying() {
-            Projectile.rotation = Projectile.velocity.ToRotation();
+            //根据变速齿轮缩放飞行速度，方向从flyAngle恢复避免冻结后丢失
+            float timeScale = TimeGear.TimeScale;
+            float effectiveSpeed = FlySpeed * timeScale;
+            Projectile.velocity = flyAngle.ToRotationVector2() * effectiveSpeed;
+
+            Projectile.rotation = flyAngle;
             fadeAlpha = 1f;
 
             // 飞行发光（超驱时更亮）
@@ -329,12 +341,15 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
                 ODCore, overdriveAmount);
             Lighting.AddLight(Projectile.Center, flyCore.ToVector3() * (0.7f + overdriveAmount * 0.8f));
 
-            // 拖尾粒子（超驱时极密集）
-            int interval = overdriveAmount > 0.3f ? 1 : TrailParticleInterval;
-            particleTimer++;
-            if (particleTimer >= interval && Main.netMode != NetmodeID.Server) {
-                particleTimer = 0;
-                SpawnTrailParticles();
+            //拖尾粒子（冻结时不生成）
+            if (timeScale > 0.01f) {
+                int baseInterval = overdriveAmount > 0.3f ? 1 : TrailParticleInterval;
+                int interval = (int)MathHelper.Max(baseInterval / timeScale, baseInterval);
+                particleTimer++;
+                if (particleTimer >= interval && Main.netMode != NetmodeID.Server) {
+                    particleTimer = 0;
+                    SpawnTrailParticles();
+                }
             }
         }
 

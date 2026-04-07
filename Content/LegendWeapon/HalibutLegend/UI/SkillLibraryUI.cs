@@ -41,7 +41,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend.UI
         private const int IconsPerRow = 4;
 
         //展开动画
-        public float Sengs;
+        public float OpenProgress;
         private float contentFade;
 
         //滚动相关
@@ -91,30 +91,30 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend.UI
 
         public override void Update() {
             //展开动画逻辑
-            bool shouldOpen = HalibutUIHead.Instance.Open && HalibutUIPanel.Instance.Sengs >= 0.8f;
+            bool shouldOpen = HalibutUIHead.Instance.Open && HalibutUIPanel.Instance.OpenProgress >= 0.8f;
             if (shouldOpen) {
-                if (Sengs < 1f) {
-                    Sengs += 0.08f;
+                if (OpenProgress < 1f) {
+                    OpenProgress += 0.08f;
                 }
             }
             else {
-                if (Sengs > 0f) {
-                    Sengs -= 0.1f;
+                if (OpenProgress > 0f) {
+                    OpenProgress -= 0.1f;
                 }
             }
-            Sengs = Math.Clamp(Sengs, 0f, 1f);
+            OpenProgress = Math.Clamp(OpenProgress, 0f, 1f);
 
             //更新飞行粒子（即使面板关闭也要更新）
             UpdateFlyingParticles();
 
-            if (Sengs <= 0.01f) {
+            if (OpenProgress <= 0.01f) {
                 IsDragHighlighted = false;
                 highlightIntensity = 0f;
                 return;
             }
 
             //内容淡入
-            if (Sengs > 0.5f) {
+            if (OpenProgress > 0.5f) {
                 contentFade += (1f - contentFade) * 0.12f;
             }
             else {
@@ -132,7 +132,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend.UI
 
             //计算位置（在主面板上方向上滑出）
             Vector2 panelPos = HalibutUIPanel.Instance.DrawPosition;
-            float slideOffset = MathHelper.Max((1f - CWRUtils.EaseOutBack(Sengs)), 0) * PanelHeight;
+            float slideOffset = MathHelper.Max((1f - CWRUtils.EaseOutBack(OpenProgress)), 0) * PanelHeight;
             DrawPosition = new Vector2(panelPos.X, panelPos.Y - PanelHeight - 10 + slideOffset);
             Size = new Vector2(PanelWidth, PanelHeight + 40);
             UIHitBox = DrawPosition.GetRectangle(Size);
@@ -294,7 +294,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend.UI
 
         private void UpdateBubbles() {
             bubbleSpawnTimer++;
-            if (Sengs > 0.5f && bubbleSpawnTimer >= 20 && bubbles.Count < 12) {
+            if (OpenProgress > 0.5f && bubbleSpawnTimer >= 20 && bubbles.Count < 12) {
                 bubbleSpawnTimer = 0;
                 float x = DrawPosition.X + Main.rand.NextFloat(20f, Size.X - 20f);
                 float y = DrawPosition.Y + Size.Y - 10f;
@@ -475,11 +475,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend.UI
                 particle.Draw(spriteBatch);
             }
 
-            if (Sengs <= 0.01f) {
+            if (OpenProgress <= 0.01f) {
                 return;
             }
 
-            float alpha = Math.Min(Sengs * 1.5f, 1f);
+            float alpha = Math.Min(OpenProgress * 1.5f, 1f);
 
             //绘制面板
             DrawPanel(spriteBatch, alpha);
@@ -503,7 +503,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend.UI
         public void DoDrawDraggingSlot(SpriteBatch spriteBatch) {
             //绘制拖拽中的槽位（在最上层）
             if (draggingSlot != null) {
-                DrawDraggingSlot(spriteBatch, Math.Min(Sengs * 1.5f, 1f));
+                DrawDraggingSlot(spriteBatch, Math.Min(OpenProgress * 1.5f, 1f));
             }
         }
 

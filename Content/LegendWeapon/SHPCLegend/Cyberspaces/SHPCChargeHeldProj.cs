@@ -60,6 +60,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             Projectile.ignoreWater = true;
             Projectile.penetrate = -1;
             Projectile.timeLeft = 60;
+            Projectile.hide = true;
         }
 
         public override bool? CanDamage() => false;
@@ -79,6 +80,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
                 Projectile.Kill();
                 return;
             }
+
+            Owner.heldProj = Projectile.whoAmI;
 
             if (recoiling) {
                 AI_Recoil();

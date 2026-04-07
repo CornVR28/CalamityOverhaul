@@ -209,9 +209,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         /// 每帧逻辑更新，驱动多层展开/收缩过渡
         /// </summary>
         public static void Update() {
-            //累计效果时间：骇客时间期间放缓10倍
+            //累计效果时间：根据变速齿轮缩放，最低保持0.1倍速让着色器动画不完全停止
             float dt = 1f / 60f;
-            float timeSpeed = HackTime.HackTime.Active ? 0.1f : 1f;
+            float timeSpeed = TimeGear.IsTimeSlowed ? MathHelper.Max(TimeGear.TimeScale, 0.1f) : 1f;
             EffectTime += dt * timeSpeed;
 
             //强度过渡：关闭时Intensity收缩要比layerExpand更慢，确保收缩动画可见

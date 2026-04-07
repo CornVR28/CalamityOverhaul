@@ -1,4 +1,5 @@
-﻿using Terraria;
+﻿using CalamityOverhaul.Common;
+using Terraria;
 using Terraria.ModLoader;
 
 namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
@@ -37,6 +38,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
         public static void Activate() {
             if (IsActive) return;
             IsActive = true;
+            TimeGear.Register("HackTimeFreeze", 0f);
             SnapshotPositions();
         }
 
@@ -45,6 +47,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
         /// </summary>
         public static void Deactivate() {
             IsActive = false;
+            TimeGear.Unregister("HackTimeFreeze");
         }
 
         private static void SnapshotPositions() {
