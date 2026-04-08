@@ -11,12 +11,10 @@ namespace CalamityOverhaul.Common
     [VaultLoaden(CWRConstant.Effects)]
     public class EffectLoader : RenderHandle
     {
-        public static ArmorShaderData StreamerDust { get; set; }
         public static Asset<Effect> PowerSFShader { get; set; }
         public static Asset<Effect> WarpShader { get; set; }
         public static Asset<Effect> NeutronRing { get; set; }
         public static Asset<Effect> PrimeHalo { get; set; }
-        public static Asset<Effect> TwistColoring { get; set; }
         public static Asset<Effect> KnifeRendering { get; set; }
         public static Asset<Effect> KnifeDistortion { get; set; }
         public static Asset<Effect> GradientTrail { get; set; }
