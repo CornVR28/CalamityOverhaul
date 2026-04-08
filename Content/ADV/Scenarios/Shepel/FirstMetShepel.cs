@@ -3,7 +3,6 @@ using CalamityOverhaul.Content.ADV.ADVChoices;
 using CalamityOverhaul.Content.ADV.DialogueBoxs;
 using CalamityOverhaul.Content.ADV.DialogueBoxs.Styles;
 using System;
-using Terraria;
 using Terraria.Audio;
 using Terraria.Localization;
 using Terraria.ModLoader;

@@ -2,7 +2,6 @@
 using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
 using Terraria;
 using Terraria.Audio;
-using Terraria.ModLoader;
 
 namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
 {

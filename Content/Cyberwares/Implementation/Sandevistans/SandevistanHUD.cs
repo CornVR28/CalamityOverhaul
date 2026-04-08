@@ -3,7 +3,6 @@ using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime;
 using CalamityOverhaul.Content.QuestLogs;
 using InnoVault.UIHandles;
 using Microsoft.Xna.Framework.Graphics;
-using ReLogic.Content;
 using ReLogic.Graphics;
 using System;
 using System.Collections.Generic;
