@@ -96,6 +96,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             CameraOffset = Vector2.Zero;
             cameraTo = Vector2.Zero;
             HackTimeFreeze.Activate();
+            HackTimeRAM.Refill();
 
             if (!VaultUtils.isServer) {
                 SoundEngine.PlaySound(CWRSound.Scanning, Main.LocalPlayer.Center);
@@ -175,6 +176,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             //光圈动画计时
             ReticleTimer += 0.016f;
 
+            //RAM自动恢复
+            HackTimeRAM.Update();
+
             //处理运镜逻辑
             UpdateCamera();
         }
@@ -250,6 +254,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             cameraTo = Vector2.Zero;
             InfiniteHack = false;
             HackTimeFreeze.Deactivate();
+            HackTimeRAM.Reset();
         }
     }
 }

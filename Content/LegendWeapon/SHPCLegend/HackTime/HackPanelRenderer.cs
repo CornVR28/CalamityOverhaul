@@ -141,7 +141,12 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
         public void HandleClick() {
             if (!visible) return;
             if (hoveredSlot >= 0 && Queue != null) {
-                Queue.Enqueue(QuickHackRegistry.All[hoveredSlot], hoveredSlot);
+                var hack = QuickHackRegistry.All[hoveredSlot];
+                //RAM不足时拒绝入队
+                if (!HackTimeRAM.CanAfford(hack.RamCost)) return;
+                if (Queue.Enqueue(hack, hoveredSlot)) {
+                    HackTimeRAM.TryConsume(hack.RamCost);
+                }
             }
         }
 
@@ -550,6 +555,19 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
                 Vector2 ts = FontAssets.MouseText.Value.MeasureString(timeStr) * FontTime;
                 Vector2 tp = new(rect.Right - ts.X - 14, rect.Y + 10);
                 Utils.DrawBorderString(sb, timeStr, tp, HackTheme.TextNormal * (alpha * 0.55f), FontTime);
+
+                //RAM消耗（右侧，上传耗时左边）
+                bool canAfford = HackTimeRAM.CanAfford(hack.RamCost);
+                string ramStr = $"{hack.RamCost} RAM";
+                Color ramColor = canAfford ? HackTheme.Accent : HackTheme.Danger;
+                //RAM不足时脉冲闪烁
+                if (!canAfford) {
+                    float ramPulse = MathF.Sin(timer * 6f) * 0.3f + 0.7f;
+                    ramColor *= ramPulse;
+                }
+                Vector2 ramSize = FontAssets.MouseText.Value.MeasureString(ramStr) * FontTime;
+                Vector2 ramPos = new(tp.X - ramSize.X - 12, rect.Y + 10);
+                Utils.DrawBorderString(sb, ramStr, ramPos, ramColor * (alpha * 0.7f), FontTime);
 
                 //类别标签（右下角）
                 string catLabel = GetCategoryLabel(hack.Category);

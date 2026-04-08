@@ -4,7 +4,7 @@ using CalamityOverhaul.Content.ADV.Scenarios.Shepel;
 using CalamityOverhaul.Content.ADV.Scenarios.SupCal.End.EternalBlazingNows;
 using CalamityOverhaul.Content.Cyberwares.UIs;
 using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
-using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime;
+using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.ID;
