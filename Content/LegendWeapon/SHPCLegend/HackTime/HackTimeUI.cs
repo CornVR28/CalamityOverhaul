@@ -37,9 +37,6 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             ScanInfo.Update();
             Ram.Update();
 
-            //驱动所有活跃骇入效果
-            HackEffectTracker.Update();
-
             //上传完成时消费结果并施加效果（仅正常模式）
             if (!HackTime.InfiniteHack && Queue.HasCompleted) {
                 var hack = Queue.ConsumeCompleted();

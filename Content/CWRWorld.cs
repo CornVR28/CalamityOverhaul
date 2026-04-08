@@ -1,4 +1,5 @@
-﻿using CalamityOverhaul.Content.NPCs.Modifys.Crabulons;
+﻿using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime;
+using CalamityOverhaul.Content.NPCs.Modifys.Crabulons;
 using System.Collections.Generic;
 using Terraria;
 using Terraria.ID;
@@ -100,6 +101,9 @@ namespace CalamityOverhaul.Content
         }
 
         public override void PostUpdateEverything() {
+            //更新
+            HackEffectTracker.Update();
+
             if (TimeFrozenTick > 0) {
                 TimeFrozenTick--;
             }
