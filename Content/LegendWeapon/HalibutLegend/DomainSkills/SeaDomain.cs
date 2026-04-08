@@ -1,6 +1,7 @@
 ﻿using CalamityOverhaul.Common;
 using InnoVault.GameContent.BaseEntity;
 using Microsoft.Xna.Framework.Graphics;
+using ReLogic.Content;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -114,9 +115,6 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend.DomainSkills
         private const int ExpandDuration = 120;
         private const int CollapseDuration = 90;
         private float domainAlpha = 0f;
-
-        private readonly List<WaterRipple> ripples = new();
-        private int rippleTimer;
 
         private readonly Dictionary<int, WaterPressureEffect> enemyEffects = new();
         private readonly HashSet<int> boundNPCs = new();
@@ -256,13 +254,6 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend.DomainSkills
             for (int i = bubbles.Count - 1; i >= 0; i--) {
                 bubbles[i].Update();
                 if (bubbles[i].ShouldRemove()) bubbles.RemoveAt(i);
-            }
-
-            for (int i = ripples.Count - 1; i >= 0; i--) {
-                ripples[i].Update();
-                if (ripples[i].Life >= ripples[i].MaxLife) {
-                    ripples.RemoveAt(i);
-                }
             }
 
             if (currentState == DomainState.Active) {
@@ -457,18 +448,13 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend.DomainSkills
                 SpawnExpandParticle();
             }
 
-            if (stateTimer % 12 == 0 && layers != null) {
-                float randomRadius = layers[Main.rand.Next(layers.Count)].Radius * Main.rand.NextFloat(0.6f, 1f);
-                ripples.Add(new WaterRipple(domainCenter, randomRadius));
-
-                //扩张过程中的水波音效
-                if (Main.myPlayer == Owner.whoAmI && stateTimer % 24 == 0) {
-                    SoundEngine.PlaySound(SoundID.Item85 with {  //魔法音效
-                        Volume = 0.2f,
-                        Pitch = -0.4f + (progress * 0.3f),  //音调随扩张提升
-                        MaxInstances = 3
-                    }, domainCenter);
-                }
+            //扩张过程中的水波音效
+            if (stateTimer % 24 == 0 && Main.myPlayer == Owner.whoAmI) {
+                SoundEngine.PlaySound(SoundID.Item85 with {  //魔法音效
+                    Volume = 0.2f,
+                    Pitch = -0.4f + (progress * 0.3f),  //音调随扩张提升
+                    MaxInstances = 3
+                }, domainCenter);
             }
 
             if (stateTimer >= ExpandDuration) {
@@ -525,16 +511,6 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend.DomainSkills
                 float dist = Main.rand.NextFloat(randomLayer.Radius * 0.4f, randomLayer.Radius * 0.9f);
                 Vector2 pos = domainCenter + angle.ToRotationVector2() * dist;
                 bubbles.Add(new BubbleChain(pos));
-            }
-
-            rippleTimer++;
-            if (rippleTimer % 35 == 0 && layers != null) {
-                //多层时生成多圈水纹
-                int rippleCount = Math.Min(3, (layerCount + 2) / 3);
-                for (int i = 0; i < rippleCount; i++) {
-                    var randomLayer = layers[Main.rand.Next(layers.Count)];
-                    ripples.Add(new WaterRipple(domainCenter, randomLayer.Radius * Main.rand.NextFloat(0.5f, 0.9f)));
-                }
             }
         }
 
@@ -608,24 +584,17 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend.DomainSkills
                 return false;
             }
 
-            //计算移动后的内容透明度（边界始终使用 domainAlpha）
+            //计算移动后的内容透明度
             float contentAlpha = domainAlpha * movementFadeFactor;
             float fishAlpha = domainAlpha * fishFadeFactor;
 
-            //从内到外绘制各层边界
-            foreach (var layer in layers) {
-                if (domainAlpha > 0.01f) {
-                    DrawLayerBorder(layer);
-                }
+            //着色器绘制海洋领域场（替代逐段环界和水纹CPU绘制）
+            if (domainAlpha > 0.01f) {
+                DrawDomainField();
             }
 
             if (CWRServerConfig.Instance.HalibutDomainConciseDisplay) {
                 return false;
-            }
-
-            //水纹
-            foreach (var ripple in ripples) {
-                ripple.Draw(domainCenter, contentAlpha);
             }
 
             //气泡
@@ -659,30 +628,59 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend.DomainSkills
             return false;
         }
 
-        private void DrawLayerBorder(DomainLayer layer) {
-            Texture2D tex = VaultAsset.placeholder2.Value;
-            int segments = 120; //固定高精度分段
-            float angleStep = MathHelper.TwoPi / segments;
+        private void DrawDomainField() {
+            Effect shader = EffectLoader.SeaDomainField?.Value;
+            if (shader == null) return;
 
-            for (int i = 0; i < segments; i++) {
-                float angle1 = i * angleStep;
-                float angle2 = (i + 1) * angleStep;
-                Vector2 p1 = domainCenter + angle1.ToRotationVector2() * layer.Radius;
-                Vector2 p2 = domainCenter + angle2.ToRotationVector2() * layer.Radius;
+            Texture2D canvas = CWRAsset.Placeholder_White.Value;
+            Texture2D noise = CWRAsset.Extra_193.Value;
+            if (canvas == null || noise == null) return;
 
-                float wave = (float)Math.Sin(Main.GlobalTimeWrappedHourly * 3f * layer.RotationSpeed + angle1 * 2f) * layer.WaveAmplitude;
-                p1 += angle1.ToRotationVector2() * wave;
-                p2 += angle2.ToRotationVector2() * wave;
+            //绘制区域比领域略大，留出边缘辉光空间
+            const float extraScale = 1.1f;
+            float drawRadius = maxDomainRadius * extraScale;
+            float drawDiameter = drawRadius * 2f;
+            Vector2 drawPos = domainCenter - Main.screenPosition;
 
-                Vector2 diff = p2 - p1;
-                float rotation = diff.ToRotation();
-                float length = diff.Length();
-
-                float brightness = 0.65f + (float)Math.Sin(Main.GlobalTimeWrappedHourly * 2f + angle1 * 3f) * 0.3f;
-                Color color = layer.BorderColor * brightness * domainAlpha * 0.9f;
-
-                Main.spriteBatch.Draw(tex, p1 - Main.screenPosition, new Rectangle(0, 0, 1, 1), color, rotation, Vector2.Zero, new Vector2(length, 4f), SpriteEffects.None, 0f);
+            //归一化各层半径到绘制区域
+            float[] radii = new float[10];
+            for (int i = 0; i < layers.Count && i < 10; i++) {
+                radii[i] = layers[i].Radius / drawRadius;
             }
+
+            //计算层级渐变颜色（内层/外层环色）
+            Color innerBorder = layers[0].BorderColor;
+            Color outerBorder = layers[^1].BorderColor;
+
+            //设置着色器参数
+            shader.Parameters["uTime"]?.SetValue((float)Main.timeForVisualEffects * 0.016f);
+            shader.Parameters["fadeAlpha"]?.SetValue(domainAlpha);
+            shader.Parameters["layerCount"]?.SetValue((float)layerCount);
+            shader.Parameters["layerRadii"]?.SetValue(radii);
+            shader.Parameters["deepColor"]?.SetValue(new Vector3(0.02f, 0.06f, 0.15f));
+            shader.Parameters["shallowColor"]?.SetValue(new Vector3(0.12f, 0.30f, 0.50f));
+            shader.Parameters["causticColor"]?.SetValue(new Vector3(0.35f, 0.75f, 1.0f));
+            shader.Parameters["ringInnerColor"]?.SetValue(innerBorder.ToVector3());
+            shader.Parameters["ringOuterColor"]?.SetValue(outerBorder.ToVector3());
+            shader.Parameters["uNoiseTex"]?.SetValue(noise);
+
+            //切换到Immediate模式应用着色器
+            Main.spriteBatch.End();
+            Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
+                SamplerState.LinearWrap, DepthStencilState.None, RasterizerState.CullNone,
+                null, Main.GameViewMatrix.TransformationMatrix);
+
+            shader.CurrentTechnique.Passes[0].Apply();
+
+            Main.spriteBatch.Draw(canvas, drawPos, null, Color.White,
+                0f, canvas.Size() * 0.5f, new Vector2(drawDiameter, drawDiameter),
+                SpriteEffects.None, 0f);
+
+            //恢复正常批次状态
+            Main.spriteBatch.End();
+            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullNone,
+                null, Main.GameViewMatrix.TransformationMatrix);
         }
 
         private void DrawBoundIndicators(float contentAlpha) {
@@ -1057,55 +1055,6 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend.DomainSkills
             Color c = color * alpha;
             Main.spriteBatch.Draw(tex, Position - Main.screenPosition, null, c, Rotation,
                 tex.Size() / 2f, Scale * (0.3f + progress * 0.2f), SpriteEffects.None, 0f);
-        }
-    }
-    #endregion
-
-    #region 水纹效果
-    internal class WaterRipple
-    {
-        public Vector2 Center;
-        public float Radius;
-        public int Life;
-        public int MaxLife;
-        private float initialRadius;
-
-        public WaterRipple(Vector2 center, float radius) {
-            Center = center;
-            initialRadius = radius;
-            Radius = radius;
-            Life = 0;
-            MaxLife = 80;
-        }
-
-        public void Update() {
-            Life++;
-            float progress = Life / (float)MaxLife;
-            Radius = initialRadius + progress * 70f;
-        }
-
-        public void Draw(Vector2 domainCenter, float alpha) {
-            float progress = Life / (float)MaxLife;
-            float fadeAlpha = (1f - progress) * alpha * 0.45f;
-            if (fadeAlpha < 0.01f) return;
-
-            Texture2D tex = CWRAsset.LightShot.Value;
-            int segments = 60;
-            float angleStep = MathHelper.TwoPi / segments;
-
-            for (int i = 0; i < segments; i++) {
-                float angle1 = i * angleStep;
-                float angle2 = (i + 1) * angleStep;
-                Vector2 p1 = domainCenter + angle1.ToRotationVector2() * Radius;
-                Vector2 p2 = domainCenter + angle2.ToRotationVector2() * Radius;
-
-                Vector2 diff = p2 - p1;
-                float rotation = diff.ToRotation();
-                float length = diff.Length();
-
-                Color color = new Color(120, 200, 255, 0) * fadeAlpha;
-                Main.spriteBatch.Draw(tex, p1 - Main.screenPosition, null, color, rotation, Vector2.Zero, 1f, SpriteEffects.None, 0f);
-            }
         }
     }
     #endregion

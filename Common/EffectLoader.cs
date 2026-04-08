@@ -39,6 +39,7 @@ namespace CalamityOverhaul.Common
         public static Asset<Effect> ForestPanel { get; set; }
         public static Asset<Effect> NotifBadge { get; set; }
         public static Asset<Effect> ShepelGlitch { get; set; }
+        public static Asset<Effect> SeaDomainField { get; set; }
         public override float Weight => 1.2f;
         public override void EndCaptureDraw(SpriteBatch spriteBatch, GraphicsDevice graphicsDevice, RenderTarget2D screenSwap) {
             DrawPrimitiveProjectile();

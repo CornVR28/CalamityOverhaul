@@ -166,7 +166,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
             Player.velocity = Vector2.Zero;
             //锁定朝向
             Player.direction = frozenDirection;
-            Player.changeDir = 0;
+            //Player.ChangeDir = 0;
             //防止解冻后摔落伤害
             Player.fallStart = (int)(Player.position.Y / 16f);
 
