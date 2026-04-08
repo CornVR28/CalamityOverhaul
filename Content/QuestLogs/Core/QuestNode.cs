@@ -130,6 +130,18 @@ namespace CalamityOverhaul.Content.QuestLogs.Core
         }
 
         /// <summary>
+        /// 任务已完成但奖励尚未全部领取
+        /// </summary>
+        public bool HasUnclaimedRewards => IsCompleted && Rewards != null
+            && Rewards.Count > 0 && Rewards.Exists(r => !r.Claimed);
+
+        /// <summary>
+        /// 任务已完成且奖励已全部领取
+        /// </summary>
+        public bool AllRewardsClaimed => IsCompleted && (Rewards == null
+            || Rewards.Count == 0 || Rewards.TrueForAll(r => r.Claimed));
+
+        /// <summary>
         /// 任务是否已解锁
         /// </summary>
         public bool IsUnlocked {

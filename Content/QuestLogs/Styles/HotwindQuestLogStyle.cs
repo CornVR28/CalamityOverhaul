@@ -138,13 +138,34 @@ namespace CalamityOverhaul.Content.QuestLogs.Styles
             int halfSize = size / 2;
             float glowPulse = MathF.Sin(Main.GameUpdateCount * 0.05f) * 0.5f + 0.5f;
 
-            //色彩体系
-            Color coreColor = node.IsCompleted ? new Color(45, 130, 65) :
-                             (node.IsUnlocked ? new Color(155, 85, 35) : new Color(45, 45, 55));
-            Color glowColor = node.IsCompleted ? new Color(70, 200, 90) :
-                             (node.IsUnlocked ? new Color(220, 140, 55) : new Color(70, 70, 85));
-            Color edgeLight = node.IsCompleted ? new Color(130, 255, 155) :
-                             (node.IsUnlocked ? new Color(255, 180, 90) : new Color(110, 110, 130));
+            //四状态色彩体系：未解锁/进行中/已完成待领取/已完成已领取
+            bool hasUnclaimed = node.HasUnclaimedRewards;
+            Color coreColor, glowColor, edgeLight;
+
+            if (node.IsCompleted && !hasUnclaimed) {
+                //已完成且已领取——沉稳绿
+                coreColor = new Color(45, 130, 65);
+                glowColor = new Color(70, 200, 90);
+                edgeLight = new Color(130, 255, 155);
+            }
+            else if (hasUnclaimed) {
+                //已完成待领取——金色
+                coreColor = new Color(160, 130, 30);
+                glowColor = new Color(245, 210, 60);
+                edgeLight = new Color(255, 240, 120);
+            }
+            else if (node.IsUnlocked) {
+                //解锁进行中
+                coreColor = new Color(155, 85, 35);
+                glowColor = new Color(220, 140, 55);
+                edgeLight = new Color(255, 180, 90);
+            }
+            else {
+                //未解锁
+                coreColor = new Color(45, 45, 55);
+                glowColor = new Color(70, 70, 85);
+                edgeLight = new Color(110, 110, 130);
+            }
 
             if (isHovered) {
                 coreColor = Color.Lerp(coreColor, Color.White, 0.25f);
@@ -157,6 +178,8 @@ namespace CalamityOverhaul.Content.QuestLogs.Styles
                 for (int layer = 3; layer >= 1; layer--) {
                     int expand = layer * 5 + (isHovered ? 3 : 0);
                     float layerAlpha = (0.06f + glowPulse * 0.04f) / layer;
+                    //待领取奖励时光晕更强烈
+                    if (hasUnclaimed) layerAlpha *= 1.6f;
                     Rectangle glowRect = new Rectangle(
                         (int)drawPos.X - halfSize - expand,
                         (int)drawPos.Y - halfSize - expand,
@@ -216,8 +239,19 @@ namespace CalamityOverhaul.Content.QuestLogs.Styles
             //节点名称
             Vector2 nameSize = FontAssets.MouseText.Value.MeasureString(node.DisplayName?.Value) * 0.75f;
             Vector2 namePos = new Vector2(drawPos.X, drawPos.Y + halfSize + 8);
-            Color textColor = node.IsCompleted ? new Color(120, 230, 145) :
-                             (node.IsUnlocked ? new Color(235, 185, 125) : new Color(125, 125, 140));
+            Color textColor;
+            if (node.IsCompleted && !node.HasUnclaimedRewards) {
+                textColor = new Color(120, 230, 145);
+            }
+            else if (node.HasUnclaimedRewards) {
+                textColor = new Color(255, 230, 100);
+            }
+            else if (node.IsUnlocked) {
+                textColor = new Color(235, 185, 125);
+            }
+            else {
+                textColor = new Color(125, 125, 140);
+            }
             if (isHovered) textColor = Color.White;
             Utils.DrawBorderStringFourWay(spriteBatch, FontAssets.MouseText.Value, node.DisplayName?.Value,
                 namePos.X, namePos.Y, textColor * alpha, Color.Black * alpha, nameSize / 2, 0.75f);

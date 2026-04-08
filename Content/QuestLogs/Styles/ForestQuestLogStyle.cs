@@ -184,16 +184,39 @@ namespace CalamityOverhaul.Content.QuestLogs.Styles
             Texture2D pixel = VaultAsset.placeholder2.Value;
             int size = (int)(50 * scale);
             float radius = size * 0.5f;
+            bool hasUnclaimed = node.HasUnclaimedRewards;
 
-            Color baseColor = node.IsCompleted ? new Color(100, 200, 120) :
-                             (node.IsUnlocked ? new Color(200, 180, 100) : new Color(80, 80, 90));
+            //四状态色彩：未解锁/进行中/已完成待领取/已完成已领取
+            Color baseColor;
+            if (node.IsCompleted && !hasUnclaimed) {
+                baseColor = new Color(100, 200, 120);
+            }
+            else if (hasUnclaimed) {
+                baseColor = new Color(220, 195, 70);
+            }
+            else if (node.IsUnlocked) {
+                baseColor = new Color(200, 180, 100);
+            }
+            else {
+                baseColor = new Color(80, 80, 90);
+            }
 
             if (isHovered) baseColor = Color.Lerp(baseColor, Color.White, 0.4f);
 
             //外层辉光
             if (node.IsUnlocked || node.IsCompleted) {
                 float gp = (float)Math.Sin(glowTimer * 2f) * 0.5f + 0.5f;
-                Color gc = node.IsCompleted ? new Color(120, 255, 150) : new Color(255, 220, 120);
+                Color gc;
+                if (node.IsCompleted && !hasUnclaimed) {
+                    gc = new Color(120, 255, 150);
+                }
+                else if (hasUnclaimed) {
+                    gc = new Color(255, 235, 90);
+                    gp = gp * 0.6f + 0.4f; //待领取时辉光更强且更持续
+                }
+                else {
+                    gc = new Color(255, 220, 120);
+                }
                 DrawHexagon(spriteBatch, pixel, drawPos, radius + 6, gc * (0.15f * gp * alpha));
                 DrawHexagon(spriteBatch, pixel, drawPos, radius + 3, gc * (0.25f * gp * alpha));
             }
@@ -215,8 +238,19 @@ namespace CalamityOverhaul.Content.QuestLogs.Styles
             DrawHexagonBorder(spriteBatch, pixel, drawPos, radius, baseColor * 1.3f * alpha, isHovered ? 3 : 2);
 
             //节点名称
-            Color textColor = node.IsCompleted ? new Color(150, 255, 180) :
-                             (node.IsUnlocked ? new Color(255, 220, 150) : new Color(120, 120, 130));
+            Color textColor;
+            if (node.IsCompleted && !hasUnclaimed) {
+                textColor = new Color(150, 255, 180);
+            }
+            else if (hasUnclaimed) {
+                textColor = new Color(255, 235, 120);
+            }
+            else if (node.IsUnlocked) {
+                textColor = new Color(255, 220, 150);
+            }
+            else {
+                textColor = new Color(120, 120, 130);
+            }
             if (isHovered) textColor = Color.White;
 
             Vector2 nameSize = FontAssets.MouseText.Value.MeasureString(node.DisplayName?.Value) * 0.7f;
