@@ -1,4 +1,4 @@
-using CalamityOverhaul.Content.PRTTypes;
+﻿using CalamityOverhaul.Content.PRTTypes;
 using InnoVault.PRT;
 using Terraria;
 
@@ -30,7 +30,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime.Protocols
                 PRTLoader.AddParticle(new PRT_Spark(target.Center, vel,
                     false, 8, 2.0f, Color.White));
             }
-            CombatText.NewText(target.Hitbox, new Color(100, 200, 255), "SHORT CIRCUIT", true);
+            //TODO:这里最好添加一个短路音效
             return true;
         }
     }
