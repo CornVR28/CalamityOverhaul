@@ -127,14 +127,11 @@ namespace CalamityOverhaul.Content.QuestLogs
         }
 
         private void DrawNotificationBadge(SpriteBatch spriteBatch) {
+            //按任务节点计数，一个节点有未领取奖励则算一个
             int unclaimedCount = 0;
             foreach (var quest in QuestNode.AllQuests) {
-                if (quest.IsCompleted && quest.Rewards != null) {
-                    foreach (var reward in quest.Rewards) {
-                        if (!reward.Claimed) {
-                            unclaimedCount++;
-                        }
-                    }
+                if (quest.HasUnclaimedRewards) {
+                    unclaimedCount++;
                 }
             }
 
@@ -142,21 +139,94 @@ namespace CalamityOverhaul.Content.QuestLogs
                 string text = unclaimedCount > 99 ? "99+" : unclaimedCount.ToString();
                 Vector2 textSize = FontAssets.MouseText.Value.MeasureString(text) * 0.75f;
                 float maxDim = Math.Max(textSize.X, textSize.Y);
-                float bgSize = Math.Max(6, maxDim);
+                float bgSize = Math.Max(20, maxDim + 8);
 
                 //红点位置在图标右上角
                 Vector2 badgeCenter = new Vector2(IconRect.Right - 4, IconRect.Top + 4);
-                Rectangle badgeRect = new Rectangle((int)(badgeCenter.X - bgSize / 2), (int)(badgeCenter.Y - bgSize / 2), (int)bgSize, (int)bgSize);
+                Rectangle badgeRect = new Rectangle(
+                    (int)(badgeCenter.X - bgSize / 2),
+                    (int)(badgeCenter.Y - bgSize / 2),
+                    (int)bgSize, (int)bgSize);
 
-                Texture2D value = CWRAsset.SoftGlow.Value;
-                for (int i = 0; i < 6; i++) {
-                    spriteBatch.Draw(value, badgeCenter, null, Color.Red with { A = 0 }, 0, value.Size() / 2, 0.6f * (1 + i * 0.02f), SpriteEffects.None, 0);
-                }
+                //使用着色器绘制高质感红点
+                DrawShaderBadge(spriteBatch, badgeCenter, bgSize);
 
                 //绘制数字
-                Vector2 textPos = new Vector2(badgeRect.X + badgeRect.Width / 2 - textSize.X / 2, badgeRect.Y + badgeRect.Height / 2 - textSize.Y / 2);
+                Vector2 textPos = new Vector2(
+                    badgeRect.X + badgeRect.Width / 2 - textSize.X / 2,
+                    badgeRect.Y + badgeRect.Height / 2 - textSize.Y / 2);
                 Utils.DrawBorderString(spriteBatch, text, textPos, Color.White, 0.75f);
             }
+        }
+
+        private void DrawShaderBadge(SpriteBatch spriteBatch, Vector2 center, float size) {
+            Texture2D px = VaultAsset.placeholder2.Value;
+            Effect effect = EffectLoader.NotifBadge?.Value;
+
+            if (effect != null) {
+                float drawSize = size * 2f;
+                Rectangle drawRect = new Rectangle(
+                    (int)(center.X - drawSize / 2),
+                    (int)(center.Y - drawSize / 2),
+                    (int)drawSize, (int)drawSize);
+
+                effect.Parameters["uTime"]?.SetValue(pulseTimer);
+                effect.Parameters["uResolution"]?.SetValue(new Vector2(drawRect.Width, drawRect.Height));
+
+                spriteBatch.End();
+                spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend,
+                    SamplerState.AnisotropicClamp, DepthStencilState.None,
+                    RasterizerState.CullNone, effect, Main.UIScaleMatrix);
+
+                spriteBatch.Draw(px, drawRect, Color.White);
+
+                spriteBatch.End();
+                spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                    SamplerState.AnisotropicClamp, DepthStencilState.None,
+                    RasterizerState.CullNone, null, Main.UIScaleMatrix);
+            }
+            else {
+                //着色器不可用时的降级绘制
+                DrawFallbackBadge(spriteBatch, center, size);
+            }
+        }
+
+        private void DrawFallbackBadge(SpriteBatch spriteBatch, Vector2 center, float size) {
+            Texture2D px = VaultAsset.placeholder2.Value;
+            float pulse = MathF.Sin(pulseTimer * 2f) * 0.5f + 0.5f;
+
+            //外层辉光
+            float glowSize = size * 1.6f;
+            Rectangle glowRect = new Rectangle(
+                (int)(center.X - glowSize / 2),
+                (int)(center.Y - glowSize / 2),
+                (int)glowSize, (int)glowSize);
+            spriteBatch.Draw(px, glowRect, new Color(200, 30, 20) * (0.2f + pulse * 0.1f));
+
+            //主体红点
+            Rectangle mainRect = new Rectangle(
+                (int)(center.X - size / 2),
+                (int)(center.Y - size / 2),
+                (int)size, (int)size);
+            //渐变分段模拟立体感
+            int segs = 6;
+            for (int i = 0; i < segs; i++) {
+                float t = i / (float)segs;
+                float t2 = (i + 1f) / segs;
+                int y1 = mainRect.Y + (int)(t * mainRect.Height);
+                int y2 = mainRect.Y + (int)(t2 * mainRect.Height);
+                float lightFactor = 1f - t * 0.5f;
+                Color c = new Color(
+                    (int)(220 * lightFactor),
+                    (int)(40 * lightFactor),
+                    (int)(30 * lightFactor));
+                spriteBatch.Draw(px, new Rectangle(mainRect.X, y1, mainRect.Width, Math.Max(1, y2 - y1)), c);
+            }
+
+            //顶部高光
+            spriteBatch.Draw(px,
+                new Rectangle(mainRect.X + 3, mainRect.Y + 1, mainRect.Width - 6, 2),
+                new Color(255, 180, 160) * 0.5f);
         }
 
         private void DrawGlowEffect(SpriteBatch spriteBatch, Texture2D texture, Rectangle sourceRect, Vector2 position, float baseScale) {
