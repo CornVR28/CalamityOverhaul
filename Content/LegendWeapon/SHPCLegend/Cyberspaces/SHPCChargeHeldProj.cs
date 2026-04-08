@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using InnoVault.GameContent.BaseEntity;
+using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;
 using Terraria.GameContent;
@@ -9,19 +10,15 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
     /// <summary>
     /// SHPC 右键蓄力时的手持弹幕
     /// <br/>负责绘制武器贴图、控制手臂动画、提供枪口位置
-    /// <br/>由 <see cref="SHPCOverride"/> 的 On_Shoot 生成，
-    /// 同时生成 <see cref="CyberChargeOrbProj"/> 挂在枪口
     /// </summary>
-    internal class SHPCChargeHeldProj : ModProjectile
+    internal class SHPCChargeHeldProj : BaseHeldProj
     {
         public override string Texture => CWRConstant.Placeholder;
-
-        private Player Owner => Main.player[Projectile.owner];
 
         /// <summary>
         /// 武器贴图偏移量
         /// </summary>
-        private static readonly Vector2 GunOffset = new(27f, -10f);
+        private static Vector2 GunOffset => new(26f, -10f);
 
         /// <summary>
         /// 枪口距离武器中心的前方距离（像素）
@@ -47,9 +44,14 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         /// <summary>
         /// 枪口世界坐标，供 CyberChargeOrbProj 查询
         /// </summary>
-        public Vector2 TipPosition => Projectile.Center
-            + Vector2.UnitX.RotatedBy(Projectile.rotation) * (TipDistance - recoilOffset)
-            + Vector2.UnitX.RotatedBy(Projectile.rotation + MathHelper.PiOver2) * GunOffset.Y;
+        public Vector2 TipPosition {
+            get {
+                float perpY = GunOffset.Y * Owner.direction;
+                return Projectile.Center
+                    + Vector2.UnitX.RotatedBy(Projectile.rotation) * (TipDistance - recoilOffset)
+                    + Vector2.UnitX.RotatedBy(Projectile.rotation + MathHelper.PiOver2) * perpY;
+            }
+        }
 
         public override void SetDefaults() {
             Projectile.width = 70;
@@ -72,7 +74,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             if (recoiling) return;
             recoiling = true;
             recoilTimer = 0;
-            recoilDir = (Main.MouseWorld - Owner.Center).SafeNormalize(Vector2.UnitX);
+            recoilDir = UnitToMouseV;
         }
 
         public override void AI() {
@@ -81,7 +83,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
                 return;
             }
 
-            Owner.heldProj = Projectile.whoAmI;
+            SetHeld();
 
             if (recoiling) {
                 AI_Recoil();
@@ -92,6 +94,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         }
 
         private void AI_Charging() {
+            if (!DownRight) {
+                TriggerRecoil();
+            }
             //由CyberChargeOrbProj统一管理生命周期，这里只保持存活
             Projectile.timeLeft = 60;
 
@@ -150,10 +155,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             if (weaponTex == null) return false;
 
             float rotation = Projectile.rotation;
+            float perpY = GunOffset.Y * Owner.direction;
             // 绘制位置沿瞄准方向后退 recoilOffset
             Vector2 position = Owner.Center - Main.screenPosition
                 + Vector2.UnitX.RotatedBy(rotation) * (GunOffset.X - recoilOffset)
-                + Vector2.UnitX.RotatedBy(rotation + MathHelper.PiOver2) * GunOffset.Y;
+                + Vector2.UnitX.RotatedBy(rotation + MathHelper.PiOver2) * perpY;
 
             SpriteEffects sp = Owner.direction < 0
                 ? SpriteEffects.FlipVertically

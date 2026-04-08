@@ -291,9 +291,6 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         private void LaunchOrb(Player owner) {
             // 停止蓄力音效
             StopChargeSound();
-            // 释放时触发手持弹幕后坐力动画
-            NotifyHeldRecoil();
-
             State = OrbState.Flying;
             Vector2 aimDir = (Main.MouseWorld - owner.Center).SafeNormalize(Vector2.UnitX);
             flyAngle = aimDir.ToRotation();
@@ -386,14 +383,12 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
 
         public override bool OnTileCollide(Vector2 oldVelocity) {
             SpawnDetonation();
-            return true; // Kill projectile
+            return true;
         }
 
         public override void OnKill(int timeLeft) {
-            // 确保手持弹幕被清理
-            KillHeldProj();
             StopChargeSound();
-            // 消散粒子（超驱时更多更亮）
+            //消散粒子（超驱时更多更亮）
             if (Main.netMode == NetmodeID.Server) return;
             float od = overdriveAmount;
             Color mainCol = Color.Lerp(
@@ -518,30 +513,6 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         #endregion
 
         public override bool ShouldUpdatePosition() => State == OrbState.Flying;
-
-        /// <summary>
-        /// 销毁关联的手持弹幕
-        /// </summary>
-        private void KillHeldProj() {
-            int idx = HeldProjIndex;
-            if (idx >= 0 && idx < Main.maxProjectiles
-                && Main.projectile[idx].active
-                && Main.projectile[idx].ModProjectile is SHPCChargeHeldProj) {
-                Main.projectile[idx].Kill();
-            }
-        }
-
-        /// <summary>
-        /// 通知手持弹幕进入后坐力动画，动画结束后自动消亡
-        /// </summary>
-        private void NotifyHeldRecoil() {
-            int idx = HeldProjIndex;
-            if (idx >= 0 && idx < Main.maxProjectiles
-                && Main.projectile[idx].active
-                && Main.projectile[idx].ModProjectile is SHPCChargeHeldProj held) {
-                held.TriggerRecoil();
-            }
-        }
 
         /// <summary>
         /// 停止蓄力循环音效
