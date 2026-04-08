@@ -19,6 +19,7 @@ sampler noiseSamp = sampler_state
 
 float uTime;
 float fadeAlpha;        //整体淡出 0~1
+float contentFade;     //填充内容淡化系数 0~1（玩家移动时降低，环形边界不受影响）
 float layerCount;       //领域层数 1~10
 float layerRadii[10];   //各层归一化半径 (0~1范围，1=绘制区域边缘)
 
@@ -146,19 +147,21 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0, float4 vertexColor : COLOR
     godRay *= smoothstep(1.0, 0.25, dist);
 
     // ======== 合成 ========
-    float3 finalColor = baseOcean * 0.6;
-    finalColor += causticContrib;
-    finalColor += shallowColor * flow;
+    //填充内容随玩家移动淡化，环形边界不受影响
+    float cf = contentFade;
+    float3 finalColor = baseOcean * 0.6 * cf;
+    finalColor += causticContrib * cf;
+    finalColor += shallowColor * flow * cf;
     finalColor += currentRingColor * (ringBrightness + ringGlowTotal);
-    finalColor += causticColor * sparkle * 0.15;
-    finalColor += float3(0.55, 0.8, 1.0) * godRay;
+    finalColor += causticColor * sparkle * 0.15 * cf;
+    finalColor += float3(0.55, 0.8, 1.0) * godRay * cf;
 
-    //透明度合成：基础场 + 高亮区域增强
-    float fieldAlpha = lerp(0.2, 0.55, depthGrad);
-    fieldAlpha += (ringBrightness + ringGlowTotal) * 0.4;
-    fieldAlpha += caustic * causticMask * 0.08;
-    fieldAlpha += sparkle * 0.05;
-    fieldAlpha = saturate(fieldAlpha);
+    //透明度合成：环线使用fadeAlpha，填充内容额外乘contentFade
+    float ringAlpha = (ringBrightness + ringGlowTotal) * 0.4;
+    float fillAlpha = lerp(0.2, 0.55, depthGrad) * cf
+        + caustic * causticMask * 0.08 * cf
+        + sparkle * 0.05 * cf;
+    float fieldAlpha = saturate(ringAlpha + fillAlpha);
 
     float alpha = edgeFade * fadeAlpha * fieldAlpha;
 

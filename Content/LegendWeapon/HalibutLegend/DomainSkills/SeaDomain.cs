@@ -655,6 +655,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend.DomainSkills
             //设置着色器参数
             shader.Parameters["uTime"]?.SetValue((float)Main.timeForVisualEffects * 0.016f);
             shader.Parameters["fadeAlpha"]?.SetValue(domainAlpha);
+            shader.Parameters["contentFade"]?.SetValue(movementFadeFactor);
             shader.Parameters["layerCount"]?.SetValue((float)layerCount);
             shader.Parameters["layerRadii"]?.SetValue(radii);
             shader.Parameters["deepColor"]?.SetValue(new Vector3(0.02f, 0.06f, 0.15f));
