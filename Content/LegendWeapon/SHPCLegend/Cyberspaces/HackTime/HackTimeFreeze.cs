@@ -127,4 +127,83 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
             return false;
         }
     }
+
+    /// <summary>
+    /// 骇客时间玩家冻结拦截器
+    /// <br/>骇入期间玩家不可移动、不可使用物品，仅保留UI交互和切换键
+    /// </summary>
+    internal class HackTimeFreezePlayer : ModPlayer
+    {
+        //冻结时的玩家位置快照
+        private Vector2 frozenPosition;
+        //是否已记录冻结位置
+        private bool positionCaptured;
+        //冻结时的朝向快照
+        private int frozenDirection;
+        //冻结时的动画帧快照
+        private Rectangle frozenBodyFrame;
+        private Rectangle frozenLegFrame;
+        private Rectangle frozenHeadFrame;
+
+        public override void PreUpdate() {
+            if (!HackTimeFreeze.IsActive) {
+                positionCaptured = false;
+                return;
+            }
+
+            //首次冻结时快照位置、朝向、动画帧
+            if (!positionCaptured) {
+                frozenPosition = Player.position;
+                frozenDirection = Player.direction;
+                frozenBodyFrame = Player.bodyFrame;
+                frozenLegFrame = Player.legFrame;
+                frozenHeadFrame = Player.headFrame;
+                positionCaptured = true;
+            }
+
+            //锁定位置和速度
+            Player.position = frozenPosition;
+            Player.velocity = Vector2.Zero;
+            //锁定朝向
+            Player.direction = frozenDirection;
+            Player.changeDir = 0;
+            //防止解冻后摔落伤害
+            Player.fallStart = (int)(Player.position.Y / 16f);
+
+            //禁用所有移动和交互控制，保留鼠标用于UI操作
+            Player.controlLeft = false;
+            Player.controlRight = false;
+            Player.controlUp = false;
+            Player.controlDown = false;
+            Player.controlJump = false;
+            Player.controlHook = false;
+            Player.controlMount = false;
+            Player.controlUseItem = false;
+            Player.controlUseTile = false;
+            Player.controlThrow = false;
+            Player.controlSmart = false;
+            Player.controlTorch = false;
+        }
+
+        public override void PostUpdate() {
+            if (!HackTimeFreeze.IsActive || !positionCaptured) return;
+            //PostUpdate后再次锁定，防止其他系统在更新中修改朝向和位置
+            Player.position = frozenPosition;
+            Player.velocity = Vector2.Zero;
+            Player.direction = frozenDirection;
+        }
+
+        public override void FrameEffects() {
+            if (!HackTimeFreeze.IsActive || !positionCaptured) return;
+            //锁定动画帧，阻止任何帧变化
+            Player.bodyFrame = frozenBodyFrame;
+            Player.legFrame = frozenLegFrame;
+            Player.headFrame = frozenHeadFrame;
+        }
+
+        public override bool PreItemCheck() {
+            if (HackTimeFreeze.IsActive) return false;
+            return true;
+        }
+    }
 }

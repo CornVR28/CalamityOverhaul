@@ -1,3 +1,6 @@
+using CalamityOverhaul.Content.ADV.EntrustManager;
+using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime;
+using CalamityOverhaul.Content.QuestLogs;
 using InnoVault.UIHandles;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
@@ -15,7 +18,16 @@ namespace CalamityOverhaul.Content.Cyberwares.Implementation.Sandevistans
     /// </summary>
     internal class SandevistanHUD : UIHandle
     {
-        public override bool Active => Sandevistan.GetEquipped(Main.LocalPlayer) != null;
+        public override bool Active {
+            get {
+                if (Sandevistan.GetEquipped(Main.LocalPlayer) == null) return false;
+                //全屏UI打开时隐藏HUD
+                if (QuestLog.Instance?.visible == true) return false;
+                if (QuestManagerUI.Instance?.IsOpen == true) return false;
+                if (HackTime.Active || HackTime.Intensity > 0.5f) return false;
+                return true;
+            }
+        }
 
         #region 状态
 
