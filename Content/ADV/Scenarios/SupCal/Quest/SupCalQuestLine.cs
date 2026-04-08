@@ -1,4 +1,4 @@
-﻿using CalamityOverhaul.Content.ADV.QuestManager;
+﻿using CalamityOverhaul.Content.ADV.EntrustManager;
 using CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest.DoGQuest;
 using CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest.PallbearerQuest;
 using CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest.YharonQuest;

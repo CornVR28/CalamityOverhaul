@@ -1,13 +1,13 @@
-using CalamityOverhaul.Content.UIs.NotificationPopup;
+﻿using CalamityOverhaul.Content.UIs.NotificationPopup;
 using Terraria.Localization;
 using Terraria.ModLoader;
 
-namespace CalamityOverhaul.Content.ADV.QuestManager
+namespace CalamityOverhaul.Content.ADV.EntrustManager
 {
     /// <summary>
     /// 委托管理器状态变更通知——瘦装饰器，将通知委托给统一的 <see cref="NotificationPopupSystem"/>
     /// </summary>
-    internal class QuestManagerNotification : ModSystem, ILocalizedModType
+    internal class EntrustManagerNotification : ModSystem, ILocalizedModType
     {
         /// <summary>通知类型</summary>
         internal enum NotifyKind

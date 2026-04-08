@@ -1,5 +1,5 @@
 ﻿using CalamityOverhaul.Common;
-using CalamityOverhaul.Content.ADV.QuestManager;
+using CalamityOverhaul.Content.ADV.EntrustManager;
 using CalamityOverhaul.Content.QuestLogs.Core;
 using CalamityOverhaul.Content.QuestLogs.Styles;
 using InnoVault.UIHandles;

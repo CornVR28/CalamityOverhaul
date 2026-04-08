@@ -1,6 +1,8 @@
-﻿using CalamityOverhaul.Content.QuestLogs.Core;
+﻿using CalamityOverhaul.Common;
+using CalamityOverhaul.Content.QuestLogs.Core;
 using Microsoft.Xna.Framework.Graphics;
 using System;
+using System.Collections.Generic;
 using Terraria;
 using Terraria.Audio;
 using Terraria.GameContent;
@@ -15,6 +17,21 @@ namespace CalamityOverhaul.Content.QuestLogs.Styles
         private float leafTimer;
         private float runeTimer;
         private float glowTimer;
+        private float shaderTime;
+        private const int EdgePad = 16;
+
+        //叶片粒子
+        private struct LeafParticle
+        {
+            public Vector2 Pos;
+            public Vector2 Vel;
+            public float Life;
+            public float MaxLife;
+            public float Size;
+            public float Rot;
+            public int Type; //0=叶片 1=孢子 2=光尘
+        }
+        private readonly List<LeafParticle> leafParticles = [];
 
         public void UpdateStyle() {
             magicTimer += 0.02f;
@@ -22,45 +39,74 @@ namespace CalamityOverhaul.Content.QuestLogs.Styles
             leafTimer += 0.015f;
             runeTimer += 0.03f;
             glowTimer += 0.025f;
+            shaderTime += 0.004f;
+            if (shaderTime > 100f) shaderTime -= 100f;
+
+            if (Main.rand.NextBool(5)) {
+                leafParticles.Add(new LeafParticle {
+                    Pos = new Vector2(Main.rand.NextFloat(0, 1f), Main.rand.NextFloat(0, 1f)),
+                    Vel = new Vector2(Main.rand.NextFloat(0.0005f, 0.002f), Main.rand.NextFloat(0.001f, 0.003f)),
+                    Life = 1f,
+                    MaxLife = Main.rand.NextFloat(90f, 180f),
+                    Size = Main.rand.NextFloat(1.5f, 3.5f),
+                    Rot = Main.rand.NextFloat(0, MathHelper.TwoPi),
+                    Type = Main.rand.Next(3)
+                });
+            }
+
+            for (int i = leafParticles.Count - 1; i >= 0; i--) {
+                var p = leafParticles[i];
+                p.Life -= 1f;
+                p.Pos += p.Vel;
+                p.Rot += 0.02f;
+                leafParticles[i] = p;
+                if (p.Life <= 0) leafParticles.RemoveAt(i);
+            }
         }
 
-        public void DrawBackground(SpriteBatch spriteBatch, QuestLog log, Rectangle panelRect) {
-            Texture2D pixel = VaultAsset.placeholder2.Value;
-            bool nightMode = log.NightMode;
+        #region 着色器面板背景
 
-            //绘制深色阴影
-            Rectangle shadowRect = panelRect;
-            shadowRect.Offset(5, 5);
-            spriteBatch.Draw(pixel, shadowRect, Color.Black * 0.5f * log.MainPanelAlpha);
+        private void DrawShaderPanel(SpriteBatch sb, Rectangle rect, float alpha, bool nightMode) {
+            Texture2D px = VaultAsset.placeholder2.Value;
 
-            //绘制主背景(羊皮纸质感)
-            Color bgColor = nightMode ? new Color(15, 20, 15) : new Color(45, 40, 30);
-            spriteBatch.Draw(pixel, panelRect, bgColor * 0.9f * log.MainPanelAlpha);
+            if (EffectLoader.ForestPanel?.Value != null) {
+                Effect effect = EffectLoader.ForestPanel.Value;
+                Rectangle extRect = rect;
+                extRect.Inflate(EdgePad, EdgePad);
 
-            //绘制纸张纹理效果
-            DrawPaperTexture(spriteBatch, pixel, panelRect, log.MainPanelAlpha, nightMode);
+                effect.Parameters["uTime"]?.SetValue(shaderTime);
+                effect.Parameters["uAlpha"]?.SetValue(alpha * 0.97f);
+                effect.Parameters["uResolution"]?.SetValue(new Vector2(extRect.Width, extRect.Height));
+                effect.Parameters["uEdgePad"]?.SetValue((float)EdgePad);
+                effect.Parameters["uNightMode"]?.SetValue(nightMode ? 1f : 0f);
 
-            //绘制魔法光晕效果
-            DrawMagicAura(spriteBatch, pixel, panelRect, log.MainPanelAlpha, nightMode);
+                sb.End();
+                sb.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend,
+                    SamplerState.AnisotropicClamp, DepthStencilState.None,
+                    RasterizerState.CullNone, effect, Main.UIScaleMatrix);
 
-            //绘制装饰性边框
-            DrawDecorativeBorder(spriteBatch, pixel, panelRect, log.MainPanelAlpha, nightMode);
+                sb.Draw(px, extRect, Color.White);
 
-            //绘制四个角落的魔法符文
-            DrawCornerRunes(spriteBatch, pixel, panelRect, log.MainPanelAlpha, nightMode);
-
-            //绘制飘落的魔法粒子
-            DrawFloatingParticles(spriteBatch, pixel, panelRect, log.MainPanelAlpha, nightMode);
+                sb.End();
+                sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                    SamplerState.AnisotropicClamp, DepthStencilState.None,
+                    RasterizerState.CullNone, null, Main.UIScaleMatrix);
+            }
+            else {
+                DrawFallbackBackground(sb, px, rect, alpha, nightMode);
+            }
         }
 
-        private void DrawPaperTexture(SpriteBatch spriteBatch, Texture2D pixel, Rectangle panelRect, float alphaMult, bool nightMode) {
-            //创建羊皮纸的褶皱纹理效果
-            Color baseColor = nightMode ? new Color(25, 35, 25) : new Color(60, 55, 40);
-            Color darkColor = nightMode ? new Color(15, 20, 15) : new Color(40, 35, 25);
+        //降级背景：深色渐变+木纹扫描线+暗角
+        private void DrawFallbackBackground(SpriteBatch sb, Texture2D px, Rectangle rect, float alpha, bool nightMode) {
+            Color top = nightMode ? new Color(10, 20, 22) : new Color(22, 28, 12);
+            Color mid = nightMode ? new Color(6, 14, 18) : new Color(16, 22, 8);
+            Color bot = nightMode ? new Color(4, 10, 14) : new Color(10, 14, 5);
 
-            int stripeCount = 30;
-            for (int i = 0; i < stripeCount; i++) {
-                float t = i / (float)stripeCount;
+            int segs = 20;
+            for (int i = 0; i < segs; i++) {
+                float t = i / (float)segs;
+                float t2 = (i + 1f) / segs;
                 float noise = (float)Math.Sin(t * 50f + magicTimer * 0.5f) * 0.3f + 0.7f;
                 int y = panelRect.Y + (int)(t * panelRect.Height);
                 int h = Math.Max(1, panelRect.Height / stripeCount);

@@ -38,6 +38,7 @@ namespace CalamityOverhaul.Common
         public static Asset<Effect> CyberPanel { get; set; }
         public static Asset<Effect> HotwindPanel { get; set; }
         public static Asset<Effect> DraedonPanel { get; set; }
+        public static Asset<Effect> ForestPanel { get; set; }
         public static Asset<Effect> ShepelGlitch { get; set; }
         public override float Weight => 1.2f;
         public override void EndCaptureDraw(SpriteBatch spriteBatch, GraphicsDevice graphicsDevice, RenderTarget2D screenSwap) {

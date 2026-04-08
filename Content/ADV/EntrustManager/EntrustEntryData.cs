@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using Terraria.Localization;
 
-namespace CalamityOverhaul.Content.ADV.QuestManager
+namespace CalamityOverhaul.Content.ADV.EntrustManager
 {
     /// <summary>
     /// 任务条目状态
@@ -29,7 +29,7 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
     /// <see cref="EntryStyle"/>、<see cref="TrackerStyle"/>，
     /// 重写 <see cref="GetTrackerDetails"/> 和 <see cref="OnUpdate"/>
     /// </summary>
-    internal class QuestEntryData
+    internal class EntrustEntryData
     {
         #region 核心数据
 
@@ -78,14 +78,14 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
 
         /// <summary>
         /// 列表中的自定义显示样式，
-        /// 为null则使用 <see cref="IQuestManagerStyle.DrawQuestEntry"/> 默认样式
+        /// 为null则使用 <see cref="IEntrustManagerStyle.DrawQuestEntry"/> 默认样式
         /// </summary>
-        public IQuestEntryStyle EntryStyle { get; set; }
+        public IEntrustEntryStyle EntryStyle { get; set; }
 
         /// <summary>
         /// 追踪窗口的自定义显示样式，为null则使用默认样式
         /// </summary>
-        public IQuestTrackerWidgetStyle TrackerStyle { get; set; }
+        public IEntrustTrackerWidgetStyle TrackerStyle { get; set; }
 
         #endregion
 
@@ -126,7 +126,7 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
 
         #endregion
 
-        public QuestEntryData(string key, LocalizedText title, LocalizedText summary, LocalizedText category) {
+        public EntrustEntryData(string key, LocalizedText title, LocalizedText summary, LocalizedText category) {
             Key = key;
             TitleText = title;
             SummaryText = summary;

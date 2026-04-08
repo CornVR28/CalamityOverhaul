@@ -1,4 +1,4 @@
-using CalamityOverhaul.Content.ADV.QuestManager;
+﻿using CalamityOverhaul.Content.ADV.EntrustManager;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;
@@ -11,7 +11,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest
     /// 深红渐变背景、硫火脉冲边框、余烬粒子、
     /// 火焰色进度条
     /// </summary>
-    internal class BrimstoneTrackerWidgetStyle : IQuestTrackerWidgetStyle
+    internal class BrimstoneTrackerWidgetStyle : IEntrustTrackerWidgetStyle
     {
         #region 色板
 

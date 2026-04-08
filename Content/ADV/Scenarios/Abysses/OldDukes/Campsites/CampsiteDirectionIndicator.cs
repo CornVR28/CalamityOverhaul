@@ -1,4 +1,4 @@
-﻿using CalamityOverhaul.Content.ADV.QuestManager;
+﻿using CalamityOverhaul.Content.ADV.EntrustManager;
 using CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Quest;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Graphics;

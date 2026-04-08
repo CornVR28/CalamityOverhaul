@@ -1,4 +1,4 @@
-﻿using CalamityOverhaul.Content.ADV.QuestManager;
+﻿using CalamityOverhaul.Content.ADV.EntrustManager;
 using CalamityOverhaul.OtherMods.ImproveGame;
 using System.Collections.Generic;
 using Terraria;
@@ -8,11 +8,11 @@ using Terraria.ModLoader;
 namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Quest
 {
     /// <summary>
-    /// 收集海洋碎片委托条目——<see cref="QuestEntryData"/> 子类，
+    /// 收集海洋碎片委托条目——<see cref="EntrustEntryData"/> 子类，
     /// 追踪玩家收集海洋残片的进度，
     /// 在追踪窗口中显示当前数量与收集提示
     /// </summary>
-    internal class FindFragmentQuestEntry : QuestEntryData
+    internal class FindFragmentQuestEntry : EntrustEntryData
     {
         private const int TargetCount = 777;
 

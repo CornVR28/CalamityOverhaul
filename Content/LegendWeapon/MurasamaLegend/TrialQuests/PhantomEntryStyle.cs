@@ -1,4 +1,4 @@
-using CalamityOverhaul.Content.ADV.QuestManager;
+﻿using CalamityOverhaul.Content.ADV.EntrustManager;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 
@@ -9,7 +9,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.MurasamaLegend.TrialQuests
     /// 军事暗绿/深灰基调、iDroid风格扫描线、菱形标记、
     /// 雷达脉冲边框、战术数据流装饰
     /// </summary>
-    internal class PhantomEntryStyle : IQuestEntryStyle
+    internal class PhantomEntryStyle : IEntrustEntryStyle
     {
         #region 色板
 
@@ -50,7 +50,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.MurasamaLegend.TrialQuests
             if (dataFlowTime > 100f) dataFlowTime -= 100f;
         }
 
-        public bool DrawEntryBackground(SpriteBatch sb, Rectangle entryRect, QuestEntryData entry,
+        public bool DrawEntryBackground(SpriteBatch sb, Rectangle entryRect, EntrustEntryData entry,
             bool isSelected, bool isHovered, float alpha) {
             var px = VaultAsset.placeholder2.Value;
             var uv = new Rectangle(0, 0, 1, 1);
@@ -131,7 +131,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.MurasamaLegend.TrialQuests
             return true;
         }
 
-        public float DrawEntryIcon(SpriteBatch sb, Vector2 titlePos, QuestEntryData entry, float alpha) {
+        public float DrawEntryIcon(SpriteBatch sb, Vector2 titlePos, EntrustEntryData entry, float alpha) {
             var px = VaultAsset.placeholder2.Value;
             float cx = titlePos.X + 8f;
             float cy = titlePos.Y + 9f;
@@ -161,7 +161,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.MurasamaLegend.TrialQuests
             return 22f;
         }
 
-        public void DrawEntryOverlay(SpriteBatch sb, Rectangle entryRect, QuestEntryData entry, float alpha) {
+        public void DrawEntryOverlay(SpriteBatch sb, Rectangle entryRect, EntrustEntryData entry, float alpha) {
             var px = VaultAsset.placeholder2.Value;
 
             //右上角Mission等级标记（小菱形序列）

@@ -1,4 +1,4 @@
-using CalamityOverhaul.Content.ADV.QuestManager;
+﻿using CalamityOverhaul.Content.ADV.EntrustManager;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;
@@ -11,7 +11,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.MurasamaLegend.TrialQuests
     /// 非对称角标框、雷达扫描线、菱形标记、CRT纵条纹，
     /// 以CP2077式层叠HUD取代传统矩形盒
     /// </summary>
-    internal class PhantomTrackerWidgetStyle : IQuestTrackerWidgetStyle
+    internal class PhantomTrackerWidgetStyle : IEntrustTrackerWidgetStyle
     {
         #region 色板
 
@@ -237,7 +237,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.MurasamaLegend.TrialQuests
 
         public int? GetPreferredWidth() => 235;
         public int? GetMinHeight() => 80;
-        public int? GetIdleCompactHeight(QuestEntryData entry) {
+        public int? GetIdleCompactHeight(EntrustEntryData entry) {
             if (entry.Progress <= 0f && entry.Status != QuestEntryStatus.Completed)
                 return 46;
             return null;

@@ -1,4 +1,4 @@
-using CalamityOverhaul.Content.ADV.QuestManager;
+﻿using CalamityOverhaul.Content.ADV.EntrustManager;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;
@@ -11,7 +11,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Quest
     /// 深绿毒雾渐变背景、硫磺酸液脉冲边框、
     /// 气泡装饰、毒绿进度条
     /// </summary>
-    internal class SulfseaTrackerWidgetStyle : IQuestTrackerWidgetStyle
+    internal class SulfseaTrackerWidgetStyle : IEntrustTrackerWidgetStyle
     {
         #region 色板（与 SulfseaTrackerStyle 一致）
 

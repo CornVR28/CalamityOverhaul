@@ -1,4 +1,4 @@
-using CalamityOverhaul.Content.ADV.QuestManager;
+﻿using CalamityOverhaul.Content.ADV.EntrustManager;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;
@@ -11,7 +11,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.Quest
     /// 冷蓝科技渐变背景、扫描线动画、薄荷青脉冲边框、
     /// 数据流进度条
     /// </summary>
-    internal class DraedonTrackerWidgetStyle : IQuestTrackerWidgetStyle
+    internal class DraedonTrackerWidgetStyle : IEntrustTrackerWidgetStyle
     {
         #region 色板（与 DraedonManagerStyle 一致）
 

@@ -1,4 +1,4 @@
-using CalamityOverhaul.Content.ADV.QuestManager;
+﻿using CalamityOverhaul.Content.ADV.EntrustManager;
 using System;
 using System.Collections.Generic;
 using Terraria;
@@ -7,10 +7,10 @@ using Terraria.Localization;
 namespace CalamityOverhaul.Content.LegendWeapon.MurasamaLegend.TrialQuests
 {
     /// <summary>
-    /// 鬼妖村正的单条试炼委托条目——<see cref="QuestEntryData"/> 子类，
+    /// 鬼妖村正的单条试炼委托条目——<see cref="EntrustEntryData"/> 子类，
     /// 动态追踪目标Boss的存活状态与血量，为追踪窗口提供战斗进度显示
     /// </summary>
-    internal class MurasamaTrialQuestEntry : QuestEntryData
+    internal class MurasamaTrialQuestEntry : EntrustEntryData
     {
         /// <summary>本试炼需要击杀的目标Boss的NPC type列表（满足其一即可）</summary>
         public int[] TargetNpcTypes { get; init; }

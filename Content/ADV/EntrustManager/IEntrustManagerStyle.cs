@@ -1,12 +1,12 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
 
-namespace CalamityOverhaul.Content.ADV.QuestManager
+namespace CalamityOverhaul.Content.ADV.EntrustManager
 {
     /// <summary>
     /// 任务管理器界面样式接口，
     /// 定义面板所有可视化元素的绘制契约
     /// </summary>
-    internal interface IQuestManagerStyle
+    internal interface IEntrustManagerStyle
     {
         #region 生命周期
 
@@ -46,7 +46,7 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
         #region 任务条目绘制
 
         /// <summary>绘制单个任务条目</summary>
-        void DrawQuestEntry(SpriteBatch sb, Rectangle entryRect, QuestEntryData entry,
+        void DrawQuestEntry(SpriteBatch sb, Rectangle entryRect, EntrustEntryData entry,
             bool isSelected, bool isHovered, float alpha, int entryIndex);
 
         /// <summary>绘制条目分隔线</summary>

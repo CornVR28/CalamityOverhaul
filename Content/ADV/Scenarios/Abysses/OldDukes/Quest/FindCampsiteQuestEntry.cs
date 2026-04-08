@@ -1,4 +1,4 @@
-using CalamityOverhaul.Content.ADV.QuestManager;
+﻿using CalamityOverhaul.Content.ADV.EntrustManager;
 using CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Campsites;
 using System.Collections.Generic;
 using Terraria;
@@ -7,11 +7,11 @@ using Terraria.Localization;
 namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Quest
 {
     /// <summary>
-    /// 寻找老公爵营地委托条目——<see cref="QuestEntryData"/> 子类，
+    /// 寻找老公爵营地委托条目——<see cref="EntrustEntryData"/> 子类，
     /// 追踪玩家前往营地与老公爵对话的进度，
     /// 在追踪窗口中显示距离和交互提示
     /// </summary>
-    internal class FindCampsiteQuestEntry : QuestEntryData
+    internal class FindCampsiteQuestEntry : EntrustEntryData
     {
         /// <summary>"目标" 文本</summary>
         public LocalizedText ObjectiveFormat { get; init; }

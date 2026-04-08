@@ -2,7 +2,7 @@
 using CalamityOverhaul.Content.ADV.ADVRewardPopups;
 using CalamityOverhaul.Content.ADV.DialogueBoxs;
 using CalamityOverhaul.Content.ADV.DialogueBoxs.Styles;
-using CalamityOverhaul.Content.ADV.QuestManager;
+using CalamityOverhaul.Content.ADV.EntrustManager;
 using CalamityOverhaul.Content.Items.Tools;
 using System;
 using System.Collections.Generic;

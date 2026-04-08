@@ -1,4 +1,4 @@
-﻿using CalamityOverhaul.Content.ADV.QuestManager;
+﻿using CalamityOverhaul.Content.ADV.EntrustManager;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 
@@ -8,7 +8,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Quest
     /// 比目鱼委托在管理器列表中的自定义条目样式——
     /// 深海渐变背景、焦散光斑、波浪边框、上浮气泡、生物发光边带
     /// </summary>
-    internal class OceanEntryStyle : IQuestEntryStyle
+    internal class OceanEntryStyle : IEntrustEntryStyle
     {
         #region 色板
 
@@ -49,7 +49,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Quest
             if (bubbleTime > 100f) bubbleTime -= 100f;
         }
 
-        public bool DrawEntryBackground(SpriteBatch sb, Rectangle entryRect, QuestEntryData entry,
+        public bool DrawEntryBackground(SpriteBatch sb, Rectangle entryRect, EntrustEntryData entry,
             bool isSelected, bool isHovered, float alpha) {
             var px = VaultAsset.placeholder2.Value;
             var uv = new Rectangle(0, 0, 1, 1);
@@ -143,7 +143,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Quest
             return true;
         }
 
-        public float DrawEntryIcon(SpriteBatch sb, Vector2 titlePos, QuestEntryData entry, float alpha) {
+        public float DrawEntryIcon(SpriteBatch sb, Vector2 titlePos, EntrustEntryData entry, float alpha) {
             var px = VaultAsset.placeholder2.Value;
             float cx = titlePos.X + 8f;
             float cy = titlePos.Y + 9f;
@@ -171,7 +171,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Quest
             return 22f;
         }
 
-        public void DrawEntryOverlay(SpriteBatch sb, Rectangle entryRect, QuestEntryData entry, float alpha) {
+        public void DrawEntryOverlay(SpriteBatch sb, Rectangle entryRect, EntrustEntryData entry, float alpha) {
             var px = VaultAsset.placeholder2.Value;
 
             //上浮气泡（5个，确定性种子驱动位置，随时间循环上升）

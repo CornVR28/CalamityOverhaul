@@ -1,4 +1,4 @@
-using CalamityOverhaul.Content.ADV.QuestManager;
+﻿using CalamityOverhaul.Content.ADV.EntrustManager;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 
@@ -9,7 +9,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Quest
     /// 深绿毒雾背景、酸液脉冲边框、毒绿色标题、
     /// 角落气泡装饰
     /// </summary>
-    internal class SulfseaEntryStyle : IQuestEntryStyle
+    internal class SulfseaEntryStyle : IEntrustEntryStyle
     {
         #region 色板
 
@@ -35,7 +35,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Quest
             if (shimmerPhase > MathHelper.TwoPi) shimmerPhase -= MathHelper.TwoPi;
         }
 
-        public bool DrawEntryBackground(SpriteBatch sb, Rectangle entryRect, QuestEntryData entry,
+        public bool DrawEntryBackground(SpriteBatch sb, Rectangle entryRect, EntrustEntryData entry,
             bool isSelected, bool isHovered, float alpha) {
             var px = VaultAsset.placeholder2.Value;
 
@@ -78,7 +78,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Quest
             return true;
         }
 
-        public float DrawEntryIcon(SpriteBatch sb, Vector2 titlePos, QuestEntryData entry, float alpha) {
+        public float DrawEntryIcon(SpriteBatch sb, Vector2 titlePos, EntrustEntryData entry, float alpha) {
             var px = VaultAsset.placeholder2.Value;
             //菱形图标
             float iconX = titlePos.X + 6f;
@@ -97,7 +97,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Quest
             return 18f;
         }
 
-        public void DrawEntryOverlay(SpriteBatch sb, Rectangle entryRect, QuestEntryData entry, float alpha) {
+        public void DrawEntryOverlay(SpriteBatch sb, Rectangle entryRect, EntrustEntryData entry, float alpha) {
             var px = VaultAsset.placeholder2.Value;
 
             //角落气泡装饰

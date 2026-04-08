@@ -1,5 +1,5 @@
 ﻿using CalamityOverhaul.Common;
-using CalamityOverhaul.Content.ADV.QuestManager;
+using CalamityOverhaul.Content.ADV.EntrustManager;
 using Terraria;
 using Terraria.ID;
 using Terraria.Localization;

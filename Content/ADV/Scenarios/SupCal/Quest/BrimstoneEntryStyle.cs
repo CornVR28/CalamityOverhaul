@@ -1,4 +1,4 @@
-﻿using CalamityOverhaul.Content.ADV.QuestManager;
+﻿using CalamityOverhaul.Content.ADV.EntrustManager;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 
@@ -9,7 +9,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest
     /// 深红暗色调背景、硫火脉冲边框、火焰色标题、
     /// 角落余烬装饰
     /// </summary>
-    internal class BrimstoneEntryStyle : IQuestEntryStyle
+    internal class BrimstoneEntryStyle : IEntrustEntryStyle
     {
         #region 色板
 
@@ -35,7 +35,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest
             if (shimmerPhase > MathHelper.TwoPi) shimmerPhase -= MathHelper.TwoPi;
         }
 
-        public bool DrawEntryBackground(SpriteBatch sb, Rectangle entryRect, QuestEntryData entry,
+        public bool DrawEntryBackground(SpriteBatch sb, Rectangle entryRect, EntrustEntryData entry,
             bool isSelected, bool isHovered, float alpha) {
             var px = VaultAsset.placeholder2.Value;
 
@@ -78,7 +78,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest
             return true; //完全接管背景
         }
 
-        public float DrawEntryIcon(SpriteBatch sb, Vector2 titlePos, QuestEntryData entry, float alpha) {
+        public float DrawEntryIcon(SpriteBatch sb, Vector2 titlePos, EntrustEntryData entry, float alpha) {
             var px = VaultAsset.placeholder2.Value;
             //硫火菱形图标
             float iconX = titlePos.X + 6f;
@@ -97,7 +97,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest
             return 18f; //标题右移量
         }
 
-        public void DrawEntryOverlay(SpriteBatch sb, Rectangle entryRect, QuestEntryData entry, float alpha) {
+        public void DrawEntryOverlay(SpriteBatch sb, Rectangle entryRect, EntrustEntryData entry, float alpha) {
             var px = VaultAsset.placeholder2.Value;
 
             //角落余烬装饰——四角微光点

@@ -1,10 +1,10 @@
-using CalamityOverhaul.Content.UIs.NotificationPopup;
+﻿using CalamityOverhaul.Content.UIs.NotificationPopup;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;
 using Terraria.GameContent;
 
-namespace CalamityOverhaul.Content.ADV.QuestManager
+namespace CalamityOverhaul.Content.ADV.EntrustManager
 {
     /// <summary>
     /// 委托管理器状态变更通知条目——嘉登风格科技感弹窗，
@@ -427,12 +427,12 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
         #region 工具方法
 
         private string GetLabel() => kind switch {
-            StatusKind.NewQuest => QuestManagerNotification.LabelNewQuest.Value,
-            StatusKind.Tracked => QuestManagerNotification.LabelTracked.Value,
-            StatusKind.Untracked => QuestManagerNotification.LabelUntracked.Value,
-            StatusKind.Suspended => QuestManagerNotification.LabelSuspended.Value,
-            StatusKind.Unsuspended => QuestManagerNotification.LabelUnsuspended.Value,
-            StatusKind.Completed => QuestManagerNotification.LabelCompleted.Value,
+            StatusKind.NewQuest => EntrustManagerNotification.LabelNewQuest.Value,
+            StatusKind.Tracked => EntrustManagerNotification.LabelTracked.Value,
+            StatusKind.Untracked => EntrustManagerNotification.LabelUntracked.Value,
+            StatusKind.Suspended => EntrustManagerNotification.LabelSuspended.Value,
+            StatusKind.Unsuspended => EntrustManagerNotification.LabelUnsuspended.Value,
+            StatusKind.Completed => EntrustManagerNotification.LabelCompleted.Value,
             _ => ""
         };
 

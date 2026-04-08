@@ -1,13 +1,13 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
 
-namespace CalamityOverhaul.Content.ADV.QuestManager
+namespace CalamityOverhaul.Content.ADV.EntrustManager
 {
     /// <summary>
     /// 委托条目在管理器列表中的自定义显示样式，
     /// 各任务线可提供独立实现来定义自己的视觉风格，
-    /// 若委托未提供则由 <see cref="IQuestManagerStyle"/> 的默认绘制接管
+    /// 若委托未提供则由 <see cref="IEntrustManagerStyle"/> 的默认绘制接管
     /// </summary>
-    internal interface IQuestEntryStyle
+    internal interface IEntrustEntryStyle
     {
         /// <summary>每帧更新动画计时器</summary>
         void Update();
@@ -15,16 +15,16 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
         /// <summary>
         /// 绘制条目自定义背景，返回true表示完全接管背景绘制
         /// </summary>
-        bool DrawEntryBackground(SpriteBatch sb, Rectangle entryRect, QuestEntryData entry,
+        bool DrawEntryBackground(SpriteBatch sb, Rectangle entryRect, EntrustEntryData entry,
             bool isSelected, bool isHovered, float alpha);
 
         /// <summary>
         /// 绘制标题左侧图标装饰，返回标题文字应右移的像素数
         /// </summary>
-        float DrawEntryIcon(SpriteBatch sb, Vector2 titlePos, QuestEntryData entry, float alpha);
+        float DrawEntryIcon(SpriteBatch sb, Vector2 titlePos, EntrustEntryData entry, float alpha);
 
         /// <summary>绘制条目前景特效覆盖层</summary>
-        void DrawEntryOverlay(SpriteBatch sb, Rectangle entryRect, QuestEntryData entry, float alpha);
+        void DrawEntryOverlay(SpriteBatch sb, Rectangle entryRect, EntrustEntryData entry, float alpha);
 
         /// <summary>获取条目左侧状态色带颜色</summary>
         Color GetAccentColor(QuestEntryStatus status, float alpha);

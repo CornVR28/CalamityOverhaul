@@ -1,5 +1,5 @@
 ﻿using CalamityOverhaul.Common;
-using CalamityOverhaul.Content.ADV.QuestManager;
+using CalamityOverhaul.Content.ADV.EntrustManager;
 using CalamityOverhaul.Content.ADV.Scenarios.Helen;
 using CalamityOverhaul.Content.ADV.Scenarios.Helen.Quest;
 using Terraria;

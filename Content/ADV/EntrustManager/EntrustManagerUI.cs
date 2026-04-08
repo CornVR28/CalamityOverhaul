@@ -1,5 +1,5 @@
 ﻿using CalamityOverhaul.Common;
-using CalamityOverhaul.Content.ADV.QuestManager.Styles;
+using CalamityOverhaul.Content.ADV.EntrustManager.Styles;
 using InnoVault.UIHandles;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -16,7 +16,7 @@ using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 using Terraria.UI;
 
-namespace CalamityOverhaul.Content.ADV.QuestManager
+namespace CalamityOverhaul.Content.ADV.EntrustManager
 {
     internal class QuestManagerSysteam : ModSystem
     {
@@ -148,23 +148,23 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
         #region 任务数据（概念化——后续由具体任务线注册）
 
         /// <summary>所有已注册的任务条目</summary>
-        private readonly List<QuestEntryData> allEntries = [];
+        private readonly List<EntrustEntryData> allEntries = [];
 
         /// <summary>当前过滤后的显示列表</summary>
-        private readonly List<QuestEntryData> filteredEntries = [];
+        private readonly List<EntrustEntryData> filteredEntries = [];
 
         /// <summary>注册一条任务到管理器</summary>
-        public void RegisterQuest(QuestEntryData entry) {
+        public void RegisterQuest(EntrustEntryData entry) {
             if (allEntries.All(e => e.Key != entry.Key)) {
                 //新注册的进行中任务自动设为关注，使追踪窗口立即显示
                 if (entry.Status == QuestEntryStatus.Active) {
                     entry.Status = QuestEntryStatus.Tracked;
-                    QuestManagerNotification.Notify(entry.Title,
-                        QuestManagerNotification.NotifyKind.NewQuest);
+                    EntrustManagerNotification.Notify(entry.Title,
+                        EntrustManagerNotification.NotifyKind.NewQuest);
                 }
                 else if (entry.Status == QuestEntryStatus.Suspended) {
-                    QuestManagerNotification.Notify(entry.Title,
-                        QuestManagerNotification.NotifyKind.Suspended);
+                    EntrustManagerNotification.Notify(entry.Title,
+                        EntrustManagerNotification.NotifyKind.Suspended);
                 }
                 allEntries.Add(entry);
                 filterDirty = true;
@@ -178,7 +178,7 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
         }
 
         /// <summary>根据 key 获取任务条目</summary>
-        public QuestEntryData GetEntry(string key) {
+        public EntrustEntryData GetEntry(string key) {
             return allEntries.Find(e => e.Key == key);
         }
 
@@ -216,8 +216,8 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
             return true;
         }
 
-        /// <summary>获取所有被关注状态的条目，供 <see cref="QuestTrackerWidget"/> 查询</summary>
-        public void GetTrackedEntries(List<QuestEntryData> result) {
+        /// <summary>获取所有被关注状态的条目，供 <see cref="EntrustTrackerWidget"/> 查询</summary>
+        public void GetTrackedEntries(List<EntrustEntryData> result) {
             foreach (var e in allEntries) {
                 if (e.Status == QuestEntryStatus.Tracked)
                     result.Add(e);
@@ -237,10 +237,10 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
 
         #region 样式系统
 
-        private IQuestManagerStyle currentStyle;
+        private IEntrustManagerStyle currentStyle;
 
         /// <summary>切换样式</summary>
-        public void SetStyle(IQuestManagerStyle style) {
+        public void SetStyle(IEntrustManagerStyle style) {
             currentStyle?.Reset();
             currentStyle = style;
         }
@@ -499,22 +499,22 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
         }
 
         /// <summary>根据状态变化发射对应的通知弹窗</summary>
-        private static void EmitStatusNotification(QuestEntryData entry,
+        private static void EmitStatusNotification(EntrustEntryData entry,
             QuestEntryStatus oldStatus, QuestEntryStatus newStatus) {
             var kind = newStatus switch {
                 QuestEntryStatus.Tracked when oldStatus == QuestEntryStatus.Suspended
-                    => QuestManagerNotification.NotifyKind.Unsuspended,
-                QuestEntryStatus.Tracked => QuestManagerNotification.NotifyKind.Tracked,
+                    => EntrustManagerNotification.NotifyKind.Unsuspended,
+                QuestEntryStatus.Tracked => EntrustManagerNotification.NotifyKind.Tracked,
                 QuestEntryStatus.Active when oldStatus == QuestEntryStatus.Tracked
-                    => QuestManagerNotification.NotifyKind.Untracked,
+                    => EntrustManagerNotification.NotifyKind.Untracked,
                 QuestEntryStatus.Active when oldStatus == QuestEntryStatus.Suspended
-                    => QuestManagerNotification.NotifyKind.Unsuspended,
-                QuestEntryStatus.Suspended => QuestManagerNotification.NotifyKind.Suspended,
-                QuestEntryStatus.Completed => QuestManagerNotification.NotifyKind.Completed,
-                _ => (QuestManagerNotification.NotifyKind?)null,
+                    => EntrustManagerNotification.NotifyKind.Unsuspended,
+                QuestEntryStatus.Suspended => EntrustManagerNotification.NotifyKind.Suspended,
+                QuestEntryStatus.Completed => EntrustManagerNotification.NotifyKind.Completed,
+                _ => (EntrustManagerNotification.NotifyKind?)null,
             };
             if (kind.HasValue) {
-                QuestManagerNotification.Notify(entry.Title, kind.Value);
+                EntrustManagerNotification.Notify(entry.Title, kind.Value);
             }
         }
 
@@ -542,7 +542,7 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
         /// <summary>
         /// 计算单个条目的动态高度，含展开内容区域
         /// </summary>
-        private int GetDynamicEntryHeight(QuestEntryData entry) {
+        private int GetDynamicEntryHeight(EntrustEntryData entry) {
             int baseH = currentStyle?.GetEntryHeight() ?? 62;
             if (entry.ExpandProgress <= 0.001f) return baseH;
 
@@ -554,7 +554,7 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
         /// <summary>
         /// 计算条目展开后描述文本区域需要的额外高度
         /// </summary>
-        private int CalcExpandedContentHeight(QuestEntryData entry) {
+        private int CalcExpandedContentHeight(EntrustEntryData entry) {
             string summary = entry.Summary ?? "";
             if (string.IsNullOrEmpty(summary)) return 0;
 
@@ -608,7 +608,7 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
             }
             filteredEntries.Clear();
 
-            IEnumerable<QuestEntryData> source = allEntries;
+            IEnumerable<EntrustEntryData> source = allEntries;
             switch (selectedCategoryIndex) {
                 case 1: //Active
                     source = allEntries.Where(e =>

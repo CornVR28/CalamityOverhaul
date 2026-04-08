@@ -1,12 +1,12 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
 
-namespace CalamityOverhaul.Content.ADV.QuestManager
+namespace CalamityOverhaul.Content.ADV.EntrustManager
 {
     /// <summary>
     /// 委托在屏幕左侧常驻追踪窗口中的显示样式，
     /// 各任务线可自定义此窗口的视觉风格
     /// </summary>
-    internal interface IQuestTrackerWidgetStyle
+    internal interface IEntrustTrackerWidgetStyle
     {
         #region 生命周期
 

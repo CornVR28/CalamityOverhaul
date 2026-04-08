@@ -1,4 +1,4 @@
-﻿using CalamityOverhaul.Content.ADV.QuestManager;
+﻿using CalamityOverhaul.Content.ADV.EntrustManager;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
@@ -14,7 +14,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Quest.FishoilQuest
     /// 鱼油委托任务条目——在任务管理器中作为标准委托管理，
     /// 追踪窗口显示收集进度，达到目标后触发提交场景
     /// </summary>
-    internal class FishoilQuestEntry : QuestEntryData
+    internal class FishoilQuestEntry : EntrustEntryData
     {
 
         public const string QuestKey = "FishoilQuest";

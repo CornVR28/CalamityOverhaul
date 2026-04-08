@@ -3,12 +3,12 @@ using System;
 using Terraria;
 using Terraria.GameContent;
 
-namespace CalamityOverhaul.Content.ADV.QuestManager
+namespace CalamityOverhaul.Content.ADV.EntrustManager
 {
     /// <summary>
     /// 任务管理器样式抽象基类——提供通用绘制工具方法
     /// </summary>
-    internal abstract class BaseManagerStyle : IQuestManagerStyle
+    internal abstract class BaseManagerStyle : IEntrustManagerStyle
     {
         protected float pulseTimer;
         protected float globalTimer;
@@ -36,7 +36,7 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
             float viewRatio, float alpha);
         public abstract void DrawFooter(SpriteBatch sb, Rectangle footerRect, int totalQuests,
             int activeQuests, float alpha);
-        public abstract void DrawQuestEntry(SpriteBatch sb, Rectangle entryRect, QuestEntryData entry,
+        public abstract void DrawQuestEntry(SpriteBatch sb, Rectangle entryRect, EntrustEntryData entry,
             bool isSelected, bool isHovered, float alpha, int entryIndex);
         public abstract void DrawEntrySeparator(SpriteBatch sb, Vector2 start, Vector2 end, float alpha);
         public abstract Color GetShadowColor(float alpha);

@@ -6,15 +6,15 @@ using Terraria;
 using Terraria.GameContent;
 using Terraria.ModLoader.IO;
 
-namespace CalamityOverhaul.Content.ADV.QuestManager
+namespace CalamityOverhaul.Content.ADV.EntrustManager
 {
     /// <summary>
     /// 被关注委托的常驻追踪窗口，位于屏幕左侧，
     /// 多个被关注任务纵向排列，管理器打开时自动隐藏
     /// </summary>
-    internal class QuestTrackerWidget : UIHandle
+    internal class EntrustTrackerWidget : UIHandle
     {
-        public static QuestTrackerWidget Instance => UIHandleLoader.GetUIHandleOfType<QuestTrackerWidget>();
+        public static EntrustTrackerWidget Instance => UIHandleLoader.GetUIHandleOfType<EntrustTrackerWidget>();
 
         #region 配置
 
@@ -45,7 +45,7 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
         private float overlappingAlpha = 1f;
 
         /// <summary>缓存的被关注条目引用</summary>
-        private readonly List<QuestEntryData> trackedEntries = [];
+        private readonly List<EntrustEntryData> trackedEntries = [];
 
         /// <summary>窗口纵向偏移（可拖拽），-1 表示尚未初始化</summary>
         private float widgetYOffset = -1f;
@@ -357,8 +357,8 @@ namespace CalamityOverhaul.Content.ADV.QuestManager
                 new Color(60, 150, 220) * (alpha * 0.3f));
         }
 
-        private void DrawDefaultContent(SpriteBatch sb, Rectangle contentRect, QuestEntryData entry,
-            IQuestTrackerWidgetStyle style, float alpha) {
+        private void DrawDefaultContent(SpriteBatch sb, Rectangle contentRect, EntrustEntryData entry,
+            IEntrustTrackerWidgetStyle style, float alpha) {
             var font = FontAssets.MouseText.Value;
             Color textC = style?.GetWidgetTextColor(alpha) ?? new Color(160, 190, 210) * (alpha * 0.8f);
             Color accentC = style?.GetWidgetAccentColor(alpha) ?? new Color(80, 255, 220) * alpha;

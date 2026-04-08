@@ -1,7 +1,7 @@
 ﻿using CalamityOverhaul.Content.ADV.ADVChoices;
 using CalamityOverhaul.Content.ADV.DialogueBoxs;
 using CalamityOverhaul.Content.ADV.DialogueBoxs.Styles;
-using CalamityOverhaul.Content.ADV.QuestManager;
+using CalamityOverhaul.Content.ADV.EntrustManager;
 using System;
 using System.Linq;
 using Terraria;

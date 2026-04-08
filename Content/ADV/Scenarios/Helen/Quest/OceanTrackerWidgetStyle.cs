@@ -1,4 +1,4 @@
-﻿using CalamityOverhaul.Content.ADV.QuestManager;
+﻿using CalamityOverhaul.Content.ADV.EntrustManager;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;
@@ -11,7 +11,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Quest
     /// 非对称边框、焦散光斑、生物发光呼吸层、波浪指示器，
     /// 用CP2077式HUD层叠思路重构，告别网页盒子感
     /// </summary>
-    internal class OceanTrackerWidgetStyle : IQuestTrackerWidgetStyle
+    internal class OceanTrackerWidgetStyle : IEntrustTrackerWidgetStyle
     {
         #region 色板
 
@@ -258,7 +258,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Quest
 
         public int? GetPreferredWidth() => 230;
         public int? GetMinHeight() => 80;
-        public int? GetIdleCompactHeight(QuestEntryData entry) {
+        public int? GetIdleCompactHeight(EntrustEntryData entry) {
             if (entry.Progress <= 0f && entry.Status != QuestEntryStatus.Completed)
                 return 46;
             return null;

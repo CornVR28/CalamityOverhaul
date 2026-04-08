@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using Terraria;
 using Terraria.GameContent;
 
-namespace CalamityOverhaul.Content.ADV.QuestManager.Styles
+namespace CalamityOverhaul.Content.ADV.EntrustManager.Styles
 {
     /// <summary>
     /// 嘉登·战术数据链风格，任务管理器默认样式，
@@ -409,7 +409,7 @@ namespace CalamityOverhaul.Content.ADV.QuestManager.Styles
 
         #region 任务条目
 
-        public override void DrawQuestEntry(SpriteBatch sb, Rectangle entryRect, QuestEntryData entry,
+        public override void DrawQuestEntry(SpriteBatch sb, Rectangle entryRect, EntrustEntryData entry,
             bool isSelected, bool isHovered, float alpha, int entryIndex) {
             var font = FontAssets.MouseText.Value;
             var customStyle = entry.EntryStyle;

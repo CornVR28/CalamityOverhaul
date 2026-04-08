@@ -1,4 +1,4 @@
-using CalamityOverhaul.Content.ADV.QuestManager;
+﻿using CalamityOverhaul.Content.ADV.EntrustManager;
 using System.Collections.Generic;
 using Terraria;
 using Terraria.Localization;
@@ -7,13 +7,13 @@ using static CalamityOverhaul.Content.ADV.Common.BaseDamageTracker;
 namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest
 {
     /// <summary>
-    /// 硫火女巫猎杀委托条目——<see cref="QuestEntryData"/> 子类，
+    /// 硫火女巫猎杀委托条目——<see cref="EntrustEntryData"/> 子类，
     /// 动态追踪Boss存活状态与伤害贡献度，
     /// 为追踪窗口提供上下文感知的内容显示：<br/>
     /// · Boss不存在时提示玩家召唤目标<br/>
     /// · Boss存在时显示实时伤害贡献与进度
     /// </summary>
-    internal class SupCalHuntQuestEntry : QuestEntryData
+    internal class SupCalHuntQuestEntry : EntrustEntryData
     {
         /// <summary>目标Boss的NPC type</summary>
         public int TargetNpcType { get; init; }
