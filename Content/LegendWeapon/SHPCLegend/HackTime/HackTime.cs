@@ -152,6 +152,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             HackTimeUI.Instance?.Panel.Hide();
         }
 
+        /// <summary>
+        /// 世界更新接口，处理与世界状态相关的逻辑
+        /// </summary>
         public static void UpdateByWorld() {
             //骇入效果全局驱动，退出骇客时间后仍持续生效
             HackEffectTracker.Update();
