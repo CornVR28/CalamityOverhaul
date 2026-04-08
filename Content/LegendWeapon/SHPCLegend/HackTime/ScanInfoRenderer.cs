@@ -208,7 +208,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             if (alpha < 0.01f) return;
 
             //计算面板位置(协议列表上方)
-            int protocolCount = QuickHackRegistry.All.Length;
+            int protocolCount = QuickHackDef.Count;
             float listTotalH = protocolCount * (78f + 5f) - 5f;
             float listStartY = (Main.screenHeight - listTotalH) * 0.5f;
             float panelH = TopPad + HeaderHeight + SepHeight

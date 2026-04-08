@@ -25,7 +25,7 @@
     {
         //对应的协议定义
         public QuickHackDef Hack;
-        //在QuickHackRegistry.All中的索引
+        //在QuickHackDef.Instances中的索引
         public int SlotIndex;
         //当前队列状态
         public HackQueueState State;

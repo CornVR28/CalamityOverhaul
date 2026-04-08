@@ -270,7 +270,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
                 HackQueueState.Completed => HackTheme.Accent,
                 _ => HackTheme.TextNormal,
             };
-            Utils.DrawBorderString(sb, entry.Hack.Name, new Vector2(nameX, nameY),
+            Utils.DrawBorderString(sb, entry.Hack.DisplayName.Value, new Vector2(nameX, nameY),
                 nameColor * itemAlpha, FontName);
 
             //=== 状态文字（右上角） ===

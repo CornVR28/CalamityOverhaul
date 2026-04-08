@@ -197,8 +197,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
         #region 生成逻辑
 
         private void SpawnPopup() {
-            var all = QuickHackRegistry.All;
-            var hack = all[Main.rand.Next(all.Length)];
+            var all = QuickHackDef.Instances;
+            var hack = all[Main.rand.Next(all.Count)];
 
             //生成区域随时间从队列区扩散到整个左半屏
             float zoneExpand = Math.Min(modeActiveTime / ZoneExpandDuration, 1f);

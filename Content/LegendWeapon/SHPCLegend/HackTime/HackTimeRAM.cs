@@ -64,16 +64,19 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
         /// <summary>
         /// 每帧更新，处理RAM自动恢复
         /// </summary>
+        //tModLoader固定每秒60tick
+        private const float TickSeconds = 1f / 60f;
+
         public static void Update() {
             //恢复冷却
             if (recoveryCooldown > 0f) {
-                recoveryCooldown -= 0.016f;
+                recoveryCooldown -= TickSeconds;
                 return;
             }
 
             //缓慢恢复
             if (CurrentRam < MaxRam) {
-                CurrentRam += RecoveryRate * 0.016f;
+                CurrentRam += RecoveryRate * TickSeconds;
                 if (CurrentRam > MaxRam) CurrentRam = MaxRam;
             }
         }

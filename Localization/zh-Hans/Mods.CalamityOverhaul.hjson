@@ -43,4 +43,41 @@ Resurrections: {
 	}
 }
 
+QuickHack: {
+	SynapseBurn: {
+		DisplayName: 突触焚毁
+		Description: 超载目标神经突触，造成持续热伤害
+	}
+
+	ShortCircuit: {
+		DisplayName: 短路
+		Description: 释放电磁脉冲造成即时伤害并短暂麻痹
+	}
+
+	Cyberpsychosis: {
+		DisplayName: 赛博精神病
+		Description: 使目标陷入癫狂，攻击周围一切单位
+	}
+
+	SystemReset: {
+		DisplayName: 系统重置
+		Description: 强制重启目标系统，使其完全瘫痪
+	}
+
+	OpticOverload: {
+		DisplayName: 视觉过载
+		Description: 致盲目标，使其无法感知周围环境
+	}
+
+	MemoryWipe: {
+		DisplayName: 记忆清除
+		Description: 清除目标的敌意数据，重置仇恨列表
+	}
+
+	Contagion: {
+		DisplayName: 蔓延
+		Description: 植入自我复制的恶意程序，向周围目标扩散
+	}
+}
+
 // NPCs.Hierophant.DisplayName: Hierophant

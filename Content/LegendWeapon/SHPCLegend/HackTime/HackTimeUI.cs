@@ -1,5 +1,6 @@
 ﻿using InnoVault.UIHandles;
 using Microsoft.Xna.Framework.Graphics;
+using Terraria;
 
 namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
 {
@@ -36,11 +37,14 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             ScanInfo.Update();
             Ram.Update();
 
-            //上传完成时消费结果（仅正常模式）
+            //驱动所有活跃骇入效果
+            HackEffectTracker.Update();
+
+            //上传完成时消费结果并施加效果（仅正常模式）
             if (!HackTime.InfiniteHack && Queue.HasCompleted) {
                 var hack = Queue.ConsumeCompleted();
-                if (hack != null) {
-                    //TODO：对选中目标施加对应的骇入效果
+                if (hack != null && HackTime.SelectedTargetIndex >= 0) {
+                    HackEffectTracker.Apply(hack, HackTime.SelectedTargetIndex, Main.myPlayer);
                 }
             }
 

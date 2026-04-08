@@ -43,4 +43,41 @@ Resurrections: {
 	}
 }
 
+QuickHack: {
+	SynapseBurn: {
+		// DisplayName: Synapse Burn
+		// Description: Overloads target neural synapses, dealing sustained thermal damage
+	}
+
+	ShortCircuit: {
+		// DisplayName: Short Circuit
+		// Description: Releases an electromagnetic pulse dealing instant damage with brief paralysis
+	}
+
+	Cyberpsychosis: {
+		// DisplayName: Cyberpsychosis
+		// Description: Drives the target into a frenzy, attacking all nearby units
+	}
+
+	SystemReset: {
+		// DisplayName: System Reset
+		// Description: Forces a hard reboot on the target system, causing total shutdown
+	}
+
+	OpticOverload: {
+		// DisplayName: Optic Overload
+		// Description: Blinds the target, disabling environmental awareness
+	}
+
+	MemoryWipe: {
+		// DisplayName: Memory Wipe
+		// Description: Purges target hostility data, resetting threat tables
+	}
+
+	Contagion: {
+		// DisplayName: Contagion
+		// Description: Implants a self-replicating malware that spreads to nearby targets
+	}
+}
+
 // NPCs.Hierophant.DisplayName: Hierophant

@@ -7,20 +7,20 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
 {
     /// <summary>
     /// 骇入面板渲染器(赛博朋克2077风格)
-    /// <br/>选中目标后协议条目从屏幕右侧依次飞入，无边框容器
-    /// <br/>故障抖动、CRT扫描线、色散文字、电路树、角标等赛博动态效果
-    /// <br/>所有UI锚定到屏幕坐标
+    /// <br/>选中目标后协议条目从屏幕右侧依次飞入，无边框侧栏
+    /// <br/>叠加多层动画：CRT扫描线、色散分离、电路连接树、背景噪波等动态效果
+    /// <br/>基于UI锚点和屏幕坐标
     /// </summary>
     internal class HackPanelRenderer
     {
         //每个槽位的飞入进度(0到1)
-        private readonly float[] slotFlyIn = new float[QuickHackRegistry.All.Length];
+        private float[] slotFlyIn;
         //每个槽位的悬停动画值
-        private readonly float[] slotHoverAnim = new float[QuickHackRegistry.All.Length];
-        //每个槽位的故障抖动随机种子
-        private readonly float[] slotGlitchSeed = new float[QuickHackRegistry.All.Length];
+        private float[] slotHoverAnim;
+        //每个槽位的故障动画随机种子
+        private float[] slotGlitchSeed;
         //各槽位的实际绘制矩形（用于悬停检测）
-        private readonly Rectangle[] slotRects = new Rectangle[QuickHackRegistry.All.Length];
+        private Rectangle[] slotRects;
         //当前悬停的槽位索引
         private int hoveredSlot = -1;
         //当前是否有悬停槽位（供外部查询）
@@ -29,25 +29,25 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
         private float timer;
         //是否显示
         private bool visible;
-        //左侧队列渲染器引用
+        //上传队列渲染器引用
         internal HackQueueRenderer Queue;
-        //列表展开计时(秒)，Show()时归零
+        //列表展开计时(秒)，Show()时重置
         private float revealTime;
-        //全局故障带Y坐标（周期性横扫列表区域的色偏带）
+        //全局故障带Y坐标（自顶向下扫描的横条，带色偏效果）
         private float glitchBandY;
-        //故障带激活倒计时
+        //故障带冷却计时
         private float glitchBandCooldown;
 
-        //===== 条目布局常量 =====
+        //===== 条目排版常量 =====
         private const float ItemWidth = 420f;
         private const float ItemHeight = 78f;
         private const float ItemGap = 5f;
         private const float RightMargin = 36f;
-        //左侧斜切宽度（平行四边形切角效果）
+        //左侧斜切宽度（平行四边形的斜角效果）
         private const float SlashWidth = 22f;
-        //电路树主干距条目左边缘的偏移
+        //电路连接树距离条目左边缘的偏移
         private const float TrunkOffsetX = 56f;
-        //首个条目飞入前的基础延迟(秒)
+        //首个条目出现前的基础延迟(秒)
         private const float BaseEntryDelay = 0.2f;
         //每个条目之间的飞入间隔(秒)
         private const float EntryStagger = 0.07f;
@@ -59,6 +59,13 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
         private const float FontStatus = 0.36f;
 
         public void Show() {
+            int count = QuickHackDef.Count;
+            if (slotFlyIn == null || slotFlyIn.Length != count) {
+                slotFlyIn = new float[count];
+                slotHoverAnim = new float[count];
+                slotGlitchSeed = new float[count];
+                slotRects = new Rectangle[count];
+            }
             visible = true;
             hoveredSlot = -1;
             revealTime = 0f;
@@ -84,6 +91,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             timer += 0.016f;
 
             if (!visible) {
+                if (slotFlyIn == null) return;
                 for (int i = 0; i < slotFlyIn.Length; i++)
                     slotFlyIn[i] = MathHelper.Lerp(slotFlyIn[i], 0f, 0.15f);
                 revealTime = Math.Max(revealTime - 0.032f, 0f);
@@ -102,11 +110,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
                 if (slotFlyIn[i] > 0.995f) slotFlyIn[i] = 1f;
             }
 
-            //故障带更新：周期性从上到下快速横扫
+            //故障带更新（自顶向下的快速横扫，带色偏效果）
             glitchBandCooldown -= 0.016f;
             if (glitchBandCooldown <= 0f) {
-                glitchBandY += 600f * 0.016f; //快速下移
-                int count = QuickHackRegistry.All.Length;
+                glitchBandY += 600f * 0.016f; //匀速下移
+                int count = QuickHackDef.Count;
                 float totalH = count * (ItemHeight + ItemGap);
                 float startY = (Main.screenHeight - totalH) * 0.5f;
                 if (glitchBandY > startY + totalH + 50f) {
@@ -141,7 +149,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
         public void HandleClick() {
             if (!visible) return;
             if (hoveredSlot >= 0 && Queue != null) {
-                var hack = QuickHackRegistry.All[hoveredSlot];
+                var hack = QuickHackDef.GetByIndex(hoveredSlot);
+                if (hack == null) return;
                 //RAM不足时拒绝入队
                 if (!HackTimeRAM.CanAfford(hack.RamCost)) return;
                 if (Queue.Enqueue(hack, hoveredSlot)) {
@@ -151,7 +160,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
         }
 
         public bool ContainsMouse() {
-            if (!visible) return false;
+            if (!visible || slotRects == null || slotFlyIn == null) return false;
             int mx = Main.mouseX;
             int my = Main.mouseY;
             for (int i = 0; i < slotRects.Length; i++) {
@@ -161,7 +170,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             return false;
         }
 
-        #region 绘制入口
+        #region 主绘制入口
 
         public void Draw(SpriteBatch sb) {
             DrawTargetFrame(sb);
@@ -170,6 +179,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             if (px == null) return;
             float alpha = HackTime.Intensity;
             if (alpha < 0.01f) return;
+            if (slotFlyIn == null) return;
 
             DrawAmbientNoise(sb, px, alpha);
             DrawConnectorTree(sb, px, alpha);
@@ -180,9 +190,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
 
         #endregion
 
-        #region 环境噪波背景
+        #region 背景噪波纹理
 
-        //在条目列表区域背后绘制微弱的水平噪波线条，增加CRT质感
+        //在条目列表区域背后画微弱的水平噪波纹理，增加CRT质感
         private void DrawAmbientNoise(SpriteBatch sb, Texture2D px, float alpha) {
             bool anyVisible = false;
             for (int i = 0; i < slotFlyIn.Length; i++) {
@@ -190,7 +200,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             }
             if (!anyVisible) return;
 
-            int count = QuickHackRegistry.All.Length;
+            int count = QuickHackDef.Count;
             float totalH = count * (ItemHeight + ItemGap) - ItemGap;
             float startY = (Main.screenHeight - totalH) * 0.5f - 10f;
             float baseX = Main.screenWidth - RightMargin - ItemWidth - TrunkOffsetX - 20;
@@ -212,7 +222,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
 
         #region 故障色偏带
 
-        //周期性从上到下横扫的故障带：水平色偏+亮度异常
+        //自顶向下横扫的故障带，水平色偏+亮度异常
         private void DrawGlitchBand(SpriteBatch sb, Texture2D px, float alpha) {
             if (glitchBandCooldown > 0f) return;
 
@@ -221,7 +231,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             float baseX = Main.screenWidth - RightMargin - ItemWidth - TrunkOffsetX - 10;
             float endX = Main.screenWidth - RightMargin + 5;
 
-            //主色偏带（青色）
+            //主色偏带（主色条）
             sb.Draw(px, new Rectangle((int)(baseX + 3), (int)glitchBandY, (int)(endX - baseX), (int)bandH),
                 new Rectangle(0, 0, 1, 1), HackTheme.Accent * bandAlpha);
             //偏移红色伪影
@@ -231,12 +241,12 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
 
         #endregion
 
-        #region 电路树连接线
+        #region 电路连接树
 
         private void DrawConnectorTree(SpriteBatch sb, Texture2D px, float alpha) {
             if (HackTime.SelectedTargetIndex < 0) return;
 
-            int count = QuickHackRegistry.All.Length;
+            int count = QuickHackDef.Count;
             float totalH = count * (ItemHeight + ItemGap) - ItemGap;
             float listStartY = (Main.screenHeight - totalH) * 0.5f;
             float baseX = Main.screenWidth - RightMargin - ItemWidth;
@@ -260,7 +270,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
                     0, Vector2.Zero, 3f, SpriteEffects.None, 0);
             }
 
-            //垂直树干
+            //垂直干线
             if (wireProgress > 0.3f) {
                 float trunkProg = Math.Clamp((wireProgress - 0.3f) / 0.7f, 0f, 1f);
                 float trunkTop = MathHelper.Lerp(screenCenter.Y, listStartY + ItemHeight * 0.5f, trunkProg);
@@ -282,7 +292,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
                     }
                     DrawLine(sb, px, new Vector2(trunkX, itemCY), new Vector2(branchEnd, itemCY), 1f, branchColor);
 
-                    //分支节点（菱形感：两层）
+                    //分支节点（菱形感，两点）
                     sb.Draw(px, new Vector2(trunkX - 2, itemCY - 2),
                         new Rectangle(0, 0, 1, 1), branchColor * 2f,
                         0, Vector2.Zero, 4f, SpriteEffects.None, 0);
@@ -297,7 +307,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
                 }
             }
 
-            //多个数据光点沿电路流动（间隔排列）
+            //流动数据光点沿电路移动（三个光点循环）
             Texture2D glow = CWRAsset.SoftGlow?.Value;
             if (glow != null) {
                 for (int d = 0; d < 3; d++) {
@@ -320,7 +330,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
                 }
             }
 
-            //上传时在对应分支上有额外脉冲
+            //上传时在对应分支上有动态脉冲
             if (Queue != null && glow != null && wireProgress > 0.3f) {
                 for (int i = 0; i < count; i++) {
                     if (Queue.GetSlotState(i) != QueueSlotState.Uploading) continue;
@@ -339,7 +349,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
         #region 协议条目列表
 
         private void DrawItems(SpriteBatch sb, Texture2D px, float alpha) {
-            int count = QuickHackRegistry.All.Length;
+            int count = QuickHackDef.Count;
             float totalH = count * (ItemHeight + ItemGap) - ItemGap;
             float startY = (Main.screenHeight - totalH) * 0.5f;
             float baseX = Main.screenWidth - RightMargin - ItemWidth;
@@ -351,13 +361,13 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
                     continue;
                 }
 
-                QuickHackDef hack = QuickHackRegistry.All[i];
+                QuickHackDef hack = QuickHackDef.GetByIndex(i);
                 float hover = slotHoverAnim[i];
                 float y = startY + i * (ItemHeight + ItemGap);
 
                 //飞入偏移（弹性过冲）
                 float flyOffset = (1f - EaseOutBack(fly)) * 400f;
-                //故障抖动
+                //故障动画
                 float glitch = 0f;
                 if (fly < 0.85f) {
                     float seed = slotGlitchSeed[i] + timer * 25f;
@@ -399,23 +409,23 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
                 bgColor = Color.Lerp(bgColor, HackTheme.Danger, 0.12f * rPulse);
             }
             sb.Draw(px, rect, new Rectangle(0, 0, 1, 1), bgColor * (alpha * 0.92f));
-            //底部渐变亮带（条目底部1/3区域微微亮起）
+            //底部暗色渐变（条目底部1/3区域微微加暗）
             int gradH = rect.Height / 3;
             sb.Draw(px, new Rectangle(rect.X, rect.Bottom - gradH, rect.Width, gradH),
                 new Rectangle(0, 0, 1, 1), HackTheme.BgSlotHover * (alpha * 0.25f));
 
-            //斜切遮罩
+            //斜角遮罩
             DrawSlashCut(sb, px, rect, alpha);
 
-            //=== CRT扫描线纹理覆盖 ===
+            //=== CRT扫描线叠加层 ===
             DrawCRTOverlay(sb, px, rect, alpha * 0.05f);
 
-            //=== 内侧顶部高光线（模拟光泽） ===
+            //=== 内部顶部线高光（模拟光泽） ===
             Color highlightLine = Color.Lerp(HackTheme.Border, HackTheme.Accent, hover * 0.3f);
             sb.Draw(px, new Rectangle(rect.X + (int)SlashWidth + 4, rect.Y + 1, rect.Width - (int)SlashWidth - 8, 1),
                 new Rectangle(0, 0, 1, 1), highlightLine * (alpha * 0.18f));
 
-            //=== 类别色条（加粗+呼吸脉冲+渐变） ===
+            //=== 左侧色条（加粗+呼吸脉动+辉光） ===
             Color catColor = GetCategoryColor(hack.Category);
             //无限骇入：红色闪烁覆盖
             if (HackTime.InfiniteHack) {
@@ -427,13 +437,13 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             float barGlow = isUploading ? 1f : (0.45f + hover * 0.55f);
             barGlow *= breathe;
             int barX = rect.X + (int)SlashWidth;
-            //主色条（加粗到4px）
+            //色条主体（加粗到4px）
             sb.Draw(px, new Rectangle(barX, rect.Y + 3, 4, rect.Height - 6),
                 new Rectangle(0, 0, 1, 1), catColor * (alpha * barGlow));
-            //色条向右的渐变扩散（半透明宽带）
+            //色条右侧的渐变消散（低透明度扩展）
             sb.Draw(px, new Rectangle(barX + 4, rect.Y + 3, 16, rect.Height - 6),
                 new Rectangle(0, 0, 1, 1), catColor * (alpha * barGlow * 0.08f));
-            //色条发光
+            //色条辉光
             Texture2D glow = CWRAsset.SoftGlow?.Value;
             if (glow != null && barGlow > 0.4f) {
                 Color barGlowCol = catColor * (alpha * barGlow * 0.12f);
@@ -442,12 +452,12 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
                     0, glow.Size() / 2, new Vector2(0.06f, rect.Height / 35f), SpriteEffects.None, 0);
             }
 
-            //=== 类别符号（色条旁的小标识） ===
+            //=== 分类符号（色条旁的小标识符） ===
             string catSymbol = GetCategorySymbol(hack.Category);
             Color symColor = catColor * (alpha * (0.35f + hover * 0.3f));
             Utils.DrawBorderString(sb, catSymbol, new Vector2(barX + 8, rect.Y + rect.Height * 0.5f - 6), symColor, 0.28f);
 
-            //=== 扫描线（悬停/上传/队列中时横扫） ===
+            //=== 扫描线（悬停/上传/排队中时横扫） ===
             if (hover > 0.1f || isUploading || isQueued || HackTime.InfiniteHack) {
                 float scanSpeed = HackTime.InfiniteHack ? 3.5f : (isUploading ? 2.5f : 1.8f);
                 float scanAlpha = HackTime.InfiniteHack ? 0.35f : (isUploading ? 0.3f : (isQueued ? 0.15f : hover * 0.22f));
@@ -455,7 +465,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
                 DrawScanLine(sb, px, rect, scanPos, alpha * scanAlpha);
             }
 
-            //=== 边框线 ===
+            //=== 边框层 ===
             Color borderCol = isUploading
                 ? Color.Lerp(HackTheme.Border, HackTheme.Uploading, 0.5f)
                 : isQueued
@@ -475,10 +485,10 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             //右边
             sb.Draw(px, new Rectangle(rect.Right - 1, rect.Y, 1, rect.Height),
                 new Rectangle(0, 0, 1, 1), borderCol * (alpha * 0.35f));
-            //斜切边线
+            //斜边边线
             DrawSlashEdge(sb, px, rect, borderCol * (alpha * 0.5f));
 
-            //=== 悬停角标（四角L形技术指示器） ===
+            //=== 悬停角标（四角L形加亮指示符） ===
             if (hover > 0.15f) {
                 DrawCornerAccents(sb, px, rect, alpha * hover, catColor);
             }
@@ -492,7 +502,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
                     SpriteEffects.None, 0);
             }
 
-            //=== 序号 ===
+            //=== 编号 ===
             string idxStr = $"{index + 1:D2}";
             Color idxColor = Color.Lerp(HackTheme.TextNormal, catColor, hover * 0.6f) * (alpha * 0.6f);
             Vector2 idxPos = new(rect.X + SlashWidth + 10, rect.Y + 10);
@@ -510,27 +520,27 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
                 float rName = MathF.Sin(timer * 12f + slotGlitchSeed[index] * 4.3f) * 0.25f + 0.75f;
                 nameColor = Color.Lerp(nameColor, HackTheme.Danger, 0.5f * rName);
             }
-            //色散：悬停时在偏移位置画红/蓝色副本
+            //色散（悬停时红偏移+蓝色叠加）
             if (hover > 0.2f) {
                 float aberration = hover * 1.8f;
                 Color redGhost = new Color(220, 40, 40) * (alpha * hover * 0.2f);
                 Color blueGhost = new Color(40, 80, 220) * (alpha * hover * 0.2f);
-                Utils.DrawBorderString(sb, hack.Name, new Vector2(nameX - aberration, nameY), redGhost, FontName);
-                Utils.DrawBorderString(sb, hack.Name, new Vector2(nameX + aberration, nameY + 0.5f), blueGhost, FontName);
+                Utils.DrawBorderString(sb, hack.DisplayName.Value, new Vector2(nameX - aberration, nameY), redGhost, FontName);
+                Utils.DrawBorderString(sb, hack.DisplayName.Value, new Vector2(nameX + aberration, nameY + 0.5f), blueGhost, FontName);
             }
-            Utils.DrawBorderString(sb, hack.Name, new Vector2(nameX, nameY), nameColor * alpha, FontName);
+            Utils.DrawBorderString(sb, hack.DisplayName.Value, new Vector2(nameX, nameY), nameColor * alpha, FontName);
 
-            //=== 名称下方分隔虚线 ===
+            //=== 名称下方分隔点线 ===
             float sepY = rect.Y + 38;
             for (float dx = 0; dx < rect.Width - SlashWidth - 60; dx += 8) {
                 sb.Draw(px, new Rectangle((int)(rect.X + SlashWidth + 48 + dx), (int)sepY, 4, 1),
                     new Rectangle(0, 0, 1, 1), HackTheme.Border * (alpha * (0.15f + hover * 0.15f)));
             }
 
-            //=== 效果描述（明亮可读） ===
+            //=== 效果描述（第二行渐淡文字） ===
             Vector2 descPos = new(rect.X + SlashWidth + 48, rect.Y + 44);
             Color descColor = Color.Lerp(HackTheme.TextNormal, HackTheme.TextBright, 0.3f + hover * 0.4f);
-            Utils.DrawBorderString(sb, hack.Desc, descPos, descColor * (alpha * 0.85f), FontDesc);
+            Utils.DrawBorderString(sb, hack.Description.Value, descPos, descColor * (alpha * 0.85f), FontDesc);
 
             //=== 右侧状态区 ===
             if (isUploading) {
@@ -560,7 +570,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
                 bool canAfford = HackTimeRAM.CanAfford(hack.RamCost);
                 string ramStr = $"{hack.RamCost} RAM";
                 Color ramColor = canAfford ? HackTheme.Accent : HackTheme.Danger;
-                //RAM不足时脉冲闪烁
+                //RAM不足时红色闪烁
                 if (!canAfford) {
                     float ramPulse = MathF.Sin(timer * 6f) * 0.3f + 0.7f;
                     ramColor *= ramPulse;
@@ -569,14 +579,14 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
                 Vector2 ramPos = new(tp.X - ramSize.X - 12, rect.Y + 10);
                 Utils.DrawBorderString(sb, ramStr, ramPos, ramColor * (alpha * 0.7f), FontTime);
 
-                //类别标签（右下角）
+                //分类标签（右下角）
                 string catLabel = GetCategoryLabel(hack.Category);
                 Vector2 cls = FontAssets.MouseText.Value.MeasureString(catLabel) * 0.26f;
                 Vector2 clp = new(rect.Right - cls.X - 14, rect.Bottom - cls.Y - 8);
                 Utils.DrawBorderString(sb, catLabel, clp, catColor * (alpha * 0.35f), 0.26f);
             }
 
-            //=== 上传时底部进度光带（贯穿条目底边） ===
+            //=== 上传时底部进度光条（会穿过条目底边） ===
             if (isUploading) {
                 int fillW = (int)(rect.Width * queueProgress);
                 sb.Draw(px, new Rectangle(rect.X, rect.Bottom - 2, fillW, 2),
@@ -594,7 +604,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
 
         #region 视觉效果
 
-        //左侧斜切遮罩
+        //左侧斜角遮罩
         private static void DrawSlashCut(SpriteBatch sb, Texture2D px, Rectangle rect, float alpha) {
             Color mask = HackTheme.BgDarkest * (alpha * 0.95f);
             int slashW = (int)SlashWidth;
@@ -607,14 +617,14 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             }
         }
 
-        //斜切边线
+        //斜边边线
         private static void DrawSlashEdge(SpriteBatch sb, Texture2D px, Rectangle rect, Color color) {
             Vector2 top = new(rect.X + SlashWidth, rect.Y);
             Vector2 bottom = new(rect.X, rect.Bottom);
             DrawLine(sb, px, top, bottom, 1f, color);
         }
 
-        //CRT水平暗线叠加（每隔几像素的暗纹）
+        //CRT水平暗线叠加（每三像素的暗纹）
         private static void DrawCRTOverlay(SpriteBatch sb, Texture2D px, Rectangle rect, float alpha) {
             Color line = HackTheme.BgDarkest * alpha;
             for (int dy = 0; dy < rect.Height; dy += 3) {
@@ -623,7 +633,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             }
         }
 
-        //悬停角标：四角的小L形括号
+        //悬停角标：四角的小L形加亮
         private static void DrawCornerAccents(SpriteBatch sb, Texture2D px, Rectangle rect, float alpha, Color color) {
             int arm = 8;
             Color c = color * (alpha * 0.6f);
@@ -641,13 +651,13 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             sb.Draw(px, new Rectangle(rect.Right - 1, rect.Bottom - arm, 1, arm), new Rectangle(0, 0, 1, 1), c);
         }
 
-        //扫描线：一道竖向亮线从左到右横穿条目
+        //扫描线：一条竖线从左到右横穿条目
         private static void DrawScanLine(SpriteBatch sb, Texture2D px, Rectangle rect, float pos, float alpha) {
             int lineX = rect.X + (int)(rect.Width * pos);
             if (lineX < rect.X || lineX > rect.Right - 2) return;
             sb.Draw(px, new Rectangle(lineX, rect.Y + 1, 2, rect.Height - 2),
                 new Rectangle(0, 0, 1, 1), HackTheme.Accent * alpha);
-            //宽域辉光
+            //扫描辉光
             Texture2D glow = CWRAsset.SoftGlow?.Value;
             if (glow != null) {
                 Color gc = HackTheme.Accent * (alpha * 0.6f);
@@ -657,7 +667,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             }
         }
 
-        //上传进度指示器（右上角百分比+底部进度条+粒子拖尾）
+        //上传进度指示器（右上角百分比+底部进度条+光点尾迹）
         private void DrawUploadIndicator(SpriteBatch sb, Texture2D px, float alpha, Rectangle rect, float progress) {
             int barW = 80;
             int barH = 5;
@@ -703,7 +713,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             }
             if (!anyVisible) return;
 
-            int count = QuickHackRegistry.All.Length;
+            int count = QuickHackDef.Count;
             float totalH = count * (ItemHeight + ItemGap) - ItemGap;
             float startY = (Main.screenHeight - totalH) * 0.5f;
             float bottomY = startY + totalH + 14f;
@@ -713,7 +723,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             sb.Draw(px, new Rectangle((int)baseX, (int)(bottomY - 4), (int)ItemWidth, 1),
                 new Rectangle(0, 0, 1, 1), HackTheme.Border * (alpha * 0.3f));
 
-            //状态脉冲灯
+            //状态指示灯
             float pulse = (MathF.Sin(timer * 3.5f) + 1f) * 0.5f;
             bool hasActive = Queue != null && !Queue.IsEmpty;
             Color dotColor = hasActive
@@ -722,7 +732,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             sb.Draw(px, new Vector2(baseX, bottomY + 3),
                 new Rectangle(0, 0, 1, 1), dotColor, 0, Vector2.Zero, 4f, SpriteEffects.None, 0);
 
-            //脉冲灯辉光
+            //指示灯辉光
             Texture2D glow = CWRAsset.SoftGlow?.Value;
             if (glow != null) {
                 Color dglow = dotColor * 0.15f;
@@ -731,13 +741,13 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
                     0, glow.Size() / 2, 0.04f, SpriteEffects.None, 0);
             }
 
-            //状态文字
+            //状态文本
             string status = hasActive ? "UPLOADING..." : "BREACH PROTOCOL // READY";
             if (Queue != null && Queue.HasCompleted) status = ">> UPLOAD COMPLETE <<";
             Utils.DrawBorderString(sb, status, new Vector2(baseX + 14, bottomY),
                 HackTheme.TextDim * alpha, FontStatus);
 
-            //滚动十六进制标签
+            //伪十六进制标签
             string tag = $"NET::0x{((int)(timer * 100) % 0xFFFF):X4}";
             Utils.DrawBorderString(sb, tag, new Vector2(baseX + ItemWidth - 110, bottomY),
                 HackTheme.Accent * (alpha * 0.22f), 0.24f);
@@ -781,7 +791,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             Color frameColor = HackTheme.Accent * (alpha * 0.75f);
             Color dimColor = HackTheme.Accent * (alpha * 0.25f);
 
-            //四角锁定括号
+            //四角方括号
             DrawFrameBracket(sb, px, center, -halfW, -halfH, armLen, frameColor);
             DrawFrameBracket(sb, px, center, halfW, -halfH, armLen, frameColor);
             DrawFrameBracket(sb, px, center, -halfW, halfH, armLen, frameColor);
@@ -829,7 +839,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             sb.Draw(px, new Rectangle((int)center.X, (int)(center.Y - crossLen), 1, (int)(crossLen * 2)),
                 new Rectangle(0, 0, 1, 1), dimColor);
 
-            //旋转外框指示环（用4条短斜线模拟）
+            //旋转环指示器（用4条短斜线模拟）
             if (ease > 0.6f) {
                 float ringAlpha = (ease - 0.6f) / 0.4f * alpha * 0.2f;
                 float rot = timer * 0.5f;
@@ -914,8 +924,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             QuickHackCategory.Lethal => "◆",
             QuickHackCategory.Control => "◇",
             QuickHackCategory.Covert => "○",
-            QuickHackCategory.Contagion => "◈",
-            _ => "·",
+            QuickHackCategory.Contagion => "◎",
+            _ => "●",
         };
 
         private static string GetCategoryLabel(QuickHackCategory cat) => cat switch {
