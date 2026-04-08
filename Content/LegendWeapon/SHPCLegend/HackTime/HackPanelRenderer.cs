@@ -3,7 +3,7 @@ using System;
 using Terraria;
 using Terraria.GameContent;
 
-namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
+namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
 {
     /// <summary>
     /// 骇入面板渲染器(赛博朋克2077风格)
