@@ -3,7 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;
 
-namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
+namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
 {
     /// <summary>
     /// 骇客时间渲染器
@@ -203,7 +203,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
                 for (int i = 0; i < 3; i++) {
                     float dist = 6f + i * (armLength / 3f);
                     Vector2 pos = center + dir * dist;
-                    float fade = 1f - (float)i / 3f;
+                    float fade = 1f - i / 3f;
                     spriteBatch.Draw(glowTex, pos, null, color * fade, 0f, origin,
                         glowScale * (1f - i * 0.15f), SpriteEffects.None, 0f);
                 }

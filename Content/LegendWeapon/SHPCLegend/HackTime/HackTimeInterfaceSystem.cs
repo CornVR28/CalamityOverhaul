@@ -2,7 +2,7 @@
 using Terraria.ModLoader;
 using Terraria.UI;
 
-namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
+namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
 {
     /// <summary>
     /// 骇客时间UI层管理

@@ -1,4 +1,4 @@
-namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
+﻿namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
 {
     //队列条目状态
     internal enum HackQueueState

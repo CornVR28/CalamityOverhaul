@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using Terraria;
 using Terraria.GameContent;
 
-namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
+namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
 {
     //左侧骇入队列渲染器
     //显示已选择的骇入协议及其上传进度，模仿赛博朋克2077的左侧待执行队列
@@ -337,7 +337,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
 
             //=== 上传时扫描线 ===
             if (entry.State == HackQueueState.Uploading) {
-                float scanPos = ((timer * 2f + index * 0.3f) % 1.4f) - 0.2f;
+                float scanPos = (timer * 2f + index * 0.3f) % 1.4f - 0.2f;
                 DrawScanLine(sb, px, rect, scanPos, itemAlpha * 0.2f);
             }
 

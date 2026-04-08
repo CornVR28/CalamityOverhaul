@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using Terraria;
 using Terraria.GameContent;
 
-namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
+namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
 {
     //无限骇入弹窗风暴渲染器
     //完全独立于HackQueueRenderer，在InfiniteHack模式下接管左侧绘制
@@ -506,8 +506,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
 
             for (int i = 0; i < patchCount; i++) {
                 float seed = i * 73.37f + timer * 40f;
-                float px2 = ((MathF.Sin(seed) + 1f) * 0.5f) * Main.screenWidth * 0.5f;
-                float py = ((MathF.Sin(seed * 1.7f + 29f) + 1f) * 0.5f) * Main.screenHeight;
+                float px2 = (MathF.Sin(seed) + 1f) * 0.5f * Main.screenWidth * 0.5f;
+                float py = (MathF.Sin(seed * 1.7f + 29f) + 1f) * 0.5f * Main.screenHeight;
                 float pw = 4f + MathF.Sin(seed * 2.3f) * 20f;
                 float ph = 1f + MathF.Sin(seed * 3.1f) * 2f;
 

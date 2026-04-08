@@ -3,7 +3,7 @@ using Terraria;
 using Terraria.GameContent;
 using Terraria.ModLoader;
 
-namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
+namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
 {
     //骇客时间NPC绘制拦截器
     //在PreDraw中切换SpriteBatch到Immediate模式并应用高亮着色器

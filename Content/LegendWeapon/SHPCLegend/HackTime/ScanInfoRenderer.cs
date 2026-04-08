@@ -3,7 +3,7 @@ using System;
 using Terraria;
 using Terraria.GameContent;
 
-namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
+namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
 {
     /// <summary>
     /// 目标扫描信息面板渲染器
@@ -276,7 +276,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
                 HackTheme.Accent * (alpha * 0.75f), FontHeader);
 
             //闪烁光标
-            if (headerChars < header.Length || (scanProgress < 1f && (int)(timer * 8f) % 2 == 0)) {
+            if (headerChars < header.Length || scanProgress < 1f && (int)(timer * 8f) % 2 == 0) {
                 float cursorX = textX + FontAssets.MouseText.Value.MeasureString(visibleHeader).X * FontHeader + 2;
                 Utils.DrawBorderString(sb, "█", new Vector2(cursorX, curY),
                     HackTheme.Accent * (alpha * 0.55f), FontHeader);
@@ -312,7 +312,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
                 Utils.DrawBorderString(sb, statusText, new Vector2(textX, curY),
                     statusColor * (alpha * statusPulse), FontStatus);
 
-                string hexTag = $"0x{((int)(timer * 50) % 0xFFFF):X4}";
+                string hexTag = $"0x{(int)(timer * 50) % 0xFFFF:X4}";
                 Utils.DrawBorderString(sb, hexTag, new Vector2(baseX + PanelWidth - 80, curY),
                     HackTheme.Accent * (alpha * 0.18f), 0.22f);
             }
@@ -360,16 +360,16 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
 
             //滚动数据噪声(模拟数据流)
             curY += 22f;
-            string noise = $"0x{((int)(timer * 200) % 0xFFFFFF):X6}  "
-                + $"BUF:{((int)(timer * 80) % 999):D3}  "
-                + $"SIG:{((int)(timer * 150) % 0xFFF):X3}";
+            string noise = $"0x{(int)(timer * 200) % 0xFFFFFF:X6}  "
+                + $"BUF:{(int)(timer * 80) % 999:D3}  "
+                + $"SIG:{(int)(timer * 150) % 0xFFF:X3}";
             Utils.DrawBorderString(sb, noise, new Vector2(baseX + 14, curY),
                 HackTheme.TextDim * (alpha * 0.3f), FontNoise);
         }
 
         //单行数据渲染：标签+数值+打字机+色散+光标
         private void DrawDataRow(SpriteBatch sb, Texture2D px, float textX, float curY, int i, float alpha) {
-            bool isCurrent = (i == revealedRows - 1);
+            bool isCurrent = i == revealedRows - 1;
             string label = rowLabels[i];
             string value = rowValues[i];
             Color valueColor = rowColors[i];
@@ -425,7 +425,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
 
         //面板内竖向扫描线
         private void DrawScanLineOverlay(SpriteBatch sb, Texture2D px, Rectangle rect, float alpha) {
-            float scanT = (timer * 1.2f) % 1f;
+            float scanT = timer * 1.2f % 1f;
             float scanY = rect.Y + scanT * rect.Height;
             float scanFade = 1f - Math.Abs(scanT - 0.5f) * 2f;
             sb.Draw(px, new Rectangle(rect.X + 2, (int)scanY, rect.Width - 4, 1),
