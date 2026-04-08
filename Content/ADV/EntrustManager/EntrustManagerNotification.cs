@@ -44,8 +44,8 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
 
         /// <summary>外部调用：添加一条状态变更通知</summary>
         public static void Notify(string questTitle, NotifyKind kind) {
-            var statusKind = (QuestStatusEntry.StatusKind)(int)kind;
-            NotificationPopupSystem.Add(new QuestStatusEntry(questTitle, statusKind));
+            var statusKind = (EntrustStatusEntry.StatusKind)(int)kind;
+            NotificationPopupSystem.Add(new EntrustStatusEntry(questTitle, statusKind));
         }
     }
 }

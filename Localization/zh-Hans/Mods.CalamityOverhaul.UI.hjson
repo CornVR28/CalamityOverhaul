@@ -403,7 +403,7 @@ SHPCDialogueBox: {
 	// FastHint: 加速
 }
 
-QuestManagerNotification: {
+EntrustManagerNotification: {
 	// LabelNewQuest: 新委托
 	// LabelTracked: 已关注
 	// LabelUntracked: 取消关注

@@ -67,14 +67,14 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
         /// 由样式自行判定何时启用紧凑模式（如待机/已完成/冷却中等），
         /// 框架不预设空闲条件，完全交由样式决定
         /// </summary>
-        int? GetIdleCompactHeight(QuestEntryData entry) => null;
+        int? GetIdleCompactHeight(EntrustEntryData entry) => null;
 
         /// <summary>
         /// 返回该追踪窗口的紧凑可见度，0=完全收起（滑出屏幕），1=完全展开。<br/>
         /// 由样式自行判定收起条件并在Update中维护动画进度，
         /// 框架仅使用该值来控制滑入/滑出偏移。默认始终展开
         /// </summary>
-        float GetCompactVisibility(QuestEntryData entry) => 1f;
+        float GetCompactVisibility(EntrustEntryData entry) => 1f;
 
         #endregion
     }

@@ -10,7 +10,7 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
     /// 委托管理器状态变更通知条目——嘉登风格科技感弹窗，
     /// 左侧强调条 + 几何状态图标 + 渐变背景 + 扫描线动画 + 状态差异化视觉效果
     /// </summary>
-    internal class QuestStatusEntry : NotificationEntry
+    internal class EntrustStatusEntry : NotificationEntry
     {
         public enum StatusKind
         {
@@ -31,7 +31,7 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
         public override int DisplayTime => 160;
         public override float Gap => 5f;
 
-        public QuestStatusEntry(string questTitle, StatusKind kind) {
+        public EntrustStatusEntry(string questTitle, StatusKind kind) {
             this.questTitle = questTitle;
             this.kind = kind;
         }
