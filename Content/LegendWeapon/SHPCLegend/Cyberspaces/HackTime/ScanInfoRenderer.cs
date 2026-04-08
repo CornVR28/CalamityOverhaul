@@ -1,4 +1,4 @@
-using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;
 using Terraria.GameContent;
@@ -32,7 +32,6 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
 
         //===== 布局常量 =====
         private const float PanelWidth = 420f;
-        private const float RightMargin = 36f;
         private const float RowHeight = 19f;
         private const float HeaderHeight = 26f;
         private const float SepHeight = 8f;
@@ -41,7 +40,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
         private const float TopPad = 8f;
         private const float BottomPad = 8f;
         //扫描时长(帧)
-        private const float ScanDuration = 90f;
+        private const float ScanDuration = 30f;
         //每行揭示间隔(秒)
         private const float RowRevealInterval = 0.13f;
         //打字机速度(字符/帧)
@@ -49,10 +48,10 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
         //固定数据行数
         private const int DataRowCount = 6;
         //字体大小
-        private const float FontHeader = 0.38f;
-        private const float FontRow = 0.30f;
-        private const float FontStatus = 0.30f;
-        private const float FontNoise = 0.24f;
+        private const float FontHeader = 0.58f;
+        private const float FontRow = 0.50f;
+        private const float FontStatus = 0.50f;
+        private const float FontNoise = 0.44f;
 
         //缓存的扫描数据
         private readonly string[] rowLabels = new string[DataRowCount];
@@ -214,7 +213,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
             float listStartY = (Main.screenHeight - listTotalH) * 0.5f;
             float panelH = TopPad + HeaderHeight + SepHeight
                 + DataRowCount * RowHeight + SepHeight + StatusHeight + BottomPad;
-            float baseX = Main.screenWidth - RightMargin - PanelWidth;
+            float baseX = Main.screenWidth / 2 - PanelWidth / 2;
             float panelTop = Math.Max(listStartY - GapToList - panelH, 6f);
 
             //飞入偏移
