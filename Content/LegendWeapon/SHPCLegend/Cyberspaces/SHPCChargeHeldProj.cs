@@ -49,7 +49,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         /// </summary>
         public Vector2 TipPosition => Projectile.Center
             + Vector2.UnitX.RotatedBy(Projectile.rotation) * (TipDistance - recoilOffset)
-            + Vector2.UnitY * GunOffset.Y;
+            + Vector2.UnitX.RotatedBy(Projectile.rotation + MathHelper.PiOver2) * GunOffset.Y;
 
         public override void SetDefaults() {
             Projectile.width = 70;
@@ -92,12 +92,10 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         }
 
         private void AI_Charging() {
-            // 右键持续按住时保持存活
-            if (Owner.PressKey(false)) {
-                Projectile.timeLeft = 60;
-            }
+            //由CyberChargeOrbProj统一管理生命周期，这里只保持存活
+            Projectile.timeLeft = 60;
 
-            // 瞄准方向
+            //瞄准方向
             Vector2 aimDir = (Main.MouseWorld - Owner.Center).SafeNormalize(Vector2.UnitX);
             UpdateGunState(aimDir, 0f);
         }
@@ -155,7 +153,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             // 绘制位置沿瞄准方向后退 recoilOffset
             Vector2 position = Owner.Center - Main.screenPosition
                 + Vector2.UnitX.RotatedBy(rotation) * (GunOffset.X - recoilOffset)
-                + Vector2.UnitY * GunOffset.Y;
+                + Vector2.UnitX.RotatedBy(rotation + MathHelper.PiOver2) * GunOffset.Y;
 
             SpriteEffects sp = Owner.direction < 0
                 ? SpriteEffects.FlipVertically

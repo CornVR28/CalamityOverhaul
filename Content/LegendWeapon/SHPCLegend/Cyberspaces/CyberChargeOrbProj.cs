@@ -27,7 +27,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         /// <summary>满蓄所需帧数（2秒 × 60帧）</summary>
         private const int MaxChargeFrames = 120;
         /// <summary>最低蓄力帧数（低于此释放视为取消）</summary>
-        private const int MinChargeFrames = 30;
+        private const int MinChargeFrames = 15;
         /// <summary>飞行速度</summary>
         private const float FlySpeed = 22f;
         /// <summary>蓄力完成时球体视觉直径（像素）</summary>

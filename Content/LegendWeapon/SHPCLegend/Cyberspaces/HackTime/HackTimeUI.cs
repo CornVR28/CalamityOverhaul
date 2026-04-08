@@ -18,6 +18,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
         internal HackQueueRenderer Queue { get; private set; } = new();
         //无限骇入弹窗风暴渲染器
         internal InfiniteHackRenderer InfiniteHack { get; private set; } = new();
+        //目标扫描信息面板渲染器
+        internal ScanInfoRenderer ScanInfo { get; private set; } = new();
 
         public override bool Active => HackTime.Active || HackTime.Intensity >= 0.001f;
 
@@ -29,6 +31,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
             Panel.Update();
             Queue.Update();
             InfiniteHack.Update();
+            ScanInfo.Update();
 
             //上传完成时消费结果（仅正常模式）
             if (!HackTime.InfiniteHack && Queue.HasCompleted) {
@@ -51,6 +54,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
 
         public override void Draw(SpriteBatch spriteBatch) {
             //脱离UIScaleMatrix，面板使用原始像素坐标绘制
+            ScanInfo.Draw(spriteBatch);
             Panel.Draw(spriteBatch);
             //左侧：无限模式用弹窗风暴，否则用普通队列
             if (HackTime.InfiniteHack)
@@ -99,6 +103,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.HackTime
             Panel = null;
             Queue = null;
             InfiniteHack = null;
+            ScanInfo = null;
         }
     }
 }
