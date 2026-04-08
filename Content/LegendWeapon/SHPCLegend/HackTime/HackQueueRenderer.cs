@@ -28,17 +28,19 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
 
         //队列数据
         private readonly List<HackQueueEntry> queue = new();
+        //队列只读访问
+        public IReadOnlyList<HackQueueEntry> Entries => queue;
         private float timer;
 
         #region 公共接口
 
-        //向队列添加一个骇入协议（不允许重复）
-        public bool Enqueue(QuickHackDef hack, int slotIndex) {
+        //向队列添加一个骇入协议（不允许重复），targetIndex是骇入目标NPC索引
+        public bool Enqueue(QuickHackDef hack, int slotIndex, int targetIndex) {
             //不允许重复入队
             for (int i = 0; i < queue.Count; i++) {
                 if (queue[i].SlotIndex == slotIndex) return false;
             }
-            queue.Add(new HackQueueEntry(hack, slotIndex));
+            queue.Add(new HackQueueEntry(hack, slotIndex, targetIndex));
             return true;
         }
 
@@ -55,6 +57,25 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
         //清空队列
         public void Clear() {
             queue.Clear();
+        }
+
+        //全局消费：处理所有已完成的条目，施加效果并移除
+        //由全局更新调用，不依赖HackTimeUI的Active状态
+        public void ConsumeAndApplyAll() {
+            for (int i = queue.Count - 1; i >= 0; i--) {
+                var entry = queue[i];
+                //目标已死亡，直接移除
+                if (entry.TargetIndex < 0 || entry.TargetIndex >= Main.maxNPCs
+                    || !Main.npc[entry.TargetIndex].active) {
+                    queue.RemoveAt(i);
+                    continue;
+                }
+                //上传完成且闪烁结束，施加效果
+                if (entry.State == HackQueueState.Completed && entry.CompletedTimer <= 0f) {
+                    HackEffectTracker.Apply(entry.Hack, entry.TargetIndex, Main.myPlayer);
+                    queue.RemoveAt(i);
+                }
+            }
         }
 
         //查询某个hack slot在队列中的状态（重复时优先级：Uploading > Queued > Completed）
@@ -115,6 +136,15 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             }
         }
 
+        //获取指定NPC身上所有正在上传的队列条目
+        public void GetEntriesForNPC(int npcIndex, List<HackQueueEntry> result) {
+            result.Clear();
+            for (int i = 0; i < queue.Count; i++) {
+                if (queue[i].TargetIndex == npcIndex)
+                    result.Add(queue[i]);
+            }
+        }
+
         //获取队列头部（正在上传或已完成的）的进度和状态，用于NPC头顶进度环
         public bool TryGetActiveEntry(out float progress, out bool completed) {
             for (int i = 0; i < queue.Count; i++) {
@@ -155,6 +185,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
                 //状态机
                 switch (entry.State) {
                     case HackQueueState.Waiting:
+                        //骇客时间中允许状态流转到Uploading（显示排队），但不推进进度
                         if (!hasUploading) {
                             entry.State = HackQueueState.Uploading;
                             hasUploading = true;
@@ -163,13 +194,15 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
 
                     case HackQueueState.Uploading:
                         hasUploading = true;
-                        //推进上传进度
-                        if (entry.Hack.UploadTime > 0)
-                            entry.UploadProgress += 1f / entry.Hack.UploadTime;
-                        if (entry.UploadProgress >= 1f) {
-                            entry.UploadProgress = 1f;
-                            entry.State = HackQueueState.Completed;
-                            entry.CompletedTimer = CompletedDuration;
+                        //骇客时间激活时冻结上传进度，必须退出后在实时战斗中推进
+                        if (!HackTime.Active) {
+                            if (entry.Hack.UploadTime > 0)
+                                entry.UploadProgress += 1f / entry.Hack.UploadTime;
+                            if (entry.UploadProgress >= 1f) {
+                                entry.UploadProgress = 1f;
+                                entry.State = HackQueueState.Completed;
+                                entry.CompletedTimer = CompletedDuration;
+                            }
                         }
                         break;
 

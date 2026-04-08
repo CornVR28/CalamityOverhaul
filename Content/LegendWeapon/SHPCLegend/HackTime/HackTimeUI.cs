@@ -32,18 +32,10 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
 
         public override void Update() {
             Panel.Update();
-            Queue.Update();
+            //Queue.Update由CWRWorld.PostUpdateEverything全局驱动，此处不再调用
             InfiniteHack.Update();
             ScanInfo.Update();
             Ram.Update();
-
-            //上传完成时消费结果并施加效果（仅正常模式）
-            if (!HackTime.InfiniteHack && Queue.HasCompleted) {
-                var hack = Queue.ConsumeCompleted();
-                if (hack != null && HackTime.SelectedTargetIndex >= 0) {
-                    HackEffectTracker.Apply(hack, HackTime.SelectedTargetIndex, Main.myPlayer);
-                }
-            }
 
             //处理点击交互
             bool mouseOnPanel = Panel.ContainsMouse();

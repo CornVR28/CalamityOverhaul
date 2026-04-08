@@ -27,6 +27,8 @@
         public QuickHackDef Hack;
         //在QuickHackDef.Instances中的索引
         public int SlotIndex;
+        //骇入目标NPC索引，入队时锁定，退出骇客时间后仍保留
+        public int TargetIndex;
         //当前队列状态
         public HackQueueState State;
         //上传进度0~1
@@ -38,9 +40,10 @@
         //故障种子
         public float GlitchSeed;
 
-        public HackQueueEntry(QuickHackDef hack, int slotIndex) {
+        public HackQueueEntry(QuickHackDef hack, int slotIndex, int targetIndex) {
             Hack = hack;
             SlotIndex = slotIndex;
+            TargetIndex = targetIndex;
             State = HackQueueState.Waiting;
             UploadProgress = 0f;
             FlyIn = 0f;

@@ -152,6 +152,15 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             HackTimeUI.Instance?.Panel.Hide();
         }
 
+        public static void UpdateByWorld() {
+            //骇入效果全局驱动，退出骇客时间后仍持续生效
+            HackEffectTracker.Update();
+            //队列上传+消费：退出骇客时间后实时推进上传并施加完成的效果
+            var queue = HackTimeUI.Instance?.Queue;
+            queue?.Update();
+            queue?.ConsumeAndApplyAll();
+        }
+
         /// <summary>
         /// 每帧逻辑更新
         /// </summary>

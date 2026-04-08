@@ -101,8 +101,7 @@ namespace CalamityOverhaul.Content
         }
 
         public override void PostUpdateEverything() {
-            //更新
-            HackEffectTracker.Update();
+            HackTime.UpdateByWorld();
 
             if (TimeFrozenTick > 0) {
                 TimeFrozenTick--;

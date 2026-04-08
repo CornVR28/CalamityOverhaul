@@ -36,25 +36,34 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
 
         public override void EndEntityDraw(SpriteBatch spriteBatch, Main main) {
             if (Main.gameMenu) return;
-            if (!HackTime.Active && HackTime.Intensity < 0.001f) return;
 
-            //加法混合层：光圈和上传进度环
-            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive, SamplerState.PointWrap,
-                DepthStencilState.None, RasterizerState.CullNone, null,
-                Main.GameViewMatrix.TransformationMatrix);
+            bool hackTimeVisible = HackTime.Active || HackTime.Intensity >= 0.001f;
 
-            DrawHoveredReticle(spriteBatch);
-            DrawSelectedReticle(spriteBatch);
+            //骇客时间激活时绘制光圈和上传进度环（加法混合）
+            if (hackTimeVisible) {
+                spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive, SamplerState.PointWrap,
+                    DepthStencilState.None, RasterizerState.CullNone, null,
+                    Main.GameViewMatrix.TransformationMatrix);
 
-            //绘制上传进度环（通过UIHandle获取队列状态）
-            var queue = HackTimeUI.Instance?.Queue;
-            if (queue != null && !queue.IsEmpty && HackTime.SelectedTargetIndex >= 0) {
-                if (queue.TryGetActiveEntry(out float headProgress, out bool headCompleted)) {
-                    UploadOverlay.Draw(spriteBatch, HackTime.SelectedTargetIndex,
-                        headProgress, headCompleted, HackTime.Intensity);
+                DrawHoveredReticle(spriteBatch);
+                DrawSelectedReticle(spriteBatch);
+
+                var queue = HackTimeUI.Instance?.Queue;
+                if (queue != null && !queue.IsEmpty && HackTime.SelectedTargetIndex >= 0) {
+                    if (queue.TryGetActiveEntry(out float headProgress, out bool headCompleted)) {
+                        UploadOverlay.Draw(spriteBatch, HackTime.SelectedTargetIndex,
+                            headProgress, headCompleted, HackTime.Intensity);
+                    }
                 }
+
+                spriteBatch.End();
             }
 
+            //NPC头顶骇入状态卡片（AlphaBlend，任何时候只要有效果或上传就绘制）
+            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointWrap,
+                DepthStencilState.None, RasterizerState.CullNone, null,
+                Main.GameViewMatrix.TransformationMatrix);
+            HackStatusDisplay.Draw(spriteBatch);
             spriteBatch.End();
         }
 

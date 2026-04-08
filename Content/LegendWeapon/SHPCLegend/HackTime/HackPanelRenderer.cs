@@ -80,7 +80,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
         public void Hide() {
             visible = false;
             hoveredSlot = -1;
-            CancelUpload();
+            //队列生命周期已独立于面板，退出时不清空，由CWRWorld全局驱动上传和消费
         }
 
         public void CancelUpload() {
@@ -153,7 +153,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
                 if (hack == null) return;
                 //RAM不足时拒绝入队
                 if (!HackTimeRAM.CanAfford(hack.RamCost)) return;
-                if (Queue.Enqueue(hack, hoveredSlot)) {
+                if (Queue.Enqueue(hack, hoveredSlot, HackTime.SelectedTargetIndex)) {
                     HackTimeRAM.TryConsume(hack.RamCost);
                 }
             }
