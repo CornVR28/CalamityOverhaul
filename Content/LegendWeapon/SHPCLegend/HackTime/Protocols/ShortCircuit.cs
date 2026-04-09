@@ -1,6 +1,8 @@
-﻿using CalamityOverhaul.Content.PRTTypes;
+﻿using CalamityOverhaul.Common;
+using CalamityOverhaul.Content.PRTTypes;
 using InnoVault.PRT;
 using Terraria;
+using Terraria.Audio;
 
 namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime.Protocols
 {
@@ -30,7 +32,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime.Protocols
                 PRTLoader.AddParticle(new PRT_Spark(target.Center, vel,
                     false, 8, 2.0f, Color.White));
             }
-            //TODO:这里最好添加一个短路音效
+            if (!VaultUtils.isServer) {
+                SoundEngine.PlaySound(CWRSound.ShortCircuit, target.Center);
+            }
             return true;
         }
     }
