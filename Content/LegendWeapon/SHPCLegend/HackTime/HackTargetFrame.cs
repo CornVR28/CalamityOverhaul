@@ -13,14 +13,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
     internal static class HackTargetFrame
     {
         public static void Draw(SpriteBatch sb, float timer) {
-            int selIdx = HackTime.SelectedTargetIndex;
-            if (selIdx < 0 || selIdx >= Main.maxNPCs) return;
-
             float camProg = HackTime.CameraProgress;
             if (camProg < 0.01f) return;
-
-            NPC npc = Main.npc[selIdx];
-            if (!npc.active) return;
 
             Texture2D px = CWRAsset.Placeholder_White?.Value;
             if (px == null) return;
@@ -28,8 +22,39 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             float alpha = HackTime.Intensity * camProg;
             Vector2 center = new(Main.screenWidth * 0.5f, Main.screenHeight * 0.5f);
 
-            float baseHalfW = Math.Max(npc.width, 32) * 0.6f + 28f;
-            float baseHalfH = Math.Max(npc.height, 32) * 0.6f + 28f;
+            float baseHalfW;
+            float baseHalfH;
+            string targetName = "";
+            string hpStr = null;
+            Color hpColor = default;
+
+            int selIdx = HackTime.SelectedTargetIndex;
+            if (selIdx >= 0 && selIdx < Main.maxNPCs) {
+                NPC npc = Main.npc[selIdx];
+                if (!npc.active) return;
+
+                baseHalfW = Math.Max(npc.width, 32) * 0.6f + 28f;
+                baseHalfH = Math.Max(npc.height, 32) * 0.6f + 28f;
+                targetName = npc.FullName;
+                if (npc.lifeMax > 0) {
+                    float hpPct = (float)npc.life / npc.lifeMax;
+                    hpStr = HackTime.HpFormat.Format((int)(hpPct * 100));
+                    hpColor = hpPct > 0.5f ? HackTheme.AccentAlt
+                        : (hpPct > 0.25f ? HackTheme.Uploading : HackTheme.Danger);
+                }
+            }
+            else if (HackTime.CurrentScanTarget is TileScannable tileScan && tileScan.IsValid) {
+                //物块扫描目标的锁定框
+                Vector2 wc = tileScan.WorldCenter;
+                int tx = (int)(wc.X / 16f);
+                int ty = (int)(wc.Y / 16f);
+                Rectangle bounds = TileScannable.GetTileWorldBounds(tx, ty);
+                baseHalfW = Math.Max(bounds.Width, 32) * 0.6f + 28f;
+                baseHalfH = Math.Max(bounds.Height, 32) * 0.6f + 28f;
+            }
+            else {
+                return;
+            }
 
             float ease = EaseOutCubic(camProg);
             float expand = 1f + (1f - ease) * 0.8f;
@@ -113,18 +138,16 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
                 Vector2 labelPos = new(center.X - labelSize.X * 0.5f, center.Y - halfH - 22f);
                 Utils.DrawBorderString(sb, label, labelPos, HackTheme.Accent * (labelAlpha * 0.7f), 0.34f);
 
-                string npcName = npc.FullName;
-                Vector2 nameSize = FontAssets.MouseText.Value.MeasureString(npcName) * 0.36f;
-                Vector2 namePos = new(center.X - nameSize.X * 0.5f, center.Y + halfH + 8f);
-                Utils.DrawBorderString(sb, npcName, namePos, HackTheme.TextBright * (labelAlpha * 0.6f), 0.36f);
+                if (!string.IsNullOrEmpty(targetName)) {
+                    Vector2 nameSize = FontAssets.MouseText.Value.MeasureString(targetName) * 0.36f;
+                    Vector2 namePos = new(center.X - nameSize.X * 0.5f, center.Y + halfH + 8f);
+                    Utils.DrawBorderString(sb, targetName, namePos, HackTheme.TextBright * (labelAlpha * 0.6f), 0.36f);
+                }
 
-                //生命值百分比
-                if (npc.lifeMax > 0) {
-                    float hpPct = (float)npc.life / npc.lifeMax;
-                    string hpStr = HackTime.HpFormat.Format((int)(hpPct * 100));
+                //生命值百分比（仅NPC目标显示）
+                if (hpStr != null) {
                     Vector2 hpSize = FontAssets.MouseText.Value.MeasureString(hpStr) * 0.26f;
                     Vector2 hpPos = new(center.X - hpSize.X * 0.5f, center.Y + halfH + 30f);
-                    Color hpColor = hpPct > 0.5f ? HackTheme.AccentAlt : (hpPct > 0.25f ? HackTheme.Uploading : HackTheme.Danger);
                     Utils.DrawBorderString(sb, hpStr, hpPos, hpColor * (labelAlpha * 0.45f), 0.26f);
                 }
             }

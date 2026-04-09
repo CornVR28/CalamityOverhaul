@@ -2,6 +2,7 @@ using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ID;
 using Terraria.Localization;
+using Terraria.Map;
 using Terraria.ModLoader;
 using Terraria.ObjectData;
 
@@ -16,6 +17,10 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
         //物块的格子坐标
         private readonly int tileX;
         private readonly int tileY;
+
+        //公开坐标供协议面板使用
+        public int TileCoordX => tileX;
+        public int TileCoordY => tileY;
 
         public TileScannable(int tileX, int tileY) {
             this.tileX = tileX;
@@ -33,7 +38,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             }
         }
 
-        public bool IsHackable => false;
+        public bool IsHackable => true;
 
         public int ScanRowCount => 5;
 
@@ -44,7 +49,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
 
             //NAME
             labels[0] = HackTime.TileScanName.Value;
-            values[0] = GetTileName(type);
+            values[0] = GetTileName(tileX, tileY, type);
             colors[0] = HackTheme.TextBright;
 
             //CLASS（分类）
@@ -77,22 +82,22 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
 
         /// <summary>
         /// 获取物块的显示名称
+        /// <br/>通过MapHelper将物块坐标转换为地图条目，再取本地化名称
         /// </summary>
-        private static string GetTileName(int type) {
-            //优先尝试获取ModTile名称
-            if (type >= TileID.Count) {
-                ModTile modTile = TileLoader.GetTile(type);
-                if (modTile != null) {
-                    //tModLoader的GetMapOption需要传入坐标参数
-                    string name = Lang.GetMapObjectName(type);
-                    if (!string.IsNullOrEmpty(name)) return name;
-                    return modTile.Name;
-                }
+        private static string GetTileName(int x, int y, int type) {
+            //MapHelper.CreateMapTile内部处理了帧到样式的映射
+            //返回的MapTile.Type就是Lang.GetMapObjectName所需的查表索引
+            MapTile mapTile = MapHelper.CreateMapTile(x, y, 255);
+            if (mapTile.Type > 0) {
+                string mapName = Lang.GetMapObjectName(mapTile.Type);
+                if (!string.IsNullOrEmpty(mapName)) return mapName;
             }
 
-            //原版物块用地图名
-            string mapName = Lang.GetMapObjectName(type);
-            if (!string.IsNullOrEmpty(mapName)) return mapName;
+            //Mod物块回退到ModTile名称
+            if (type >= TileID.Count) {
+                ModTile modTile = TileLoader.GetTile(type);
+                if (modTile != null) return modTile.Name;
+            }
 
             return $"TILE#{type:X3}";
         }
@@ -252,6 +257,38 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             if (tile.TileType == TileID.LihzahrdBrick) return true;
 
             return false;
+        }
+
+        /// <summary>
+        /// 获取物块对象在世界空间中的包围盒（像素坐标）
+        /// <br/>对于多格物块会尝试找到其左上角并计算完整尺寸
+        /// </summary>
+        public static Rectangle GetTileWorldBounds(int x, int y) {
+            if (x < 0 || x >= Main.maxTilesX || y < 0 || y >= Main.maxTilesY)
+                return new Rectangle(x * 16, y * 16, 16, 16);
+
+            Tile tile = Main.tile[x, y];
+            if (!tile.HasTile) return new Rectangle(x * 16, y * 16, 16, 16);
+
+            int type = tile.TileType;
+            TileObjectData data = TileObjectData.GetTileData(type, 0);
+            if (data == null) return new Rectangle(x * 16, y * 16, 16, 16);
+
+            //通过帧坐标反推当前格子在多格物块中的偏移
+            int frameWidth = data.CoordinateWidth + data.CoordinatePadding;
+            int frameHeight = data.CoordinateHeights[0] + data.CoordinatePadding;
+            int offsetX = tile.TileFrameX % (data.Width * frameWidth) / frameWidth;
+            int offsetY = tile.TileFrameY % (data.Height * frameHeight) / frameHeight;
+
+            //左上角格子坐标
+            int topLeftX = x - offsetX;
+            int topLeftY = y - offsetY;
+
+            return new Rectangle(
+                topLeftX * 16,
+                topLeftY * 16,
+                data.Width * 16,
+                data.Height * 16);
         }
     }
 }

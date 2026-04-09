@@ -26,7 +26,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
         /// <summary>
         /// 传播型：扩散至附近目标
         /// </summary>
-        Contagion
+        Contagion,
+        /// <summary>
+        /// 物块操控型：对物块施加效果
+        /// </summary>
+        TileManip,
     }
 
     /// <summary>
@@ -107,6 +111,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
         /// 协议类别
         /// </summary>
         public QuickHackCategory Category { get; set; } = QuickHackCategory.Lethal;
+        /// <summary>
+        /// 该协议支持的目标类型，默认仅NPC
+        /// <br/>子类可在SetDefaults中设置为Tile或NPC|Tile
+        /// </summary>
+        public HackTargetKind SupportedTargets { get; set; } = HackTargetKind.Npc;
 
         #endregion
 
@@ -186,6 +195,56 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
         /// </summary>
         public virtual int GetDuration() => 0;
 
+        #endregion
+
+        #region 物块目标虚方法
+
+        /// <summary>
+        /// 当协议上传完成时对目标物块施加效果
+        /// </summary>
+        /// <param name="tileX">物块格子X</param>
+        /// <param name="tileY">物块格子Y</param>
+        /// <param name="caster">发起骇入的玩家</param>
+        /// <returns>返回true表示效果成功施加</returns>
+        public virtual bool OnApplyToTile(int tileX, int tileY, Player caster) => false;
+
+        /// <summary>
+        /// 物块协议的持续帧逻辑
+        /// </summary>
+        /// <param name="tileX">物块格子X</param>
+        /// <param name="tileY">物块格子Y</param>
+        /// <param name="elapsed">效果已持续的帧数</param>
+        /// <returns>返回false表示效果提前结束</returns>
+        public virtual bool OnTickTile(int tileX, int tileY, int elapsed) => true;
+
+        /// <summary>
+        /// 物块协议效果被移除或到期时调用
+        /// </summary>
+        public virtual void OnRemoveTile(int tileX, int tileY) { }
+
+        /// <summary>
+        /// 判断该协议是否可对指定物块使用
+        /// </summary>
+        public virtual bool CanApplyToTile(int tileX, int tileY) {
+            if (tileX < 0 || tileX >= Main.maxTilesX || tileY < 0 || tileY >= Main.maxTilesY)
+                return false;
+            return Main.tile[tileX, tileY].HasTile;
+        }
+
+        #endregion
+
+        #region 工具方法
+
+        /// <summary>
+        /// 获取与指定目标类型匹配的所有协议索引
+        /// </summary>
+        public static void GetFilteredIndices(HackTargetKind kind, List<int> result) {
+            result.Clear();
+            for (int i = 0; i < Instances.Count; i++) {
+                if ((Instances[i].SupportedTargets & kind) != 0)
+                    result.Add(i);
+            }
+        }
         #endregion
     }
 }

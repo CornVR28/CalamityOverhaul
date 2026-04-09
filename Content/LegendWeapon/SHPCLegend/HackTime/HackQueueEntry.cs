@@ -27,8 +27,13 @@
         public QuickHackDef Hack;
         //在QuickHackDef.Instances中的索引
         public int SlotIndex;
-        //骇入目标NPC索引，入队时锁定，退出骇客时间后仍保留
+        //目标类型
+        public HackTargetKind TargetKind;
+        //骇入目标NPC索引（TargetKind为Npc时有效），入队时锁定
         public int TargetIndex;
+        //骇入目标物块坐标（TargetKind为Tile时有效）
+        public int TileX;
+        public int TileY;
         //当前队列状态
         public HackQueueState State;
         //上传进度0~1
@@ -40,15 +45,50 @@
         //故障种子
         public float GlitchSeed;
 
+        //NPC目标构造
         public HackQueueEntry(QuickHackDef hack, int slotIndex, int targetIndex) {
             Hack = hack;
             SlotIndex = slotIndex;
+            TargetKind = HackTargetKind.Npc;
             TargetIndex = targetIndex;
+            TileX = -1;
+            TileY = -1;
             State = HackQueueState.Waiting;
             UploadProgress = 0f;
             FlyIn = 0f;
             CompletedTimer = 0f;
             GlitchSeed = Terraria.Main.rand?.Next(10000) / 100f ?? 0f;
+        }
+
+        //物块目标构造
+        public HackQueueEntry(QuickHackDef hack, int slotIndex, int tileX, int tileY) {
+            Hack = hack;
+            SlotIndex = slotIndex;
+            TargetKind = HackTargetKind.Tile;
+            TargetIndex = -1;
+            TileX = tileX;
+            TileY = tileY;
+            State = HackQueueState.Waiting;
+            UploadProgress = 0f;
+            FlyIn = 0f;
+            CompletedTimer = 0f;
+            GlitchSeed = Terraria.Main.rand?.Next(10000) / 100f ?? 0f;
+        }
+
+        //目标是否仍然有效
+        public bool IsTargetValid {
+            get {
+                if (TargetKind == HackTargetKind.Npc) {
+                    return TargetIndex >= 0 && TargetIndex < Terraria.Main.maxNPCs
+                        && Terraria.Main.npc[TargetIndex].active;
+                }
+                if (TargetKind == HackTargetKind.Tile) {
+                    return TileX >= 0 && TileX < Terraria.Main.maxTilesX
+                        && TileY >= 0 && TileY < Terraria.Main.maxTilesY
+                        && Terraria.Main.tile[TileX, TileY].HasTile;
+                }
+                return false;
+            }
         }
     }
 }

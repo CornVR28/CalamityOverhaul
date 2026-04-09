@@ -459,6 +459,7 @@ HackTime: {
 	CatCovert: COVERT
 	CatContagion: CONTAGION
 	CatUnknown: UNKNOWN
+	CatTileManip: TILE MANIP
 	TileScanName: NAME
 	TileScanClass: CLASS
 	TileScanSize: SIZE

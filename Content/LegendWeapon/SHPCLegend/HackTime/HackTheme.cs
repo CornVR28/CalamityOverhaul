@@ -52,6 +52,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             QuickHackCategory.Control => Uploading,
             QuickHackCategory.Covert => AccentAlt,
             QuickHackCategory.Contagion => Contagion,
+            QuickHackCategory.TileManip => new Color(80, 200, 255),
             _ => Accent,
         };
 
@@ -60,6 +61,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             QuickHackCategory.Control => "◇",
             QuickHackCategory.Covert => "○",
             QuickHackCategory.Contagion => "◎",
+            QuickHackCategory.TileManip => "▣",
             _ => "●",
         };
 
@@ -68,6 +70,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             QuickHackCategory.Control => HackTime.CatControl.Value,
             QuickHackCategory.Covert => HackTime.CatCovert.Value,
             QuickHackCategory.Contagion => HackTime.CatContagion.Value,
+            QuickHackCategory.TileManip => HackTime.CatTileManip.Value,
             _ => HackTime.CatUnknown.Value,
         };
 

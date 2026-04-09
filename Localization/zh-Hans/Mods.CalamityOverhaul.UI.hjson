@@ -456,6 +456,7 @@ HackTime: {
 	CatCovert: 隐秘
 	CatContagion: 蔓延
 	CatUnknown: 未知
+	CatTileManip: 物块操控
 	TileScanName: 名称
 	TileScanClass: 分类
 	TileScanSize: 尺寸

@@ -63,6 +63,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
         public static LocalizedText CatCovert { get; private set; }
         public static LocalizedText CatContagion { get; private set; }
         public static LocalizedText CatUnknown { get; private set; }
+        public static LocalizedText CatTileManip { get; private set; }
 
         //物块扫描本地化字段
         public static LocalizedText TileScanName { get; private set; }
@@ -131,6 +132,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             CatCovert = this.GetLocalization(nameof(CatCovert));
             CatContagion = this.GetLocalization(nameof(CatContagion));
             CatUnknown = this.GetLocalization(nameof(CatUnknown));
+            CatTileManip = this.GetLocalization(nameof(CatTileManip));
 
             TileScanName = this.GetLocalization(nameof(TileScanName));
             TileScanClass = this.GetLocalization(nameof(TileScanClass));
@@ -294,7 +296,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
         }
 
         /// <summary>
-        /// 选中一个物块进行扫描（只扫描不骇入）
+        /// 选中一个物块进行扫描和骇入
         /// </summary>
         public static void SelectTileScan(int tileX, int tileY) {
             if (!Active) return;
@@ -302,10 +304,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             Tile tile = Main.tile[tileX, tileY];
             if (!tile.HasTile) return;
 
-            //切换到物块扫描时清除NPC选中状态
+            //切换到物块扫描时清除NPC选中状态和旧队列
             if (SelectedTargetIndex >= 0) {
                 HackTimeUI.Instance?.Panel.CancelUpload();
-                HackTimeUI.Instance?.Panel.Hide();
             }
             SelectedTargetIndex = -1;
 
@@ -341,6 +342,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             HackTimeRAM.Update();
             //骇入效果全局驱动，退出骇客时间后仍持续生效
             HackEffectTracker.Update();
+            //物块骇入效果驱动
+            HackEffectTracker.UpdateTileEffects();
             //队列上传+消费：退出骇客时间后实时推进上传并施加完成的效果
             var queue = HackTimeUI.Instance?.Queue;
             queue?.Update();

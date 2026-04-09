@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
 using System;
+using System.Collections.Generic;
 using Terraria;
 using Terraria.GameContent;
 
@@ -37,6 +38,12 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
         private float glitchBandY;
         //故障带冷却计时
         private float glitchBandCooldown;
+        //当前面板显示的目标类型
+        private HackTargetKind currentTargetKind;
+        //过滤后的协议索引映射（面板槽位→QuickHackDef全局索引）
+        private readonly List<int> filteredIndices = [];
+        //面板显示的协议数量（过滤后）
+        private int displayCount;
 
         //===== 条目排版常量 =====
         private const float ItemWidth = 420f;
@@ -60,13 +67,17 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
         private const float FontTime = 0.40f;
         private const float FontStatus = 0.36f;
 
-        public void Show() {
-            int count = QuickHackDef.Count;
-            if (slotFlyIn == null || slotFlyIn.Length != count) {
-                slotFlyIn = new float[count];
-                slotHoverAnim = new float[count];
-                slotGlitchSeed = new float[count];
-                slotRects = new Rectangle[count];
+        public void Show(HackTargetKind targetKind = HackTargetKind.Npc) {
+            currentTargetKind = targetKind;
+            QuickHackDef.GetFilteredIndices(targetKind, filteredIndices);
+            displayCount = filteredIndices.Count;
+            if (displayCount == 0) return;
+
+            if (slotFlyIn == null || slotFlyIn.Length != displayCount) {
+                slotFlyIn = new float[displayCount];
+                slotHoverAnim = new float[displayCount];
+                slotGlitchSeed = new float[displayCount];
+                slotRects = new Rectangle[displayCount];
             }
             visible = true;
             hoveredSlot = -1;
@@ -116,8 +127,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             glitchBandCooldown -= 0.016f;
             if (glitchBandCooldown <= 0f) {
                 glitchBandY += 600f * 0.016f; //匀速下移
-                int count = QuickHackDef.Count;
-                float totalH = count * (ItemHeight + ItemGap);
+                float totalH = displayCount * (ItemHeight + ItemGap);
                 float startY = (Main.screenHeight - totalH) * 0.5f + TopPadding;
                 if (glitchBandY > startY + totalH + 50f) {
                     glitchBandY = startY - 50f;
@@ -136,8 +146,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
                 if (slotFlyIn[i] < 0.8f) continue;
                 if (slotRects[i].Contains(mx, my)) {
                     //禁用状态的槽位不响应悬停
-                    var hack = QuickHackDef.GetByIndex(i);
-                    var qs = Queue?.GetSlotState(i) ?? QueueSlotState.None;
+                    int globalIdx = GetGlobalIndex(i);
+                    var hack = QuickHackDef.GetByIndex(globalIdx);
+                    var qs = Queue?.GetSlotState(globalIdx) ?? QueueSlotState.None;
                     bool disabled = (hack != null && !HackTimeRAM.CanAfford(hack.RamCost))
                         || qs != QueueSlotState.None;
                     if (!disabled) hoveredSlot = i;
@@ -147,20 +158,40 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
 
             for (int i = 0; i < slotHoverAnim.Length; i++) {
                 float target = 0f;
+                int gi = GetGlobalIndex(i);
                 if (i == hoveredSlot) target = 1f;
-                else if (Queue != null && Queue.GetSlotState(i) == QueueSlotState.Uploading) target = 0.5f;
+                else if (Queue != null && Queue.GetSlotState(gi) == QueueSlotState.Uploading) target = 0.5f;
                 slotHoverAnim[i] = MathHelper.Lerp(slotHoverAnim[i], target, 0.2f);
             }
+        }
+
+        //面板槽位索引→QuickHackDef全局索引
+        private int GetGlobalIndex(int displaySlot) {
+            if (displaySlot >= 0 && displaySlot < filteredIndices.Count)
+                return filteredIndices[displaySlot];
+            return -1;
         }
 
         public void HandleClick() {
             if (!visible) return;
             if (hoveredSlot >= 0 && Queue != null) {
-                var hack = QuickHackDef.GetByIndex(hoveredSlot);
+                int globalIdx = GetGlobalIndex(hoveredSlot);
+                var hack = QuickHackDef.GetByIndex(globalIdx);
                 if (hack == null) return;
                 //RAM不足时拒绝入队
                 if (!HackTimeRAM.CanAfford(hack.RamCost)) return;
-                if (Queue.Enqueue(hack, hoveredSlot, HackTime.SelectedTargetIndex)) {
+
+                bool enqueued;
+                if (currentTargetKind == HackTargetKind.Tile
+                    && HackTime.CurrentScanTarget is TileScannable tileScan) {
+                    //物块目标入队
+                    enqueued = Queue.EnqueueTile(hack, globalIdx, tileScan.TileCoordX, tileScan.TileCoordY);
+                }
+                else {
+                    enqueued = Queue.Enqueue(hack, globalIdx, HackTime.SelectedTargetIndex);
+                }
+
+                if (enqueued) {
                     HackTimeRAM.TryConsume(hack.RamCost);
                 }
             }
@@ -207,8 +238,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             }
             if (!anyVisible) return;
 
-            int count = QuickHackDef.Count;
-            float totalH = count * (ItemHeight + ItemGap) - ItemGap;
+            float totalH = displayCount * (ItemHeight + ItemGap) - ItemGap;
             float startY = (Main.screenHeight - totalH) * 0.5f + TopPadding - 10f;
             float baseX = Main.screenWidth - RightMargin - ItemWidth - TrunkOffsetX - 20;
             float endX = Main.screenWidth - RightMargin + 10;
@@ -251,10 +281,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
         #region 电路连接树
 
         private void DrawConnectorTree(SpriteBatch sb, Texture2D px, float alpha) {
-            if (HackTime.SelectedTargetIndex < 0) return;
+            if (HackTime.SelectedTargetIndex < 0 && HackTime.CurrentScanTarget == null) return;
 
-            int count = QuickHackDef.Count;
-            float totalH = count * (ItemHeight + ItemGap) - ItemGap;
+            float totalH = displayCount * (ItemHeight + ItemGap) - ItemGap;
             float listStartY = (Main.screenHeight - totalH) * 0.5f + TopPadding;
             float baseX = Main.screenWidth - RightMargin - ItemWidth;
             float trunkX = baseX - TrunkOffsetX;
@@ -285,15 +314,16 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
                 DrawLine(sb, px, new Vector2(trunkX, trunkTop), new Vector2(trunkX, trunkBot), 1.5f, wireColor * 0.7f);
 
                 //分支线 + 节点
-                for (int i = 0; i < count; i++) {
+                for (int i = 0; i < displayCount; i++) {
                     float fly = slotFlyIn[i];
                     if (fly < 0.05f) continue;
                     float itemCY = listStartY + i * (ItemHeight + ItemGap) + ItemHeight * 0.5f;
                     float branchEnd = MathHelper.Lerp(trunkX, baseX - 4, fly);
                     Color branchColor = wireColor * 0.5f;
                     if (i == hoveredSlot) branchColor = HackTheme.Accent * (wireAlpha * 1f);
+                    int gi = GetGlobalIndex(i);
                     if (Queue != null) {
-                        var qs = Queue.GetSlotState(i);
+                        var qs = Queue.GetSlotState(gi);
                         if (qs == QueueSlotState.Uploading) branchColor = HackTheme.Uploading * (wireAlpha * 0.8f);
                         else if (qs == QueueSlotState.Queued) branchColor = HackTheme.Uploading * (wireAlpha * 0.4f);
                     }
@@ -339,8 +369,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
 
             //上传时在对应分支上有动态脉冲
             if (Queue != null && glow != null && wireProgress > 0.3f) {
-                for (int i = 0; i < count; i++) {
-                    if (Queue.GetSlotState(i) != QueueSlotState.Uploading) continue;
+                for (int i = 0; i < displayCount; i++) {
+                    int gi = GetGlobalIndex(i);
+                    if (Queue.GetSlotState(gi) != QueueSlotState.Uploading) continue;
                     float itemCY = listStartY + i * (ItemHeight + ItemGap) + ItemHeight * 0.5f;
                     float pulseT = (timer * 2f) % 1f;
                     float pulseX = MathHelper.Lerp(trunkX, baseX - 4, pulseT);
@@ -356,24 +387,24 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
         #region 协议条目列表
 
         private void DrawItems(SpriteBatch sb, Texture2D px, float alpha) {
-            int count = QuickHackDef.Count;
-            float totalH = count * (ItemHeight + ItemGap) - ItemGap;
+            float totalH = displayCount * (ItemHeight + ItemGap) - ItemGap;
             float startY = (Main.screenHeight - totalH) * 0.5f + TopPadding;
             float baseX = Main.screenWidth - RightMargin - ItemWidth;
 
-            for (int i = 0; i < count; i++) {
+            for (int i = 0; i < displayCount; i++) {
                 float fly = slotFlyIn[i];
                 if (fly < 0.01f) {
                     slotRects[i] = Rectangle.Empty;
                     continue;
                 }
 
-                QuickHackDef hack = QuickHackDef.GetByIndex(i);
+                int globalIdx = GetGlobalIndex(i);
+                QuickHackDef hack = QuickHackDef.GetByIndex(globalIdx);
                 float hover = slotHoverAnim[i];
                 float y = startY + i * (ItemHeight + ItemGap);
 
                 //禁用状态：RAM不足或该协议已在队列中，抑制悬停展开
-                QueueSlotState queueState = Queue?.GetSlotState(i) ?? QueueSlotState.None;
+                QueueSlotState queueState = Queue?.GetSlotState(globalIdx) ?? QueueSlotState.None;
                 bool slotDisabled = !HackTimeRAM.CanAfford(hack.RamCost)
                     || queueState != QueueSlotState.None;
                 if (slotDisabled) hover = 0f;
@@ -774,8 +805,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             }
             if (!anyVisible) return;
 
-            int count = QuickHackDef.Count;
-            float totalH = count * (ItemHeight + ItemGap) - ItemGap;
+            float totalH = displayCount * (ItemHeight + ItemGap) - ItemGap;
             float startY = (Main.screenHeight - totalH) * 0.5f + TopPadding;
             float bottomY = startY + totalH + 14f;
             float baseX = Main.screenWidth - RightMargin - ItemWidth;
@@ -814,7 +844,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
                 HackTheme.Accent * (alpha * 0.22f), 0.24f);
 
             //协议计数
-            string countStr = HackTime.Protocols.Format(count);
+            string countStr = HackTime.Protocols.Format(displayCount);
             Utils.DrawBorderString(sb, countStr, new Vector2(baseX + ItemWidth - 110, bottomY + 20),
                 HackTheme.TextDim * (alpha * 0.25f), 0.22f);
         }

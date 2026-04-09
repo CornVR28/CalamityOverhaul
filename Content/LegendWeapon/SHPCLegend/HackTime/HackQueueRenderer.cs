@@ -44,6 +44,15 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             return true;
         }
 
+        //物块目标入队
+        public bool EnqueueTile(QuickHackDef hack, int slotIndex, int tileX, int tileY) {
+            for (int i = 0; i < queue.Count; i++) {
+                if (queue[i].SlotIndex == slotIndex) return false;
+            }
+            queue.Add(new HackQueueEntry(hack, slotIndex, tileX, tileY));
+            return true;
+        }
+
         //取消队列中指定slot的协议
         public void Cancel(int slotIndex) {
             for (int i = queue.Count - 1; i >= 0; i--) {
@@ -64,15 +73,19 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
         public void ConsumeAndApplyAll() {
             for (int i = queue.Count - 1; i >= 0; i--) {
                 var entry = queue[i];
-                //目标已死亡，直接移除
-                if (entry.TargetIndex < 0 || entry.TargetIndex >= Main.maxNPCs
-                    || !Main.npc[entry.TargetIndex].active) {
+                //目标失效则移除
+                if (!entry.IsTargetValid) {
                     queue.RemoveAt(i);
                     continue;
                 }
                 //上传完成且闪烁结束，施加效果
                 if (entry.State == HackQueueState.Completed && entry.CompletedTimer <= 0f) {
-                    HackEffectTracker.Apply(entry.Hack, entry.TargetIndex, Main.myPlayer);
+                    if (entry.TargetKind == HackTargetKind.Tile) {
+                        HackEffectTracker.ApplyToTile(entry.Hack, entry.TileX, entry.TileY, Main.myPlayer);
+                    }
+                    else {
+                        HackEffectTracker.Apply(entry.Hack, entry.TargetIndex, Main.myPlayer);
+                    }
                     queue.RemoveAt(i);
                 }
             }

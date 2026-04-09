@@ -47,6 +47,20 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
     }
 
     /// <summary>
+    /// 物块骇入效果的运行时实例
+    /// </summary>
+    internal class ActiveTileHackEffect
+    {
+        public QuickHackDef Hack;
+        public int CasterIndex;
+        public int TileX;
+        public int TileY;
+        public int Elapsed;
+        public bool Active = true;
+        public bool Applied;
+    }
+
+    /// <summary>
     /// 骇入效果全局追踪器
     /// <br/>管理所有NPC身上正在生效的骇入协议，驱动效果生命周期（Apply→Tick→Remove）
     /// <br/>无叠加限制，同一NPC可承受任意数量的不同协议
@@ -61,6 +75,10 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
         private const float KillRefundRatio = 0.5f;
         //本帧已处理击杀回收的NPC索引集（避免同一NPC多效果重复回收）
         private static readonly HashSet<int> killRefundedThisFrame = [];
+
+        //物块效果列表
+        private static readonly List<ActiveTileHackEffect> activeTileEffects = [];
+        private static readonly List<ActiveTileHackEffect> tileRemoveBuffer = [];
 
         void ICWRLoader.UnLoadData() => Reset();
 
@@ -247,6 +265,117 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             activeEffects.Clear();
             removeBuffer.Clear();
             killRefundedThisFrame.Clear();
+            activeTileEffects.Clear();
+            tileRemoveBuffer.Clear();
         }
+
+        #region 物块效果管理
+
+        /// <summary>
+        /// 对指定物块施加一个骇入协议效果
+        /// </summary>
+        public static ActiveTileHackEffect ApplyToTile(QuickHackDef hack, int tileX, int tileY, int casterIndex) {
+            if (tileX < 0 || tileX >= Main.maxTilesX || tileY < 0 || tileY >= Main.maxTilesY)
+                return null;
+            if (!Main.tile[tileX, tileY].HasTile) return null;
+            if (!hack.CanApplyToTile(tileX, tileY)) return null;
+
+            var effect = new ActiveTileHackEffect {
+                Hack = hack,
+                CasterIndex = casterIndex,
+                TileX = tileX,
+                TileY = tileY,
+                Elapsed = 0,
+                Active = true,
+                Applied = false,
+            };
+
+            activeTileEffects.Add(effect);
+            return effect;
+        }
+
+        /// <summary>
+        /// 每帧更新所有物块效果
+        /// </summary>
+        public static void UpdateTileEffects() {
+            tileRemoveBuffer.Clear();
+
+            for (int i = 0; i < activeTileEffects.Count; i++) {
+                var eff = activeTileEffects[i];
+                if (!eff.Active) {
+                    tileRemoveBuffer.Add(eff);
+                    continue;
+                }
+
+                //物块被挖掉则移除效果
+                if (eff.TileX < 0 || eff.TileX >= Main.maxTilesX
+                    || eff.TileY < 0 || eff.TileY >= Main.maxTilesY
+                    || !Main.tile[eff.TileX, eff.TileY].HasTile) {
+                    eff.Active = false;
+                    tileRemoveBuffer.Add(eff);
+                    continue;
+                }
+
+                //首帧触发OnApplyToTile
+                if (!eff.Applied) {
+                    eff.Applied = true;
+                    Player caster = eff.CasterIndex >= 0 && eff.CasterIndex < Main.maxPlayers
+                        ? Main.player[eff.CasterIndex] : Main.LocalPlayer;
+                    eff.Hack.OnApplyToTile(eff.TileX, eff.TileY, caster);
+                }
+
+                int duration = eff.Hack.GetDuration();
+                //到期
+                if (duration > 0 && eff.Elapsed >= duration) {
+                    eff.Hack.OnRemoveTile(eff.TileX, eff.TileY);
+                    eff.Active = false;
+                    tileRemoveBuffer.Add(eff);
+                    continue;
+                }
+
+                //即时效果在Apply后直接结束
+                if (duration == 0 && eff.Applied) {
+                    eff.Active = false;
+                    tileRemoveBuffer.Add(eff);
+                    continue;
+                }
+
+                //持续逻辑
+                bool alive = eff.Hack.OnTickTile(eff.TileX, eff.TileY, eff.Elapsed);
+                if (!alive) {
+                    eff.Hack.OnRemoveTile(eff.TileX, eff.TileY);
+                    eff.Active = false;
+                    tileRemoveBuffer.Add(eff);
+                    continue;
+                }
+
+                eff.Elapsed++;
+            }
+
+            for (int i = 0; i < tileRemoveBuffer.Count; i++) {
+                activeTileEffects.Remove(tileRemoveBuffer[i]);
+            }
+        }
+
+        /// <summary>
+        /// 查询指定物块位置是否有某类型的活跃效果
+        /// </summary>
+        public static bool HasTileEffect<T>(int tileX, int tileY) where T : QuickHackDef {
+            for (int i = 0; i < activeTileEffects.Count; i++) {
+                if (activeTileEffects[i].Active
+                    && activeTileEffects[i].TileX == tileX
+                    && activeTileEffects[i].TileY == tileY
+                    && activeTileEffects[i].Hack is T)
+                    return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// 所有活跃的物块效果（只读）
+        /// </summary>
+        public static IReadOnlyList<ActiveTileHackEffect> AllActiveTileEffects => activeTileEffects;
+
+        #endregion
     }
 }

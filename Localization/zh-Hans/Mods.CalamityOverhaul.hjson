@@ -78,6 +78,21 @@ QuickHack: {
 		DisplayName: 蔓延
 		Description: 植入自我复制的恶意程序，向周围目标扩散
 	}
+
+	TileDetonate: {
+		DisplayName: 物块爆破
+		Description: 瓦解结构完整性，触发区域性爆炸
+	}
+
+	TilePhase: {
+		DisplayName: 虚化协议
+		Description: 篡改物块物理属性，使其在一段时间内变为虚体
+	}
+
+	TileMagPull: {
+		DisplayName: 磁力牵引
+		Description: 生成磁场，将附近掉落物吸引向你
+	}
 }
 
 // NPCs.Hierophant.DisplayName: Hierophant

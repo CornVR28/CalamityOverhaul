@@ -25,6 +25,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
 
             HackTime.Update();
             UploadOverlay.Update();
+            HackTimeTileDraw.Update();
         }
 
         public override void EndCaptureDraw(SpriteBatch spriteBatch, GraphicsDevice graphicsDevice, RenderTarget2D screenSwap) {
@@ -47,6 +48,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
 
                 DrawHoveredReticle(spriteBatch);
                 DrawSelectedReticle(spriteBatch);
+                HackTimeTileDraw.DrawAdditive(spriteBatch);
 
                 var queue = HackTimeUI.Instance?.Queue;
                 if (queue != null && !queue.IsEmpty && HackTime.SelectedTargetIndex >= 0) {
@@ -59,11 +61,12 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
                 spriteBatch.End();
             }
 
-            //NPC头顶骇入状态卡片（AlphaBlend，任何时候只要有效果或上传就绘制）
+            //NPC头顶骇入状态卡片和物块扫描边框（AlphaBlend，任何时候只要有效果或上传就绘制）
             spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointWrap,
                 DepthStencilState.None, RasterizerState.CullNone, null,
                 Main.GameViewMatrix.TransformationMatrix);
             HackStatusDisplay.Draw(spriteBatch);
+            HackTimeTileDraw.DrawAlphaBlend(spriteBatch);
             spriteBatch.End();
         }
 
