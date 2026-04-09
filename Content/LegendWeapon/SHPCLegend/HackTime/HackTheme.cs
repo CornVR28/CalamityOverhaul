@@ -1,4 +1,7 @@
-﻿namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
+﻿using Microsoft.Xna.Framework;
+using Terraria.Localization;
+
+namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
 {
     /// <summary>
     /// 骇客时间界面主题配色
@@ -26,6 +29,8 @@
         public static readonly Color Danger = new(220, 45, 45);
         //上传中色（琥珀）
         public static readonly Color Uploading = new(200, 170, 40);
+        //蔓延色（紫色）
+        public static readonly Color Contagion = new(160, 40, 200);
 
         //文字层级
         public static readonly Color TextDim = new(70, 85, 95);
@@ -40,5 +45,45 @@
         public static readonly Color ProgressBg = new(12, 16, 22);
         public static readonly Color ProgressFill = new(0, 190, 200);
         public static readonly Color ProgressGlow = new(40, 220, 230);
+
+        #region 本地化文本
+
+        private const string TextPrefix = "Mods.CalamityOverhaul.UI.HackTime.";
+
+        internal static string Text(string key) =>
+            Language.GetTextValue(TextPrefix + key);
+
+        internal static string Text(string key, object arg0) =>
+            Language.GetTextValue(TextPrefix + key, arg0);
+
+        #endregion
+
+        #region 类别辅助
+
+        public static Color CategoryColor(QuickHackCategory cat) => cat switch {
+            QuickHackCategory.Lethal => Danger,
+            QuickHackCategory.Control => Uploading,
+            QuickHackCategory.Covert => AccentAlt,
+            QuickHackCategory.Contagion => Contagion,
+            _ => Accent,
+        };
+
+        public static string CategorySymbol(QuickHackCategory cat) => cat switch {
+            QuickHackCategory.Lethal => "◆",
+            QuickHackCategory.Control => "◇",
+            QuickHackCategory.Covert => "○",
+            QuickHackCategory.Contagion => "◎",
+            _ => "●",
+        };
+
+        public static string CategoryLabel(QuickHackCategory cat) => cat switch {
+            QuickHackCategory.Lethal => Text("CatLethal"),
+            QuickHackCategory.Control => Text("CatControl"),
+            QuickHackCategory.Covert => Text("CatCovert"),
+            QuickHackCategory.Contagion => Text("CatContagion"),
+            _ => Text("CatUnknown"),
+        };
+
+        #endregion
     }
 }

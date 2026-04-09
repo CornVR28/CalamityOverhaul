@@ -414,3 +414,49 @@ EntrustManagerNotification: {
 	LabelUnsuspended: 已恢复
 	LabelCompleted: 委托完成
 }
+
+HackTime: {
+	Locked: LOCKED
+	Done: DONE
+	Queued: QUEUED
+	Uploading: "UPLOADING..."
+	BreachReady: "BREACH PROTOCOL // READY"
+	UploadComplete: ">> UPLOAD COMPLETE <<"
+	UploadQueue: "// UPLOAD QUEUE"
+	TargetLocked: "// TARGET LOCKED"
+	HpFormat: "HP {0}%"
+	Protocols: "[{0} PROTOCOLS]"
+	RamDepleted: "!! RAM DEPLETED !!"
+	LowRam: "! LOW RAM !"
+	Scanning: "SCANNING..."
+	AnalysisComplete: "ANALYSIS COMPLETE"
+	TypeLabel: TYPE
+	BossClass: "BOSS CLASS"
+	EliteUnit: "ELITE UNIT"
+	HostileEntity: "HOSTILE ENTITY"
+	ThreatLabel: THREAT
+	ThreatExtreme: EXTREME
+	ThreatHigh: HIGH
+	ThreatModerate: MODERATE
+	ThreatLow: LOW
+	DefLabel: DEF
+	DmgLabel: DMG
+	KbResLabel: KB.RES
+	Breach: BREACH
+	InitBreach: "// INITIALIZING BREACH"
+	SystemBreach: "// SYSTEM BREACH"
+	Rebooting: "REBOOTING..."
+	SystemOnline: "SYSTEM ONLINE"
+	MemoryWiped: "???"
+	Cyberpsychosis: CYBERPSYCHOSIS
+	RamRefund: "+{0} RAM"
+	Active: ACTIVE
+	ActivePct: "ACTIVE {0}%"
+	Complete: COMPLETE
+	UploadingPct: "UPLOADING {0}%"
+	CatLethal: LETHAL
+	CatControl: CONTROL
+	CatCovert: COVERT
+	CatContagion: CONTAGION
+	CatUnknown: UNKNOWN
+}

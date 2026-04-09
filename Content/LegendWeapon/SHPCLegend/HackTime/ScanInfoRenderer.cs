@@ -127,7 +127,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             revealedRows = 0;
             typewriterChar = 0f;
             glitchIntensity = 0.3f;
-            statusText = "SCANNING...";
+            statusText = HackTheme.Text("Scanning");
             statusColor = HackTheme.Uploading;
         }
 
@@ -137,37 +137,37 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             if (!npc.active) return;
 
             //TYPE
-            rowLabels[0] = "TYPE";
+            rowLabels[0] = HackTheme.Text("TypeLabel");
             if (npc.boss) {
-                rowValues[0] = "BOSS CLASS";
+                rowValues[0] = HackTheme.Text("BossClass");
                 rowColors[0] = HackTheme.Danger;
             }
             else if (npc.lifeMax > 5000) {
-                rowValues[0] = "ELITE UNIT";
+                rowValues[0] = HackTheme.Text("EliteUnit");
                 rowColors[0] = HackTheme.Uploading;
             }
             else {
-                rowValues[0] = "HOSTILE ENTITY";
+                rowValues[0] = HackTheme.Text("HostileEntity");
                 rowColors[0] = HackTheme.TextBright;
             }
 
             //THREAT
             int threatScore = (int)(npc.damage * 0.5f + npc.lifeMax * 0.01f + npc.defense);
-            rowLabels[1] = "THREAT";
+            rowLabels[1] = HackTheme.Text("ThreatLabel");
             if (threatScore > 500) {
-                rowValues[1] = "EXTREME";
+                rowValues[1] = HackTheme.Text("ThreatExtreme");
                 rowColors[1] = HackTheme.Danger;
             }
             else if (threatScore > 200) {
-                rowValues[1] = "HIGH";
+                rowValues[1] = HackTheme.Text("ThreatHigh");
                 rowColors[1] = HackTheme.Uploading;
             }
             else if (threatScore > 80) {
-                rowValues[1] = "MODERATE";
+                rowValues[1] = HackTheme.Text("ThreatModerate");
                 rowColors[1] = HackTheme.AccentAlt;
             }
             else {
-                rowValues[1] = "LOW";
+                rowValues[1] = HackTheme.Text("ThreatLow");
                 rowColors[1] = HackTheme.Accent;
             }
 
@@ -179,22 +179,22 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
                 : hpPct > 0.25f ? HackTheme.Uploading : HackTheme.Danger;
 
             //DEF
-            rowLabels[3] = "DEF";
+            rowLabels[3] = HackTheme.Text("DefLabel");
             rowValues[3] = $"{npc.defense}";
             rowColors[3] = HackTheme.TextBright;
 
             //DMG
-            rowLabels[4] = "DMG";
+            rowLabels[4] = HackTheme.Text("DmgLabel");
             rowValues[4] = $"{npc.damage}";
             rowColors[4] = HackTheme.TextBright;
 
             //KB.RES
-            rowLabels[5] = "KB.RES";
+            rowLabels[5] = HackTheme.Text("KbResLabel");
             rowValues[5] = $"{npc.knockBackResist:F2}";
             rowColors[5] = npc.knockBackResist >= 0.9f ? HackTheme.Danger
                 : npc.knockBackResist >= 0.5f ? HackTheme.Uploading : HackTheme.TextBright;
 
-            statusText = "ANALYSIS COMPLETE";
+            statusText = HackTheme.Text("AnalysisComplete");
             statusColor = HackTheme.Accent;
         }
 

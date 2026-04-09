@@ -446,7 +446,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
                 new Rectangle(0, 0, 1, 1), highlightLine * (alpha * 0.18f));
 
             //=== 左侧色条（加粗+呼吸脉动+辉光） ===
-            Color catColor = GetCategoryColor(hack.Category);
+            Color catColor = HackTheme.CategoryColor(hack.Category);
             //禁用时色条变为暗红/灰
             if (isDisabled) {
                 catColor = Color.Lerp(new Color(80, 25, 25), HackTheme.Danger, 0.3f);
@@ -477,7 +477,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             }
 
             //=== 分类符号（色条旁的小标识符） ===
-            string catSymbol = GetCategorySymbol(hack.Category);
+            string catSymbol = HackTheme.CategorySymbol(hack.Category);
             Color symColor = catColor * (alpha * (0.35f + hover * 0.3f));
             Utils.DrawBorderString(sb, catSymbol, new Vector2(barX + 8, rect.Y + rect.Height * 0.5f - 6), symColor, 0.28f);
 
@@ -589,7 +589,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             if (isDisabled && !isUploading && !isQueued) {
                 //纯RAM不足的禁用——显示闪烁红色LOCKED和RAM消耗
                 float lockPulse = MathF.Sin(timer * 5f + index) * 0.25f + 0.75f;
-                string lockStr = "LOCKED";
+                string lockStr = HackTheme.Text("Locked");
                 Vector2 lockSize = FontAssets.MouseText.Value.MeasureString(lockStr) * 0.38f;
                 Vector2 lockPos = new(rect.Right - lockSize.X - 14,
                     rect.Y + (rect.Height - lockSize.Y) * 0.5f - 8);
@@ -607,15 +607,17 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             }
             else if (isCompleted) {
                 float flash = MathF.Sin(timer * 8f) * 0.3f + 0.7f;
-                Vector2 okSize = FontAssets.MouseText.Value.MeasureString("DONE") * 0.42f;
+                string doneStr = HackTheme.Text("Done");
+                Vector2 okSize = FontAssets.MouseText.Value.MeasureString(doneStr) * 0.42f;
                 Vector2 okPos = new(rect.Right - okSize.X - 14, rect.Y + (rect.Height - okSize.Y) * 0.5f);
-                Utils.DrawBorderString(sb, "DONE", okPos, HackTheme.Accent * (alpha * flash), 0.42f);
+                Utils.DrawBorderString(sb, doneStr, okPos, HackTheme.Accent * (alpha * flash), 0.42f);
             }
             else if (isQueued) {
-                Vector2 qSize = FontAssets.MouseText.Value.MeasureString("QUEUED") * 0.38f;
+                string queuedStr = HackTheme.Text("Queued");
+                Vector2 qSize = FontAssets.MouseText.Value.MeasureString(queuedStr) * 0.38f;
                 Vector2 qPos = new(rect.Right - qSize.X - 14, rect.Y + (rect.Height - qSize.Y) * 0.5f);
                 float qPulse = MathF.Sin(timer * 3f) * 0.15f + 0.85f;
-                Utils.DrawBorderString(sb, "QUEUED", qPos, HackTheme.Uploading * (alpha * 0.6f * qPulse), 0.38f);
+                Utils.DrawBorderString(sb, queuedStr, qPos, HackTheme.Uploading * (alpha * 0.6f * qPulse), 0.38f);
             }
             else {
                 //上传耗时（右上角）
@@ -639,7 +641,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
                 Utils.DrawBorderString(sb, ramStr, ramPos, ramColor * (alpha * 0.7f), FontTime);
 
                 //分类标签（右下角）
-                string catLabel = GetCategoryLabel(hack.Category);
+                string catLabel = HackTheme.CategoryLabel(hack.Category);
                 Vector2 cls = FontAssets.MouseText.Value.MeasureString(catLabel) * 0.26f;
                 Vector2 clp = new(rect.Right - cls.X - 14, rect.Bottom - cls.Y - 8);
                 Utils.DrawBorderString(sb, catLabel, clp, catColor * (alpha * 0.35f), 0.26f);
@@ -801,8 +803,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             }
 
             //状态文本
-            string status = hasActive ? "UPLOADING..." : "BREACH PROTOCOL // READY";
-            if (Queue != null && Queue.HasCompleted) status = ">> UPLOAD COMPLETE <<";
+            string status = hasActive ? HackTheme.Text("Uploading") : HackTheme.Text("BreachReady");
+            if (Queue != null && Queue.HasCompleted) status = HackTheme.Text("UploadComplete");
             Utils.DrawBorderString(sb, status, new Vector2(baseX + 14, bottomY),
                 HackTheme.TextDim * alpha, FontStatus);
 
@@ -812,7 +814,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
                 HackTheme.Accent * (alpha * 0.22f), 0.24f);
 
             //协议计数
-            string countStr = $"[{count} PROTOCOLS]";
+            string countStr = HackTheme.Text("Protocols", count);
             Utils.DrawBorderString(sb, countStr, new Vector2(baseX + ItemWidth - 110, bottomY + 20),
                 HackTheme.TextDim * (alpha * 0.25f), 0.22f);
         }
@@ -917,7 +919,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             if (ease > 0.4f) {
                 float labelAlpha = (ease - 0.4f) / 0.6f * alpha;
 
-                string label = "// TARGET LOCKED";
+                string label = HackTheme.Text("TargetLocked");
                 Vector2 labelSize = FontAssets.MouseText.Value.MeasureString(label) * 0.34f;
                 Vector2 labelPos = new(center.X - labelSize.X * 0.5f, center.Y - halfH - 22f);
                 Utils.DrawBorderString(sb, label, labelPos, HackTheme.Accent * (labelAlpha * 0.7f), 0.34f);
@@ -930,7 +932,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
                 //生命值百分比
                 if (npc.lifeMax > 0) {
                     float hpPct = (float)npc.life / npc.lifeMax;
-                    string hpStr = $"HP {(int)(hpPct * 100)}%";
+                    string hpStr = HackTheme.Text("HpFormat", (int)(hpPct * 100));
                     Vector2 hpSize = FontAssets.MouseText.Value.MeasureString(hpStr) * 0.26f;
                     Vector2 hpPos = new(center.X - hpSize.X * 0.5f, center.Y + halfH + 30f);
                     Color hpColor = hpPct > 0.5f ? HackTheme.AccentAlt : (hpPct > 0.25f ? HackTheme.Uploading : HackTheme.Danger);
@@ -970,30 +972,6 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
         #endregion
 
         #region 工具函数
-
-        private static Color GetCategoryColor(QuickHackCategory cat) => cat switch {
-            QuickHackCategory.Lethal => HackTheme.Danger,
-            QuickHackCategory.Control => HackTheme.Uploading,
-            QuickHackCategory.Covert => HackTheme.AccentAlt,
-            QuickHackCategory.Contagion => new Color(160, 40, 200),
-            _ => HackTheme.Accent,
-        };
-
-        private static string GetCategorySymbol(QuickHackCategory cat) => cat switch {
-            QuickHackCategory.Lethal => "◆",
-            QuickHackCategory.Control => "◇",
-            QuickHackCategory.Covert => "○",
-            QuickHackCategory.Contagion => "◎",
-            _ => "●",
-        };
-
-        private static string GetCategoryLabel(QuickHackCategory cat) => cat switch {
-            QuickHackCategory.Lethal => "LETHAL",
-            QuickHackCategory.Control => "CONTROL",
-            QuickHackCategory.Covert => "COVERT",
-            QuickHackCategory.Contagion => "CONTAGION",
-            _ => "UNKNOWN",
-        };
 
         private static void DrawLine(SpriteBatch sb, Texture2D px, Vector2 start, Vector2 end, float thickness, Color color) {
             Vector2 diff = end - start;

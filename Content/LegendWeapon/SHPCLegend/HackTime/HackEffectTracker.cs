@@ -236,7 +236,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
 
             //视觉反馈：在NPC位置弹出青色浮动文字
             if (actual > 0.01f && !VaultUtils.isServer) {
-                string text = $"+{actual:F0} RAM";
+                string text = HackTheme.Text("RamRefund", actual.ToString("F0"));
                 CombatText.NewText(target.Hitbox, HackTheme.Accent, text, true);
                 SoundEngine.PlaySound(CWRSound.Hacker with { Volume = 0.35f, Pitch = 0.4f },
                     target.Center);

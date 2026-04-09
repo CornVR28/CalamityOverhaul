@@ -26,7 +26,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime.Protocols
                 PRTLoader.AddParticle(new PRT_Spark(pos, vel,
                     false, 30, 0.7f, new Color(50, 255, 180)));
             }
-            CombatText.NewText(target.Hitbox, new Color(80, 255, 200), "???", true);
+            CombatText.NewText(target.Hitbox, new Color(80, 255, 200), HackTheme.Text("MemoryWiped"), true);
             return true;
         }
 

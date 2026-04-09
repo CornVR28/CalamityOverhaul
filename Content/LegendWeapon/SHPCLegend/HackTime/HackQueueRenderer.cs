@@ -236,7 +236,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
 
         private void DrawHeader(SpriteBatch sb, float alpha) {
             float headerY = GetStartY() - 26f;
-            string header = "// UPLOAD QUEUE";
+            string header = HackTheme.Text("UploadQueue");
             Color headerColor = HackTheme.Accent * (alpha * 0.55f);
             Utils.DrawBorderString(sb, header, new Vector2(LeftMargin, headerY), headerColor, 0.34f);
 
@@ -280,7 +280,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             DrawSlashCutRight(sb, px, rect, itemAlpha);
 
             //=== 类别色条（左侧） ===
-            Color catColor = GetCategoryColor(entry.Hack.Category);
+            Color catColor = HackTheme.CategoryColor(entry.Hack.Category);
             float breathe = MathF.Sin(timer * 2.5f + index * 1.1f) * 0.1f + 0.9f;
             float barGlow = entry.State == HackQueueState.Uploading ? 1f : 0.5f;
             barGlow *= breathe;
@@ -291,7 +291,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
                 new Rectangle(0, 0, 1, 1), catColor * (itemAlpha * barGlow * 0.06f));
 
             //=== 类别符号 ===
-            string catSymbol = GetCategorySymbol(entry.Hack.Category);
+            string catSymbol = HackTheme.CategorySymbol(entry.Hack.Category);
             Utils.DrawBorderString(sb, catSymbol, new Vector2(rect.X + 10, rect.Y + 6),
                 catColor * (itemAlpha * 0.5f), 0.24f);
 
@@ -316,11 +316,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
                     break;
                 case HackQueueState.Completed:
                     float flash = MathF.Sin(entry.CompletedTimer * 12f) * 0.3f + 0.7f;
-                    statusText = "DONE";
+                    statusText = HackTheme.Text("Done");
                     statusColor = HackTheme.Accent * flash;
                     break;
                 default:
-                    statusText = "QUEUED";
+                    statusText = HackTheme.Text("Queued");
                     statusColor = HackTheme.TextDim;
                     break;
             }
@@ -447,22 +447,6 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             sb.Draw(px, new Rectangle(lineX, rect.Y + 1, 2, rect.Height - 2),
                 new Rectangle(0, 0, 1, 1), HackTheme.Accent * alpha);
         }
-
-        private static Color GetCategoryColor(QuickHackCategory cat) => cat switch {
-            QuickHackCategory.Lethal => HackTheme.Danger,
-            QuickHackCategory.Control => HackTheme.Uploading,
-            QuickHackCategory.Covert => HackTheme.AccentAlt,
-            QuickHackCategory.Contagion => new Color(160, 40, 200),
-            _ => HackTheme.Accent,
-        };
-
-        private static string GetCategorySymbol(QuickHackCategory cat) => cat switch {
-            QuickHackCategory.Lethal => "◆",
-            QuickHackCategory.Control => "◇",
-            QuickHackCategory.Covert => "○",
-            QuickHackCategory.Contagion => "◈",
-            _ => "·",
-        };
 
         private static void DrawLine(SpriteBatch sb, Texture2D px, Vector2 start, Vector2 end, float thickness, Color color) {
             Vector2 diff = end - start;

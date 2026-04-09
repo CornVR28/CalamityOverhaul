@@ -18,7 +18,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
         /// <summary>
         /// 当前可用RAM（精确浮点值，显示时取整）
         /// </summary>
-        public static float CurrentRam { get; set; }
+        public static float CurrentRam {
+            get => _currentRam;
+            set => _currentRam = Math.Clamp(value, 0f, MaxRam);
+        }
+        private static float _currentRam;
         /// <summary>
         /// 每秒恢复的RAM量
         /// </summary>

@@ -354,8 +354,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             if (HackTimeRAM.CurrentRam <= 2f && !HackTime.InfiniteHack) {
                 float wPulse = MathF.Sin(timer * 5f) * 0.4f + 0.6f;
                 string warn = HackTimeRAM.CurrentRam < 0.5f
-                    ? "!! RAM DEPLETED !!"
-                    : "! LOW RAM !";
+                    ? HackTheme.Text("RamDepleted")
+                    : HackTheme.Text("LowRam");
                 Vector2 wSize = FontAssets.MouseText.Value.MeasureString(warn) * FWarn;
                 Utils.DrawBorderString(sb, warn,
                     new Vector2(center.X - wSize.X * 0.5f, baseY + 62),
