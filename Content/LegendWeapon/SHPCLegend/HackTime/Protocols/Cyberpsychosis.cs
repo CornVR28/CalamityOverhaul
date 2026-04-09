@@ -24,7 +24,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime.Protocols
                 PRTLoader.AddParticle(new PRT_Spark(target.Center, vel,
                     false, 30, 1.0f, new Color(255, 30, 30)));
             }
-            CombatText.NewText(target.Hitbox, new Color(255, 0, 50), HackTheme.Text("Cyberpsychosis"), true);
+            CombatText.NewText(target.Hitbox, new Color(255, 0, 50), HackTime.Cyberpsychosis.Value, true);
             return true;
         }
 

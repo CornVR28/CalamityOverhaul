@@ -350,7 +350,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             Color statusColor;
             if (p.UploadProgress >= 1f) {
                 float flash = MathF.Sin(timer * 14f + p.GlitchSeed) * 0.3f + 0.7f;
-                statusText = HackTheme.Text("Breach");
+                statusText = HackTime.Breach.Value;
                 statusColor = HackTheme.Danger * flash;
             }
             else {
@@ -394,7 +394,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             //标题——闪烁渐显
             float titleAlpha = Math.Min(t * 4f, 1f);
             float glitch = MathF.Sin(timer * 22f) * (1f + t * 3f);
-            string title = HackTheme.Text("InitBreach");
+            string title = HackTime.InitBreach.Value;
             Color titleColor = Color.Lerp(HackTheme.Accent, HackTheme.Danger, t) * (alpha * titleAlpha * 0.65f);
             Utils.DrawBorderString(sb, title,
                 new Vector2(barX + glitch, centerY - 40f), titleColor, 0.36f);
@@ -465,7 +465,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             float headerAlpha = Math.Min(modeActiveTime * 2f, 1f);
             float glitch = MathF.Sin(timer * 25f) * 2f;
 
-            string header = HackTheme.Text("SystemBreach");
+            string header = HackTime.SystemBreach.Value;
             Color headerColor = HackTheme.Danger * (alpha * headerAlpha * 0.7f);
 
             //闪烁间歇可见

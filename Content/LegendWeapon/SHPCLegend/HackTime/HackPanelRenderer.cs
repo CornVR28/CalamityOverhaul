@@ -589,7 +589,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             if (isDisabled && !isUploading && !isQueued) {
                 //纯RAM不足的禁用——显示闪烁红色LOCKED和RAM消耗
                 float lockPulse = MathF.Sin(timer * 5f + index) * 0.25f + 0.75f;
-                string lockStr = HackTheme.Text("Locked");
+                string lockStr = HackTime.Locked.Value;
                 Vector2 lockSize = FontAssets.MouseText.Value.MeasureString(lockStr) * 0.38f;
                 Vector2 lockPos = new(rect.Right - lockSize.X - 14,
                     rect.Y + (rect.Height - lockSize.Y) * 0.5f - 8);
@@ -607,13 +607,13 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             }
             else if (isCompleted) {
                 float flash = MathF.Sin(timer * 8f) * 0.3f + 0.7f;
-                string doneStr = HackTheme.Text("Done");
+                string doneStr = HackTime.Done.Value;
                 Vector2 okSize = FontAssets.MouseText.Value.MeasureString(doneStr) * 0.42f;
                 Vector2 okPos = new(rect.Right - okSize.X - 14, rect.Y + (rect.Height - okSize.Y) * 0.5f);
                 Utils.DrawBorderString(sb, doneStr, okPos, HackTheme.Accent * (alpha * flash), 0.42f);
             }
             else if (isQueued) {
-                string queuedStr = HackTheme.Text("Queued");
+                string queuedStr = HackTime.Queued.Value;
                 Vector2 qSize = FontAssets.MouseText.Value.MeasureString(queuedStr) * 0.38f;
                 Vector2 qPos = new(rect.Right - qSize.X - 14, rect.Y + (rect.Height - qSize.Y) * 0.5f);
                 float qPulse = MathF.Sin(timer * 3f) * 0.15f + 0.85f;
@@ -803,8 +803,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             }
 
             //状态文本
-            string status = hasActive ? HackTheme.Text("Uploading") : HackTheme.Text("BreachReady");
-            if (Queue != null && Queue.HasCompleted) status = HackTheme.Text("UploadComplete");
+            string status = hasActive ? HackTime.UploadingText.Value : HackTime.BreachReady.Value;
+            if (Queue != null && Queue.HasCompleted) status = HackTime.UploadComplete.Value;
             Utils.DrawBorderString(sb, status, new Vector2(baseX + 14, bottomY),
                 HackTheme.TextDim * alpha, FontStatus);
 
@@ -814,7 +814,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
                 HackTheme.Accent * (alpha * 0.22f), 0.24f);
 
             //协议计数
-            string countStr = HackTheme.Text("Protocols", count);
+            string countStr = HackTime.Protocols.Format(count);
             Utils.DrawBorderString(sb, countStr, new Vector2(baseX + ItemWidth - 110, bottomY + 20),
                 HackTheme.TextDim * (alpha * 0.25f), 0.22f);
         }
@@ -919,7 +919,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             if (ease > 0.4f) {
                 float labelAlpha = (ease - 0.4f) / 0.6f * alpha;
 
-                string label = HackTheme.Text("TargetLocked");
+                string label = HackTime.TargetLocked.Value;
                 Vector2 labelSize = FontAssets.MouseText.Value.MeasureString(label) * 0.34f;
                 Vector2 labelPos = new(center.X - labelSize.X * 0.5f, center.Y - halfH - 22f);
                 Utils.DrawBorderString(sb, label, labelPos, HackTheme.Accent * (labelAlpha * 0.7f), 0.34f);
@@ -932,7 +932,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
                 //生命值百分比
                 if (npc.lifeMax > 0) {
                     float hpPct = (float)npc.life / npc.lifeMax;
-                    string hpStr = HackTheme.Text("HpFormat", (int)(hpPct * 100));
+                    string hpStr = HackTime.HpFormat.Format((int)(hpPct * 100));
                     Vector2 hpSize = FontAssets.MouseText.Value.MeasureString(hpStr) * 0.26f;
                     Vector2 hpPos = new(center.X - hpSize.X * 0.5f, center.Y + halfH + 30f);
                     Color hpColor = hpPct > 0.5f ? HackTheme.AccentAlt : (hpPct > 0.25f ? HackTheme.Uploading : HackTheme.Danger);

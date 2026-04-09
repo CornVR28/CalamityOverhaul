@@ -24,7 +24,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime.Protocols
                 PRTLoader.AddParticle(new PRT_Spark(target.Center, vel,
                     false, 25, 1.0f, new Color(40, 120, 255)));
             }
-            CombatText.NewText(target.Hitbox, new Color(40, 150, 255), HackTheme.Text("Rebooting"), true);
+            CombatText.NewText(target.Hitbox, new Color(40, 150, 255), HackTime.Rebooting.Value, true);
             return true;
         }
 
@@ -54,7 +54,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime.Protocols
                 PRTLoader.AddParticle(new PRT_Spark(target.Center, vel,
                     false, 12, 0.8f, new Color(100, 200, 255)));
             }
-            CombatText.NewText(target.Hitbox, new Color(100, 200, 255), HackTheme.Text("SystemOnline"), false);
+            CombatText.NewText(target.Hitbox, new Color(100, 200, 255), HackTime.SystemOnline.Value, false);
         }
     }
 }

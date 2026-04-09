@@ -2,6 +2,8 @@
 using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
 using Terraria;
 using Terraria.Audio;
+using Terraria.Localization;
+using Terraria.ModLoader;
 
 namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
 {
@@ -10,9 +12,105 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
     /// <br/>控制骇客模式的激活、目标选择、运镜和时间冻结
     /// <br/>按键切换进入或退出，进入后世界冻结，屏幕叠加赛博科技感滤镜
     /// </summary>
-    internal class HackTime : ICWRLoader
+    internal class HackTime : ModSystem, ILocalizedModType
     {
-        void ICWRLoader.UnLoadData() => Reset();
+        public string LocalizationCategory => "UI";
+
+        public override void Unload() => Reset();
+
+        #region 本地化字段
+
+        public static LocalizedText Locked { get; private set; }
+        public static LocalizedText Done { get; private set; }
+        public static LocalizedText Queued { get; private set; }
+        public static LocalizedText UploadingText { get; private set; }
+        public static LocalizedText BreachReady { get; private set; }
+        public static LocalizedText UploadComplete { get; private set; }
+        public static LocalizedText UploadQueue { get; private set; }
+        public static LocalizedText TargetLocked { get; private set; }
+        public static LocalizedText HpFormat { get; private set; }
+        public static LocalizedText Protocols { get; private set; }
+        public static LocalizedText RamDepleted { get; private set; }
+        public static LocalizedText LowRam { get; private set; }
+        public static LocalizedText Scanning { get; private set; }
+        public static LocalizedText AnalysisComplete { get; private set; }
+        public static LocalizedText TypeLabel { get; private set; }
+        public static LocalizedText BossClass { get; private set; }
+        public static LocalizedText EliteUnit { get; private set; }
+        public static LocalizedText HostileEntity { get; private set; }
+        public static LocalizedText ThreatLabel { get; private set; }
+        public static LocalizedText ThreatExtreme { get; private set; }
+        public static LocalizedText ThreatHigh { get; private set; }
+        public static LocalizedText ThreatModerate { get; private set; }
+        public static LocalizedText ThreatLow { get; private set; }
+        public static LocalizedText DefLabel { get; private set; }
+        public static LocalizedText DmgLabel { get; private set; }
+        public static LocalizedText KbResLabel { get; private set; }
+        public static LocalizedText Breach { get; private set; }
+        public static LocalizedText InitBreach { get; private set; }
+        public static LocalizedText SystemBreach { get; private set; }
+        public static LocalizedText Rebooting { get; private set; }
+        public static LocalizedText SystemOnline { get; private set; }
+        public static LocalizedText MemoryWiped { get; private set; }
+        public static LocalizedText Cyberpsychosis { get; private set; }
+        public static LocalizedText RamRefund { get; private set; }
+        public static LocalizedText ActiveText { get; private set; }
+        public static LocalizedText ActivePct { get; private set; }
+        public static LocalizedText Complete { get; private set; }
+        public static LocalizedText UploadingPct { get; private set; }
+        public static LocalizedText CatLethal { get; private set; }
+        public static LocalizedText CatControl { get; private set; }
+        public static LocalizedText CatCovert { get; private set; }
+        public static LocalizedText CatContagion { get; private set; }
+        public static LocalizedText CatUnknown { get; private set; }
+
+        public override void SetStaticDefaults() {
+            Locked = this.GetLocalization(nameof(Locked));
+            Done = this.GetLocalization(nameof(Done));
+            Queued = this.GetLocalization(nameof(Queued));
+            UploadingText = this.GetLocalization("Uploading");
+            BreachReady = this.GetLocalization(nameof(BreachReady));
+            UploadComplete = this.GetLocalization(nameof(UploadComplete));
+            UploadQueue = this.GetLocalization(nameof(UploadQueue));
+            TargetLocked = this.GetLocalization(nameof(TargetLocked));
+            HpFormat = this.GetLocalization(nameof(HpFormat));
+            Protocols = this.GetLocalization(nameof(Protocols));
+            RamDepleted = this.GetLocalization(nameof(RamDepleted));
+            LowRam = this.GetLocalization(nameof(LowRam));
+            Scanning = this.GetLocalization(nameof(Scanning));
+            AnalysisComplete = this.GetLocalization(nameof(AnalysisComplete));
+            TypeLabel = this.GetLocalization(nameof(TypeLabel));
+            BossClass = this.GetLocalization(nameof(BossClass));
+            EliteUnit = this.GetLocalization(nameof(EliteUnit));
+            HostileEntity = this.GetLocalization(nameof(HostileEntity));
+            ThreatLabel = this.GetLocalization(nameof(ThreatLabel));
+            ThreatExtreme = this.GetLocalization(nameof(ThreatExtreme));
+            ThreatHigh = this.GetLocalization(nameof(ThreatHigh));
+            ThreatModerate = this.GetLocalization(nameof(ThreatModerate));
+            ThreatLow = this.GetLocalization(nameof(ThreatLow));
+            DefLabel = this.GetLocalization(nameof(DefLabel));
+            DmgLabel = this.GetLocalization(nameof(DmgLabel));
+            KbResLabel = this.GetLocalization(nameof(KbResLabel));
+            Breach = this.GetLocalization(nameof(Breach));
+            InitBreach = this.GetLocalization(nameof(InitBreach));
+            SystemBreach = this.GetLocalization(nameof(SystemBreach));
+            Rebooting = this.GetLocalization(nameof(Rebooting));
+            SystemOnline = this.GetLocalization(nameof(SystemOnline));
+            MemoryWiped = this.GetLocalization(nameof(MemoryWiped));
+            Cyberpsychosis = this.GetLocalization(nameof(Cyberpsychosis));
+            RamRefund = this.GetLocalization(nameof(RamRefund));
+            ActiveText = this.GetLocalization("Active");
+            ActivePct = this.GetLocalization(nameof(ActivePct));
+            Complete = this.GetLocalization(nameof(Complete));
+            UploadingPct = this.GetLocalization(nameof(UploadingPct));
+            CatLethal = this.GetLocalization(nameof(CatLethal));
+            CatControl = this.GetLocalization(nameof(CatControl));
+            CatCovert = this.GetLocalization(nameof(CatCovert));
+            CatContagion = this.GetLocalization(nameof(CatContagion));
+            CatUnknown = this.GetLocalization(nameof(CatUnknown));
+        }
+
+        #endregion
 
         /// <summary>
         /// 骇客时间是否处于激活状态
@@ -151,9 +249,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
         }
 
         /// <summary>
-        /// 世界更新接口，处理与世界状态相关的逻辑
+        /// 世界更新：RAM恢复、骇入效果驱动、队列上传推进
         /// </summary>
-        public static void UpdateByWorld() {
+        public override void PostUpdateEverything() {
             //RAM自动恢复
             HackTimeRAM.Update();
             //骇入效果全局驱动，退出骇客时间后仍持续生效

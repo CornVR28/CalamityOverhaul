@@ -236,7 +236,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
 
         private void DrawHeader(SpriteBatch sb, float alpha) {
             float headerY = GetStartY() - 26f;
-            string header = HackTheme.Text("UploadQueue");
+            string header = HackTime.UploadQueue.Value;
             Color headerColor = HackTheme.Accent * (alpha * 0.55f);
             Utils.DrawBorderString(sb, header, new Vector2(LeftMargin, headerY), headerColor, 0.34f);
 
@@ -316,11 +316,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
                     break;
                 case HackQueueState.Completed:
                     float flash = MathF.Sin(entry.CompletedTimer * 12f) * 0.3f + 0.7f;
-                    statusText = HackTheme.Text("Done");
+                    statusText = HackTime.Done.Value;
                     statusColor = HackTheme.Accent * flash;
                     break;
                 default:
-                    statusText = HackTheme.Text("Queued");
+                    statusText = HackTime.Queued.Value;
                     statusColor = HackTheme.TextDim;
                     break;
             }

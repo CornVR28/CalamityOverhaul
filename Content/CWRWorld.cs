@@ -101,8 +101,6 @@ namespace CalamityOverhaul.Content
         }
 
         public override void PostUpdateEverything() {
-            HackTime.UpdateByWorld();
-
             if (TimeFrozenTick > 0) {
                 TimeFrozenTick--;
             }

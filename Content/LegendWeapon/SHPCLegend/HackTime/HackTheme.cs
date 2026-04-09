@@ -1,5 +1,4 @@
 ﻿using Microsoft.Xna.Framework;
-using Terraria.Localization;
 
 namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
 {
@@ -46,18 +45,6 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
         public static readonly Color ProgressFill = new(0, 190, 200);
         public static readonly Color ProgressGlow = new(40, 220, 230);
 
-        #region 本地化文本
-
-        private const string TextPrefix = "Mods.CalamityOverhaul.UI.HackTime.";
-
-        internal static string Text(string key) =>
-            Language.GetTextValue(TextPrefix + key);
-
-        internal static string Text(string key, object arg0) =>
-            Language.GetTextValue(TextPrefix + key, arg0);
-
-        #endregion
-
         #region 类别辅助
 
         public static Color CategoryColor(QuickHackCategory cat) => cat switch {
@@ -77,11 +64,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
         };
 
         public static string CategoryLabel(QuickHackCategory cat) => cat switch {
-            QuickHackCategory.Lethal => Text("CatLethal"),
-            QuickHackCategory.Control => Text("CatControl"),
-            QuickHackCategory.Covert => Text("CatCovert"),
-            QuickHackCategory.Contagion => Text("CatContagion"),
-            _ => Text("CatUnknown"),
+            QuickHackCategory.Lethal => HackTime.CatLethal.Value,
+            QuickHackCategory.Control => HackTime.CatControl.Value,
+            QuickHackCategory.Covert => HackTime.CatCovert.Value,
+            QuickHackCategory.Contagion => HackTime.CatContagion.Value,
+            _ => HackTime.CatUnknown.Value,
         };
 
         #endregion

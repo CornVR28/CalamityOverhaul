@@ -116,9 +116,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
 
             //状态文字
             string status = entry.State switch {
-                HackQueueState.Waiting => HackTheme.Text("Queued"),
-                HackQueueState.Uploading => HackTheme.Text("UploadingPct", (int)(entry.UploadProgress * 100)),
-                HackQueueState.Completed => HackTheme.Text("Complete"),
+                HackQueueState.Waiting => HackTime.Queued.Value,
+                HackQueueState.Uploading => HackTime.UploadingPct.Format((int)(entry.UploadProgress * 100)),
+                HackQueueState.Completed => HackTime.Complete.Value,
                 _ => ""
             };
             float statusWidth = FontAssets.MouseText.Value.MeasureString(status).X * (FontScale * 0.85f);
@@ -165,7 +165,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             float progress = duration > 0 ? Math.Clamp(1f - (float)eff.Elapsed / duration, 0f, 1f) : 0f;
 
             //状态文字
-            string status = duration > 0 ? HackTheme.Text("ActivePct", (int)(progress * 100)) : HackTheme.Text("Active");
+            string status = duration > 0 ? HackTime.ActivePct.Format((int)(progress * 100)) : HackTime.ActiveText.Value;
             float statusWidth = FontAssets.MouseText.Value.MeasureString(status).X * (FontScale * 0.85f);
             Utils.DrawBorderString(sb, status, new Vector2(x + CardWidth - statusWidth - 4f, nameY),
                 HackTheme.TextDim, FontScale * 0.85f);
