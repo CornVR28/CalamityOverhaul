@@ -51,6 +51,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
         private const float BaseEntryDelay = 0.2f;
         //每个条目之间的飞入间隔(秒)
         private const float EntryStagger = 0.07f;
+        //协议列表整体下移偏移，避免RAM弧形HUD遮挡
+        private const float TopPadding = 60f;
         //===== 字体尺寸 =====
         private const float FontName = 0.8f;
         private const float FontDesc = 0.62f;
@@ -116,7 +118,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
                 glitchBandY += 600f * 0.016f; //匀速下移
                 int count = QuickHackDef.Count;
                 float totalH = count * (ItemHeight + ItemGap);
-                float startY = (Main.screenHeight - totalH) * 0.5f;
+                float startY = (Main.screenHeight - totalH) * 0.5f + TopPadding;
                 if (glitchBandY > startY + totalH + 50f) {
                     glitchBandY = startY - 50f;
                     glitchBandCooldown = 2f + Main.rand.NextFloat() * 3f; //随机间隔
@@ -133,7 +135,12 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             for (int i = 0; i < slotRects.Length; i++) {
                 if (slotFlyIn[i] < 0.8f) continue;
                 if (slotRects[i].Contains(mx, my)) {
-                    hoveredSlot = i;
+                    //禁用状态的槽位不响应悬停
+                    var hack = QuickHackDef.GetByIndex(i);
+                    var qs = Queue?.GetSlotState(i) ?? QueueSlotState.None;
+                    bool disabled = (hack != null && !HackTimeRAM.CanAfford(hack.RamCost))
+                        || qs != QueueSlotState.None;
+                    if (!disabled) hoveredSlot = i;
                     break;
                 }
             }
@@ -202,7 +209,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
 
             int count = QuickHackDef.Count;
             float totalH = count * (ItemHeight + ItemGap) - ItemGap;
-            float startY = (Main.screenHeight - totalH) * 0.5f - 10f;
+            float startY = (Main.screenHeight - totalH) * 0.5f + TopPadding - 10f;
             float baseX = Main.screenWidth - RightMargin - ItemWidth - TrunkOffsetX - 20;
             float endX = Main.screenWidth - RightMargin + 10;
             float regionH = totalH + 20f;
@@ -248,7 +255,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
 
             int count = QuickHackDef.Count;
             float totalH = count * (ItemHeight + ItemGap) - ItemGap;
-            float listStartY = (Main.screenHeight - totalH) * 0.5f;
+            float listStartY = (Main.screenHeight - totalH) * 0.5f + TopPadding;
             float baseX = Main.screenWidth - RightMargin - ItemWidth;
             float trunkX = baseX - TrunkOffsetX;
             Vector2 screenCenter = new(Main.screenWidth * 0.5f, Main.screenHeight * 0.5f);
@@ -351,7 +358,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
         private void DrawItems(SpriteBatch sb, Texture2D px, float alpha) {
             int count = QuickHackDef.Count;
             float totalH = count * (ItemHeight + ItemGap) - ItemGap;
-            float startY = (Main.screenHeight - totalH) * 0.5f;
+            float startY = (Main.screenHeight - totalH) * 0.5f + TopPadding;
             float baseX = Main.screenWidth - RightMargin - ItemWidth;
 
             for (int i = 0; i < count; i++) {
@@ -364,6 +371,12 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
                 QuickHackDef hack = QuickHackDef.GetByIndex(i);
                 float hover = slotHoverAnim[i];
                 float y = startY + i * (ItemHeight + ItemGap);
+
+                //禁用状态：RAM不足或该协议已在队列中，抑制悬停展开
+                QueueSlotState queueState = Queue?.GetSlotState(i) ?? QueueSlotState.None;
+                bool slotDisabled = !HackTimeRAM.CanAfford(hack.RamCost)
+                    || queueState != QueueSlotState.None;
+                if (slotDisabled) hover = 0f;
 
                 //飞入偏移（弹性过冲）
                 float flyOffset = (1f - EaseOutBack(fly)) * 400f;
@@ -381,7 +394,6 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
                 slotRects[i] = rect;
 
                 float itemAlpha = alpha * Math.Min(fly * 2.5f, 1f);
-                QueueSlotState queueState = Queue?.GetSlotState(i) ?? QueueSlotState.None;
                 float queueProgress = Queue?.GetSlotProgress(i) ?? 0f;
 
                 DrawSingleItem(sb, px, itemAlpha, rect, hack, i, hover, queueState, queueProgress);
@@ -394,11 +406,19 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             bool isUploading = queueState == QueueSlotState.Uploading;
             bool isQueued = queueState == QueueSlotState.Queued;
             bool isCompleted = queueState == QueueSlotState.Completed;
+            //禁用状态：RAM不足 或 已在上传队列中
+            bool isDisabled = !HackTimeRAM.CanAfford(hack.RamCost)
+                || isUploading || isQueued;
 
             //=== 背景（双层渐变） ===
             Color bgColor = Color.Lerp(HackTheme.BgSlot, HackTheme.BgSlotHover, hover * 0.6f);
-            if (isUploading) bgColor = Color.Lerp(bgColor, HackTheme.Uploading, 0.08f);
-            if (isQueued) bgColor = Color.Lerp(bgColor, HackTheme.Uploading, 0.03f);
+            if (isDisabled) {
+                //禁用时背景压暗并带红色偏移
+                float redPulse = MathF.Sin(timer * 4f + index * 1.2f) * 0.15f + 0.85f;
+                bgColor = Color.Lerp(HackTheme.BgDarkest, new Color(45, 8, 8), 0.35f * redPulse);
+            }
+            else if (isUploading) bgColor = Color.Lerp(bgColor, HackTheme.Uploading, 0.08f);
+            else if (isQueued) bgColor = Color.Lerp(bgColor, HackTheme.Uploading, 0.03f);
             if (isCompleted) {
                 float flash = MathF.Sin(timer * 10f) * 0.5f + 0.5f;
                 bgColor = Color.Lerp(bgColor, HackTheme.Accent, flash * 0.15f);
@@ -427,8 +447,12 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
 
             //=== 左侧色条（加粗+呼吸脉动+辉光） ===
             Color catColor = GetCategoryColor(hack.Category);
+            //禁用时色条变为暗红/灰
+            if (isDisabled) {
+                catColor = Color.Lerp(new Color(80, 25, 25), HackTheme.Danger, 0.3f);
+            }
             //无限骇入：红色闪烁覆盖
-            if (HackTime.InfiniteHack) {
+            else if (HackTime.InfiniteHack) {
                 float rFlicker = MathF.Sin(timer * 15f + slotGlitchSeed[index] * 3f) * 0.35f
                     + MathF.Sin(timer * 23f + slotGlitchSeed[index] * 7f) * 0.15f + 0.5f;
                 catColor = Color.Lerp(HackTheme.Danger, new Color(255, 60, 30), rFlicker * 0.3f);
@@ -466,11 +490,17 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             }
 
             //=== 边框层 ===
-            Color borderCol = isUploading
-                ? Color.Lerp(HackTheme.Border, HackTheme.Uploading, 0.5f)
-                : isQueued
-                    ? Color.Lerp(HackTheme.Border, HackTheme.Uploading, 0.25f)
-                    : Color.Lerp(HackTheme.Border, HackTheme.Accent, hover * 0.5f);
+            Color borderCol;
+            if (isDisabled) {
+                float rBrd = MathF.Sin(timer * 5f + index * 1.5f) * 0.2f + 0.8f;
+                borderCol = HackTheme.Danger * (0.4f * rBrd);
+            }
+            else if (isUploading)
+                borderCol = Color.Lerp(HackTheme.Border, HackTheme.Uploading, 0.5f);
+            else if (isQueued)
+                borderCol = Color.Lerp(HackTheme.Border, HackTheme.Uploading, 0.25f);
+            else
+                borderCol = Color.Lerp(HackTheme.Border, HackTheme.Accent, hover * 0.5f);
             //无限骇入：边框红色闪烁
             if (HackTime.InfiniteHack) {
                 float rBorder = MathF.Sin(timer * 20f + slotGlitchSeed[index] * 6f) * 0.3f + 0.7f;
@@ -504,17 +534,26 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
 
             //=== 编号 ===
             string idxStr = $"{index + 1:D2}";
-            Color idxColor = Color.Lerp(HackTheme.TextNormal, catColor, hover * 0.6f) * (alpha * 0.6f);
+            Color idxColor = isDisabled
+                ? HackTheme.Danger * (alpha * 0.25f)
+                : Color.Lerp(HackTheme.TextNormal, catColor, hover * 0.6f) * (alpha * 0.6f);
             Vector2 idxPos = new(rect.X + SlashWidth + 10, rect.Y + 10);
             Utils.DrawBorderString(sb, idxStr, idxPos, idxColor, FontIndex);
 
             //=== 协议名称（带色散效果） ===
             float nameX = rect.X + SlashWidth + 48;
             float nameY = rect.Y + 8;
-            Color nameColor = Color.Lerp(HackTheme.TextBright, Color.White, hover * 0.3f);
-            if (isUploading) nameColor = Color.Lerp(nameColor, HackTheme.Uploading, 0.35f);
-            if (isQueued) nameColor = Color.Lerp(nameColor, HackTheme.Uploading, 0.15f);
-            if (isCompleted) nameColor = HackTheme.Accent;
+            Color nameColor;
+            if (isDisabled) {
+                //禁用时名称变为暗红灰
+                nameColor = Color.Lerp(HackTheme.TextNormal, HackTheme.Danger, 0.4f) * 0.5f;
+            }
+            else {
+                nameColor = Color.Lerp(HackTheme.TextBright, Color.White, hover * 0.3f);
+                if (isUploading) nameColor = Color.Lerp(nameColor, HackTheme.Uploading, 0.35f);
+                if (isQueued) nameColor = Color.Lerp(nameColor, HackTheme.Uploading, 0.15f);
+                if (isCompleted) nameColor = HackTheme.Accent;
+            }
             //无限骇入：名称红色闪烁
             if (HackTime.InfiniteHack) {
                 float rName = MathF.Sin(timer * 12f + slotGlitchSeed[index] * 4.3f) * 0.25f + 0.75f;
@@ -532,18 +571,38 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
 
             //=== 名称下方分隔点线 ===
             float sepY = rect.Y + 38;
+            Color sepColor = isDisabled ? HackTheme.Danger * (alpha * 0.1f)
+                : HackTheme.Border * (alpha * (0.15f + hover * 0.15f));
             for (float dx = 0; dx < rect.Width - SlashWidth - 60; dx += 8) {
                 sb.Draw(px, new Rectangle((int)(rect.X + SlashWidth + 48 + dx), (int)sepY, 4, 1),
-                    new Rectangle(0, 0, 1, 1), HackTheme.Border * (alpha * (0.15f + hover * 0.15f)));
+                    new Rectangle(0, 0, 1, 1), sepColor);
             }
 
             //=== 效果描述（第二行渐淡文字） ===
             Vector2 descPos = new(rect.X + SlashWidth + 48, rect.Y + 44);
-            Color descColor = Color.Lerp(HackTheme.TextNormal, HackTheme.TextBright, 0.3f + hover * 0.4f);
+            Color descColor = isDisabled
+                ? HackTheme.TextNormal * 0.3f
+                : Color.Lerp(HackTheme.TextNormal, HackTheme.TextBright, 0.3f + hover * 0.4f);
             Utils.DrawBorderString(sb, hack.Description.Value, descPos, descColor * (alpha * 0.85f), FontDesc);
 
             //=== 右侧状态区 ===
-            if (isUploading) {
+            if (isDisabled && !isUploading && !isQueued) {
+                //纯RAM不足的禁用——显示闪烁红色LOCKED和RAM消耗
+                float lockPulse = MathF.Sin(timer * 5f + index) * 0.25f + 0.75f;
+                string lockStr = "LOCKED";
+                Vector2 lockSize = FontAssets.MouseText.Value.MeasureString(lockStr) * 0.38f;
+                Vector2 lockPos = new(rect.Right - lockSize.X - 14,
+                    rect.Y + (rect.Height - lockSize.Y) * 0.5f - 8);
+                Utils.DrawBorderString(sb, lockStr, lockPos,
+                    HackTheme.Danger * (alpha * 0.7f * lockPulse), 0.38f);
+                //RAM消耗（LOCKED下方）
+                string ramStr2 = $"{hack.RamCost} RAM";
+                Vector2 ramSize2 = FontAssets.MouseText.Value.MeasureString(ramStr2) * FontTime;
+                Vector2 ramPos2 = new(rect.Right - ramSize2.X - 14, lockPos.Y + lockSize.Y + 2);
+                Utils.DrawBorderString(sb, ramStr2, ramPos2,
+                    HackTheme.Danger * (alpha * 0.5f * lockPulse), FontTime);
+            }
+            else if (isUploading) {
                 DrawUploadIndicator(sb, px, alpha, rect, queueProgress);
             }
             else if (isCompleted) {
@@ -715,7 +774,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
 
             int count = QuickHackDef.Count;
             float totalH = count * (ItemHeight + ItemGap) - ItemGap;
-            float startY = (Main.screenHeight - totalH) * 0.5f;
+            float startY = (Main.screenHeight - totalH) * 0.5f + TopPadding;
             float bottomY = startY + totalH + 14f;
             float baseX = Main.screenWidth - RightMargin - ItemWidth;
 

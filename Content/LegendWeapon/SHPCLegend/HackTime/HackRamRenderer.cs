@@ -1,4 +1,4 @@
-using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;
 using Terraria.GameContent;
@@ -43,10 +43,10 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
         private const float InnerDecoR = InnerR - InnerDecoGap;
 
         //===== 字体 =====
-        private const float FTitle = 0.34f;
-        private const float FValue = 0.52f;
-        private const float FWarn = 0.30f;
-        private const float FHex = 0.22f;
+        private const float FTitle = 0.54f;
+        private const float FValue = 0.64f;
+        private const float FWarn = 0.50f;
+        private const float FHex = 0.42f;
 
         //弧线半扫掠角（由跨度和中径计算）
         private float HalfSweep() => MathF.Asin(ArcSpanPx * 0.5f / (InnerR + ArcThick * 0.5f));
