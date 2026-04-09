@@ -456,4 +456,25 @@ HackTime: {
 	CatCovert: 隐秘
 	CatContagion: 蔓延
 	CatUnknown: 未知
+	TileScanName: 名称
+	TileScanClass: 分类
+	TileScanSize: 尺寸
+	TileScanHardness: 硬度
+	TileScanStatus: 状态
+	TileScanCrafting: 制作站
+	TileScanContainer: 容器
+	TileScanLight: 光源
+	TileScanFurniture: 家具
+	TileScanBlock: 结构体
+	TileScanDungeon: 地牢材质
+	TileScanLihzahrd: 神庙科技
+	TileScanHardnessExtreme: 极高
+	TileScanHardnessHigh: 高
+	TileScanHardnessNormal: 中等
+	TileScanHardnessLow: 低
+	TileScanActive: 运作中
+	TileScanInactive: 已关闭
+	TileScanSealed: 密封
+	TileScanOnline: 在线
+	TileScanIntact: 完整
 }

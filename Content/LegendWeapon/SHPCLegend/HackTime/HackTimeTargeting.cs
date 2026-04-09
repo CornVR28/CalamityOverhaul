@@ -16,6 +16,12 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
         //进入骇客时间前保存的原始缩放目标值
         private float savedZoomTarget;
 
+        /// <summary>
+        /// 当前悬停的可扫描物块坐标，负数表示无悬停
+        /// </summary>
+        public static int HoveredTileX { get; set; } = -1;
+        public static int HoveredTileY { get; set; } = -1;
+
         public override void ProcessTriggers(Terraria.GameInput.TriggersSet triggersSet) {
             if (Player.whoAmI != Main.myPlayer) return;
             if (CWRKeySystem.HackTime_Toggle != null && CWRKeySystem.HackTime_Toggle.JustPressed) {
@@ -31,7 +37,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
         }
 
         /// <summary>
-        /// 检测光标下方的可骇入目标
+        /// 检测光标下方的可骇入目标或可扫描物块
         /// </summary>
         private void UpdateHoverDetection() {
             //获取鼠标在世界中的位置
@@ -65,6 +71,22 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             }
 
             HackTime.HoveredTargetIndex = bestIndex;
+
+            //NPC优先，没有悬停NPC时再检测物块
+            if (bestIndex >= 0) {
+                HoveredTileX = -1;
+                HoveredTileY = -1;
+            }
+            else {
+                if (TileScannable.TryGetScannableTile(mouseWorld, out int tx, out int ty)) {
+                    HoveredTileX = tx;
+                    HoveredTileY = ty;
+                }
+                else {
+                    HoveredTileX = -1;
+                    HoveredTileY = -1;
+                }
+            }
         }
 
         /// <summary>

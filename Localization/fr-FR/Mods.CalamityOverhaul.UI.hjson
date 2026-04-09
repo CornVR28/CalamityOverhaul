@@ -456,4 +456,25 @@ HackTime: {
 	// CatCovert: COVERT
 	// CatContagion: CONTAGION
 	// CatUnknown: UNKNOWN
+	// TileScanName: NAME
+	// TileScanClass: CLASS
+	// TileScanSize: SIZE
+	// TileScanHardness: HARDNESS
+	// TileScanStatus: STATUS
+	// TileScanCrafting: CRAFTING STATION
+	// TileScanContainer: CONTAINER
+	// TileScanLight: LIGHT SOURCE
+	// TileScanFurniture: FURNITURE
+	// TileScanBlock: STRUCTURE
+	// TileScanDungeon: DUNGEON MATERIAL
+	// TileScanLihzahrd: LIHZAHRD TECH
+	// TileScanHardnessExtreme: EXTREME
+	// TileScanHardnessHigh: HIGH
+	// TileScanHardnessNormal: MODERATE
+	// TileScanHardnessLow: LOW
+	// TileScanActive: ACTIVE
+	// TileScanInactive: INACTIVE
+	// TileScanSealed: SEALED
+	// TileScanOnline: ONLINE
+	// TileScanIntact: INTACT
 }

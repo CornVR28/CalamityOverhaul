@@ -80,15 +80,19 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             int hovered = HackTime.HoveredTargetIndex;
 
             if (hovered >= 0) {
-                //点击新目标
+                //点击NPC目标
                 if (hovered != HackTime.SelectedTargetIndex) {
                     HackTime.SelectTarget(hovered);
                     Panel.Show();
                 }
             }
+            else if (HackTimeTargeting.HoveredTileX >= 0) {
+                //点击可扫描物块（只扫描不骇入，不显示协议面板）
+                HackTime.SelectTileScan(HackTimeTargeting.HoveredTileX, HackTimeTargeting.HoveredTileY);
+            }
             else {
                 //点击空白处取消选中
-                if (HackTime.SelectedTargetIndex >= 0) {
+                if (HackTime.SelectedTargetIndex >= 0 || HackTime.CurrentScanTarget != null) {
                     HackTime.DeselectTarget();
                     Panel.Hide();
                 }

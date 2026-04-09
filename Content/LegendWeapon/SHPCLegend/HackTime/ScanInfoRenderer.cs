@@ -13,8 +13,10 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
     /// </summary>
     internal class ScanInfoRenderer
     {
-        //上一帧的选中目标索引，用于检测目标切换
-        private int lastTargetIndex = -1;
+        //上一帧的扫描目标引用，用于检测目标切换
+        private IScannable lastScanTarget;
+        //当前扫描目标的实际数据行数
+        private int currentDataRowCount;
         //扫描进度(0~1)
         private float scanProgress;
         //扫描完成后的计时器(秒)
@@ -45,8 +47,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
         private const float RowRevealInterval = 0.13f;
         //打字机速度(字符/帧)
         private const float TypewriterSpeed = 2.5f;
-        //固定数据行数
-        private const int DataRowCount = 6;
+        //固定数据行数（数组最大容量）
+        private const int MaxDataRowCount = 10;
         //字体大小
         private const float FontHeader = 0.58f;
         private const float FontRow = 0.50f;
@@ -54,21 +56,22 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
         private const float FontNoise = 0.44f;
 
         //缓存的扫描数据
-        private readonly string[] rowLabels = new string[DataRowCount];
-        private readonly string[] rowValues = new string[DataRowCount];
-        private readonly Color[] rowColors = new Color[DataRowCount];
+        private readonly string[] rowLabels = new string[MaxDataRowCount];
+        private readonly string[] rowValues = new string[MaxDataRowCount];
+        private readonly Color[] rowColors = new Color[MaxDataRowCount];
         private string statusText = "";
         private Color statusColor;
 
         public void Update() {
             timer += 0.016f;
 
-            int currentTarget = HackTime.SelectedTargetIndex;
+            IScannable currentTarget = HackTime.CurrentScanTarget;
 
             //目标切换时重置扫描
-            if (currentTarget != lastTargetIndex) {
-                lastTargetIndex = currentTarget;
-                if (currentTarget >= 0) {
+            if (currentTarget != lastScanTarget) {
+                lastScanTarget = currentTarget;
+                if (currentTarget != null) {
+                    currentDataRowCount = currentTarget.ScanRowCount;
                     StartScan();
                 }
                 else {
@@ -76,10 +79,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
                     revealTimer = 0f;
                     revealedRows = 0;
                     typewriterChar = 0f;
+                    currentDataRowCount = 0;
                 }
             }
 
-            if (currentTarget < 0) {
+            if (currentTarget == null) {
                 flyInProgress = MathHelper.Lerp(flyInProgress, 0f, 0.12f);
                 return;
             }
@@ -97,14 +101,17 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
                     revealedRows = 0;
                     typewriterChar = 0f;
                     glitchIntensity = 1f;
-                    BuildScanData(currentTarget);
+                    //通过IScannable接口构建扫描数据，不关心具体目标类型
+                    currentTarget?.BuildScanData(rowLabels, rowValues, rowColors);
+                    statusText = HackTime.AnalysisComplete.Value;
+                    statusColor = HackTheme.Accent;
                 }
                 return;
             }
 
             //数据行逐行揭示
             revealTimer += 0.016f;
-            int targetRows = Math.Min((int)(revealTimer / RowRevealInterval) + 1, DataRowCount);
+            int targetRows = Math.Min((int)(revealTimer / RowRevealInterval) + 1, currentDataRowCount);
             if (revealedRows < targetRows) {
                 revealedRows = targetRows;
                 typewriterChar = 0f;
@@ -112,7 +119,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             }
 
             //打字机推进
-            if (revealedRows > 0 && revealedRows <= DataRowCount) {
+            if (revealedRows > 0 && revealedRows <= currentDataRowCount) {
                 string val = rowValues[revealedRows - 1];
                 typewriterChar = Math.Min(typewriterChar + TypewriterSpeed, val.Length);
             }
@@ -131,75 +138,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             statusColor = HackTheme.Uploading;
         }
 
-        private void BuildScanData(int npcIndex) {
-            if (npcIndex < 0 || npcIndex >= Main.maxNPCs) return;
-            NPC npc = Main.npc[npcIndex];
-            if (!npc.active) return;
-
-            //TYPE
-            rowLabels[0] = HackTime.TypeLabel.Value;
-            if (npc.boss) {
-                rowValues[0] = HackTime.BossClass.Value;
-                rowColors[0] = HackTheme.Danger;
-            }
-            else if (npc.lifeMax > 5000) {
-                rowValues[0] = HackTime.EliteUnit.Value;
-                rowColors[0] = HackTheme.Uploading;
-            }
-            else {
-                rowValues[0] = HackTime.HostileEntity.Value;
-                rowColors[0] = HackTheme.TextBright;
-            }
-
-            //THREAT
-            int threatScore = (int)(npc.damage * 0.5f + npc.lifeMax * 0.01f + npc.defense);
-            rowLabels[1] = HackTime.ThreatLabel.Value;
-            if (threatScore > 500) {
-                rowValues[1] = HackTime.ThreatExtreme.Value;
-                rowColors[1] = HackTheme.Danger;
-            }
-            else if (threatScore > 200) {
-                rowValues[1] = HackTime.ThreatHigh.Value;
-                rowColors[1] = HackTheme.Uploading;
-            }
-            else if (threatScore > 80) {
-                rowValues[1] = HackTime.ThreatModerate.Value;
-                rowColors[1] = HackTheme.AccentAlt;
-            }
-            else {
-                rowValues[1] = HackTime.ThreatLow.Value;
-                rowColors[1] = HackTheme.Accent;
-            }
-
-            //HP
-            rowLabels[2] = "HP";
-            rowValues[2] = $"{npc.life:N0} / {npc.lifeMax:N0}";
-            float hpPct = (float)npc.life / Math.Max(npc.lifeMax, 1);
-            rowColors[2] = hpPct > 0.5f ? HackTheme.Accent
-                : hpPct > 0.25f ? HackTheme.Uploading : HackTheme.Danger;
-
-            //DEF
-            rowLabels[3] = HackTime.DefLabel.Value;
-            rowValues[3] = $"{npc.defense}";
-            rowColors[3] = HackTheme.TextBright;
-
-            //DMG
-            rowLabels[4] = HackTime.DmgLabel.Value;
-            rowValues[4] = $"{npc.damage}";
-            rowColors[4] = HackTheme.TextBright;
-
-            //KB.RES
-            rowLabels[5] = HackTime.KbResLabel.Value;
-            rowValues[5] = $"{npc.knockBackResist:F2}";
-            rowColors[5] = npc.knockBackResist >= 0.9f ? HackTheme.Danger
-                : npc.knockBackResist >= 0.5f ? HackTheme.Uploading : HackTheme.TextBright;
-
-            statusText = HackTime.AnalysisComplete.Value;
-            statusColor = HackTheme.Accent;
-        }
-
         public void Draw(SpriteBatch sb) {
-            if (lastTargetIndex < 0 && flyInProgress < 0.01f) return;
+            if (lastScanTarget == null && flyInProgress < 0.01f) return;
 
             Texture2D px = CWRAsset.Placeholder_White?.Value;
             if (px == null) return;
@@ -212,7 +152,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             float listTotalH = protocolCount * (78f + 5f) - 5f;
             float listStartY = (Main.screenHeight - listTotalH) * 0.5f;
             float panelH = TopPad + HeaderHeight + SepHeight
-                + DataRowCount * RowHeight + SepHeight + StatusHeight + BottomPad;
+                + currentDataRowCount * RowHeight + SepHeight + StatusHeight + BottomPad;
             float baseX = Main.screenWidth / 2 - PanelWidth / 2;
             float panelTop = Math.Max(listStartY - GapToList - panelH, 6f);
 
@@ -297,14 +237,14 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             }
 
             //===== 数据行 =====
-            for (int i = 0; i < DataRowCount; i++) {
+            for (int i = 0; i < currentDataRowCount; i++) {
                 if (i >= revealedRows) break;
                 DrawDataRow(sb, px, textX, curY, i, alpha);
                 curY += RowHeight;
             }
 
             //===== 底部分隔与状态 =====
-            if (revealedRows >= DataRowCount) {
+            if (revealedRows >= currentDataRowCount) {
                 DrawDashedLine(sb, px, baseX + 10, curY, PanelWidth - 20, alpha);
                 curY += SepHeight;
 

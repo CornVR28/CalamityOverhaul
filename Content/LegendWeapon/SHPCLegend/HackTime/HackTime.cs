@@ -64,6 +64,29 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
         public static LocalizedText CatContagion { get; private set; }
         public static LocalizedText CatUnknown { get; private set; }
 
+        //物块扫描本地化字段
+        public static LocalizedText TileScanName { get; private set; }
+        public static LocalizedText TileScanClass { get; private set; }
+        public static LocalizedText TileScanSize { get; private set; }
+        public static LocalizedText TileScanHardness { get; private set; }
+        public static LocalizedText TileScanStatus { get; private set; }
+        public static LocalizedText TileScanCrafting { get; private set; }
+        public static LocalizedText TileScanContainer { get; private set; }
+        public static LocalizedText TileScanLight { get; private set; }
+        public static LocalizedText TileScanFurniture { get; private set; }
+        public static LocalizedText TileScanBlock { get; private set; }
+        public static LocalizedText TileScanDungeon { get; private set; }
+        public static LocalizedText TileScanLihzahrd { get; private set; }
+        public static LocalizedText TileScanHardnessExtreme { get; private set; }
+        public static LocalizedText TileScanHardnessHigh { get; private set; }
+        public static LocalizedText TileScanHardnessNormal { get; private set; }
+        public static LocalizedText TileScanHardnessLow { get; private set; }
+        public static LocalizedText TileScanActive { get; private set; }
+        public static LocalizedText TileScanInactive { get; private set; }
+        public static LocalizedText TileScanSealed { get; private set; }
+        public static LocalizedText TileScanOnline { get; private set; }
+        public static LocalizedText TileScanIntact { get; private set; }
+
         public override void SetStaticDefaults() {
             Locked = this.GetLocalization(nameof(Locked));
             Done = this.GetLocalization(nameof(Done));
@@ -108,6 +131,28 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             CatCovert = this.GetLocalization(nameof(CatCovert));
             CatContagion = this.GetLocalization(nameof(CatContagion));
             CatUnknown = this.GetLocalization(nameof(CatUnknown));
+
+            TileScanName = this.GetLocalization(nameof(TileScanName));
+            TileScanClass = this.GetLocalization(nameof(TileScanClass));
+            TileScanSize = this.GetLocalization(nameof(TileScanSize));
+            TileScanHardness = this.GetLocalization(nameof(TileScanHardness));
+            TileScanStatus = this.GetLocalization(nameof(TileScanStatus));
+            TileScanCrafting = this.GetLocalization(nameof(TileScanCrafting));
+            TileScanContainer = this.GetLocalization(nameof(TileScanContainer));
+            TileScanLight = this.GetLocalization(nameof(TileScanLight));
+            TileScanFurniture = this.GetLocalization(nameof(TileScanFurniture));
+            TileScanBlock = this.GetLocalization(nameof(TileScanBlock));
+            TileScanDungeon = this.GetLocalization(nameof(TileScanDungeon));
+            TileScanLihzahrd = this.GetLocalization(nameof(TileScanLihzahrd));
+            TileScanHardnessExtreme = this.GetLocalization(nameof(TileScanHardnessExtreme));
+            TileScanHardnessHigh = this.GetLocalization(nameof(TileScanHardnessHigh));
+            TileScanHardnessNormal = this.GetLocalization(nameof(TileScanHardnessNormal));
+            TileScanHardnessLow = this.GetLocalization(nameof(TileScanHardnessLow));
+            TileScanActive = this.GetLocalization(nameof(TileScanActive));
+            TileScanInactive = this.GetLocalization(nameof(TileScanInactive));
+            TileScanSealed = this.GetLocalization(nameof(TileScanSealed));
+            TileScanOnline = this.GetLocalization(nameof(TileScanOnline));
+            TileScanIntact = this.GetLocalization(nameof(TileScanIntact));
         }
 
         #endregion
@@ -144,6 +189,12 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
         /// 运镜偏移量，每帧在ModifyScreenPosition中应用
         /// </summary>
         public static Vector2 CameraOffset { get; set; }
+
+        /// <summary>
+        /// 当前扫描目标（NPC或物块），null表示无扫描目标
+        /// <br/>通过IScannable接口解耦，扫描面板不需要关心具体目标类型
+        /// </summary>
+        public static IScannable CurrentScanTarget { get; private set; }
 
         //无限骇入模式（无限袭击终态演出用）
         public static bool InfiniteHack { get; set; }
@@ -188,6 +239,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             targetIntensity = 1f;
             SelectedTargetIndex = -1;
             HoveredTargetIndex = -1;
+            CurrentScanTarget = null;
             CameraProgress = 0f;
             ZoomProgress = 0f;
             ReticleTimer = 0f;
@@ -208,6 +260,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             targetIntensity = 0f;
             SelectedTargetIndex = -1;
             HoveredTargetIndex = -1;
+            CurrentScanTarget = null;
             HackTimeFreeze.Deactivate();
             HackTimeUI.Instance?.Panel.Hide();
         }
@@ -224,11 +277,42 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             //切换目标时取消正在进行的上传
             HackTimeUI.Instance?.Panel.CancelUpload();
 
-            bool freshSelect = SelectedTargetIndex < 0;
+            bool freshSelect = SelectedTargetIndex < 0 && CurrentScanTarget == null;
             SelectedTargetIndex = npcIndex;
+            CurrentScanTarget = new NpcScannable(npcIndex);
             cameraTo = npc.Center;
 
             //首次选中时从零开始推进；切换目标时保持当前进度，让偏移量平滑重定向
+            if (freshSelect) {
+                CameraProgress = 0f;
+                ZoomProgress = 0f;
+            }
+
+            if (!VaultUtils.isServer) {
+                SoundEngine.PlaySound(CWRSound.Hacker, Main.LocalPlayer.Center);
+            }
+        }
+
+        /// <summary>
+        /// 选中一个物块进行扫描（只扫描不骇入）
+        /// </summary>
+        public static void SelectTileScan(int tileX, int tileY) {
+            if (!Active) return;
+
+            Tile tile = Main.tile[tileX, tileY];
+            if (!tile.HasTile) return;
+
+            //切换到物块扫描时清除NPC选中状态
+            if (SelectedTargetIndex >= 0) {
+                HackTimeUI.Instance?.Panel.CancelUpload();
+                HackTimeUI.Instance?.Panel.Hide();
+            }
+            SelectedTargetIndex = -1;
+
+            bool freshSelect = CurrentScanTarget == null;
+            CurrentScanTarget = new TileScannable(tileX, tileY);
+            cameraTo = CurrentScanTarget.WorldCenter;
+
             if (freshSelect) {
                 CameraProgress = 0f;
                 ZoomProgress = 0f;
@@ -244,6 +328,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
         /// </summary>
         public static void DeselectTarget() {
             SelectedTargetIndex = -1;
+            CurrentScanTarget = null;
             //不立即归零CameraProgress/CameraOffset，由UpdateCamera平滑回归
             HackTimeUI.Instance?.Panel.Hide();
         }
@@ -311,6 +396,20 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
                 Vector2 desiredOffset = cameraTo - Main.LocalPlayer.Center;
                 CameraOffset = Vector2.Lerp(CameraOffset, desiredOffset, CameraLerpSpeed);
             }
+            else if (CurrentScanTarget != null && CurrentScanTarget.IsValid) {
+                //物块扫描目标的运镜处理
+                cameraTo = CurrentScanTarget.WorldCenter;
+
+                CameraProgress = MathHelper.Lerp(CameraProgress, 1f, CameraLerpSpeed);
+                ZoomProgress = MathHelper.Lerp(ZoomProgress, 1f, CameraLerpSpeed * 0.8f);
+
+                Vector2 desiredOffset = cameraTo - Main.LocalPlayer.Center;
+                CameraOffset = Vector2.Lerp(CameraOffset, desiredOffset, CameraLerpSpeed);
+            }
+            else if (CurrentScanTarget != null && !CurrentScanTarget.IsValid) {
+                //物块扫描目标失效时自动取消
+                DeselectTarget();
+            }
             else {
                 //无目标时平滑回归
                 float returnSpeed = CameraLerpSpeed * 1.5f;
@@ -355,6 +454,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             targetIntensity = 0f;
             SelectedTargetIndex = -1;
             HoveredTargetIndex = -1;
+            CurrentScanTarget = null;
             CameraProgress = 0f;
             ZoomProgress = 0f;
             ReticleTimer = 0f;
