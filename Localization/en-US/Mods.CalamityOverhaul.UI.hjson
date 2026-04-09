@@ -419,7 +419,7 @@ HackTime: {
 	Locked: LOCKED
 	Done: DONE
 	Queued: QUEUED
-	Uploading: "UPLOADING..."
+	UploadingText: "UPLOADING..."
 	BreachReady: "BREACH PROTOCOL // READY"
 	UploadComplete: ">> UPLOAD COMPLETE <<"
 	UploadQueue: "// UPLOAD QUEUE"
@@ -450,7 +450,7 @@ HackTime: {
 	MemoryWiped: "???"
 	Cyberpsychosis: CYBERPSYCHOSIS
 	RamRefund: "+{0} RAM"
-	Active: ACTIVE
+	ActiveText: ACTIVE
 	ActivePct: "ACTIVE {0}%"
 	Complete: COMPLETE
 	UploadingPct: "UPLOADING {0}%"

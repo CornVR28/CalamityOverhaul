@@ -68,7 +68,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             Locked = this.GetLocalization(nameof(Locked));
             Done = this.GetLocalization(nameof(Done));
             Queued = this.GetLocalization(nameof(Queued));
-            UploadingText = this.GetLocalization("Uploading");
+            UploadingText = this.GetLocalization(nameof(UploadingText));
             BreachReady = this.GetLocalization(nameof(BreachReady));
             UploadComplete = this.GetLocalization(nameof(UploadComplete));
             UploadQueue = this.GetLocalization(nameof(UploadQueue));
@@ -99,7 +99,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             MemoryWiped = this.GetLocalization(nameof(MemoryWiped));
             Cyberpsychosis = this.GetLocalization(nameof(Cyberpsychosis));
             RamRefund = this.GetLocalization(nameof(RamRefund));
-            ActiveText = this.GetLocalization("Active");
+            ActiveText = this.GetLocalization(nameof(ActiveText));
             ActivePct = this.GetLocalization(nameof(ActivePct));
             Complete = this.GetLocalization(nameof(Complete));
             UploadingPct = this.GetLocalization(nameof(UploadingPct));

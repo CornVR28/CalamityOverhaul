@@ -1,4 +1,4 @@
-ItemFilterUI: {
+﻿ItemFilterUI: {
 	HintText: 左键点击可添加项目
 	HintText2: 左键点击可移除项目
 	CloseHint: "[ESC]键或[右键点击]可关闭"
@@ -416,7 +416,7 @@ HackTime: {
 	Locked: 已锁定
 	Done: 完成
 	Queued: 排队中
-	Uploading: 上传中...
+	UploadingText: 上传中...
 	BreachReady: "破防协议 // 就绪"
 	UploadComplete: ">> 上传完成 <<"
 	UploadQueue: "// 上传队列"
@@ -447,7 +447,7 @@ HackTime: {
 	MemoryWiped: "???"
 	Cyberpsychosis: 赛博精神病
 	RamRefund: "+{0} RAM"
-	Active: 生效中
+	ActiveText: 生效中
 	ActivePct: "生效中 {0}%"
 	Complete: 完成
 	UploadingPct: "上传中 {0}%"
