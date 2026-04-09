@@ -1,4 +1,4 @@
-﻿ItemFilterUI: {
+ItemFilterUI: {
 	HintText: 左键点击可添加项目
 	HintText2: 左键点击可移除项目
 	CloseHint: "[ESC]键或[右键点击]可关闭"
@@ -417,14 +417,14 @@ HackTime: {
 	Done: 完成
 	Queued: 排队中
 	UploadingText: 上传中...
-	BreachReady: "破防协议 // 就绪"
-	UploadComplete: ">> 上传完成 <<"
+	BreachReady: 破防协议 // 就绪
+	UploadComplete: >> 上传完成 <<
 	UploadQueue: "// 上传队列"
 	TargetLocked: "// 目标锁定"
-	HpFormat: "HP {0}%"
+	HpFormat: HP {0}%
 	Protocols: "[{0} 协议]"
-	RamDepleted: "!! RAM已耗尽 !!"
-	LowRam: "! RAM不足 !"
+	RamDepleted: !! RAM已耗尽 !!
+	LowRam: ! RAM不足 !
 	Scanning: 扫描中...
 	AnalysisComplete: 分析完成
 	TypeLabel: 类型
@@ -444,13 +444,13 @@ HackTime: {
 	SystemBreach: "// 系统入侵"
 	Rebooting: 重启中...
 	SystemOnline: 系统上线
-	MemoryWiped: "???"
+	MemoryWiped: ???
 	Cyberpsychosis: 赛博精神病
-	RamRefund: "+{0} RAM"
+	RamRefund: +{0} RAM
 	ActiveText: 生效中
-	ActivePct: "生效中 {0}%"
+	ActivePct: 生效中 {0}%
 	Complete: 完成
-	UploadingPct: "上传中 {0}%"
+	UploadingPct: 上传中 {0}%
 	CatLethal: 致命
 	CatControl: 控制
 	CatCovert: 隐秘

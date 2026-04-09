@@ -1,4 +1,4 @@
-﻿ItemFilterUI: {
+ItemFilterUI: {
 	HintText: Left-click to add an item
 	HintText2: Left-click to remove an item
 	CloseHint: Press [ESC] or [Right-click] to close
@@ -419,21 +419,21 @@ HackTime: {
 	Locked: LOCKED
 	Done: DONE
 	Queued: QUEUED
-	UploadingText: "UPLOADING..."
-	BreachReady: "BREACH PROTOCOL // READY"
-	UploadComplete: ">> UPLOAD COMPLETE <<"
+	UploadingText: UPLOADING...
+	BreachReady: BREACH PROTOCOL // READY
+	UploadComplete: >> UPLOAD COMPLETE <<
 	UploadQueue: "// UPLOAD QUEUE"
 	TargetLocked: "// TARGET LOCKED"
-	HpFormat: "HP {0}%"
+	HpFormat: HP {0}%
 	Protocols: "[{0} PROTOCOLS]"
-	RamDepleted: "!! RAM DEPLETED !!"
-	LowRam: "! LOW RAM !"
-	Scanning: "SCANNING..."
-	AnalysisComplete: "ANALYSIS COMPLETE"
+	RamDepleted: !! RAM DEPLETED !!
+	LowRam: ! LOW RAM !
+	Scanning: SCANNING...
+	AnalysisComplete: ANALYSIS COMPLETE
 	TypeLabel: TYPE
-	BossClass: "BOSS CLASS"
-	EliteUnit: "ELITE UNIT"
-	HostileEntity: "HOSTILE ENTITY"
+	BossClass: BOSS CLASS
+	EliteUnit: ELITE UNIT
+	HostileEntity: HOSTILE ENTITY
 	ThreatLabel: THREAT
 	ThreatExtreme: EXTREME
 	ThreatHigh: HIGH
@@ -445,15 +445,15 @@ HackTime: {
 	Breach: BREACH
 	InitBreach: "// INITIALIZING BREACH"
 	SystemBreach: "// SYSTEM BREACH"
-	Rebooting: "REBOOTING..."
-	SystemOnline: "SYSTEM ONLINE"
-	MemoryWiped: "???"
+	Rebooting: REBOOTING...
+	SystemOnline: SYSTEM ONLINE
+	MemoryWiped: ???
 	Cyberpsychosis: CYBERPSYCHOSIS
-	RamRefund: "+{0} RAM"
+	RamRefund: +{0} RAM
 	ActiveText: ACTIVE
-	ActivePct: "ACTIVE {0}%"
+	ActivePct: ACTIVE {0}%
 	Complete: COMPLETE
-	UploadingPct: "UPLOADING {0}%"
+	UploadingPct: UPLOADING {0}%
 	CatLethal: LETHAL
 	CatControl: CONTROL
 	CatCovert: COVERT
