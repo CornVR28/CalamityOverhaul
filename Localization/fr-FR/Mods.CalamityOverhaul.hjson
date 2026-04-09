@@ -78,6 +78,21 @@ QuickHack: {
 		// DisplayName: Contagion
 		// Description: Implants a self-replicating malware that spreads to nearby targets
 	}
+
+	TileDetonate: {
+		// DisplayName: Tile Detonate
+		// Description: Destabilizes structural integrity, triggering an area explosion
+	}
+
+	TilePhase: {
+		// DisplayName: Phase Shift
+		// Description: Hacks tile physics, making it intangible for a limited time
+	}
+
+	TileMagPull: {
+		// DisplayName: Mag Pull
+		// Description: Generates a magnetic field that pulls nearby items toward you
+	}
 }
 
 // NPCs.Hierophant.DisplayName: Hierophant

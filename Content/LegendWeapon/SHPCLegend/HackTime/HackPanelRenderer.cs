@@ -425,7 +425,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
                 slotRects[i] = rect;
 
                 float itemAlpha = alpha * Math.Min(fly * 2.5f, 1f);
-                float queueProgress = Queue?.GetSlotProgress(i) ?? 0f;
+                float queueProgress = Queue?.GetSlotProgress(globalIdx) ?? 0f;
 
                 DrawSingleItem(sb, px, itemAlpha, rect, hack, i, hover, queueState, queueProgress);
             }
