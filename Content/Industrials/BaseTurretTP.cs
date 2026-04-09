@@ -46,6 +46,14 @@ namespace CalamityOverhaul.Content.Industrials
         /// </summary>
         public virtual bool Friend => true;
         /// <summary>
+        /// 骇入劫持标记：为true时翻转敌我判定
+        /// </summary>
+        public bool IsHijacked;
+        /// <summary>
+        /// 实际敌我判定（受劫持影响）
+        /// </summary>
+        public bool EffectiveFriend => Friend != IsHijacked;
+        /// <summary>
         /// 选择角度
         /// </summary>
         public float Rotation;
@@ -149,7 +157,7 @@ namespace CalamityOverhaul.Content.Industrials
 
             CanFire = false;
             BatteryLow = false;
-            if (Friend) {
+            if (EffectiveFriend) {
                 TargetByNPC = Center.FindClosestNPC(MaxFindMode, false, true);
                 if (TargetByNPC != null) {
                     TargetCenter = TargetByNPC.Center;
@@ -209,7 +217,7 @@ namespace CalamityOverhaul.Content.Industrials
             else {
                 Rotation = CWRUtils.ToRot(Rotation, Center.To(TargetCenter).ToRotation(), 0.2f);
                 if (!AttackPrompt) {
-                    if (!Friend) {
+                    if (!EffectiveFriend) {
                         CombatText.NewText(HitBox, Color.OrangeRed, CWRLocText.Instance.Turret_Text2.Value, false);
                     }
                     AttackPrompt = true;
@@ -223,7 +231,7 @@ namespace CalamityOverhaul.Content.Industrials
                 RecoilValue -= Recoil;
                 if (PreShoot() && !VaultUtils.isClient) {
                     Projectile.NewProjectile(new EntitySource_WorldEvent()
-                        , Center + UnitToTarget * BarrelOffsetX, UnitToTarget * 9, ShootID, Damage, Friend ? 4 : 0, -1);
+                        , Center + UnitToTarget * BarrelOffsetX, UnitToTarget * 9, ShootID, Damage, EffectiveFriend ? 4 : 0, -1);
                 }
                 MachineData.UEvalue -= SingleEnergyConsumption;
                 FireStorage += FireTime;

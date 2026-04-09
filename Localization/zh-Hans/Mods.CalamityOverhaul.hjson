@@ -93,6 +93,16 @@ QuickHack: {
 		DisplayName: 磁力牵引
 		Description: 生成磁场，将附近掉落物吸引向你
 	}
+
+	MachineShortCircuit: {
+		DisplayName: 机械短路
+		Description: 清空目标机械电能，释放电弧伤害附近实体
+	}
+
+	TurretHijack: {
+		DisplayName: 炮塔劫持
+		Description: 篡改IFF识别模块，临时翻转炮塔敌我判定
+	}
 }
 
 // NPCs.Hierophant.DisplayName: Hierophant
