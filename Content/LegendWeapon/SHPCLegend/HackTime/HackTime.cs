@@ -96,7 +96,6 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             CameraOffset = Vector2.Zero;
             cameraTo = Vector2.Zero;
             HackTimeFreeze.Activate();
-            HackTimeRAM.Refill();
 
             if (!VaultUtils.isServer) {
                 SoundEngine.PlaySound(CWRSound.Scanning, Main.LocalPlayer.Center);
@@ -155,6 +154,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
         /// 世界更新接口，处理与世界状态相关的逻辑
         /// </summary>
         public static void UpdateByWorld() {
+            //RAM自动恢复
+            HackTimeRAM.Update();
             //骇入效果全局驱动，退出骇客时间后仍持续生效
             HackEffectTracker.Update();
             //队列上传+消费：退出骇客时间后实时推进上传并施加完成的效果
@@ -187,9 +188,6 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
 
             //光圈动画计时
             ReticleTimer += 0.016f;
-
-            //RAM自动恢复
-            HackTimeRAM.Update();
 
             //处理运镜逻辑
             UpdateCamera();

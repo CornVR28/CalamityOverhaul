@@ -1,6 +1,9 @@
-﻿using System;
+﻿using CalamityOverhaul.Common;
+using Microsoft.Xna.Framework;
+using System;
 using System.Collections.Generic;
 using Terraria;
+using Terraria.Audio;
 
 namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
 {
@@ -54,6 +57,10 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
         private static readonly List<ActiveHackEffect> activeEffects = [];
         //帧内移除缓冲
         private static readonly List<ActiveHackEffect> removeBuffer = [];
+        //击杀回收RAM的比例（返还协议RamCost的百分比）
+        private const float KillRefundRatio = 0.5f;
+        //本帧已处理击杀回收的NPC索引集（避免同一NPC多效果重复回收）
+        private static readonly HashSet<int> killRefundedThisFrame = [];
 
         void ICWRLoader.UnLoadData() => Reset();
 
@@ -87,6 +94,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
         /// </summary>
         public static void Update() {
             removeBuffer.Clear();
+            killRefundedThisFrame.Clear();
 
             for (int i = 0; i < activeEffects.Count; i++) {
                 var eff = activeEffects[i];
@@ -98,6 +106,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
                 NPC target = Main.npc[eff.TargetIndex];
                 //目标死亡或失效则移除
                 if (target == null || !target.active || target.life <= 0) {
+                    //击杀回收：目标死亡时返还该协议部分RAM
+                    if (!HackTime.InfiniteHack && target != null
+                        && !killRefundedThisFrame.Contains(eff.TargetIndex)) {
+                        OnHackedTargetKilled(target, eff.TargetIndex);
+                    }
                     eff.Active = false;
                     removeBuffer.Add(eff);
                     continue;
@@ -201,9 +214,39 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
         /// </summary>
         public static IReadOnlyList<ActiveHackEffect> AllActiveEffects => activeEffects;
 
+        //击杀带有骇入效果的NPC时，汇总所有效果的RAM消耗并按比例返还
+        private static void OnHackedTargetKilled(NPC target, int npcIndex) {
+            killRefundedThisFrame.Add(npcIndex);
+
+            //汇总该NPC身上所有活跃效果的RAM消耗
+            int totalCost = 0;
+            for (int i = 0; i < activeEffects.Count; i++) {
+                var e = activeEffects[i];
+                if (e.TargetIndex == npcIndex && e.Active)
+                    totalCost += e.Hack.RamCost;
+            }
+            if (totalCost <= 0) return;
+
+            float refund = totalCost * KillRefundRatio;
+            //至少返还1点
+            if (refund < 1f) refund = 1f;
+            float before = HackTimeRAM.CurrentRam;
+            HackTimeRAM.Restore(refund);
+            float actual = HackTimeRAM.CurrentRam - before;
+
+            //视觉反馈：在NPC位置弹出青色浮动文字
+            if (actual > 0.01f && !VaultUtils.isServer) {
+                string text = $"+{actual:F0} RAM";
+                CombatText.NewText(target.Hitbox, HackTheme.Accent, text, true);
+                SoundEngine.PlaySound(CWRSound.Hacker with { Volume = 0.35f, Pitch = 0.4f },
+                    target.Center);
+            }
+        }
+
         public static void Reset() {
             activeEffects.Clear();
             removeBuffer.Clear();
+            killRefundedThisFrame.Clear();
         }
     }
 }

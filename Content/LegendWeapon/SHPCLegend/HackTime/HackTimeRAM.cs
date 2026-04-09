@@ -1,3 +1,5 @@
+using System;
+
 namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
 {
     /// <summary>
@@ -68,6 +70,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
         private const float TickSeconds = 1f / 60f;
 
         public static void Update() {
+            //骇客时间激活期间冻结恢复（时停中不应回复RAM）
+            if (HackTime.Active) return;
+
             //恢复冷却
             if (recoveryCooldown > 0f) {
                 recoveryCooldown -= TickSeconds;
@@ -82,11 +87,19 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
         }
 
         /// <summary>
-        /// 将RAM充满（进入骇客时间或重置时调用）
+        /// 将RAM充满（仅用于初始化或重置状态）
         /// </summary>
         public static void Refill() {
             CurrentRam = MaxRam;
             recoveryCooldown = 0f;
+        }
+
+        /// <summary>
+        /// 击杀回收：恢复指定量RAM（不超过上限，不触发冷却）
+        /// </summary>
+        public static void Restore(float amount) {
+            if (amount <= 0f) return;
+            CurrentRam = Math.Min(CurrentRam + amount, MaxRam);
         }
 
         /// <summary>
