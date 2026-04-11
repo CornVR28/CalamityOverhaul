@@ -25,7 +25,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
             "CalamityOverhaul/Elysium"
         ];
 
-        public override bool IsLoadingEnabled(Mod mod) => false;
+        public override bool IsLoadingEnabled(Mod mod) => true;
 
         public override void SetStaticDefaults() {
             ItemID.Sets.ItemsThatAllowRepeatedRightClick[Type] = true;
