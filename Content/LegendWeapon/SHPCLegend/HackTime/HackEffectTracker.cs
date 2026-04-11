@@ -372,6 +372,19 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
         }
 
         /// <summary>
+        /// 获取指定物块坐标上所有活跃效果
+        /// </summary>
+        public static void GetTileEffects(int tileX, int tileY, List<ActiveTileHackEffect> result) {
+            result.Clear();
+            for (int i = 0; i < activeTileEffects.Count; i++) {
+                if (activeTileEffects[i].Active
+                    && activeTileEffects[i].TileX == tileX
+                    && activeTileEffects[i].TileY == tileY)
+                    result.Add(activeTileEffects[i]);
+            }
+        }
+
+        /// <summary>
         /// 所有活跃的物块效果（只读）
         /// </summary>
         public static IReadOnlyList<ActiveTileHackEffect> AllActiveTileEffects => activeTileEffects;

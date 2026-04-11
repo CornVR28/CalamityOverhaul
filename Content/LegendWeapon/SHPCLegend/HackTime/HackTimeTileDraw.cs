@@ -2,6 +2,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;
+using Terraria.GameContent;
 
 namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
 {
@@ -51,9 +52,56 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             float effectStr = HackTime.Intensity;
             if (effectStr < 0.01f) return;
 
+            //绘制悬停物块的名称标签
+            DrawHoveredTileLabel(sb, effectStr);
+
             //绘制选中物块的边框装饰
             if (selectedFadeIn > 0.01f && HackTime.CurrentScanTarget is TileScannable tileScan) {
                 DrawSelectedTileFrame(sb, tileScan, effectStr);
+            }
+        }
+
+        private static void DrawHoveredTileLabel(SpriteBatch sb, float effectStr) {
+            int hx = HackTimeTargeting.HoveredTileX;
+            int hy = HackTimeTargeting.HoveredTileY;
+            if (hx < 0 || hy < 0) return;
+
+            //悬停物块已被选中则跳过（选中状态由HackTargetFrame负责显示）
+            if (HackTime.CurrentScanTarget is TileScannable sel) {
+                Rectangle selBounds = TileScannable.GetTileWorldBounds(hx, hy);
+                if (sel.WorldCenter.X >= selBounds.X && sel.WorldCenter.X <= selBounds.Right
+                    && sel.WorldCenter.Y >= selBounds.Y && sel.WorldCenter.Y <= selBounds.Bottom)
+                    return;
+            }
+
+            Tile tile = Main.tile[hx, hy];
+            if (!tile.HasTile) return;
+
+            int tileType = tile.TileType;
+            string name = TileScannable.GetTileName(hx, hy, tileType);
+            string tileClass = TileScannable.GetTileClass(tileType);
+            Color classColor = TileScannable.GetTileClassColor(tileType);
+
+            Rectangle bounds = TileScannable.GetTileWorldBounds(hx, hy);
+            float centerX = bounds.Center.X - Main.screenPosition.X;
+            float bottomY = bounds.Bottom - Main.screenPosition.Y;
+
+            float pulse = MathF.Sin(hoverTimer * 4f) * 0.1f + 0.9f;
+            float alpha = effectStr * 0.7f * pulse;
+
+            //物块名称
+            if (!string.IsNullOrEmpty(name)) {
+                Vector2 nameSize = FontAssets.MouseText.Value.MeasureString(name) * 0.32f;
+                Vector2 namePos = new(centerX - nameSize.X * 0.5f, bottomY + 6f);
+                Utils.DrawBorderString(sb, name, namePos, HackTheme.TextBright * alpha, 0.32f);
+            }
+
+            //物块分类
+            if (!string.IsNullOrEmpty(tileClass)) {
+                float nameOffsetY = string.IsNullOrEmpty(name) ? 0f : 16f;
+                Vector2 classSize = FontAssets.MouseText.Value.MeasureString(tileClass) * 0.24f;
+                Vector2 classPos = new(centerX - classSize.X * 0.5f, bottomY + 6f + nameOffsetY);
+                Utils.DrawBorderString(sb, tileClass, classPos, classColor * (alpha * 0.6f), 0.24f);
             }
         }
 

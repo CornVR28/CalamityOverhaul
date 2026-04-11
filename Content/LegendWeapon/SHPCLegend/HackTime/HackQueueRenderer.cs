@@ -158,6 +158,16 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             }
         }
 
+        //获取指定物块坐标上所有正在上传的队列条目
+        public void GetEntriesForTile(int tileX, int tileY, List<HackQueueEntry> result) {
+            result.Clear();
+            for (int i = 0; i < queue.Count; i++) {
+                if (queue[i].TargetKind == HackTargetKind.Tile
+                    && queue[i].TileX == tileX && queue[i].TileY == tileY)
+                    result.Add(queue[i]);
+            }
+        }
+
         //获取队列头部（正在上传或已完成的）的进度和状态，用于NPC头顶进度环
         public bool TryGetActiveEntry(out float progress, out bool completed) {
             for (int i = 0; i < queue.Count; i++) {

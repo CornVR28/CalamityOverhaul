@@ -51,6 +51,15 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
                 Rectangle bounds = TileScannable.GetTileWorldBounds(tx, ty);
                 baseHalfW = Math.Max(bounds.Width, 32) * 0.6f + 28f;
                 baseHalfH = Math.Max(bounds.Height, 32) * 0.6f + 28f;
+
+                //物块名称和分类
+                Tile tile = Main.tile[tx, ty];
+                if (tile.HasTile) {
+                    int tileType = tile.TileType;
+                    targetName = TileScannable.GetTileName(tx, ty, tileType);
+                    hpStr = TileScannable.GetTileClass(tileType);
+                    hpColor = TileScannable.GetTileClassColor(tileType);
+                }
             }
             else {
                 return;
@@ -144,7 +153,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
                     Utils.DrawBorderString(sb, targetName, namePos, HackTheme.TextBright * (labelAlpha * 0.6f), 0.36f);
                 }
 
-                //生命值百分比（仅NPC目标显示）
+                //状态信息（NPC为生命值百分比，物块为分类）
                 if (hpStr != null) {
                     Vector2 hpSize = FontAssets.MouseText.Value.MeasureString(hpStr) * 0.26f;
                     Vector2 hpPos = new(center.X - hpSize.X * 0.5f, center.Y + halfH + 30f);

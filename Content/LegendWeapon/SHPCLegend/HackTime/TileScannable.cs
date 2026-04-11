@@ -84,7 +84,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
         /// 获取物块的显示名称
         /// <br/>通过MapHelper将物块坐标转换为地图条目，再取本地化名称
         /// </summary>
-        private static string GetTileName(int x, int y, int type) {
+        internal static string GetTileName(int x, int y, int type) {
             //MapHelper.CreateMapTile内部处理了帧到样式的映射
             //返回的MapTile.Type就是Lang.GetMapObjectName所需的查表索引
             MapTile mapTile = MapHelper.CreateMapTile(x, y, 255);
@@ -105,7 +105,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
         /// <summary>
         /// 获取物块的分类文本
         /// </summary>
-        private static string GetTileClass(int type) {
+        internal static string GetTileClass(int type) {
             if (IsCraftingStation(type)) return HackTime.TileScanCrafting.Value;
             if (IsContainer(type)) return HackTime.TileScanContainer.Value;
             if (IsLightSource(type)) return HackTime.TileScanLight.Value;
@@ -116,7 +116,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
         /// <summary>
         /// 获取物块分类对应的颜色
         /// </summary>
-        private static Color GetTileClassColor(int type) {
+        internal static Color GetTileClassColor(int type) {
             if (IsCraftingStation(type)) return HackTheme.Uploading;
             if (IsContainer(type)) return HackTheme.AccentAlt;
             if (IsLightSource(type)) return new Color(200, 200, 80);

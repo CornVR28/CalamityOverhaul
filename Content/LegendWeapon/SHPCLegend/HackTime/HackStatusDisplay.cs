@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using Terraria;
@@ -24,12 +25,18 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
         //复用缓冲
         private static readonly List<ActiveHackEffect> effectBuf = [];
         private static readonly List<HackQueueEntry> queueBuf = [];
+        private static readonly List<ActiveTileHackEffect> tileEffectBuf = [];
+        private static readonly List<HackQueueEntry> tileQueueBuf = [];
         //收集需要绘制的NPC索引集合（避免重复）
         private static readonly HashSet<int> npcSet = [];
+        //收集需要绘制的物块坐标集合（避免重复，用long编码x|y）
+        private static readonly HashSet<long> tileSet = [];
 
         public static void Draw(SpriteBatch sb) {
             Texture2D px = CWRAsset.Placeholder_White?.Value;
             if (px == null) return;
+
+            var queue = HackTimeUI.Instance?.Queue;
 
             //收集所有需要绘制的NPC
             npcSet.Clear();
@@ -38,26 +45,50 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
                 if (allEffects[i].Active)
                     npcSet.Add(allEffects[i].TargetIndex);
             }
-
-            //也收集队列中正在上传的目标
-            var queue = HackTimeUI.Instance?.Queue;
             if (queue != null) {
                 var entries = queue.Entries;
                 for (int i = 0; i < entries.Count; i++) {
-                    npcSet.Add(entries[i].TargetIndex);
+                    if (entries[i].TargetKind == HackTargetKind.Npc)
+                        npcSet.Add(entries[i].TargetIndex);
                 }
             }
-
-            if (npcSet.Count == 0) return;
 
             //逐NPC绘制
             foreach (int npcIndex in npcSet) {
                 if (npcIndex < 0 || npcIndex >= Main.maxNPCs) continue;
                 NPC npc = Main.npc[npcIndex];
                 if (!npc.active) continue;
-
                 DrawNPCStatus(sb, px, npc, npcIndex, queue);
             }
+
+            //收集所有需要绘制的物块
+            tileSet.Clear();
+            var allTileEffects = HackEffectTracker.AllActiveTileEffects;
+            for (int i = 0; i < allTileEffects.Count; i++) {
+                if (allTileEffects[i].Active)
+                    tileSet.Add(PackTileCoord(allTileEffects[i].TileX, allTileEffects[i].TileY));
+            }
+            if (queue != null) {
+                var entries = queue.Entries;
+                for (int i = 0; i < entries.Count; i++) {
+                    if (entries[i].TargetKind == HackTargetKind.Tile)
+                        tileSet.Add(PackTileCoord(entries[i].TileX, entries[i].TileY));
+                }
+            }
+
+            //逐物块绘制
+            foreach (long packed in tileSet) {
+                UnpackTileCoord(packed, out int tx, out int ty);
+                if (tx < 0 || tx >= Main.maxTilesX || ty < 0 || ty >= Main.maxTilesY) continue;
+                if (!Main.tile[tx, ty].HasTile) continue;
+                DrawTileStatus(sb, px, tx, ty, queue);
+            }
+        }
+
+        private static long PackTileCoord(int x, int y) => ((long)x << 32) | (uint)y;
+        private static void UnpackTileCoord(long packed, out int x, out int y) {
+            x = (int)(packed >> 32);
+            y = (int)(packed & 0xFFFFFFFF);
         }
 
         private static void DrawNPCStatus(SpriteBatch sb, Texture2D px, NPC npc, int npcIndex, HackQueueRenderer queue) {
@@ -92,6 +123,42 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
                 var eff = effectBuf[i];
                 float y = startY + cardIndex * (CardHeight + CardGap);
                 DrawActiveCard(sb, px, baseX, y, eff);
+                cardIndex++;
+            }
+        }
+
+        private static void DrawTileStatus(SpriteBatch sb, Texture2D px, int tileX, int tileY, HackQueueRenderer queue) {
+            //收集该物块的活跃效果和上传条目
+            HackEffectTracker.GetTileEffects(tileX, tileY, tileEffectBuf);
+            if (queue != null)
+                queue.GetEntriesForTile(tileX, tileY, tileQueueBuf);
+            else
+                tileQueueBuf.Clear();
+
+            int totalCards = tileEffectBuf.Count + tileQueueBuf.Count;
+            if (totalCards == 0) return;
+
+            //获取物块包围盒，卡片从顶部向上排列
+            Rectangle bounds = TileScannable.GetTileWorldBounds(tileX, tileY);
+            Vector2 topCenter = new(bounds.Center.X - Main.screenPosition.X,
+                bounds.Top - Main.screenPosition.Y);
+            float totalHeight = totalCards * (CardHeight + CardGap) - CardGap;
+            float startY = topCenter.Y - TopOffset - totalHeight;
+            float baseX = topCenter.X - CardWidth * 0.5f;
+
+            int cardIndex = 0;
+
+            //先绘制上传中的条目
+            for (int i = 0; i < tileQueueBuf.Count; i++) {
+                float y = startY + cardIndex * (CardHeight + CardGap);
+                DrawUploadCard(sb, px, baseX, y, tileQueueBuf[i]);
+                cardIndex++;
+            }
+
+            //再绘制已生效的协议
+            for (int i = 0; i < tileEffectBuf.Count; i++) {
+                float y = startY + cardIndex * (CardHeight + CardGap);
+                DrawActiveTileCard(sb, px, baseX, y, tileEffectBuf[i]);
                 cardIndex++;
             }
         }
@@ -184,6 +251,40 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             }
 
             //边框
+            DrawCardBorder(sb, px, x, y, HackTheme.Border * 0.4f);
+        }
+
+        //绘制物块上已生效的协议卡片（无EffectMult，物块不区分Boss）
+        private static void DrawActiveTileCard(SpriteBatch sb, Texture2D px, float x, float y, ActiveTileHackEffect eff) {
+            Color bgColor = HackTheme.BgSection * 0.85f;
+            sb.Draw(px, new Rectangle((int)x, (int)y, (int)CardWidth, (int)CardHeight), bgColor);
+
+            sb.Draw(px, new Rectangle((int)x, (int)y, 2, (int)CardHeight), HackTheme.Accent);
+
+            string name = eff.Hack.DisplayName.Value;
+            float nameX = x + 6f;
+            float nameY = y + 2f;
+            Utils.DrawBorderString(sb, name, new Vector2(nameX, nameY), HackTheme.Accent, FontScale);
+
+            int duration = eff.Hack.GetDuration();
+            float progress = duration > 0 ? Math.Clamp(1f - (float)eff.Elapsed / duration, 0f, 1f) : 0f;
+
+            string status = duration > 0 ? HackTime.ActivePct.Format((int)(progress * 100)) : HackTime.ActiveText.Value;
+            float statusWidth = FontAssets.MouseText.Value.MeasureString(status).X * (FontScale * 0.85f);
+            Utils.DrawBorderString(sb, status, new Vector2(x + CardWidth - statusWidth - 4f, nameY),
+                HackTheme.TextDim, FontScale * 0.85f);
+
+            if (duration > 0) {
+                float barY = y + CardHeight - BarHeight - 2f;
+                float barW = CardWidth - BarMargin * 2;
+                sb.Draw(px, new Rectangle((int)(x + BarMargin), (int)barY, (int)barW, (int)BarHeight),
+                    HackTheme.ProgressBg * 0.9f);
+                if (progress > 0) {
+                    sb.Draw(px, new Rectangle((int)(x + BarMargin), (int)barY,
+                        (int)(barW * progress), (int)BarHeight), HackTheme.ProgressFill);
+                }
+            }
+
             DrawCardBorder(sb, px, x, y, HackTheme.Border * 0.4f);
         }
 
