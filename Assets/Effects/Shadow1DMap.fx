@@ -1,10 +1,10 @@
 //=============================================================================
 //Shadow1DMap.fx - 1D阴影图生成着色器
-//将以光源为中心的遮挡图在极坐标空间中展开，
-//对每个角度方向做列归约(取最小距离)，输出1D阴影图
+//从光源沿每个角度方向在Tile空间中做射线步进，
+//找到第一个遮挡物并存储归一化距离(distTiles / radiusTiles)
+//关键: 步进在Tile空间中(各向同性)，UV采样通过uvPerTile转换
 //=============================================================================
 
-//遮挡图纹理，每像素=1个Tile，白色=实心遮挡，黑色=空气
 texture occlusionMap;
 sampler occlusionSampler = sampler_state
 {
@@ -15,41 +15,42 @@ sampler occlusionSampler = sampler_state
     AddressV = clamp;
 };
 
-//光源在遮挡图中的UV坐标 (0~1)
+//光源在遮挡图中的UV坐标(0~1)
 float2 lightPosUV;
-//遮挡图尺寸(像素)
+//遮挡图尺寸(Tile数)
 float2 mapSize;
-//光源半径(以Tile为单位，归一化到UV空间)
-float lightRadiusUV;
-//角度分辨率 (输出纹理宽度，如360或720)
-float angleResolution;
-//射线步进次数
-float maxSteps;
+//光源半径(Tile单位)
+float radiusTiles;
 
-//输出: 高度为1的纹理，宽度=angleResolution
-//每个像素x对应一个角度，r通道存储归一化距离(0~1, 相对于lightRadius)
+static const float TWO_PI = 6.28318530718;
+
 float4 GenerateShadowMap(float2 coords : TEXCOORD0) : COLOR0
 {
-    float angle = coords.x * 6.28318530718; //0~2PI
+    float angle = coords.x * TWO_PI;
 
-    float2 dir = float2(cos(angle), sin(angle));
+    //在Tile空间中的方向(各向同性，1单位=1Tile)
+    float2 dirTile = float2(cos(angle), sin(angle));
 
-    float stepSize = lightRadiusUV / maxSteps;
-    float minDist = 1.0; //默认无遮挡，距离=1(最大)
+    //每个Tile对应的UV偏移量(非方形修正的关键)
+    float2 uvPerTile = 1.0 / mapSize;
 
-    for (int i = 1; i <= 96; i++)
+    float stepTiles = radiusTiles / 64.0;
+    float minDist = 1.0;
+
+    for (int i = 1; i <= 64; i++)
     {
-        float dist = stepSize * (float)i;
-        float2 samplePos = lightPosUV + dir * dist;
+        float d = stepTiles * (float)i;
+        //在Tile空间沿方向步进d个Tile，转换为UV坐标采样
+        float2 sampleUV = lightPosUV + dirTile * d * uvPerTile;
 
-        //越界检查
-        if (samplePos.x < 0.0 || samplePos.x > 1.0 || samplePos.y < 0.0 || samplePos.y > 1.0)
+        if (sampleUV.x < 0.0 || sampleUV.x > 1.0 || sampleUV.y < 0.0 || sampleUV.y > 1.0)
             break;
 
-        float occlusion = tex2D(occlusionSampler, samplePos).r;
-        if (occlusion > 0.5)
+        //使用tex2Dlod避免循环内gradient指令问题
+        float occ = tex2Dlod(occlusionSampler, float4(sampleUV, 0, 0)).r;
+        if (occ > 0.5)
         {
-            minDist = dist / lightRadiusUV;
+            minDist = d / radiusTiles;
             break;
         }
     }

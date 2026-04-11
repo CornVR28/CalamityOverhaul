@@ -1,5 +1,7 @@
-﻿using CalamityOverhaul.Content.PRTTypes;
+﻿using CalamityOverhaul.Common;
+using CalamityOverhaul.Content.PRTTypes;
 using InnoVault.PRT;
+using InnoVault.Trails;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
@@ -14,7 +16,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
     /// 神圣之蛇弹幕 - 由化蛇术转化敌人生成
     /// 摩西之杖的化蛇奇迹风格，金色神圣蛇形追踪弹幕
     /// </summary>
-    internal class HolySerpent : ModProjectile
+    internal class HolySerpent : ModProjectile, IPrimitiveDrawable
     {
         public override string Texture => CWRConstant.Placeholder;
 
@@ -51,6 +53,9 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
         //视觉效果
         private float glowIntensity = 1f;
         private readonly List<SerpentParticle> particles = [];
+
+        //Trail拖尾渲染
+        private Trail serpentTrail;
 
         //状态枚举
         private enum State
@@ -464,17 +469,80 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
 
         #region 绘制
 
+        private float TrailWidthFunction(float completionRatio) {
+            //completionRatio: 0=起点(尾) 1=终点(头)
+            //蛇形体型：极细尾→缓慢增粗→2/3处最宽→颈部收窄→头部略膨
+            float t = completionRatio;
+            float bodyWidth;
+            if (t < 0.65f) {
+                //尾到身体：从极细平滑增粗
+                float rise = t / 0.65f;
+                bodyWidth = 0.05f + rise * rise * 0.75f;
+            }
+            else if (t < 0.82f) {
+                //身体到颈：缓慢收窄
+                float neck = (t - 0.65f) / 0.17f;
+                bodyWidth = 0.8f - neck * 0.25f;
+            }
+            else {
+                //颈到头：略微膨出(蛇头)
+                float head = (t - 0.82f) / 0.18f;
+                bodyWidth = 0.55f + MathF.Sin(head * MathF.PI) * 0.2f;
+            }
+            //呼吸脉动
+            float breathe = 1f + MathF.Sin(glowPulse * 2f + t * 4f) * 0.03f;
+            return bodyWidth * breathe * 12f * glowIntensity;
+        }
+
+        private Color TrailColorFunction(Vector2 _) => Color.White;
+
+        private float glowPulse => slitherPhase;
+
+        void IPrimitiveDrawable.DrawPrimitives() {
+            if (bodyPositions.Count < 2) return;
+
+            Effect effect = EffectLoader.SerpentTrail?.Value;
+            Texture2D noise = CWRAsset.Extra_193?.Value;
+            if (effect == null) return;
+
+            //构建trail位置数组(从尾到头)
+            //bodyPositions[0]是头，需要反转
+            Vector2[] trailPositions = new Vector2[bodyPositions.Count];
+            for (int i = 0; i < bodyPositions.Count; i++) {
+                trailPositions[i] = bodyPositions[bodyPositions.Count - 1 - i];
+            }
+
+            serpentTrail ??= new Trail(trailPositions, TrailWidthFunction, TrailColorFunction);
+            serpentTrail.TrailPositions = trailPositions;
+
+            effect.CurrentTechnique = effect.Techniques["SerpentBody"];
+            effect.Parameters["transformMatrix"]?.SetValue(VaultUtils.GetTransfromMatrix());
+            effect.Parameters["uTime"]?.SetValue(glowPulse);
+            effect.Parameters["fadeAlpha"]?.SetValue(1f);
+            effect.Parameters["glowIntensity"]?.SetValue(glowIntensity);
+            effect.Parameters["holyGold"]?.SetValue(HolyGold.ToVector3());
+            effect.Parameters["scaleGreen"]?.SetValue(ScaleGreen.ToVector3());
+            effect.Parameters["pureWhite"]?.SetValue(PureWhite.ToVector3());
+            effect.Parameters["mysticPurple"]?.SetValue(MysticPurple.ToVector3());
+
+            if (noise != null) {
+                effect.Parameters["uNoiseTex"]?.SetValue(noise);
+            }
+
+            GraphicsDevice device = Main.graphics.GraphicsDevice;
+            device.BlendState = BlendState.Additive;
+            serpentTrail.DrawTrail(effect);
+            device.BlendState = BlendState.AlphaBlend;
+        }
+
         public override bool PreDraw(ref Color lightColor) {
             SpriteBatch sb = Main.spriteBatch;
 
-            //绘制粒子
+            //绘制粒子(在Trail之上叠加)
             DrawParticles(sb);
 
-            //绘制身体
-            DrawSerpentBody(sb);
-
-            //绘制头部
-            DrawSerpentHead(sb);
+            //绘制着色器驱动的蛇头光晕
+            DrawShaderSerpentHead(sb);
 
             return false;
         }
@@ -491,91 +559,43 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
             }
         }
 
-        private void DrawSerpentBody(SpriteBatch sb) {
-            Texture2D glow = CWRAsset.SoftGlow?.Value;
-            Texture2D pixel = CWRAsset.Placeholder_White?.Value;
-            if (glow == null || pixel == null) return;
-
-            //从尾到头绘制身体段
-            for (int i = bodyPositions.Count - 1; i >= 1; i--) {
-                Vector2 pos = bodyPositions[i] - Main.screenPosition;
-                float rotation = bodyRotations[i];
-                float segmentRatio = 1f - (i / (float)bodyPositions.Count);
-
-                //段大小（头大尾小）
-                float segmentScale = 0.3f + segmentRatio * 0.4f;
-                segmentScale *= glowIntensity;
-
-                //颜色渐变
-                Color segmentColor = Color.Lerp(ScaleGreen, HolyGold, segmentRatio);
-
-                //光晕
-                Color glowColor = segmentColor with { A = 0 } * 0.5f * glowIntensity;
-                sb.Draw(glow, pos, null, glowColor, rotation, glow.Size() / 2, segmentScale * 1.5f, SpriteEffects.None, 0);
-
-                //核心
-                Color coreColor = Color.Lerp(segmentColor, PureWhite, 0.3f) with { A = 0 } * glowIntensity;
-                sb.Draw(glow, pos, null, coreColor, rotation, glow.Size() / 2, segmentScale * 0.8f, SpriteEffects.None, 0);
-
-                //鳞片纹理（用小线段模拟）
-                if (i % 2 == 0) {
-                    float scaleAngle = rotation + MathHelper.PiOver2;
-                    Color scaleColor = HolyGold with { A = 50 } * 0.4f * glowIntensity;
-                    sb.Draw(pixel, pos, null, scaleColor, scaleAngle, new Vector2(0.5f), new Vector2(segmentScale * 20f, 1f), SpriteEffects.None, 0);
-                }
-            }
-
-            //身体连接线
-            for (int i = 0; i < bodyPositions.Count - 1; i++) {
-                Vector2 start = bodyPositions[i] - Main.screenPosition;
-                Vector2 end = bodyPositions[i + 1] - Main.screenPosition;
-                Vector2 diff = end - start;
-                float length = diff.Length();
-                if (length < 1f) continue;
-
-                float lineAlpha = (1f - i / (float)bodyPositions.Count) * 0.3f * glowIntensity;
-                Color lineColor = HolyGold with { A = 0 } * lineAlpha;
-
-                sb.Draw(pixel, start, new Rectangle(0, 0, 1, 1), lineColor, diff.ToRotation(), Vector2.Zero, new Vector2(length, 3f), SpriteEffects.None, 0f);
-            }
-        }
-
-        private void DrawSerpentHead(SpriteBatch sb) {
-            Texture2D glow = CWRAsset.SoftGlow?.Value;
-            Texture2D pixel = CWRAsset.Placeholder_White?.Value;
-            if (glow == null || pixel == null) return;
+        /// <summary>
+        /// 着色器绘制蛇头神圣光晕+眼睛+冠冕
+        /// </summary>
+        private void DrawShaderSerpentHead(SpriteBatch sb) {
+            Effect effect = EffectLoader.SerpentTrail?.Value;
+            Texture2D canvas = CWRAsset.Placeholder_White?.Value;
+            if (effect == null || canvas == null) return;
 
             Vector2 headPos = Projectile.Center - Main.screenPosition;
+            float headSize = 50f * glowIntensity;
+
+            sb.End();
+
+            effect.CurrentTechnique = effect.Techniques["SerpentHead"];
+            effect.Parameters["uTime"]?.SetValue(glowPulse);
+            effect.Parameters["fadeAlpha"]?.SetValue(1f);
+            effect.Parameters["glowIntensity"]?.SetValue(glowIntensity);
+            effect.Parameters["holyGold"]?.SetValue(HolyGold.ToVector3());
+            effect.Parameters["scaleGreen"]?.SetValue(ScaleGreen.ToVector3());
+            effect.Parameters["pureWhite"]?.SetValue(PureWhite.ToVector3());
+            effect.Parameters["mysticPurple"]?.SetValue(MysticPurple.ToVector3());
+
+            sb.Begin(SpriteSortMode.Immediate, BlendState.Additive,
+                SamplerState.LinearClamp, DepthStencilState.None,
+                RasterizerState.CullNone, null, Main.GameViewMatrix.TransformationMatrix);
+
+            effect.CurrentTechnique.Passes[0].Apply();
+
             float headRot = Projectile.velocity.ToRotation();
+            sb.Draw(canvas, headPos, null, Color.White, headRot,
+                canvas.Size() * 0.5f, headSize, SpriteEffects.None, 0f);
 
-            //头部光晕
-            Color headGlow = HolyGold with { A = 0 } * 0.7f * glowIntensity;
-            sb.Draw(glow, headPos, null, headGlow, headRot, glow.Size() / 2, 0.8f * glowIntensity, SpriteEffects.None, 0);
+            sb.End();
 
-            //头部核心
-            Color headCore = PureWhite with { A = 0 } * 0.8f * glowIntensity;
-            sb.Draw(glow, headPos, null, headCore, headRot, glow.Size() / 2, 0.4f * glowIntensity, SpriteEffects.None, 0);
-
-            //眼睛（两个小点）
-            Vector2 headDir = headRot.ToRotationVector2();
-            Vector2 perpendicular = headDir.RotatedBy(MathHelper.PiOver2);
-            Vector2 eyeOffset = headDir * 5f;
-
-            for (int side = -1; side <= 1; side += 2) {
-                Vector2 eyePos = headPos + eyeOffset + perpendicular * side * 4f;
-                Color eyeColor = MysticPurple with { A = 0 } * glowIntensity;
-                sb.Draw(glow, eyePos, null, eyeColor, 0, glow.Size() / 2, 0.15f * glowIntensity, SpriteEffects.None, 0);
-            }
-
-            //头部冠冕（十字形）
-            float crownAlpha = 0.5f * glowIntensity;
-            Color crownColor = HolyGold with { A = 50 } * crownAlpha;
-            Vector2 crownPos = headPos + headDir * 8f;
-
-            //水平线
-            sb.Draw(pixel, crownPos, null, crownColor, headRot, new Vector2(0.5f), new Vector2(12f, 2f), SpriteEffects.None, 0);
-            //垂直线
-            sb.Draw(pixel, crownPos, null, crownColor, headRot + MathHelper.PiOver2, new Vector2(0.5f), new Vector2(8f, 2f), SpriteEffects.None, 0);
+            sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                Main.DefaultSamplerState, DepthStencilState.None,
+                Main.Rasterizer, null, Main.GameViewMatrix.TransformationMatrix);
         }
 
         #endregion

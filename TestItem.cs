@@ -133,14 +133,14 @@ namespace CalamityOverhaul
             //CyberwareUI.Instance.Toggle();
             //Sandevistan.IsActive = !Sandevistan.IsActive;
 
-            //ShadowMapSystem.Enabled = true;              //开启系统
-            //ShadowMapSystem.AutoCollectTileLights = true; //自动收集Tile光源
-            //ShadowMapSystem.AutoPlayerLight = true;       //玩家自带微光
-            //ShadowMapSystem.PlayerLightRadius = 200f;     //玩家光圈半径
-            //ShadowMapSystem.PlayerLightIntensity = 0.6f;  //玩家光源强度
-            //ShadowMapSystem.TorchLightRadius = 320f;      //火把光圈半径
-            //ShadowMapSystem.MaxAutoLights = 130;           //自动光源上限
-            //ShadowMapSystem.TileScanInterval = 3;         //扫描间隔(帧)
+            ShadowMapSystem.Enabled = true;              //开启系统
+            ShadowMapSystem.AutoCollectTileLights = true; //自动收集Tile光源
+            ShadowMapSystem.AutoPlayerLight = true;       //玩家自带微光
+            ShadowMapSystem.PlayerLightRadius = 200f;     //玩家光圈半径
+            ShadowMapSystem.PlayerLightIntensity = 0.6f;  //玩家光源强度
+            ShadowMapSystem.TorchLightRadius = 320f;      //火把光圈半径
+            ShadowMapSystem.MaxAutoLights = 130;           //自动光源上限
+            ShadowMapSystem.TileScanInterval = 3;         //扫描间隔(帧)
         }
     }
 }
