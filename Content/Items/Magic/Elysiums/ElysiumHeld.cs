@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using CalamityOverhaul.Common;
+using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using System;
 using System.Collections.Generic;
@@ -28,6 +29,12 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
         private float staffRotation = 0f;
         private float glowPulse = 0f;
         private List<HolyRingData> holyRings = [];
+
+        //释放爆发状态
+        private bool releasing = false;
+        private float releaseTimer = 0f;
+        private const float ReleaseMaxTime = 25f;
+        private float releaseChargeRatio = 0f;
 
         //圣环数据
         private class HolyRingData
@@ -64,13 +71,32 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
             Owner.heldProj = Projectile.whoAmI;
             Projectile.timeLeft = 2;
 
+            //释放爆发阶段
+            if (releasing) {
+                releaseTimer++;
+                glowPulse += 0.1f;
+                UpdateHolyRings();
+
+                //爆发期间缓慢衰减照明
+                float burstProg = releaseTimer / ReleaseMaxTime;
+                float burstLight = (1f - burstProg) * 0.8f * releaseChargeRatio;
+                Lighting.AddLight(Owner.Center, burstLight, burstLight * 0.95f, burstLight * 0.85f);
+
+                if (releaseTimer >= ReleaseMaxTime) {
+                    Projectile.Kill();
+                }
+                return;
+            }
+
             //检查是否继续引导
             if (!Owner.channel) {
                 //释放攻击
                 if (ChargeTime > 30) {
                     ReleaseSnakeConversion();
                 }
-                Projectile.Kill();
+                else {
+                    Projectile.Kill();
+                }
                 return;
             }
 
@@ -217,7 +243,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
         }
 
         /// <summary>
-        /// 释放化蛇术攻击
+        /// 释放化蛇术攻击，启动着色器驱动的爆发演出
         /// </summary>
         private void ReleaseSnakeConversion() {
             SoundEngine.PlaySound(SoundID.Item117 with { Volume = 1.5f, Pitch = -0.3f }, Owner.Center);
@@ -240,23 +266,19 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
                 chargeRatio
             );
 
-            //大范围圣光爆发特效
-            for (int i = 0; i < 60; i++) {
-                float angle = MathHelper.TwoPi * i / 60f;
-                Vector2 vel = angle.ToRotationVector2() * (8f + chargeRatio * 4f);
-                int dustType = i % 2 == 0 ? DustID.SilverFlame : DustID.Shadowflame;
-                Dust d = Dust.NewDustPerfect(Owner.Center, dustType, vel, 100, default, 2f);
-                d.noGravity = true;
-            }
+            //进入释放爆发阶段(着色器渲染)
+            releasing = true;
+            releaseTimer = 0f;
+            releaseChargeRatio = chargeRatio;
 
-            //十字架爆发
-            for (int j = 0; j < 4; j++) {
-                float baseAngle = MathHelper.PiOver2 * j;
-                for (int i = 0; i < 10; i++) {
-                    Vector2 pos = Owner.Center + baseAngle.ToRotationVector2() * (i * 20f);
-                    Dust d = Dust.NewDustPerfect(pos, DustID.GoldFlame, baseAngle.ToRotationVector2() * 5f, 100, Color.White, 2f);
-                    d.noGravity = true;
-                }
+            //生成多层爆发圣环
+            SpawnHolyRing(180f + chargeRatio * 120f, 20, Color.White);
+            SpawnHolyRing(250f + chargeRatio * 150f, 25, new Color(255, 220, 160));
+            if (chargeRatio > 0.4f) {
+                SpawnHolyRing(320f + chargeRatio * 100f, 22, Color.Gold);
+            }
+            if (chargeRatio > 0.7f) {
+                SpawnHolyRing(400f, 28, new Color(255, 255, 220));
             }
         }
 
@@ -264,96 +286,197 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
             SpriteBatch sb = Main.spriteBatch;
             Vector2 drawPos = Projectile.Center - Main.screenPosition;
 
-            //获取权杖纹理
             Texture2D staffTex = ModContent.Request<Texture2D>(Texture).Value;
 
-            //绘制圣环
-            DrawHolyRings(sb);
+            //结束当前SpriteBatch，进入着色器管线
+            sb.End();
 
-            Vector2 drawPos2 = drawPos + staffRotation.ToRotationVector2() * 110;
-            //绘制蓄力光晕
-            if (ChargeTime > 20 && GlowAsset?.IsLoaded == true) {
-                float glowScale = 0.5f + (ChargeTime / 120f) * 1f;
-                float pulse = (float)Math.Sin(glowPulse) * 0.2f + 0.8f;
+            //释放爆发阶段：渲染DivineBurst + 圣环
+            if (releasing) {
+                DrawShaderDivineBurst(sb);
+                DrawShaderHolyRings(sb);
 
-                //白色外层光晕
-                Color outerGlow = Color.White with { A = 0 } * 0.3f * pulse;
-                sb.Draw(GlowAsset.Value, drawPos2, null, outerGlow, 0, GlowAsset.Value.Size() / 2, glowScale * 2f, SpriteEffects.None, 0);
+                //恢复SpriteBatch，不再绘制权杖
+                sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                    Main.DefaultSamplerState, DepthStencilState.None,
+                    Main.Rasterizer, null, Main.GameViewMatrix.TransformationMatrix);
+                return false;
+            }
 
-                //金色内层光晕
-                Color innerGlow = new Color(255, 215, 100) with { A = 0 } * 0.5f * pulse;
-                sb.Draw(GlowAsset.Value, drawPos2, null, innerGlow, 0, GlowAsset.Value.Size() / 2, glowScale, SpriteEffects.None, 0);
+            //着色器绘制：神圣扩散环
+            DrawShaderHolyRings(sb);
+
+            //着色器绘制：蓄力神圣光辉
+            if (ChargeTime > 10) {
+                DrawShaderDivineAura(sb);
+            }
+
+            //恢复常规SpriteBatch绘制权杖
+            sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                Main.DefaultSamplerState, DepthStencilState.None,
+                Main.Rasterizer, null, Main.GameViewMatrix.TransformationMatrix);
+
+            //蓄力时权杖附带金色光泽
+            Color staffColor = lightColor;
+            if (ChargeTime > 30) {
+                float glowFactor = Math.Min((ChargeTime - 30) / 90f, 1f) * 0.4f;
+                staffColor = Color.Lerp(staffColor, new Color(255, 230, 180), glowFactor);
             }
 
             //绘制权杖
-            //纹理是垂直的(头部在上，手柄在下)，原点设在底部中心(手柄位置)
             Vector2 origin = new Vector2(Owner.direction > 0 ? 10 : 20, staffTex.Height - 65f);
-
-            //计算绘制旋转：纹理默认朝上，需要旋转到指向鼠标的方向
-            //staffRotation是指向鼠标的角度，纹理需要额外旋转90度(从朝上变为朝右作为基准)
             float drawRot = staffRotation + MathHelper.ToRadians(76);
-
-            //朝左时不需要翻转，只需要正确的旋转即可
             SpriteEffects effect = SpriteEffects.None;
-
-            sb.Draw(staffTex, drawPos, null, lightColor, drawRot, origin, 1f, effect, 0);
+            sb.Draw(staffTex, drawPos, null, staffColor, drawRot, origin, 1f, effect, 0);
 
             return false;
         }
 
         /// <summary>
-        /// 绘制圣环
+        /// 着色器绘制蓄力神圣光辉
         /// </summary>
-        private void DrawHolyRings(SpriteBatch sb) {
-            Texture2D pixel = CWRAsset.Placeholder_White?.Value;
-            if (pixel == null) return;
+        private void DrawShaderDivineAura(SpriteBatch sb) {
+            Effect effect = EffectLoader.ElysiumStaff?.Value;
+            Texture2D canvas = CWRAsset.Placeholder_White?.Value;
+            Texture2D noise = CWRAsset.Extra_193?.Value;
+            if (effect == null || canvas == null) {
+                //着色器不可用时的简易回退
+                DrawDivineAuraFallback(sb);
+                return;
+            }
+
+            Vector2 tipPos = (Owner.Center + staffRotation.ToRotationVector2() * 140f) - Main.screenPosition;
+            float chargeRat = Math.Min(ChargeTime / 120f, 1f);
+            float auraSize = (40f + chargeRat * 60f) * 2f;
+
+            effect.CurrentTechnique = effect.Techniques["DivineAura"];
+            effect.Parameters["uTime"]?.SetValue(glowPulse);
+            effect.Parameters["fadeAlpha"]?.SetValue(1f);
+            effect.Parameters["chargeRatio"]?.SetValue(chargeRat);
+            effect.Parameters["auraRotation"]?.SetValue(glowPulse * 0.3f);
+            effect.Parameters["warmGold"]?.SetValue(new Vector3(1f, 0.863f, 0.588f));
+            effect.Parameters["brightGold"]?.SetValue(new Vector3(1f, 0.784f, 0.392f));
+            effect.Parameters["holyWhite"]?.SetValue(new Vector3(1f, 0.98f, 0.94f));
+
+            if (noise != null) {
+                Main.graphics.GraphicsDevice.Textures[1] = noise;
+                Main.graphics.GraphicsDevice.SamplerStates[1] = SamplerState.LinearWrap;
+            }
+
+            sb.Begin(SpriteSortMode.Immediate, BlendState.Additive,
+                SamplerState.LinearClamp, DepthStencilState.None,
+                RasterizerState.CullNone, null, Main.GameViewMatrix.TransformationMatrix);
+
+            effect.CurrentTechnique.Passes[0].Apply();
+
+            sb.Draw(canvas, tipPos, null, Color.White, 0f,
+                canvas.Size() * 0.5f, auraSize, SpriteEffects.None, 0f);
+
+            sb.End();
+        }
+
+        /// <summary>
+        /// 着色器绘制释放爆发特效
+        /// </summary>
+        private void DrawShaderDivineBurst(SpriteBatch sb) {
+            Effect effect = EffectLoader.ElysiumStaff?.Value;
+            Texture2D canvas = CWRAsset.Placeholder_White?.Value;
+            Texture2D noise = CWRAsset.Extra_193?.Value;
+            if (effect == null || canvas == null) return;
+
+            Vector2 center = Owner.Center - Main.screenPosition;
+            float burstProg = releaseTimer / ReleaseMaxTime;
+            //爆发画布尺寸适中，让十字架和纹饰清晰可辨
+            float burstSize = (120f + releaseChargeRatio * 100f) * (1f + burstProg * 0.4f);
+
+            effect.CurrentTechnique = effect.Techniques["DivineBurst"];
+            effect.Parameters["uTime"]?.SetValue(glowPulse);
+            effect.Parameters["fadeAlpha"]?.SetValue(1f);
+            effect.Parameters["burstProgress"]?.SetValue(burstProg);
+            effect.Parameters["burstIntensity"]?.SetValue(0.6f + releaseChargeRatio * 0.4f);
+            effect.Parameters["auraRotation"]?.SetValue(glowPulse * 0.3f);
+            effect.Parameters["warmGold"]?.SetValue(new Vector3(1f, 0.863f, 0.588f));
+            effect.Parameters["brightGold"]?.SetValue(new Vector3(1f, 0.784f, 0.392f));
+            effect.Parameters["holyWhite"]?.SetValue(new Vector3(1f, 0.98f, 0.94f));
+
+            if (noise != null) {
+                Main.graphics.GraphicsDevice.Textures[1] = noise;
+                Main.graphics.GraphicsDevice.SamplerStates[1] = SamplerState.LinearWrap;
+            }
+
+            sb.Begin(SpriteSortMode.Immediate, BlendState.Additive,
+                SamplerState.LinearClamp, DepthStencilState.None,
+                RasterizerState.CullNone, null, Main.GameViewMatrix.TransformationMatrix);
+
+            effect.CurrentTechnique.Passes[0].Apply();
+
+            sb.Draw(canvas, center, null, Color.White, 0f,
+                canvas.Size() * 0.5f, burstSize, SpriteEffects.None, 0f);
+
+            sb.End();
+        }
+
+        /// <summary>
+        /// 着色器绘制神圣扩散环
+        /// </summary>
+        private void DrawShaderHolyRings(SpriteBatch sb) {
+            if (holyRings.Count == 0) return;
+
+            Effect effect = EffectLoader.ElysiumStaff?.Value;
+            Texture2D canvas = CWRAsset.Placeholder_White?.Value;
+            if (effect == null || canvas == null) return;
 
             Vector2 center = Owner.Center - Main.screenPosition;
 
+            effect.CurrentTechnique = effect.Techniques["SacredRing"];
+            effect.Parameters["warmGold"]?.SetValue(new Vector3(1f, 0.863f, 0.588f));
+            effect.Parameters["brightGold"]?.SetValue(new Vector3(1f, 0.784f, 0.392f));
+            effect.Parameters["holyWhite"]?.SetValue(new Vector3(1f, 0.98f, 0.94f));
+
+            sb.Begin(SpriteSortMode.Immediate, BlendState.Additive,
+                SamplerState.LinearClamp, DepthStencilState.None,
+                RasterizerState.CullNone, null, Main.GameViewMatrix.TransformationMatrix);
+
             foreach (var ring in holyRings) {
-                float alpha = 1f - (ring.Life / ring.MaxLife);
-                Color ringColor = ring.RingColor with { A = 0 } * alpha * 0.6f;
+                float progress = ring.Life / ring.MaxLife;
+                float quadSize = (ring.MaxRadius + 40f) * 2f;
 
-                int segments = 36;
-                for (int i = 0; i < segments; i++) {
-                    float angle = ring.Rotation + MathHelper.TwoPi * i / segments;
-                    float nextAngle = ring.Rotation + MathHelper.TwoPi * (i + 1) / segments;
+                effect.Parameters["uTime"]?.SetValue(glowPulse);
+                effect.Parameters["fadeAlpha"]?.SetValue(1f);
+                effect.Parameters["ringProgress"]?.SetValue(progress);
+                effect.Parameters["ringColor"]?.SetValue(ring.RingColor.ToVector3());
+                effect.Parameters["ringRotation"]?.SetValue(ring.Rotation);
 
-                    Vector2 start = center + angle.ToRotationVector2() * ring.Radius;
-                    Vector2 end = center + nextAngle.ToRotationVector2() * ring.Radius;
+                effect.CurrentTechnique.Passes[0].Apply();
 
-                    DrawLine(sb, pixel, start, end, 2f, ringColor);
-                }
-
-                //绘制十字标记
-                for (int j = 0; j < 4; j++) {
-                    float crossAngle = ring.Rotation + MathHelper.PiOver2 * j;
-                    Vector2 crossPos = center + crossAngle.ToRotationVector2() * ring.Radius;
-                    DrawSmallCross(sb, pixel, crossPos, 8f, ringColor);
-                }
+                sb.Draw(canvas, center, null, Color.White, 0f,
+                    canvas.Size() * 0.5f, quadSize, SpriteEffects.None, 0f);
             }
+
+            sb.End();
         }
 
         /// <summary>
-        /// 绘制线段
+        /// 着色器不可用时的回退渲染
         /// </summary>
-        private static void DrawLine(SpriteBatch sb, Texture2D pixel, Vector2 start, Vector2 end, float thickness, Color color) {
-            Vector2 diff = end - start;
-            float length = diff.Length();
-            if (length < 1f) return;
-            sb.Draw(pixel, start, new Rectangle(0, 0, 1, 1), color, diff.ToRotation(), Vector2.Zero, new Vector2(length, thickness), SpriteEffects.None, 0f);
-        }
+        private void DrawDivineAuraFallback(SpriteBatch sb) {
+            if (GlowAsset?.IsLoaded != true) return;
 
-        /// <summary>
-        /// 绘制小十字
-        /// </summary>
-        private static void DrawSmallCross(SpriteBatch sb, Texture2D pixel, Vector2 center, float size, Color color) {
-            float half = size / 2;
-            float thickness = 2f;
-            //垂直
-            sb.Draw(pixel, center - new Vector2(thickness / 2, half), null, color, 0, Vector2.Zero, new Vector2(thickness, size), SpriteEffects.None, 0);
-            //水平
-            sb.Draw(pixel, center - new Vector2(half, thickness / 2), null, color, 0, Vector2.Zero, new Vector2(size, thickness), SpriteEffects.None, 0);
+            Vector2 tipPos = (Owner.Center + staffRotation.ToRotationVector2() * 140f) - Main.screenPosition;
+            float glowScale = 0.5f + (ChargeTime / 120f) * 1f;
+            float pulse = (float)Math.Sin(glowPulse) * 0.2f + 0.8f;
+
+            sb.Begin(SpriteSortMode.Deferred, BlendState.Additive,
+                SamplerState.LinearClamp, DepthStencilState.None,
+                RasterizerState.CullNone, null, Main.GameViewMatrix.TransformationMatrix);
+
+            Color outerGlow = Color.White with { A = 0 } * 0.3f * pulse;
+            sb.Draw(GlowAsset.Value, tipPos, null, outerGlow, 0, GlowAsset.Value.Size() / 2, glowScale * 2f, SpriteEffects.None, 0);
+
+            Color innerGlow = new Color(255, 215, 100) with { A = 0 } * 0.5f * pulse;
+            sb.Draw(GlowAsset.Value, tipPos, null, innerGlow, 0, GlowAsset.Value.Size() / 2, glowScale, SpriteEffects.None, 0);
+
+            sb.End();
         }
     }
 }
