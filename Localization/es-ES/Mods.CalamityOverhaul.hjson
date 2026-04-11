@@ -93,6 +93,16 @@ QuickHack: {
 		// DisplayName: Mag Pull
 		// Description: Generates a magnetic field that pulls nearby items toward you
 	}
+
+	MachineShortCircuit: {
+		// DisplayName: Short Circuit
+		// Description: Drains all energy and discharges an electric arc, damaging nearby entities
+	}
+
+	TurretHijack: {
+		// DisplayName: Turret Hijack
+		// Description: Overrides IFF module, flipping turret allegiance for a limited time
+	}
 }
 
 // NPCs.Hierophant.DisplayName: Hierophant

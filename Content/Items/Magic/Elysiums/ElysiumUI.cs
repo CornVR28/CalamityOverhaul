@@ -1,4 +1,5 @@
-﻿using InnoVault.UIHandles;
+﻿using CalamityOverhaul.Common;
+using InnoVault.UIHandles;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using ReLogic.Graphics;
@@ -439,26 +440,31 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
 
             float alpha = uiFadeAlpha;
 
-            //绘制底层光晕
-            DrawBackgroundGlow(spriteBatch, alpha);
+            //结束当前SpriteBatch，切换到着色器渲染管线
+            spriteBatch.End();
 
-            //绘制圣光射线
-            DrawHolyRays(spriteBatch, alpha);
+            //着色器绘制：神圣光环背景
+            DrawShaderHaloBackground(spriteBatch, alpha);
 
-            //绘制外环装饰
-            DrawOuterRing(spriteBatch, alpha);
+            //着色器绘制：门徒槽位光环
+            DrawShaderSlotAuras(spriteBatch, alpha);
+
+            //着色器绘制：中心面板
+            DrawShaderCenterPanel(spriteBatch, alpha);
+
+            //恢复常规SpriteBatch用于文字和交互元素
+            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                SamplerState.LinearClamp, DepthStencilState.None,
+                RasterizerState.CullCounterClockwise, null, Main.UIScaleMatrix);
 
             //绘制拉丁文铭文环
             DrawInscriptionRing(spriteBatch, alpha);
 
-            //绘制门徒转盘
+            //绘制门徒图标
             DrawDiscipleWheel(spriteBatch, alpha);
 
-            //绘制中心区域
-            DrawCenterArea(spriteBatch, alpha);
-
-            //绘制十字架装饰
-            DrawCrossDecorations(spriteBatch, alpha);
+            //绘制中心文字
+            DrawCenterText(spriteBatch, alpha);
 
             //绘制粒子
             foreach (var p in holyParticles) {
@@ -491,93 +497,158 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
         }
 
         /// <summary>
-        /// 绘制背景光晕
+        /// 着色器绘制：神圣光环背景（体积圣光+环形结构+玫瑰窗+十字光芒）
         /// </summary>
-        private void DrawBackgroundGlow(SpriteBatch sb, float alpha) {
+        private void DrawShaderHaloBackground(SpriteBatch sb, float alpha) {
+            Effect effect = EffectLoader.ElysiumHalo?.Value;
+            if (effect == null) { DrawBackgroundGlowFallback(sb, alpha); return; }
+
+            Texture2D canvas = CWRAsset.Placeholder_White?.Value;
+            Texture2D noise = CWRAsset.Extra_193?.Value;
+            if (canvas == null) return;
+
+            float canvasSize = (OuterRadius + 40) * 2f;
+            float halfCanvas = canvasSize * 0.5f;
+
+            effect.CurrentTechnique = effect.Techniques["HaloBackground"];
+            effect.Parameters["uTime"]?.SetValue(glowTimer);
+            effect.Parameters["fadeAlpha"]?.SetValue(alpha);
+            effect.Parameters["discipleRatio"]?.SetValue(GetDiscipleRatio());
+            effect.Parameters["rotationAngle"]?.SetValue(rotationAngle);
+            effect.Parameters["pulsePhase"]?.SetValue(pulseTimer);
+            effect.Parameters["hoverSector"]?.SetValue((float)hoveringDiscipleIndex);
+            effect.Parameters["outerR"]?.SetValue(OuterRadius / halfCanvas * 0.5f);
+            effect.Parameters["discipleR"]?.SetValue(DiscipleRadius / halfCanvas * 0.5f);
+            effect.Parameters["innerR"]?.SetValue(InnerRadius / halfCanvas * 0.5f);
+            effect.Parameters["warmGold"]?.SetValue(new Vector3(1f, 0.863f, 0.588f));
+            effect.Parameters["brightGold"]?.SetValue(new Vector3(1f, 0.784f, 0.392f));
+            effect.Parameters["holyWhite"]?.SetValue(new Vector3(1f, 0.98f, 0.94f));
+
+            if (noise != null) {
+                Main.graphics.GraphicsDevice.Textures[1] = noise;
+                Main.graphics.GraphicsDevice.SamplerStates[1] = SamplerState.LinearWrap;
+            }
+
+            sb.Begin(SpriteSortMode.Immediate, BlendState.Additive,
+                SamplerState.LinearClamp, DepthStencilState.None,
+                RasterizerState.CullNone, null, Main.UIScaleMatrix);
+
+            effect.CurrentTechnique.Passes[0].Apply();
+
+            sb.Draw(canvas, DrawPosition, null, Color.White, 0f,
+                new Vector2(0.5f, 0.5f), canvasSize, SpriteEffects.None, 0f);
+
+            sb.End();
+        }
+
+        /// <summary>
+        /// 着色器绘制：门徒槽位光环
+        /// </summary>
+        private void DrawShaderSlotAuras(SpriteBatch sb, float alpha) {
+            Effect effect = EffectLoader.ElysiumHalo?.Value;
+            if (effect == null) return;
+
+            Texture2D canvas = CWRAsset.Placeholder_White?.Value;
+            if (canvas == null) return;
+
+            player.TryGetModPlayer<ElysiumPlayer>(out var ep);
+
+            effect.CurrentTechnique = effect.Techniques["SlotAura"];
+            effect.Parameters["warmGold"]?.SetValue(new Vector3(1f, 0.863f, 0.588f));
+            effect.Parameters["holyWhite"]?.SetValue(new Vector3(1f, 0.98f, 0.94f));
+
+            sb.Begin(SpriteSortMode.Immediate, BlendState.Additive,
+                SamplerState.LinearClamp, DepthStencilState.None,
+                RasterizerState.CullNone, null, Main.UIScaleMatrix);
+
+            float auraSize = DiscipleSlotSize + 30f;
+
+            for (int i = 0; i < 12; i++) {
+                Vector2 slotPos = GetSlotPosition(i);
+                bool active = ep != null && ep.HasDiscipleOfType(ElysiumPlayer.DiscipleTypes[i]);
+                bool hover = hoveringDiscipleIndex == i && !isDragging;
+                bool dragSrc = isDragging && dragSourceIndex == i;
+                bool dragTgt = isDragging && dragTargetIndex == i;
+                Color dColor = GetDiscipleColor(i);
+
+                effect.Parameters["uTime"]?.SetValue(glowTimer);
+                effect.Parameters["fadeAlpha"]?.SetValue(alpha);
+                effect.Parameters["slotColor"]?.SetValue(dColor.ToVector3());
+                effect.Parameters["slotActive"]?.SetValue(active ? 1f : 0f);
+                effect.Parameters["slotHover"]?.SetValue(hover ? 1f : 0f);
+                effect.Parameters["slotDragSource"]?.SetValue(dragSrc ? 1f : 0f);
+                effect.Parameters["slotDragTarget"]?.SetValue(dragTgt ? 1f : 0f);
+                effect.Parameters["slotPhase"]?.SetValue(i * 0.5f);
+
+                effect.CurrentTechnique.Passes[0].Apply();
+
+                sb.Draw(canvas, slotPos, null, Color.White, 0f,
+                    new Vector2(0.5f, 0.5f), auraSize, SpriteEffects.None, 0f);
+            }
+
+            sb.End();
+        }
+
+        /// <summary>
+        /// 着色器绘制：中心面板（暗底背景+发光边框，预乘alpha混合）
+        /// </summary>
+        private void DrawShaderCenterPanel(SpriteBatch sb, float alpha) {
+            Effect effect = EffectLoader.ElysiumHalo?.Value;
+            if (effect == null) return;
+
+            Texture2D canvas = CWRAsset.Placeholder_White?.Value;
+            if (canvas == null) return;
+
+            float panelSize = (InnerRadius + 15) * 2f;
+
+            effect.CurrentTechnique = effect.Techniques["CenterPanel"];
+            effect.Parameters["uTime"]?.SetValue(glowTimer);
+            effect.Parameters["fadeAlpha"]?.SetValue(alpha);
+            effect.Parameters["pulsePhase"]?.SetValue(pulseTimer);
+            effect.Parameters["warmGold"]?.SetValue(new Vector3(1f, 0.863f, 0.588f));
+            effect.Parameters["brightGold"]?.SetValue(new Vector3(1f, 0.784f, 0.392f));
+            effect.Parameters["holyWhite"]?.SetValue(new Vector3(1f, 0.98f, 0.94f));
+
+            sb.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend,
+                SamplerState.LinearClamp, DepthStencilState.None,
+                RasterizerState.CullNone, null, Main.UIScaleMatrix);
+
+            effect.CurrentTechnique.Passes[0].Apply();
+
+            sb.Draw(canvas, DrawPosition, null, Color.White, 0f,
+                new Vector2(0.5f, 0.5f), panelSize, SpriteEffects.None, 0f);
+
+            sb.End();
+        }
+
+        /// <summary>
+        /// 获取门徒激活比例(0~1)
+        /// </summary>
+        private float GetDiscipleRatio() {
+            if (player.TryGetModPlayer<ElysiumPlayer>(out var ep)) {
+                return ep.GetDiscipleCount() / 12f;
+            }
+            return 0f;
+        }
+
+        /// <summary>
+        /// 着色器不可用时的简易回退渲染
+        /// </summary>
+        private void DrawBackgroundGlowFallback(SpriteBatch sb, float alpha) {
             Texture2D glow = CWRAsset.SoftGlow?.Value;
             if (glow == null) return;
 
-            float pulse = (float)Math.Sin(pulseTimer) * 0.15f + 0.85f;
+            sb.Begin(SpriteSortMode.Deferred, BlendState.Additive,
+                SamplerState.LinearClamp, DepthStencilState.None,
+                RasterizerState.CullNone, null, Main.UIScaleMatrix);
 
-            //最外层柔和光晕
-            Color outerGlow = new Color(255, 230, 180, 0) * alpha;
-            sb.Draw(glow, DrawPosition, null, outerGlow, 0, glow.Size() / 2, OuterRadius / 32f * 1.5f, SpriteEffects.None, 0);
+            Color outerGlowCol = new Color(255, 230, 180, 0) * alpha;
+            sb.Draw(glow, DrawPosition, null, outerGlowCol, 0, glow.Size() / 2, OuterRadius / 32f * 1.5f, SpriteEffects.None, 0);
 
-            //中层金色光晕
-            Color midGlow = new Color(255, 200, 100, 0) * alpha;
-            sb.Draw(glow, DrawPosition, null, midGlow, 0, glow.Size() / 2, OuterRadius / 32f, SpriteEffects.None, 0);
+            Color midGlowCol = new Color(255, 200, 100, 0) * alpha;
+            sb.Draw(glow, DrawPosition, null, midGlowCol, 0, glow.Size() / 2, OuterRadius / 32f, SpriteEffects.None, 0);
 
-            //内层白色光晕
-            Color innerGlow = Color.White with { A = 0 } * alpha;
-            sb.Draw(glow, DrawPosition, null, innerGlow, 0, glow.Size() / 2, InnerRadius / 32f * 1.2f, SpriteEffects.None, 0);
-        }
-
-        /// <summary>
-        /// 绘制圣光射线
-        /// </summary>
-        private void DrawHolyRays(SpriteBatch sb, float alpha) {
-            Texture2D px = CWRAsset.Placeholder_White?.Value;
-            if (px == null) return;
-
-            int rayCount = 24;
-            for (int i = 0; i < rayCount; i++) {
-                float angle = MathHelper.TwoPi * i / rayCount + rayTimer;
-                float rayLength = OuterRadius * (0.8f + (float)Math.Sin(rayTimer * 2 + i * 0.5f) * 0.2f);
-                float rayAlpha = 0.08f + (float)Math.Sin(rayTimer * 3 + i) * 0.04f;
-
-                Vector2 start = DrawPosition + angle.ToRotationVector2() * InnerRadius * 0.5f;
-                Vector2 end = DrawPosition + angle.ToRotationVector2() * rayLength;
-
-                //渐变射线
-                Color rayColor = new Color(255, 220, 150) * (alpha * rayAlpha);
-                DrawGradientLine(sb, px, start, end, 2f, rayColor, rayColor * 0.1f);
-            }
-        }
-
-        /// <summary>
-        /// 绘制外环装饰
-        /// </summary>
-        private void DrawOuterRing(SpriteBatch sb, float alpha) {
-            Texture2D px = CWRAsset.Placeholder_White?.Value;
-            if (px == null) return;
-
-            //外环主体
-            int segments = 72;
-            float thickness = 3f;
-            Color ringColor = new Color(200, 170, 120) * (alpha * 0.6f);
-
-            for (int i = 0; i < segments; i++) {
-                float angle1 = MathHelper.TwoPi * i / segments;
-                float angle2 = MathHelper.TwoPi * (i + 1) / segments;
-
-                Vector2 p1 = DrawPosition + angle1.ToRotationVector2() * OuterRadius;
-                Vector2 p2 = DrawPosition + angle2.ToRotationVector2() * OuterRadius;
-
-                DrawLine(sb, px, p1, p2, thickness, ringColor);
-            }
-
-            //内环
-            Color innerRingColor = new Color(220, 190, 140) * (alpha * 0.5f);
-            for (int i = 0; i < segments; i++) {
-                float angle1 = MathHelper.TwoPi * i / segments;
-                float angle2 = MathHelper.TwoPi * (i + 1) / segments;
-
-                Vector2 p1 = DrawPosition + angle1.ToRotationVector2() * (InnerRadius + 10f);
-                Vector2 p2 = DrawPosition + angle2.ToRotationVector2() * (InnerRadius + 10f);
-
-                DrawLine(sb, px, p1, p2, 2f, innerRingColor);
-            }
-
-            //12分割线(玫瑰窗式)
-            for (int i = 0; i < 12; i++) {
-                float angle = MathHelper.TwoPi * i / 12f - MathHelper.PiOver2;
-                Vector2 inner = DrawPosition + angle.ToRotationVector2() * (InnerRadius + 15f);
-                Vector2 outer = DrawPosition + angle.ToRotationVector2() * (OuterRadius - 5f);
-
-                float lineAlpha = i == hoveringDiscipleIndex ? 0.8f : 0.3f;
-                Color lineColor = new Color(180, 150, 100) * (alpha * lineAlpha);
-                DrawLine(sb, px, inner, outer, 1f, lineColor);
-            }
+            sb.End();
         }
 
         /// <summary>
@@ -616,7 +687,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
         }
 
         /// <summary>
-        /// 绘制门徒转盘
+        /// 绘制门徒图标和编号（背景由着色器渲染）
         /// </summary>
         private void DrawDiscipleWheel(SpriteBatch sb, float alpha) {
             Texture2D px = CWRAsset.Placeholder_White?.Value;
@@ -630,72 +701,12 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
                 Vector2 slotPos = DrawPosition + angle.ToRotationVector2() * DiscipleRadius;
 
                 bool hasDisciple = ep != null && ep.HasDiscipleOfType(ElysiumPlayer.DiscipleTypes[i]);
-                bool isHovering = hoveringDiscipleIndex == i;
                 bool isJudas = i == 11;
-                bool isDragSource = isDragging && dragSourceIndex == i;
-                bool isDragTarget = isDragging && dragTargetIndex == i;
-
-                //槽位背景
-                float slotPulse = (float)Math.Sin(pulseTimer + i * 0.5f) * 0.1f + 0.9f;
-                Color bgColor;
-
-                if (isDragSource) {
-                    //拖动源槽位变暗
-                    bgColor = new Color(15, 12, 10) * 0.6f;
-                }
-                else if (isDragTarget) {
-                    //拖动目标槽位高亮
-                    float targetPulse = (float)Math.Sin(glowTimer * 5) * 0.2f + 0.8f;
-                    bgColor = Color.Lerp(new Color(40, 35, 25), GetDiscipleColor(i), 0.3f * targetPulse);
-                }
-                else if (hasDisciple) {
-                    if (isJudas && ep.GetDiscipleCount() == 12) {
-                        //犹大特殊颜色(危险)
-                        float dangerFlash = (float)Math.Sin(glowTimer * 3) * 0.3f + 0.7f;
-                        bgColor = Color.Lerp(new Color(60, 20, 20), new Color(100, 30, 30), dangerFlash);
-                    }
-                    else {
-                        bgColor = new Color(40, 35, 25) * slotPulse;
-                    }
-                }
-                else {
-                    bgColor = new Color(20, 18, 15) * 0.8f;
-                }
-
-                if (isHovering && !isDragging) {
-                    bgColor = Color.Lerp(bgColor, new Color(60, 50, 35), 0.4f);
-                }
-
-                //绘制槽位圆形背景
-                DrawFilledCircle(sb, px, slotPos, DiscipleSlotSize / 2f, bgColor * alpha);
-
-                //槽位边框
-                Color borderColor;
-                if (isDragTarget) {
-                    //拖动目标边框高亮脉冲
-                    float targetPulse = (float)Math.Sin(glowTimer * 6) * 0.3f + 0.7f;
-                    borderColor = Color.Lerp(GetDiscipleColor(dragSourceIndex), GetDiscipleColor(i), 0.5f) * targetPulse;
-                    borderColor = Color.Lerp(borderColor, Color.White, 0.3f);
-                }
-                else if (isDragSource) {
-                    //拖动源边框变暗
-                    borderColor = GetDiscipleColor(i) * 0.4f;
-                }
-                else if (hasDisciple) {
-                    borderColor = GetDiscipleColor(i);
-                    if (isHovering) borderColor = Color.Lerp(borderColor, Color.White, 0.3f);
-                }
-                else {
-                    borderColor = new Color(80, 70, 50) * 0.6f;
-                }
-
-                float borderThickness = isDragTarget ? 3f : 2f;
-                DrawCircleOutline(sb, px, slotPos, DiscipleSlotSize / 2f, borderThickness, borderColor * alpha);
+                bool isDragSrc = isDragging && dragSourceIndex == i;
+                bool isDragTgt = isDragging && dragTargetIndex == i;
 
                 //门徒图标或空缺标记
-                if (hasDisciple && !isDragSource) {
-                    //绘制门徒纹理
-                    int projType = ElysiumPlayer.DiscipleTypes[i];
+                if (hasDisciple && !isDragSrc) {
                     string texPath = GetDiscipleTexturePath(i);
                     Texture2D discipleTex = ModContent.Request<Texture2D>(texPath).Value;
 
@@ -706,23 +717,22 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
                         iconColor = Color.Lerp(iconColor, new Color(150, 100, 100), 1f - shadowPulse);
                     }
 
-                    //如果是拖动目标，稍微缩小显示
-                    if (isDragTarget) {
+                    if (isDragTgt) {
                         iconScale *= 0.8f;
                         iconColor *= 0.7f;
                     }
 
                     sb.Draw(discipleTex, slotPos, null, iconColor, 0, discipleTex.Size() / 2, iconScale, SpriteEffects.None, 0);
 
-                    //光晕效果
+                    //图标光晕
                     if (glow != null) {
+                        float slotPulse = (float)Math.Sin(pulseTimer + i * 0.5f) * 0.1f + 0.9f;
                         Color glowColor = GetDiscipleColor(i) * (alpha * 0.3f * slotPulse);
                         glowColor.A = 0;
                         sb.Draw(glow, slotPos, null, glowColor, 0, glow.Size() / 2, DiscipleSlotSize / 32f, SpriteEffects.None, 0);
                     }
                 }
-                else if (isDragSource) {
-                    //拖动源显示虚影
+                else if (isDragSrc) {
                     string texPath = GetDiscipleTexturePath(i);
                     Texture2D discipleTex = ModContent.Request<Texture2D>(texPath).Value;
 
@@ -732,11 +742,9 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
                     sb.Draw(discipleTex, slotPos, null, ghostColor, 0, discipleTex.Size() / 2, iconScale * 0.9f, SpriteEffects.None, 0);
                 }
                 else {
-                    //空缺标记(十字虚线)
                     Color emptyColor = new Color(60, 50, 40) * (alpha * 0.5f);
 
-                    //如果是拖动目标且目标为空，显示加号提示
-                    if (isDragTarget) {
+                    if (isDragTgt) {
                         float plusPulse = (float)Math.Sin(glowTimer * 4) * 0.3f + 0.7f;
                         emptyColor = GetDiscipleColor(dragSourceIndex) * (alpha * 0.6f * plusPulse);
                     }
@@ -750,7 +758,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
                 string numText = (i + 1).ToString();
                 Vector2 numPos = slotPos + new Vector2(0, DiscipleSlotSize / 2f + 8f);
                 Color numColor = hasDisciple ? new Color(200, 180, 140) : new Color(100, 90, 70);
-                if (isDragTarget) {
+                if (isDragTgt) {
                     numColor = Color.Lerp(numColor, GetDiscipleColor(dragSourceIndex), 0.5f);
                 }
                 Vector2 numSize = FontAssets.MouseText.Value.MeasureString(numText) * 0.4f;
@@ -759,45 +767,24 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
         }
 
         /// <summary>
-        /// 绘制中心区域
+        /// 绘制中心文字信息（背景由着色器渲染）
         /// </summary>
-        private void DrawCenterArea(SpriteBatch sb, float alpha) {
-            Texture2D px = CWRAsset.Placeholder_White?.Value;
-            Texture2D glow = CWRAsset.SoftGlow?.Value;
-            if (px == null) return;
-
-            //中心圆形背景
-            Color centerBg = new Color(25, 22, 18) * (alpha * 0.9f);
-            DrawFilledCircle(sb, px, DrawPosition, InnerRadius, centerBg);
-
-            //中心边框
-            float borderPulse = (float)Math.Sin(pulseTimer * 1.5f) * 0.2f + 0.8f;
-            Color centerBorder = new Color(200, 170, 120) * (alpha * 0.7f * borderPulse);
-            DrawCircleOutline(sb, px, DrawPosition, InnerRadius, 2f, centerBorder);
-
-            //获取门徒数据
+        private void DrawCenterText(SpriteBatch sb, float alpha) {
             int discipleCount = 0;
-            float damageBonus = 0, defenseBonus = 0, critBonus = 0;
+            float damageBonus = 0;
 
             if (player.TryGetModPlayer<ElysiumPlayer>(out var ep)) {
                 discipleCount = ep.GetDiscipleCount();
 
-                //计算总增益(与ElysiumPlayer中的逻辑对应)
                 if (discipleCount == 11) {
                     damageBonus = 25;
-                    critBonus = 15;
-                    defenseBonus = 20;
                 }
                 else if (discipleCount == 12) {
                     damageBonus = 50;
-                    critBonus = 30;
-                    defenseBonus = 40;
                 }
                 else if (discipleCount > 0) {
                     float ratio = discipleCount / 12f;
                     damageBonus = 15 * ratio;
-                    critBonus = 10 * ratio;
-                    defenseBonus = 15 * ratio;
                 }
             }
 
@@ -821,34 +808,15 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
             Vector2 labelSize = FontAssets.MouseText.Value.MeasureString(labelText) * 0.4f;
             Utils.DrawBorderString(sb, labelText, DrawPosition - labelSize / 2 + new Vector2(0, 12), new Color(180, 160, 130) * alpha, 0.4f);
 
-            //增益信息(在中心下方)
-            if (discipleCount > 0) {
+            //增益信息
+            if (discipleCount > 0 && damageBonus > 0) {
                 Vector2 bonusStart = DrawPosition + new Vector2(0, 32);
                 float fontSize = 0.35f;
                 Color bonusColor = new Color(200, 180, 140) * alpha;
 
-                if (damageBonus > 0) {
-                    string dmgText = $"+{damageBonus:F0}% {DamageText.Value}";
-                    Vector2 dmgSize = FontAssets.MouseText.Value.MeasureString(dmgText) * fontSize;
-                    Utils.DrawBorderString(sb, dmgText, bonusStart - dmgSize / 2, bonusColor, fontSize);
-                }
-            }
-        }
-
-        /// <summary>
-        /// 绘制十字架装饰
-        /// </summary>
-        private void DrawCrossDecorations(SpriteBatch sb, float alpha) {
-            Texture2D px = CWRAsset.Placeholder_White?.Value;
-            if (px == null) return;
-
-            //四个方向的十字架
-            float[] angles = [0, MathHelper.PiOver2, MathHelper.Pi, MathHelper.Pi * 1.5f];
-            float crossDist = OuterRadius + 15f;
-
-            foreach (float angle in angles) {
-                Vector2 crossPos = DrawPosition + angle.ToRotationVector2() * crossDist;
-                DrawSmallCross(sb, px, crossPos, 10f, new Color(180, 150, 100) * (alpha * 0.6f));
+                string dmgText = $"+{damageBonus:F0}% {DamageText.Value}";
+                Vector2 dmgSize = FontAssets.MouseText.Value.MeasureString(dmgText) * fontSize;
+                Utils.DrawBorderString(sb, dmgText, bonusStart - dmgSize / 2, bonusColor, fontSize);
             }
         }
 
@@ -1146,32 +1114,6 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
             }
         }
 
-        private static void DrawFilledCircle(SpriteBatch sb, Texture2D px, Vector2 center, float radius, Color color) {
-            //用矩形近似圆形
-            int segments = 24;
-            for (int i = 0; i < segments; i++) {
-                float angle1 = MathHelper.TwoPi * i / segments;
-                float angle2 = MathHelper.TwoPi * (i + 1) / segments;
-
-                Vector2 p1 = center + angle1.ToRotationVector2() * radius;
-                Vector2 p2 = center + angle2.ToRotationVector2() * radius;
-
-                //绘制三角形扇形
-                DrawTriangle(sb, px, center, p1, p2, color);
-            }
-        }
-
-        private static void DrawTriangle(SpriteBatch sb, Texture2D px, Vector2 p1, Vector2 p2, Vector2 p3, Color color) {
-            //简化处理：用线段填充
-            int steps = 10;
-            for (int i = 0; i <= steps; i++) {
-                float t = i / (float)steps;
-                Vector2 start = Vector2.Lerp(p1, p2, t);
-                Vector2 end = Vector2.Lerp(p1, p3, t);
-                DrawLine(sb, px, start, end, 2f, color);
-            }
-        }
-
         private static void DrawCircleOutline(SpriteBatch sb, Texture2D px, Vector2 center, float radius, float thickness, Color color) {
             int segments = 48;
             for (int i = 0; i < segments; i++) {
@@ -1183,13 +1125,6 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
 
                 DrawLine(sb, px, p1, p2, thickness, color);
             }
-        }
-
-        private static void DrawSmallCross(SpriteBatch sb, Texture2D px, Vector2 center, float size, Color color) {
-            float half = size / 2;
-            float thickness = 2f;
-            sb.Draw(px, center, null, color, 0, new Vector2(0.5f), new Vector2(size, thickness), SpriteEffects.None, 0);
-            sb.Draw(px, center, null, color, MathHelper.PiOver2, new Vector2(0.5f), new Vector2(size, thickness), SpriteEffects.None, 0);
         }
 
         private static void DrawRotatedText(SpriteBatch sb, string text, Vector2 pos, float rotation, Color color, float scale) {
