@@ -1,6 +1,4 @@
-﻿using Microsoft.Xna.Framework;
-
-namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
+﻿namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
 {
     /// <summary>
     /// 骇客时间界面主题配色

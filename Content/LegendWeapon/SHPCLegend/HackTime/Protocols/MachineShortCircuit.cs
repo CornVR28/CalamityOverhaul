@@ -1,11 +1,9 @@
-using CalamityOverhaul.Content.Industrials;
+﻿using CalamityOverhaul.Content.Industrials;
 using CalamityOverhaul.Content.PRTTypes;
 using InnoVault.PRT;
 using InnoVault.TileProcessors;
-using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.Audio;
-using Terraria.DataStructures;
 using Terraria.ID;
 
 namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime.Protocols

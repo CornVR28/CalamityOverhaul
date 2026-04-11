@@ -1,6 +1,4 @@
-using Microsoft.Xna.Framework;
-
-namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
+﻿namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
 {
     /// <summary>
     /// 可扫描目标的抽象接口

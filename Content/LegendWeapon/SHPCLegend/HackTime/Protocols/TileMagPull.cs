@@ -1,8 +1,7 @@
-using System;
-using CalamityOverhaul.Common;
+﻿using CalamityOverhaul.Common;
 using CalamityOverhaul.Content.PRTTypes;
 using InnoVault.PRT;
-using Microsoft.Xna.Framework;
+using System;
 using Terraria;
 using Terraria.Audio;
 
