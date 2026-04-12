@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using CalamityOverhaul.Common;
+using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using System;
 using System.Collections.Generic;
@@ -43,10 +44,6 @@ namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
         private float expandScale = 0f;
         private float tierTransitionProgress = 1f; //层级过渡进度，0=过渡中，1=稳定
 
-        [VaultLoaden(CWRConstant.Masking + "Fire")]
-        private static Asset<Texture2D> RuneAsset = null;
-        [VaultLoaden(CWRConstant.Masking)]
-        private static Asset<Texture2D> StarTexture = null;
         [VaultLoaden(CWRConstant.Masking + "SoftGlow")]
         private static Asset<Texture2D> GlowAsset = null;
 
@@ -841,71 +838,65 @@ namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
             float time = Main.GlobalTimeWrappedHourly;
             int tier = (int)CurrentTier;
 
-            //硫磺火色彩方案 - 黑红暗色系
-            Color coreColor = new Color(255, 80, 40);        //核心橙红
-            Color midColor = new Color(200, 50, 30);         //中层深红
-            Color edgeColor = new Color(120, 30, 20);        //边缘暗红
-            Color darkColor = new Color(80, 20, 15);         //深黑红
-            Color voidColor = new Color(40, 10, 10);         //虚空暗红
-            Color highlightColor = new Color(255, 100, 50);  //高光橙红
-
-            //计算过渡效果 - 使用缓动函数平滑过渡
+            //计算过渡效果
             float transitionEase = CWRUtils.EaseOutCubic(tierTransitionProgress);
-            float visualAlpha = expandScale * transitionEase;
 
-            //绘制扩展环（硫磺火色彩）
-            foreach (var ring in circleRings) {
-                float ringAlpha = (1f - (ring.Life / ring.MaxLife)) * transitionEase;
-                DrawCircleRing(sb, center, ring.Radius, ring.Thickness, ring.Color * ringAlpha);
-            }
+            //绘制着色器领域
+            DrawBrimstoneDomainShader(sb, center, time, tier, transitionEase);
 
-            //绘制外层暗影光环
-            for (int i = 0; i <= tier; i++) {
-                float ringSize = 520f + i * 130f;
-                float alpha = (0.7f - i * 0.12f) * visualAlpha;
-                DrawVoidRing(sb, center, ringSize, voidColor, alpha, time * (1f + i * 0.25f));
-            }
-
-            //绘制连接线网络
-            if (tier >= 1) {
-                DrawConnectionWeb(sb, center, 330f + tier * 70f, visualAlpha, edgeColor, time);
-            }
-
-            //绘制多重几何图形（过渡期间淡入）
-            DrawHexagram(sb, center, 280f + tier * 55f, 5f, Color.Lerp(darkColor, edgeColor, 0.75f) * visualAlpha * transitionEase, time * 1.1f);
-
-            if (tier >= 1) {
-                DrawPentagram(sb, center, 240f + tier * 45f, 3.5f, midColor * visualAlpha * transitionEase, -time * 1.4f);
-                DrawHexagram(sb, center, 360f, 6f, darkColor * visualAlpha * transitionEase * 0.8f, time * 1.6f);
-            }
-
-            if (tier >= 2) {
-                DrawPentagram(sb, center, 170f, 2.5f, coreColor * visualAlpha * transitionEase, time * 2f);
-                DrawOctagon(sb, center, 420f, 4f, edgeColor * visualAlpha * transitionEase * 0.7f, -time * 1.2f);
-            }
-
-            //绘制硫磺火余烬
-            DrawBrimstoneEmbers(sb);
-
-            //绘制符文（带过渡淡入）
-            if (RuneAsset?.IsLoaded ?? false) {
-                for (int layer = 0; layer <= tier && layer < runeLayers.Length; layer++) {
-                    DrawAnimatedRunes(sb, RuneAsset.Value, center, layer, coreColor, midColor, darkColor, transitionEase);
-                }
-            }
-
-            //绘制能量球
+            //绘制能量球（保持CPU侧粒子效果作为点缀）
             DrawEnergyOrbs(sb);
 
             //绘制闪电弧
             DrawLightningArcsVisual(sb);
 
-            //绘制中心核心辉光
-            if (GlowAsset?.IsLoaded ?? false) {
-                DrawCoreGlow(sb, GlowAsset.Value, center, visualAlpha, coreColor, midColor, edgeColor, highlightColor, time);
-            }
-
             return false;
+        }
+
+        private void DrawBrimstoneDomainShader(SpriteBatch sb, Vector2 center, float time, int tier, float transitionEase) {
+            Effect shader = EffectLoader.BrimstoneDomain?.Value;
+            if (shader == null) return;
+
+            Texture2D canvas = CWRAsset.Placeholder_White.Value;
+            Texture2D noise = CWRAsset.Extra_193.Value;
+            if (canvas == null || noise == null) return;
+
+            //绘制区域：根据当前层级计算法阵大小
+            float baseRadius = 300f + tier * 120f;
+            float drawRadius = baseRadius * expandScale * 1.15f; //额外留出辉光空间
+            float drawDiameter = drawRadius * 2f;
+
+            //设置着色器参数
+            shader.Parameters["uTime"]?.SetValue((float)Main.timeForVisualEffects * 0.016f);
+            shader.Parameters["fadeAlpha"]?.SetValue(Math.Min(expandScale, 1f) * transitionEase);
+            shader.Parameters["tierLevel"]?.SetValue(visualTier);
+            shader.Parameters["expandProgress"]?.SetValue(MathHelper.Clamp(expandScale, 0f, 1f));
+            shader.Parameters["pulseIntensity"]?.SetValue(0.6f + (float)Math.Sin(time * 3f) * 0.4f);
+
+            //硫磺火色彩方案
+            shader.Parameters["coreColor"]?.SetValue(new Vector3(1f, 0.31f, 0.16f));    //255,80,40
+            shader.Parameters["midColor"]?.SetValue(new Vector3(0.78f, 0.2f, 0.12f));   //200,50,30
+            shader.Parameters["edgeColor"]?.SetValue(new Vector3(0.47f, 0.12f, 0.08f)); //120,30,20
+            shader.Parameters["voidColor"]?.SetValue(new Vector3(0.16f, 0.04f, 0.04f)); //40,10,10
+            shader.Parameters["uNoiseTex"]?.SetValue(noise);
+
+            //切换到Immediate模式应用着色器
+            sb.End();
+            sb.Begin(SpriteSortMode.Immediate, BlendState.Additive,
+                SamplerState.LinearWrap, DepthStencilState.None, RasterizerState.CullNone,
+                null, Main.GameViewMatrix.TransformationMatrix);
+
+            shader.CurrentTechnique.Passes[0].Apply();
+
+            sb.Draw(canvas, center, null, Color.White,
+                0f, canvas.Size() * 0.5f, new Vector2(drawDiameter, drawDiameter),
+                SpriteEffects.None, 0f);
+
+            //恢复正常批次状态
+            sb.End();
+            sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullNone,
+                null, Main.GameViewMatrix.TransformationMatrix);
         }
 
         private void DrawEnergyOrbs(SpriteBatch sb) {
@@ -943,222 +934,11 @@ namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
             }
         }
 
-        private void DrawBrimstoneEmbers(SpriteBatch sb) {
-            Texture2D glow = GlowAsset?.Value;
-            if (glow == null) return;
-
-            foreach (var ember in brimstoneEmbers) {
-                Vector2 drawPos = ember.Position - Main.screenPosition;
-                float scale = ember.Scale * ember.Alpha;
-
-                sb.Draw(glow, drawPos, null, ember.Color with { A = 0 } * ember.Alpha * 0.8f, ember.Rotation,
-                    glow.Size() / 2, scale * 0.3f, SpriteEffects.None, 0);
-            }
-        }
-
-        private static void DrawCircleRing(SpriteBatch sb, Vector2 center, float radius, float thickness, Color color) {
-            Texture2D pixel = CWRAsset.Placeholder_White.Value;
-            int segments = (int)(radius / 10f);
-
-            for (int i = 0; i < segments; i++) {
-                float angle = MathHelper.TwoPi * i / segments;
-                float nextAngle = MathHelper.TwoPi * (i + 1) / segments;
-
-                Vector2 start = center + angle.ToRotationVector2() * radius;
-                Vector2 end = center + nextAngle.ToRotationVector2() * radius;
-
-                DrawLine(sb, pixel, start, end, thickness, color);
-            }
-        }
-
-        private static void DrawOctagon(SpriteBatch sb, Vector2 center, float radius, float thickness, Color color, float rotation) {
-            Texture2D pixel = CWRAsset.Placeholder_White.Value;
-            DrawPolygon(sb, pixel, center, 8, radius, thickness, color, rotation);
-        }
-
-        private static void DrawVoidRing(SpriteBatch sb, Vector2 center, float radius, Color color, float alpha, float time) {
-            if (!(GlowAsset?.IsLoaded ?? false)) return;
-
-            float pulse = (float)Math.Sin(time * 2.5f) * 0.25f + 0.75f;
-            float rotation = time * 0.3f;
-            sb.Draw(GlowAsset.Value, center, null,
-                color with { A = 0 } * alpha * 0.25f * pulse,
-                rotation,
-                GlowAsset.Value.Size() / 2,
-                radius / GlowAsset.Value.Width * 2.2f,
-                SpriteEffects.None, 0);
-        }
-
-        private static void DrawConnectionWeb(SpriteBatch sb, Vector2 center, float radius, float alpha, Color color, float time) {
-            if (alpha < 0.25f) return;
-            Texture2D pixel = CWRAsset.Placeholder_White.Value;
-
-            int points = 14;
-            for (int i = 0; i < points; i++) {
-                float angle1 = time * 1.8f + MathHelper.TwoPi * i / points;
-                Vector2 pos1 = center + angle1.ToRotationVector2() * radius;
-
-                //连接到相邻点
-                for (int j = i + 1; j < Math.Min(i + 3, points); j++) {
-                    float angle2 = time * 1.8f + MathHelper.TwoPi * j / points;
-                    Vector2 pos2 = center + angle2.ToRotationVector2() * radius;
-
-                    float pulse = (float)Math.Sin(time * 8f + i + j) * 0.4f + 0.6f;
-                    DrawLine(sb, pixel, pos1, pos2, 0.8f, color * alpha * 0.25f * pulse);
-                }
-            }
-        }
-
-        private static void DrawHexagram(SpriteBatch sb, Vector2 center, float radius, float thickness, Color color, float rotation) {
-            Texture2D pixel = CWRAsset.Placeholder_White.Value;
-            DrawPolygon(sb, pixel, center, 3, radius, thickness, color, rotation);
-            DrawPolygon(sb, pixel, center, 3, radius, thickness, color, rotation + MathHelper.Pi);
-        }
-
-        private static void DrawPentagram(SpriteBatch sb, Vector2 center, float radius, float thickness, Color color, float rotation) {
-            Texture2D pixel = CWRAsset.Placeholder_White.Value;
-            int points = 5;
-            Vector2[] vertices = new Vector2[points];
-
-            for (int i = 0; i < points; i++) {
-                float angle = rotation + i * MathHelper.TwoPi / points - MathHelper.PiOver2;
-                vertices[i] = center + angle.ToRotationVector2() * radius;
-            }
-
-            for (int i = 0; i < points; i++) {
-                DrawLine(sb, pixel, vertices[i], vertices[(i + 2) % points], thickness, color);
-            }
-        }
-
-        private static void DrawPolygon(SpriteBatch sb, Texture2D pixel, Vector2 center, int sides, float radius, float thickness, Color color, float rotation) {
-            if (sides < 3) return;
-            Vector2 prev = center + rotation.ToRotationVector2() * radius;
-            for (int i = 1; i <= sides; i++) {
-                float ang = rotation + i * MathHelper.TwoPi / sides;
-                Vector2 curr = center + ang.ToRotationVector2() * radius;
-                DrawLine(sb, pixel, prev, curr, thickness, color);
-                prev = curr;
-            }
-        }
-
         private static void DrawLine(SpriteBatch sb, Texture2D pixel, Vector2 start, Vector2 end, float thickness, Color color) {
             Vector2 diff = end - start;
             float length = diff.Length();
             if (length < 1f) return;
             sb.Draw(pixel, start, new Rectangle(0, 0, 1, 1), color, diff.ToRotation(), Vector2.Zero, new Vector2(length, thickness), SpriteEffects.None, 0f);
-        }
-
-        private void DrawAnimatedRunes(SpriteBatch sb, Texture2D runeTex, Vector2 center, int layer, Color c1, Color c2, Color c3, float transitionAlpha) {
-            if (layer >= runeLayers.Length || runeLayers[layer] == null) return;
-
-            Texture2D starTex = StarTexture?.Value;
-            if (runeTex == null) return;
-
-            //4x4火焰纹理的单帧尺寸
-            int frameWidth = runeTex.Width / 4;
-            int frameHeight = runeTex.Height / 4;
-
-            foreach (var rune in runeLayers[layer]) {
-                if (rune.Alpha < 0.01f) continue;
-
-                Vector2 pos = center + rune.Offset * expandScale;
-
-                //火焰强度脉冲（更剧烈的火焰效果）
-                float intensityPulse = (float)Math.Sin(rune.IntensityPulse) * 0.3f + 0.7f;
-                float fireFlicker = (float)Math.Sin(Main.GlobalTimeWrappedHourly * 15f + rune.PulsePhase) * 0.2f + 0.8f;
-
-                //计算火焰帧的矩形区域
-                int frameX = rune.FireFrame % 4;
-                int frameY = rune.FireFrame / 4;
-                Rectangle fireFrame = new Rectangle(frameX * frameWidth, frameY * frameHeight, frameWidth, frameHeight);
-
-                //硫磺火色彩渐变（黑红暗色系 - 从暗红到深黑红）
-                Color baseFireColor = rune.Type switch {
-                    0 => Color.Lerp(new Color(180, 60, 40), new Color(100, 30, 20), intensityPulse),   //暗橙红到深红
-                    1 => Color.Lerp(new Color(200, 70, 45), new Color(120, 35, 25), intensityPulse),   //橙红到暗红
-                    2 => Color.Lerp(new Color(150, 50, 35), new Color(80, 25, 18), intensityPulse),    //深红到黑红
-                    3 => Color.Lerp(new Color(220, 80, 50), new Color(140, 40, 28), intensityPulse),   //亮橙红到暗橙红
-                    4 => Color.Lerp(new Color(160, 55, 38), new Color(90, 28, 20), intensityPulse),    //中红到深暗红
-                    _ => Color.Lerp(new Color(140, 45, 32), new Color(70, 22, 16), intensityPulse)     //默认暗红渐变
-                };
-
-                //添加黑暗基调
-                float darknessBlend = 0.3f + layer * 0.1f; //外层更暗
-                baseFireColor = Color.Lerp(baseFireColor, new Color(30, 10, 8), darknessBlend * (1f - intensityPulse * 0.5f));
-
-                float layerAlpha = (1f - layer * 0.18f) * rune.Alpha * transitionAlpha;
-                baseFireColor *= layerAlpha * expandScale * intensityPulse * fireFlicker;
-                baseFireColor.A = 0;//加法混合
-
-                float finalScale = rune.Scale * (0.9f + intensityPulse * 0.4f) * expandScale;
-
-                //绘制火焰阴影底层（增强暗黑感）
-                Color shadowColor = new Color(20, 8, 6) with { A = 0 } * layerAlpha * 0.8f;
-                sb.Draw(runeTex, pos, fireFrame, shadowColor, rune.Rotation,
-                    new Vector2(frameWidth, frameHeight) / 2f, finalScale * 1.5f, SpriteEffects.None, 0f);
-
-                //绘制火焰主体（稍大的底层光晕）
-                sb.Draw(runeTex, pos, fireFrame, baseFireColor * 0.6f, rune.Rotation,
-                    new Vector2(frameWidth, frameHeight) / 2f, finalScale * 1.3f, SpriteEffects.None, 0f);
-
-                //绘制火焰核心（较亮）
-                sb.Draw(runeTex, pos, fireFrame, baseFireColor * 1.2f, rune.Rotation,
-                    new Vector2(frameWidth, frameHeight) / 2f, finalScale, SpriteEffects.None, 0f);
-
-                //绘制额外的火焰细节层（旋转角度不同，增加动感）
-                sb.Draw(runeTex, pos, fireFrame, baseFireColor * 0.4f, rune.Rotation + MathHelper.PiOver4,
-                    new Vector2(frameWidth, frameHeight) / 2f, finalScale * 0.8f, SpriteEffects.None, 0f);
-
-                //绘制星星核心闪光（暗红橙色调）
-                if (starTex != null && rune.CoreGlowAlpha > 0.3f) {
-                    float corePulse = (float)Math.Sin(rune.PulsePhase * 2f) * 0.5f + 0.5f;
-                    float coreIntensity = intensityPulse * corePulse * fireFlicker;
-
-                    //核心暗红光（不再是白光）
-                    Color coreColor = new Color(255, 90, 50) with { A = 0 } * rune.CoreGlowAlpha * coreIntensity * layerAlpha * 0.7f;
-                    sb.Draw(starTex, pos, null, coreColor, rune.Rotation,
-                        starTex.Size() / 2f, finalScale * 0.3f * (0.8f + corePulse * 0.4f), SpriteEffects.None, 0f);
-
-                    //核心深橙红光
-                    Color coreGlow = new Color(200, 70, 40) with { A = 0 } * rune.CoreGlowAlpha * coreIntensity * layerAlpha * 0.5f;
-                    sb.Draw(starTex, pos, null, coreGlow, rune.Rotation + MathHelper.PiOver4,
-                        starTex.Size() / 2f, finalScale * 0.4f * (0.7f + corePulse * 0.5f), SpriteEffects.None, 0f);
-
-                    //外层脉冲光环（暗红色）
-                    if (corePulse > 0.6f) {
-                        Color pulseRing = new Color(180, 60, 35) with { A = 0 } * rune.CoreGlowAlpha * (corePulse - 0.6f) * 2f * layerAlpha * 0.3f;
-                        sb.Draw(starTex, pos, null, pulseRing, rune.Rotation,
-                            starTex.Size() / 2f, finalScale * 0.6f * corePulse, SpriteEffects.None, 0f);
-                    }
-                }
-            }
-        }
-
-        private static void DrawCoreGlow(SpriteBatch sb, Texture2D glow, Vector2 center, float scale, Color c1, Color c2, Color c3, Color c4, float time) {
-            float pulse1 = (float)Math.Sin(time * 13f) * 0.4f + 0.6f;
-            float pulse2 = (float)Math.Sin(time * 10f + 1f) * 0.4f + 0.6f;
-            float pulse3 = (float)Math.Sin(time * 16f + 2f) * 0.4f + 0.6f;
-
-            //硫磺火核心辉光（暗红色调）
-            //最外层 - 深暗红
-            sb.Draw(glow, center, null, new Color(80, 25, 18) with { A = 0 } * scale * 0.5f, time * 1.8f,
-                glow.Size() / 2, scale * 3.2f, SpriteEffects.None, 0);
-
-            //中层 - 深红
-            sb.Draw(glow, center, null, c2 with { A = 0 } * scale * 0.75f * pulse1, -time * 1.3f,
-                glow.Size() / 2, scale * (2.4f + pulse1 * 0.4f), SpriteEffects.None, 0);
-
-            //内层 - 橙红
-            sb.Draw(glow, center, null, c1 with { A = 0 } * scale * pulse2, time * 0.9f,
-                glow.Size() / 2, scale * (1.8f + pulse2 * 0.5f), SpriteEffects.None, 0);
-
-            //高光层 - 亮橙红
-            sb.Draw(glow, center, null, c4 with { A = 0 } * scale * 0.6f * pulse2, -time * 2f,
-                glow.Size() / 2, scale * (1.3f + pulse2 * 0.3f), SpriteEffects.None, 0);
-
-            //核心 - 暗橙红（不再是纯白）
-            sb.Draw(glow, center, null, new Color(220, 80, 50) with { A = 0 } * scale * 0.4f * pulse3, 0,
-                glow.Size() / 2, scale * 1.1f * (1f + pulse3 * 0.3f), SpriteEffects.None, 0);
         }
     }
 }
