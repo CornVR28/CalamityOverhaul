@@ -42,6 +42,7 @@ namespace CalamityOverhaul.Common
         public static Asset<Effect> ElysiumHalo { get; set; }
         public static Asset<Effect> ElysiumStaff { get; set; }
         public static Asset<Effect> SerpentTrail { get; set; }
+        public static Asset<Effect> CelestialStar { get; set; }
         public override float Weight => 1.2f;
         public override void EndCaptureDraw(SpriteBatch spriteBatch, GraphicsDevice graphicsDevice, RenderTarget2D screenSwap) {
             DrawPrimitiveProjectile();

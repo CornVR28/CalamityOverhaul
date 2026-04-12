@@ -77,6 +77,12 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
                 glowPulse += 0.1f;
                 UpdateHolyRings();
 
+                //爆发期间维持玩家朝向与手臂姿态
+                Owner.itemTime = Owner.itemAnimation = 2;
+                float armRot = staffRotation - MathHelper.PiOver2;
+                Owner.SetCompositeArmFront(true, Player.CompositeArmStretchAmount.Full, armRot);
+                Owner.SetCompositeArmBack(true, Player.CompositeArmStretchAmount.Quarter, armRot + 0.3f * Owner.direction);
+
                 //爆发期间缓慢衰减照明
                 float burstProg = releaseTimer / ReleaseMaxTime;
                 float burstLight = (1f - burstProg) * 0.8f * releaseChargeRatio;
@@ -133,16 +139,18 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
         private void UpdatePositionAndRotation() {
             if (!ist) {
                 ist = true;
-                if (Owner.direction == 1) {
-                    staffRotation = MathHelper.ToRadians(-160);
-                }
+                //根据初始朝向设定起始旋转角，模拟抬起权杖的动作
+                staffRotation = Owner.direction == 1
+                    ? MathHelper.ToRadians(-160)
+                    : MathHelper.ToRadians(-20);
             }
 
             Vector2 toMouse = Main.MouseWorld - Owner.Center;
             float targetRot = toMouse.ToRotation();
 
-            //平滑旋转
-            staffRotation = MathHelper.Lerp(staffRotation, targetRot, 0.15f);
+            //使用角度差插值，避免越过±π边界时的跳变
+            float angleDiff = MathHelper.WrapAngle(targetRot - staffRotation);
+            staffRotation += angleDiff * 0.15f;
             Projectile.rotation = staffRotation + MathHelper.PiOver4;
 
             //权杖位置
@@ -154,7 +162,9 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
 
             //固定玩家动作
             Owner.itemTime = Owner.itemAnimation = 2;
-            Owner.SetCompositeArmFront(true, Player.CompositeArmStretchAmount.Full, staffRotation - MathHelper.PiOver2);
+            float armRot = staffRotation - MathHelper.PiOver2;
+            Owner.SetCompositeArmFront(true, Player.CompositeArmStretchAmount.Full, armRot);
+            Owner.SetCompositeArmBack(true, Player.CompositeArmStretchAmount.Quarter, armRot + 0.3f * Owner.direction);
         }
 
         /// <summary>
@@ -323,10 +333,14 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
                 staffColor = Color.Lerp(staffColor, new Color(255, 230, 180), glowFactor);
             }
 
-            //绘制权杖
-            Vector2 origin = new Vector2(Owner.direction > 0 ? 10 : 20, staffTex.Height - 65f);
-            float drawRot = staffRotation + MathHelper.ToRadians(76);
-            SpriteEffects effect = SpriteEffects.None;
+            //绘制权杖，根据朝向翻转贴图
+            //FlipVertically会翻转UV的V轴，origin需要对应调整Y坐标
+            int dir = Owner.direction;
+            SpriteEffects effect = dir > 0 ? SpriteEffects.None : SpriteEffects.FlipVertically;
+            float originX = dir > 0 ? 10f : 20f;
+            float originY = dir > 0 ? (staffTex.Height - 65f) : 65f;
+            Vector2 origin = new Vector2(originX, originY);
+            float drawRot = staffRotation + MathHelper.ToRadians(76) * dir;
             sb.Draw(staffTex, drawPos, null, staffColor, drawRot, origin, 1f, effect, 0);
 
             return false;

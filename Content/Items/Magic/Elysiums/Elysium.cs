@@ -1,4 +1,6 @@
-﻿using CalamityOverhaul.Content.UIs.SupertableUIs;
+﻿using CalamityOverhaul.Common;
+using CalamityOverhaul.Content.UIs.SupertableUIs;
+using Microsoft.Xna.Framework;
 using System.Collections.Generic;
 using Terraria;
 using Terraria.DataStructures;
@@ -55,6 +57,17 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
         }
 
         public override bool AltFunctionUse(Player player) => true;
+
+        public override void HoldItem(Player player) {
+            if (CWRKeySystem.WeponSkill_Q.JustPressed && player.CountProjectilesOfID<RevelationStar>() == 0) {
+                ShootState shootState = player.GetShootState();
+                //天体生成在鼠标位置正上方800像素处
+                Vector2 spawnPos = new Vector2(Main.MouseWorld.X, Main.MouseWorld.Y - 800f);
+                Projectile.NewProjectile(shootState.Source, spawnPos
+                    , Vector2.Zero, ModContent.ProjectileType<RevelationStar>()
+                    , shootState.WeaponDamage * 2, shootState.WeaponKnockback, player.whoAmI);
+            }
+        }
 
         public override bool CanUseItem(Player player) {
             if (player.altFunctionUse == 2) {
