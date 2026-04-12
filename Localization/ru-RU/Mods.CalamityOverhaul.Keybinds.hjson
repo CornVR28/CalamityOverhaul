@@ -13,8 +13,8 @@ Halibut_Teleport.DisplayName: Палтус: Телепортация в доме
 Halibut_UIControl.DisplayName: Палтус: Панель управления
 Halibut_Skill_L.DisplayName: Палтус: Предыдущий навык
 Halibut_Skill_R.DisplayName: Палтус: Следующий навык
-Pandemonium_Q.DisplayName: Пандемониум: Кара серного огня
-Pandemonium_R.DisplayName: Пандемониум: Конец всех демонов
+// WeponSkill_Q.DisplayName: WeponSkill: Q
+// WeponSkill_R.DisplayName: WeponSkill: R
 AriaofTheCosmos_Q.DisplayName: Ария Космоса: Страж звездного кольца
 AriaofTheCosmos_R.DisplayName: Ария Космоса: Гамма-всплеск
 JusticeUnveiled.DisplayName: Явление правосудия: Свершить правосудие

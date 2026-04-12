@@ -19,8 +19,8 @@ namespace CalamityOverhaul.Common
         public static ModKeybind Halibut_UIControl { get; private set; }
         public static ModKeybind Halibut_Skill_L { get; private set; }
         public static ModKeybind Halibut_Skill_R { get; private set; }
-        public static ModKeybind Pandemonium_Q { get; private set; }
-        public static ModKeybind Pandemonium_R { get; private set; }
+        public static ModKeybind WeponSkill_Q { get; private set; }
+        public static ModKeybind WeponSkill_R { get; private set; }
         public static ModKeybind AriaofTheCosmos_Q { get; private set; }
         public static ModKeybind AriaofTheCosmos_R { get; private set; }
         public static ModKeybind JusticeUnveiled { get; private set; }
@@ -48,10 +48,8 @@ namespace CalamityOverhaul.Common
             Halibut_UIControl = KeybindLoader.RegisterKeybind(mod, "Halibut_UIControl", "M");
             Halibut_Skill_L = KeybindLoader.RegisterKeybind(mod, "Halibut_Skill_L", "Q");
             Halibut_Skill_R = KeybindLoader.RegisterKeybind(mod, "Halibut_Skill_R", "E");
-            Pandemonium_Q = KeybindLoader.RegisterKeybind(mod, "Pandemonium_Q", "Q");
-            Pandemonium_R = KeybindLoader.RegisterKeybind(mod, "Pandemonium_R", "R");
-            AriaofTheCosmos_Q = KeybindLoader.RegisterKeybind(mod, "AriaofTheCosmos_Q", "Q");
-            AriaofTheCosmos_R = KeybindLoader.RegisterKeybind(mod, "AriaofTheCosmos_R", "R");
+            WeponSkill_Q = KeybindLoader.RegisterKeybind(mod, "WeponSkill_Q", "Q");
+            WeponSkill_R = KeybindLoader.RegisterKeybind(mod, "WeponSkill_R", "R");
             JusticeUnveiled = KeybindLoader.RegisterKeybind(mod, "JusticeUnveiled", "W");
             EmblemOfDread_Dash = KeybindLoader.RegisterKeybind(mod, "EmblemOfDread_Dash", "V");
             EyeOfSingularity_QuantumLeap = KeybindLoader.RegisterKeybind(mod, "EyeOfSingularity_QuantumLeap", "B");
@@ -77,10 +75,8 @@ namespace CalamityOverhaul.Common
             Halibut_UIControl = null;
             Halibut_Skill_L = null;
             Halibut_Skill_R = null;
-            Pandemonium_Q = null;
-            Pandemonium_R = null;
-            AriaofTheCosmos_Q = null;
-            AriaofTheCosmos_R = null;
+            WeponSkill_Q = null;
+            WeponSkill_R = null;
             JusticeUnveiled = null;
             EmblemOfDread_Dash = null;
             EyeOfSingularity_QuantumLeap = null;

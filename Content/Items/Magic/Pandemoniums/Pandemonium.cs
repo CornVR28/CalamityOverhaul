@@ -56,8 +56,8 @@ namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
         }
 
         public override void ModifyTooltips(List<TooltipLine> tooltips) {
-            tooltips.InsertHotkeyBinding(CWRKeySystem.Pandemonium_Q, "PandemoniumQSkill", CWRLocText.Instance.Notbound.Value);
-            tooltips.InsertHotkeyBinding(CWRKeySystem.Pandemonium_R, "PandemoniumRSkill", CWRLocText.Instance.Notbound.Value);
+            tooltips.InsertHotkeyBinding(CWRKeySystem.WeponSkill_Q, "PandemoniumQSkill", CWRLocText.Instance.Notbound.Value);
+            tooltips.InsertHotkeyBinding(CWRKeySystem.WeponSkill_R, "PandemoniumRSkill", CWRLocText.Instance.Notbound.Value);
 
             if (Main.LocalPlayer.TryGetADVSave(out ADVSave save) && save.Get<SupCalADVData>().EternalBlazingNow) {
                 TooltipLine line = new(Mod, "Story", SupCalDisplayText.Story4.Value);
@@ -67,13 +67,13 @@ namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
         }
 
         public override void HoldItem(Player player) {
-            if (CWRKeySystem.Pandemonium_Q.JustPressed && player.CountProjectilesOfID<PandemoniumQSkill>() == 0) {
+            if (CWRKeySystem.WeponSkill_Q.JustPressed && player.CountProjectilesOfID<PandemoniumQSkill>() == 0) {
                 ShootState shootState = player.GetShootState();
                 Projectile.NewProjectile(shootState.Source, player.Center
                     , Vector2.Zero, ModContent.ProjectileType<PandemoniumQSkill>()
                     , shootState.WeaponDamage, shootState.WeaponKnockback, player.whoAmI);
             }
-            if (CWRKeySystem.Pandemonium_R.JustPressed && player.CountProjectilesOfID<PandemoniumRSkill>() == 0) {
+            if (CWRKeySystem.WeponSkill_R.JustPressed && player.CountProjectilesOfID<PandemoniumRSkill>() == 0) {
                 ShootState shootState = player.GetShootState();
                 Projectile.NewProjectile(shootState.Source, player.Center
                     , Vector2.Zero, ModContent.ProjectileType<PandemoniumRSkill>()
