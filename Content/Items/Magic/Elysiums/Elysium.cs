@@ -59,13 +59,29 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
         public override bool AltFunctionUse(Player player) => true;
 
         public override void HoldItem(Player player) {
-            if (CWRKeySystem.WeponSkill_Q.JustPressed && player.CountProjectilesOfID<RevelationStar>() == 0) {
-                ShootState shootState = player.GetShootState();
-                //天体生成在鼠标位置正上方800像素处
-                Vector2 spawnPos = new Vector2(Main.MouseWorld.X, Main.MouseWorld.Y - 800f);
-                Projectile.NewProjectile(shootState.Source, spawnPos
-                    , Vector2.Zero, ModContent.ProjectileType<RevelationStar>()
-                    , shootState.WeaponDamage * 2, shootState.WeaponKnockback, player.whoAmI);
+            if (CWRKeySystem.WeponSkill_Q.JustPressed) {
+                if (player.TryGetModPlayer<ElysiumPlayer>(out var ep)) {
+                    //满足殉道条件时按Q进入启示录
+                    if (ep.GetMartyrdomEnergy() >= 11
+                        && !ep.Martyred[3]
+                        && ep.HasDiscipleOfType(ModContent.ProjectileType<John>())
+                        && !ep.IsRevelationActive
+                        && player.CountProjectilesOfID<RevelationDomain>() == 0) {
+                        ep.ActivateRevelation(player);
+                    }
+                    else if (!ep.IsRevelationActive) {
+                        //未进入启示录时按Q召唤天雷
+                        Projectile.NewProjectile(
+                            player.GetSource_ItemUse(Item),
+                            player.Center,
+                            Vector2.Zero,
+                            ModContent.ProjectileType<DivineThunderStrike>(),
+                            (int)(Item.damage * 1.5f),
+                            Item.knockBack,
+                            player.whoAmI
+                        );
+                    }
+                }
             }
         }
 
@@ -87,11 +103,27 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
         }
 
         public override void ModifyTooltips(List<TooltipLine> tooltips) {
-            //显示当前门徒数量
+            //显示当前门徒数量和殉道能量
             if (Main.LocalPlayer.TryGetModPlayer<ElysiumPlayer>(out var ep)) {
                 int count = ep.GetDiscipleCount();
                 string discipleInfo = count > 0 ? $"当前门徒: {count}/12" : "尚无门徒追随";
                 tooltips.Add(new TooltipLine(Mod, "DiscipleCount", discipleInfo));
+
+                int energy = ep.GetMartyrdomEnergy();
+                if (energy > 0) {
+                    string energyBar = "";
+                    for (int i = 0; i < 11; i++) {
+                        energyBar += i < energy ? "█" : "░";
+                    }
+                    tooltips.Add(new TooltipLine(Mod, "MartyrdomEnergy", $"[c/FFD700:殉道之力: {energyBar} {energy}/11]"));
+                }
+
+                if (energy >= 11 && !ep.IsRevelationActive) {
+                    tooltips.Add(new TooltipLine(Mod, "RevelationReady", "[c/FFFFFF:按Q键 — 约翰将殉道，启示录将降临]"));
+                }
+                else if (ep.IsRevelationActive) {
+                    tooltips.Add(new TooltipLine(Mod, "RevelationActive", "[c/FFD700:启示录已降临]"));
+                }
 
                 if (count == 12) {
                     tooltips.Add(new TooltipLine(Mod, "JudasWarning", "[c/FF4444:警告: 犹大的背叛已潜伏于你的身边]"));

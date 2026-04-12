@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Xna.Framework;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Terraria;
@@ -47,6 +48,17 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
         //上次检查犹大背刺的时间
         private int judasBetrayalCooldown = 0;
 
+        //殉道追踪系统
+        public bool[] Martyred; //记录12门徒中哪些已殉道
+        public bool IsRevelationActive; //启示录阶段是否激活
+        private int revelationDuration; //启示录剩余持续时间
+
+        public override void Initialize() {
+            Martyred = new bool[12];
+            IsRevelationActive = false;
+            revelationDuration = 0;
+        }
+
         public override void ResetEffects() {
             //清理无效的门徒引用
             ActiveDisciples.RemoveAll(i => i < 0 || i >= Main.maxProjectiles || !Main.projectile[i].active
@@ -69,6 +81,16 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
 
             if (GetDiscipleCount() == 12 && judasBetrayalCooldown <= 0) {
                 CheckJudasBetrayal();
+            }
+
+            //启示录阶段倒计时
+            if (IsRevelationActive) {
+                revelationDuration--;
+                if (revelationDuration <= 0) {
+                    IsRevelationActive = false;
+                    //重置殉道状态，允许重新召唤门徒
+                    Array.Clear(Martyred, 0, 12);
+                }
             }
 
             //门徒增益效果
@@ -136,15 +158,62 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
         }
 
         /// <summary>
-        /// 获取下一个可用的门徒类型
+        /// 获取下一个可用的门徒类型(跳过已殉道的)
         /// </summary>
         private int GetNextAvailableDiscipleType() {
             for (int i = 0; i < DiscipleTypes.Length; i++) {
+                if (Martyred != null && Martyred[i]) continue; //已殉道的不可重新召唤
                 if (!HasDiscipleOfType(DiscipleTypes[i])) {
                     return DiscipleTypes[i];
                 }
             }
             return -1;
+        }
+
+        /// <summary>
+        /// 获取殉道能量(约翰除外的已殉道门徒数)
+        /// </summary>
+        public int GetMartyrdomEnergy() {
+            if (Martyred == null) return 0;
+            int count = 0;
+            for (int i = 0; i < 12; i++) {
+                if (i == 3) continue; //约翰不计入被动殉道能量
+                if (Martyred[i]) count++;
+            }
+            return count;
+        }
+
+        /// <summary>
+        /// 激活启示录阶段：约翰殉道，展开天国领域
+        /// </summary>
+        public void ActivateRevelation(Player player) {
+            //约翰殉道
+            Martyred[3] = true;
+            RemoveDiscipleByType(ModContent.ProjectileType<John>());
+            IsRevelationActive = true;
+            revelationDuration = 600; //10秒持续时间
+
+            //播放神圣雷鸣音效
+            SoundEngine.PlaySound(SoundID.Item122 with { Volume = 2f, Pitch = -0.3f }, player.Center);
+            SoundEngine.PlaySound(SoundID.Item105 with { Volume = 1.5f, Pitch = 0.3f }, player.Center);
+
+            //神圣粒子爆发
+            for (int i = 0; i < 80; i++) {
+                Vector2 vel = Main.rand.NextVector2Circular(8f, 8f);
+                int dustType = Main.rand.NextBool(3) ? DustID.GoldFlame : DustID.SilverFlame;
+                Dust d = Dust.NewDustPerfect(player.Center, dustType, vel, 80, default, 2.5f);
+                d.noGravity = true;
+            }
+
+            //生成天国领域弹幕
+            ShootState shootState = player.GetShootState();
+            Projectile.NewProjectile(
+                shootState.Source, player.Center, Vector2.Zero,
+                ModContent.ProjectileType<RevelationDomain>(),
+                shootState.WeaponDamage * 3, 0f, player.whoAmI
+            );
+
+            CombatText.NewText(player.Hitbox, Color.Gold, "启示录", true);
         }
 
         /// <summary>
@@ -425,26 +494,42 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
         }
 
         /// <summary>
-        /// 当玩家被Boss伤害时，门徒可能会死亡
+        /// 当玩家被Boss伤害时，门徒可能会殉道(约翰除外)
         /// </summary>
         public override void OnHurt(Player.HurtInfo info) {
             //检查是否被Boss攻击
             if (info.DamageSource.TryGetCausingEntity(out Entity entity)) {
                 if (entity is NPC npc && (npc.boss || NPCID.Sets.ShouldBeCountedAsBoss[npc.type])) {
-                    //Boss攻击有几率杀死一个门徒
-                    if (Main.rand.NextBool(3) && ActiveDisciples.Count > 0) {
-                        int randomIndex = Main.rand.Next(ActiveDisciples.Count);
-                        int projIndex = ActiveDisciples[randomIndex];
-                        if (projIndex >= 0 && projIndex < Main.maxProjectiles && Main.projectile[projIndex].active) {
-                            Projectile proj = Main.projectile[projIndex];
-                            //获取门徒名称
-                            string name = "门徒";
-                            if (proj.ModProjectile is BaseDisciple disciple) {
-                                name = disciple.DiscipleName;
+                    //Boss攻击必定杀死一个门徒
+                    if (ActiveDisciples.Count > 0) {
+                        //收集可殉道的门徒(排除约翰，index=3)
+                        List<int> eligible = [];
+                        for (int i = 0; i < ActiveDisciples.Count; i++) {
+                            int projIdx = ActiveDisciples[i];
+                            if (projIdx >= 0 && projIdx < Main.maxProjectiles && Main.projectile[projIdx].active) {
+                                if (Main.projectile[projIdx].ModProjectile is BaseDisciple disc && disc.DiscipleIndex != 3) {
+                                    eligible.Add(i);
+                                }
                             }
-                            CombatText.NewText(proj.Hitbox, Color.Red, $"{name} 殉道了");
-                            proj.Kill();
-                            ActiveDisciples.RemoveAt(randomIndex);
+                        }
+
+                        if (eligible.Count > 0) {
+                            int chosenListIndex = eligible[Main.rand.Next(eligible.Count)];
+                            int projIndex = ActiveDisciples[chosenListIndex];
+                            Projectile proj = Main.projectile[projIndex];
+
+                            if (proj.ModProjectile is BaseDisciple disciple) {
+                                int dIdx = disciple.DiscipleIndex;
+                                if (Martyred != null) Martyred[dIdx] = true;
+
+                                CombatText.NewText(proj.Hitbox, Color.Red, $"{disciple.DiscipleName} 殉道了");
+                                //显示能量增长提示
+                                int energy = GetMartyrdomEnergy();
+                                CombatText.NewText(Player.Hitbox, Color.Gold, $"殉道之力 {energy}/11");
+
+                                proj.Kill();
+                                ActiveDisciples.RemoveAt(chosenListIndex);
+                            }
                         }
                     }
                 }
