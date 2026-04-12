@@ -61,6 +61,15 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
         public override void HoldItem(Player player) {
             if (CWRKeySystem.WeponSkill_Q.JustPressed) {
                 if (player.TryGetModPlayer<ElysiumPlayer>(out var ep)) {
+                    if (!ep.HasElysiumInInventory()) {
+                        return;
+                    }
+
+                    if (ep.IsRevelationActive) {
+                        ep.DeactivateRevelation(player);
+                        return;
+                    }
+
                     //满足殉道条件时按Q进入启示录
                     if (ep.GetMartyrdomEnergy() >= 11
                         && !ep.Martyred[3]
@@ -86,7 +95,17 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
         }
 
         public override bool CanUseItem(Player player) {
+            player.TryGetModPlayer<ElysiumPlayer>(out var ep);
+
             if (player.altFunctionUse == 2) {
+                if (ep != null && ep.IsRevelationActive) {
+                    //右键：启示录期间召唤四骑士
+                    Item.mana = 15;
+                    Item.useTime = Item.useAnimation = 18;
+                    Item.channel = false;
+                    return ep.GetHorsemanCount() < 4;
+                }
+
                 //右键：转化NPC为门徒
                 Item.mana = 50;
                 Item.useTime = Item.useAnimation = 30;
@@ -122,7 +141,8 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
                     tooltips.Add(new TooltipLine(Mod, "RevelationReady", "[c/FFFFFF:按Q键 — 约翰将殉道，启示录将降临]"));
                 }
                 else if (ep.IsRevelationActive) {
-                    tooltips.Add(new TooltipLine(Mod, "RevelationActive", "[c/FFD700:启示录已降临]"));
+                    int horsemen = ep.GetHorsemanCount();
+                    tooltips.Add(new TooltipLine(Mod, "RevelationActive", $"[c/FFD700:启示录已降临 按Q终止 右键召唤四骑士 {horsemen}/4]"));
                 }
 
                 if (count == 12) {
@@ -133,9 +153,14 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
 
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback) {
             if (player.altFunctionUse == 2) {
-                //右键：尝试转化最近的NPC为门徒
                 if (player.TryGetModPlayer<ElysiumPlayer>(out var ep)) {
-                    ep.TryConvertNearestNPC(player);
+                    if (ep.IsRevelationActive) {
+                        ep.SummonNextHorseman(player);
+                    }
+                    else {
+                        //右键：尝试转化最近的NPC为门徒
+                        ep.TryConvertNearestNPC(player);
+                    }
                 }
                 return false;
             }

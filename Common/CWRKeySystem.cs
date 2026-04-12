@@ -21,8 +21,6 @@ namespace CalamityOverhaul.Common
         public static ModKeybind Halibut_Skill_R { get; private set; }
         public static ModKeybind WeponSkill_Q { get; private set; }
         public static ModKeybind WeponSkill_R { get; private set; }
-        public static ModKeybind AriaofTheCosmos_Q { get; private set; }
-        public static ModKeybind AriaofTheCosmos_R { get; private set; }
         public static ModKeybind JusticeUnveiled { get; private set; }
         public static ModKeybind EmblemOfDread_Dash { get; private set; }
         public static ModKeybind EyeOfSingularity_QuantumLeap { get; private set; }

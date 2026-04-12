@@ -51,10 +51,10 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
 
         public override bool Active {
             get {
-                //玩家持有或背包中有天国极乐且有殉道能量时显示
+                //启示录期间强制显示；非启示录时按原能量逻辑显示
                 if (!Main.LocalPlayer.active || Main.LocalPlayer.dead) return false;
                 if (!Main.LocalPlayer.TryGetModPlayer<ElysiumPlayer>(out var ep)) return false;
-                bool hasElysium = Main.LocalPlayer.HeldItem?.type == ModContent.ItemType<Elysium>();
+                bool hasElysium = ep.HasElysiumInInventory();
                 bool hasEnergy = ep.GetMartyrdomEnergy() > 0 || ep.IsRevelationActive;
                 return (hasElysium && hasEnergy) || uiFadeAlpha > 0.01f;
             }
@@ -63,8 +63,8 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
         public override void Update() {
             if (!Main.LocalPlayer.TryGetModPlayer<ElysiumPlayer>(out var ep)) return;
 
-            bool shouldShow = Main.LocalPlayer.HeldItem?.type == ModContent.ItemType<Elysium>()
-                && (ep.GetMartyrdomEnergy() > 0 || ep.IsRevelationActive);
+            bool heldElysium = Main.LocalPlayer.HeldItem?.type == ModContent.ItemType<Elysium>();
+            bool shouldShow = ep.IsRevelationActive || (heldElysium && ep.GetMartyrdomEnergy() > 0);
 
             if (shouldShow) {
                 uiFadeAlpha = Math.Min(1f, uiFadeAlpha + 0.06f);
@@ -120,7 +120,8 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
             string text;
             Color textColor;
             if (ep.IsRevelationActive) {
-                text = "启示录";
+                int horsemanCount = ep.GetHorsemanCount();
+                text = $"启示录 四骑士 {horsemanCount}/4";
                 float flash = (float)Math.Sin(revelationFlash) * 0.3f + 0.7f;
                 textColor = Color.Lerp(Color.Gold, Color.White, flash);
             }

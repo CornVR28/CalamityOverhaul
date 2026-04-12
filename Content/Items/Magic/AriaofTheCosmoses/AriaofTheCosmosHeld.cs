@@ -78,7 +78,7 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
             }
 
             //Q技能检测
-            if (Projectile.IsOwnedByLocalPlayer() && CWRKeySystem.AriaofTheCosmos_Q.JustPressed && qSkillCooldown <= 0) {
+            if (Projectile.IsOwnedByLocalPlayer() && CWRKeySystem.WeponSkill_Q.JustPressed && qSkillCooldown <= 0) {
                 if (Owner.CountProjectilesOfID<AriaQSkill>() == 0) {
                     int qSkillIndex = Projectile.NewProjectile(
                         Source,
@@ -110,7 +110,7 @@ namespace CalamityOverhaul.Content.Items.Magic.AriaofTheCosmoses
             }
 
             //R技能检测
-            if (Projectile.IsOwnedByLocalPlayer() && CWRKeySystem.AriaofTheCosmos_R.JustPressed && rSkillCooldown <= 0) {
+            if (Projectile.IsOwnedByLocalPlayer() && CWRKeySystem.WeponSkill_R.JustPressed && rSkillCooldown <= 0) {
                 if (Owner.CountProjectilesOfID<AriaRSkill>() == 0) {
                     int rSkillIndex = Projectile.NewProjectile(
                         Source,

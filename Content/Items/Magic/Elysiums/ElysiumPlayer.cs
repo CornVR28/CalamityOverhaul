@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using CalamityOverhaul.Common;
+using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -51,12 +52,15 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
         //殉道追踪系统
         public bool[] Martyred; //记录12门徒中哪些已殉道
         public bool IsRevelationActive; //启示录阶段是否激活
-        private int revelationDuration; //启示录剩余持续时间
+
+        //天启四骑士
+        public bool[] SummonedHorsemen; //0瘟疫 1战争 2饥荒 3死亡
+        public static readonly string[] HorsemanNames = ["瘟疫", "战争", "饥荒", "死亡"];
 
         public override void Initialize() {
             Martyred = new bool[12];
             IsRevelationActive = false;
-            revelationDuration = 0;
+            SummonedHorsemen = new bool[4];
         }
 
         public override void ResetEffects() {
@@ -74,6 +78,12 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
         }
 
         public override void PostUpdate() {
+            if (IsRevelationActive && !HasElysiumInInventory()) {
+                //防止极端情况下状态残留：没有武器本体时强制终止启示录
+                DeactivateRevelation(Player);
+                return;
+            }
+
             //犹大背刺检测
             if (judasBetrayalCooldown > 0) {
                 judasBetrayalCooldown--;
@@ -83,14 +93,18 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
                 CheckJudasBetrayal();
             }
 
-            //启示录阶段倒计时
+            if (Player.dead && IsRevelationActive) {
+                DeactivateRevelation(Player, false);
+            }
+
             if (IsRevelationActive) {
-                revelationDuration--;
-                if (revelationDuration <= 0) {
-                    IsRevelationActive = false;
-                    //重置殉道状态，允许重新召唤门徒
-                    Array.Clear(Martyred, 0, 12);
+                //启示录激活时，允许不手持天国极乐也能用Q安全退出
+                if (CWRKeySystem.WeponSkill_Q.JustPressed && Player.HeldItem?.type != ModContent.ItemType<Elysium>()) {
+                    DeactivateRevelation(Player);
+                    return;
                 }
+
+                SyncHorsemanState();
             }
 
             //门徒增益效果
@@ -183,6 +197,41 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
             return count;
         }
 
+        public int GetHorsemanCount() {
+            if (SummonedHorsemen == null) return 0;
+            int count = 0;
+            for (int i = 0; i < SummonedHorsemen.Length; i++) {
+                if (SummonedHorsemen[i]) count++;
+            }
+            return count;
+        }
+
+        public bool HasHorseman(int horsemanIndex) {
+            return SummonedHorsemen != null
+                && horsemanIndex >= 0
+                && horsemanIndex < SummonedHorsemen.Length
+                && SummonedHorsemen[horsemanIndex];
+        }
+
+        public bool HasDeathAmplification() {
+            return IsRevelationActive && HasHorseman(3);
+        }
+
+        public bool HasElysiumInInventory() {
+            int elysiumType = ModContent.ItemType<Elysium>();
+            if (Player.HeldItem != null && Player.HeldItem.type == elysiumType) {
+                return true;
+            }
+
+            foreach (Item item in Player.inventory) {
+                if (item != null && !item.IsAir && item.type == elysiumType) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         /// <summary>
         /// 激活启示录阶段：约翰殉道，展开天国领域
         /// </summary>
@@ -191,7 +240,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
             Martyred[3] = true;
             RemoveDiscipleByType(ModContent.ProjectileType<John>());
             IsRevelationActive = true;
-            revelationDuration = 600; //10秒持续时间
+            Array.Clear(SummonedHorsemen, 0, SummonedHorsemen.Length);
 
             //播放神圣雷鸣音效
             SoundEngine.PlaySound(SoundID.Item122 with { Volume = 2f, Pitch = -0.3f }, player.Center);
@@ -214,6 +263,115 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
             );
 
             CombatText.NewText(player.Hitbox, Color.Gold, "启示录", true);
+        }
+
+        public void DeactivateRevelation(Player player, bool clearMartyrdom = true) {
+            if (!IsRevelationActive) {
+                return;
+            }
+
+            IsRevelationActive = false;
+            Array.Clear(SummonedHorsemen, 0, SummonedHorsemen.Length);
+
+            foreach (Projectile projectile in Main.projectile) {
+                if (!projectile.active || projectile.owner != player.whoAmI) {
+                    continue;
+                }
+
+                if (projectile.type == ModContent.ProjectileType<RevelationDomain>()
+                    || projectile.type == ModContent.ProjectileType<ApocalypseHorseman>()) {
+                    projectile.Kill();
+                }
+            }
+
+            if (clearMartyrdom) {
+                Array.Clear(Martyred, 0, Martyred.Length);
+            }
+
+            SoundEngine.PlaySound(SoundID.Item8 with { Volume = 1.2f, Pitch = -0.15f }, player.Center);
+            CombatText.NewText(player.Hitbox, Color.Silver, "启示录终止");
+        }
+
+        public void SummonNextHorseman(Player player) {
+            if (!IsRevelationActive) {
+                return;
+            }
+
+            int nextIndex = GetHorsemanCount();
+            if (nextIndex >= 4) {
+                CombatText.NewText(player.Hitbox, Color.Gray, "四骑士已齐聚");
+                return;
+            }
+
+            if (SummonedHorsemen[nextIndex]) {
+                return;
+            }
+
+            HorsemanStyle style = HorsemanCatalog.Get(nextIndex);
+            Vector2 summonDirection = (MathHelper.PiOver2 * nextIndex - MathHelper.PiOver4).ToRotationVector2();
+            Vector2 summonPosition = player.Center + summonDirection * style.EntryRadius + new Vector2(0f, -style.EntryHeight * 0.45f);
+
+            ShootState shootState = player.GetShootState();
+            Projectile.NewProjectile(
+                shootState.Source,
+                summonPosition,
+                Vector2.Zero,
+                ModContent.ProjectileType<ApocalypseHorseman>(),
+                shootState.WeaponDamage,
+                0f,
+                player.whoAmI,
+                nextIndex,
+                Main.GameUpdateCount % 1000
+            );
+
+            SummonedHorsemen[nextIndex] = true;
+
+            for (int i = 0; i < 32; i++) {
+                float angle = MathHelper.TwoPi * i / 32f;
+                Vector2 velocity = angle.ToRotationVector2() * Main.rand.NextFloat(2.5f, 7f) + summonDirection * 1.5f;
+                Dust dust = Dust.NewDustPerfect(summonPosition, style.DustType, velocity, 80, style.PrimaryColor, 1.45f);
+                dust.noGravity = true;
+                dust.fadeIn = 1f;
+            }
+
+            for (int i = 0; i < 16; i++) {
+                Vector2 lineVelocity = summonDirection.RotatedBy(Main.rand.NextFloat(-0.35f, 0.35f)) * Main.rand.NextFloat(6f, 14f);
+                Dust streak = Dust.NewDustPerfect(player.Center + summonDirection * 20f, style.DustType, lineVelocity, 60, style.SecondaryColor, 1.2f);
+                streak.noGravity = true;
+            }
+
+            SoundEngine.PlaySound(SoundID.Item117 with { Volume = 1.25f, Pitch = -0.22f + nextIndex * 0.12f }, summonPosition);
+            SoundEngine.PlaySound(SoundID.Item122 with { Volume = 0.8f, Pitch = -0.45f + nextIndex * 0.08f }, summonPosition);
+            CombatText.NewText(player.Hitbox, style.TextColor, $"{HorsemanNames[nextIndex]}骑士降临", true);
+        }
+
+        private void SyncHorsemanState() {
+            if (SummonedHorsemen == null) {
+                return;
+            }
+
+            for (int i = 0; i < SummonedHorsemen.Length; i++) {
+                if (!SummonedHorsemen[i]) {
+                    continue;
+                }
+
+                bool exists = false;
+                foreach (Projectile projectile in Main.projectile) {
+                    if (!projectile.active || projectile.owner != Player.whoAmI) {
+                        continue;
+                    }
+
+                    if (projectile.type == ModContent.ProjectileType<ApocalypseHorseman>()
+                        && (int)projectile.ai[0] == i) {
+                        exists = true;
+                        break;
+                    }
+                }
+
+                if (!exists) {
+                    SummonedHorsemen[i] = false;
+                }
+            }
         }
 
         /// <summary>
@@ -467,29 +625,46 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
         /// </summary>
         private void ApplyDiscipleBonuses() {
             int count = GetDiscipleCount();
-            if (count == 0) return;
+            if (count > 0) {
+                //11门徒时的强力增益(没有犹大的危险)
+                if (count == 11) {
+                    Player.GetDamage(DamageClass.Generic) += 0.25f;
+                    Player.GetCritChance(DamageClass.Generic) += 15;
+                    Player.statDefense += 20;
+                    Player.lifeRegen += 5;
+                }
+                //12门徒时的超强增益(但有犹大背刺风险)
+                else if (count == 12) {
+                    Player.GetDamage(DamageClass.Generic) += 0.50f;
+                    Player.GetCritChance(DamageClass.Generic) += 30;
+                    Player.statDefense += 40;
+                    Player.lifeRegen += 10;
+                    Player.moveSpeed += 0.3f;
+                }
+                //其他数量按比例增益
+                else {
+                    float ratio = count / 12f;
+                    Player.GetDamage(DamageClass.Generic) += 0.15f * ratio;
+                    Player.GetCritChance(DamageClass.Generic) += (int)(10 * ratio);
+                    Player.statDefense += (int)(15 * ratio);
+                }
+            }
 
-            //11门徒时的强力增益(没有犹大的危险)
-            if (count == 11) {
-                Player.GetDamage(DamageClass.Generic) += 0.25f;
-                Player.GetCritChance(DamageClass.Generic) += 15;
-                Player.statDefense += 20;
-                Player.lifeRegen += 5;
-            }
-            //12门徒时的超强增益(但有犹大背刺风险)
-            else if (count == 12) {
-                Player.GetDamage(DamageClass.Generic) += 0.50f;
-                Player.GetCritChance(DamageClass.Generic) += 30;
-                Player.statDefense += 40;
-                Player.lifeRegen += 10;
-                Player.moveSpeed += 0.3f;
-            }
-            //其他数量按比例增益
-            else {
-                float ratio = count / 12f;
-                Player.GetDamage(DamageClass.Generic) += 0.15f * ratio;
-                Player.GetCritChance(DamageClass.Generic) += (int)(10 * ratio);
-                Player.statDefense += (int)(15 * ratio);
+            if (IsRevelationActive) {
+                bool deathAmp = HasDeathAmplification();
+
+                if (HasHorseman(1)) {
+                    Player.GetDamage(DamageClass.Generic) += deathAmp ? 0.8f : 0.42f;
+                    Player.GetCritChance(DamageClass.Generic) += deathAmp ? 40 : 22;
+                }
+
+                if (HasHorseman(2)) {
+                    Player.GetArmorPenetration(DamageClass.Generic) += deathAmp ? 120 : 60;
+                }
+
+                if (HasHorseman(0)) {
+                    Player.GetDamage(DamageClass.Generic) += deathAmp ? 0.18f : 0.08f;
+                }
             }
         }
 
@@ -534,6 +709,44 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
                     }
                 }
             }
+        }
+
+        public override void ModifyHitNPC(NPC target, ref NPC.HitModifiers modifiers) {
+            if (IsRevelationActive && HasHorseman(2)) {
+                modifiers.DefenseEffectiveness *= 0f;
+                modifiers.ScalingArmorPenetration += HasDeathAmplification() ? 1.2f : 0.75f;
+            }
+        }
+
+        public override void ModifyHitNPCWithProj(Projectile proj, NPC target, ref NPC.HitModifiers modifiers) {
+            if (IsRevelationActive && HasHorseman(2) && proj.owner == Player.whoAmI) {
+                modifiers.DefenseEffectiveness *= 0f;
+                modifiers.ScalingArmorPenetration += HasDeathAmplification() ? 1.2f : 0.75f;
+            }
+        }
+
+        public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone) {
+            ApplyPlagueMark(target);
+        }
+
+        public override void OnHitNPCWithItem(Item item, NPC target, NPC.HitInfo hit, int damageDone) {
+            ApplyPlagueMark(target);
+        }
+
+        public override void OnHitNPCWithProj(Projectile proj, NPC target, NPC.HitInfo hit, int damageDone) {
+            if (proj.owner == Player.whoAmI) {
+                ApplyPlagueMark(target);
+            }
+        }
+
+        private void ApplyPlagueMark(NPC target) {
+            if (!IsRevelationActive || !HasHorseman(0) || target == null || !target.active || target.friendly) {
+                return;
+            }
+
+            int plagueTime = HasDeathAmplification() ? 420 : 240;
+            float plagueIntensity = HasDeathAmplification() ? 1.35f : 0.8f;
+            RevelationPlagueNPC.Apply(target, plagueTime, plagueIntensity, Player.whoAmI);
         }
     }
 }

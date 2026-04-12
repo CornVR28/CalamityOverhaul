@@ -24,9 +24,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
         private ref float Timer => ref Projectile.ai[0];
 
         //领域参数
-        private const int Duration = 600; //10秒
         private const int ExpandFrames = 60; //展开时间
-        private const int ContractFrames = 60; //收缩时间
         private const float MaxRadius = 1000f; //最大半径(像素)
         private const int DamageInterval = 15; //伤害间隔(帧)
 
@@ -63,7 +61,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
             Projectile.DamageType = DamageClass.Magic;
             Projectile.usesLocalNPCImmunity = true;
             Projectile.localNPCHitCooldown = DamageInterval;
-            Projectile.timeLeft = Duration;
+            Projectile.timeLeft = 2;
         }
 
         public override void AI() {
@@ -72,6 +70,13 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
                 return;
             }
 
+            if (!Owner.TryGetModPlayer<ElysiumPlayer>(out var ep) || !ep.IsRevelationActive) {
+                Projectile.Kill();
+                return;
+            }
+
+            Projectile.timeLeft = 2;
+
             Timer++;
             shaderTime += 0.016f;
 
@@ -79,28 +84,19 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
             Projectile.Center = Owner.Center;
 
             //展开/持续/收缩阶段
-            float remaining = Projectile.timeLeft;
-
             if (Timer <= ExpandFrames) {
                 //展开阶段
                 float t = Timer / ExpandFrames;
                 expandScale = MathHelper.SmoothStep(0f, 1f, t);
                 fadeAlpha = MathHelper.SmoothStep(0f, 1f, t);
             }
-            else if (remaining <= ContractFrames) {
-                //收缩阶段
-                float t = remaining / ContractFrames;
-                expandScale = MathHelper.SmoothStep(0f, 1f, t);
-                fadeAlpha = MathHelper.SmoothStep(0f, 1f, t);
-            }
             else {
-                //持续阶段
                 expandScale = 1f;
                 fadeAlpha = 1f;
             }
 
             //启示录强度随时间渐增
-            revelationBuildUp = MathHelper.Clamp(Timer / (Duration * 0.5f), 0f, 1f);
+            revelationBuildUp = MathHelper.Clamp(Timer / 300f, 0f, 1f);
 
             //更新碰撞尺寸
             float currentRadius = MaxRadius * expandScale;
