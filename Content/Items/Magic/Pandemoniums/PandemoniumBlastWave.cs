@@ -1,4 +1,7 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using CalamityOverhaul.Common;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using System;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -53,23 +56,53 @@ namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
         }
 
         public override bool PreDraw(ref Color lightColor) {
-            if (!(CWRAsset.SoftGlow?.IsLoaded ?? false)) return false;
-
             SpriteBatch sb = Main.spriteBatch;
-            Texture2D glow = CWRAsset.SoftGlow.Value;
             Vector2 center = Projectile.Center - Main.screenPosition;
             float progress = ExpandTimer / 60f;
-            float alpha = 1f - progress;
 
-            Color c1 = new Color(255, 200, 100, 0) * alpha;
-            Color c2 = new Color(255, 100, 50, 0) * alpha * 0.8f;
-            Color c3 = new Color(200, 50, 30, 0) * alpha * 0.6f;
-
-            sb.Draw(glow, center, null, c3, 0, glow.Size() / 2, Projectile.scale * 1.2f, 0, 0);
-            sb.Draw(glow, center, null, c2, 0, glow.Size() / 2, Projectile.scale, 0, 0);
-            sb.Draw(glow, center, null, c1, 0, glow.Size() / 2, Projectile.scale * 0.7f, 0, 0);
-
+            DrawBlastWaveShader(sb, center, progress);
             return false;
+        }
+
+        private void DrawBlastWaveShader(SpriteBatch sb, Vector2 center, float progress) {
+            Effect shader = EffectLoader.BrimstoneBlastWave?.Value;
+            if (shader == null) return;
+
+            Texture2D canvas = CWRAsset.Placeholder_White.Value;
+            Texture2D noise = CWRAsset.Extra_193.Value;
+            if (canvas == null || noise == null) return;
+
+            //爆炸波的绘制范围随进度扩大
+            float drawRadius = 50f + progress * 600f;
+            float drawDiameter = drawRadius;
+
+            float fadeAlpha = 1f - progress;
+
+            shader.Parameters["uTime"]?.SetValue((float)Main.timeForVisualEffects * 0.016f);
+            shader.Parameters["ringProgress"]?.SetValue(progress);
+            shader.Parameters["fadeAlpha"]?.SetValue(fadeAlpha);
+            shader.Parameters["pulseIntensity"]?.SetValue(0.6f + (float)Math.Sin(Main.GlobalTimeWrappedHourly * 15f) * 0.4f);
+
+            shader.Parameters["coreColor"]?.SetValue(new Vector3(1f, 0.78f, 0.39f));
+            shader.Parameters["midColor"]?.SetValue(new Vector3(1f, 0.39f, 0.2f));
+            shader.Parameters["edgeColor"]?.SetValue(new Vector3(0.78f, 0.2f, 0.12f));
+            shader.Parameters["uNoiseTex"]?.SetValue(noise);
+
+            sb.End();
+            sb.Begin(SpriteSortMode.Immediate, BlendState.Additive,
+                SamplerState.LinearWrap, DepthStencilState.None, RasterizerState.CullNone,
+                null, Main.GameViewMatrix.TransformationMatrix);
+
+            shader.CurrentTechnique.Passes[0].Apply();
+
+            sb.Draw(canvas, center, null, Color.White,
+                0f, canvas.Size() * 0.5f, new Vector2(drawDiameter, drawDiameter),
+                SpriteEffects.None, 0f);
+
+            sb.End();
+            sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullNone,
+                null, Main.GameViewMatrix.TransformationMatrix);
         }
     }
 }

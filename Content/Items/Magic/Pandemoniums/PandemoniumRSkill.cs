@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using CalamityOverhaul.Common;
+using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using System;
 using System.Collections.Generic;
@@ -32,8 +33,6 @@ namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
         private float intensity = 0f;
         private Vector2 centerPos;
 
-        [VaultLoaden(CWRConstant.Masking + "Fire")]
-        private static Asset<Texture2D> RuneAsset = null;
         [VaultLoaden(CWRConstant.Masking + "SoftGlow")]
         private static Asset<Texture2D> GlowAsset = null;
 
@@ -458,14 +457,8 @@ namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
             SpriteBatch sb = Main.spriteBatch;
             Vector2 screenCenter = centerPos - Main.screenPosition;
 
-            //绘制底层暗影
-            DrawBaseGlow(sb, screenCenter);
-
-            //绘制符文层
-            DrawRuneLayers(sb, screenCenter);
-
-            //绘制几何图形
-            DrawGeometry(sb, screenCenter);
+            //绘制着色器领域
+            DrawBrimstoneDomainShader(sb, screenCenter);
 
             //绘制闪电
             DrawLightningStrikes(sb);
@@ -473,88 +466,50 @@ namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
             //绘制火球
             DrawFireOrbs(sb);
 
-            //绘制顶层辉光
-            DrawTopGlow(sb, screenCenter);
-
             return false;
         }
 
-        private void DrawBaseGlow(SpriteBatch sb, Vector2 screenCenter) {
-            if (!(GlowAsset?.IsLoaded ?? false)) return;
+        private void DrawBrimstoneDomainShader(SpriteBatch sb, Vector2 screenCenter) {
+            Effect shader = EffectLoader.BrimstoneDomain?.Value;
+            if (shader == null) return;
 
-            //多层暗影光晕
-            for (int i = 0; i < 6; i++) {
-                float scale = (currentRadius / GlowAsset.Value.Width) * (3f + i * 0.4f);
-                float alpha = intensity * (0.2f - i * 0.03f);
-                float rotation = Timer * 0.005f * (i % 2 == 0 ? 1 : -1);
+            Texture2D canvas = CWRAsset.Placeholder_White.Value;
+            Texture2D noise = CWRAsset.Extra_193.Value;
+            if (canvas == null || noise == null) return;
 
-                sb.Draw(
-                    GlowAsset.Value,
-                    screenCenter,
-                    null,
-                    new Color(40, 10, 10) with { A = 0 } * alpha,
-                    rotation,
-                    GlowAsset.Value.Size() / 2,
-                    scale,
-                    SpriteEffects.None,
-                    0
-                );
-            }
-        }
+            //R技能领域更大，使用1.2倍扩展
+            float drawRadius = currentRadius * 1.2f;
+            float drawDiameter = drawRadius * 2f;
 
-        private void DrawRuneLayers(SpriteBatch sb, Vector2 screenCenter) {
-            if (!(RuneAsset?.IsLoaded ?? false)) return;
+            //设置着色器参数（R技能使用更高的tier值3来展示完整法阵）
+            shader.Parameters["uTime"]?.SetValue((float)Main.timeForVisualEffects * 0.016f);
+            shader.Parameters["fadeAlpha"]?.SetValue(intensity);
+            shader.Parameters["tierLevel"]?.SetValue(3f); //R技能始终满级法阵
+            shader.Parameters["expandProgress"]?.SetValue(MathHelper.Clamp(intensity, 0f, 1f));
+            shader.Parameters["pulseIntensity"]?.SetValue(0.7f + (float)Math.Sin(Timer * 0.1f) * 0.3f);
 
-            int frameWidth = RuneAsset.Value.Width / 4;
-            int frameHeight = RuneAsset.Value.Height / 4;
+            //R技能使用更强烈的色彩
+            shader.Parameters["coreColor"]?.SetValue(new Vector3(1f, 0.35f, 0.18f));
+            shader.Parameters["midColor"]?.SetValue(new Vector3(0.85f, 0.22f, 0.13f));
+            shader.Parameters["edgeColor"]?.SetValue(new Vector3(0.55f, 0.14f, 0.09f));
+            shader.Parameters["voidColor"]?.SetValue(new Vector3(0.2f, 0.05f, 0.04f));
+            shader.Parameters["uNoiseTex"]?.SetValue(noise);
 
-            foreach (var layer in runeLayers) {
-                if (layer.Alpha < 0.01f) continue;
+            sb.End();
+            sb.Begin(SpriteSortMode.Immediate, BlendState.Additive,
+                SamplerState.LinearWrap, DepthStencilState.None, RasterizerState.CullNone,
+                null, Main.GameViewMatrix.TransformationMatrix);
 
-                for (int i = 0; i < layer.RuneCount; i++) {
-                    float angle = layer.Rotation + MathHelper.TwoPi * i / layer.RuneCount;
-                    Vector2 pos = screenCenter + angle.ToRotationVector2() * layer.Radius * (currentRadius / MaxCircleRadius);
+            shader.CurrentTechnique.Passes[0].Apply();
 
-                    int frameX = layer.FireFrame % 4;
-                    int frameY = layer.FireFrame / 4;
-                    Rectangle fireFrame = new Rectangle(frameX * frameWidth, frameY * frameHeight, frameWidth, frameHeight);
+            sb.Draw(canvas, screenCenter, null, Color.White,
+                0f, canvas.Size() * 0.5f, new Vector2(drawDiameter, drawDiameter),
+                SpriteEffects.None, 0f);
 
-                    float pulse = (float)Math.Sin(Timer * 0.1f + i) * 0.3f + 0.7f;
-                    Color fireColor = new Color(180, 60, 40) * layer.Alpha * pulse;
-                    fireColor.A = 0;
-
-                    sb.Draw(
-                        RuneAsset.Value,
-                        pos,
-                        fireFrame,
-                        fireColor,
-                        angle + MathHelper.PiOver2,
-                        new Vector2(frameWidth, frameHeight) / 2f,
-                        0.9f,
-                        SpriteEffects.None,
-                        0
-                    );
-                }
-            }
-        }
-
-        private void DrawGeometry(SpriteBatch sb, Vector2 screenCenter) {
-            Texture2D pixel = CWRAsset.Placeholder_White.Value;
-
-            //绘制多个旋转的几何图形
-            float rotation1 = Timer * 0.01f;
-            float rotation2 = Timer * -0.015f;
-
-            Color geometryColor = new Color(120, 30, 20) * intensity;
-
-            //外层大六芒星
-            DrawHexagram(sb, pixel, screenCenter, currentRadius * 0.8f, 4f, geometryColor * 0.6f, rotation1);
-
-            //中层五芒星
-            DrawPentagram(sb, pixel, screenCenter, currentRadius * 0.6f, 3.5f, geometryColor * 0.7f, rotation2);
-
-            //内层八边形
-            DrawOctagon(sb, pixel, screenCenter, currentRadius * 0.4f, 3f, geometryColor * 0.8f, rotation1 * 1.5f);
+            sb.End();
+            sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullNone,
+                null, Main.GameViewMatrix.TransformationMatrix);
         }
 
         private void DrawLightningStrikes(SpriteBatch sb) {
@@ -583,122 +538,22 @@ namespace CalamityOverhaul.Content.Items.Magic.Pandemoniums
                 float lifeRatio = 1f - (orb.Life / orb.MaxLife);
                 float scale = orb.Scale * lifeRatio;
 
-                //外层辉光
-                sb.Draw(
-                    GlowAsset.Value,
-                    drawPos,
-                    null,
-                    orb.OrbColor with { A = 0 } * lifeRatio * 0.6f,
-                    orb.Life * 0.1f,
-                    GlowAsset.Value.Size() / 2,
-                    scale * 0.5f,
-                    SpriteEffects.None,
-                    0
-                );
+                sb.Draw(GlowAsset.Value, drawPos, null,
+                    orb.OrbColor with { A = 0 } * lifeRatio * 0.6f, orb.Life * 0.1f,
+                    GlowAsset.Value.Size() / 2, scale * 0.5f, SpriteEffects.None, 0);
 
-                //核心
-                sb.Draw(
-                    GlowAsset.Value,
-                    drawPos,
-                    null,
-                    Color.White with { A = 0 } * lifeRatio * 0.4f,
-                    orb.Life * 0.15f,
-                    GlowAsset.Value.Size() / 2,
-                    scale * 0.3f,
-                    SpriteEffects.None,
-                    0
-                );
+                sb.Draw(GlowAsset.Value, drawPos, null,
+                    Color.White with { A = 0 } * lifeRatio * 0.4f, orb.Life * 0.15f,
+                    GlowAsset.Value.Size() / 2, scale * 0.3f, SpriteEffects.None, 0);
             }
         }
 
-        private void DrawTopGlow(SpriteBatch sb, Vector2 screenCenter) {
-            if (!(GlowAsset?.IsLoaded ?? false)) return;
-
-            float pulse = (float)Math.Sin(Timer * 0.15f) * 0.4f + 0.6f;
-
-            //核心辉光
-            for (int i = 0; i < 4; i++) {
-                float scale = (currentRadius / GlowAsset.Value.Width) * (1.5f + i * 0.3f);
-                float alpha = intensity * pulse * (0.4f - i * 0.08f);
-                float rotation = -Timer * 0.02f * (i + 1);
-
-                Color glowColor = i switch {
-                    0 => new Color(255, 80, 40),
-                    1 => new Color(200, 50, 30),
-                    2 => new Color(150, 40, 25),
-                    _ => new Color(100, 25, 15)
-                };
-
-                sb.Draw(
-                    GlowAsset.Value,
-                    screenCenter,
-                    null,
-                    glowColor with { A = 0 } * alpha,
-                    rotation,
-                    GlowAsset.Value.Size() / 2,
-                    scale,
-                    SpriteEffects.None,
-                    0
-                );
-            }
-        }
-
-        private void DrawHexagram(SpriteBatch sb, Texture2D pixel, Vector2 center, float radius, float thickness, Color color, float rotation) {
-            for (int t = 0; t < 2; t++) {
-                Vector2[] vertices = new Vector2[3];
-                for (int i = 0; i < 3; i++) {
-                    float angle = rotation + (t * MathHelper.Pi) + i * MathHelper.TwoPi / 3f;
-                    vertices[i] = center + angle.ToRotationVector2() * radius;
-                }
-
-                for (int i = 0; i < 3; i++) {
-                    DrawLine(sb, pixel, vertices[i], vertices[(i + 1) % 3], thickness, color);
-                }
-            }
-        }
-
-        private void DrawPentagram(SpriteBatch sb, Texture2D pixel, Vector2 center, float radius, float thickness, Color color, float rotation) {
-            int points = 5;
-            Vector2[] vertices = new Vector2[points];
-
-            for (int i = 0; i < points; i++) {
-                float angle = rotation + i * MathHelper.TwoPi / points - MathHelper.PiOver2;
-                vertices[i] = center + angle.ToRotationVector2() * radius;
-            }
-
-            for (int i = 0; i < points; i++) {
-                DrawLine(sb, pixel, vertices[i], vertices[(i + 2) % points], thickness, color);
-            }
-        }
-
-        private void DrawOctagon(SpriteBatch sb, Texture2D pixel, Vector2 center, float radius, float thickness, Color color, float rotation) {
-            int sides = 8;
-            Vector2 prev = center + rotation.ToRotationVector2() * radius;
-
-            for (int i = 1; i <= sides; i++) {
-                float angle = rotation + i * MathHelper.TwoPi / sides;
-                Vector2 curr = center + angle.ToRotationVector2() * radius;
-                DrawLine(sb, pixel, prev, curr, thickness, color);
-                prev = curr;
-            }
-        }
-
-        private void DrawLine(SpriteBatch sb, Texture2D pixel, Vector2 start, Vector2 end, float thickness, Color color) {
+        private static void DrawLine(SpriteBatch sb, Texture2D pixel, Vector2 start, Vector2 end, float thickness, Color color) {
             Vector2 diff = end - start;
             float length = diff.Length();
             if (length < 1f) return;
-
-            sb.Draw(
-                pixel,
-                start,
-                new Rectangle(0, 0, 1, 1),
-                color,
-                diff.ToRotation(),
-                Vector2.Zero,
-                new Vector2(length, thickness),
-                SpriteEffects.None,
-                0f
-            );
+            sb.Draw(pixel, start, new Rectangle(0, 0, 1, 1), color, diff.ToRotation(),
+                Vector2.Zero, new Vector2(length, thickness), SpriteEffects.None, 0f);
         }
     }
 }
