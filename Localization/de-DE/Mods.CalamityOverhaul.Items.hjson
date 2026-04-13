@@ -1557,6 +1557,43 @@ Thrower: {
 Elysium: {
 	// DisplayName: Elysium
 	// Tooltip: ""
+	// DiscipleName_0: Simon Peter
+	// DiscipleName_1: Saint Andrew
+	// DiscipleName_2: James
+	// DiscipleName_3: Saint John
+	// DiscipleName_4: Philip
+	// DiscipleName_5: Bartholomew
+	// DiscipleName_6: Thomas
+	// DiscipleName_7: Saint Matthew
+	// DiscipleName_8: James the Lesser
+	// DiscipleName_9: Thaddaeus
+	// DiscipleName_10: Simon the Zealot
+	// DiscipleName_11: Judas Iscariot
+	// HorsemanName_0: Pestilence
+	// HorsemanName_1: War
+	// HorsemanName_2: Famine
+	// HorsemanName_3: Death
+	// DiscipleFullText: Disciple slots full
+	// NoConvertTargetText: No convertible residents nearby
+	// DiscipleFallbackText: Disciple
+	// RevelationText: Revelation
+	// RevelationEndText: Revelation ended
+	// CelestialMeteorText: Celestial Meteor
+	// SealStarsText: Fifth Star Sixth Star Seventh Star
+	// HorsemenFullText: All Four Horsemen summoned
+	// HorsemanArrivalText: Horseman of {0} descends
+	// DiscipleJoinedText: "{0} has joined"
+	// JudasBetrayalText: Judas's Betrayal!
+	// JudasDeathReasonText: "{0} was betrayed by Judas"
+	// DiscipleMartyrText: "{0} was martyred"
+	// MartyrdomPowerText: Martyrdom {0}/11
+	// Tooltip_DiscipleCountText: Current Disciples: {0}/12
+	// Tooltip_NoDisciplesText: No disciples following
+	// Tooltip_MartyrdomPowerText: Martyrdom: {0} {1}/11
+	// Tooltip_RevelationReadyText: Press Q — John will be martyred, Revelation begins
+	// Tooltip_JudgmentActiveText: Last Three Seals judgment in progress
+	// Tooltip_RevelationActiveText: Revelation active Q:Meteor R:Seal Judgment RMB:Horsemen {0}/4
+	// Tooltip_JudasWarningText: Warning: Judas's betrayal lurks beside you
 }
 
 MechanizedWood: {

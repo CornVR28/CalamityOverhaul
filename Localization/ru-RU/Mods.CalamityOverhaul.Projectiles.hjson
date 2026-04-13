@@ -419,18 +419,64 @@ MuraSlashLine.DisplayName: Разрез измерения
 WGGLumberjackSaw.DisplayName: Ржавая цепная пила
 WGGLifeWeaverAcorn.DisplayName: Желудь
 Andrew.DisplayName: Андрей
-Bartholomew.DisplayName: Варфоломей
+
+Bartholomew: {
+	DisplayName: Варфоломей
+	// TruthRevealText: Truth Revealed
+}
+
 ElysiumHeld.DisplayName: Элизиум
-James.DisplayName: Иаков
+
+James: {
+	DisplayName: Иаков
+	// ThunderChainText: Thunder Chain x{0}
+}
+
 John.DisplayName: Иоанн
-JudasIscariot.DisplayName: Иуда Искариот
-Jude.DisplayName: Иуда
-Lesser.DisplayName: Иаков Младший
-Matthew.DisplayName: Матфей
+
+JudasIscariot: {
+	DisplayName: Иуда Искариот
+	// OminousText_0: Thirty silver coins...
+	// OminousText_1: Betrayal...
+	// OminousText_2: A kiss...
+	// OminousText_3: The gallows...
+}
+
+Jude: {
+	DisplayName: Иуда
+	// HealingMiracleText: Healing Miracle
+	// GuardianMiracleText: Guardian Miracle
+	// JudgmentMiracleText: Judgment Miracle
+	// JudgmentStandbyText: Judgment Standby
+	// SwiftMiracleText: Swift Miracle
+	// ManaMiracleText: Mana Miracle
+}
+
+Lesser: {
+	DisplayName: Иаков Младший
+	// DivineHealText: Divine Heal +{0}
+}
+
+Matthew: {
+	DisplayName: Матфей
+	// WealthBlessingText: Wealth Blessing x{0}
+}
+
 Philip.DisplayName: Филипп
-SimonPeter.DisplayName: Симон Петр
+
+SimonPeter: {
+	DisplayName: Симон Петр
+	// RockShieldText: Rock Shield -{0}%
+}
+
 SnakeConversionWave.DisplayName: Змеиная волна
-Thomas.DisplayName: Фома
+
+Thomas: {
+	DisplayName: Фома
+	// VerifyEnhancedText: Verification Enhanced!
+	// DoubtVerifyText: Doubt Verified!
+}
+
 Zealot.DisplayName: Симон Зилот
 JudgmentLightning.DisplayName: Молния суда
 HolySerpent.DisplayName: Священный змей
@@ -454,4 +500,11 @@ StarfuryFallingStar.DisplayName: Падающая звезда Звездной 
 // ApocalypseHorseman.DisplayName: Apocalypse Horseman
 // RevelationMeteorImpact.DisplayName: Revelation Meteor Impact
 // RevelationMeteorStrike.DisplayName: Revelation Meteor Strike
-// RevelationSealJudgment.DisplayName: Revelation Seal Judgment
+
+RevelationSealJudgment: {
+	// Seal5Text: Fifth Seal
+	// Seal6Text: Sixth Seal
+	// Seal7Text: Seventh Seal
+	// WorldJudgmentText: World Judgment
+	// DisplayName: Revelation Seal Judgment
+}

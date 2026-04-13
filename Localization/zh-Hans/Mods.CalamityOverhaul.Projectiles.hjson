@@ -419,18 +419,64 @@ MuraSlashLine.DisplayName: 次元斩
 WGGLumberjackSaw.DisplayName: 生锈动力锯
 WGGLifeWeaverAcorn.DisplayName: 橡子
 Andrew.DisplayName: 安德烈
-Bartholomew.DisplayName: 巴多罗买
+
+Bartholomew: {
+	DisplayName: 巴多罗买
+	TruthRevealText: 真言揭示
+}
+
 ElysiumHeld.DisplayName: 天国极乐
-James.DisplayName: 雅各
+
+James: {
+	DisplayName: 雅各
+	ThunderChainText: 雷霆连锁 x{0}
+}
+
 John.DisplayName: 约翰
-JudasIscariot.DisplayName: 加略人犹大
-Jude.DisplayName: 犹大
-Lesser.DisplayName: 小雅各
-Matthew.DisplayName: 马太
+
+JudasIscariot: {
+	DisplayName: 加略人犹大
+	OminousText_0: 三十银币...
+	OminousText_1: 背叛...
+	OminousText_2: 亲吻...
+	OminousText_3: 绞刑架...
+}
+
+Jude: {
+	DisplayName: 犹大
+	HealingMiracleText: 治愈奇迹
+	GuardianMiracleText: 守护奇迹
+	JudgmentMiracleText: 审判奇迹
+	JudgmentStandbyText: 审判待命
+	SwiftMiracleText: 迅捷奇迹
+	ManaMiracleText: 魔力奇迹
+}
+
+Lesser: {
+	DisplayName: 小雅各
+	DivineHealText: 神圣治愈 +{0}
+}
+
+Matthew: {
+	DisplayName: 马太
+	WealthBlessingText: 财富祝福 x{0}
+}
+
 Philip.DisplayName: 腓力
-SimonPeter.DisplayName: 西门彼得
+
+SimonPeter: {
+	DisplayName: 西门彼得
+	RockShieldText: 磐石之盾 -{0}%
+}
+
 SnakeConversionWave.DisplayName: 化蛇波动
-Thomas.DisplayName: 多马
+
+Thomas: {
+	DisplayName: 多马
+	VerifyEnhancedText: 验证强化!
+	DoubtVerifyText: 怀疑验证!
+}
+
 Zealot.DisplayName: 奋锐者
 JudgmentLightning.DisplayName: 审判之雷
 HolySerpent.DisplayName: 神圣巨蛇
@@ -455,25 +501,10 @@ SpawnOldDukeWannaToFight.DisplayName: 生成老公爵切磋
 // RevelationMeteorImpact.DisplayName: Revelation Meteor Impact
 // RevelationMeteorStrike.DisplayName: Revelation Meteor Strike
 
-SimonPeter.RockShieldText: "磐石之盾 -{0}%"
-James.ThunderChainText: "雷霆连锁 x{0}"
-Bartholomew.TruthRevealText: 真言揭示
-Thomas.VerifyEnhancedText: 验证强化!
-Thomas.DoubtVerifyText: 怀疑验证!
-Matthew.WealthBlessingText: "财富祝福 x{0}"
-Lesser.DivineHealText: "神圣治愈 +{0}"
-Jude.HealingMiracleText: 治愈奇迹
-Jude.GuardianMiracleText: 守护奇迹
-Jude.JudgmentMiracleText: 审判奇迹
-Jude.JudgmentStandbyText: 审判待命
-Jude.SwiftMiracleText: 迅捷奇迹
-Jude.ManaMiracleText: 魔力奇迹
-JudasIscariot.OminousText_0: 三十银币...
-JudasIscariot.OminousText_1: 背叛...
-JudasIscariot.OminousText_2: 亲吻...
-JudasIscariot.OminousText_3: 绞刑架...
-RevelationSealJudgment.Seal5Text: 第五印
-RevelationSealJudgment.Seal6Text: 第六印
-RevelationSealJudgment.Seal7Text: 第七印
-RevelationSealJudgment.WorldJudgmentText: 世界审判
-// RevelationSealJudgment.DisplayName: Revelation Seal Judgment
+RevelationSealJudgment: {
+	Seal5Text: 第五印
+	Seal6Text: 第六印
+	Seal7Text: 第七印
+	WorldJudgmentText: 世界审判
+	// DisplayName: Revelation Seal Judgment
+}

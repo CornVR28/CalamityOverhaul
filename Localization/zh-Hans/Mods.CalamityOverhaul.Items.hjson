@@ -1,4 +1,4 @@
-﻿ElementWhip: {
+ElementWhip: {
 	DisplayName: 元素长鞭
 	Tooltip:
 		'''
@@ -1590,14 +1590,14 @@ Elysium: {
 	JudasBetrayalText: 犹大的背叛!
 	JudasDeathReasonText: "{0} 被犹大背叛了"
 	DiscipleMartyrText: "{0} 殉道了"
-	MartyrdomPowerText: "殉道之力 {0}/11"
-	Tooltip_DiscipleCountText: "当前门徒: {0}/12"
+	MartyrdomPowerText: 殉道之力 {0}/11
+	Tooltip_DiscipleCountText: 当前门徒: {0}/12
 	Tooltip_NoDisciplesText: 尚无门徒追随
-	Tooltip_MartyrdomPowerText: "殉道之力: {0} {1}/11"
+	Tooltip_MartyrdomPowerText: 殉道之力: {0} {1}/11
 	Tooltip_RevelationReadyText: 按Q键 — 约翰将殉道，启示录将降临
 	Tooltip_JudgmentActiveText: 后三印审判进行中，等待终结收束
-	Tooltip_RevelationActiveText: "启示录已降临 Q降天体陨石 R发动后三印审判 右键召唤四骑士 {0}/4"
-	Tooltip_JudasWarningText: "警告: 犹大的背叛已潜伏于你的身边"
+	Tooltip_RevelationActiveText: 启示录已降临 Q降天体陨石 R发动后三印审判 右键召唤四骑士 {0}/4
+	Tooltip_JudasWarningText: 警告: 犹大的背叛已潜伏于你的身边
 }
 
 MechanizedWood: {

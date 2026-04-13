@@ -288,9 +288,9 @@ MartyrdomBarUI: {
 	SlotLabel_10: 西
 	SlotLabel_11: 犹
 	RevelationJudgingText: 启示录 后三印审判进行中
-	RevelationStatusText: "启示录 四骑士 {0}/4 Q陨石 R审判"
+	RevelationStatusText: 启示录 四骑士 {0}/4 Q陨石 R审判
 	RevelationReadyText: 按 Q — 启示录就绪
-	MartyrdomPowerText: "殉道之力 {0}/11"
+	MartyrdomPowerText: 殉道之力 {0}/11
 }
 
 MenuModify.OverhaulSettingsButtonText: 大修设置
