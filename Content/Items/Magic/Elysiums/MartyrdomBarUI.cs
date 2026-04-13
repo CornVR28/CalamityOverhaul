@@ -121,7 +121,9 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
             Color textColor;
             if (ep.IsRevelationActive) {
                 int horsemanCount = ep.GetHorsemanCount();
-                text = $"启示录 四骑士 {horsemanCount}/4";
+                text = ep.IsSealJudgmentActive
+                    ? "启示录 后三印审判进行中"
+                    : $"启示录 四骑士 {horsemanCount}/4 Q陨石 R审判";
                 float flash = (float)Math.Sin(revelationFlash) * 0.3f + 0.7f;
                 textColor = Color.Lerp(Color.Gold, Color.White, flash);
             }

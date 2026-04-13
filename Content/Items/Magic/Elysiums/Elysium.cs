@@ -59,38 +59,42 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
         public override bool AltFunctionUse(Player player) => true;
 
         public override void HoldItem(Player player) {
-            if (CWRKeySystem.WeponSkill_Q.JustPressed) {
-                if (player.TryGetModPlayer<ElysiumPlayer>(out var ep)) {
-                    if (!ep.HasElysiumInInventory()) {
-                        return;
-                    }
+            if (!player.TryGetModPlayer<ElysiumPlayer>(out var ep) || !ep.HasElysiumInInventory()) {
+                return;
+            }
 
-                    if (ep.IsRevelationActive) {
-                        ep.DeactivateRevelation(player);
-                        return;
-                    }
+            if (ep.IsRevelationActive && CWRKeySystem.WeponSkill_R.JustPressed) {
+                ep.TriggerSealJudgment(player);
+                return;
+            }
 
-                    //满足殉道条件时按Q进入启示录
-                    if (ep.GetMartyrdomEnergy() >= 11
-                        && !ep.Martyred[3]
-                        && ep.HasDiscipleOfType(ModContent.ProjectileType<John>())
-                        && !ep.IsRevelationActive
-                        && player.CountProjectilesOfID<RevelationDomain>() == 0) {
-                        ep.ActivateRevelation(player);
-                    }
-                    else if (!ep.IsRevelationActive) {
-                        //未进入启示录时按Q召唤天雷
-                        Projectile.NewProjectile(
-                            player.GetSource_ItemUse(Item),
-                            player.Center,
-                            Vector2.Zero,
-                            ModContent.ProjectileType<DivineThunderStrike>(),
-                            (int)(Item.damage * 1.5f),
-                            Item.knockBack,
-                            player.whoAmI
-                        );
-                    }
-                }
+            if (!CWRKeySystem.WeponSkill_Q.JustPressed) {
+                return;
+            }
+
+            if (ep.IsRevelationActive) {
+                ep.CastRevelationMeteor(player);
+                return;
+            }
+
+            //满足殉道条件时按Q进入启示录
+            if (ep.GetMartyrdomEnergy() >= 11
+                && !ep.Martyred[3]
+                && ep.HasDiscipleOfType(ModContent.ProjectileType<John>())
+                && player.CountProjectilesOfID<RevelationDomain>() == 0) {
+                ep.ActivateRevelation(player);
+            }
+            else {
+                //未进入启示录时按Q召唤天雷
+                Projectile.NewProjectile(
+                    player.GetSource_ItemUse(Item),
+                    player.Center,
+                    Vector2.Zero,
+                    ModContent.ProjectileType<DivineThunderStrike>(),
+                    (int)(Item.damage * 1.5f),
+                    Item.knockBack,
+                    player.whoAmI
+                );
             }
         }
 
@@ -103,7 +107,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
                     Item.mana = 15;
                     Item.useTime = Item.useAnimation = 18;
                     Item.channel = false;
-                    return ep.GetHorsemanCount() < 4;
+                    return !ep.IsSealJudgmentActive && ep.GetHorsemanCount() < 4;
                 }
 
                 //右键：转化NPC为门徒
@@ -142,7 +146,12 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
                 }
                 else if (ep.IsRevelationActive) {
                     int horsemen = ep.GetHorsemanCount();
-                    tooltips.Add(new TooltipLine(Mod, "RevelationActive", $"[c/FFD700:启示录已降临 按Q终止 右键召唤四骑士 {horsemen}/4]"));
+                    if (ep.IsSealJudgmentActive) {
+                        tooltips.Add(new TooltipLine(Mod, "RevelationJudgment", "[c/FFAA55:后三印审判进行中，等待终结收束]"));
+                    }
+                    else {
+                        tooltips.Add(new TooltipLine(Mod, "RevelationActive", $"[c/FFD700:启示录已降临 Q降天体陨石 R发动后三印审判 右键召唤四骑士 {horsemen}/4]"));
+                    }
                 }
 
                 if (count == 12) {

@@ -57,10 +57,16 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
         public bool[] SummonedHorsemen; //0瘟疫 1战争 2饥荒 3死亡
         public static readonly string[] HorsemanNames = ["瘟疫", "战争", "饥荒", "死亡"];
 
+        //启示录战斗状态
+        public int RevelationMeteorCooldown;
+        public bool IsSealJudgmentActive;
+
         public override void Initialize() {
             Martyred = new bool[12];
             IsRevelationActive = false;
             SummonedHorsemen = new bool[4];
+            RevelationMeteorCooldown = 0;
+            IsSealJudgmentActive = false;
         }
 
         public override void ResetEffects() {
@@ -84,6 +90,10 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
                 return;
             }
 
+            if (RevelationMeteorCooldown > 0) {
+                RevelationMeteorCooldown--;
+            }
+
             //犹大背刺检测
             if (judasBetrayalCooldown > 0) {
                 judasBetrayalCooldown--;
@@ -98,13 +108,8 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
             }
 
             if (IsRevelationActive) {
-                //启示录激活时，允许不手持天国极乐也能用Q安全退出
-                if (CWRKeySystem.WeponSkill_Q.JustPressed && Player.HeldItem?.type != ModContent.ItemType<Elysium>()) {
-                    DeactivateRevelation(Player);
-                    return;
-                }
-
                 SyncHorsemanState();
+                SyncJudgmentState();
             }
 
             //门徒增益效果
@@ -271,6 +276,8 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
             }
 
             IsRevelationActive = false;
+            IsSealJudgmentActive = false;
+            RevelationMeteorCooldown = 0;
             Array.Clear(SummonedHorsemen, 0, SummonedHorsemen.Length);
 
             foreach (Projectile projectile in Main.projectile) {
@@ -279,7 +286,10 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
                 }
 
                 if (projectile.type == ModContent.ProjectileType<RevelationDomain>()
-                    || projectile.type == ModContent.ProjectileType<ApocalypseHorseman>()) {
+                    || projectile.type == ModContent.ProjectileType<ApocalypseHorseman>()
+                    || projectile.type == ModContent.ProjectileType<RevelationSealJudgment>()
+                    || projectile.type == ModContent.ProjectileType<RevelationMeteorStrike>()
+                    || projectile.type == ModContent.ProjectileType<RevelationMeteorImpact>()) {
                     projectile.Kill();
                 }
             }
@@ -290,6 +300,66 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
 
             SoundEngine.PlaySound(SoundID.Item8 with { Volume = 1.2f, Pitch = -0.15f }, player.Center);
             CombatText.NewText(player.Hitbox, Color.Silver, "启示录终止");
+        }
+
+        public bool CanCastRevelationMeteor() {
+            return IsRevelationActive && !IsSealJudgmentActive && RevelationMeteorCooldown <= 0;
+        }
+
+        public void CastRevelationMeteor(Player player) {
+            if (!CanCastRevelationMeteor()) {
+                return;
+            }
+
+            Vector2 target = Main.MouseWorld;
+            ShootState shootState = player.GetShootState();
+
+            int damage = (int)(shootState.WeaponDamage * (HasDeathAmplification() ? 2.4f : 1.8f));
+            if (HasHorseman(1)) {
+                damage = (int)(damage * (HasDeathAmplification() ? 1.35f : 1.2f));
+            }
+
+            Projectile.NewProjectile(
+                shootState.Source,
+                new Vector2(target.X + Main.rand.NextFloat(-180f, 180f), target.Y - 900f),
+                Vector2.Zero,
+                ModContent.ProjectileType<RevelationMeteorStrike>(),
+                damage,
+                8f,
+                player.whoAmI,
+                target.X,
+                target.Y
+            );
+
+            RevelationMeteorCooldown = HasDeathAmplification() ? 12 : 24;
+
+            SoundEngine.PlaySound(SoundID.Item122 with { Volume = 1.05f, Pitch = -0.1f }, target);
+            CombatText.NewText(player.Hitbox, Color.Gold, "天体陨石", true);
+        }
+
+        public bool CanTriggerSealJudgment() {
+            return IsRevelationActive && !IsSealJudgmentActive;
+        }
+
+        public void TriggerSealJudgment(Player player) {
+            if (!CanTriggerSealJudgment()) {
+                return;
+            }
+
+            ShootState shootState = player.GetShootState();
+            Projectile.NewProjectile(
+                shootState.Source,
+                player.Center,
+                Vector2.Zero,
+                ModContent.ProjectileType<RevelationSealJudgment>(),
+                (int)(shootState.WeaponDamage * 4.2f),
+                12f,
+                player.whoAmI
+            );
+
+            IsSealJudgmentActive = true;
+            SoundEngine.PlaySound(SoundID.Item84 with { Volume = 1.25f, Pitch = -0.25f }, player.Center);
+            CombatText.NewText(player.Hitbox, Color.OrangeRed, "第五星 第六星 第七星", true);
         }
 
         public void SummonNextHorseman(Player player) {
@@ -371,6 +441,28 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
                 if (!exists) {
                     SummonedHorsemen[i] = false;
                 }
+            }
+        }
+
+        private void SyncJudgmentState() {
+            if (!IsSealJudgmentActive) {
+                return;
+            }
+
+            bool exists = false;
+            foreach (Projectile projectile in Main.projectile) {
+                if (!projectile.active || projectile.owner != Player.whoAmI) {
+                    continue;
+                }
+
+                if (projectile.type == ModContent.ProjectileType<RevelationSealJudgment>()) {
+                    exists = true;
+                    break;
+                }
+            }
+
+            if (!exists) {
+                IsSealJudgmentActive = false;
             }
         }
 
