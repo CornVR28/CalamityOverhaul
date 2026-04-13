@@ -1,4 +1,4 @@
-﻿using CalamityOverhaul.Content.ADV.UIEffect;
+﻿using CalamityOverhaul.Common;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
@@ -8,42 +8,46 @@ using Terraria.GameContent;
 namespace CalamityOverhaul.Content.ADV.EntrustManager.Styles
 {
     /// <summary>
-    /// 嘉登·战术数据链风格，任务管理器默认样式，
-    /// 左侧垂直时间线脊柱、菱形状态节点、雪佛龙指示器、
-    /// 虎纹扫描带、六边形蜂巢底纹、雷达旋转弧装饰
+    /// 嘉登·精密工程风格，任务管理器默认样式，
+    /// 使用DraedonPanel着色器渲染面板背景（精密工程网格/柔和边缘光/克制扫掠），
+    /// 电路节点/数据流粒子/科技边框/角标装饰
     /// </summary>
     internal class DraedonManagerStyle : BaseManagerStyle
     {
         #region 动画计时器
 
-        private float scanBandPos;
-        private float radarSweep;
-        private float chevronPulse;
-        private float spineGlowPhase;
-        private float hexGridPhase;
-        private float glitchTimer;
-        private float headerGlowPhase;
+        private float shaderTime;
         private float dataFlowTimer;
+        private float chevronPulse;
+        private float headerGlowPhase;
+        private float scanTimer;
+        private const int EdgePad = 12;
 
-        private readonly List<DraedonDataPRT> bgParticles = [];
-        private int bgParticleSpawnTimer;
-        private readonly List<CircuitNodePRT> circuitNodes = [];
-        private int circuitNodeSpawnTimer;
+        //数据流粒子（与QuestLogStyle统一结构）
+        private struct DataParticle
+        {
+            public Vector2 Pos;
+            public Vector2 Vel;
+            public float Life;
+            public float MaxLife;
+            public float Size;
+            public int Type; //0=方块 1=短线 2=亮点
+        }
+        private readonly List<DataParticle> dataParticles = [];
 
         #endregion
 
-        #region 色板（偏冷白蓝色调，区别于其他嘉登UI的纯青/纯蓝）
+        #region 色板
 
-        private static readonly Color PrimaryBright = new(140, 210, 255);   //冷白蓝（区别于来电框的40,220,255纯青）
-        private static readonly Color PrimaryMid = new(60, 150, 220);       //中蓝
-        private static readonly Color PrimaryDim = new(30, 80, 140);        //暗蓝
-        private static readonly Color AccentCyan = new(80, 255, 220);       //薄荷青强调（区别于对话框的50,210,185青绿）
-        private static readonly Color AccentWarm = new(255, 200, 100);      //暖琥珀（警告/关注态）
-        private static readonly Color BgDeep = new(4, 8, 20);              //极深背景
-        private static readonly Color BgMid = new(10, 18, 36);             //中层背景
-        private static readonly Color StatusComplete = new(60, 220, 140);   //已完成绿
-        private static readonly Color StatusFailed = new(220, 60, 70);      //失败红
-        private static readonly Color StatusSuspended = new(160, 140, 100); //挂起暗金
+        private static readonly Color PrimaryBright = new(140, 210, 255);
+        private static readonly Color PrimaryMid = new(60, 150, 220);
+        private static readonly Color PrimaryDim = new(30, 80, 140);
+        private static readonly Color AccentCyan = new(80, 255, 220);
+        private static readonly Color AccentWarm = new(255, 200, 100);
+        private static readonly Color BgDeep = new(4, 8, 20);
+        private static readonly Color StatusComplete = new(60, 220, 140);
+        private static readonly Color StatusFailed = new(220, 60, 70);
+        private static readonly Color StatusSuspended = new(160, 140, 100);
 
         #endregion
 
@@ -52,77 +56,135 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager.Styles
         public override void Update(Rectangle panelRect, float openProgress) {
             base.Update(panelRect, openProgress);
 
-            //虎纹扫描带，从上往下循环，比单线更宽（覆盖约8%面板高度）
-            scanBandPos += 0.004f;
-            if (scanBandPos > 1.15f) scanBandPos = -0.15f;
+            shaderTime += 0.004f;
+            if (shaderTime > 100f) shaderTime -= 100f;
 
-            //雷达旋转弧
-            radarSweep += 0.018f;
-            if (radarSweep > MathHelper.TwoPi) radarSweep -= MathHelper.TwoPi;
+            dataFlowTimer += 0.008f;
+            if (dataFlowTimer > 1000f) dataFlowTimer -= 1000f;
 
             chevronPulse += 0.065f;
             if (chevronPulse > MathHelper.TwoPi) chevronPulse -= MathHelper.TwoPi;
 
-            spineGlowPhase += 0.03f;
-            if (spineGlowPhase > MathHelper.TwoPi) spineGlowPhase -= MathHelper.TwoPi;
-
-            hexGridPhase += 0.008f;
-            if (hexGridPhase > MathHelper.TwoPi) hexGridPhase -= MathHelper.TwoPi;
-
             headerGlowPhase += 0.04f;
             if (headerGlowPhase > MathHelper.TwoPi) headerGlowPhase -= MathHelper.TwoPi;
 
-            dataFlowTimer += 0.015f;
-            if (dataFlowTimer > MathHelper.TwoPi) dataFlowTimer -= MathHelper.TwoPi;
+            scanTimer += 0.04f;
+            if (scanTimer > MathHelper.TwoPi) scanTimer -= MathHelper.TwoPi;
 
-            glitchTimer += 0.12f;
-            if (glitchTimer > MathHelper.TwoPi) glitchTimer -= MathHelper.TwoPi;
-
-            //背景粒子
-            Vector2 panelPos = new(panelRect.X, panelRect.Y);
-            Vector2 panelSize = new(panelRect.Width, panelRect.Height);
-            bgParticleSpawnTimer++;
-            if (openProgress > 0.3f && bgParticleSpawnTimer >= 35 && bgParticles.Count < 12) {
-                bgParticleSpawnTimer = 0;
-                Vector2 p = panelPos + new Vector2(
-                    Main.rand.NextFloat(20f, panelSize.X - 20f),
-                    Main.rand.NextFloat(60f, panelSize.Y - 20f));
-                bgParticles.Add(new DraedonDataPRT(p));
+            //数据流粒子
+            if (openProgress > 0.3f && Main.rand.NextBool(6)) {
+                dataParticles.Add(new DataParticle {
+                    Pos = new Vector2(Main.rand.NextFloat(0, 1f), Main.rand.NextFloat(0, 1f)),
+                    Vel = new Vector2(Main.rand.NextFloat(-0.001f, 0.001f), Main.rand.NextFloat(-0.003f, -0.001f)),
+                    Life = Main.rand.NextFloat(80f, 160f),
+                    MaxLife = Main.rand.NextFloat(80f, 160f),
+                    Size = Main.rand.NextFloat(1f, 3f),
+                    Type = Main.rand.Next(3)
+                });
             }
-            for (int i = bgParticles.Count - 1; i >= 0; i--) {
-                if (bgParticles[i].Update(panelPos, panelSize))
-                    bgParticles.RemoveAt(i);
-            }
-
-            //电路节点
-            circuitNodeSpawnTimer++;
-            if (openProgress > 0.5f && circuitNodeSpawnTimer >= 45 && circuitNodes.Count < 5) {
-                circuitNodeSpawnTimer = 0;
-                circuitNodes.Add(new CircuitNodePRT(
-                    panelPos + new Vector2(
-                        Main.rand.NextFloat(20f, panelSize.X - 20f),
-                        Main.rand.NextFloat(60f, panelSize.Y - 30f))));
-            }
-            for (int i = circuitNodes.Count - 1; i >= 0; i--) {
-                if (circuitNodes[i].Update(panelPos, panelSize))
-                    circuitNodes.RemoveAt(i);
+            for (int i = dataParticles.Count - 1; i >= 0; i--) {
+                var p = dataParticles[i];
+                p.Life -= 1f;
+                p.Pos += p.Vel;
+                dataParticles[i] = p;
+                if (p.Life <= 0) dataParticles.RemoveAt(i);
             }
         }
 
         public override void Reset() {
             base.Reset();
-            scanBandPos = 0f;
-            radarSweep = 0f;
-            chevronPulse = 0f;
-            spineGlowPhase = 0f;
-            hexGridPhase = 0f;
-            glitchTimer = 0f;
-            headerGlowPhase = 0f;
+            shaderTime = 0f;
             dataFlowTimer = 0f;
-            bgParticles.Clear();
-            circuitNodes.Clear();
-            bgParticleSpawnTimer = 0;
-            circuitNodeSpawnTimer = 0;
+            chevronPulse = 0f;
+            headerGlowPhase = 0f;
+            scanTimer = 0f;
+            dataParticles.Clear();
+        }
+
+        #endregion
+
+        #region 着色器面板背景
+
+        //使用DraedonPanel着色器绘制面板底图，降级时回退到手绘背景
+        private void DrawShaderPanel(SpriteBatch sb, Rectangle rect, float alpha) {
+            if (EffectLoader.DraedonPanel?.Value != null) {
+                Effect effect = EffectLoader.DraedonPanel.Value;
+                Rectangle extRect = rect;
+                extRect.Inflate(EdgePad, EdgePad);
+
+                effect.Parameters["uTime"]?.SetValue(shaderTime);
+                effect.Parameters["uAlpha"]?.SetValue(alpha * 0.97f);
+                effect.Parameters["uResolution"]?.SetValue(new Vector2(extRect.Width, extRect.Height));
+                effect.Parameters["uEdgePad"]?.SetValue((float)EdgePad);
+                effect.Parameters["uNightMode"]?.SetValue(0f);
+
+                sb.End();
+                sb.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend,
+                    SamplerState.AnisotropicClamp, DepthStencilState.None,
+                    RasterizerState.CullNone, effect, Main.UIScaleMatrix);
+
+                sb.Draw(Px, extRect, Color.White);
+
+                sb.End();
+                sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                    SamplerState.AnisotropicClamp, DepthStencilState.None,
+                    RasterizerState.CullNone, null, Main.UIScaleMatrix);
+            }
+            else {
+                DrawFallbackBackground(sb, rect, alpha);
+            }
+        }
+
+        //降级背景：深色渐变 + CRT扫描线 + 网格 + 暗角
+        private void DrawFallbackBackground(SpriteBatch sb, Rectangle rect, float alpha) {
+            Color top = new(6, 12, 22);
+            Color mid = new(4, 8, 16);
+            Color bot = new(2, 5, 10);
+
+            int segs = 20;
+            for (int i = 0; i < segs; i++) {
+                float t = i / (float)segs;
+                float t2 = (i + 1f) / segs;
+                int y1 = rect.Y + (int)(t * rect.Height);
+                int y2 = rect.Y + (int)(t2 * rect.Height);
+                Color c = t < 0.5f
+                    ? Color.Lerp(top, mid, t * 2f)
+                    : Color.Lerp(mid, bot, (t - 0.5f) * 2f);
+                FillRect(sb, new Rectangle(rect.X, y1, rect.Width, Math.Max(1, y2 - y1)), c * alpha);
+            }
+
+            //CRT扫描线
+            Color scanC = new(12, 25, 50);
+            for (int y = rect.Y; y < rect.Bottom; y += 3)
+                HLine(sb, rect.X + 2, y, rect.Width - 4, scanC * (alpha * 0.08f));
+
+            //网格线
+            Color gridC = new(18, 45, 80);
+            int gridSpacing = 40;
+            for (int gx = rect.X + gridSpacing; gx < rect.Right; gx += gridSpacing)
+                VLine(sb, gx, rect.Y + 4, rect.Height - 8, gridC * (alpha * 0.06f));
+            for (int gy = rect.Y + gridSpacing; gy < rect.Bottom; gy += gridSpacing)
+                HLine(sb, rect.X + 4, gy, rect.Width - 8, gridC * (alpha * 0.06f));
+
+            //暗角
+            int vigW = 30;
+            for (int v = 0; v < vigW; v += 3) {
+                float fade = 1f - v / (float)vigW;
+                fade *= fade;
+                Color vc = Color.Black * (alpha * 0.2f * fade);
+                FillRect(sb, new Rectangle(rect.X + v, rect.Y, 2, rect.Height), vc);
+                FillRect(sb, new Rectangle(rect.Right - v - 2, rect.Y, 2, rect.Height), vc);
+            }
+
+            //扫掠线
+            float sweepY = rect.Y + (shaderTime * 0.06f % 1f) * rect.Height;
+            Color sweepC = new(30, 80, 150);
+            for (int dy = -4; dy <= 4; dy++) {
+                int py = (int)sweepY + dy;
+                if (py < rect.Y || py >= rect.Bottom) continue;
+                float f = 1f - Math.Abs(dy) / 5f;
+                HLine(sb, rect.X + 2, py, rect.Width - 4, sweepC * (alpha * 0.1f * f * f));
+            }
         }
 
         #endregion
@@ -130,55 +192,10 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager.Styles
         #region 面板背景
 
         public override void DrawPanelBackground(SpriteBatch sb, Rectangle rect, float alpha) {
-            // 多层扩散阴影 
+            //多层扩散阴影
             DrawShadowLayers(sb, rect, alpha, 10, 4, 5);
-
-            // 纵向渐变底色（30段，轻微脉冲呼吸）
-            int segs = 30;
-            for (int i = 0; i < segs; i++) {
-                float t = i / (float)segs;
-                float t2 = (i + 1) / (float)segs;
-                int y1 = rect.Y + (int)(t * rect.Height);
-                int y2 = rect.Y + (int)(t2 * rect.Height);
-                float breath = MathF.Sin(pulseTimer * 0.4f + t * 1.8f) * 0.5f + 0.5f;
-                Color c = Color.Lerp(BgDeep, BgMid, t * 0.4f + breath * 0.15f) * (alpha * 0.96f);
-                FillRect(sb, new Rectangle(rect.X, y1, rect.Width, Math.Max(1, y2 - y1)), c);
-            }
-
-            // 六边形蜂巢底纹（比TrackerStyle更大更稀疏，加等高线偏移感）
-            DrawHexTopography(sb, rect, alpha * 0.04f);
-
-            // 左侧时间线脊柱背景辉光 
-            int spineX = rect.X + 28;
-            float spineGlow = MathF.Sin(spineGlowPhase) * 0.15f + 0.25f;
-            for (int gy = rect.Y + 50; gy < rect.Bottom - 20; gy += 2) {
-                float yRatio = (gy - rect.Y) / (float)rect.Height;
-                float localGlow = MathF.Sin(spineGlowPhase + yRatio * 4f) * 0.2f + 0.2f;
-                Color gc = PrimaryDim * (alpha * (spineGlow + localGlow) * 0.3f);
-                sb.Draw(Px, new Rectangle(spineX - 6, gy, 12, 1), new Rectangle(0, 0, 1, 1), gc);
-            }
-        }
-
-        /// <summary>六边形加等高线拓扑纹理</summary>
-        private void DrawHexTopography(SpriteBatch sb, Rectangle rect, float alpha) {
-            if (alpha < 0.005f) return;
-            float cellW = 24f, cellH = 20f;
-            int cols = (int)(rect.Width / cellW) + 2;
-            int rows = (int)(rect.Height / cellH) + 2;
-            for (int row = 0; row < rows; row++) {
-                for (int col = 0; col < cols; col++) {
-                    float ox = row % 2 == 0 ? 0f : cellW * 0.5f;
-                    float px2 = rect.X + col * cellW + ox;
-                    float py = rect.Y + row * cellH;
-                    if (px2 < rect.X || px2 >= rect.Right || py < rect.Y || py >= rect.Bottom) continue;
-
-                    //等高线式明暗起伏
-                    float topo = MathF.Sin(col * 0.5f + row * 0.3f + hexGridPhase * 0.7f);
-                    float brightness = 0.3f + topo * 0.25f;
-                    Color c = PrimaryDim * (alpha * brightness);
-                    sb.Draw(Px, new Rectangle((int)px2, (int)py, 2, 2), new Rectangle(0, 0, 1, 1), c);
-                }
-            }
+            //着色器驱动的面板底图
+            DrawShaderPanel(sb, rect, alpha);
         }
 
         #endregion
@@ -186,58 +203,70 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager.Styles
         #region 面板边框
 
         public override void DrawPanelFrame(SpriteBatch sb, Rectangle rect, float alpha) {
-            // 顶部双层重线（4px亮+2px暗），和对话框的3+1、来电框的L括号都不同 
-            Color topBright = PrimaryBright * (alpha * 0.92f);
-            Color topDim = PrimaryMid * (alpha * 0.4f);
-            HLine(sb, rect.X, rect.Y, rect.Width, 4, topBright);
-            HLine(sb, rect.X, rect.Y + 4, rect.Width, 2, topDim);
+            //科技边框：顶部亮线+底部暗线+左侧强调+右侧淡线
+            Color edgeC = PrimaryBright * (alpha * 0.8f);
+            HLine(sb, rect.X, rect.Y, rect.Width, edgeC);
+            HLine(sb, rect.X, rect.Bottom - 1, rect.Width, PrimaryDim * (alpha * 0.5f));
+            VLine(sb, rect.X, rect.Y, rect.Height, edgeC * 0.7f);
+            VLine(sb, rect.Right - 1, rect.Y, rect.Height, PrimaryDim * (alpha * 0.3f));
 
-            // 底部渐变线（左亮右暗）
-            DrawGradientHLine(sb, rect.X, rect.Bottom - 2, rect.Width,
-                PrimaryBright * (alpha * 0.65f), PrimaryDim * (alpha * 0.15f), 20);
-            HLine(sb, rect.X, rect.Bottom - 1, rect.Width, PrimaryDim * (alpha * 0.2f));
+            //四角标点
+            int cs = 5;
+            Color cornerC = AccentCyan * (alpha * 0.9f);
+            HLine(sb, rect.X, rect.Y, cs, cornerC);
+            VLine(sb, rect.X, rect.Y, cs, cornerC);
+            HLine(sb, rect.Right - cs, rect.Y, cs, cornerC);
+            VLine(sb, rect.Right - 1, rect.Y, cs, cornerC);
+            HLine(sb, rect.X, rect.Bottom - 1, cs, cornerC);
+            VLine(sb, rect.X, rect.Bottom - cs, cs, cornerC);
+            HLine(sb, rect.Right - cs, rect.Bottom - 1, cs, cornerC);
+            VLine(sb, rect.Right - 1, rect.Bottom - cs, cs, cornerC);
 
-            // 左侧强调竖条（3px，上2/3亮+下1/3暗），区别于对话框的4px全高 
-            int leftBarH = (int)(rect.Height * 0.66f);
-            VLine(sb, rect.X, rect.Y, leftBarH, 3, PrimaryBright * (alpha * 0.6f));
-            VLine(sb, rect.X, rect.Y + leftBarH, rect.Height - leftBarH, 3, PrimaryDim * (alpha * 0.25f));
+            //角落电路节点装饰
+            float nodePulse = MathF.Sin(pulseTimer) * 0.5f + 0.5f;
+            DrawCircuitNode(sb, new Vector2(rect.X + 10, rect.Y + 10), nodePulse, alpha);
+            DrawCircuitNode(sb, new Vector2(rect.Right - 10, rect.Y + 10), nodePulse, alpha);
+            DrawCircuitNode(sb, new Vector2(rect.X + 10, rect.Bottom - 10), nodePulse * 0.6f, alpha);
+            DrawCircuitNode(sb, new Vector2(rect.Right - 10, rect.Bottom - 10), nodePulse * 0.6f, alpha);
 
-            // 右侧细线 + 中段刻度标尺 
-            VLine(sb, rect.Right - 1, rect.Y, rect.Height, PrimaryDim * (alpha * 0.35f));
-            DrawRightRuler(sb, rect, alpha);
-
-            // 顶部左侧三道刻痕（机械感，间距递减）
-            VLine(sb, rect.X + 5, rect.Y, 12, 1, topBright * 0.7f);
-            VLine(sb, rect.X + 14, rect.Y, 8, 1, topBright * 0.45f);
-            VLine(sb, rect.X + 21, rect.Y, 5, 1, topBright * 0.25f);
-
-            // 右上角斜切装饰（15px三角缺口），区别于对话框的大斜切 
-            int cut = 15;
-            for (int row = 0; row < cut; row++) {
-                int segLen = cut - row;
-                FillRect(sb, new Rectangle(rect.Right - segLen, rect.Y + row, segLen, 1),
-                    BgDeep * (alpha * 0.98f));
-            }
-            //斜线高亮
-            for (int row = 0; row < cut; row++) {
-                float fade = 1f - (float)row / cut;
-                FillRect(sb, new Rectangle(rect.Right - (cut - row), rect.Y + row, 1, 1),
-                    AccentCyan * (alpha * 0.6f * fade));
-            }
+            //角落走线装饰
+            DrawCircuitTrace(sb, new Vector2(rect.X + 10, rect.Y + 10), true, true, alpha);
+            DrawCircuitTrace(sb, new Vector2(rect.Right - 10, rect.Y + 10), false, true, alpha);
         }
 
-        /// <summary>右侧刻度标尺，带流光效果</summary>
-        private void DrawRightRuler(SpriteBatch sb, Rectangle rect, float alpha) {
-            int rx = rect.Right - 8;
-            int spacing = 8;
-            int marks = (rect.Height - 20) / spacing;
-            for (int i = 0; i < marks; i++) {
-                float t = (float)i / marks;
-                float flow = MathF.Sin((t + dataFlowTimer * 0.3f) * MathHelper.TwoPi) * 0.3f + 0.4f;
-                int mLen = i % 5 == 0 ? 6 : 3;
-                Color mc = PrimaryDim * (alpha * flow);
-                HLine(sb, rx - mLen, rect.Y + 10 + i * spacing, mLen, mc);
-            }
+        //电路节点装饰（十字线+菱形核心+高光点）
+        private void DrawCircuitNode(SpriteBatch sb, Vector2 pos, float pulse, float alpha) {
+            Color c = PrimaryBright;
+            //外圈辉光
+            sb.Draw(Px, pos, new Rectangle(0, 0, 1, 1), c * (0.15f * pulse * alpha), 0f,
+                new Vector2(0.5f), 10f, SpriteEffects.None, 0f);
+            //十字电路线
+            sb.Draw(Px, pos, new Rectangle(0, 0, 1, 1), c * (0.7f * pulse * alpha), 0f,
+                new Vector2(0.5f), new Vector2(8f, 1f), SpriteEffects.None, 0f);
+            sb.Draw(Px, pos, new Rectangle(0, 0, 1, 1), c * (0.6f * pulse * alpha), MathHelper.PiOver2,
+                new Vector2(0.5f), new Vector2(8f, 1f), SpriteEffects.None, 0f);
+            //菱形核心
+            sb.Draw(Px, pos, new Rectangle(0, 0, 1, 1), AccentCyan * (0.9f * pulse * alpha), MathHelper.PiOver4,
+                new Vector2(0.5f), 3f, SpriteEffects.None, 0f);
+            //高光点
+            sb.Draw(Px, pos, new Rectangle(0, 0, 1, 1), Color.White * (0.3f * pulse * alpha), 0f,
+                new Vector2(0.5f), 1.5f, SpriteEffects.None, 0f);
+        }
+
+        //角落电路走线
+        private void DrawCircuitTrace(SpriteBatch sb, Vector2 corner, bool goRight, bool goDown, float alpha) {
+            int dirX = goRight ? 1 : -1;
+            int dirY = goDown ? 1 : -1;
+            Color traceC = PrimaryMid * (alpha * 0.2f);
+            //水平走线
+            FillRect(sb, new Rectangle((int)corner.X, (int)corner.Y, 22 * dirX, 1), traceC);
+            //转角
+            Vector2 turn = corner + new Vector2(22 * dirX, 0);
+            FillRect(sb, new Rectangle((int)turn.X, (int)turn.Y, 1, 14 * dirY), traceC);
+            //末端方块
+            Vector2 end = turn + new Vector2(0, 14 * dirY);
+            sb.Draw(Px, end, new Rectangle(0, 0, 1, 1), PrimaryBright * (alpha * 0.35f), 0f,
+                new Vector2(0.5f), 2f, SpriteEffects.None, 0f);
         }
 
         #endregion
@@ -245,18 +274,27 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager.Styles
         #region 标题栏
 
         public override void DrawHeader(SpriteBatch sb, Rectangle headerRect, string title, float alpha) {
-            // 标题栏背景（比面板背景深一层）
+            //标题栏深色背景
             FillRect(sb, headerRect, new Color(3, 6, 16) * (alpha * 0.7f));
 
-            // 雷达旋转弧装饰（标题左侧，替代来电框的信号弧/对话框的HEX读出）
-            Vector2 radarCenter = new(headerRect.X + 24f, headerRect.Y + headerRect.Height / 2f);
-            DrawRadarArc(sb, radarCenter, 14f, alpha);
+            //雷达扫描环装饰（标题左侧）
+            Vector2 radarCenter = new(headerRect.X + 22f, headerRect.Y + headerRect.Height / 2f);
+            float scanRot = scanTimer;
+            for (int i = 0; i < 4; i++) {
+                float r = scanRot + i * MathHelper.PiOver2;
+                Vector2 tickEnd = radarCenter + new Vector2(0, -10).RotatedBy(r);
+                sb.Draw(Px, tickEnd, new Rectangle(0, 0, 1, 3), PrimaryMid * (alpha * 0.4f),
+                    (float)r, new Vector2(0.5f, 1.5f), 1f, SpriteEffects.None, 0f);
+            }
+            //雷达中心亮点
+            FillRect(sb, new Rectangle((int)(radarCenter.X - 1), (int)(radarCenter.Y - 1), 3, 3),
+                AccentCyan * (alpha * 0.5f));
 
-            // 标题文字——超出宽度时截断加省略号
+            //标题文字
             var font = FontAssets.MouseText.Value;
             float headerBlink = MathF.Sin(headerGlowPhase) * 0.12f + 0.88f;
-            Vector2 titlePos = new(headerRect.X + 46f, headerRect.Y + (headerRect.Height - 18f) / 2f);
-            float maxHeaderTitleW = headerRect.Width - 120f;
+            Vector2 titlePos = new(headerRect.X + 40f, headerRect.Y + (headerRect.Height - 18f) / 2f);
+            float maxHeaderTitleW = headerRect.Width - 110f;
             if (font.MeasureString(title).X * 0.88f > maxHeaderTitleW) {
                 while (title.Length > 3 && font.MeasureString(title + "...").X * 0.88f > maxHeaderTitleW)
                     title = title[..^1];
@@ -264,7 +302,7 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager.Styles
             }
             Utils.DrawBorderString(sb, title, titlePos, PrimaryBright * (alpha * headerBlink), 0.88f);
 
-            //标题右侧数据流标签
+            //右侧状态标签
             float tagBlink = MathF.Sin(headerGlowPhase * 1.6f) * 0.35f + 0.65f;
             string tag = QuestManagerUI.HeaderStatusTag.Value;
             float tagW = font.MeasureString(tag).X * 0.6f;
@@ -272,45 +310,20 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager.Styles
                 new Vector2(headerRect.Right - tagW - 14f, headerRect.Y + (headerRect.Height - 14f) / 2f),
                 AccentCyan * (alpha * 0.55f * tagBlink), 0.6f);
 
-            // 底部分隔线（虎纹虚线，短实线+间隙交替，区别于对话框的流动虚线）
-            DrawTigerDash(sb, headerRect.X + 8, headerRect.Bottom - 1, headerRect.Width - 16, alpha * 0.5f);
-        }
-
-        /// <summary>雷达旋转弧，任务管理器专属标识</summary>
-        private void DrawRadarArc(SpriteBatch sb, Vector2 center, float radius, float alpha) {
-            int segments = 12;
-            for (int arc = 0; arc < 2; arc++) {
-                float baseAngle = radarSweep + arc * MathHelper.Pi;
-                float arcSpan = MathHelper.PiOver4 * 1.2f;
-                for (int i = 0; i < segments; i++) {
-                    float t = (float)i / segments;
-                    float angle = baseAngle + t * arcSpan;
-                    float fade = MathF.Sin(t * MathHelper.Pi) * 0.7f + 0.3f;
-                    Vector2 p = center + angle.ToRotationVector2() * radius;
-                    FillRect(sb, new Rectangle((int)p.X, (int)p.Y, 2, 2),
-                        PrimaryBright * (alpha * 0.5f * fade));
+            //底部分隔线（双线凹槽 + 扫掠亮点）
+            int lineW = headerRect.Width - 16;
+            int lineX = headerRect.X + 8;
+            int lineY = headerRect.Bottom - 2;
+            HLine(sb, lineX, lineY, lineW, new Color(0, 0, 0) * (alpha * 0.8f));
+            HLine(sb, lineX, lineY + 1, lineW, PrimaryMid * (alpha * 0.5f));
+            //扫掠亮点
+            float sweepX = lineX + (dataFlowTimer * 0.8f % 1f) * lineW;
+            for (int dx = -4; dx <= 4; dx++) {
+                int px = (int)sweepX + dx;
+                if (px >= lineX && px < lineX + lineW) {
+                    float f = 1f - Math.Abs(dx) / 5f;
+                    FillRect(sb, new Rectangle(px, lineY, 1, 2), AccentCyan * (alpha * 0.6f * f * f));
                 }
-            }
-            //中心亮点
-            FillRect(sb, new Rectangle((int)(center.X - 1), (int)(center.Y - 1), 3, 3),
-                AccentCyan * (alpha * 0.4f));
-        }
-
-        /// <summary>虎纹虚线，4px实线加2px间隙的紧密排列</summary>
-        private void DrawTigerDash(SpriteBatch sb, int x, int y, int w, float alpha) {
-            int dashW = 4, gapW = 2;
-            float flow = dataFlowTimer * 18f;
-            int period = dashW + gapW;
-            float cx = x - flow % period;
-            while (cx < x + w) {
-                float segStart = Math.Max(cx, x);
-                float segEnd = Math.Min(cx + dashW, x + w);
-                if (segEnd > segStart) {
-                    float bright = 0.5f + MathF.Sin((segStart - x) / w * MathHelper.Pi) * 0.4f;
-                    HLine(sb, (int)segStart, y, (int)(segEnd - segStart),
-                        PrimaryMid * (alpha * bright));
-                }
-                cx += period;
             }
         }
 
@@ -331,14 +344,28 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager.Styles
                 Rectangle tab = new((int)tabX, tabRect.Y + 2, (int)tabW, tabRect.Height - 4);
 
                 bool selected = i == selectedIndex;
-                Color bgC = selected ? PrimaryDim * (alpha * 0.4f) : new Color(6, 12, 28) * (alpha * 0.3f);
+
+                //底色 + 扫描线纹理
+                Color bgC = selected ? PrimaryDim * (alpha * 0.35f) : new Color(6, 12, 28) * (alpha * 0.25f);
                 FillRect(sb, tab, bgC);
+                for (int sy = tab.Y; sy < tab.Bottom; sy += 3)
+                    HLine(sb, tab.X + 1, sy, tab.Width - 2, PrimaryMid * (alpha * 0.04f));
 
                 if (selected) {
                     //选中态底部高亮线
                     HLine(sb, tab.X, tab.Bottom - 1, tab.Width, 2, AccentCyan * (alpha * 0.85f));
-                    //轻微辉光
-                    FillRect(sb, new Rectangle(tab.X, tab.Y, tab.Width, 1), PrimaryBright * (alpha * 0.15f));
+                    //顶部亮边
+                    HLine(sb, tab.X, tab.Y, tab.Width, PrimaryBright * (alpha * 0.2f));
+                }
+
+                //科技角标
+                if (selected) {
+                    int cs2 = 3;
+                    Color csC = AccentCyan * (alpha * 0.7f);
+                    HLine(sb, tab.X, tab.Y, cs2, csC);
+                    VLine(sb, tab.X, tab.Y, cs2, csC);
+                    HLine(sb, tab.Right - cs2, tab.Bottom - 1, cs2, csC);
+                    VLine(sb, tab.Right - 1, tab.Bottom - cs2, cs2, csC);
                 }
 
                 Color textC = selected ? PrimaryBright * alpha : PrimaryMid * (alpha * 0.65f);
@@ -359,8 +386,8 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager.Styles
 
         public override void DrawScrollbar(SpriteBatch sb, Rectangle trackRect, float scrollRatio,
             float viewRatio, float alpha) {
-            //轨道
-            FillRect(sb, trackRect, new Color(8, 16, 32) * (alpha * 0.5f));
+            //轨道暗底
+            FillRect(sb, trackRect, new Color(5, 8, 14) * (alpha * 0.5f));
             VLine(sb, trackRect.X, trackRect.Y, trackRect.Height, PrimaryDim * (alpha * 0.25f));
 
             //滑块
@@ -369,13 +396,25 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager.Styles
             int thumbY = trackRect.Y + (int)((trackRect.Height - thumbH) * MathHelper.Clamp(scrollRatio, 0f, 1f));
             Rectangle thumb = new(trackRect.X + 1, thumbY, trackRect.Width - 2, thumbH);
 
-            float thumbPulse = MathF.Sin(pulseTimer * 1.5f) * 0.15f + 0.6f;
-            FillRect(sb, thumb, PrimaryMid * (alpha * thumbPulse));
-            //滑块中3道刻线
-            int midY = thumb.Y + thumb.Height / 2;
-            for (int j = -1; j <= 1; j++) {
-                HLine(sb, thumb.X + 2, midY + j * 3, thumb.Width - 4, PrimaryBright * (alpha * 0.35f));
+            //渐变填充
+            float thumbPulse = MathF.Sin(pulseTimer * 1.5f) * 0.15f + 0.55f;
+            for (int ty = thumb.Y; ty < thumb.Bottom; ty++) {
+                float t = (ty - thumb.Y) / (float)thumb.Height;
+                Color c = Color.Lerp(PrimaryMid * 0.8f, PrimaryDim * 0.4f, t);
+                HLine(sb, thumb.X, ty, thumb.Width, c * (alpha * thumbPulse));
             }
+
+            //薄顶部高光
+            HLine(sb, thumb.X, thumb.Y, thumb.Width, Color.White * (alpha * 0.15f));
+
+            //流光
+            float flow = (dataFlowTimer * 4f) % 1f;
+            int flowY = thumb.Y + (int)(flow * thumb.Height);
+            if (flowY >= thumb.Y && flowY < thumb.Bottom)
+                HLine(sb, thumb.X, flowY, thumb.Width, Color.White * (alpha * 0.3f));
+
+            //科技边框
+            DrawThinTechBorder(sb, thumb, PrimaryMid * (alpha * 0.5f));
         }
 
         #endregion
@@ -386,8 +425,10 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager.Styles
             int activeQuests, float alpha) {
             //背景
             FillRect(sb, footerRect, new Color(3, 6, 16) * (alpha * 0.65f));
-            //顶部分隔
-            HLine(sb, footerRect.X + 8, footerRect.Y, footerRect.Width - 16, PrimaryDim * (alpha * 0.35f));
+
+            //顶部分隔（双线凹槽）
+            HLine(sb, footerRect.X + 8, footerRect.Y, footerRect.Width - 16, new Color(0, 0, 0) * (alpha * 0.6f));
+            HLine(sb, footerRect.X + 8, footerRect.Y + 1, footerRect.Width - 16, PrimaryDim * (alpha * 0.3f));
 
             //统计文本
             string statsText = string.Format(QuestManagerUI.FooterStatsFormat.Value, totalQuests, activeQuests);
@@ -418,39 +459,30 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager.Styles
             bool bgHandled = customStyle?.DrawEntryBackground(sb, entryRect, entry, isSelected, isHovered, alpha) ?? false;
             if (!bgHandled) {
                 if (isSelected) {
-                    FillRect(sb, entryRect, PrimaryDim * (alpha * 0.22f));
-                    VLine(sb, entryRect.X, entryRect.Y, entryRect.Height, 2, AccentCyan * (alpha * 0.7f));
+                    FillRect(sb, entryRect, PrimaryDim * (alpha * 0.2f));
+                    //选中态科技边框
+                    DrawThinTechBorder(sb, entryRect, AccentCyan * (alpha * 0.5f));
                 }
                 else if (isHovered) {
-                    FillRect(sb, entryRect, PrimaryDim * (alpha * 0.12f));
-                    VLine(sb, entryRect.X, entryRect.Y, entryRect.Height, 1, PrimaryMid * (alpha * 0.4f));
+                    FillRect(sb, entryRect, PrimaryDim * (alpha * 0.1f));
+                    DrawThinTechBorder(sb, entryRect, PrimaryMid * (alpha * 0.25f));
                 }
 
+                //状态指示条（左侧3px竖条）
                 Color statusBarColor = GetStatusColor(entry.Status, alpha);
-                VLine(sb, entryRect.X + 4, entryRect.Y + 4, entryRect.Height - 8, 3, statusBarColor);
+                VLine(sb, entryRect.X + 2, entryRect.Y + 4, entryRect.Height - 8, 3, statusBarColor);
 
-                //时间线脊柱上的菱形节点（嘉登科技专属装饰，自定义样式接管时跳过）
-                int spineX = entryRect.X + 28;
-                int spineNodeY = entryRect.Y + entryRect.Height / 2;
-                DrawDiamondNode(sb, new Vector2(spineX, spineNodeY), entry.Status, alpha, entryIndex);
-
-                //连接线（到下一条目的虚线，在条目绘制时只画下半段）
-                Color spineLineC = PrimaryDim * (alpha * 0.3f);
-                for (int ly = spineNodeY + 6; ly < entryRect.Bottom; ly += 3) {
-                    FillRect(sb, new Rectangle(spineX, ly, 1, 1), spineLineC);
-                }
-                //上半段
-                for (int ly = entryRect.Y; ly < spineNodeY - 5; ly += 3) {
-                    FillRect(sb, new Rectangle(spineX, ly, 1, 1), spineLineC);
-                }
+                //状态菱形节点
+                int nodeX = entryRect.X + 16;
+                int nodeY = entryRect.Y + 14;
+                DrawStatusNode(sb, new Vector2(nodeX, nodeY), entry.Status, alpha, entryIndex);
             }
 
             // === 图标 + 标题 ===
-            //有脊柱时标题从X+42开始（脊柱在X+28），自定义背景无脊柱时从X+10开始
-            float titleX = entryRect.X + (bgHandled ? 10f : 42f);
+            float titleX = entryRect.X + (bgHandled ? 10f : 28f);
             float titleY = entryRect.Y + 6f;
 
-            //自定义图标（可能右移标题位置）
+            //自定义图标
             float iconOffset = customStyle?.DrawEntryIcon(sb, new Vector2(titleX, titleY), entry, alpha) ?? 0f;
             titleX += iconOffset;
 
@@ -462,9 +494,10 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager.Styles
                 float newBlink = MathF.Sin(chevronPulse * 2f) * 0.3f + 0.7f;
                 titleColor = Color.Lerp(titleColor, AccentWarm, newBlink * 0.4f);
             }
-            //截断过长的标题
+
+            //截断标题
             string displayTitle = entry.Title ?? "";
-            float maxEntryTitleW = entryRect.Width - 60f - iconOffset;
+            float maxEntryTitleW = entryRect.Width - 50f - iconOffset;
             if (font.MeasureString(displayTitle).X * 0.78f > maxEntryTitleW) {
                 while (displayTitle.Length > 3 && font.MeasureString(displayTitle + "...").X * 0.78f > maxEntryTitleW)
                     displayTitle = displayTitle[..^1];
@@ -472,7 +505,7 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager.Styles
             }
             Utils.DrawBorderString(sb, displayTitle, new Vector2(titleX, titleY), titleColor, 0.78f);
 
-            // 雪佛龙关注指示器（Tracked态在标题右侧显示 ››）
+            //Tracked态雪佛龙指示器
             if (entry.Status == QuestEntryStatus.Tracked) {
                 float chevBlink = MathF.Sin(chevronPulse * 1.5f) * 0.4f + 0.6f;
                 float titleW = font.MeasureString(displayTitle).X * 0.78f;
@@ -483,26 +516,23 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager.Styles
                     chevColor, 0.7f);
             }
 
-            // 摘要文本 
+            //摘要文本
             float summaryY = titleY + 20f;
             Color summaryColor = PrimaryMid * (alpha * 0.6f);
-            //折叠态只显示单行，将换行符替换为空格并去除首尾空白
             string summary = (entry.Summary ?? "").Replace("\r", "").Replace("\n", " ").Trim();
-            //截断过长的摘要
-            float maxSummaryW = entryRect.Width - 60f - iconOffset;
+            float maxSummaryW = entryRect.Width - 50f - iconOffset;
             if (font.MeasureString(summary).X * 0.65f > maxSummaryW) {
                 while (summary.Length > 3 && font.MeasureString(summary + "...").X * 0.65f > maxSummaryW)
                     summary = summary[..^1];
                 summary += "...";
             }
-            //未展开时显示截断摘要，展开后摘要淡出
             float collapsedAlpha = 1f - entry.ExpandProgress;
             if (collapsedAlpha > 0.01f) {
                 Utils.DrawBorderString(sb, summary, new Vector2(titleX, summaryY),
                     summaryColor * collapsedAlpha, 0.65f);
             }
 
-            //展开指示器（标题行右端，▼/▲）
+            //展开指示器
             if (!string.IsNullOrEmpty(entry.Summary)) {
                 string expandIcon = entry.IsExpanded ? "▲" : "▼";
                 float iconAlpha = isHovered ? 0.7f : 0.35f;
@@ -511,7 +541,7 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager.Styles
                     PrimaryMid * (alpha * iconAlpha), 0.6f);
             }
 
-            // 展开内容区域（动画插值）
+            //展开内容区域
             if (entry.ExpandProgress > 0.01f) {
                 int baseH = GetEntryHeight();
                 float expandAlpha = alpha * entry.ExpandProgress;
@@ -520,33 +550,31 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager.Styles
                 //展开区域半透明背景
                 int expandAreaH = entryRect.Height - baseH;
                 if (expandAreaH > 0) {
-                    int bgLeftPad = bgHandled ? 4 : 34;
+                    int bgLeftPad = bgHandled ? 4 : 22;
                     Rectangle expandBg = new(entryRect.X + bgLeftPad, (int)descY - 2, entryRect.Width - bgLeftPad - 4, expandAreaH + 2);
-                    FillRect(sb, expandBg, new Color(6, 12, 28) * (expandAlpha * 0.35f));
+                    FillRect(sb, expandBg, new Color(4, 8, 18) * (expandAlpha * 0.35f));
                 }
 
-                //分隔虚线
-                Color sepColor = PrimaryDim * (expandAlpha * 0.4f);
-                float sepX = titleX;
-                float sepEndX = entryRect.Right - 14f;
-                int dashW = 3, gapW = 3;
-                float cx = sepX;
-                while (cx < sepEndX) {
-                    float segEnd = Math.Min(cx + dashW, sepEndX);
-                    if (segEnd > cx) {
-                        HLine(sb, (int)cx, (int)descY, (int)(segEnd - cx), sepColor);
+                //分隔线（双线凹槽 + 扫掠亮点）
+                int sepW = (int)(entryRect.Width - titleX + entryRect.X - 14f);
+                HLine(sb, (int)titleX, (int)descY, sepW, new Color(0, 0, 0) * (expandAlpha * 0.6f));
+                HLine(sb, (int)titleX, (int)descY + 1, sepW, PrimaryDim * (expandAlpha * 0.35f));
+                float sepSweep = (int)titleX + (dataFlowTimer * 1.2f % 1f) * sepW;
+                for (int dx = -3; dx <= 3; dx++) {
+                    int spx = (int)sepSweep + dx;
+                    if (spx >= (int)titleX && spx < (int)titleX + sepW) {
+                        float f = 1f - Math.Abs(dx) / 4f;
+                        FillRect(sb, new Rectangle(spx, (int)descY, 1, 2), AccentCyan * (expandAlpha * 0.5f * f * f));
                     }
-                    cx += dashW + gapW;
                 }
-                descY += 5f;
+                descY += 6f;
 
-                //自动换行的完整描述文本
+                //自动换行描述文本
                 string fullText = entry.Summary ?? "";
                 float descScale = 0.62f;
-                int wrapWidth = (int)((entryRect.Width - 50f) / descScale);
+                int wrapWidth = (int)((entryRect.Width - 40f) / descScale);
                 Color descColor = new Color(170, 200, 220) * (expandAlpha * 0.75f);
 
-                //先按换行符拆分，再对每段做自动换行
                 string[] paragraphs = fullText.Split('\n');
                 foreach (string paragraph in paragraphs) {
                     string trimmedPara = paragraph.Trim();
@@ -562,20 +590,25 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager.Styles
                 }
             }
 
-            // 进度条（如果有进度数据）
+            //进度条
             if (entry.Progress > 0f && entry.Status != QuestEntryStatus.Completed) {
-                //展开时进度条靠近条目底部，折叠时紧跟摘要下方
                 float barY = entry.ExpandProgress > 0.5f
                     ? entryRect.Bottom - 14f
                     : summaryY + 18f;
-                int barW = Math.Min(120, entryRect.Width - 60);
+                int barW = Math.Min(120, entryRect.Width - 50);
                 Rectangle barRect = new((int)titleX, (int)barY, barW, 5);
                 DrawProgressBar(sb, barRect, entry.Progress,
-                    new Color(8, 16, 32) * alpha,
+                    new Color(5, 8, 14) * alpha,
                     PrimaryMid * alpha, AccentCyan * alpha,
                     PrimaryDim * (alpha * 0.4f), pulseTimer);
 
-                //进度文本
+                //流光
+                float flow = (dataFlowTimer * 4f) % 1f;
+                int fillW = (int)(barW * MathHelper.Clamp(entry.Progress, 0f, 1f));
+                int flowX = barRect.X + (int)(flow * fillW);
+                if (fillW > 2 && flowX < barRect.X + fillW)
+                    FillRect(sb, new Rectangle(flowX, barRect.Y, 2, barRect.Height), Color.White * (alpha * 0.4f));
+
                 if (entry.ProgressText != null) {
                     Utils.DrawBorderString(sb, entry.ProgressText,
                         new Vector2(barRect.Right + 6f, barRect.Y - 2f),
@@ -587,53 +620,50 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager.Styles
             customStyle?.DrawEntryOverlay(sb, entryRect, entry, alpha);
         }
 
-        /// <summary>
-        /// 菱形状态节点，空心=进行中，实心=已完成，叉号=失败
-        /// </summary>
-        private void DrawDiamondNode(SpriteBatch sb, Vector2 center, QuestEntryStatus status, float alpha, int index) {
+        //菱形状态节点（多层全息风格，与QuestLogStyle的节点统一）
+        private void DrawStatusNode(SpriteBatch sb, Vector2 center, QuestEntryStatus status, float alpha, int index) {
             float nodeSize = 4f;
-            float pulse = MathF.Sin(spineGlowPhase + index * 0.8f) * 0.2f + 0.8f;
+            float pulse = MathF.Sin(pulseTimer + index * 0.8f) * 0.2f + 0.8f;
             Color nodeColor = GetStatusColor(status, alpha * pulse);
 
             if (status == QuestEntryStatus.Completed) {
-                //实心菱形（两个旋转矩形叠加）
+                //实心菱形
                 sb.Draw(Px, center, null, nodeColor, MathHelper.PiOver4, new Vector2(0.5f),
                     new Vector2(nodeSize * 1.4f), SpriteEffects.None, 0f);
+                //高光点
+                sb.Draw(Px, center, null, Color.White * (alpha * 0.3f * pulse), 0f,
+                    new Vector2(0.5f), 1.5f, SpriteEffects.None, 0f);
             }
             else if (status == QuestEntryStatus.Failed) {
-                //叉号
                 sb.Draw(Px, center, null, nodeColor, MathHelper.PiOver4, new Vector2(0.5f),
                     new Vector2(nodeSize * 1.2f, nodeSize * 0.3f), SpriteEffects.None, 0f);
                 sb.Draw(Px, center, null, nodeColor, -MathHelper.PiOver4, new Vector2(0.5f),
                     new Vector2(nodeSize * 1.2f, nodeSize * 0.3f), SpriteEffects.None, 0f);
             }
             else {
-                //空心菱形（外框）
+                //空心菱形（多层全息辉光）
+                if (status == QuestEntryStatus.Tracked) {
+                    float glowPulse = MathF.Sin(chevronPulse + index) * 0.3f + 0.3f;
+                    sb.Draw(Px, center, null, AccentCyan * (alpha * glowPulse * 0.15f), MathHelper.PiOver4,
+                        new Vector2(0.5f), nodeSize * 3f, SpriteEffects.None, 0f);
+                }
                 sb.Draw(Px, center, null, nodeColor, MathHelper.PiOver4, new Vector2(0.5f),
                     new Vector2(nodeSize * 1.4f), SpriteEffects.None, 0f);
                 sb.Draw(Px, center, null, BgDeep * (alpha * 0.9f), MathHelper.PiOver4, new Vector2(0.5f),
                     new Vector2(nodeSize * 0.8f), SpriteEffects.None, 0f);
-
-                //Tracked 态：外层光晕
-                if (status == QuestEntryStatus.Tracked) {
-                    float glowPulse = MathF.Sin(chevronPulse + index) * 0.3f + 0.3f;
-                    sb.Draw(Px, center, null, AccentCyan * (alpha * glowPulse), MathHelper.PiOver4,
-                        new Vector2(0.5f), new Vector2(nodeSize * 2.2f), SpriteEffects.None, 0f);
-                }
             }
         }
 
         public override void DrawEntrySeparator(SpriteBatch sb, Vector2 start, Vector2 end, float alpha) {
-            //极细虚线
-            float w = end.X - start.X;
-            int dashW = 3, gap = 4;
+            //方块点阵虚线
+            int dashLen = 3, gapLen = 4;
             float x = start.X;
             while (x < end.X) {
-                float segEnd = Math.Min(x + dashW, end.X);
+                float segEnd = Math.Min(x + dashLen, end.X);
                 if (segEnd > x) {
                     HLine(sb, (int)x, (int)start.Y, (int)(segEnd - x), PrimaryDim * (alpha * 0.15f));
                 }
-                x += dashW + gap;
+                x += dashLen + gapLen;
             }
         }
 
@@ -661,38 +691,65 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager.Styles
         #region 粒子与特效
 
         public override void DrawParticles(SpriteBatch sb, Rectangle panelRect, float alpha) {
-            foreach (var node in circuitNodes)
-                node.Draw(sb, alpha * 0.55f);
-            foreach (var prt in bgParticles)
-                prt.Draw(sb, alpha * 0.45f);
+            Color accentColor = PrimaryBright;
+            foreach (var p in dataParticles) {
+                Vector2 drawPos = new(
+                    panelRect.X + p.Pos.X * panelRect.Width,
+                    panelRect.Y + p.Pos.Y * panelRect.Height);
+                if (drawPos.X < panelRect.X || drawPos.X > panelRect.Right ||
+                    drawPos.Y < panelRect.Y || drawPos.Y > panelRect.Bottom) continue;
+
+                float lifeRatio = p.Life / p.MaxLife;
+                float fade = MathF.Sin(lifeRatio * MathHelper.Pi);
+                Color pColor = accentColor * (fade * 0.5f * alpha);
+
+                if (p.Type == 0) {
+                    sb.Draw(Px, drawPos, new Rectangle(0, 0, 1, 1), pColor, 0f,
+                        new Vector2(0.5f), new Vector2(p.Size * 2f, p.Size * 2f), SpriteEffects.None, 0f);
+                }
+                else if (p.Type == 1) {
+                    float rot = p.Vel.ToRotation();
+                    sb.Draw(Px, drawPos, new Rectangle(0, 0, 1, 1), pColor, rot,
+                        new Vector2(0.5f, 0.5f), new Vector2(p.Size * 4f, p.Size * 0.5f), SpriteEffects.None, 0f);
+                }
+                else {
+                    sb.Draw(Px, drawPos, new Rectangle(0, 0, 1, 1), pColor * 1.5f, 0f,
+                        new Vector2(0.5f), p.Size, SpriteEffects.None, 0f);
+                }
+            }
         }
 
         public override void DrawOverlayEffects(SpriteBatch sb, Rectangle panelRect, float alpha) {
-            // 虎纹扫描带（8%面板高度的渐变亮带，从上向下循环）
-            float bandH = panelRect.Height * 0.08f;
-            float bandY = panelRect.Y + scanBandPos * (panelRect.Height + bandH) - bandH;
-            int bandTop = Math.Max(panelRect.Y, (int)bandY);
-            int bandBot = Math.Min(panelRect.Bottom, (int)(bandY + bandH));
-            if (bandBot > bandTop) {
-                for (int y = bandTop; y < bandBot; y++) {
-                    float t = (y - bandY) / bandH;
-                    float intensity = MathF.Sin(t * MathHelper.Pi) * 0.12f;
-                    HLine(sb, panelRect.X + 4, y, panelRect.Width - 8,
-                        PrimaryBright * (alpha * intensity));
-                }
+            //CRT扫描线叠层
+            Color scanC = new(12, 25, 50);
+            for (int y = panelRect.Y; y < panelRect.Bottom; y += 3)
+                HLine(sb, panelRect.X + 2, y, panelRect.Width - 4, scanC * (alpha * 0.05f));
+
+            //扫掠线
+            float sweepY = panelRect.Y + (shaderTime * 0.06f % 1f) * panelRect.Height;
+            Color sweepC = new(30, 80, 150);
+            for (int dy = -4; dy <= 4; dy++) {
+                int py = (int)sweepY + dy;
+                if (py < panelRect.Y || py >= panelRect.Bottom) continue;
+                float f = 1f - Math.Abs(dy) / 5f;
+                HLine(sb, panelRect.X + 4, py, panelRect.Width - 8, sweepC * (alpha * 0.08f * f * f));
             }
 
-            // 偶发故障横条（低频，约1/6触发）
-            float gf = MathF.Sin(glitchTimer * 2.6f);
-            if (gf > 0.95f) {
-                float gy = panelRect.Y + glitchTimer * 113f % panelRect.Height;
-                HLine(sb, panelRect.X + 4, (int)gy, panelRect.Width - 8, 2,
-                    PrimaryBright * (alpha * (gf - 0.95f) * 4f));
-            }
-
-            // 全息闪烁叠层（极低透明度的全面板覆盖）
+            //全息闪烁叠层
             float flicker = MathF.Sin(globalTimer * 2.4f) * 0.5f + 0.5f;
-            FillRect(sb, panelRect, new Color(20, 40, 60) * (alpha * 0.04f * flicker));
+            FillRect(sb, panelRect, new Color(20, 40, 60) * (alpha * 0.03f * flicker));
+        }
+
+        #endregion
+
+        #region 工具方法
+
+        //细线科技边框
+        private static void DrawThinTechBorder(SpriteBatch sb, Rectangle rect, Color color) {
+            HLine(sb, rect.X, rect.Y, rect.Width, color);
+            HLine(sb, rect.X, rect.Bottom - 1, rect.Width, color * 0.6f);
+            VLine(sb, rect.X, rect.Y, rect.Height, color * 0.8f);
+            VLine(sb, rect.Right - 1, rect.Y, rect.Height, color * 0.5f);
         }
 
         #endregion
