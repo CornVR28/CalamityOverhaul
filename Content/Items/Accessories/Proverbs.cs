@@ -184,7 +184,7 @@ namespace CalamityOverhaul.Content.Items.Accessories
             float targetTier = dualMode ? 3f : 1.5f;
             tierLevel = MathHelper.Lerp(tierLevel, targetTier, 0.05f);
 
-            float maxR = dualMode ? 620f : 120f;
+            float maxR = dualMode ? 620f : 220f;
             if (hideVisual) {
                 maxR = 0;
             }
