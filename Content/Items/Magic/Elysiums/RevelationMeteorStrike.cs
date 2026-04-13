@@ -1,3 +1,4 @@
+using CalamityOverhaul.Common;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -13,20 +14,22 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
     {
         public override string Texture => CWRConstant.Placeholder;
 
-        private const float ImpactDistance = 40f;
+        private const float ImpactDistance = 52f;
+        private const float BaseVisualScale = 1.95f;
+        private const float BaseShaderSize = 172f;
 
         private ref float TargetX => ref Projectile.ai[0];
         private ref float TargetY => ref Projectile.ai[1];
         private bool impacted;
 
         public override void SetStaticDefaults() {
-            ProjectileID.Sets.TrailCacheLength[Type] = 12;
+            ProjectileID.Sets.TrailCacheLength[Type] = 16;
             ProjectileID.Sets.TrailingMode[Type] = 2;
         }
 
         public override void SetDefaults() {
-            Projectile.width = 56;
-            Projectile.height = 56;
+            Projectile.width = 84;
+            Projectile.height = 84;
             Projectile.friendly = true;
             Projectile.hostile = false;
             Projectile.tileCollide = false;
@@ -109,6 +112,9 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
             float time = Main.GlobalTimeWrappedHourly;
             float pulse = 0.84f + (float)Math.Sin(time * 12f + Projectile.whoAmI * 0.37f) * 0.12f;
             float speedFactor = MathHelper.Clamp(Projectile.velocity.Length() / 24f, 0.65f, 1.2f);
+            float visualScale = BaseVisualScale * (0.92f + speedFactor * 0.34f);
+
+            DrawCelestialBodyShader(sb, drawPos, time, speedFactor, visualScale);
 
             for (int i = Projectile.oldPos.Length - 1; i >= 0; i--) {
                 if (Projectile.oldPos[i] == Vector2.Zero) {
@@ -117,40 +123,86 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
 
                 float factor = (Projectile.oldPos.Length - i) / (float)Projectile.oldPos.Length;
                 Vector2 trailPos = Projectile.oldPos[i] + Projectile.Size * 0.5f - Main.screenPosition;
-                Vector2 stretchScale = new(0.22f + factor * 0.3f, (0.9f + factor * 2.4f) * speedFactor);
-                Color outerTrail = new Color(255, 135, 68, 0) * factor * 0.32f;
-                Color innerTrail = new Color(255, 220, 150, 0) * factor * 0.2f;
+                Vector2 stretchScale = new((0.32f + factor * 0.42f) * visualScale, (1.35f + factor * 3.6f) * speedFactor * visualScale);
+                Color outerTrail = new Color(255, 135, 68, 0) * factor * 0.4f;
+                Color innerTrail = new Color(255, 220, 150, 0) * factor * 0.24f;
 
                 sb.Draw(glow, trailPos, null, outerTrail, Projectile.rotation, glow.Size() * 0.5f, stretchScale, SpriteEffects.None, 0f);
-                sb.Draw(glow, trailPos + backward * (6f + factor * 8f), null, innerTrail, Projectile.rotation, glow.Size() * 0.5f, stretchScale * new Vector2(0.55f, 0.72f), SpriteEffects.None, 0f);
+                sb.Draw(glow, trailPos + backward * (12f + factor * 18f) * visualScale, null, innerTrail, Projectile.rotation, glow.Size() * 0.5f,
+                    stretchScale * new Vector2(0.58f, 0.74f), SpriteEffects.None, 0f);
             }
 
-            for (int i = 0; i < 4; i++) {
+            for (int i = 0; i < 5; i++) {
                 float offsetFactor = i / 3f;
-                Vector2 plumePos = drawPos + backward * (24f + i * 17f) + side * (float)Math.Sin(time * 8f + i * 1.2f) * (3f + i * 1.5f);
-                Color plumeColor = Color.Lerp(new Color(255, 218, 145, 0), new Color(255, 112, 52, 0), offsetFactor) * (0.34f - offsetFactor * 0.06f);
-                Vector2 plumeScale = new(0.4f - offsetFactor * 0.08f, (1.4f + i * 0.3f) * speedFactor);
+                Vector2 plumePos = drawPos + backward * (42f + i * 28f) * visualScale + side * (float)Math.Sin(time * 8f + i * 1.2f) * (6f + i * 2.5f) * visualScale;
+                Color plumeColor = Color.Lerp(new Color(255, 218, 145, 0), new Color(255, 112, 52, 0), MathHelper.Clamp(offsetFactor * 0.75f, 0f, 1f)) * (0.4f - offsetFactor * 0.05f);
+                Vector2 plumeScale = new((0.52f - offsetFactor * 0.07f) * visualScale, (1.8f + i * 0.42f) * speedFactor * visualScale);
                 sb.Draw(glow, plumePos, null, plumeColor, Projectile.rotation, glow.Size() * 0.5f, plumeScale, SpriteEffects.None, 0f);
             }
 
-            sb.Draw(glow, drawPos + backward * 10f, null, new Color(255, 128, 58, 0) * 0.52f, Projectile.rotation, glow.Size() * 0.5f,
-                new Vector2(0.92f, 1.8f) * pulse * speedFactor, SpriteEffects.None, 0f);
-            sb.Draw(glow, drawPos + backward * 2f, null, new Color(255, 205, 126, 0) * 0.68f, Projectile.rotation, glow.Size() * 0.5f,
-                new Vector2(0.68f, 1.15f) * pulse, SpriteEffects.None, 0f);
+            sb.Draw(glow, drawPos + backward * 18f * visualScale, null, new Color(255, 128, 58, 0) * 0.58f, Projectile.rotation, glow.Size() * 0.5f,
+                new Vector2(1.28f, 2.62f) * pulse * speedFactor * visualScale, SpriteEffects.None, 0f);
+            sb.Draw(glow, drawPos + backward * 5f * visualScale, null, new Color(255, 205, 126, 0) * 0.76f, Projectile.rotation, glow.Size() * 0.5f,
+                new Vector2(0.96f, 1.58f) * pulse * visualScale, SpriteEffects.None, 0f);
+            sb.Draw(glow, drawPos + forward * 2f * visualScale, null, new Color(255, 245, 225, 0) * 0.34f, Projectile.rotation, glow.Size() * 0.5f,
+                new Vector2(1.15f, 1.15f) * pulse * visualScale, SpriteEffects.None, 0f);
 
             if (star != null) {
-                sb.Draw(star, drawPos + forward * 2f, null, new Color(255, 180, 90, 0) * 0.72f, Projectile.rotation + time * 4.5f,
-                    star.Size() * 0.5f, 0.5f * pulse, SpriteEffects.None, 0f);
-                sb.Draw(star, drawPos + backward * 4f, null, new Color(255, 244, 220, 0) * 0.38f, -Projectile.rotation * 0.75f,
-                    star.Size() * 0.5f, 0.34f * pulse, SpriteEffects.None, 0f);
+                sb.Draw(star, drawPos + forward * 4f * visualScale, null, new Color(255, 180, 90, 0) * 0.78f, Projectile.rotation + time * 4.5f,
+                    star.Size() * 0.5f, 0.92f * pulse * visualScale, SpriteEffects.None, 0f);
+                sb.Draw(star, drawPos + backward * 6f * visualScale, null, new Color(255, 244, 220, 0) * 0.42f, -Projectile.rotation * 0.75f,
+                    star.Size() * 0.5f, 0.64f * pulse * visualScale, SpriteEffects.None, 0f);
             }
 
             if (starWhite != null) {
-                sb.Draw(starWhite, drawPos + forward * 6f, null, Color.White with { A = 0 } * (0.82f * pulse), Projectile.rotation - time * 6.8f,
-                    starWhite.Size() * 0.5f, 0.16f + pulse * 0.08f, SpriteEffects.None, 0f);
+                sb.Draw(starWhite, drawPos + forward * 9f * visualScale, null, Color.White with { A = 0 } * (0.9f * pulse), Projectile.rotation - time * 6.8f,
+                    starWhite.Size() * 0.5f, (0.28f + pulse * 0.12f) * visualScale, SpriteEffects.None, 0f);
             }
 
             return false;
+        }
+
+        private void DrawCelestialBodyShader(SpriteBatch sb, Vector2 drawPos, float time, float speedFactor, float visualScale) {
+            Effect shader = EffectLoader.CelestialStar?.Value;
+            Texture2D canvas = CWRAsset.Placeholder_White?.Value;
+            Texture2D noise = CWRAsset.Extra_193?.Value;
+            if (shader == null || canvas == null || noise == null) {
+                return;
+            }
+
+            shader.CurrentTechnique = shader.Techniques["CelestialBody"];
+            shader.Parameters["uTime"]?.SetValue(time);
+            shader.Parameters["fadeAlpha"]?.SetValue(1f);
+            shader.Parameters["fallSpeed"]?.SetValue(Projectile.velocity.Length());
+            shader.Parameters["coreColor"]?.SetValue(new Vector3(1f, 0.985f, 0.94f));
+            shader.Parameters["surfaceColor"]?.SetValue(new Vector3(1f, 0.84f, 0.46f));
+            shader.Parameters["coronaColor"]?.SetValue(new Vector3(1f, 0.44f, 0.18f));
+            shader.Parameters["trailColor"]?.SetValue(new Vector3(1f, 0.24f, 0.09f));
+            shader.Parameters["sphereRadius"]?.SetValue(0.235f);
+            shader.Parameters["coronaWidth"]?.SetValue(0.12f);
+            shader.Parameters["intensity"]?.SetValue(1.5f + speedFactor * 0.45f);
+            shader.Parameters["impactProgress"]?.SetValue(0f);
+            shader.Parameters["impactRadius"]?.SetValue(0f);
+            shader.Parameters["uNoiseTex"]?.SetValue(noise);
+
+            Main.graphics.GraphicsDevice.Textures[1] = noise;
+            Main.graphics.GraphicsDevice.SamplerStates[1] = SamplerState.LinearWrap;
+
+            sb.End();
+            sb.Begin(SpriteSortMode.Immediate, BlendState.Additive,
+                SamplerState.LinearWrap, DepthStencilState.None, RasterizerState.CullNone,
+                null, Main.GameViewMatrix.TransformationMatrix);
+
+            shader.CurrentTechnique.Passes[0].Apply();
+
+            sb.Draw(canvas, drawPos, null, Color.White,
+                Projectile.rotation, canvas.Size() * 0.5f, BaseShaderSize * visualScale,
+                SpriteEffects.None, 0f);
+
+            sb.End();
+            sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullNone,
+                null, Main.GameViewMatrix.TransformationMatrix);
         }
     }
 }
