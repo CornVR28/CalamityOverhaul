@@ -263,6 +263,37 @@ ElysiumUI: {
 	SwapSuccessText: Identity swap complete
 	SwapFailText: Swap failed
 	CannotSwapText: Cannot swap to this position
+	AbilityBrief_0: Rock Shield
+	AbilityBrief_1: Fishing Net Bind
+	AbilityBrief_2: Thunder Judgment
+	AbilityBrief_3: Revelation Sight
+	AbilityBrief_4: Holy Light Guide
+	AbilityBrief_5: Truth Revelation
+	AbilityBrief_6: Doubt's Touch
+	AbilityBrief_7: Wealth Blessing
+	AbilityBrief_8: Devotion Healing
+	AbilityBrief_9: Miracle Manifest
+	AbilityBrief_10: Zealous Force
+	AbilityBrief_11: Betrayal Pact
+}
+
+MartyrdomBarUI: {
+	SlotLabel_0: Pe
+	SlotLabel_1: An
+	SlotLabel_2: Ja
+	SlotLabel_3: Jo
+	SlotLabel_4: Ph
+	SlotLabel_5: Ba
+	SlotLabel_6: Th
+	SlotLabel_7: Mt
+	SlotLabel_8: Jl
+	SlotLabel_9: Td
+	SlotLabel_10: Si
+	SlotLabel_11: Ju
+	RevelationJudgingText: Revelation Last Three Seals in progress
+	RevelationStatusText: "Revelation Horsemen {0}/4 Q:Meteor R:Judgment"
+	RevelationReadyText: Press Q — Revelation ready
+	MartyrdomPowerText: "Martyrdom {0}/11"
 }
 
 MenuModify.OverhaulSettingsButtonText: Overhaul Settings

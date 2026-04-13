@@ -1561,6 +1561,43 @@ Thrower: {
 Elysium: {
 	DisplayName: 天国极乐
 	Tooltip: ""
+	DiscipleName_0: 西门彼得
+	DiscipleName_1: 圣安德鲁
+	DiscipleName_2: 雅各布
+	DiscipleName_3: 圣约翰
+	DiscipleName_4: 腓力
+	DiscipleName_5: 巴多罗买
+	DiscipleName_6: 多马
+	DiscipleName_7: 圣马修
+	DiscipleName_8: 雅各
+	DiscipleName_9: 达泰
+	DiscipleName_10: 西门
+	DiscipleName_11: 犹大
+	HorsemanName_0: 瘟疫
+	HorsemanName_1: 战争
+	HorsemanName_2: 饥荒
+	HorsemanName_3: 死亡
+	DiscipleFullText: 门徒已满
+	NoConvertTargetText: 附近没有可转化的居民
+	DiscipleFallbackText: 门徒
+	RevelationText: 启示录
+	RevelationEndText: 启示录终止
+	CelestialMeteorText: 天体陨石
+	SealStarsText: 第五星 第六星 第七星
+	HorsemenFullText: 四骑士已齐聚
+	HorsemanArrivalText: "{0}骑士降临"
+	DiscipleJoinedText: "{0} 已加入"
+	JudasBetrayalText: 犹大的背叛!
+	JudasDeathReasonText: "{0} 被犹大背叛了"
+	DiscipleMartyrText: "{0} 殉道了"
+	MartyrdomPowerText: "殉道之力 {0}/11"
+	Tooltip_DiscipleCountText: "当前门徒: {0}/12"
+	Tooltip_NoDisciplesText: 尚无门徒追随
+	Tooltip_MartyrdomPowerText: "殉道之力: {0} {1}/11"
+	Tooltip_RevelationReadyText: 按Q键 — 约翰将殉道，启示录将降临
+	Tooltip_JudgmentActiveText: 后三印审判进行中，等待终结收束
+	Tooltip_RevelationActiveText: "启示录已降临 Q降天体陨石 R发动后三印审判 右键召唤四骑士 {0}/4"
+	Tooltip_JudasWarningText: "警告: 犹大的背叛已潜伏于你的身边"
 }
 
 MechanizedWood: {

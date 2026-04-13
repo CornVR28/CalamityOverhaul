@@ -1,6 +1,8 @@
 ﻿using System;
 using Terraria;
 using Terraria.ID;
+using Terraria.Localization;
+using Terraria.ModLoader;
 
 namespace CalamityOverhaul.Content.Items.Magic.Elysiums
 {
@@ -11,8 +13,9 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
     /// </summary>
     internal class Bartholomew : BaseDisciple
     {
+        public static LocalizedText TruthRevealText { get; private set; }
+
         public override int DiscipleIndex => 5;
-        public override string DiscipleName => "巴多罗买";
         public override Color DiscipleColor => new(200, 100, 255); //真言紫
         public override int AbilityCooldownTime => 150;
 
@@ -27,11 +30,15 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
         protected override float OrbitTiltDirection => MathHelper.Pi * 0.9f;
         protected override float OrbitHeightLayer => -0.3f;
 
+        public override void SetStaticDefaults() {
+            TruthRevealText = this.GetLocalization(nameof(TruthRevealText), () => "真言揭示");
+        }
+
         protected override void ExecuteAbility() {
             NPC target = FindNearestEnemy(300f);
             if (target != null) {
                 target.defense = Math.Max(0, target.defense - 10);
-                CombatText.NewText(target.Hitbox, Color.Purple, "真言揭示");
+                CombatText.NewText(target.Hitbox, Color.Purple, TruthRevealText.Value);
                 //紫色光芒效果
                 for (int i = 0; i < 15; i++) {
                     Dust d = Dust.NewDustPerfect(target.Center, DustID.PurpleTorch, Main.rand.NextVector2Circular(5f, 5f), 100, default, 1.5f);

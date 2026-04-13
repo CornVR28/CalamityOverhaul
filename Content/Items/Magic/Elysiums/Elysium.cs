@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ID;
+using Terraria.Localization;
 using Terraria.ModLoader;
 
 namespace CalamityOverhaul.Content.Items.Magic.Elysiums
@@ -14,6 +15,36 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
     /// </summary>
     internal class Elysium : ModItem
     {
+        #region 本地化
+        //门徒名称
+        public static LocalizedText[] DiscipleNameTexts { get; private set; }
+        //骑士名称
+        public static LocalizedText[] HorsemanNameTexts { get; private set; }
+        //combat text
+        public static LocalizedText DiscipleFullText { get; private set; }
+        public static LocalizedText NoConvertTargetText { get; private set; }
+        public static LocalizedText DiscipleFallbackText { get; private set; }
+        public static LocalizedText RevelationText { get; private set; }
+        public static LocalizedText RevelationEndText { get; private set; }
+        public static LocalizedText CelestialMeteorText { get; private set; }
+        public static LocalizedText SealStarsText { get; private set; }
+        public static LocalizedText HorsemenFullText { get; private set; }
+        public static LocalizedText HorsemanArrivalText { get; private set; }
+        public static LocalizedText DiscipleJoinedText { get; private set; }
+        public static LocalizedText JudasBetrayalText { get; private set; }
+        public static LocalizedText JudasDeathReasonText { get; private set; }
+        public static LocalizedText DiscipleMartyrText { get; private set; }
+        public static LocalizedText MartyrdomPowerText { get; private set; }
+        //tooltip
+        public static LocalizedText Tooltip_DiscipleCountText { get; private set; }
+        public static LocalizedText Tooltip_NoDisciplesText { get; private set; }
+        public static LocalizedText Tooltip_MartyrdomPowerText { get; private set; }
+        public static LocalizedText Tooltip_RevelationReadyText { get; private set; }
+        public static LocalizedText Tooltip_JudgmentActiveText { get; private set; }
+        public static LocalizedText Tooltip_RevelationActiveText { get; private set; }
+        public static LocalizedText Tooltip_JudasWarningText { get; private set; }
+        #endregion
+
         //合成配方材料，与万魔殿同级
         public readonly static string[] FullItems = ["0", "0", "0", "0", "CalamityMod/AshesofAnnihilation", "0", "0", "0", "0",
             "0", "0", "0", "CalamityMod/AshesofAnnihilation", "CalamityMod/AshesofAnnihilation", "CalamityMod/AshesofAnnihilation", "0", "0", "0",
@@ -32,6 +63,43 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
         public override void SetStaticDefaults() {
             ItemID.Sets.ItemsThatAllowRepeatedRightClick[Type] = true;
             SupertableUI.ModCall_OtherRpsData_StringList.Add(FullItems);
+
+            DiscipleNameTexts = new LocalizedText[12];
+            string[] defaultNames = ["西门彼得", "圣安德鲁", "雅各布", "圣约翰", "腓力", "巴多罗买", "多马", "圣马修", "雅各", "达泰", "西门", "犹大"];
+            for (int i = 0; i < 12; i++) {
+                string name = defaultNames[i];
+                DiscipleNameTexts[i] = this.GetLocalization($"DiscipleName_{i}", () => name);
+            }
+
+            HorsemanNameTexts = new LocalizedText[4];
+            string[] defaultHorsemen = ["瘟疫", "战争", "饥荒", "死亡"];
+            for (int i = 0; i < 4; i++) {
+                string hname = defaultHorsemen[i];
+                HorsemanNameTexts[i] = this.GetLocalization($"HorsemanName_{i}", () => hname);
+            }
+
+            DiscipleFullText = this.GetLocalization(nameof(DiscipleFullText), () => "门徒已满");
+            NoConvertTargetText = this.GetLocalization(nameof(NoConvertTargetText), () => "附近没有可转化的居民");
+            DiscipleFallbackText = this.GetLocalization(nameof(DiscipleFallbackText), () => "门徒");
+            RevelationText = this.GetLocalization(nameof(RevelationText), () => "启示录");
+            RevelationEndText = this.GetLocalization(nameof(RevelationEndText), () => "启示录终止");
+            CelestialMeteorText = this.GetLocalization(nameof(CelestialMeteorText), () => "天体陨石");
+            SealStarsText = this.GetLocalization(nameof(SealStarsText), () => "第五星 第六星 第七星");
+            HorsemenFullText = this.GetLocalization(nameof(HorsemenFullText), () => "四骑士已齐聚");
+            HorsemanArrivalText = this.GetLocalization(nameof(HorsemanArrivalText), () => "{0}骑士降临");
+            DiscipleJoinedText = this.GetLocalization(nameof(DiscipleJoinedText), () => "{0} 已加入");
+            JudasBetrayalText = this.GetLocalization(nameof(JudasBetrayalText), () => "犹大的背叛!");
+            JudasDeathReasonText = this.GetLocalization(nameof(JudasDeathReasonText), () => "{0} 被犹大背叛了");
+            DiscipleMartyrText = this.GetLocalization(nameof(DiscipleMartyrText), () => "{0} 殉道了");
+            MartyrdomPowerText = this.GetLocalization(nameof(MartyrdomPowerText), () => "殉道之力 {0}/11");
+
+            Tooltip_DiscipleCountText = this.GetLocalization(nameof(Tooltip_DiscipleCountText), () => "当前门徒: {0}/12");
+            Tooltip_NoDisciplesText = this.GetLocalization(nameof(Tooltip_NoDisciplesText), () => "尚无门徒追随");
+            Tooltip_MartyrdomPowerText = this.GetLocalization(nameof(Tooltip_MartyrdomPowerText), () => "殉道之力: {0} {1}/11");
+            Tooltip_RevelationReadyText = this.GetLocalization(nameof(Tooltip_RevelationReadyText), () => "按Q键 — 约翰将殉道，启示录将降临");
+            Tooltip_JudgmentActiveText = this.GetLocalization(nameof(Tooltip_JudgmentActiveText), () => "后三印审判进行中，等待终结收束");
+            Tooltip_RevelationActiveText = this.GetLocalization(nameof(Tooltip_RevelationActiveText), () => "启示录已降临 Q降天体陨石 R发动后三印审判 右键召唤四骑士 {0}/4");
+            Tooltip_JudasWarningText = this.GetLocalization(nameof(Tooltip_JudasWarningText), () => "警告: 犹大的背叛已潜伏于你的身边");
         }
 
         public override void SetDefaults() {
@@ -129,7 +197,9 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
             //显示当前门徒数量和殉道能量
             if (Main.LocalPlayer.TryGetModPlayer<ElysiumPlayer>(out var ep)) {
                 int count = ep.GetDiscipleCount();
-                string discipleInfo = count > 0 ? $"当前门徒: {count}/12" : "尚无门徒追随";
+                string discipleInfo = count > 0
+                    ? Tooltip_DiscipleCountText.Format(count)
+                    : Tooltip_NoDisciplesText.Value;
                 tooltips.Add(new TooltipLine(Mod, "DiscipleCount", discipleInfo));
 
                 int energy = ep.GetMartyrdomEnergy();
@@ -138,24 +208,29 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
                     for (int i = 0; i < 11; i++) {
                         energyBar += i < energy ? "█" : "░";
                     }
-                    tooltips.Add(new TooltipLine(Mod, "MartyrdomEnergy", $"[c/FFD700:殉道之力: {energyBar} {energy}/11]"));
+                    tooltips.Add(new TooltipLine(Mod, "MartyrdomEnergy",
+                        $"[c/FFD700:{Tooltip_MartyrdomPowerText.Format(energyBar, energy)}]"));
                 }
 
                 if (energy >= 11 && !ep.IsRevelationActive) {
-                    tooltips.Add(new TooltipLine(Mod, "RevelationReady", "[c/FFFFFF:按Q键 — 约翰将殉道，启示录将降临]"));
+                    tooltips.Add(new TooltipLine(Mod, "RevelationReady",
+                        $"[c/FFFFFF:{Tooltip_RevelationReadyText.Value}]"));
                 }
                 else if (ep.IsRevelationActive) {
                     int horsemen = ep.GetHorsemanCount();
                     if (ep.IsSealJudgmentActive) {
-                        tooltips.Add(new TooltipLine(Mod, "RevelationJudgment", "[c/FFAA55:后三印审判进行中，等待终结收束]"));
+                        tooltips.Add(new TooltipLine(Mod, "RevelationJudgment",
+                            $"[c/FFAA55:{Tooltip_JudgmentActiveText.Value}]"));
                     }
                     else {
-                        tooltips.Add(new TooltipLine(Mod, "RevelationActive", $"[c/FFD700:启示录已降临 Q降天体陨石 R发动后三印审判 右键召唤四骑士 {horsemen}/4]"));
+                        tooltips.Add(new TooltipLine(Mod, "RevelationActive",
+                            $"[c/FFD700:{Tooltip_RevelationActiveText.Format(horsemen)}]"));
                     }
                 }
 
                 if (count == 12) {
-                    tooltips.Add(new TooltipLine(Mod, "JudasWarning", "[c/FF4444:警告: 犹大的背叛已潜伏于你的身边]"));
+                    tooltips.Add(new TooltipLine(Mod, "JudasWarning",
+                        $"[c/FF4444:{Tooltip_JudasWarningText.Value}]"));
                 }
             }
         }

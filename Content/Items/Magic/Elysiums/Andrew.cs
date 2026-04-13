@@ -11,7 +11,6 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
     internal class Andrew : BaseDisciple
     {
         public override int DiscipleIndex => 1;
-        public override string DiscipleName => "圣安德鲁";
         public override Color DiscipleColor => new(100, 149, 237); //矢车菊蓝
         public override int AbilityCooldownTime => 90;
 

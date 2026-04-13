@@ -4,6 +4,7 @@ using System;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
+using Terraria.Localization;
 using Terraria.ModLoader;
 
 namespace CalamityOverhaul.Content.Items.Magic.Elysiums
@@ -11,6 +12,11 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
     //R技能：七印后三印审判
     internal class RevelationSealJudgment : ModProjectile
     {
+        public static LocalizedText Seal5Text { get; private set; }
+        public static LocalizedText Seal6Text { get; private set; }
+        public static LocalizedText Seal7Text { get; private set; }
+        public static LocalizedText WorldJudgmentText { get; private set; }
+
         public override string Texture => CWRConstant.Placeholder;
 
         private Player Owner => Main.player[Projectile.owner];
@@ -26,6 +32,13 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
         private float screenFlashAlpha;
         private float screenDarkenAlpha;
         private Color screenFlashColor = Color.White;
+
+        public override void SetStaticDefaults() {
+            Seal5Text = this.GetLocalization(nameof(Seal5Text), () => "第五印");
+            Seal6Text = this.GetLocalization(nameof(Seal6Text), () => "第六印");
+            Seal7Text = this.GetLocalization(nameof(Seal7Text), () => "第七印");
+            WorldJudgmentText = this.GetLocalization(nameof(WorldJudgmentText), () => "世界审判");
+        }
 
         public override void SetDefaults() {
             Projectile.width = 16;
@@ -73,23 +86,23 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
 
             if (t == 1) {
                 SoundEngine.PlaySound(SoundID.Item62 with { Volume = 1.2f, Pitch = -0.3f }, Projectile.Center);
-                CombatText.NewText(Owner.Hitbox, Color.Gold, "第五印", true);
+                CombatText.NewText(Owner.Hitbox, Color.Gold, Seal5Text.Value, true);
                 TriggerScreenFlash(new Color(255, 230, 180), 0.5f, 3f);
             }
             else if (t == seal5End + 1) {
                 SoundEngine.PlaySound(SoundID.Item122 with { Volume = 1.2f, Pitch = -0.22f }, Projectile.Center);
-                CombatText.NewText(Owner.Hitbox, Color.Orange, "第六印", true);
+                CombatText.NewText(Owner.Hitbox, Color.Orange, Seal6Text.Value, true);
                 TriggerScreenFlash(new Color(255, 200, 120), 0.62f, 5f);
             }
             else if (t == seal6End + 1) {
                 SoundEngine.PlaySound(SoundID.Item84 with { Volume = 1.25f, Pitch = -0.1f }, Projectile.Center);
-                CombatText.NewText(Owner.Hitbox, Color.OrangeRed, "第七印", true);
+                CombatText.NewText(Owner.Hitbox, Color.OrangeRed, Seal7Text.Value, true);
                 TriggerScreenFlash(new Color(255, 160, 80), 0.78f, 8f);
             }
             else if (t == seal7End + 1) {
                 SoundEngine.PlaySound(SoundID.Item14 with { Volume = 1.45f, Pitch = -0.45f }, Projectile.Center);
                 SoundEngine.PlaySound(SoundID.Item122 with { Volume = 1.6f, Pitch = -0.5f }, Projectile.Center);
-                CombatText.NewText(Owner.Hitbox, Color.White, "世界审判", true);
+                CombatText.NewText(Owner.Hitbox, Color.White, WorldJudgmentText.Value, true);
                 TriggerScreenFlash(Color.White, 1f, 14f);
             }
 

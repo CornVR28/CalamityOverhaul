@@ -2,6 +2,8 @@
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
+using Terraria.Localization;
+using Terraria.ModLoader;
 
 namespace CalamityOverhaul.Content.Items.Magic.Elysiums
 {
@@ -12,8 +14,9 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
     /// </summary>
     internal class Matthew : BaseDisciple
     {
+        public static LocalizedText WealthBlessingText { get; private set; }
+
         public override int DiscipleIndex => 7;
-        public override string DiscipleName => "圣马修";
         public override Color DiscipleColor => new(255, 215, 100); //财富金
         public override int AbilityCooldownTime => 60; //缩短冷却，更频繁地祝福敌人
 
@@ -27,6 +30,10 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
         protected override float OrbitTiltAngle => 0.18f;
         protected override float OrbitTiltDirection => MathHelper.Pi * 1.3f;
         protected override float OrbitHeightLayer => -0.1f;
+
+        public override void SetStaticDefaults() {
+            WealthBlessingText = this.GetLocalization(nameof(WealthBlessingText), () => "财富祝福 x{0}");
+        }
 
         /// <summary>被动效果计时器</summary>
         private int passiveTimer = 0;
@@ -87,7 +94,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
                 SpawnBlessingEffect();
 
                 //显示祝福文字
-                CombatText.NewText(Projectile.Hitbox, DiscipleColor, $"财富祝福 x{newBlessedCount}", true);
+                CombatText.NewText(Projectile.Hitbox, DiscipleColor, WealthBlessingText.Format(newBlessedCount), true);
             }
 
             SetCooldown(40); //成功祝福后冷却较短

@@ -454,4 +454,26 @@ SpawnOldDukeWannaToFight.DisplayName: 生成老公爵切磋
 // ApocalypseHorseman.DisplayName: Apocalypse Horseman
 // RevelationMeteorImpact.DisplayName: Revelation Meteor Impact
 // RevelationMeteorStrike.DisplayName: Revelation Meteor Strike
+
+SimonPeter.RockShieldText: "磐石之盾 -{0}%"
+James.ThunderChainText: "雷霆连锁 x{0}"
+Bartholomew.TruthRevealText: 真言揭示
+Thomas.VerifyEnhancedText: 验证强化!
+Thomas.DoubtVerifyText: 怀疑验证!
+Matthew.WealthBlessingText: "财富祝福 x{0}"
+Lesser.DivineHealText: "神圣治愈 +{0}"
+Jude.HealingMiracleText: 治愈奇迹
+Jude.GuardianMiracleText: 守护奇迹
+Jude.JudgmentMiracleText: 审判奇迹
+Jude.JudgmentStandbyText: 审判待命
+Jude.SwiftMiracleText: 迅捷奇迹
+Jude.ManaMiracleText: 魔力奇迹
+JudasIscariot.OminousText_0: 三十银币...
+JudasIscariot.OminousText_1: 背叛...
+JudasIscariot.OminousText_2: 亲吻...
+JudasIscariot.OminousText_3: 绞刑架...
+RevelationSealJudgment.Seal5Text: 第五印
+RevelationSealJudgment.Seal6Text: 第六印
+RevelationSealJudgment.Seal7Text: 第七印
+RevelationSealJudgment.WorldJudgmentText: 世界审判
 // RevelationSealJudgment.DisplayName: Revelation Seal Judgment

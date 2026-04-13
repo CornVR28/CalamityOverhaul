@@ -45,21 +45,10 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
             "IUDAS"         //犹大
         ];
 
-        //门徒能力简述
-        private static readonly string[] AbilityBriefs = [
-            "磐石之盾",
-            "渔网束缚",
-            "雷霆审判",
-            "启示视野",
-            "圣光引导",
-            "真言揭示",
-            "怀疑之触",
-            "财富祝福",
-            "奉献治愈",
-            "奇迹显现",
-            "狂热之力",
-            "背叛契约"
-        ];
+        //门徒能力简述本地化
+        public static LocalizedText[] AbilityBriefTexts { get; private set; }
+
+        private static string GetAbilityBrief(int index) => AbilityBriefTexts[index].Value;
 
         #endregion
 
@@ -147,6 +136,14 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
             SwapSuccessText = this.GetLocalization(nameof(SwapSuccessText), () => "身份转换完成");
             SwapFailText = this.GetLocalization(nameof(SwapFailText), () => "转换失败");
             CannotSwapText = this.GetLocalization(nameof(CannotSwapText), () => "无法转换至此位置");
+
+            AbilityBriefTexts = new LocalizedText[12];
+            string[] defaultBriefs = ["磐石之盾", "渔网束缚", "雷霆审判", "启示视野", "圣光引导", "真言揭示",
+                "怀疑之触", "财富祝福", "奉献治愈", "奇迹显现", "狂热之力", "背叛契约"];
+            for (int i = 0; i < 12; i++) {
+                string brief = defaultBriefs[i];
+                AbilityBriefTexts[i] = this.GetLocalization($"AbilityBrief_{i}", () => brief);
+            }
         }
 
         #endregion
@@ -839,9 +836,9 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
             Vector2 tooltipPos = mousePos + new Vector2(20, 20);
 
             //提示框内容
-            string name = ElysiumPlayer.DiscipleNames[idx];
+            string name = ElysiumPlayer.GetDiscipleName(idx);
             string latinName = LatinNames[idx];
-            string ability = AbilityBriefs[idx];
+            string ability = GetAbilityBrief(idx);
             string status = hasDisciple ? "已追随" : EmptySlotText.Value;
 
             //计算提示框大小
@@ -977,7 +974,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
                 DrawArrowIndicator(sb, px, dragCurrentPos, targetPos, highlightColor);
 
                 //显示目标门徒名称
-                string targetName = ElysiumPlayer.DiscipleNames[dragTargetIndex];
+                string targetName = ElysiumPlayer.GetDiscipleName(dragTargetIndex);
                 Vector2 nameSize = FontAssets.MouseText.Value.MeasureString(targetName) * 0.4f;
                 Vector2 namePos = targetPos - new Vector2(0, DiscipleSlotSize / 2f + 18f) - nameSize / 2;
                 Utils.DrawBorderString(sb, targetName, namePos, highlightColor, 0.4f);
@@ -1000,7 +997,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
             sb.Draw(discipleTex, dragCurrentPos, null, Color.White * effectiveAlpha, 0, discipleTex.Size() / 2, iconScale, SpriteEffects.None, 0);
 
             //门徒名称跟随
-            string sourceName = ElysiumPlayer.DiscipleNames[dragSourceIndex];
+            string sourceName = ElysiumPlayer.GetDiscipleName(dragSourceIndex);
             Vector2 sourceNameSize = FontAssets.MouseText.Value.MeasureString(sourceName) * 0.45f;
             Vector2 sourceNamePos = dragCurrentPos + new Vector2(0, DiscipleSlotSize / 2f + 5f) - sourceNameSize / 2;
             Utils.DrawBorderString(sb, sourceName, sourceNamePos, GetDiscipleColor(dragSourceIndex) * effectiveAlpha, 0.45f);

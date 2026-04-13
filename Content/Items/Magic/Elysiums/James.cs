@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
+using Terraria.Localization;
 using Terraria.ModLoader;
 
 namespace CalamityOverhaul.Content.Items.Magic.Elysiums
@@ -18,8 +19,9 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
     /// </summary>
     internal class James : BaseDisciple
     {
+        public static LocalizedText ThunderChainText { get; private set; }
+
         public override int DiscipleIndex => 2;
-        public override string DiscipleName => "雅各布";
         public override Color DiscipleColor => new(255, 255, 100); //雷霆黄
         public override int AbilityCooldownTime => 150;
 
@@ -31,6 +33,10 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
         protected override float OrbitTiltAngle => 0.35f;
         protected override float OrbitTiltDirection => MathHelper.Pi * 0.1f;
         protected override float OrbitHeightLayer => 0.7f;
+
+        public override void SetStaticDefaults() {
+            ThunderChainText = this.GetLocalization(nameof(ThunderChainText), () => "雷霆连锁 x{0}");
+        }
 
         /// <summary>被动效果计时器</summary>
         private int passiveTimer = 0;
@@ -78,7 +84,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
                 ExecuteChainLightning(primaryTarget, damage, chainCount, 1);
 
                 //显示连锁信息
-                CombatText.NewText(Owner.Hitbox, DiscipleColor, $"雷霆连锁 x{struckEnemies.Count}", true);
+                CombatText.NewText(Owner.Hitbox, DiscipleColor, ThunderChainText.Format(struckEnemies.Count), true);
 
                 //消耗蓄能
                 thunderCharge = Math.Max(0f, thunderCharge - 0.5f);

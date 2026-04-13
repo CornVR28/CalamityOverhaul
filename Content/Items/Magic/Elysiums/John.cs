@@ -12,7 +12,6 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
     internal class John : BaseDisciple
     {
         public override int DiscipleIndex => 3;
-        public override string DiscipleName => "圣约翰";
         public override Color DiscipleColor => new(200, 200, 255); //启示白蓝
         public override int AbilityCooldownTime => 180;
 

@@ -454,4 +454,26 @@ DivineThunderStrike.DisplayName: Divine Thunder Strike
 ApocalypseHorseman.DisplayName: Apocalypse Horseman
 RevelationMeteorImpact.DisplayName: Revelation Meteor Impact
 RevelationMeteorStrike.DisplayName: Revelation Meteor Strike
+
+SimonPeter.RockShieldText: "Rock Shield -{0}%"
+James.ThunderChainText: "Thunder Chain x{0}"
+Bartholomew.TruthRevealText: Truth Revealed
+Thomas.VerifyEnhancedText: Verification Enhanced!
+Thomas.DoubtVerifyText: Doubt Verified!
+Matthew.WealthBlessingText: "Wealth Blessing x{0}"
+Lesser.DivineHealText: "Divine Heal +{0}"
+Jude.HealingMiracleText: Healing Miracle
+Jude.GuardianMiracleText: Guardian Miracle
+Jude.JudgmentMiracleText: Judgment Miracle
+Jude.JudgmentStandbyText: Judgment Standby
+Jude.SwiftMiracleText: Swift Miracle
+Jude.ManaMiracleText: Mana Miracle
+JudasIscariot.OminousText_0: Thirty silver coins...
+JudasIscariot.OminousText_1: Betrayal...
+JudasIscariot.OminousText_2: A kiss...
+JudasIscariot.OminousText_3: The gallows...
+RevelationSealJudgment.Seal5Text: Fifth Seal
+RevelationSealJudgment.Seal6Text: Sixth Seal
+RevelationSealJudgment.Seal7Text: Seventh Seal
+RevelationSealJudgment.WorldJudgmentText: World Judgment
 RevelationSealJudgment.DisplayName: Revelation Seal Judgment

@@ -3,19 +3,22 @@ using System;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
+using Terraria.Localization;
 using Terraria.ModLoader;
 
 namespace CalamityOverhaul.Content.Items.Magic.Elysiums
 {
     /// <summary>
     /// 第七门徒：多马（怀疑之触）
-    /// 能力：给予玩家"验证"状态，期间必定暴击，暴击会延长状态持续时间
+    /// 能力：给予玩家“验证”状态，期间必定暴击，暴击会延长状态持续时间
     /// 象征物：长枪（多马用长枪验证了耶稣的伤口）
     /// </summary>
     internal class Thomas : BaseDisciple
     {
+        public static LocalizedText VerifyEnhancedText { get; private set; }
+        public static LocalizedText DoubtVerifyText { get; private set; }
+
         public override int DiscipleIndex => 6;
-        public override string DiscipleName => "多马";
         public override Color DiscipleColor => new(255, 165, 0); //怀疑橙
         public override int AbilityCooldownTime => 300; //5秒冷却
 
@@ -27,6 +30,11 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
         protected override float OrbitTiltAngle => 0.4f;
         protected override float OrbitTiltDirection => MathHelper.Pi * 1.1f;
         protected override float OrbitHeightLayer => 0.2f;
+
+        public override void SetStaticDefaults() {
+            VerifyEnhancedText = this.GetLocalization(nameof(VerifyEnhancedText), () => "验证强化!");
+            DoubtVerifyText = this.GetLocalization(nameof(DoubtVerifyText), () => "怀疑验证!");
+        }
 
         /// <summary>被动效果计时器</summary>
         private int passiveTimer = 0;
@@ -55,7 +63,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
                     Pitch = 0.8f
                 }, Owner.Center);
 
-                CombatText.NewText(Owner.Hitbox, ThomasDoubtEffects.VerifyGold, "验证强化!", true);
+                CombatText.NewText(Owner.Hitbox, ThomasDoubtEffects.VerifyGold, VerifyEnhancedText.Value, true);
 
                 //增强特效
                 SpawnEnhanceEffect();
@@ -72,7 +80,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
                     ThomasDoubtEffects.SpawnVerificationEffect(Owner, Projectile.Center);
                 }
 
-                CombatText.NewText(Owner.Hitbox, DiscipleColor, "怀疑验证!", true);
+                CombatText.NewText(Owner.Hitbox, DiscipleColor, DoubtVerifyText.Value, true);
 
                 //重置怀疑积累
                 doubtAccumulation = 0f;

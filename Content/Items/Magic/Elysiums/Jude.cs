@@ -2,6 +2,7 @@
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
+using Terraria.Localization;
 using Terraria.ModLoader;
 
 namespace CalamityOverhaul.Content.Items.Magic.Elysiums
@@ -13,8 +14,14 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
     /// </summary>
     internal class Jude : BaseDisciple
     {
+        public static LocalizedText HealingMiracleText { get; private set; }
+        public static LocalizedText GuardianMiracleText { get; private set; }
+        public static LocalizedText JudgmentMiracleText { get; private set; }
+        public static LocalizedText JudgmentStandbyText { get; private set; }
+        public static LocalizedText SwiftMiracleText { get; private set; }
+        public static LocalizedText ManaMiracleText { get; private set; }
+
         public override int DiscipleIndex => 9;
-        public override string DiscipleName => "达泰";
         public override Color DiscipleColor => new(255, 200, 255); //奇迹粉
         public override int AbilityCooldownTime => 240;
 
@@ -28,6 +35,15 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
         protected override float OrbitTiltAngle => 0.38f;
         protected override float OrbitTiltDirection => MathHelper.Pi * 1.7f;
         protected override float OrbitHeightLayer => 0.5f;
+
+        public override void SetStaticDefaults() {
+            HealingMiracleText = this.GetLocalization(nameof(HealingMiracleText), () => "治愈奇迹");
+            GuardianMiracleText = this.GetLocalization(nameof(GuardianMiracleText), () => "守护奇迹");
+            JudgmentMiracleText = this.GetLocalization(nameof(JudgmentMiracleText), () => "审判奇迹");
+            JudgmentStandbyText = this.GetLocalization(nameof(JudgmentStandbyText), () => "审判待命");
+            SwiftMiracleText = this.GetLocalization(nameof(SwiftMiracleText), () => "迅捷奇迹");
+            ManaMiracleText = this.GetLocalization(nameof(ManaMiracleText), () => "魔力奇迹");
+        }
 
         /// <summary>
         /// 奇迹类型枚举
@@ -83,7 +99,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
             JudeMiracleEffects.SpawnHealingMiracleEffect(Owner);
 
             //显示奇迹名称
-            JudeMiracleEffects.SpawnMiracleAura(Owner.Center, JudeMiracleEffects.HealingColor, "治愈奇迹");
+            JudeMiracleEffects.SpawnMiracleAura(Owner.Center, JudeMiracleEffects.HealingColor, HealingMiracleText.Value);
 
             //给玩家添加短暂的生命恢复buff
             Owner.AddBuff(BuffID.RapidHealing, 180);
@@ -107,7 +123,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
             JudeMiracleEffects.SpawnGuardianMiracleEffect(Owner);
 
             //显示奇迹名称
-            JudeMiracleEffects.SpawnMiracleAura(Owner.Center, JudeMiracleEffects.GuardianColor, "守护奇迹");
+            JudeMiracleEffects.SpawnMiracleAura(Owner.Center, JudeMiracleEffects.GuardianColor, GuardianMiracleText.Value);
 
             //播放守护音效
             SoundEngine.PlaySound(SoundID.Item4 with { Volume = 0.6f, Pitch = -0.2f }, Owner.Center);
@@ -150,7 +166,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
                 }
 
                 //显示奇迹名称在目标位置
-                JudeMiracleEffects.SpawnMiracleAura(target.Center, JudeMiracleEffects.JudgmentColor, "审判奇迹");
+                JudeMiracleEffects.SpawnMiracleAura(target.Center, JudeMiracleEffects.JudgmentColor, JudgmentMiracleText.Value);
 
                 //播放预兆音效
                 SoundEngine.PlaySound(SoundID.Item122 with {
@@ -177,7 +193,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
                 }
 
                 //显示提示
-                CombatText.NewText(Projectile.Hitbox, JudeMiracleEffects.JudgmentColor, "审判待命", true);
+                CombatText.NewText(Projectile.Hitbox, JudeMiracleEffects.JudgmentColor, JudgmentStandbyText.Value, true);
             }
 
             //生成十字架光芒
@@ -208,7 +224,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
             JudeMiracleEffects.SpawnSwiftMiracleEffect(Owner);
 
             //显示奇迹名称
-            JudeMiracleEffects.SpawnMiracleAura(Owner.Center, JudeMiracleEffects.SwiftColor, "迅捷奇迹");
+            JudeMiracleEffects.SpawnMiracleAura(Owner.Center, JudeMiracleEffects.SwiftColor, SwiftMiracleText.Value);
         }
         #endregion
 
@@ -229,7 +245,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
             JudeMiracleEffects.SpawnManaMiracleEffect(Owner);
 
             //显示奇迹名称
-            JudeMiracleEffects.SpawnMiracleAura(Owner.Center, JudeMiracleEffects.ManaColor, "魔力奇迹");
+            JudeMiracleEffects.SpawnMiracleAura(Owner.Center, JudeMiracleEffects.ManaColor, ManaMiracleText.Value);
 
             //显示恢复的魔力数值
             CombatText.NewText(Owner.Hitbox, JudeMiracleEffects.ManaColor, $"+{manaRestore} MP");

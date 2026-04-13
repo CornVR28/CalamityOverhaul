@@ -260,6 +260,37 @@ ElysiumUI: {
 	SwapSuccessText: 身份转换完成
 	SwapFailText: 转换失败
 	CannotSwapText: 无法转换至此位置
+	AbilityBrief_0: 磐石之盾
+	AbilityBrief_1: 渔网束缚
+	AbilityBrief_2: 雷霆审判
+	AbilityBrief_3: 启示视野
+	AbilityBrief_4: 圣光引导
+	AbilityBrief_5: 真言揭示
+	AbilityBrief_6: 怀疑之触
+	AbilityBrief_7: 财富祝福
+	AbilityBrief_8: 奉献治愈
+	AbilityBrief_9: 奇迹显现
+	AbilityBrief_10: 狂热之力
+	AbilityBrief_11: 背叛契约
+}
+
+MartyrdomBarUI: {
+	SlotLabel_0: 彼
+	SlotLabel_1: 安
+	SlotLabel_2: 雅
+	SlotLabel_3: 约
+	SlotLabel_4: 腓
+	SlotLabel_5: 巴
+	SlotLabel_6: 多
+	SlotLabel_7: 马
+	SlotLabel_8: 小
+	SlotLabel_9: 达
+	SlotLabel_10: 西
+	SlotLabel_11: 犹
+	RevelationJudgingText: 启示录 后三印审判进行中
+	RevelationStatusText: "启示录 四骑士 {0}/4 Q陨石 R审判"
+	RevelationReadyText: 按 Q — 启示录就绪
+	MartyrdomPowerText: "殉道之力 {0}/11"
 }
 
 MenuModify.OverhaulSettingsButtonText: 大修设置

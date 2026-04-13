@@ -1,5 +1,7 @@
 ﻿using System;
 using Terraria;
+using Terraria.Localization;
+using Terraria.ModLoader;
 
 namespace CalamityOverhaul.Content.Items.Magic.Elysiums
 {
@@ -10,8 +12,9 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
     /// </summary>
     internal class Lesser : BaseDisciple
     {
+        public static LocalizedText DivineHealText { get; private set; }
+
         public override int DiscipleIndex => 8;
-        public override string DiscipleName => "雅各";
         public override Color DiscipleColor => new(100, 255, 100); //治愈绿
         public override int AbilityCooldownTime => 180;
 
@@ -24,6 +27,10 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
         protected override float OrbitTiltAngle => 0.22f;
         protected override float OrbitTiltDirection => MathHelper.Pi * 1.5f;
         protected override float OrbitHeightLayer => -0.5f;
+
+        public override void SetStaticDefaults() {
+            DivineHealText = this.GetLocalization(nameof(DivineHealText), () => "神圣治愈 +{0}");
+        }
 
         /// <summary>被动效果计时器</summary>
         private int passiveTimer = 0;
@@ -50,7 +57,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
                 LesserHealingEffects.SpawnFullHealingEffect(Owner, totalHeal, Projectile.Center);
 
                 //显示治愈文字
-                CombatText.NewText(Owner.Hitbox, new Color(100, 255, 150), $"神圣治愈 +{totalHeal}", true);
+                CombatText.NewText(Owner.Hitbox, new Color(100, 255, 150), DivineHealText.Format(totalHeal), true);
 
                 //根据治愈量调整冷却时间
                 int cooldown = Math.Max(120, 180 - totalHeal);

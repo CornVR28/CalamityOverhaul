@@ -22,9 +22,9 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
         public abstract int DiscipleIndex { get; }
 
         /// <summary>
-        /// 门徒名称
+        /// 门徒名称，从Elysium注册的本地化文本中获取
         /// </summary>
-        public abstract string DiscipleName { get; }
+        public virtual string DiscipleName => Elysium.DiscipleNameTexts[DiscipleIndex].Value;
 
         /// <summary>
         /// 门徒代表色

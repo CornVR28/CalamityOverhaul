@@ -33,12 +33,8 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
             ModContent.ProjectileType<JudasIscariot>()   //11: 犹大
         ];
 
-        //12门徒的名称
-        public static readonly string[] DiscipleNames = [
-            "西门彼得", "圣安德鲁", "雅各布", "圣约翰",
-            "腓力", "巴多罗买", "多马", "圣马修",
-            "雅各", "达泰", "西门", "犹大"
-        ];
+        //12门徒的名称(从Elysium注册的本地化文本中获取)
+        public static string GetDiscipleName(int index) => Elysium.DiscipleNameTexts[index].Value;
 
         //当前激活的门徒弹幕索引列表
         public List<int> ActiveDisciples = [];
@@ -55,7 +51,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
 
         //天启四骑士
         public bool[] SummonedHorsemen; //0瘟疫 1战争 2饥荒 3死亡
-        public static readonly string[] HorsemanNames = ["瘟疫", "战争", "饥荒", "死亡"];
+        public static string GetHorsemanName(int index) => Elysium.HorsemanNameTexts[index].Value;
 
         //启示录战斗状态
         public int RevelationMeteorCooldown;
@@ -142,7 +138,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
         public void TryConvertNearestNPC(Player player) {
             int currentCount = GetDiscipleCount();
             if (currentCount >= 12) {
-                CombatText.NewText(player.Hitbox, Color.Gold, "门徒已满");
+                CombatText.NewText(player.Hitbox, Color.Gold, Elysium.DiscipleFullText.Value);
                 return;
             }
 
@@ -161,14 +157,14 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
             }
 
             if (targetNPC == null) {
-                CombatText.NewText(player.Hitbox, Color.Gray, "附近没有可转化的居民");
+                CombatText.NewText(player.Hitbox, Color.Gray, Elysium.NoConvertTargetText.Value);
                 return;
             }
 
             //找到下一个可用的门徒类型
             int nextDiscipleType = GetNextAvailableDiscipleType();
             if (nextDiscipleType == -1) {
-                CombatText.NewText(player.Hitbox, Color.Gold, "门徒已满");
+                CombatText.NewText(player.Hitbox, Color.Gold, Elysium.DiscipleFullText.Value);
                 return;
             }
 
@@ -267,7 +263,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
                 shootState.WeaponDamage * 3, 0f, player.whoAmI
             );
 
-            CombatText.NewText(player.Hitbox, Color.Gold, "启示录", true);
+            CombatText.NewText(player.Hitbox, Color.Gold, Elysium.RevelationText.Value, true);
         }
 
         public void DeactivateRevelation(Player player, bool clearMartyrdom = true) {
@@ -299,7 +295,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
             }
 
             SoundEngine.PlaySound(SoundID.Item8 with { Volume = 1.2f, Pitch = -0.15f }, player.Center);
-            CombatText.NewText(player.Hitbox, Color.Silver, "启示录终止");
+            CombatText.NewText(player.Hitbox, Color.Silver, Elysium.RevelationEndText.Value);
         }
 
         public bool CanCastRevelationMeteor() {
@@ -334,7 +330,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
             RevelationMeteorCooldown = HasDeathAmplification() ? 12 : 24;
 
             SoundEngine.PlaySound(SoundID.Item122 with { Volume = 1.05f, Pitch = -0.1f }, target);
-            CombatText.NewText(player.Hitbox, Color.Gold, "天体陨石", true);
+            CombatText.NewText(player.Hitbox, Color.Gold, Elysium.CelestialMeteorText.Value, true);
         }
 
         public bool CanTriggerSealJudgment() {
@@ -359,7 +355,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
 
             IsSealJudgmentActive = true;
             SoundEngine.PlaySound(SoundID.Item84 with { Volume = 1.25f, Pitch = -0.25f }, player.Center);
-            CombatText.NewText(player.Hitbox, Color.OrangeRed, "第五星 第六星 第七星", true);
+            CombatText.NewText(player.Hitbox, Color.OrangeRed, Elysium.SealStarsText.Value, true);
         }
 
         public void SummonNextHorseman(Player player) {
@@ -369,7 +365,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
 
             int nextIndex = GetHorsemanCount();
             if (nextIndex >= 4) {
-                CombatText.NewText(player.Hitbox, Color.Gray, "四骑士已齐聚");
+                CombatText.NewText(player.Hitbox, Color.Gray, Elysium.HorsemenFullText.Value);
                 return;
             }
 
@@ -412,7 +408,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
 
             SoundEngine.PlaySound(SoundID.Item117 with { Volume = 1.25f, Pitch = -0.22f + nextIndex * 0.12f }, summonPosition);
             SoundEngine.PlaySound(SoundID.Item122 with { Volume = 0.8f, Pitch = -0.45f + nextIndex * 0.08f }, summonPosition);
-            CombatText.NewText(player.Hitbox, style.TextColor, $"{HorsemanNames[nextIndex]}骑士降临", true);
+            CombatText.NewText(player.Hitbox, style.TextColor, Elysium.HorsemanArrivalText.Format(GetHorsemanName(nextIndex)), true);
         }
 
         private void SyncHorsemanState() {
@@ -509,8 +505,8 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
 
                 //获取门徒名称
                 int idx = GetDiscipleIndex(discipleType);
-                string name = idx >= 0 && idx < DiscipleNames.Length ? DiscipleNames[idx] : "门徒";
-                CombatText.NewText(npc.Hitbox, Color.Gold, $"{name} 已加入");
+                string name = idx >= 0 && idx < 12 ? GetDiscipleName(idx) : Elysium.DiscipleFallbackText.Value;
+                CombatText.NewText(npc.Hitbox, Color.Gold, Elysium.DiscipleJoinedText.Format(name));
 
                 //让原NPC消失(进入门徒状态)
                 npc.active = false;
@@ -537,11 +533,11 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
                 SoundEngine.PlaySound(SoundID.NPCDeath59 with { Volume = 2f, Pitch = -0.5f }, Player.Center);
 
                 //显示背叛文字
-                CombatText.NewText(Player.Hitbox, Color.DarkRed, "犹大的背叛!", true);
+                CombatText.NewText(Player.Hitbox, Color.DarkRed, Elysium.JudasBetrayalText.Value, true);
 
                 //造成斩杀伤害
                 int betrayalDamage = Player.statLife + 100;
-                Player.Hurt(PlayerDeathReason.ByCustomReason(NetworkText.FromLiteral($"{Player.name} 被犹大背叛了")), betrayalDamage, 0);
+                Player.Hurt(PlayerDeathReason.ByCustomReason(NetworkText.FromLiteral(Elysium.JudasDeathReasonText.Format(Player.name))), betrayalDamage, 0);
 
                 //犹大门徒消失
                 RemoveDiscipleByType(ModContent.ProjectileType<JudasIscariot>());
@@ -789,10 +785,10 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
                                 int dIdx = disciple.DiscipleIndex;
                                 if (Martyred != null) Martyred[dIdx] = true;
 
-                                CombatText.NewText(proj.Hitbox, Color.Red, $"{disciple.DiscipleName} 殉道了");
+                                CombatText.NewText(proj.Hitbox, Color.Red, Elysium.DiscipleMartyrText.Format(disciple.DiscipleName));
                                 //显示能量增长提示
                                 int energy = GetMartyrdomEnergy();
-                                CombatText.NewText(Player.Hitbox, Color.Gold, $"殉道之力 {energy}/11");
+                                CombatText.NewText(Player.Hitbox, Color.Gold, Elysium.MartyrdomPowerText.Format(energy));
 
                                 proj.Kill();
                                 ActiveDisciples.RemoveAt(chosenListIndex);

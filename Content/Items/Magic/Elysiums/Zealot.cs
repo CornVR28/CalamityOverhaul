@@ -12,7 +12,6 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
     internal class Zealot : BaseDisciple
     {
         public override int DiscipleIndex => 10;
-        public override string DiscipleName => "西门";
         public override Color DiscipleColor => new(255, 100, 100); //狂热红
         public override int AbilityCooldownTime => 10;
 

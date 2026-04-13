@@ -11,7 +11,6 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
     internal class Philip : BaseDisciple
     {
         public override int DiscipleIndex => 4;
-        public override string DiscipleName => "腓力";
         public override Color DiscipleColor => new(255, 255, 200); //引导浅金
         public override int AbilityCooldownTime => 5; //高频率但弱效果
 

@@ -2,6 +2,7 @@
 using System;
 using Terraria;
 using Terraria.ID;
+using Terraria.Localization;
 using Terraria.ModLoader;
 
 namespace CalamityOverhaul.Content.Items.Magic.Elysiums
@@ -13,8 +14,9 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
     /// </summary>
     internal class SimonPeter : BaseDisciple
     {
+        public static LocalizedText RockShieldText { get; private set; }
+
         public override int DiscipleIndex => 0;
-        public override string DiscipleName => "西门彼得";
         public override Color DiscipleColor => new(255, 215, 0); //金色
         public override int AbilityCooldownTime => 180;
 
@@ -26,6 +28,10 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
         //3D轨道：彼得在中心层（第一门徒，核心位置）
         protected override float OrbitTiltAngle => 0.1f;
         protected override float OrbitHeightLayer => 0f;
+
+        public override void SetStaticDefaults() {
+            RockShieldText = this.GetLocalization(nameof(RockShieldText), () => "磐石之盾 -{0}%");
+        }
 
         /// <summary>被动效果计时器</summary>
         private int passiveTimer = 0;
@@ -65,7 +71,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
 
             //显示护盾信息
             int reductionPercent = (int)(damageReduction * 100);
-            CombatText.NewText(Owner.Hitbox, DiscipleColor, $"磐石之盾 -{reductionPercent}%", true);
+            CombatText.NewText(Owner.Hitbox, DiscipleColor, RockShieldText.Format(reductionPercent), true);
 
             SetCooldown(120);
         }

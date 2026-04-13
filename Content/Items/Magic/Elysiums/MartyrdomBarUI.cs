@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;
 using Terraria.GameContent;
+using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.UI.Chat;
 
@@ -13,7 +14,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
     /// 殉道之力能量条HUD — 显示在屏幕下方
     /// 12个门徒槽位，殉道的显示为金色十字，约翰特殊标记
     /// </summary>
-    internal class MartyrdomBarUI : UIHandle
+    internal class MartyrdomBarUI : UIHandle, ILocalizedModType
     {
         //布局参数
         private const float SlotSize = 22f;
@@ -27,11 +28,30 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
         private float pulseTimer;
         private float revelationFlash;
 
+        public string LocalizationCategory => "UI";
+
+        //门徒名称缩写本地化
+        public static LocalizedText[] SlotLabelTexts { get; private set; }
+        public static LocalizedText RevelationJudgingText { get; private set; }
+        public static LocalizedText RevelationStatusText { get; private set; }
+        public static LocalizedText RevelationReadyText { get; private set; }
+        public static LocalizedText MartyrdomPowerText { get; private set; }
+
+        public override void SetStaticDefaults() {
+            SlotLabelTexts = new LocalizedText[12];
+            string[] defaults = ["彼", "安", "雅", "约", "腓", "巴", "多", "马", "小", "达", "西", "犹"];
+            for (int i = 0; i < 12; i++) {
+                string label = defaults[i];
+                SlotLabelTexts[i] = this.GetLocalization($"SlotLabel_{i}", () => label);
+            }
+            RevelationJudgingText = this.GetLocalization(nameof(RevelationJudgingText), () => "启示录 后三印审判进行中");
+            RevelationStatusText = this.GetLocalization(nameof(RevelationStatusText), () => "启示录 四骑士 {0}/4 Q陨石 R审判");
+            RevelationReadyText = this.GetLocalization(nameof(RevelationReadyText), () => "按 Q — 启示录就绪");
+            MartyrdomPowerText = this.GetLocalization(nameof(MartyrdomPowerText), () => "殉道之力 {0}/11");
+        }
+
         //门徒名称缩写（对应12槽位）
-        private static readonly string[] SlotLabels = [
-            "彼", "安", "雅", "约", "腓", "巴",
-            "多", "马", "小", "达", "西", "犹"
-        ];
+        private static string GetSlotLabel(int index) => SlotLabelTexts[index].Value;
 
         //门徒代表色
         private static readonly Color[] DiscipleColors = [
@@ -122,18 +142,18 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
             if (ep.IsRevelationActive) {
                 int horsemanCount = ep.GetHorsemanCount();
                 text = ep.IsSealJudgmentActive
-                    ? "启示录 后三印审判进行中"
-                    : $"启示录 四骑士 {horsemanCount}/4 Q陨石 R审判";
+                    ? RevelationJudgingText.Value
+                    : RevelationStatusText.Format(horsemanCount);
                 float flash = (float)Math.Sin(revelationFlash) * 0.3f + 0.7f;
                 textColor = Color.Lerp(Color.Gold, Color.White, flash);
             }
             else if (energy >= 11) {
-                text = "按 Q — 启示录就绪";
+                text = RevelationReadyText.Value;
                 float blink = (float)Math.Sin(pulseTimer * 2f) * 0.3f + 0.7f;
                 textColor = Color.Gold * blink;
             }
             else {
-                text = $"殉道之力 {energy}/11";
+                text = MartyrdomPowerText.Format(energy);
                 textColor = Color.Lerp(Color.Gray, Color.Gold, energy / 11f);
             }
 
@@ -239,14 +259,14 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
             }
 
             //门徒名称缩写
-            Vector2 labelSize = FontAssets.MouseText.Value.MeasureString(SlotLabels[index]) * 0.55f;
+            Vector2 labelSize = FontAssets.MouseText.Value.MeasureString(GetSlotLabel(index)) * 0.55f;
             Vector2 labelPos = new Vector2(
                 pos.X + SlotSize / 2f - labelSize.X / 2f,
                 pos.Y + BarHeight - labelSize.Y - 2f
             );
 
             ChatManager.DrawColorCodedStringWithShadow(sb, FontAssets.MouseText.Value,
-                SlotLabels[index], labelPos, labelColor, 0f, Vector2.Zero, Vector2.One * 0.55f);
+                GetSlotLabel(index), labelPos, labelColor, 0f, Vector2.Zero, Vector2.One * 0.55f);
         }
     }
 }

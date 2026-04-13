@@ -1,5 +1,6 @@
 ﻿using Terraria;
 using Terraria.ID;
+using Terraria.Localization;
 using Terraria.ModLoader;
 
 namespace CalamityOverhaul.Content.Items.Magic.Elysiums
@@ -12,12 +13,22 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
     /// </summary>
     internal class JudasIscariot : BaseDisciple
     {
+        public static LocalizedText[] OminousTexts { get; private set; }
+
         public override int DiscipleIndex => 11;
-        public override string DiscipleName => "犹大";
         public override Color DiscipleColor => new(80, 80, 80); //背叛灰黑
         public override int AbilityCooldownTime => 30;
 
         private int ominousTimer = 0;
+
+        public override void SetStaticDefaults() {
+            OminousTexts = new LocalizedText[4];
+            string[] defaults = ["三十银币...", "背叛...", "亲吻...", "绞刑架..."];
+            for (int i = 0; i < 4; i++) {
+                string text = defaults[i];
+                OminousTexts[i] = this.GetLocalization($"OminousText_{i}", () => text);
+            }
+        }
 
         //犹大是背叛者，运动阴森但流畅
         protected override float OrbitSpeedMultiplier => 0.75f;
@@ -38,8 +49,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
             //偶尔显示不祥的文字
             ominousTimer++;
             if (ominousTimer >= 600 && Main.rand.NextBool(3)) {
-                string[] ominousTexts = ["三十银币...", "背叛...", "亲吻...", "绞刑架..."];
-                CombatText.NewText(Projectile.Hitbox, Color.DarkRed, Main.rand.Next(ominousTexts));
+                CombatText.NewText(Projectile.Hitbox, Color.DarkRed, Main.rand.Next(OminousTexts).Value);
                 ominousTimer = 0;
             }
             SetCooldown();
