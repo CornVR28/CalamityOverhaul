@@ -105,11 +105,12 @@ namespace CalamityOverhaul.Content.QuestLogs.Styles
             int segs = 20;
             for (int i = 0; i < segs; i++) {
                 float t = i / (float)segs;
-                int y = rect.Y + (int)(t * rect.Height);
-                int h = Math.Max(1, rect.Height / segs);
+                float t2 = (i + 1f) / segs;
+                int y1 = rect.Y + (int)(t * rect.Height);
+                int y2 = rect.Y + (int)(t2 * rect.Height);
                 float noise = (float)Math.Sin(t * 50f + magicTimer * 0.5f) * 0.15f + 0.85f;
                 Color c = Color.Lerp(top, bot, t) * noise;
-                sb.Draw(px, new Rectangle(rect.X, y, rect.Width, h), c * alpha * 0.9f);
+                sb.Draw(px, new Rectangle(rect.X, y1, rect.Width, Math.Max(1, y2 - y1)), c * alpha * 0.9f);
             }
 
             //木纹扫描线
@@ -514,9 +515,10 @@ namespace CalamityOverhaul.Content.QuestLogs.Styles
                 int steps = 8;
                 for (int i = 0; i < steps; i++) {
                     float t = i / (float)steps;
-                    int y = fillRect.Y + (int)(t * fillRect.Height);
-                    int h = Math.Max(1, fillRect.Height / steps);
-                    spriteBatch.Draw(pixel, new Rectangle(fillRect.X, y, fillRect.Width, h), Color.Lerp(fill1, fill2, t) * alpha * 0.7f);
+                    float t2 = (i + 1f) / steps;
+                    int y1 = fillRect.Y + (int)(t * fillRect.Height);
+                    int y2 = fillRect.Y + (int)(t2 * fillRect.Height);
+                    spriteBatch.Draw(pixel, new Rectangle(fillRect.X, y1, fillRect.Width, Math.Max(1, y2 - y1)), Color.Lerp(fill1, fill2, t) * alpha * 0.7f);
                 }
 
                 float flow = (magicTimer * 1.5f) % 1f;
@@ -644,9 +646,10 @@ namespace CalamityOverhaul.Content.QuestLogs.Styles
             int steps = 8;
             for (int i = 0; i < steps; i++) {
                 float t = i / (float)steps;
-                int y = buttonRect.Y + (int)(t * buttonRect.Height);
-                int h = Math.Max(1, buttonRect.Height / steps);
-                spriteBatch.Draw(pixel, new Rectangle(buttonRect.X, y, buttonRect.Width, h), Color.Lerp(bg1, bg2, t) * alpha * 0.85f);
+                float t2 = (i + 1f) / steps;
+                int y1 = buttonRect.Y + (int)(t * buttonRect.Height);
+                int y2 = buttonRect.Y + (int)(t2 * buttonRect.Height);
+                spriteBatch.Draw(pixel, new Rectangle(buttonRect.X, y1, buttonRect.Width, Math.Max(1, y2 - y1)), Color.Lerp(bg1, bg2, t) * alpha * 0.85f);
             }
 
             Color glowColor = Color.Lerp(new Color(120, 200, 140), new Color(180, 255, 200), pulse);

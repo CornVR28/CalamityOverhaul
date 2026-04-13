@@ -94,6 +94,9 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
         /// <summary>外部只读访问</summary>
         public bool IsOpen => isOpen;
 
+        /// <summary>当前面板右边缘X坐标（含滑动动画），用于其他UI联动定位</summary>
+        public int PanelRightEdge { get; private set; }
+
         /// <summary>打开/关闭动画进度 0~1</summary>
         private float openProgress;
 
@@ -238,11 +241,31 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
         #region 样式系统
 
         private IEntrustManagerStyle currentStyle;
+        private readonly List<IEntrustManagerStyle> availableStyles = [];
+        private int currentStyleIndex;
 
         /// <summary>切换样式</summary>
         public void SetStyle(IEntrustManagerStyle style) {
             currentStyle?.Reset();
             currentStyle = style;
+        }
+
+        /// <summary>按索引设置样式，sync为true时同步任务书样式</summary>
+        public void SetStyleByIndex(int index, bool sync = true) {
+            if (availableStyles.Count == 0) return;
+            currentStyleIndex = Math.Clamp(index, 0, availableStyles.Count - 1);
+            SetStyle(availableStyles[currentStyleIndex]);
+            if (sync) {
+                QuestLogs.QuestLog.Instance?.SetStyleByIndex(currentStyleIndex, false);
+            }
+        }
+
+        /// <summary>切换到下一个可用样式</summary>
+        private void CycleStyle() {
+            if (availableStyles.Count <= 1) return;
+            currentStyleIndex = (currentStyleIndex + 1) % availableStyles.Count;
+            SetStyle(availableStyles[currentStyleIndex]);
+            QuestLogs.QuestLog.Instance?.SetStyleByIndex(currentStyleIndex, false);
         }
 
         #endregion
@@ -259,7 +282,11 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
         public override bool Active => !Main.gameMenu && (openProgress > 0.005f || isOpen || allEntries.Count > 0);
 
         public QuestManagerUI() {
-            currentStyle = new DraedonManagerStyle();
+            availableStyles.Add(new HotwindManagerStyle());
+            availableStyles.Add(new DraedonManagerStyle());
+            availableStyles.Add(new ForestManagerStyle());
+            currentStyleIndex = 0;
+            currentStyle = availableStyles[0];
             categoryNames = new string[4];
         }
 
@@ -329,6 +356,7 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
 
             //面板碰撞区域
             Rectangle panelRect = GetPanelRect();
+            PanelRightEdge = panelRect.Right;
             UIHitBox = panelRect;
             hoverInMainPage = panelRect.Intersects(MouseHitBox) && isOpen;
 
@@ -400,6 +428,18 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
                     }
                 }
                 return;
+            }
+
+            //样式切换按钮
+            if (currentStyle != null) {
+                Rectangle styleRect = currentStyle.GetStyleSwitchButtonRect(panelRect);
+                if (styleRect.Contains(Main.mouseX, Main.mouseY)) {
+                    if (keyLeftPressState == KeyPressState.Pressed) {
+                        CycleStyle();
+                        SoundEngine.PlaySound(SoundID.MenuTick);
+                    }
+                    return;
+                }
             }
 
             //关闭按钮
@@ -705,6 +745,13 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
             //5. 关闭按钮
             DrawCloseButton(spriteBatch, panelRect, alpha);
 
+            //5.5 样式切换按钮
+            if (currentStyle != null && availableStyles.Count > 1) {
+                Rectangle styleRect = currentStyle.GetStyleSwitchButtonRect(panelRect);
+                bool styleHovered = styleRect.Contains(Main.mouseX, Main.mouseY) && isOpen;
+                currentStyle.DrawStyleSwitchButton(spriteBatch, panelRect, styleHovered, alpha);
+            }
+
             if (contentAlpha < 0.01f) {
                 //展开中——绘制加载指示
                 DrawLoadingIndicator(spriteBatch, panelRect, alpha);
@@ -908,6 +955,7 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
         public override void SaveUIData(TagCompound tag) {
             tag[Name + ":isOpen"] = isOpen;
             tag[Name + ":selectedCategory"] = selectedCategoryIndex;
+            tag[Name + ":styleIndex"] = currentStyleIndex;
         }
 
         public override void LoadUIData(TagCompound tag) {
@@ -915,6 +963,10 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
                 isOpen = open;
             if (tag.TryGet(Name + ":selectedCategory", out int cat))
                 selectedCategoryIndex = Math.Clamp(cat, 0, categoryKeys.Length - 1);
+            if (tag.TryGet(Name + ":styleIndex", out int si)) {
+                currentStyleIndex = Math.Clamp(si, 0, availableStyles.Count - 1);
+                SetStyle(availableStyles[currentStyleIndex]);
+            }
         }
 
         #endregion

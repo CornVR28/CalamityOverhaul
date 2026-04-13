@@ -102,6 +102,16 @@ namespace CalamityOverhaul.Content.QuestLogs
             CurrentStyle = availableStyles[0];
         }
 
+        /// <summary>按索引设置样式，sync为true时同步委托管理器样式</summary>
+        public void SetStyleByIndex(int index, bool sync = true) {
+            if (availableStyles == null || availableStyles.Count == 0) return;
+            currentStyleIndex = Math.Clamp(index, 0, availableStyles.Count - 1);
+            CurrentStyle = availableStyles[currentStyleIndex];
+            if (sync) {
+                ADV.EntrustManager.QuestManagerUI.Instance?.SetStyleByIndex(currentStyleIndex, false);
+            }
+        }
+
         public override void SetStaticDefaults() {
             ObjectiveText = this.GetLocalization(nameof(ObjectiveText), () => "任务目标");
             RewardText = this.GetLocalization(nameof(RewardText), () => "任务奖励");
@@ -167,8 +177,20 @@ namespace CalamityOverhaul.Content.QuestLogs
                 }
             }
 
-            //打开时居中
-            panelRect.X = (Main.screenWidth - panelRect.Width) / 2;
+            //默认屏幕居中，若与委托面板重叠则向右推开
+            int availLeft = 0;
+            var entrustUI = QuestManagerUI.Instance;
+            if (entrustUI != null) {
+                int rightEdge = entrustUI.PanelRightEdge;
+                if (rightEdge > 0)
+                    availLeft = rightEdge;
+            }
+            panelRect.X = Math.Max(0, (Main.screenWidth - panelRect.Width) / 2);
+            int overlap = availLeft + 8 - panelRect.X;
+            if (overlap > 0) {
+                panelRect.X += overlap;
+                panelRect.X = Math.Min(panelRect.X, Math.Max(0, Main.screenWidth - panelRect.Width));
+            }
             panelRect.Y = (Main.screenHeight - panelRect.Height) / 2;
 
             //更新主UI碰撞箱
@@ -239,9 +261,15 @@ namespace CalamityOverhaul.Content.QuestLogs
 
             //如果详情面板开启，优先处理详情面板交互
             if (showDetailPanel && detailPanelAlpha > 0.5f) {
-                //计算详情面板位置(居中)
+                //计算详情面板位置（同样避让委托面板）
+                int detailX = Math.Max(0, (Main.screenWidth - DetailPanelWidth) / 2);
+                int detailOverlap = availLeft + 8 - detailX;
+                if (detailOverlap > 0) {
+                    detailX += detailOverlap;
+                    detailX = Math.Min(detailX, Math.Max(0, Main.screenWidth - DetailPanelWidth));
+                }
                 detailPanelRect = new Rectangle(
-                    (Main.screenWidth - DetailPanelWidth) / 2,
+                    detailX,
                     (Main.screenHeight - DetailPanelHeight) / 2,
                     DetailPanelWidth,
                     DetailPanelHeight
@@ -297,8 +325,8 @@ namespace CalamityOverhaul.Content.QuestLogs
                 player.mouseInterface = true;
                 hoveredOtherButton = true;
                 if (keyLeftPressState == KeyPressState.Pressed) {
-                    currentStyleIndex = (currentStyleIndex + 1) % availableStyles.Count;
-                    CurrentStyle = availableStyles[currentStyleIndex];
+                    int nextIndex = (currentStyleIndex + 1) % availableStyles.Count;
+                    SetStyleByIndex(nextIndex);
                     SoundEngine.PlaySound(SoundID.MenuTick);
                 }
             }
@@ -710,38 +738,46 @@ namespace CalamityOverhaul.Content.QuestLogs
 
         private void DrawMainCloseButton(SpriteBatch spriteBatch) {
             bool hovered = mainCloseButtonRect.Contains(Main.MouseScreen.ToPoint());
-            Color buttonColor = hovered ? new Color(255, 100, 100) : new Color(200, 80, 80);
-
             Texture2D pixel = VaultAsset.placeholder2.Value;
-            spriteBatch.Draw(pixel, mainCloseButtonRect, buttonColor * mainPanelAlpha);
 
-            //绘制X符号
-            string closeText = "×";
-            Vector2 textSize = FontAssets.MouseText.Value.MeasureString(closeText);
-            Vector2 textPos = new Vector2(
-                mainCloseButtonRect.X + mainCloseButtonRect.Width / 2,
-                mainCloseButtonRect.Y + mainCloseButtonRect.Height / 2
-            );
-            Utils.DrawBorderString(spriteBatch, closeText, textPos, Color.White * mainPanelAlpha, 1.2f, 0.5f, 0.5f);
+            //半透明底色
+            Color bgC = hovered ? new Color(80, 40, 40) * (mainPanelAlpha * 0.4f)
+                : new Color(10, 10, 10) * (mainPanelAlpha * 0.35f);
+            spriteBatch.Draw(pixel, mainCloseButtonRect, bgC);
+
+            //几何交叉线X
+            Color xColor = hovered ? new Color(255, 100, 100) * mainPanelAlpha
+                : new Color(180, 180, 180) * (mainPanelAlpha * 0.6f);
+            float cx = mainCloseButtonRect.X + mainCloseButtonRect.Width / 2f;
+            float cy = mainCloseButtonRect.Y + mainCloseButtonRect.Height / 2f;
+            float xSize = mainCloseButtonRect.Width * 0.22f;
+            spriteBatch.Draw(pixel, new Vector2(cx, cy), null, xColor,
+                MathHelper.PiOver4, new Vector2(0.5f), new Vector2(xSize * 2f, 1.5f), SpriteEffects.None, 0f);
+            spriteBatch.Draw(pixel, new Vector2(cx, cy), null, xColor,
+                -MathHelper.PiOver4, new Vector2(0.5f), new Vector2(xSize * 2f, 1.5f), SpriteEffects.None, 0f);
         }
 
         private void DrawCloseButton(SpriteBatch spriteBatch) {
             Rectangle closeButtonRect = CurrentStyle.GetCloseButtonRect(detailPanelRect);
 
             bool hovered = closeButtonRect.Contains(Main.MouseScreen.ToPoint());
-            Color buttonColor = hovered ? new Color(255, 100, 100) : new Color(200, 80, 80);
-
             Texture2D pixel = VaultAsset.placeholder2.Value;
-            spriteBatch.Draw(pixel, closeButtonRect, buttonColor * detailPanelAlpha);
 
-            //绘制X符号
-            string closeText = "×";
-            Vector2 textSize = FontAssets.MouseText.Value.MeasureString(closeText);
-            Vector2 textPos = new Vector2(
-                closeButtonRect.X + closeButtonRect.Width / 2,
-                closeButtonRect.Y + closeButtonRect.Height / 2
-            );
-            Utils.DrawBorderString(spriteBatch, closeText, textPos, Color.White * detailPanelAlpha, 1.2f, 0.5f, 0.5f);
+            //半透明底色
+            Color bgC = hovered ? new Color(80, 40, 40) * (detailPanelAlpha * 0.4f)
+                : new Color(10, 10, 10) * (detailPanelAlpha * 0.35f);
+            spriteBatch.Draw(pixel, closeButtonRect, bgC);
+
+            //几何交叉线X
+            Color xColor = hovered ? new Color(255, 100, 100) * detailPanelAlpha
+                : new Color(180, 180, 180) * (detailPanelAlpha * 0.6f);
+            float cx = closeButtonRect.X + closeButtonRect.Width / 2f;
+            float cy = closeButtonRect.Y + closeButtonRect.Height / 2f;
+            float xSize = closeButtonRect.Width * 0.22f;
+            spriteBatch.Draw(pixel, new Vector2(cx, cy), null, xColor,
+                MathHelper.PiOver4, new Vector2(0.5f), new Vector2(xSize * 2f, 1.5f), SpriteEffects.None, 0f);
+            spriteBatch.Draw(pixel, new Vector2(cx, cy), null, xColor,
+                -MathHelper.PiOver4, new Vector2(0.5f), new Vector2(xSize * 2f, 1.5f), SpriteEffects.None, 0f);
         }
 
         private Vector2 GetNodeScreenPos(Vector2 nodePos) {

@@ -46,6 +46,8 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
         public virtual int GetEntryPadding() => 4;
         public abstract void DrawParticles(SpriteBatch sb, Rectangle panelRect, float alpha);
         public abstract void DrawOverlayEffects(SpriteBatch sb, Rectangle panelRect, float alpha);
+        public abstract Rectangle GetStyleSwitchButtonRect(Rectangle panelRect);
+        public abstract void DrawStyleSwitchButton(SpriteBatch sb, Rectangle panelRect, bool isHovered, float alpha);
 
         #endregion
 

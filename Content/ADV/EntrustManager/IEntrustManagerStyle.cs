@@ -82,5 +82,15 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
         void DrawOverlayEffects(SpriteBatch sb, Rectangle panelRect, float alpha);
 
         #endregion
+
+        #region 样式切换按钮
+
+        /// <summary>获取样式切换按钮的矩形区域</summary>
+        Rectangle GetStyleSwitchButtonRect(Rectangle panelRect);
+
+        /// <summary>绘制样式切换按钮</summary>
+        void DrawStyleSwitchButton(SpriteBatch sb, Rectangle panelRect, bool isHovered, float alpha);
+
+        #endregion
     }
 }
