@@ -157,6 +157,16 @@ QuestLog: {
 
 QuestNotificationSystem.Text1: Quest abgeschlossen
 
+ExtraMain: {
+	// ExtraText: EXTRA
+	// GalleryText: GALLERY
+	// SceneText: SCENE
+	// MusicText: MUSIC
+	// StaffText: STAFF
+	// BackText: BACK
+	// LockedText: ???
+}
+
 CompatibilityAlert: {
 	TitleText: Kompatibilitätsmodus aktiv
 	ContentText:

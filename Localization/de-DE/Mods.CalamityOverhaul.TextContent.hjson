@@ -1,4 +1,4 @@
-﻿CWRLocText: {
+CWRLocText: {
 	// TemperatureText: Combustion Temperature
 	// EnergyShortage: Energy Shortage
 	// ChargingStation_Text1: Put in charge items
@@ -348,6 +348,7 @@
 	IconUI_Text7: Log anzeigen
 	IconUI_Text8: Mod Wiki
 	// IconUI_Text9: Musician
+	// IconUI_ExtraText: Extra
 	SPU_Text0: In Arbeit
 	SPU_Text1: Endsynthetisierung läuft
 	SPU_Text2: Durch Synthese erhalten:

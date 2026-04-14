@@ -1,4 +1,4 @@
-﻿CWRLocText: {
+CWRLocText: {
 	TemperatureText: Температура сгорания
 	EnergyShortage: Недостаток энергии
 	ChargingStation_Text1: Положите предметы для зарядки
@@ -320,6 +320,7 @@
 	IconUI_Text7: Список изменений
 	IconUI_Text8: Wiki мода
 	IconUI_Text9: Musician
+	// IconUI_ExtraText: Extra
 	SPU_Text0: В процессе
 	SPU_Text1: завершения синтеза
 	SPU_Text2: Получено при синтезе:

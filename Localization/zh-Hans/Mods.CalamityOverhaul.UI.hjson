@@ -157,6 +157,16 @@ QuestLog: {
 
 QuestNotificationSystem.Text1: 任务完成
 
+ExtraMain: {
+	ExtraText: 额外内容
+	GalleryText: CG回廊
+	SceneText: 场景回放
+	MusicText: 音乐
+	StaffText: 制作人员
+	BackText: 返回
+	LockedText: ???
+}
+
 CompatibilityAlert: {
 	TitleText: 当前正处于兼容模式
 	ContentText:

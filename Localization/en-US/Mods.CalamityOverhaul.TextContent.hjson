@@ -323,6 +323,7 @@
 	IconUI_Text7: View log
 	IconUI_Text8: Mod Wiki
 	IconUI_Text9: Musician
+	IconUI_ExtraText: Extra
 	SPU_Text0: In
 	SPU_Text1: Perform final synthesis
 	SPU_Text2: Synthetic acquisition：
