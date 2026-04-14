@@ -121,12 +121,9 @@ namespace CalamityOverhaul.Content.Items.Accessories
     {
         public override string Texture => CWRConstant.Placeholder;
 
-        private float rotationAngle = 0f;
         private float circleRadius = 0f;
         private float circleAlpha = 0f;
         private float Time;
-        private float tierLevel = 0f;
-        private float expandProgress = 0f;
 
         public override void SetDefaults() {
             Projectile.width = 200;
@@ -179,10 +176,8 @@ namespace CalamityOverhaul.Content.Items.Accessories
                 }
             }
 
-            //双重增幅时层级更高，法阵更大更复杂
+            //双重增幅时法阵更大
             bool dualMode = proverbsPlayer.HasProverbs && proverbsPlayer.IsEbn;
-            float targetTier = dualMode ? 3f : 1.5f;
-            tierLevel = MathHelper.Lerp(tierLevel, targetTier, 0.05f);
 
             float maxR = dualMode ? 620f : 220f;
             if (hideVisual) {
@@ -190,12 +185,6 @@ namespace CalamityOverhaul.Content.Items.Accessories
             }
 
             circleRadius = MathHelper.Lerp(circleRadius, maxR, 0.1f);
-
-            //展开进度跟随alpha
-            expandProgress = MathHelper.Lerp(expandProgress, hideVisual ? 0f : 1f, 0.08f);
-
-            //旋转
-            rotationAngle += 0.015f;
 
             //跟随玩家
             Projectile.Center = Owner.GetPlayerStabilityCenter();
@@ -233,13 +222,13 @@ namespace CalamityOverhaul.Content.Items.Accessories
             SpriteBatch sb = Main.spriteBatch;
             Vector2 center = Projectile.Center - Main.screenPosition;
 
-            DrawBrimstoneDomainShader(sb, center);
+            DrawGhostDomainShader(sb, center);
 
             return false;
         }
 
-        private void DrawBrimstoneDomainShader(SpriteBatch sb, Vector2 center) {
-            Effect shader = EffectLoader.BrimstoneDomain?.Value;
+        private void DrawGhostDomainShader(SpriteBatch sb, Vector2 center) {
+            Effect shader = EffectLoader.ProverbsGhostDomain?.Value;
             if (shader == null) return;
 
             Texture2D canvas = CWRAsset.Placeholder_White.Value;
@@ -250,15 +239,14 @@ namespace CalamityOverhaul.Content.Items.Accessories
             float drawDiameter = drawRadius * 2f;
 
             float time = (float)Main.timeForVisualEffects * 0.016f;
-            float pulse = 0.5f + (float)Math.Sin(Time * 0.06f) * 0.3f;
+            bool isDual = Owner.GetModPlayer<ProverbsPlayer>() is var pp && pp.HasProverbs && pp.IsEbn;
 
             shader.Parameters["uTime"]?.SetValue(time);
             shader.Parameters["fadeAlpha"]?.SetValue(circleAlpha);
-            shader.Parameters["tierLevel"]?.SetValue(tierLevel);
-            shader.Parameters["expandProgress"]?.SetValue(MathHelper.Clamp(expandProgress, 0f, 1f));
-            shader.Parameters["pulseIntensity"]?.SetValue(pulse);
+            shader.Parameters["pulsePhase"]?.SetValue(Time * 0.012f);
+            shader.Parameters["dualMode"]?.SetValue(isDual ? 1f : 0f);
 
-            //硫磺火鬼域色调：深邃暗焰，核心橙红，边缘暗紫红
+            //鬼域色调：核心暖橙、中层血红、边缘暗紫红、虚空黑
             shader.Parameters["coreColor"]?.SetValue(new Vector3(1f, 0.65f, 0.25f));
             shader.Parameters["midColor"]?.SetValue(new Vector3(0.85f, 0.22f, 0.12f));
             shader.Parameters["edgeColor"]?.SetValue(new Vector3(0.5f, 0.1f, 0.15f));
