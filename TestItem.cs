@@ -1,5 +1,6 @@
 ﻿#if DEBUG
 using CalamityOverhaul.Content.ADV.Scenarios;
+using CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machines.DropPodScens;
 using CalamityOverhaul.Content.ADV.Scenarios.SupCal.End.EternalBlazingNows;
 using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
 using Microsoft.Xna.Framework.Graphics;
@@ -69,8 +70,8 @@ namespace CalamityOverhaul
         }
 
         public override bool? UseItem(Player player) {
-            //ScenarioManager.Reset<GalacticCrisis>();
-            //ScenarioManager.Start<GalacticCrisis>();
+            ScenarioManager.Reset<EternalBlazingNow>();
+            ScenarioManager.Start<EternalBlazingNow>();
             //MachineWorld.Enter();
             //DropPodWorld.Enter();
             //ActorLoader.NewActor<DropPodActor>(player.Center, Vector2.Zero);
@@ -83,13 +84,13 @@ namespace CalamityOverhaul
             //Sandevistan.IsActive = !Sandevistan.IsActive;
             //CyberwareUI.Instance.Toggle();
 
-            if (player.altFunctionUse == 0) {
-                Cyberspace.Activate(player);   // 展开领域
-                Cyberspace.SetLayer(3, player);
-            }
-            else {
-                Cyberspace.Deactivate(); // 收缩关闭
-            }
+            //if (player.altFunctionUse == 0) {
+            //    Cyberspace.Activate(player);   // 展开领域
+            //    Cyberspace.SetLayer(3, player);
+            //}
+            //else {
+            //    Cyberspace.Deactivate(); // 收缩关闭
+            //}
 
             //HackTime.InfiniteHack = true;
 
