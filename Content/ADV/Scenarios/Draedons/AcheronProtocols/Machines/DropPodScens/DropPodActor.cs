@@ -242,14 +242,14 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
         /// 这样 GetFlameTrailWidth/Color 中 progress=0 对应根部（宽/亮），progress=1 对应远端（窄/暗）
         /// </summary>
         private void UpdateFlameTrailPoints() {
-            //喷口位置：仓体中心上方（仓体顶部）
-            Vector2 nozzle = Center + shakeOffset;
+            //喷口位置：仓体中心略偏下，确保根部被仓体遮挡不露出断口
+            Vector2 nozzle = Center + shakeOffset + new Vector2(0, -Height * 0.05f);
 
             //火焰的最终完整长度
             float fullFlameLength = 680f;
 
-            //当前火焰实际长度——从0逐渐增长到完整长度
-            float growProgress = MathHelper.Clamp(dropTimer / 60f, 0f, 1f);
+            //当前火焰实际长度——快速增长到完整长度（10帧内完成）
+            float growProgress = MathHelper.Clamp(dropTimer / 10f, 0f, 1f);
             float currentFlameLength = growProgress * fullFlameLength;
 
             //倾斜偏转：tiltAngle > 0 仓体右倾，火焰末端向左偏（X负方向）

@@ -61,7 +61,7 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0) : COLOR0
     radialWave *= exp(-dist * 5.0); // 径向波快速衰减
 
     // ---- UV偏移计算 ----
-    float distortionStrength = hazeIntensity * 0.025;
+    float distortionStrength = hazeIntensity * 0.008;
     float2 offset = float2(
         (combinedWave + radialWave) * distortionStrength * falloff,
         (combinedWave * 0.7 + radialWave * 0.5) * distortionStrength * falloff
