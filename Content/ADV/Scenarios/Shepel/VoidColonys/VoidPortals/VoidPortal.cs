@@ -124,9 +124,14 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys.VoidPortals
             sustainDuration = (int)Projectile.ai[0];
             if (sustainDuration <= 0) sustainDuration = 300;
             CrackSeed = Main.rand.NextFloat(0f, 100f);
+
+            //清理旧实例避免竞争
+            if (ActiveInstance != null && ActiveInstance != this && ActiveInstance.Projectile.active) {
+                ActiveInstance.Projectile.Kill();
+            }
             ActiveInstance = this;
 
-            // 初始化：展开burst
+            //初始化：展开burst
             CurrentPhase = Phase.Opening;
             phaseTimer = 0;
             targetIntensity = 1f;
@@ -276,7 +281,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys.VoidPortals
             float worldHalfH = BaseRiftHalfHeight * ExpandProgress;
             float worldHalfW = BaseRiftMaxWidth * ExpandProgress;
 
-            // === 火花粒子 ===
+            //=== 火花粒子 ===
             int sparkCount = (int)(spawnRate * 2.5f);
             for (int i = 0; i < sparkCount; i++) {
                 float yOff = Main.rand.NextFloat(-worldHalfH, worldHalfH) * 0.85f;
@@ -297,7 +302,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys.VoidPortals
                 PRTLoader.AddParticle(new PRT_VoidSpark(spawnPos, vel, sparkColor, sparkScale));
             }
 
-            // === 电弧粒子 ===
+            //=== 电弧粒子 ===
             if (Main.rand.NextFloat() < spawnRate * 0.3f) {
                 float yOff = Main.rand.NextFloat(-worldHalfH, worldHalfH) * 0.7f;
                 float xSign = Main.rand.NextBool() ? 1f : -1f;

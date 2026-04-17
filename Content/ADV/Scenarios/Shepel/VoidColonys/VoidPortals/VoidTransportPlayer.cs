@@ -38,8 +38,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys.VoidPortals
         const int BlackFlashDuration = 50;
         //黑闪上升到峰值的帧数
         const int BlackFlashRise = 10;
-        //黑闪完全黑屏保持帧数（峰值后持续纯黑）
-        const int BlackFlashHold = 30;
         //镜头缩放lerp速度
         const float ZoomLerpSpeed = 0.025f;
         //镜头位置lerp速度
@@ -111,7 +109,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys.VoidPortals
 
         public override void PostUpdate() {
             if (CurrentStage == Stage.Idle) return;
-            if (Main.dedServ) return;
 
             stageTimer++;
             VoidPortal portal = GetPortal();
@@ -127,7 +124,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys.VoidPortals
                     UpdateSuction(portal);
                     break;
                 case Stage.BlackFlash:
-                    UpdateBlackFlash(portal);
+                    UpdateBlackFlash();
                     break;
                 case Stage.Finish:
                     UpdateFinish();
@@ -186,17 +183,11 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys.VoidPortals
             VoidPortal portal = GetPortal();
             if (portal == null) return;
 
-            //计算玩家朝传送门方向的旋转（身体被"拽"向裂隙）
+            //用垂直分量驱动身体倾斜方向，水平分量驱动倾斜量
             Vector2 toPortal = portal.PortalCenter - Player.Center;
-            float angle = toPortal.ToRotation();
-            //修正：角色面朝右时0度是正常，面朝左时需要翻转
-            if (Player.direction == -1)
-                angle = MathHelper.Pi - angle;
-
+            float tiltAngle = MathF.Atan2(toPortal.Y, MathF.Abs(toPortal.X));
             float rotationStr = SuctionProgress * SuctionProgress;
-            float maxRotation = MathHelper.PiOver4 * 0.8f;
-            Player.fullRotation = MathHelper.Lerp(0f, maxRotation * MathF.Sign(angle), rotationStr)
-                * MathHelper.Clamp(MathF.Abs(angle) / MathHelper.PiOver2, 0f, 1f);
+            Player.fullRotation = tiltAngle * rotationStr * 0.35f;
             Player.fullRotationOrigin = new Vector2(Player.width / 2f, Player.height / 2f);
 
             //暗红色调：随吸入进度加深
@@ -281,10 +272,12 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys.VoidPortals
                 }
             }
 
-            //屏幕震动递增
-            float shakeStr = SuctionProgress * 2.5f;
-            if (shakeStr > 0.3f) {
-                Main.screenPosition += Main.rand.NextVector2Circular(shakeStr, shakeStr);
+            //屏幕震动递增（仅客户端）
+            if (!Main.dedServ) {
+                float shakeStr = SuctionProgress * 2.5f;
+                if (shakeStr > 0.3f) {
+                    Main.screenPosition += Main.rand.NextVector2Circular(shakeStr, shakeStr);
+                }
             }
 
             if (stageTimer >= SuctionDuration) {
@@ -292,7 +285,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys.VoidPortals
             }
         }
 
-        void UpdateBlackFlash(VoidPortal portal) {
+        void UpdateBlackFlash() {
             //黑闪曲线：上升→纯黑保持→结束
             if (stageTimer <= BlackFlashRise) {
                 float rise = (float)stageTimer / BlackFlashRise;
@@ -314,10 +307,11 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys.VoidPortals
             //关闭传送门
             KillPortal();
             RestorePlayer();
-
-            onTransportDone?.Invoke();
-            onTransportDone = null;
             CurrentStage = Stage.Idle;
+
+            var callback = onTransportDone;
+            onTransportDone = null;
+            callback?.Invoke();
         }
 
         void TransitionTo(Stage next) {

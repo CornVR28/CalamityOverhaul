@@ -80,9 +80,11 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0) : COLOR0
     float corruptionEdge = lerp(1.4, 0.15, sp2);
 
     //多层噪声确定侵蚀边界
-    float2 cUV1 = frac(float2(atan2(centerUV.y, centerUV.x) * 0.3 + uTime * 0.02, edgeDist * 0.5 + uTime * 0.015));
+    //归一化极角到0-1避免atan2的±π接缝
+    float polarAngle = (atan2(centerUV.y, centerUV.x) + 3.14159) / 6.28318;
+    float2 cUV1 = frac(float2(polarAngle * 3.0 + uTime * 0.02, edgeDist * 0.5 + uTime * 0.015));
     float cNoise1 = tex2D(noiseTex, cUV1).r;
-    float2 cUV2 = frac(float2(atan2(centerUV.y, centerUV.x) * 0.7 - uTime * 0.03, edgeDist * 1.2 - uTime * 0.01));
+    float2 cUV2 = frac(float2(polarAngle * 5.0 - uTime * 0.03, edgeDist * 1.2 - uTime * 0.01));
     float cNoise2 = tex2D(noiseTex, cUV2).g;
     float corruptNoise = cNoise1 * 0.6 + cNoise2 * 0.4;
 
