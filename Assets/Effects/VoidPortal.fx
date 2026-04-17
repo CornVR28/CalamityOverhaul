@@ -9,18 +9,18 @@
 sampler uImage0 : register(s0);
 sampler noiseTex : register(s1);
 
-float uTime;             // 着色器累计时间（秒）
-float intensity;         // 全局强度 0-1（淡入淡出）
-float expandProgress;    // 裂隙展开进度 0-1
-float riftHalfHeight;    // 裂隙半高（世界像素）
-float riftMaxWidth;      // 裂隙最大半宽（世界像素）
-float dimStrength;       // 背景压暗强度
-float energyPower;       // 能量辉光强度
-float crackSeed;         // 裂缝随机种子
+float uTime;             //着色器累计时间（秒）
+float intensity;         //全局强度0-1（淡入淡出）
+float expandProgress;    //裂隙展开进度0-1
+float riftHalfHeight;    //裂隙半高（世界像素）
+float riftMaxWidth;      //裂隙最大半宽（世界像素）
+float dimStrength;       //背景压暗强度
+float energyPower;       //能量辉光强度
+float crackSeed;         //裂缝随机种子
 
-float2 riftCenter;       // 裂隙中心（世界坐标）
-float2 screenPosition;   // 屏幕左上角（世界坐标）
-float2 worldViewSize;    // 缩放修正后的世界可视范围
+float2 riftCenter;       //裂隙中心（世界坐标）
+float2 screenPosition;   //屏幕左上角（世界坐标）
+float2 worldViewSize;    //缩放修正后的世界可视范围
 
 // ---- 工具函数 ----
 
@@ -126,14 +126,14 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0) : COLOR0
     float pullLen = length(pullDir);
     pullDir = pullLen > 0.1 ? pullDir / pullLen : float2(0, 0);
     float pullStr = intensity * 0.002 * saturate(1.0 - normDist) * saturate(expandProgress);
-    pullStr = pullStr * pullStr; // 二次衰减
+    pullStr = pullStr * pullStr;
 
     float2 warpOffset = (warpDisp * warpStr + pullDir * pullStr) * worldViewSize / max(worldViewSize.x, 1.0);
     float2 warpedCoords = clamp(coords + warpOffset, 0.002, 0.998);
     original = tex2D(uImage0, warpedCoords);
 
     // ================================================================
-    // 第二层：色差分离 — 空间应力的视觉表现
+    // 第二层：色差分离
     // ================================================================
     float2 edgeDir = relPos / max(worldDist, 0.1);
     float caWorldPx = edgeFactor * 4.0 * intensity;

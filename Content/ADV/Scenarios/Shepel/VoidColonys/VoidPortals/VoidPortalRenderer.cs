@@ -30,6 +30,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys.VoidPortals
 
             ApplyFullScreenShader(spriteBatch, graphicsDevice, screenSwap, portal);
 
+            //吸入演出滤镜（独立着色器，仅在吸入阶段激活）
+            ApplySuctionShader(spriteBatch, graphicsDevice, screenSwap, portal);
+
             //裂隙边缘辉光环（Additive混合）
             spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive,
                 SamplerState.PointWrap, DepthStencilState.None, RasterizerState.CullNone,
@@ -83,9 +86,52 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys.VoidPortals
             spriteBatch.End();
         }
 
+        private static void ApplySuctionShader(SpriteBatch spriteBatch, GraphicsDevice graphicsDevice,
+            RenderTarget2D screenSwap, VoidPortal portal) {
+            Player localPlayer = Main.LocalPlayer;
+            if (localPlayer == null || !localPlayer.active) return;
+            if (!localPlayer.TryGetModPlayer(out VoidTransportPlayer tp)) return;
+            if (tp.SuctionProgress < 0.001f && tp.BlackFlashAlpha < 0.001f) return;
+
+            Effect shader = EffectLoader.VoidSuction?.Value;
+            Texture2D noiseTex = noise2?.Value;
+            if (shader == null || noiseTex == null) return;
+            if (screenSwap == null || screenSwap.IsDisposed) return;
+            if (Main.screenTarget == null || Main.screenTarget.IsDisposed) return;
+
+            //复制当前屏幕到交换缓冲
+            graphicsDevice.SetRenderTarget(screenSwap);
+            graphicsDevice.Clear(Color.Transparent);
+            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
+            spriteBatch.Draw(Main.screenTarget, Vector2.Zero, Color.White);
+            spriteBatch.End();
+
+            //世界坐标参数
+            Vector2 zoom = Main.GameViewMatrix.Zoom;
+            Vector2 screenPixels = Main.ScreenSize.ToVector2();
+            Vector2 worldViewSize = screenPixels / zoom;
+            Vector2 worldViewOrigin = Main.screenPosition
+                + screenPixels * (Vector2.One - Vector2.One / zoom) * 0.5f;
+
+            shader.Parameters["uTime"]?.SetValue(portal.EffectTime);
+            shader.Parameters["suctionProgress"]?.SetValue(tp.SuctionProgress);
+            shader.Parameters["blackFlash"]?.SetValue(tp.BlackFlashAlpha);
+            shader.Parameters["focusCenter"]?.SetValue(portal.PortalCenter);
+            shader.Parameters["screenPosition"]?.SetValue(worldViewOrigin);
+            shader.Parameters["worldViewSize"]?.SetValue(worldViewSize);
+
+            //应用
+            graphicsDevice.SetRenderTarget(Main.screenTarget);
+            graphicsDevice.Clear(Color.Transparent);
+            graphicsDevice.Textures[1] = noiseTex;
+            spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend);
+            shader.CurrentTechnique.Passes[0].Apply();
+            spriteBatch.Draw(screenSwap, Vector2.Zero, Color.White);
+            spriteBatch.End();
+        }
+
         /// <summary>
-        /// 沿裂隙边缘绘制辉光光点（参考 CyberspaceRender.DrawEdgeGlowRing）
-        /// 不使用网格snap，而是沿裂隙轮廓分布
+        /// 沿裂隙边缘绘制辉光光点
         /// </summary>
         private static void DrawEdgeGlow(SpriteBatch spriteBatch, VoidPortal portal) {
             Texture2D glowTex = softGlow?.Value;
