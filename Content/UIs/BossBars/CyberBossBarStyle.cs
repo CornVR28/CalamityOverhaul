@@ -1,4 +1,4 @@
-using CalamityOverhaul.Common;
+﻿using CalamityOverhaul.Common;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -44,7 +44,7 @@ namespace CalamityOverhaul.Content.UIs.BossBars
             foreach (NPC n in Main.ActiveNPCs) {
                 if (ExclusionList.Contains(n.type))
                     continue;
-                if (n.IsABoss())
+                if (n.boss)
                     TryAddBar(n.whoAmI);
             }
 
@@ -96,13 +96,12 @@ namespace CalamityOverhaul.Content.UIs.BossBars
         public float TrailRatio = 1f;
         public float HitFlash;
 
-        private static readonly Color PanelBg = new(6, 1, 1, 170);
         private static readonly Color PrimaryRed = new(210, 28, 28);
-        private static readonly Color DarkRed = new(45, 6, 6);
-        private static readonly Color TrailColor = new(130, 18, 18, 110);
-        private static readonly Color GlowRed = new(255, 30, 30, 40);
-        private static readonly Color TextShadow = new(12, 0, 0);
-        private static readonly Color AccentDim = new(180, 22, 22, 180);
+        private static readonly Color DimRed = new(90, 12, 12);
+        private static readonly Color TrailColor = new(140, 20, 20, 120);
+        private static readonly Color GlowCore = new(255, 60, 40, 50);
+        private static readonly Color GlowSoft = new(200, 25, 15, 20);
+        private static readonly Color NameGlow = new(160, 10, 5, 30);
 
         public NPC Target => Main.npc.IndexInRange(NPCIndex) ? Main.npc[NPCIndex] : null;
 
@@ -136,10 +135,8 @@ namespace CalamityOverhaul.Content.UIs.BossBars
             if (npc.lifeMax > InitMaxLife)
                 InitMaxLife = npc.lifeMax;
 
-            //受击检测
-            if (npc.life < PrevLife) {
+            if (npc.life < PrevLife)
                 HitFlash = 1f;
-            }
             PrevLife = npc.life;
 
             float target = LifeRatio;
@@ -156,69 +153,108 @@ namespace CalamityOverhaul.Content.UIs.BossBars
             NPC npc = Target;
             if (npc == null) return;
 
-            //动画透明度
             float alpha = MathHelper.Clamp(OpenTimer / (float)OpenTime, 0f, 1f);
             if (CloseTimer > 0)
                 alpha = 1f - MathHelper.Clamp(CloseTimer / (float)CloseTime, 0f, 1f);
             if (alpha <= 0f) return;
 
-            //开场闪烁
+            //开场赛博闪烁
             if (OpenTimer == 3 || OpenTimer == 7 || OpenTimer == 14)
-                alpha *= Main.rand.NextFloat(0.4f, 0.6f);
+                alpha *= Main.rand.NextFloat(0.35f, 0.55f);
             if (OpenTimer == 4 || OpenTimer == 8 || OpenTimer == 15)
-                alpha *= Main.rand.NextFloat(0.7f, 0.85f);
+                alpha *= Main.rand.NextFloat(0.65f, 0.8f);
 
             Texture2D px = TextureAssets.MagicPixel.Value;
-            float left = cx - CyberBossBarStyle.BarWidth / 2f;
+            float barWidth = CyberBossBarStyle.BarWidth;
+            float left = cx - barWidth / 2f;
 
-            //背景面板
-            sb.Draw(px, new Rectangle(
-                (int)(left - 14), (int)(y - 8),
-                CyberBossBarStyle.BarWidth + 28, 80),
-                PanelBg * alpha);
-
-            //名称
+            //名称绘制，用多层偏移模拟辉光散射代替矩形底板
             var titleFont = FontAssets.DeathText.Value;
             const float nameScale = 0.44f;
             string name = npc.FullName;
             Vector2 nameSize = titleFont.MeasureString(name) * nameScale;
             float nameX = cx - nameSize.X / 2f;
+            float nameY = y;
+
+            //名称外层散射辉光
+            for (int i = 0; i < 4; i++) {
+                Vector2 off = (MathHelper.TwoPi * i / 4f).ToRotationVector2() * 2f;
+                Utils.DrawBorderStringFourWay(sb, titleFont, name,
+                    nameX + off.X, nameY + off.Y,
+                    NameGlow * alpha, Color.Transparent, Vector2.Zero, nameScale);
+            }
+            //名称本体
             Utils.DrawBorderStringFourWay(sb, titleFont, name,
-                nameX, y, PrimaryRed * alpha, TextShadow * alpha, Vector2.Zero, nameScale);
+                nameX, nameY, PrimaryRed * alpha, Color.Black * (alpha * 0.4f), Vector2.Zero, nameScale);
 
-            y += nameSize.Y + 3;
+            y += nameSize.Y + 2;
 
-            //顶部装饰线
-            sb.Draw(px, new Rectangle((int)left, (int)y, CyberBossBarStyle.BarWidth, 2), PrimaryRed * alpha);
-            y += 5;
+            //装饰线：左右渐隐的细线
+            float lineAlpha = alpha * 0.85f;
+            int lineW = (int)barWidth;
+            int lineH = 1;
+            //中间亮，两端渐隐，用3段拼接
+            int fadeZone = lineW / 6;
+            int solidZone = lineW - fadeZone * 2;
+            sb.Draw(px, new Rectangle((int)left + fadeZone, (int)y, solidZone, lineH), PrimaryRed * lineAlpha);
+            for (int i = 0; i < fadeZone; i++) {
+                float t = i / (float)fadeZone;
+                Color lc = PrimaryRed * (lineAlpha * t);
+                sb.Draw(px, new Rectangle((int)left + i, (int)y, 1, lineH), lc);
+                sb.Draw(px, new Rectangle((int)left + fadeZone + solidZone + (fadeZone - 1 - i), (int)y, 1, lineH), lc);
+            }
+
+            y += 4;
 
             //百分比文本
             var textFont = FontAssets.MouseText.Value;
-            const float pctScale = 0.85f;
+            const float pctScale = 0.8f;
             string pctText = $"{(int)(LifeRatio * 100)}%";
             Vector2 pctSize = textFont.MeasureString(pctText) * pctScale;
             Utils.DrawBorderStringFourWay(sb, textFont, pctText,
-                left, y, PrimaryRed * alpha, TextShadow * alpha, Vector2.Zero, pctScale);
+                left, y, PrimaryRed * alpha, Color.Black * (alpha * 0.3f), Vector2.Zero, pctScale);
 
-            //血条区域
-            float barLeft = left + pctSize.X + 10;
-            float barWidth = CyberBossBarStyle.BarWidth - pctSize.X - 10;
-            int barH = CyberBossBarStyle.BarHeight;
+            //血条主体区域
+            float bLeft = left + pctSize.X + 8;
+            float bWidth = barWidth - pctSize.X - 8;
+            int bH = CyberBossBarStyle.BarHeight;
 
-            //暗底
-            sb.Draw(px, new Rectangle((int)barLeft, (int)y, (int)barWidth, barH), DarkRed * alpha);
-
-            //拖尾
-            int trailW = (int)(barWidth * TrailRatio);
+            //拖尾层
+            int trailW = (int)(bWidth * TrailRatio);
             if (trailW > 0)
-                sb.Draw(px, new Rectangle((int)barLeft, (int)y, trailW, barH), TrailColor * alpha);
+                sb.Draw(px, new Rectangle((int)bLeft, (int)y, trailW, bH), TrailColor * alpha);
 
-            //着色器血条绘制
-            DrawShaderBar(sb, barLeft, y, barWidth, barH, alpha);
+            //外层辉光（Additive混合），给血条一个向外扩散的红色光晕
+            sb.End();
+            sb.Begin(SpriteSortMode.Deferred, BlendState.Additive, SamplerState.PointClamp,
+                DepthStencilState.None, RasterizerState.CullNone, null, Main.UIScaleMatrix);
 
-            //底部装饰线
-            float bottomY = y + barH + 3;
-            sb.Draw(px, new Rectangle((int)left, (int)bottomY, CyberBossBarStyle.BarWidth, 1), AccentDim * alpha);
+            int glowFillW = (int)(bWidth * SmoothRatio);
+            if (glowFillW > 0) {
+                //纵向扩展的柔和辉光
+                sb.Draw(px, new Rectangle((int)bLeft, (int)y - 3, glowFillW, bH + 6), GlowSoft * alpha);
+                //更集中的内核辉光
+                sb.Draw(px, new Rectangle((int)bLeft, (int)y - 1, glowFillW, bH + 2), GlowSoft * (alpha * 0.6f));
+            }
+            //末端高亮点
+            if (glowFillW > 4) {
+                sb.Draw(px, new Rectangle((int)(bLeft + glowFillW - 6), (int)(y - 4), 12, bH + 8), GlowCore * alpha);
+            }
+            //受击时整体闪亮
+            if (HitFlash > 0.01f) {
+                sb.Draw(px, new Rectangle((int)bLeft, (int)y - 2, glowFillW, bH + 4), GlowCore * (alpha * HitFlash * 0.6f));
+            }
+
+            sb.End();
+            sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp,
+                DepthStencilState.None, RasterizerState.CullNone, null, Main.UIScaleMatrix);
+
+            //着色器血条主体
+            DrawShaderBar(sb, bLeft, y, bWidth, bH, alpha);
+
+            //底部细线
+            float bottomY = y + bH + 3;
+            sb.Draw(px, new Rectangle((int)left + fadeZone, (int)bottomY, solidZone, 1), DimRed * (alpha * 0.5f));
         }
 
         private void DrawShaderBar(SpriteBatch sb, float x, float y, float w, float h, float alpha) {
@@ -244,7 +280,7 @@ namespace CalamityOverhaul.Content.UIs.BossBars
                     DepthStencilState.None, RasterizerState.CullNone, null, Main.UIScaleMatrix);
             }
             else {
-                //着色器不可用时的降级绘制
+                //降级绘制
                 int fillW = (int)(w * SmoothRatio);
                 float segW = w / 20f;
                 for (int i = 0; i < 20; i++) {
@@ -257,14 +293,6 @@ namespace CalamityOverhaul.Content.UIs.BossBars
                         (int)(x + segStart), (int)y,
                         (int)(end - segStart), (int)h), PrimaryRed * alpha);
                 }
-            }
-
-            //末端辉光叠加层
-            int glowFillW = (int)(w * SmoothRatio);
-            if (glowFillW > 2) {
-                sb.Draw(px, new Rectangle(
-                    (int)(x + glowFillW - 4), (int)(y - 2),
-                    8, (int)h + 4), GlowRed * alpha);
             }
         }
     }

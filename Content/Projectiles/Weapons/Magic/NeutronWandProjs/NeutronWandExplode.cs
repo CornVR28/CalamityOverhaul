@@ -79,7 +79,7 @@ namespace CalamityOverhaul.Content.Projectiles.Weapons.Magic.NeutronWandProjs
                 Projectile.Center,
                 screenWidth: 60f,
                 screenHeight: System.Math.Min(5000f * Projectile.ai[1], Main.screenHeight * 2f),
-                intensity: Projectile.ai[1] * 0.35f,
+                intensity: Projectile.ai[1] * 0.8f,
                 progress: Projectile.ai[1],
                 rotation: Projectile.velocity.ToRotation() + MathHelper.PiOver2,
                 technique: "RelativisticJet"

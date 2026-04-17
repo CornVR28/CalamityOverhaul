@@ -64,7 +64,7 @@ namespace CalamityOverhaul.Content.Projectiles.Weapons.Melee.Neutrons
                 Projectile.Center,
                 screenWidth: 400f * scale,
                 screenHeight: 400f * scale,
-                intensity: Projectile.ai[1] * 0.35f,
+                intensity: Projectile.ai[1] * 0.85f,
                 progress: Projectile.ai[1],
                 rotation: Projectile.ai[0],
                 technique: "GravitationalVortex"

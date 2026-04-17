@@ -193,7 +193,7 @@ namespace CalamityOverhaul.Content.Items.Ranged
                 Projectile.Center,
                 screenWidth: 80f,
                 screenHeight: 80f,
-                intensity: 0.08f,
+                intensity: 0.3f,
                 progress: 1f,
                 rotation: Projectile.rotation,
                 technique: "GravitationalLens",

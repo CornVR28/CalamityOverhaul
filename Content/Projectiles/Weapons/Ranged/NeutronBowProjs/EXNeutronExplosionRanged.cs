@@ -65,7 +65,7 @@ namespace CalamityOverhaul.Content.Projectiles.Weapons.Ranged.NeutronBowProjs
                 Projectile.Center,
                 screenWidth: 500f * scale,
                 screenHeight: 500f * scale,
-                intensity: Projectile.ai[1] * 0.35f,
+                intensity: Projectile.ai[1] * 0.8f,
                 progress: Projectile.ai[1],
                 rotation: Projectile.ai[0],
                 technique: "ShockwaveRing",

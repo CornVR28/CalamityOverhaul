@@ -137,7 +137,7 @@ namespace CalamityOverhaul.Common
             Effect effect = WarpShader.Value;
             effect.Parameters["tex0"].SetValue(Main.screenTargetSwap);
             effect.Parameters["noBlueshift"].SetValue(noBlueshift);
-            effect.Parameters["i"].SetValue(0.02f);
+            effect.Parameters["i"].SetValue(0.035f);
             effect.CurrentTechnique.Passes[0].Apply();
             Main.spriteBatch.Draw(screen, Vector2.Zero, Color.White);
             Main.spriteBatch.End();

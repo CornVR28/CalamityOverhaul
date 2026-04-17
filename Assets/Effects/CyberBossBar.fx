@@ -1,60 +1,62 @@
 // ============================================================================
 // CyberBossBar.fx — 赛博朋克2077风格Boss血条着色器
-// 分段血条泛光 + 扫描线质感 + 边缘辉光 + 受击脉冲
+// 多层辉光叠加 + 内发光边缘 + 扫描线噪波 + 能量脉冲
 // ============================================================================
 
 sampler uImage0 : register(s0);
 
 float uTime;
-float uLifeRatio;      //当前生命比例0~1
-float uHitFlash;       //受击闪烁强度0~1
-float2 uBarSize;       //血条像素尺寸
+float uLifeRatio;
+float uHitFlash;
+float2 uBarSize;
 
 float4 PixelShaderFunction(float2 coords : TEXCOORD0, float4 vertexColor : COLOR0) : COLOR0
 {
     float2 uv = coords;
 
-    //基色
-    float3 coreRed = float3(0.82, 0.11, 0.11);
-    float3 hotRed = float3(1.0, 0.30, 0.18);
-    float3 dimRed = float3(0.18, 0.03, 0.03);
+    //血条核心色阶
+    float3 deepRed = float3(0.55, 0.04, 0.04);
+    float3 coreRed = float3(0.88, 0.12, 0.08);
+    float3 hotWhite = float3(1.0, 0.55, 0.40);
 
-    //分段遮罩
-    float segX = frac(uv.x * 20.0);
-    float segMask = step(0.04, segX) * step(segX, 0.96);
+    //20段分隔，间隙更窄更精致
+    float seg = frac(uv.x * 20.0);
+    float gap = step(0.03, seg) * step(seg, 0.97);
 
-    //填充遮罩
-    float fillMask = step(uv.x, uLifeRatio);
+    //填充区
+    float fill = step(uv.x, uLifeRatio);
 
-    //扫描线（用像素坐标）
-    float scan = 0.90 + 0.10 * frac(uv.y * uBarSize.y * 0.5);
+    //纵向内发光：边缘亮中间略暗，模拟管状光源
+    float ey = uv.y * (1.0 - uv.y) * 4.0;
+    float tubeLit = 0.55 + ey * 0.45;
 
-    //纵向边缘柔化
-    float edgeY = smoothstep(0.0, 0.2, uv.y) * smoothstep(0.0, 0.2, 1.0 - uv.y);
+    //顶部锐利高光条，模拟玻璃反光
+    float specular = saturate(1.0 - abs(uv.y - 0.18) * 12.0) * 0.6;
 
-    //填充区颜色
-    float3 barColor = coreRed * segMask * scan * edgeY;
+    //扫描线干扰纹
+    float scanPx = frac(uv.y * uBarSize.y * 0.5);
+    float scan = 0.92 + scanPx * 0.08;
 
-    //顶部高光
-    float topHL = saturate(0.35 - uv.y) * 0.8;
-    barColor += hotRed * topHL * segMask;
+    //填充区最终颜色
+    float3 barCol = coreRed * tubeLit * scan * gap;
+    barCol += hotWhite * specular * gap;
+
+    //受击高亮
+    barCol += hotWhite * uHitFlash * gap * 0.5;
+
+    //空区暗色轮廓
+    float3 emptyCol = deepRed * gap * ey * 0.12;
+
+    float3 color = lerp(emptyCol, barCol, fill);
+    float a = lerp(gap * ey * 0.08, saturate(gap * tubeLit + specular * 0.3), fill);
 
     //末端辉光
-    float dist = abs(uv.x - uLifeRatio);
-    float endGlow = saturate(1.0 - dist * 35.0) * 0.5;
-    barColor += hotRed * endGlow * edgeY;
+    float endD = abs(uv.x - uLifeRatio);
+    float endG = saturate(1.0 - endD * 30.0) * 0.45 * fill;
+    color += hotWhite * endG * ey;
+    a = saturate(a + endG);
 
-    //受击脉冲
-    barColor += hotRed * uHitFlash * segMask * 0.4;
-
-    //组合
-    float3 empty = dimRed * segMask * edgeY * 0.2;
-    float3 finalColor = lerp(empty, barColor, fillMask);
-
-    float alpha = saturate(fillMask * segMask * edgeY + endGlow * 0.3 + uHitFlash * 0.15);
-    alpha = max(alpha, segMask * edgeY * 0.15);
-
-    return float4(finalColor * alpha, alpha) * vertexColor;
+    return float4(color * a, a) * vertexColor;
 }
 
 technique Technique1
