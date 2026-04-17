@@ -10,14 +10,14 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys
 {
     /// <summary>
     /// 虚空聚落地形生成器
-    /// 生成漂浮在虚空中的岛屿群，核心岛屿在中心，周围环绕大小不一的卫星岛
-    /// 建筑结构由后续的固定结构文件放置，此处只负责自然地形
+    /// 生成漂浮在虚空中的岛屿群：核心岛→卫星岛→多圈哨站岛→碎片岛，由内向外扩散至地图边缘
+    /// 所有岛屿信息注册到 <see cref="IslandRegistry"/>，供后续建筑放置、桥梁连接等系统使用
     /// </summary>
     internal class VoidColonyGen : GenPass
     {
         private const int SafePadding = 10;
 
-        //物块类型缓存，避免重复获取
+        //物块类型缓存
         private static int typePlating;
         private static int typeFramework;
 
@@ -28,25 +28,26 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys
                 && y >= SafePadding && y < Main.maxTilesY - SafePadding;
         }
 
-        /// <summary>
-        /// 根据深度和位置选择物块类型，增加材质变化
-        /// surfaceDepth: 距离岛屿表面的深度, 0=表面
-        /// </summary>
         private static int ChooseTileType(int surfaceDepth, float distFromCenter) {
-            //表面2层使用镀层
             if (surfaceDepth < 2) return typePlating;
-            //浅层混合
-            if (surfaceDepth < 5) {
+            if (surfaceDepth < 5)
                 return WorldGen.genRand.NextFloat() < 0.7f ? typePlating : typeFramework;
-            }
-            //深层以骨架为主，偶尔混入镀层
             if (WorldGen.genRand.NextFloat() < 0.12f) return typePlating;
             return typeFramework;
         }
 
-        protected override void ApplyPass(GenerationProgress progress, GameConfiguration configuration) {
-            progress.Message = "正在撕裂亚空间屏障...";
+        /// <summary>
+        /// 检查候选岛屿是否在世界安全范围内
+        /// </summary>
+        private static bool IslandInBounds(int cx, int cy, int hw, int topT, int botD,
+            int worldWidth, int worldHeight) {
+            return cx - hw - 5 >= SafePadding
+                && cx + hw + 5 < worldWidth - SafePadding
+                && cy - topT - 5 >= SafePadding
+                && cy + botD + 5 < worldHeight - SafePadding;
+        }
 
+        protected override void ApplyPass(GenerationProgress progress, GameConfiguration configuration) {
             int worldWidth = Main.maxTilesX;
             int worldHeight = Main.maxTilesY;
             int centerX = worldWidth / 2;
@@ -56,67 +57,93 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys
             typePlating = ModContent.TileType<VoidPlating>();
             typeFramework = ModContent.TileType<VoidFramework>();
 
-            //清空整个世界，制造纯虚空环境
+            //清空注册表
+            IslandRegistry.Clear();
+
+            //============ 第一步：清空世界 ============
+            progress.Message = "正在撕裂亚空间屏障...";
             ClearWorld(worldWidth, worldHeight);
 
+            //============ 第二步：核心岛 ============
             progress.Message = "正在凝聚核心岛屿...";
+            PlaceAndRegister(IslandTier.Core, centerX, centerY, 130, 28, 90, seed + 5000,
+                "核心实验室", worldWidth, worldHeight);
 
-            //核心浮岛（最大的中心岛屿，承载主实验室的基座）
-            GenerateNaturalIsland(centerX, centerY, 130, 28, 90, seed + 5000);
-
+            //============ 第三步：卫星岛（固定布局，对应草图标注位置） ============
             progress.Message = "正在牵引卫星岛屿...";
-
-            //卫星浮岛（中型，对应图中标注的各实验室位置）
-            //布局参考草图：上方两个、左右各一个、下方一个
-            (int ox, int oy, int hw, int topT, int botD)[] satellites = [
-                (-280, -180, 55, 18, 48),  //左上 - 亚空间异界生物实验室
-                (200, -220, 50, 16, 42),   //右上 - 超凡材料分析实验室
-                (-320, 60, 45, 15, 38),    //左   - 亚空间异界生物实验室
-                (300, -50, 48, 16, 40),    //右   - 能量控制站
-                (0, 220, 52, 17, 44),      //下方 - 核心亚空间能量分析站
+            (int ox, int oy, int hw, int topT, int botD, string tag)[] satellites = [
+                (-280, -180, 55, 18, 48, "亚空间异界生物实验室_上"),
+                (200, -220, 50, 16, 42, "超凡材料分析实验室"),
+                (-320, 60, 45, 15, 38, "亚空间异界生物实验室_下"),
+                (300, -50, 48, 16, 40, "能量控制站"),
+                (0, 220, 52, 17, 44, "核心亚空间能量分析站"),
             ];
 
             for (int i = 0; i < satellites.Length; i++) {
-                var (ox, oy, hw, topT, botD) = satellites[i];
-                int ix = centerX + ox;
-                int iy = centerY + oy;
-                if (ix - hw < SafePadding || ix + hw >= worldWidth - SafePadding) continue;
-                if (iy < SafePadding + 60 || iy >= worldHeight - SafePadding - 60) continue;
-                GenerateNaturalIsland(ix, iy, hw, topT, botD, seed + 6000 + i * 333);
-                //卫星岛附近生成小型碎片岛
-                GenerateDebrisField(ix, iy, hw, botD, seed + 6500 + i * 111, worldWidth, worldHeight);
+                var (ox, oy, hw, topT, botD, tag) = satellites[i];
+                PlaceAndRegister(IslandTier.Satellite, centerX + ox, centerY + oy,
+                    hw, topT, botD, seed + 6000 + i * 333, tag, worldWidth, worldHeight);
             }
 
-            progress.Message = "正在展开观察哨站...";
+            //============ 第四步：多圈哨站岛，由内向外扩散至地图边缘 ============
+            progress.Message = "正在展开哨站网络...";
+            GenerateExpandingOutposts(centerX, centerY, worldWidth, worldHeight, seed);
 
-            //远端哨站岛（小型，环形分布在外围）
-            GenerateOutpostRing(centerX, centerY, worldWidth, worldHeight, seed);
+            //============ 第五步：碎片岛，填充所有剩余空间 ============
+            progress.Message = "正在散布亚空间碎片...";
+            GenerateFragments(centerX, centerY, worldWidth, worldHeight, seed);
 
-            progress.Message = "正在稳定亚空间锚点...";
+            //============ 最终：扫描表面 & 设置出生点 ============
+            IslandRegistry.ScanAllSurfaces();
 
-            //极远处的微型碎片岛群，填充虚空中的空旷感
-            GenerateScatteredFragments(centerX, centerY, worldWidth, worldHeight, seed);
+            var coreIsland = IslandRegistry.FindByTag("核心实验室");
+            if (coreIsland != null) {
+                Main.spawnTileX = coreIsland.CenterX;
+                Main.spawnTileY = coreIsland.SurfaceY - 3;
+            }
+            else {
+                Main.spawnTileX = centerX;
+                Main.spawnTileY = centerY - 30;
+            }
 
-            //核心岛周围额外的碎片场
-            GenerateDebrisField(centerX, centerY, 130, 90, seed + 7777, worldWidth, worldHeight);
-
-            //设置出生点在核心岛屿上表面
-            Main.spawnTileX = centerX;
-            Main.spawnTileY = FindIslandSurface(centerX, centerY) - 3;
-
-            //推到底部防止地下背景渲染
             Main.worldSurface = worldHeight - 2;
             Main.rockLayer = worldHeight - 1;
 
-            //清除所有NPC
             for (int i = 0; i < Main.maxNPCs; i++) {
                 Main.npc[i] = new NPC();
             }
         }
 
         /// <summary>
-        /// 清空整个世界
+        /// 放置岛屿并注册到 IslandRegistry
         /// </summary>
+        private static IslandData PlaceAndRegister(IslandTier tier, int cx, int cy,
+            int hw, int topT, int botD, int noiseSeed, string tag,
+            int worldWidth, int worldHeight) {
+            if (!IslandInBounds(cx, cy, hw, topT, botD, worldWidth, worldHeight))
+                return null;
+
+            var data = IslandRegistry.Register(tier, cx, cy, hw, topT, botD, noiseSeed, tag);
+            GenerateNaturalIsland(cx, cy, hw, topT, botD, noiseSeed);
+            return data;
+        }
+
+        /// <summary>
+        /// 尝试在指定位置放置岛屿，先检查与已有岛屿的重叠
+        /// </summary>
+        private static IslandData TryPlaceIsland(IslandTier tier, int cx, int cy,
+            int hw, int topT, int botD, int noiseSeed, int minGap,
+            int worldWidth, int worldHeight, string tag = null) {
+            if (!IslandInBounds(cx, cy, hw, topT, botD, worldWidth, worldHeight))
+                return null;
+            if (IslandRegistry.HasOverlap(cx, cy, hw, topT, botD, minGap))
+                return null;
+
+            return PlaceAndRegister(tier, cx, cy, hw, topT, botD, noiseSeed, tag, worldWidth, worldHeight);
+        }
+
+        #region 清空世界
+
         private static void ClearWorld(int worldWidth, int worldHeight) {
             for (int x = 0; x < worldWidth; x++) {
                 for (int y = 0; y < worldHeight; y++) {
@@ -129,120 +156,217 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys
             }
         }
 
+        #endregion
+
+        #region 多圈哨站扩散
+
         /// <summary>
-        /// 从某个Y坐标向下搜索，找到第一个有方块的位置（岛屿表面）
+        /// 从核心向外生成多圈哨站岛，逐圈扩大半径直到覆盖整个地图
+        /// 外圈岛屿更小更稀疏，模拟从实验室集群向外扩散的布局
         /// </summary>
-        private static int FindIslandSurface(int x, int startY) {
-            for (int y = startY - 60; y < startY + 60; y++) {
-                if (InWorldSafe(x, y) && Main.tile[x, y].HasTile) {
-                    return y;
+        private static void GenerateExpandingOutposts(int cx, int cy,
+            int worldWidth, int worldHeight, int seed) {
+            //计算地图对角线的一半作为最大半径（确保覆盖到角落）
+            float maxRadiusX = (worldWidth - SafePadding * 2) * 0.5f;
+            float maxRadiusY = (worldHeight - SafePadding * 2) * 0.5f;
+            float maxRadius = MathF.Sqrt(maxRadiusX * maxRadiusX + maxRadiusY * maxRadiusY);
+
+            //第一圈从卫星岛外侧开始（约350格处）
+            float ringRadius = 350f;
+            //圈间距随距离增大
+            float ringSpacing = 180f;
+            int ringIndex = 0;
+
+            while (ringRadius < maxRadius) {
+                //每圈的岛屿数量：内圈密，外圈按比例增加保持角间距大致一致
+                float circumference = MathHelper.TwoPi * ringRadius;
+                //每80~120格角距放一个岛
+                float angularSpacing = 90f + ringIndex * 8f;
+                int islandCount = Math.Max(6, (int)(circumference / angularSpacing));
+
+                //外圈岛屿逐渐变小
+                float sizeFactor = Math.Clamp(1f - (ringRadius - 350f) / (maxRadius - 350f), 0.25f, 1f);
+
+                //初始角度偏移，每圈错开避免径向对齐
+                float angleOffset = ringIndex * 0.618f * MathHelper.TwoPi; //黄金角偏移
+
+                FastNoiseLite ringNoise = new(seed + 8000 + ringIndex * 137);
+                ringNoise.SetNoiseType(FastNoiseLite.NoiseType.Perlin);
+                ringNoise.SetFrequency(0.01f);
+
+                for (int i = 0; i < islandCount; i++) {
+                    float angle = angleOffset + MathHelper.TwoPi * i / islandCount;
+                    //径向扰动
+                    float radialNoise = ringNoise.GetNoise(MathF.Cos(angle) * 100, MathF.Sin(angle) * 100) * ringSpacing * 0.35f;
+                    float r = ringRadius + radialNoise;
+                    //角度扰动
+                    float angleNoise = ringNoise.GetNoise(i * 50f, ringIndex * 50f) * 0.15f;
+                    angle += angleNoise;
+
+                    //椭圆映射（世界通常比高度宽），Y轴压缩
+                    float yScale = (float)worldHeight / worldWidth;
+                    int ix = cx + (int)(MathF.Cos(angle) * r);
+                    int iy = cy + (int)(MathF.Sin(angle) * r * yScale);
+
+                    //岛屿尺寸随外圈递减
+                    int hw = (int)(18 + WorldGen.genRand.Next(16) * sizeFactor);
+                    int topT = (int)(7 + WorldGen.genRand.Next(7) * sizeFactor);
+                    int botD = (int)(16 + WorldGen.genRand.Next(20) * sizeFactor);
+
+                    int noiseSeed2 = seed + 8100 + ringIndex * 1000 + i * 77;
+                    //最小间距：避免岛屿重叠，小岛间距小一些
+                    int minGap = Math.Max(8, hw / 2);
+
+                    TryPlaceIsland(IslandTier.Outpost, ix, iy, hw, topT, botD,
+                        noiseSeed2, minGap, worldWidth, worldHeight);
+                }
+
+                //圈间距逐渐增大（外围更稀疏）
+                ringRadius += ringSpacing;
+                ringSpacing += 15f;
+                ringIndex++;
+            }
+        }
+
+        #endregion
+
+        #region 碎片岛填充
+
+        /// <summary>
+        /// 用碎片岛填充整个世界的空隙
+        /// 采用网格+随机抖动的方式确保均匀分布，同时用碰撞检测避免重叠
+        /// </summary>
+        private static void GenerateFragments(int cx, int cy,
+            int worldWidth, int worldHeight, int seed) {
+            //网格间距（每个网格格子中尝试放一个碎片）
+            int gridSpacing = 60;
+            int gridCols = (worldWidth - SafePadding * 2) / gridSpacing;
+            int gridRows = (worldHeight - SafePadding * 2) / gridSpacing;
+
+            FastNoiseLite densityNoise = new(seed + 12000);
+            densityNoise.SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2);
+            densityNoise.SetFrequency(0.004f);
+
+            int placed = 0;
+
+            for (int gx = 0; gx < gridCols; gx++) {
+                for (int gy = 0; gy < gridRows; gy++) {
+                    //网格中心
+                    int baseCX = SafePadding + gx * gridSpacing + gridSpacing / 2;
+                    int baseCY = SafePadding + gy * gridSpacing + gridSpacing / 2;
+
+                    //密度噪声：某些区域碎片更密集
+                    float density = densityNoise.GetNoise(baseCX, baseCY);
+                    //太靠近核心的区域（已经有大岛了）降低碎片密度
+                    float distToCenter = MathF.Sqrt(
+                        (baseCX - cx) * (baseCX - cx) + (baseCY - cy) * (baseCY - cy));
+                    if (distToCenter < 180) continue; //核心区完全跳过
+
+                    //密度阈值：基础40%放置率，核心附近降低
+                    float threshold = 0.6f;
+                    if (distToCenter < 400) threshold += (400 - distToCenter) / 400 * 0.3f;
+                    //密度噪声调节
+                    threshold -= density * 0.2f;
+
+                    if (WorldGen.genRand.NextFloat() > (1f - threshold)) continue;
+
+                    //在网格内随机抖动位置
+                    int jitterX = WorldGen.genRand.Next(-gridSpacing / 3, gridSpacing / 3);
+                    int jitterY = WorldGen.genRand.Next(-gridSpacing / 3, gridSpacing / 3);
+                    int fragX = baseCX + jitterX;
+                    int fragY = baseCY + jitterY;
+
+                    //碎片尺寸
+                    int hw = 3 + WorldGen.genRand.Next(7);
+                    int topT = 2 + WorldGen.genRand.Next(4);
+                    int botD = 4 + WorldGen.genRand.Next(10);
+                    int noiseSeed2 = seed + 12100 + placed * 131;
+
+                    if (TryPlaceIsland(IslandTier.Fragment, fragX, fragY, hw, topT, botD,
+                        noiseSeed2, 5, worldWidth, worldHeight) != null) {
+                        placed++;
+                    }
                 }
             }
-            return startY;
         }
+
+        #endregion
 
         #region 自然浮岛核心算法
 
         /// <summary>
         /// 生成一个自然形态的浮岛
         /// 上表面有起伏的丘陵轮廓，下方是多层递减的倒锥/钟乳石形态
-        /// 内部有侵蚀空洞，边缘有不规则碎裂
+        /// 内部有侵蚀空洞
         /// </summary>
-        /// <param name="cx">岛屿中心X</param>
-        /// <param name="cy">岛屿中心Y（大约在上表面和下锥体的交界处）</param>
-        /// <param name="halfWidth">岛屿半宽</param>
-        /// <param name="topThickness">上部最大厚度</param>
-        /// <param name="bottomDepth">下部最大深度</param>
-        /// <param name="noiseSeed">噪声种子</param>
         private static void GenerateNaturalIsland(int cx, int cy, int halfWidth,
             int topThickness, int bottomDepth, int noiseSeed) {
-            //============ 噪声层 ============
-            //大尺度轮廓 - 控制岛屿整体形状的起伏
+            //大尺度轮廓
             FastNoiseLite shapeNoise = new(noiseSeed);
             shapeNoise.SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2);
             shapeNoise.SetFrequency(0.012f);
 
-            //中尺度细节 - 控制边缘凹凸
+            //中尺度细节
             FastNoiseLite edgeNoise = new(noiseSeed + 100);
             edgeNoise.SetNoiseType(FastNoiseLite.NoiseType.Perlin);
             edgeNoise.SetFrequency(0.035f);
 
-            //小尺度粗糙度 - 让表面不那么光滑
+            //小尺度粗糙度
             FastNoiseLite roughNoise = new(noiseSeed + 200);
             roughNoise.SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2S);
             roughNoise.SetFrequency(0.08f);
 
-            //侵蚀噪声 - 用于在岛屿内部挖洞
+            //侵蚀噪声
             FastNoiseLite erosionNoise = new(noiseSeed + 300);
             erosionNoise.SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2);
             erosionNoise.SetFrequency(0.05f);
 
-            //钟乳石噪声 - 控制底部悬垂结构的分布
+            //钟乳石噪声
             FastNoiseLite stalactiteNoise = new(noiseSeed + 400);
             stalactiteNoise.SetNoiseType(FastNoiseLite.NoiseType.Perlin);
             stalactiteNoise.SetFrequency(0.06f);
 
-            //扩展宽度以容纳边缘碎裂
-            int scanHalfWidth = halfWidth + 8;
+            int scanHalfWidth = halfWidth + 5;
 
-            //============ 第一遍：构建岛屿主体 ============
             for (int x = cx - scanHalfWidth; x <= cx + scanHalfWidth; x++) {
                 if (!InWorldSafe(x, cy)) continue;
 
-                float dx = (x - cx) / (float)halfWidth; //归一化水平距离，-1到1
+                float dx = (x - cx) / (float)halfWidth;
                 float absDx = MathF.Abs(dx);
 
-                //大尺度形状调制
                 float shapeMod = shapeNoise.GetNoise(x, cy) * 0.15f;
-                //中尺度边缘调制
                 float edgeMod = edgeNoise.GetNoise(x, cy) * 0.08f;
-
-                //有效宽度比 = 基础衰减 + 噪声扰动
                 float effectiveEdge = absDx - shapeMod - edgeMod;
 
-                //==== 上部 ====
-                //上表面高度轮廓：中间略高，向边缘下降，叠加起伏
+                //上部
                 float surfaceUndulation = shapeNoise.GetNoise(x, cy - 50) * 6f
                     + edgeNoise.GetNoise(x, cy - 50) * 3f
                     + roughNoise.GetNoise(x, cy - 50) * 1.5f;
 
-                //边缘衰减曲线（柔和的平台边缘）
                 float topFalloff = 1f - MathF.Pow(Math.Clamp(effectiveEdge, 0f, 1f), 2.0f);
-                if (topFalloff <= 0.02f) continue; //完全在岛屿外
+                if (topFalloff <= 0.02f) continue;
 
-                //上表面Y：中心最高点
                 int surfaceY = cy - (int)(topThickness * 0.4f + surfaceUndulation * topFalloff);
-                //有效厚度
                 int effectiveThickness = Math.Max(3, (int)(topThickness * topFalloff));
 
-                //铺设上部方块
                 for (int dy = 0; dy < effectiveThickness; dy++) {
                     int py = surfaceY + dy;
                     if (!InWorldSafe(x, py)) continue;
-
-                    //小尺度粗糙：边缘随机缺失
                     if (topFalloff < 0.3f && roughNoise.GetNoise(x * 2, py * 2) > 0.3f)
                         continue;
-
-                    int surfDepth = dy; //距表面深度
-                    WorldGen.PlaceTile(x, py, ChooseTileType(surfDepth, absDx), mute: true, forced: true);
+                    WorldGen.PlaceTile(x, py, ChooseTileType(dy, absDx), mute: true, forced: true);
                 }
 
-                //==== 下部（倒锥/钟乳石） ====
+                //下部
                 int bottomStartY = surfaceY + effectiveThickness;
-
-                //基础下垂深度
                 float bottomFalloff = 1f - MathF.Pow(Math.Clamp(effectiveEdge, 0f, 1f), 1.5f);
                 if (bottomFalloff <= 0.01f) continue;
 
                 float baseDepth = bottomDepth * bottomFalloff;
-                //钟乳石局部加深
                 float stalactiteMod = stalactiteNoise.GetNoise(x, cy + 100);
                 if (stalactiteMod > 0.2f) {
-                    //在高噪声区域形成较长的钟乳石尖
                     baseDepth += (stalactiteMod - 0.2f) * bottomDepth * 0.6f;
                 }
-                //中尺度扰动
                 baseDepth += edgeNoise.GetNoise(x, cy + 80) * 8f;
                 int totalDepth = Math.Max(3, (int)baseDepth);
 
@@ -250,54 +374,41 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys
                     int py = bottomStartY + dy;
                     if (!InWorldSafe(x, py)) continue;
 
-                    float depthProgress = dy / (float)totalDepth; //0=顶，1=底
-
-                    //宽度随深度收缩，形成倒锥
-                    //使用混合曲线：上半段缓慢收窄，下半段加速收窄
+                    float depthProgress = dy / (float)totalDepth;
                     float widthCurve = 1f - MathF.Pow(depthProgress, 1.3f + absDx * 0.5f);
                     if (effectiveEdge > widthCurve) continue;
 
-                    //深处侵蚀空洞
                     float erosionVal = erosionNoise.GetNoise(x, py);
-                    //越深处越容易出现空洞
                     float erosionThreshold = 0.35f - depthProgress * 0.15f;
                     if (erosionVal > erosionThreshold && depthProgress > 0.3f && depthProgress < 0.85f)
                         continue;
 
-                    //边缘粗糙
                     if (widthCurve - effectiveEdge < 0.15f && roughNoise.GetNoise(x * 2, py * 2) > 0.2f)
                         continue;
 
-                    int surfDepth = effectiveThickness + dy;
-                    WorldGen.PlaceTile(x, py, ChooseTileType(surfDepth, absDx), mute: true, forced: true);
+                    WorldGen.PlaceTile(x, py, ChooseTileType(effectiveThickness + dy, absDx), mute: true, forced: true);
                 }
             }
 
-            //============ 第二遍：生成悬挂的钟乳石尖刺 ============
-            GenerateStalactites(cx, cy, halfWidth, bottomDepth, noiseSeed + 500);
-
-            //============ 第三遍：边缘碎裂（在岛屿轮廓外侧零星放置散落方块） ============
-            GenerateEdgeCrumble(cx, cy, halfWidth, topThickness, noiseSeed + 600);
+            //钟乳石尖刺（只对较大的岛屿生成）
+            if (halfWidth >= 12) {
+                GenerateStalactites(cx, cy, halfWidth, bottomDepth, noiseSeed + 500);
+            }
         }
 
         /// <summary>
         /// 在岛屿底部生成独立的钟乳石尖刺
-        /// 这些尖刺从岛屿底面向下延伸，粗细不一
         /// </summary>
         private static void GenerateStalactites(int cx, int cy, int halfWidth, int bottomDepth, int noiseSeed) {
             FastNoiseLite placeNoise = new(noiseSeed);
             placeNoise.SetNoiseType(FastNoiseLite.NoiseType.Perlin);
             placeNoise.SetFrequency(0.04f);
 
-            //在岛屿宽度范围内扫描
             for (int x = cx - halfWidth + 5; x <= cx + halfWidth - 5; x += 3) {
                 float placeVal = placeNoise.GetNoise(x, 0);
-                //只有噪声值足够高时才生成钟乳石
                 if (placeVal < 0.1f) continue;
-                //随机跳过一些，控制密度
                 if (WorldGen.genRand.NextFloat() > 0.4f) continue;
 
-                //从岛屿底面开始向下搜索，找到第一个没有方块的位置
                 int startY = cy + bottomDepth / 2;
                 for (int searchY = cy; searchY < cy + bottomDepth + 30; searchY++) {
                     if (InWorldSafe(x, searchY) && !Main.tile[x, searchY].HasTile) {
@@ -306,160 +417,23 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys
                     }
                 }
 
-                //钟乳石参数
                 float heightFactor = (placeVal - 0.1f) / 0.9f;
                 int spikeHeight = (int)(8 + heightFactor * 18 + WorldGen.genRand.Next(5));
                 int baseHalfWidth = Math.Max(1, (int)(1 + heightFactor * 3));
 
-                //构建尖刺
                 for (int dy = 0; dy < spikeHeight; dy++) {
                     float t = dy / (float)spikeHeight;
-                    //从baseHalfWidth收窄到0
                     float currentHW = baseHalfWidth * (1f - MathF.Pow(t, 1.2f));
-
                     int intHW = (int)MathF.Ceiling(currentHW);
-                    for (int dx = -intHW; dx <= intHW; dx++) {
-                        if (MathF.Abs(dx) > currentHW) continue;
-                        int px = x + dx;
+                    for (int ddx = -intHW; ddx <= intHW; ddx++) {
+                        if (MathF.Abs(ddx) > currentHW) continue;
+                        int px = x + ddx;
                         int py = startY + dy;
                         if (InWorldSafe(px, py) && !Main.tile[px, py].HasTile) {
                             WorldGen.PlaceTile(px, py, typeFramework, mute: true, forced: true);
                         }
                     }
                 }
-            }
-        }
-
-        /// <summary>
-        /// 在岛屿边缘生成碎裂散落的方块
-        /// 看起来像是岛屿边缘在亚空间侵蚀下崩碎
-        /// </summary>
-        private static void GenerateEdgeCrumble(int cx, int cy, int halfWidth, int topThickness, int noiseSeed) {
-            FastNoiseLite crumbleNoise = new(noiseSeed);
-            crumbleNoise.SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2);
-            crumbleNoise.SetFrequency(0.1f);
-
-            //在岛屿边缘外围扫描
-            int outerRange = 12;
-            for (int x = cx - halfWidth - outerRange; x <= cx + halfWidth + outerRange; x++) {
-                float absDx = MathF.Abs(x - cx) / (float)halfWidth;
-                //只处理边缘区域（0.85~1.2范围）
-                if (absDx < 0.82f || absDx > 1.3f) continue;
-
-                for (int y = cy - topThickness; y < cy + topThickness * 2; y++) {
-                    if (!InWorldSafe(x, y)) continue;
-                    if (Main.tile[x, y].HasTile) continue; //已有方块跳过
-
-                    float n = crumbleNoise.GetNoise(x, y);
-                    //越靠近岛屿边缘越密集
-                    float edgeDist = MathF.Abs(absDx - 1f);
-                    float threshold = 0.2f + edgeDist * 2.5f;
-                    if (n > threshold) continue;
-                    if (WorldGen.genRand.NextFloat() > 0.35f) continue;
-
-                    //散落方块
-                    WorldGen.PlaceTile(x, y, WorldGen.genRand.NextBool() ? typePlating : typeFramework,
-                        mute: true, forced: true);
-                }
-            }
-        }
-
-        #endregion
-
-        #region 卫星岛与哨站
-
-        /// <summary>
-        /// 生成环形分布的远端哨站岛
-        /// </summary>
-        private static void GenerateOutpostRing(int cx, int cy, int worldWidth, int worldHeight, int seed) {
-            FastNoiseLite posNoise = new(seed + 9000);
-            posNoise.SetNoiseType(FastNoiseLite.NoiseType.Perlin);
-            posNoise.SetFrequency(0.005f);
-
-            int outpostCount = 10 + WorldGen.genRand.Next(4);
-            float baseRadius = 480f;
-
-            for (int i = 0; i < outpostCount; i++) {
-                float angle = MathHelper.TwoPi * i / outpostCount + WorldGen.genRand.NextFloat() * 0.35f;
-                float radius = baseRadius + WorldGen.genRand.Next(-100, 140);
-                float noiseOffset = posNoise.GetNoise(i * 100f, 0) * 70f;
-
-                int islandX = cx + (int)(MathF.Cos(angle) * (radius + noiseOffset));
-                int islandY = cy + (int)(MathF.Sin(angle) * (radius * 0.55f + noiseOffset * 0.4f));
-
-                int hw = 18 + WorldGen.genRand.Next(14);
-                if (islandX - hw - 10 < SafePadding || islandX + hw + 10 >= worldWidth - SafePadding) continue;
-                if (islandY < SafePadding + 40 || islandY >= worldHeight - SafePadding - 40) continue;
-
-                int topT = 8 + WorldGen.genRand.Next(6);
-                int botD = 20 + WorldGen.genRand.Next(18);
-                GenerateNaturalIsland(islandX, islandY, hw, topT, botD, seed + 9100 + i * 777);
-
-                //哨站岛附近有少量碎片
-                if (WorldGen.genRand.NextBool(3)) {
-                    GenerateDebrisField(islandX, islandY, hw, botD, seed + 9200 + i * 111,
-                        worldWidth, worldHeight);
-                }
-            }
-        }
-
-        /// <summary>
-        /// 在岛屿附近生成碎片浮岛场
-        /// 模拟亚空间侵蚀导致的碎裂漂浮物
-        /// </summary>
-        private static void GenerateDebrisField(int cx, int cy, int parentHW, int parentBotD,
-            int noiseSeed, int worldWidth, int worldHeight) {
-            int debrisCount = 3 + WorldGen.genRand.Next(5);
-
-            for (int i = 0; i < debrisCount; i++) {
-                //在父岛周围随机分布，但保持一定距离
-                float angle = WorldGen.genRand.NextFloat() * MathHelper.TwoPi;
-                float dist = parentHW + 20 + WorldGen.genRand.Next(30, 80);
-                int dx = (int)(MathF.Cos(angle) * dist);
-                int dy = (int)(MathF.Sin(angle) * dist * 0.7f);
-
-                int fragX = cx + dx;
-                int fragY = cy + dy;
-
-                if (fragX < SafePadding + 20 || fragX >= worldWidth - SafePadding - 20) continue;
-                if (fragY < SafePadding + 20 || fragY >= worldHeight - SafePadding - 20) continue;
-
-                //微型浮岛
-                int fragHW = 5 + WorldGen.genRand.Next(8);
-                int fragTopT = 3 + WorldGen.genRand.Next(4);
-                int fragBotD = 6 + WorldGen.genRand.Next(10);
-                GenerateNaturalIsland(fragX, fragY, fragHW, fragTopT, fragBotD, noiseSeed + i * 333);
-            }
-        }
-
-        /// <summary>
-        /// 在整个世界范围内散布极小的碎片岛
-        /// 填充虚空中的空旷感，营造亚空间中物质碎裂漂浮的氛围
-        /// </summary>
-        private static void GenerateScatteredFragments(int cx, int cy, int worldWidth, int worldHeight, int seed) {
-            FastNoiseLite scatterNoise = new(seed + 11000);
-            scatterNoise.SetNoiseType(FastNoiseLite.NoiseType.OpenSimplex2);
-            scatterNoise.SetFrequency(0.003f);
-
-            int fragmentCount = 25 + WorldGen.genRand.Next(15);
-
-            for (int i = 0; i < fragmentCount; i++) {
-                //在世界范围内随机位置
-                int fx = SafePadding + 100 + WorldGen.genRand.Next(worldWidth - SafePadding * 2 - 200);
-                int fy = SafePadding + 100 + WorldGen.genRand.Next(worldHeight - SafePadding * 2 - 200);
-
-                //避开核心岛附近（那里已经够密了）
-                float distToCenter = MathF.Sqrt((fx - cx) * (fx - cx) + (fy - cy) * (fy - cy));
-                if (distToCenter < 200) continue;
-
-                //噪声控制密度分布
-                float n = scatterNoise.GetNoise(fx, fy);
-                if (n < -0.1f) continue;
-
-                int fragHW = 3 + WorldGen.genRand.Next(6);
-                int fragTopT = 2 + WorldGen.genRand.Next(3);
-                int fragBotD = 4 + WorldGen.genRand.Next(8);
-                GenerateNaturalIsland(fx, fy, fragHW, fragTopT, fragBotD, seed + 11100 + i * 131);
             }
         }
 

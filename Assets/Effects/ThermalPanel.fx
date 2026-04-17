@@ -65,10 +65,10 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0, float4 vertexColor : COLOR
     float burn = uBurnIntensity;
 
     // ═══ 1. 底色渐变（冷工业→热锻造） ═══
-    float3 coldTop = float3(0.045, 0.032, 0.028);
-    float3 coldBot = float3(0.020, 0.015, 0.012);
-    float3 hotTop  = float3(0.088, 0.042, 0.022);
-    float3 hotBot  = float3(0.055, 0.028, 0.016);
+    float3 coldTop = float3(0.055, 0.042, 0.038);
+    float3 coldBot = float3(0.028, 0.022, 0.018);
+    float3 hotTop  = float3(0.10, 0.055, 0.032);
+    float3 hotBot  = float3(0.065, 0.035, 0.022);
 
     float3 top = lerp(coldTop, hotTop, t);
     float3 bot = lerp(coldBot, hotBot, t);
@@ -77,16 +77,16 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0, float4 vertexColor : COLOR
     // ═══ 2. 拉丝金属纹理 ═══
     float brush = valueNoise(pixelPos * float2(0.05, 0.16));
     float brushCoarse = valueNoise(pixelPos * 0.022 + 150.0);
-    bg *= 0.74 + (brush * 0.55 + brushCoarse * 0.28) * 0.52;
+    bg *= 0.82 + (brush * 0.35 + brushCoarse * 0.18) * 0.38;
 
     // 热色偏移
-    float3 warmTint = float3(0.018, 0.006, -0.004);
+    float3 warmTint = float3(0.014, 0.005, -0.003);
     bg += warmTint * t * (brush - 0.5);
 
-    // ═══ 3. 锈蚀噪声花纹 ═══
-    float rust = fbm2(pixelPos * 0.018 + float2(uTime * 0.2, uTime * 0.08));
-    float3 rustColor = float3(0.14, 0.06, 0.025);
-    bg += rustColor * rust * 0.10 * (0.3 + t * 0.7);
+    // ═══ 3. 锈蚀噪声花纹（淡化以保持清洁感） ═══
+    float rust = fbm2(pixelPos * 0.015 + float2(uTime * 0.15, uTime * 0.06));
+    float3 rustColor = float3(0.10, 0.05, 0.025);
+    bg += rustColor * rust * 0.06 * (0.3 + t * 0.7);
 
     // ═══ 4. 热能脉络网（两条水平脉冲线） ═══
     float circuitAccum = 0.0;
@@ -115,18 +115,16 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0, float4 vertexColor : COLOR
     bg += burnColor * burn * burnPulse * 0.10;
     bg += float3(0.3, 0.08, 0.02) * burn * burnPulse2 * 0.06 * (1.0 - uv.y);
 
-    // ═══ 6. 网格线 ═══
-    float gridSize = 42.0;
+    // ═══ 6. 网格线（更细更淡） ═══
+    float gridSize = 48.0;
     float gx = abs(frac(pixelPos.x / gridSize) - 0.5) * 2.0;
     float gy = abs(frac(pixelPos.y / gridSize) - 0.5) * 2.0;
-    float gridLineX = 1.0 - smoothstep(0.0, 0.028, 1.0 - gx);
-    float gridLineY = 1.0 - smoothstep(0.0, 0.028, 1.0 - gy);
+    float gridLineX = 1.0 - smoothstep(0.0, 0.022, 1.0 - gx);
+    float gridLineY = 1.0 - smoothstep(0.0, 0.022, 1.0 - gy);
     float gridLine = max(gridLineX, gridLineY);
-    float gridCross = gridLineX * gridLineY;
 
-    float3 gridColor = lerp(float3(0.06, 0.04, 0.03), float3(0.16, 0.08, 0.04), t);
-    bg += gridColor * gridLine * 0.07;
-    bg += gridColor * gridCross * 0.15;
+    float3 gridColor = lerp(float3(0.05, 0.035, 0.025), float3(0.12, 0.06, 0.035), t);
+    bg += gridColor * gridLine * 0.04;
 
     // ═══ 7. 扫描线 ═══
     float scanPos = frac(uTime * 0.035) * innerSize.y;
@@ -140,45 +138,22 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0, float4 vertexColor : COLOR
     float scanDist2 = abs((pixelPos.y - innerMin.y) - scanPos2);
     bg += scanColor * 0.5 * exp(-scanDist2 * 0.18) * 0.08;
 
-    // ═══ 8. CRT水平线 ═══
+    // ═══ 8. CRT水平线（微弱，仅提供质感） ═══
     float crtLine = abs(frac(pixelPos.y * 0.25) - 0.5) * 2.0;
-    crtLine = smoothstep(0.4, 0.5, crtLine);
-    bg *= 1.0 - crtLine * 0.04;
+    crtLine = smoothstep(0.45, 0.5, crtLine);
+    bg *= 1.0 - crtLine * 0.018;
 
-    // ═══ 9. 边框辉光 ═══
+    // ═══ 9. 边框辉光（加强，轮廓分明） ═══
     float edgeDist = -panelSDF;
-    float edgeGlowStr = exp(-edgeDist * 0.22);
-    float3 edgeColor = lerp(float3(0.28, 0.14, 0.07), float3(0.50, 0.22, 0.08), t + burn * 0.3);
-    bg += edgeColor * edgeGlowStr * (0.25 + t * 0.45 + burn * 0.15);
+    float edgeGlowStr = exp(-edgeDist * 0.18);
+    float3 edgeColor = lerp(float3(0.35, 0.18, 0.09), float3(0.60, 0.28, 0.10), t + burn * 0.3);
+    bg += edgeColor * edgeGlowStr * (0.30 + t * 0.50 + burn * 0.18);
 
     // 内框细线
-    float innerEdge = exp(-abs(edgeDist - 10.0) * 0.6);
-    bg += edgeColor * innerEdge * 0.12;
+    float innerEdge = exp(-abs(edgeDist - 8.0) * 0.5);
+    bg += edgeColor * innerEdge * 0.16;
 
-    // ═══ 10. 角落标记 ═══
-    float markerLen = 18.0;
-    float markerW = 2.5;
-    float markers = 0.0;
-
-    // 左上
-    float2 tl = innerMin + 8.0;
-    markers += step(abs(pixelPos.x - tl.x), markerLen) * step(abs(pixelPos.y - tl.y), markerW);
-    markers += step(abs(pixelPos.y - tl.y), markerLen) * step(abs(pixelPos.x - tl.x), markerW);
-    // 右上
-    float2 tr = float2(innerMax.x - 8.0, innerMin.y + 8.0);
-    markers += step(abs(pixelPos.x - tr.x), markerLen) * step(abs(pixelPos.y - tr.y), markerW);
-    markers += step(abs(pixelPos.y - tr.y), markerLen) * step(abs(pixelPos.x - tr.x), markerW);
-    // 左下
-    float2 bl = float2(innerMin.x + 8.0, innerMax.y - 8.0);
-    markers += step(abs(pixelPos.x - bl.x), markerLen) * step(abs(pixelPos.y - bl.y), markerW);
-    markers += step(abs(pixelPos.y - bl.y), markerLen) * step(abs(pixelPos.x - bl.x), markerW);
-    // 右下
-    float2 br = innerMax - 8.0;
-    markers += step(abs(pixelPos.x - br.x), markerLen) * step(abs(pixelPos.y - br.y), markerW);
-    markers += step(abs(pixelPos.y - br.y), markerLen) * step(abs(pixelPos.x - br.x), markerW);
-
-    float3 markerColor = lerp(float3(0.30, 0.15, 0.08), float3(0.55, 0.25, 0.10), t);
-    bg += markerColor * saturate(markers) * 0.35;
+    // ═══ 10. (removed corner markers) ═══
 
     // ═══ 11. 暗角 ═══
     float2 vigUV = uv * 2.0 - 1.0;
@@ -186,8 +161,8 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0, float4 vertexColor : COLOR
     bg *= 1.0 - vig * 0.22;
 
     // ═══ 12. 顶部反光条 ═══
-    float topHighlight = 1.0 - smoothstep(0.0, 0.06, uv.y);
-    bg += float3(0.15, 0.10, 0.06) * topHighlight * 0.12;
+    float topHighlight = 1.0 - smoothstep(0.0, 0.08, uv.y);
+    bg += float3(0.18, 0.12, 0.07) * topHighlight * 0.18;
 
     float alpha = edgeAlpha * uAlpha;
     return float4(bg * alpha, alpha);

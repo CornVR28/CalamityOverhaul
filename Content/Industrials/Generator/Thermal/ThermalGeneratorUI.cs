@@ -43,6 +43,11 @@ namespace CalamityOverhaul.Content.Industrials.Generator.Thermal
         private float uiFadeAlpha = 0f;
         private float targetAlpha = 0f;
 
+        //拖拽
+        private bool isDragging = false;
+        private Vector2 dragOffset;
+        private bool positionInitialized = false;
+
         //鼠标交互
         private Rectangle panelRect;
         private Rectangle fuelSlotRect;
@@ -84,6 +89,14 @@ namespace CalamityOverhaul.Content.Industrials.Generator.Thermal
         }
 
         public override void UpdateElement() {
+            //首次使用时确保位置在屏幕内（防止LoadUIData在屏幕初始化前执行导致坐标为0）
+            if (!positionInitialized && Main.screenWidth > 0) {
+                positionInitialized = true;
+                if (DrawPosition.X < PanelWidth / 2 + 10 && DrawPosition.Y < PanelHeight / 2 + 10) {
+                    DrawPosition = new Vector2(Main.screenWidth / 2f, Main.screenHeight / 2f);
+                }
+            }
+
             //限制面板位置在屏幕内
             DrawPosition.X = MathHelper.Clamp(DrawPosition.X, PanelWidth / 2 + 10, Main.screenWidth - PanelWidth / 2 - 10);
             DrawPosition.Y = MathHelper.Clamp(DrawPosition.Y, PanelHeight / 2 + 10, Main.screenHeight - PanelHeight / 2 - 10);
@@ -115,7 +128,7 @@ namespace CalamityOverhaul.Content.Industrials.Generator.Thermal
             temperatureBarRect = new Rectangle((int)(topLeft.X + 180), (int)(topLeft.Y + 70), 45, 190);
             powerBarRect = new Rectangle((int)(topLeft.X + 355), (int)(topLeft.Y + 70), 45, 190);
 
-            //鼠标交互检测（拖拽由基类右键处理）
+            //鼠标交互检测
             hoveringFuelSlot = fuelSlotRect.Contains(MouseHitBox);
             hoveringTempBar = temperatureBarRect.Contains(MouseHitBox);
             hoveringPowerBar = powerBarRect.Contains(MouseHitBox);
@@ -124,8 +137,21 @@ namespace CalamityOverhaul.Content.Industrials.Generator.Thermal
                 player.mouseInterface = true;
             }
 
+            //左键拖拽（仅在面板背景区域生效，不与燃料槽等交互区域冲突）
+            if (keyLeftPressState == KeyPressState.Pressed && hoverInMainPage
+                && !hoveringFuelSlot && !hoveringTempBar && !hoveringPowerBar && !isDragging) {
+                isDragging = true;
+                dragOffset = new Vector2(Main.mouseX, Main.mouseY) - DrawPosition;
+            }
+            if (isDragging) {
+                DrawPosition = new Vector2(Main.mouseX, Main.mouseY) - dragOffset;
+                if (keyLeftPressState == KeyPressState.Released) {
+                    isDragging = false;
+                }
+            }
+
             //燃料槽交互
-            if (hoveringFuelSlot && ThermalData != null) {
+            if (hoveringFuelSlot && !isDragging && ThermalData != null) {
                 if (!ThermalData.FuelItem.IsAir) {
                     Main.HoverItem = ThermalData.FuelItem.Clone();
                     Main.hoverItemName = ThermalData.FuelItem.Name;
