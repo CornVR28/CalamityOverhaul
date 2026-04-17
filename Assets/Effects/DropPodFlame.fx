@@ -103,8 +103,12 @@ float4 PixelShaderFunction(PSInput input) : COLOR0
     else
         flameColor = lerp(cyanMid, warmOuter, (progress - 0.45) / 0.55);
 
-    // 横截面着色：中心偏白，边缘保留主色
-    flameColor = lerp(whiteCore, flameColor, saturate(crossDist * 1.8));
+    // 与顶点色融合——根部由着色器主导，远端由顶点色主导
+    float3 vertexRGB = input.Color.rgb;
+    flameColor = lerp(flameColor, vertexRGB * 1.2, saturate(progress * 1.5));
+
+    // 横截面着色：中心偏白，边缘保留主色（降低白色比例）
+    flameColor = lerp(whiteCore * 0.7 + flameColor * 0.3, flameColor, saturate(crossDist * 2.5));
 
     // ---- 亮度组合 ----
     float baseBrightness = edgeFade * tailFade * combinedNoise;
@@ -124,12 +128,12 @@ float4 PixelShaderFunction(PSInput input) : COLOR0
     float3 haloColor = blueInner * haloFade;
 
     // ---- 最终合成 ----
-    float3 finalColor = flameColor * baseBrightness * 2.2 * heatBoost * pulse
-                       + whiteCore * coreGlow * 3.5 * heatBoost
-                       + whiteCore * wispMask
+    float3 finalColor = flameColor * baseBrightness * 1.6 * heatBoost * pulse
+                       + whiteCore * coreGlow * 1.2 * heatBoost
+                       + flameColor * wispMask * 0.8
                        + haloColor;
 
-    float alpha = saturate(baseBrightness + coreGlow * 0.8 + wispMask * 0.3 + haloFade)
+    float alpha = saturate(baseBrightness + coreGlow * 0.5 + wispMask * 0.3 + haloFade)
                 * input.Color.a * heatBoost;
 
     return float4(finalColor * alpha, alpha);
