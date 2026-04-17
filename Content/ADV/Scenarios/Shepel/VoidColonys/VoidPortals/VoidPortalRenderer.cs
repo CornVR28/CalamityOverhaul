@@ -24,8 +24,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys.VoidPortals
             RenderTarget2D screenSwap) {
             if (Main.gameMenu) return;
 
-            VoidPortal portal = VoidPortal.ActiveInstance;
-            if (portal == null || !portal.Projectile.active) return;
+            VoidPortal portal = VoidPortal.ValidateActiveInstance();
+            if (portal == null) return;
             if (portal.Intensity < 0.001f || portal.ExpandProgress < 0.001f) return;
 
             ApplyFullScreenShader(spriteBatch, graphicsDevice, screenSwap, portal);
@@ -45,8 +45,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys.VoidPortals
             RenderTarget2D screenSwap) {
             if (Main.gameMenu) return;
 
-            VoidPortal portal = VoidPortal.ActiveInstance;
-            if (portal == null || !portal.Projectile.active) return;
+            VoidPortal portal = VoidPortal.ValidateActiveInstance();
+            if (portal == null) return;
 
             ApplySuctionShader(spriteBatch, graphicsDevice, screenSwap, portal);
         }

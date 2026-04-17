@@ -56,6 +56,29 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys.VoidPortals
         /// <summary>当前活跃的传送门实例（供渲染器读取）</summary>
         internal static VoidPortal ActiveInstance { get; private set; }
 
+        /// <summary>
+        /// 验证并返回有效的活跃实例，清理过期引用（世界卸载后弹幕引用会残留）
+        /// </summary>
+        internal static VoidPortal ValidateActiveInstance() {
+            var inst = ActiveInstance;
+            if (inst == null) return null;
+
+            var proj = inst.Projectile;
+            if (proj == null || !proj.active) {
+                ActiveInstance = null;
+                return null;
+            }
+
+            // 验证弹幕仍在主数组中（防止世界卸载后引用残留）
+            int idx = proj.whoAmI;
+            if (idx < 0 || idx >= Main.maxProjectiles || Main.projectile[idx].ModProjectile != inst) {
+                ActiveInstance = null;
+                return null;
+            }
+
+            return inst;
+        }
+
         /// <summary>当前阶段</summary>
         public Phase CurrentPhase { get; private set; }
         /// <summary>当前阶段内的计时器（帧）</summary>
@@ -99,7 +122,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys.VoidPortals
         /// 手动触发关闭
         /// </summary>
         public void Close() {
-            if (CurrentPhase == Phase.Sustaining) {
+            if (CurrentPhase == Phase.Opening || CurrentPhase == Phase.Sustaining) {
                 BeginClosing();
             }
         }
@@ -107,6 +130,10 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys.VoidPortals
         #endregion
 
         public override string Texture => CWRConstant.Placeholder;
+
+        public override void Unload() {
+            ActiveInstance = null;
+        }
 
         public override void SetDefaults() {
             Projectile.width = 2;
