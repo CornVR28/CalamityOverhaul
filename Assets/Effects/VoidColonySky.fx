@@ -1,35 +1,20 @@
 // ============================================================================
 // VoidColonySky.fx — 虚空聚落天空着色器
-// 红黑风格亚空间末日背景：深邃漩涡 + 域扭曲火焰 + 暗物质星云 + 虚空之眼
-// 全屏 CustomSky 渲染，单 DrawCall
-// 所有效果使用笛卡尔坐标噪声，避免 atan2 角度接缝
+// 亚空间末日风格全屏天空背景
+// 红黑旋涡漩涡 + 能量裂隙流 + 星云 + 星辰 + 中心暗域
+// 全程序化生成，无需外部纹理依赖
 // ============================================================================
 
 sampler uImage0 : register(s0);
 
-texture uNoiseTex;
-sampler noiseSamp = sampler_state
-{
-    texture = <uNoiseTex>;
-    magfilter = LINEAR;
-    minfilter = LINEAR;
-    mipfilter = LINEAR;
-    AddressU = wrap;
-    AddressV = wrap;
-};
-
 float uTime;
-float intensity;       // 整体强度 0~1
-float aspectRatio;     // 屏幕宽高比
+float uIntensity;       // 整体强度 0~1（淡入淡出）
+float uAspectRatio;     // 屏幕宽高比 screenWidth / screenHeight
 
-float3 voidCore;       // 中心深黑色
-float3 fireColor1;     // 火焰亮色 (橙黄)
-float3 fireColor2;     // 火焰中色 (暗红)
-float3 nebulaColor;    // 星云色 (暗紫/蓝紫)
-
-// ---- 辅助函数 ----
-#define PI 3.14159265
+#define PI  3.14159265
 #define TAU 6.28318530
+
+// ======================== Hash Functions ========================
 
 float hash11(float p)
 {
@@ -53,317 +38,264 @@ float2 hash22(float2 p)
     return frac(float2((p3.x + p3.y) * p3.z, (p3.x + p3.z) * p3.y));
 }
 
-// 值噪声
-float valueNoise(float2 p)
+// ======================== Noise Primitives ========================
+
+float vnoise(float2 p)
 {
     float2 i = floor(p);
     float2 f = frac(p);
-    f = f * f * (3.0 - 2.0 * f);
+    f = f * f * (3.0 - 2.0 * f); // Hermite smooth
+
     float a = hash21(i);
     float b = hash21(i + float2(1, 0));
     float c = hash21(i + float2(0, 1));
     float d = hash21(i + float2(1, 1));
+
     return lerp(lerp(a, b, f.x), lerp(c, d, f.x), f.y);
 }
 
-// 分形噪声
-float fbm(float2 p, int octaves)
+// 分形噪声，octave间旋转避免轴向伪影
+float fbm(float2 p, int oct)
 {
-    float value = 0.0;
-    float amp = 0.5;
-    float freq = 1.0;
-    for (int i = 0; i < octaves; i++)
+    float v = 0.0;
+    float a = 0.5;
+    for (int i = 0; i < oct; i++)
     {
-        value += amp * valueNoise(p * freq);
-        freq *= 2.13;
-        amp *= 0.49;
-        p += float2(1.7, 9.2);
+        v += a * vnoise(p);
+        // 旋转 ~37° 并放大频率
+        p = float2(p.x * 0.8 - p.y * 0.6, p.x * 0.6 + p.y * 0.8) * 2.0;
+        a *= 0.5;
     }
-    return value;
+    return v;
 }
 
-// 域扭曲 fbm — 产生有机的漩涡/火焰形态
-float warpedFbm(float2 p, float time)
+// 脊噪声 — 产生锐利的山脊/裂缝图案
+float ridgedFbm(float2 p, int oct)
+{
+    float v = 0.0;
+    float a = 0.5;
+    float prev = 1.0;
+    for (int i = 0; i < oct; i++)
+    {
+        float n = 1.0 - abs(vnoise(p) * 2.0 - 1.0);
+        n = n * n;
+        n *= prev; // 级联权重，让深层细节依附于浅层结构
+        prev = n;
+        v += a * n;
+        p = float2(p.x * 0.8 - p.y * 0.6, p.x * 0.6 + p.y * 0.8) * 2.0;
+        a *= 0.5;
+    }
+    return v;
+}
+
+// 域弯曲fbm — 产生有机的扭曲图案
+float warpedFbm(float2 p, float t)
 {
     float2 q = float2(
-        fbm(p + float2(0.0, 0.0), 4),
-        fbm(p + float2(5.2, 1.3), 4));
+        fbm(p + float2(0.0, 0.0), 3),
+        fbm(p + float2(5.2, 1.3), 3)
+    );
     float2 r = float2(
-        fbm(p + 4.0 * q + float2(1.7, 9.2) + time * 0.08, 4),
-        fbm(p + 4.0 * q + float2(8.3, 2.8) + time * 0.06, 4));
-    return fbm(p + 3.5 * r, 4);
+        fbm(p + 3.5 * q + float2(1.7, 9.2) + t * 0.1, 3),
+        fbm(p + 3.5 * q + float2(8.3, 2.8) + t * 0.08, 3)
+    );
+    return fbm(p + 3.0 * r, 3);
 }
 
-// 旋转2D坐标（用于漩涡效果，避免极坐标）
-float2 rotate2D(float2 p, float a)
+// ======================== Star Field ========================
+
+float starField(float2 uv, float scale, float time)
 {
-    float s = sin(a);
-    float c = cos(a);
-    return float2(p.x * c - p.y * s, p.x * s + p.y * c);
+    float2 id = floor(uv * scale);
+    float2 sub = frac(uv * scale);
+
+    float2 starPos = hash22(id);
+    float brightness = hash21(id + 137.0);
+
+    // 只有部分格子有星星
+    if (brightness < 0.72)
+        return 0.0;
+    brightness = (brightness - 0.72) / 0.28; // remap to 0~1
+
+    float d = length(sub - starPos);
+    float star = smoothstep(0.045, 0.0, d) * brightness;
+
+    // 闪烁
+    float twinkle = sin(hash11(id.x * 31.0 + id.y * 57.0) * TAU
+        + time * (1.5 + hash11(id.x * 13.0) * 2.5));
+    star *= 0.55 + 0.45 * twinkle;
+
+    return star;
 }
 
-// ---- A. 深邃漩涡背景 ----
-// 使用笛卡尔坐标旋转采样，完全避免 atan2 接缝
-float3 cosmicVortex(float2 centered, float dist, float time)
+// ======================== Main Pixel Shader ========================
+
+float4 PSVoidColonySky(float2 coords : TEXCOORD0, float4 vertexColor : COLOR0) : COLOR0
 {
-    // 对坐标施加距离相关的旋转 — 产生螺旋效果
-    float2 spiral1 = rotate2D(centered, dist * 4.5 - time * 0.12);
-    float2 spiral2 = rotate2D(centered, -dist * 3.2 + time * 0.08);
+    float t = uTime;
+    float2 uv = coords;
 
-    // 第一层漩涡臂 — 直接用旋转后的笛卡尔坐标采样
-    float2 armUV1 = spiral1 * 0.8 + float2(time * 0.02, -time * 0.015);
-    float2 warp1 = tex2D(noiseSamp, frac(armUV1 * 0.4 + 0.5)).rg * 0.5;
-    float arm1 = tex2D(noiseSamp, frac(spiral1 * 0.6 + warp1 + 0.5)).r;
+    // 中心偏移并校正宽高比，使漩涡为圆形
+    float2 c = (uv - float2(0.5, 0.48)) * float2(uAspectRatio, 1.0);
+    float dist = length(c);
+    float angle = atan2(c.y, c.x);
 
-    // 第二层漩涡臂 — 反向旋转
-    float2 armUV2 = spiral2 * 0.7 + float2(-time * 0.018, time * 0.012);
-    float2 warp2 = tex2D(noiseSamp, frac(armUV2 * 0.35 + 0.3)).gb * 0.4;
-    float arm2 = tex2D(noiseSamp, frac(spiral2 * 0.5 + warp2 + 0.5)).g;
+    // ====================================================================
+    // Layer 1: 深渊底色 — 接近纯黑，微带暗红
+    // ====================================================================
+    float3 col = float3(0.01, 0.003, 0.008);
+    // 远处略微提亮
+    col += float3(0.012, 0.004, 0.008) * smoothstep(0.0, 1.0, dist);
 
-    // 第三层 — 更细的纹理
-    float2 spiral3 = rotate2D(centered, dist * 6.0 + time * 0.05);
-    float arm3 = tex2D(noiseSamp, frac(spiral3 * 1.0 + 0.5)).b;
+    // ====================================================================
+    // Layer 2: 漩涡旋臂 — 深红色旋转云层
+    // 对数螺旋：角度随距离偏移产生旋臂结构
+    // ====================================================================
+    float spiralA = angle + dist * 4.2 - t * 0.18;
+    float spiralB = angle - dist * 2.8 + t * 0.13; // 反向旋转层
 
-    // 混合漩涡层
-    float vortex = arm1 * 0.45 + arm2 * 0.35 + arm3 * 0.2;
-    vortex = pow(abs(vortex), 1.3);
+    // 双旋臂（主）
+    float mainArm = pow(max(sin(spiralA * 2.0) * 0.5 + 0.5, 0.0), 1.8);
+    // 三旋臂（次，较淡）
+    float secArm = pow(max(sin(spiralB * 3.0) * 0.5 + 0.5, 0.0), 2.5) * 0.3;
+    float armBase = mainArm + secArm;
 
-    // 径向衰减 — 中心暗，中段亮，外围渐暗
-    float radialMask = smoothstep(0.0, 0.2, dist) * smoothstep(1.5, 0.45, dist);
-    vortex *= radialMask;
+    // 在螺旋坐标系中采样流动噪声
+    // 使用旋转后的笛卡尔坐标代替 angle/TAU，避免 atan2 在左侧 ±π 处的不连续接缝
+    float va = t * 0.15;
+    float vcos = cos(va);
+    float vsin = sin(va);
+    float2 rotC = float2(c.x * vcos - c.y * vsin, c.x * vsin + c.y * vcos);
+    float2 vortexUV = float2(rotC.x * 1.8 + t * 0.022, rotC.y * 1.8 + dist * 0.8 - t * 0.045);
+    float vNoise = fbm(vortexUV * 5.0, 4);
+    float vDetail = fbm(vortexUV * 11.0 + 47.0, 3) * 0.25;
+    float vortex = armBase * (vNoise + vDetail);
 
-    // 漩涡颜色：从暗红到黑
-    float3 color = lerp(voidCore, fireColor2 * 0.7, vortex);
-    color += fireColor2 * 0.2 * vortex * smoothstep(0.5, 0.15, dist);
+    // 径向衰减：中心暗洞和极远处淡出
+    float vortexFade = smoothstep(0.04, 0.22, dist) * smoothstep(1.5, 0.35, dist);
+    vortex *= vortexFade;
 
-    return color;
+    // 漩涡着色：暗红 → 亮橙红
+    float3 vortexCol = lerp(
+        float3(0.28, 0.03, 0.015),
+        float3(0.85, 0.2, 0.04),
+        saturate(vortex * 2.2)
+    );
+    col += vortexCol * vortex;
+
+    // ====================================================================
+    // Layer 3: 能量裂隙 — 明亮的橙黄色裂缝/流
+    // 使用脊噪声产生锐利裂缝纹理，沿螺旋方向旋转
+    // ====================================================================
+    float2 riftUV = c * 2.2;
+    // 螺旋扭转
+    float sw = dist * 3.2 - t * 0.25;
+    float cs = cos(sw);
+    float sn = sin(sw);
+    riftUV = float2(riftUV.x * cs - riftUV.y * sn, riftUV.x * sn + riftUV.y * cs);
+
+    float ridge = ridgedFbm(riftUV * 2.8, 4);
+
+    // 锐利阈值产生裂缝形态
+    float rift = smoothstep(0.55, 0.78, ridge);
+    float riftCore = smoothstep(0.68, 0.9, ridge);
+
+    // 裂隙沿旋臂更密集
+    rift *= (0.35 + 0.65 * armBase);
+    riftCore *= (0.3 + 0.7 * armBase);
+
+    // 径向衰减
+    float riftFade = smoothstep(0.025, 0.16, dist) * smoothstep(1.1, 0.2, dist);
+    rift *= riftFade;
+    riftCore *= riftFade;
+
+    // 裂隙发光晕散（宽且柔和的底光）
+    float riftGlow = smoothstep(0.38, 0.7, ridge) * riftFade * armBase * 0.35;
+    col += float3(0.5, 0.08, 0.02) * riftGlow;
+
+    // 裂隙本体色：橙边 → 黄白核心
+    float3 riftCol = lerp(
+        float3(1.0, 0.38, 0.05),
+        float3(1.0, 0.82, 0.38),
+        riftCore
+    );
+    col += riftCol * rift * 1.4;
+
+    // ====================================================================
+    // Layer 4: 域弯曲能量流 — 大尺度有机扭曲流
+    // 补充旋涡中的宽大能量带（概念图中从中心向外延伸的火焰流）
+    // ====================================================================
+    float2 streamUV = c * 1.2 + float2(t * 0.03, -t * 0.02);
+    float stream = warpedFbm(streamUV, t * 0.6);
+    float streamEdge = smoothstep(0.48, 0.6, stream);
+    float streamBright = smoothstep(0.56, 0.72, stream);
+
+    float streamFade = smoothstep(0.06, 0.2, dist) * smoothstep(1.3, 0.3, dist);
+    streamEdge *= streamFade * 0.5;
+    streamBright *= streamFade * 0.4;
+
+    col += float3(0.7, 0.15, 0.03) * streamEdge;
+    col += float3(1.0, 0.55, 0.12) * streamBright;
+
+    // ====================================================================
+    // Layer 5: 星云 — 紫蓝色弥漫云
+    // ====================================================================
+    float neb1 = fbm(c * 1.6 + float2(100.0, 50.0) + t * 0.008, 4);
+    neb1 = smoothstep(0.32, 0.68, neb1);
+    float nebZone = smoothstep(0.3, 0.85, dist); // 边缘更浓
+    col += float3(0.12, 0.04, 0.22) * neb1 * nebZone * 0.5;
+
+    // 第二层星云：偏红紫
+    float neb2 = fbm(c * 1.1 + float2(50.0, 80.0) - t * 0.006, 3);
+    neb2 = smoothstep(0.38, 0.65, neb2);
+    col += float3(0.18, 0.03, 0.12) * neb2 * nebZone * 0.35;
+
+    // ====================================================================
+    // Layer 6: 星辰 — 多层程序化星空
+    // ====================================================================
+    float s1 = starField(c + 200.0, 28.0, t);
+    float s2 = starField(c + 500.0, 55.0, t);
+    float s3 = starField(c + 800.0, 95.0, t);
+
+    // 明亮区域压制星星
+    float sDim = 1.0 - saturate(vortex * 3.5 + rift * 5.0 + streamEdge * 3.0 + neb1 * 1.5);
+    sDim *= smoothstep(0.05, 0.2, dist); // 中心无星
+
+    float3 starCol = float3(1.0, 0.92, 0.85) * s1 * 0.75
+        + float3(0.92, 0.85, 1.0) * s2 * 0.45
+        + float3(0.85, 0.88, 1.0) * s3 * 0.25;
+    col += starCol * sDim;
+
+    // ====================================================================
+    // Layer 7: 中心暗域 + 边缘辉光环
+    // ====================================================================
+    float centerDark = smoothstep(0.0, 0.13, dist);
+    col *= centerDark;
+
+    // 暗域边缘的灼热辉光环
+    float glowRing = exp(-(dist - 0.16) * (dist - 0.16) * 55.0) * 0.38;
+    col += float3(0.9, 0.28, 0.06) * glowRing;
+
+    // 极中心微弱的深红余辉
+    float coreGlow = exp(-dist * dist * 80.0) * 0.08;
+    col += float3(0.4, 0.05, 0.02) * coreGlow;
+
+    // ====================================================================
+    // Post: 柔和暗角 + 输出
+    // ====================================================================
+    float vignette = smoothstep(1.3, 0.45, dist);
+    vignette = max(vignette, 0.12);
+    col *= vignette;
+
+    col *= uIntensity;
+
+    return float4(saturate(col), 1.0);
 }
 
-// ---- B. 域扭曲火焰 ----
-// 纯笛卡尔坐标的有机火焰/能量，无方向性光束
-float3 warpedFlames(float2 centered, float dist, float time)
+technique VoidColonySky
 {
-    // 多层域扭曲 — 产生有机的火焰形态
-    float2 uv1 = centered * 1.2 + float2(time * 0.025, -time * 0.02);
-    float flame1 = warpedFbm(uv1, time);
-
-    // 第二层 — 不同频率和相位
-    float2 uv2 = centered * 0.8 + float2(-time * 0.015, time * 0.03);
-    float flame2 = warpedFbm(uv2 + float2(7.3, 2.1), time * 0.7);
-
-    // 混合并塑形
-    float flame = flame1 * 0.6 + flame2 * 0.4;
-
-    // 提取高亮区域作为火焰纹理
-    float firePattern = smoothstep(0.35, 0.7, flame);
-
-    // 径向遮罩 — 中心到中段最亮，外围衰减
-    float radialMask = smoothstep(0.0, 0.1, dist) * smoothstep(1.1, 0.2, dist);
-    firePattern *= radialMask;
-
-    // 额外的中心区域炽热层
-    float2 uvCenter = centered * 2.0 + float2(time * 0.04, -time * 0.035);
-    float centerFlame = warpedFbm(uvCenter + float2(3.1, 8.7), time * 1.2);
-    centerFlame = smoothstep(0.4, 0.75, centerFlame);
-    centerFlame *= smoothstep(0.5, 0.05, dist); // 只在中心区域
-
-    float totalFlame = firePattern + centerFlame * 0.8;
-    totalFlame = saturate(totalFlame);
-
-    // 颜色梯度：暗红底 → 亮橙黄高光
-    float3 color = lerp(fireColor2 * 0.5, fireColor1, pow(abs(totalFlame), 1.8));
-    color *= totalFlame;
-
-    // 极亮区域额外泛白
-    color += float3(1.0, 0.8, 0.5) * pow(abs(centerFlame), 3.0) * 0.3;
-
-    return color;
-}
-
-// ---- C. 虚空之眼 ----
-// 中央黑暗核心 + 炽热吸积环（使用笛卡尔旋转采样）
-float3 voidEye(float2 centered, float dist, float time)
-{
-    // 吸积环参数
-    float eyeRadius = 0.12;
-    float ringWidth = 0.055;
-    float ringDist = abs(dist - eyeRadius);
-
-    // 吸积环 — 高斯辉光
-    float ring = exp(-ringDist * ringDist / (ringWidth * ringWidth));
-
-    // 环上纹理 — 用旋转坐标采样，无 atan2
-    float2 ringCoord = rotate2D(centered, time * 0.6);
-    float2 ringUV = ringCoord * 4.0 + 0.5;
-    float ringTex = tex2D(noiseSamp, frac(ringUV)).r;
-
-    // 第二层环纹理
-    float2 ringCoord2 = rotate2D(centered, -time * 0.35);
-    float ringTex2 = tex2D(noiseSamp, frac(ringCoord2 * 6.0 + 0.3)).g;
-
-    ring *= 0.4 + ringTex * 0.35 + ringTex2 * 0.25;
-
-    // 环颜色：超亮橙白
-    float3 ringColor = lerp(fireColor1, float3(1.0, 0.9, 0.7), ring * 0.5) * ring * 2.0;
-
-    // 中央黑暗
-    float darkness = smoothstep(eyeRadius * 0.8, eyeRadius * 0.25, dist);
-
-    // 引力透镜 — 内侧亮边
-    float lensEdge = smoothstep(eyeRadius * 1.2, eyeRadius * 0.85, dist)
-                   * smoothstep(eyeRadius * 0.35, eyeRadius * 0.65, dist);
-    float3 lensColor = fireColor1 * lensEdge * 0.6;
-
-    float3 color = ringColor + lensColor;
-    color *= (1.0 - darkness);
-
-    return color;
-}
-
-// ---- D. 星空背景 ----
-float stars(float2 uv, float time)
-{
-    float starField = 0.0;
-
-    for (int layer = 0; layer < 3; layer++)
+    pass P0
     {
-        float scale = 20.0 + (float) layer * 15.0;
-        float2 cell = floor(uv * scale);
-        float2 cellUV = frac(uv * scale);
-
-        float h = hash21(cell + (float) layer * 100.0);
-
-        if (h > 0.85)
-        {
-            float2 starPos = hash22(cell + (float) layer * 50.0) * 0.6 + 0.2;
-            float starDist = length(cellUV - starPos);
-
-            float brightness = (h - 0.85) / 0.15;
-            float starSize = 0.01 + brightness * 0.02;
-            float star = exp(-starDist * starDist / (starSize * starSize));
-
-            float twinkle = 0.6 + 0.4 * sin(time * (1.0 + hash11(h * 100.0) * 3.0) + h * TAU);
-            star *= twinkle * brightness;
-
-            starField += star;
-        }
-    }
-
-    return saturate(starField);
-}
-
-// ---- E. 紫蓝星云 ----
-float3 nebulaGlow(float2 centered, float dist, float time)
-{
-    float2 nebUV = centered * 0.8 + float2(time * 0.01, -time * 0.008);
-    float neb1 = fbm(nebUV * 3.0, 5);
-    float neb2 = fbm(nebUV * 2.0 + float2(3.7, 1.2), 4);
-
-    float outerMask = smoothstep(0.3, 0.9, dist) * smoothstep(1.5, 0.8, dist);
-
-    float nebDensity = neb1 * 0.6 + neb2 * 0.4;
-    nebDensity = smoothstep(0.3, 0.7, nebDensity) * outerMask;
-
-    float colorVar = fbm(centered * 2.0 + 10.0, 3);
-    float3 nebColor1 = nebulaColor;
-    float3 nebColor2 = float3(0.08, 0.04, 0.18);
-    float3 nebCol = lerp(nebColor1, nebColor2, colorVar);
-
-    return nebCol * nebDensity * 0.5;
-}
-
-// ---- F. 细微能量丝 ----
-// 在中远距离区域用噪声产生柔和的丝状能量纹理，纯装饰
-float3 energyWisps(float2 centered, float dist, float time)
-{
-    // 缓慢旋转采样
-    float2 rc1 = rotate2D(centered, time * 0.04) * 2.0;
-    float2 rc2 = rotate2D(centered, -time * 0.03) * 1.5;
-
-    // 拉伸采样产生丝状效果
-    float w1 = tex2D(noiseSamp, frac(float2(rc1.x * 0.3, rc1.y * 1.5) + 0.5)).r;
-    float w2 = tex2D(noiseSamp, frac(float2(rc2.x * 1.5, rc2.y * 0.3) + 0.3)).g;
-
-    // 噪声域扭曲
-    float2 warpUV = centered * 1.0 + float2(time * 0.02, -time * 0.015);
-    float warpVal = fbm(warpUV * 3.0, 3);
-
-    float wisps = w1 * w2;
-    wisps = smoothstep(0.15, 0.45, wisps + warpVal * 0.2);
-
-    // 遮罩 — 中间环带最明显
-    float mask = smoothstep(0.15, 0.35, dist) * smoothstep(0.9, 0.5, dist);
-    wisps *= mask;
-
-    // 淡红色调
-    float3 color = lerp(fireColor2 * 0.3, fireColor1 * 0.4, wisps);
-    color *= wisps * 0.5;
-
-    return color;
-}
-
-// ============================================================================
-// 主像素着色器
-// ============================================================================
-float4 PixelShaderFunction(float2 coords : TEXCOORD0) : COLOR0
-{
-    // 归一化到 [-1, 1]，校正宽高比
-    float2 centered = coords * 2.0 - 1.0;
-    centered.x *= aspectRatio;
-
-    float dist = length(centered);
-    float time = uTime;
-
-    // ======== 逐层合成 ========
-
-    // 1. 基底：纯黑虚空
-    float3 color = float3(0.01, 0.005, 0.015);
-
-    // 2. 星空（最底层，在暗区域可见）
-    float starVal = stars(coords, time);
-    float3 starColor = lerp(float3(0.7, 0.6, 0.8), float3(1.0, 0.85, 0.7), hash21(floor(coords * 30.0)));
-    color += starColor * starVal * 0.25 * smoothstep(0.3, 0.8, dist);
-
-    // 3. 紫蓝星云
-    color += nebulaGlow(centered, dist, time);
-
-    // 4. 宇宙漩涡
-    color += cosmicVortex(centered, dist, time);
-
-    // 5. 域扭曲火焰
-    color += warpedFlames(centered, dist, time);
-
-    // 6. 细微能量丝
-    color += energyWisps(centered, dist, time);
-
-    // 7. 虚空之眼（最上层，中央黑洞）
-    float3 eye = voidEye(centered, dist, time);
-    float eyeDarkness = smoothstep(0.12, 0.04, dist);
-    color = color * (1.0 - eyeDarkness * 0.95) + eye;
-
-    // ======== 全局后处理 ========
-
-    // 暗角效果 — 四角压暗
-    float vignette = 1.0 - smoothstep(0.5, 1.5, dist);
-    color *= vignette;
-
-    // 微弱的整体脉动
-    float globalPulse = 0.92 + 0.08 * sin(time * 0.5);
-    color *= globalPulse;
-
-    // 色调映射（简化 ACES）
-    color = color / (color + 0.8);
-
-    // 应用强度
-    color *= intensity;
-
-    return float4(color, intensity);
-}
-
-technique Technique1
-{
-    pass VoidColonySkyPass
-    {
-        PixelShader = compile ps_3_0 PixelShaderFunction();
+        PixelShader = compile ps_3_0 PSVoidColonySky();
     }
 }
