@@ -59,7 +59,7 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0, float4 vertexColor : COLOR
     // ═══ 2. 填充区域 ═══
     // 填充从底部(uv.y=1)向顶部(uv.y=0)增长
     float fillLine = 1.0 - fill;  // uv坐标中的填充边界线
-    float inFill = smoothstep(fillLine + 0.005, fillLine - 0.005, uv.y);
+    float inFill = smoothstep(fillLine - 0.005, fillLine + 0.005, uv.y);
 
     if (inFill > 0.01) {
         // 填充内的归一化位置 (0=填充底部, 1=填充顶部)

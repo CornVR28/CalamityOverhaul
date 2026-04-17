@@ -289,6 +289,14 @@ namespace CalamityOverhaul.Content.Industrials.Generator.Thermal
             DrawTemperatureBar(spriteBatch);
             DrawPowerBar(spriteBatch);
             DrawStatusText(spriteBatch);
+
+            //提示框最后绘制，确保在最上层
+            if (hoveringTempBar) {
+                DrawBarTooltip(spriteBatch, $"{(int)ThermalData.Temperature}/{(int)ThermalData.MaxTemperature}{TemperatureUnit.Value}");
+            }
+            else if (hoveringPowerBar) {
+                DrawBarTooltip(spriteBatch, $"{(int)ThermalData.UEvalue}/{(int)ThermalData.MaxUEValue} {PowerUnit.Value}");
+            }
         }
 
         private void DrawMainPanel(SpriteBatch sb) {
@@ -474,10 +482,6 @@ namespace CalamityOverhaul.Content.Industrials.Generator.Thermal
             Utils.DrawBorderString(sb, label, labelPos + new Vector2(1.5f, 1.5f), labelGlow, 0.65f);
             Utils.DrawBorderString(sb, label, labelPos, new Color(240, 200, 160) * alpha, 0.65f);
 
-            //悬停详细信息
-            if (hoveringTempBar) {
-                DrawBarTooltip(sb, $"{(int)ThermalData.Temperature}/{(int)ThermalData.MaxTemperature}{TemperatureUnit.Value}");
-            }
         }
 
         private void DrawPowerBar(SpriteBatch sb) {
@@ -500,10 +504,6 @@ namespace CalamityOverhaul.Content.Industrials.Generator.Thermal
             Utils.DrawBorderString(sb, label, labelPos + new Vector2(1.5f, 1.5f), labelGlow, 0.75f);
             Utils.DrawBorderString(sb, label, labelPos, new Color(240, 200, 160) * alpha, 0.75f);
 
-            //悬停详细信息
-            if (hoveringPowerBar) {
-                DrawBarTooltip(sb, $"{(int)ThermalData.UEvalue}/{(int)ThermalData.MaxUEValue} {PowerUnit.Value}");
-            }
         }
 
         private void DrawShaderBar(SpriteBatch sb, Rectangle barRect, float fillRatio, float barMode, float alpha) {
@@ -573,15 +573,76 @@ namespace CalamityOverhaul.Content.Industrials.Generator.Thermal
 
         private static void DrawBarTooltip(SpriteBatch sb, string text) {
             Texture2D px = VaultAsset.placeholder2.Value;
-            Vector2 textSize = FontAssets.MouseText.Value.MeasureString(text) * 0.8f;
-            Vector2 textPos = new Vector2(Main.mouseX + 18, Main.mouseY + 18);
+            float scale = 0.8f;
+            Vector2 textSize = FontAssets.MouseText.Value.MeasureString(text) * scale;
+            int padH = 16, padV = 12;
+            int bw = (int)textSize.X + padH * 2;
+            int bh = (int)textSize.Y + padV * 2;
 
-            Rectangle tooltipBg = new Rectangle((int)textPos.X - 10, (int)textPos.Y - 6, (int)textSize.X + 20, (int)textSize.Y + 12);
-            sb.Draw(px, tooltipBg, new Rectangle(0, 0, 1, 1), new Color(15, 10, 8) * 0.95f);
-            sb.Draw(px, new Rectangle(tooltipBg.X, tooltipBg.Y, tooltipBg.Width, 3), new Rectangle(0, 0, 1, 1), new Color(180, 100, 50) * 0.8f);
-            sb.Draw(px, new Rectangle(tooltipBg.X, tooltipBg.Y, 3, tooltipBg.Height), new Rectangle(0, 0, 1, 1), new Color(180, 100, 50) * 0.8f);
+            //确保不超出屏幕
+            int tx = Main.mouseX + 20;
+            int ty = Main.mouseY - bh - 8;
+            if (tx + bw > Main.screenWidth - 4) tx = Main.screenWidth - bw - 4;
+            if (ty < 4) ty = Main.mouseY + 22;
 
-            Utils.DrawBorderString(sb, text, textPos, new Color(255, 220, 180), 0.8f);
+            Rectangle box = new Rectangle(tx, ty, bw, bh);
+            float pulse = (float)Math.Sin(Main.GlobalTimeWrappedHourly * 3.5f) * 0.5f + 0.5f;
+
+            //多层渐变背景，模拟金属深度
+            for (int i = 0; i < 8; i++) {
+                float t = i / 7f;
+                Rectangle layer = box;
+                layer.Inflate(-i, -i);
+                if (layer.Width <= 0 || layer.Height <= 0) break;
+                Color bg = Color.Lerp(new Color(35, 22, 16), new Color(12, 8, 6), t * t);
+                sb.Draw(px, layer, new Rectangle(0, 0, 1, 1), bg * 0.95f);
+            }
+
+            //内侧暗角（上下渐暗）
+            for (int v = 0; v < 12; v++) {
+                float fade = 1f - v / 12f;
+                fade *= fade * fade;
+                Color vc = Color.Black * (0.18f * fade);
+                Rectangle inner = new Rectangle(box.X + 4, box.Y + 4 + v, box.Width - 8, 1);
+                sb.Draw(px, inner, new Rectangle(0, 0, 1, 1), vc);
+                inner.Y = box.Bottom - 5 - v;
+                sb.Draw(px, inner, new Rectangle(0, 0, 1, 1), vc);
+            }
+
+            //四面边框，锈蚀金属质感
+            Color edgeBase = Color.Lerp(new Color(140, 75, 38), new Color(190, 110, 55), pulse * 0.3f);
+            Color edgeDark = edgeBase * 0.6f;
+            //顶边（亮）
+            sb.Draw(px, new Rectangle(box.X + 1, box.Y, box.Width - 2, 2), new Rectangle(0, 0, 1, 1), edgeBase * 0.85f);
+            //底边（暗）
+            sb.Draw(px, new Rectangle(box.X + 1, box.Bottom - 2, box.Width - 2, 2), new Rectangle(0, 0, 1, 1), edgeDark * 0.7f);
+            //左边
+            sb.Draw(px, new Rectangle(box.X, box.Y + 1, 2, box.Height - 2), new Rectangle(0, 0, 1, 1), edgeBase * 0.75f);
+            //右边
+            sb.Draw(px, new Rectangle(box.Right - 2, box.Y + 1, 2, box.Height - 2), new Rectangle(0, 0, 1, 1), edgeDark * 0.65f);
+
+            //内侧高光线（顶部和左侧各一条细线，模拟金属反光）
+            Color innerHighlight = new Color(200, 140, 80) * 0.15f;
+            sb.Draw(px, new Rectangle(box.X + 3, box.Y + 3, box.Width - 6, 1), new Rectangle(0, 0, 1, 1), innerHighlight);
+            sb.Draw(px, new Rectangle(box.X + 3, box.Y + 4, 1, box.Height - 8), new Rectangle(0, 0, 1, 1), innerHighlight * 0.7f);
+
+            //四角铆钉装饰
+            Color rivetColor = Color.Lerp(new Color(160, 100, 55), new Color(200, 130, 70), pulse * 0.4f) * 0.9f;
+            int rs = 3;
+            sb.Draw(px, new Rectangle(box.X + 3, box.Y + 3, rs, rs), new Rectangle(0, 0, 1, 1), rivetColor);
+            sb.Draw(px, new Rectangle(box.Right - 3 - rs, box.Y + 3, rs, rs), new Rectangle(0, 0, 1, 1), rivetColor);
+            sb.Draw(px, new Rectangle(box.X + 3, box.Bottom - 3 - rs, rs, rs), new Rectangle(0, 0, 1, 1), rivetColor * 0.7f);
+            sb.Draw(px, new Rectangle(box.Right - 3 - rs, box.Bottom - 3 - rs, rs, rs), new Rectangle(0, 0, 1, 1), rivetColor * 0.7f);
+
+            //文字绘制：发光层 + 主体
+            Vector2 textPos = new Vector2(box.X + padH, box.Y + padV);
+            Color textGlow = new Color(255, 160, 80) * 0.35f;
+            for (int i = 0; i < 4; i++) {
+                float angle = MathHelper.TwoPi * i / 4f;
+                Vector2 off = angle.ToRotationVector2() * 1.5f;
+                Utils.DrawBorderString(sb, text, textPos + off, textGlow, scale);
+            }
+            Utils.DrawBorderString(sb, text, textPos, new Color(245, 215, 175), scale);
         }
 
         private void DrawStatusText(SpriteBatch sb) {
