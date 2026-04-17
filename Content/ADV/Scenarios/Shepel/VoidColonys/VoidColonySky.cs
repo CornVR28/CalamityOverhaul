@@ -30,7 +30,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys
 
         private bool active;
         private float intensity;
-
         void ICWRLoader.LoadData() {
             if (Main.dedServ) return;
 
