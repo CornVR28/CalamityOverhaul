@@ -118,6 +118,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
 
         public override void AI() {
             if (!DropPodWorld.Active) {
+                DropPodHeatHazeRender.Reset();
                 ActorLoader.KillActor(WhoAmI);
                 return;
             }
@@ -226,6 +227,12 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
 
             //同步dropTimer给DropPodDrawSystem的屏幕特效使用
             DropPodDrawSystem.SyncDropTimer(dropTimer, reentryHeat);
+
+            //同步热浪扭曲数据——仓体屏幕中心归一化坐标 + 强度
+            Vector2 screenCenter = (Center - Main.screenPosition + shakeOffset)
+                / new Vector2(Main.screenWidth, Main.screenHeight);
+            float hazeStrength = reentryHeat * (landingPhaseActive ? 0.3f : 1f);
+            DropPodHeatHazeRender.SyncHazeData(screenCenter, hazeStrength);
         }
 
         /// <summary>

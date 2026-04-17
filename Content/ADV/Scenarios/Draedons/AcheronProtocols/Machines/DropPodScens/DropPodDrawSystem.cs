@@ -39,6 +39,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
                 dropTimer = 0;
                 reentryHeat = 0f;
                 landingFade = 0f;
+                DropPodHeatHazeRender.Reset();
             }
         }
 
