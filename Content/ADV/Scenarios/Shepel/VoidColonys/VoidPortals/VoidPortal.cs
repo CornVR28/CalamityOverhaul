@@ -8,11 +8,6 @@ using Terraria.ModLoader;
 
 namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys.VoidPortals
 {
-    /// <summary>
-    /// 虚空传送门状态管理器 — 参考 Cyberspace 的 lerp+burst 动画架构
-    /// <br/>管理裂隙的完整生命周期（展开→维持→关闭）
-    /// <br/>核心视觉效果由 <see cref="VoidPortalRenderer"/> 的屏幕空间着色器处理
-    /// </summary>
     internal class VoidPortal : ModProjectile
     {
         /// <summary>

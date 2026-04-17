@@ -10,10 +10,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys.VoidPortals
 {
     /// <summary>
     /// 虚空传送门屏幕空间渲染器
-    /// <br/>参考 CyberspaceRender 的架构：
-    /// <br/>1. DrawNPCsOverTiles 时机应用全屏着色器（物块之上、实体之下）
-    /// <br/>2. 额外绘制裂隙边缘辉光环（Additive SpriteBatch）
-    /// <br/>3. 世界坐标系参数传递给着色器
     /// </summary>
     internal class VoidPortalRenderer : RenderHandle
     {
@@ -34,7 +30,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys.VoidPortals
 
             ApplyFullScreenShader(spriteBatch, graphicsDevice, screenSwap, portal);
 
-            // 裂隙边缘辉光环（Additive混合）
+            //裂隙边缘辉光环（Additive混合）
             spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive,
                 SamplerState.PointWrap, DepthStencilState.None, RasterizerState.CullNone,
                 null, Main.GameViewMatrix.TransformationMatrix);
@@ -50,21 +46,21 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys.VoidPortals
             if (screenSwap == null || screenSwap.IsDisposed) return;
             if (Main.screenTarget == null || Main.screenTarget.IsDisposed) return;
 
-            // ① 复制当前屏幕到交换缓冲
+            //复制当前屏幕到交换缓冲
             graphicsDevice.SetRenderTarget(screenSwap);
             graphicsDevice.Clear(Color.Transparent);
             spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
             spriteBatch.Draw(Main.screenTarget, Vector2.Zero, Color.White);
             spriteBatch.End();
 
-            // ② 计算缩放感知的世界坐标参数（参考CyberspaceRender）
+            //计算缩放感知的世界坐标参数（参考CyberspaceRender）
             Vector2 zoom = Main.GameViewMatrix.Zoom;
             Vector2 screenPixels = Main.ScreenSize.ToVector2();
             Vector2 worldViewSize = screenPixels / zoom;
             Vector2 worldViewOrigin = Main.screenPosition
                 + screenPixels * (Vector2.One - Vector2.One / zoom) * 0.5f;
 
-            // ③ 设置着色器参数（全部世界坐标）
+            //设置着色器参数（全部世界坐标）
             shader.Parameters["uTime"]?.SetValue(portal.EffectTime);
             shader.Parameters["intensity"]?.SetValue(portal.Intensity);
             shader.Parameters["expandProgress"]?.SetValue(portal.ExpandProgress);
@@ -77,7 +73,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys.VoidPortals
             shader.Parameters["screenPosition"]?.SetValue(worldViewOrigin);
             shader.Parameters["worldViewSize"]?.SetValue(worldViewSize);
 
-            // ④ 应用着色器绘制回主屏幕
+            //应用着色器绘制回主屏幕
             graphicsDevice.SetRenderTarget(Main.screenTarget);
             graphicsDevice.Clear(Color.Transparent);
             graphicsDevice.Textures[1] = noiseTex;
