@@ -122,15 +122,19 @@ namespace CalamityOverhaul.Content.Industrials.Generator.Thermal
         public override int TargetItem => ModContent.ItemType<ThermalGeneratorMK2>();
         public override float MaxUEValue => 10000;
         public override void SetGenerator() {
-            GeneratingSpeed = 2;
             MaxFrame = 5;
         }
         public override MachineData GetGeneratorDataInds() {
-            var inds = new ThermalData();
-            inds.MaxChargeCool = 4;
-            inds.MaxTemperature = 2000;
-            inds.MaxUEValue = MaxUEValue;
-            return inds;
+            var data = new ThermalData();
+            data.MaxChargeCool = 4;
+            data.MaxTemperature = 2000;
+            data.MaxUEValue = MaxUEValue;
+            data.OptimalTemperature = 1400f;
+            data.MaxPowerPerTick = 4f;
+            data.DissipationRate = 0.001f;
+            data.MinDissipation = 0.08f;
+            data.HeatCostPerUE = 0.5f;
+            return data;
         }
     }
 }

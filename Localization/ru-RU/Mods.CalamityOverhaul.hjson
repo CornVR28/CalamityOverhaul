@@ -16,6 +16,11 @@ Biomes: {
 		// DisplayName: Drop Pod Biome
 		// TownNPCDialogueName: the Drop Pod Biome
 	}
+
+	VoidColonyBiome: {
+		// DisplayName: Void Colony Biome
+		// TownNPCDialogueName: the Void Colony Biome
+	}
 }
 
 # For Language Pack Creators:

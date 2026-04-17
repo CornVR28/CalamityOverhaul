@@ -119,63 +119,94 @@ namespace CalamityOverhaul.Content.Industrials.Generator.Thermal
     internal class ThermalGeneratorTP : BaseGeneratorTP
     {
         public override int TargetTileID => ModContent.TileType<ThermalGeneratorTile>();
+        public override int TargetItem => ModContent.ItemType<ThermalGenerator>();
+        public override float MaxUEValue => 1000;
         internal int frame;
         internal ThermalData ThermalData => MachineData as ThermalData;
-        public override float MaxUEValue => 1000;
-        public int GeneratingSpeed = 1;
         public int MaxFrame = 4;
-        public override int TargetItem => ModContent.ItemType<ThermalGenerator>();
+
         public override MachineData GetGeneratorDataInds() {
-            var inds = new ThermalData();
-            inds.MaxChargeCool = 6;
-            inds.MaxTemperature = 600;
-            inds.MaxUEValue = MaxUEValue;
-            return inds;
+            var data = new ThermalData();
+            data.MaxChargeCool = 6;
+            data.MaxTemperature = 600;
+            data.MaxUEValue = MaxUEValue;
+            data.OptimalTemperature = 420f;
+            data.MaxPowerPerTick = 1.5f;
+            data.DissipationRate = 0.002f;
+            data.MinDissipation = 0.1f;
+            data.HeatCostPerUE = 1.0f;
+            return data;
         }
 
+        /// <summary>
+        /// 处理UI燃料槽的物品放入/取出/交换/堆叠，含燃料类型验证
+        /// </summary>
         internal void HandlerItem() {
-            SoundEngine.PlaySound(SoundID.Grab);
-            if (ThermalData.FuelItem.type == ItemID.None) {
-                ThermalData.FuelItem = Main.mouseItem.Clone();
-                Main.mouseItem.TurnToAir();
+            Item mouseItem = Main.mouseItem;
+            bool mouseHasFuel = !mouseItem.IsAir && FuelItems.FuelItemToCombustion.ContainsKey(mouseItem.type);
+
+            if (ThermalData.FuelItem.IsAir) {
+                // 槽位空：仅允许放入合法燃料
+                if (mouseHasFuel) {
+                    ThermalData.FuelItem = mouseItem.Clone();
+                    mouseItem.TurnToAir();
+                    SoundEngine.PlaySound(SoundID.Grab);
+                }
             }
-            else if (Main.mouseItem.IsAir) {
+            else if (mouseItem.IsAir) {
+                // 鼠标空：取出燃料
                 Main.mouseItem = ThermalData.FuelItem.Clone();
                 ThermalData.FuelItem.TurnToAir();
+                SoundEngine.PlaySound(SoundID.Grab);
             }
-            else if (Main.mouseItem.type == ThermalData.FuelItem.type) {
-                ThermalData.FuelItem.stack += Main.mouseItem.stack;
-                Main.mouseItem.TurnToAir();
+            else if (mouseItem.type == ThermalData.FuelItem.type) {
+                // 同类物品：合并堆叠
+                int canAdd = ThermalData.FuelItem.maxStack - ThermalData.FuelItem.stack;
+                int toAdd = canAdd < mouseItem.stack ? canAdd : mouseItem.stack;
+                if (toAdd > 0) {
+                    ThermalData.FuelItem.stack += toAdd;
+                    mouseItem.stack -= toAdd;
+                    if (mouseItem.stack <= 0) mouseItem.TurnToAir();
+                }
+                SoundEngine.PlaySound(SoundID.Grab);
             }
-            else if (Main.mouseItem.type != ItemID.None) {
-                ThermalData.FuelItem = Main.mouseItem.Clone();
-                Main.mouseItem = ThermalData.FuelItem.Clone();
+            else if (mouseHasFuel) {
+                // 不同类燃料：安全交换（先保存旧物品再赋新值）
+                Item temp = ThermalData.FuelItem.Clone();
+                ThermalData.FuelItem = mouseItem.Clone();
+                Main.mouseItem = temp;
+                SoundEngine.PlaySound(SoundID.Grab);
             }
+
             SendData();
         }
 
-        public bool CanUseFuel(out int value) {
-            value = 0;
-            bool reset = false;
-            if (ThermalData.FuelItem == null || ThermalData.FuelItem.type == ItemID.None) {
-                return false;
+        /// <summary>
+        /// 尝试消耗一个燃料物品，开始新的燃烧周期
+        /// 纯副作用方法，仅在条件满足时执行消耗
+        /// </summary>
+        private void TryConsumeFuel() {
+            if (ThermalData.FuelItem == null || ThermalData.FuelItem.IsAir) return;
+            if (!FuelItems.FuelItemToCombustion.TryGetValue(ThermalData.FuelItem.type, out int combustion)) return;
+            if (ThermalData.Temperature >= ThermalData.MaxTemperature * 0.95f) return;
+
+            int burnDuration = FuelItems.GetBurnDuration(combustion);
+            float heatPerTick = FuelItems.GetHeatPerTick(combustion);
+
+            ThermalData.BurnTimeRemaining = burnDuration;
+            ThermalData.BurnTimeMax = burnDuration;
+            ThermalData.HeatPerTick = heatPerTick;
+            ThermalData.ChargeCool = 0;
+
+            ThermalData.FuelItem.stack--;
+            FuelItems.OnAfterFlaming(ThermalData.FuelItem.type, this);
+            if (ThermalData.FuelItem.stack <= 0) {
+                ThermalData.FuelItem.TurnToAir();
             }
-            if (FuelItems.FuelItemToCombustion.TryGetValue(ThermalData.FuelItem.type, out value)) {
-                reset = true;
-            }
-            if (ThermalData.Temperature > ThermalData.MaxTemperature - value) {
-                reset = false;
-            }
-            if (ThermalData.Temperature <= 0) {
-                reset = true;
-            }
-            if (++ThermalData.ChargeCool < ThermalData.MaxChargeCool) {
-                reset = false;
-            }
-            return reset;
         }
 
         public sealed override void GeneratorUpdate() {
+            // 距离检查：玩家离开范围时关闭UI
             if (PosInWorld.Distance(Main.LocalPlayer.Center) > MaxFindMode) {
                 if (!VaultUtils.isServer && GeneratorUI?.GeneratorTP == this
                     && UIHandleLoader.GetUIHandleOfType<ThermalGeneratorUI>().IsActive) {
@@ -187,43 +218,51 @@ namespace CalamityOverhaul.Content.Industrials.Generator.Thermal
                 Main.LocalPlayer.CWR().ThermalGenerationActiveTime = 2;
             }
 
-            if (CanUseFuel(out int value)) {
-                ThermalData.FuelItem.stack--;
-                ThermalData.TemperatureTransfer += value;
-                ThermalData.MaxTemperatureTransfer = ThermalData.TemperatureTransfer;
-                FuelItems.OnAfterFlaming(ThermalData.FuelItem.type, this);
+            // 1. 燃料燃烧：持续释放热量（每tick）
+            if (ThermalData.IsBurning) {
+                ThermalData.Temperature += ThermalData.HeatPerTick;
+                ThermalData.BurnTimeRemaining--;
                 if (ThermalData.Temperature > ThermalData.MaxTemperature) {
                     ThermalData.Temperature = ThermalData.MaxTemperature;
                 }
-                if (ThermalData.FuelItem.stack <= 0) {
-                    ThermalData.FuelItem.TurnToAir();
-                }
-
-                ThermalData.ChargeCool = 0;
             }
 
-            for (int i = 0; i < 6; i++) {
-                if (ThermalData.TemperatureTransfer > 0 && ThermalData.Temperature < ThermalData.MaxTemperature) {
-                    ThermalData.Temperature++;
-                    ThermalData.TemperatureTransfer--;
-                }
+            // 2. 冷却计时器递增，非燃烧状态下尝试消耗下一份燃料
+            ThermalData.ChargeCool++;
+            if (!ThermalData.IsBurning && ThermalData.ChargeCool >= ThermalData.MaxChargeCool) {
+                TryConsumeFuel();
             }
 
+            // 3. 热力学更新：发电 + 散热
             UpdateThermal();
         }
 
+        /// <summary>
+        /// 热力学核心：基于温度效率曲线发电，并计算自然散热
+        /// </summary>
         public virtual void UpdateThermal() {
             if (ThermalData.Temperature > 0) {
-                if (ThermalData.UEvalue < ThermalData.MaxUEValue - GeneratingSpeed) {
-                    ThermalData.Temperature--;
-                    ThermalData.UEvalue += GeneratingSpeed;
+                // 基于效率曲线发电
+                float efficiency = ThermalData.CurrentEfficiency;
+                float maxPower = ThermalData.MaxPowerPerTick * efficiency;
+
+                if (ThermalData.UEvalue < ThermalData.MaxUEValue) {
+                    float availableCapacity = ThermalData.MaxUEValue - ThermalData.UEvalue;
+                    float actualPower = maxPower < availableCapacity ? maxPower : availableCapacity;
+                    ThermalData.UEvalue += actualPower;
+                    ThermalData.Temperature -= actualPower * ThermalData.HeatCostPerUE;
                 }
+
+                // 自然散热：固定值 + 温度比例值
+                float dissipation = ThermalData.MinDissipation + ThermalData.Temperature * ThermalData.DissipationRate;
+                ThermalData.Temperature -= dissipation;
+                ThermalData.Temperature = MathHelper.Clamp(ThermalData.Temperature, 0, ThermalData.MaxTemperature);
+
                 VaultUtils.ClockFrame(ref frame, 5, MaxFrame, 1);
             }
             else {
                 frame = 0;
             }
-            ThermalData.Temperature = MathHelper.Clamp(ThermalData.Temperature, 0, ThermalData.MaxTemperature);
         }
 
         public override void GeneratorKill() {
@@ -246,7 +285,7 @@ namespace CalamityOverhaul.Content.Industrials.Generator.Thermal
             Item item = Main.LocalPlayer.GetItem();
 
             if (Main.keyState.PressingShift()) {
-                if (!ThermalData.FuelItem.IsAir) {//这里代码不会在服务端运行
+                if (!ThermalData.FuelItem.IsAir) {
                     Main.LocalPlayer.QuickSpawnItem(new EntitySource_WorldEvent(), ThermalData.FuelItem, ThermalData.FuelItem.stack);
                     ThermalData.FuelItem.TurnToAir();
                 }
@@ -259,18 +298,30 @@ namespace CalamityOverhaul.Content.Industrials.Generator.Thermal
                 return;
             }
 
-            if (!ThermalData.FuelItem.IsAir) {
-                Main.LocalPlayer.QuickSpawnItem(new EntitySource_WorldEvent(), ThermalData.FuelItem, ThermalData.FuelItem.stack);
-                ThermalData.FuelItem.TurnToAir();
+            // 同类物品：合并堆叠
+            if (!ThermalData.FuelItem.IsAir && ThermalData.FuelItem.type == item.type) {
+                int canAdd = ThermalData.FuelItem.maxStack - ThermalData.FuelItem.stack;
+                int toAdd = canAdd < item.stack ? canAdd : item.stack;
+                if (toAdd > 0) {
+                    ThermalData.FuelItem.stack += toAdd;
+                    item.stack -= toAdd;
+                    if (item.stack <= 0) item.TurnToAir();
+                }
             }
-
-            if (FuelItems.FuelItemToCombustion.TryGetValue(item.type, out _)) {
+            // 不同类：先弹出旧燃料，再放入新燃料
+            else if (!ThermalData.FuelItem.IsAir) {
+                Main.LocalPlayer.QuickSpawnItem(new EntitySource_WorldEvent(), ThermalData.FuelItem, ThermalData.FuelItem.stack);
                 ThermalData.FuelItem = item.Clone();
                 item.TurnToAir();
-                SoundEngine.PlaySound(SoundID.Grab);
+            }
+            // 空槽：直接放入
+            else {
+                ThermalData.FuelItem = item.Clone();
+                item.TurnToAir();
             }
 
             SendData();
+            SoundEngine.PlaySound(SoundID.Grab);
         }
 
         public override void FrontDraw(SpriteBatch spriteBatch) => DrawChargeBar();
