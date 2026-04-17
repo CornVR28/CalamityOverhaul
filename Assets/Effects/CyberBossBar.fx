@@ -1,6 +1,6 @@
 // ============================================================================
 // CyberBossBar.fx — 赛博朋克2077风格Boss血条着色器
-// 多层辉光叠加 + 内发光边缘 + 扫描线噪波 + 能量脉冲
+// 弧形band + 管状明暗 + 高光条 + 分段 + 末端辉光
 // ============================================================================
 
 sampler uImage0 : register(s0);
@@ -14,46 +14,42 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0, float4 vertexColor : COLOR
 {
     float2 uv = coords;
 
-    //血条核心色阶
-    float3 deepRed = float3(0.55, 0.04, 0.04);
-    float3 coreRed = float3(0.88, 0.12, 0.08);
-    float3 hotWhite = float3(1.0, 0.55, 0.40);
+    float3 darkRed = float3(0.40, 0.02, 0.02);
+    float3 coreRed = float3(0.84, 0.10, 0.06);
+    float3 hot = float3(1.0, 0.42, 0.28);
 
-    //20段分隔，间隙更窄更精致
+    //弧形band中心：中间上凸两端下沉
+    float dx = uv.x - 0.5;
+    float bandY = 0.5 - dx * dx * 0.45;
+    float dist = abs(uv.y - bandY);
+
+    //band遮罩含管状明暗
+    float band = smoothstep(0.28, 0.10, dist);
+
+    //分段
     float seg = frac(uv.x * 20.0);
-    float gap = step(0.03, seg) * step(seg, 0.97);
+    float gap = step(0.025, seg) * step(seg, 0.975);
 
-    //填充区
+    //填充
     float fill = step(uv.x, uLifeRatio);
 
-    //纵向内发光：边缘亮中间略暗，模拟管状光源
-    float ey = uv.y * (1.0 - uv.y) * 4.0;
-    float tubeLit = 0.55 + ey * 0.45;
+    //高光条偏向band上沿
+    float relY = uv.y - bandY;
+    float spec = saturate(1.0 - abs(relY + 0.065) * 16.0) * 0.38 * band;
 
-    //顶部锐利高光条，模拟玻璃反光
-    float specular = saturate(1.0 - abs(uv.y - 0.18) * 12.0) * 0.6;
-
-    //扫描线干扰纹
-    float scanPx = frac(uv.y * uBarSize.y * 0.5);
-    float scan = 0.92 + scanPx * 0.08;
-
-    //填充区最终颜色
-    float3 barCol = coreRed * tubeLit * scan * gap;
-    barCol += hotWhite * specular * gap;
-
-    //受击高亮
-    barCol += hotWhite * uHitFlash * gap * 0.5;
+    //填充色
+    float hitGlow = uHitFlash * band * 0.25;
+    float3 barCol = coreRed * band * gap + hot * gap * (spec + hitGlow);
 
     //空区暗色轮廓
-    float3 emptyCol = deepRed * gap * ey * 0.12;
+    float3 emptyCol = darkRed * gap * band * 0.05;
 
     float3 color = lerp(emptyCol, barCol, fill);
-    float a = lerp(gap * ey * 0.08, saturate(gap * tubeLit + specular * 0.3), fill);
+    float a = lerp(gap * band * 0.025, gap * band + spec * 0.1, fill);
 
     //末端辉光
-    float endD = abs(uv.x - uLifeRatio);
-    float endG = saturate(1.0 - endD * 30.0) * 0.45 * fill;
-    color += hotWhite * endG * ey;
+    float endG = saturate(1.0 - abs(uv.x - uLifeRatio) * 18.0) * 0.25 * fill * band;
+    color += hot * endG;
     a = saturate(a + endG);
 
     return float4(color * a, a) * vertexColor;
