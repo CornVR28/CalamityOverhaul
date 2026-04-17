@@ -34,10 +34,12 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys.VoidPortals
         const int HoldDuration = 60;
         //吸入阶段总帧数
         const int SuctionDuration = 110;
-        //黑闪持续帧数
-        const int BlackFlashDuration = 8;
-        //黑闪峰值帧（前半上升后半保持）
-        const int BlackFlashPeak = 3;
+        //黑闪总持续帧数（上升+保持+传送等待）
+        const int BlackFlashDuration = 50;
+        //黑闪上升到峰值的帧数
+        const int BlackFlashRise = 10;
+        //黑闪完全黑屏保持帧数（峰值后持续纯黑）
+        const int BlackFlashHold = 30;
         //镜头缩放lerp速度
         const float ZoomLerpSpeed = 0.025f;
         //镜头位置lerp速度
@@ -136,14 +138,15 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys.VoidPortals
         public override void ModifyScreenPosition() {
             if (CurrentStage == Stage.Idle) return;
 
+            bool isSuctionActive = CurrentStage == Stage.Suction
+                || CurrentStage == Stage.BlackFlash;
+            bool isPreHeat = CurrentStage == Stage.Hold && stageTimer > HoldDuration / 2;
+
             //缩放
             float targetZoom;
-            if (CurrentStage == Stage.Suction || CurrentStage == Stage.BlackFlash) {
+            if (isSuctionActive) {
                 float t = SuctionProgress;
                 targetZoom = MathHelper.Lerp(savedZoom, SuctionTargetZoom, t * t);
-            }
-            else if (CurrentStage == Stage.WaitExpand || CurrentStage == Stage.Hold) {
-                targetZoom = savedZoom;
             }
             else {
                 targetZoom = savedZoom;
@@ -152,8 +155,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys.VoidPortals
             currentZoom = MathHelper.Lerp(currentZoom, targetZoom, ZoomLerpSpeed);
             Main.GameZoomTarget = currentZoom;
 
-            //吸入阶段锁定镜头到传送门中心
-            if (CurrentStage == Stage.Suction || CurrentStage == Stage.BlackFlash) {
+            //吸入和预热阶段锁定镜头到传送门中心
+            if (isSuctionActive || isPreHeat) {
                 VoidPortal portal = GetPortal();
                 if (portal != null) {
                     if (!cameraInit) {
@@ -163,7 +166,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys.VoidPortals
 
                     Vector2 screenSize = new Vector2(Main.screenWidth, Main.screenHeight);
                     Vector2 desired = portal.PortalCenter - screenSize * 0.5f;
-                    smoothedScreenPos = Vector2.Lerp(smoothedScreenPos, desired, PosLerpSpeed);
+                    float lerpSpeed = isPreHeat ? PosLerpSpeed * 0.3f : PosLerpSpeed;
+                    smoothedScreenPos = Vector2.Lerp(smoothedScreenPos, desired, lerpSpeed);
                     Main.screenPosition = smoothedScreenPos;
                 }
             }
@@ -191,16 +195,24 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys.VoidPortals
         }
 
         void UpdateHold() {
+            //展示后半段开始微量滤镜预热（让观众感知到"有事要发生"）
+            if (stageTimer > HoldDuration / 2) {
+                float preHeat = (float)(stageTimer - HoldDuration / 2) / (HoldDuration / 2);
+                SuctionProgress = preHeat * 0.08f;
+            }
+
             if (stageTimer >= HoldDuration) {
                 TransitionTo(Stage.Suction);
             }
         }
 
         void UpdateSuction(VoidPortal portal) {
-            //吸入进度曲线（前慢后快）
+            //吸入进度曲线：从预热值平滑过渡到1
             float t = (float)stageTimer / SuctionDuration;
             t = MathHelper.Clamp(t, 0f, 1f);
-            SuctionProgress = t * t * (3f - 2f * t); //smoothstep
+            float target = t * t * (3f - 2f * t);
+            //确保不低于预热值
+            SuctionProgress = MathHelper.Max(0.08f, target);
 
             //牵引玩家向门中心
             if (portal != null) {
@@ -228,10 +240,10 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys.VoidPortals
         }
 
         void UpdateBlackFlash(VoidPortal portal) {
-            //黑闪曲线：快速上升到1，短暂保持
-            float t = (float)stageTimer / BlackFlashDuration;
-            if (stageTimer <= BlackFlashPeak) {
-                BlackFlashAlpha = MathHelper.Lerp(0f, 1f, (float)stageTimer / BlackFlashPeak);
+            //黑闪曲线：上升→纯黑保持→结束
+            if (stageTimer <= BlackFlashRise) {
+                float rise = (float)stageTimer / BlackFlashRise;
+                BlackFlashAlpha = rise * rise;
             }
             else {
                 BlackFlashAlpha = 1f;
