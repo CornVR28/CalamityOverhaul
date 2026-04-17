@@ -30,15 +30,25 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys.VoidPortals
 
             ApplyFullScreenShader(spriteBatch, graphicsDevice, screenSwap, portal);
 
-            //吸入演出滤镜（独立着色器，仅在吸入阶段激活）
-            ApplySuctionShader(spriteBatch, graphicsDevice, screenSwap, portal);
-
             //裂隙边缘辉光环（Additive混合）
             spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive,
                 SamplerState.PointWrap, DepthStencilState.None, RasterizerState.CullNone,
                 null, Main.GameViewMatrix.TransformationMatrix);
             DrawEdgeGlow(spriteBatch, portal);
             spriteBatch.End();
+        }
+
+        /// <summary>
+        /// 吸入滤镜放在EndCaptureDraw，确保覆盖所有实体、PRT粒子和玩家
+        /// </summary>
+        public override void EndCaptureDraw(SpriteBatch spriteBatch, GraphicsDevice graphicsDevice,
+            RenderTarget2D screenSwap) {
+            if (Main.gameMenu) return;
+
+            VoidPortal portal = VoidPortal.ActiveInstance;
+            if (portal == null || !portal.Projectile.active) return;
+
+            ApplySuctionShader(spriteBatch, graphicsDevice, screenSwap, portal);
         }
 
         private static void ApplyFullScreenShader(SpriteBatch spriteBatch, GraphicsDevice graphicsDevice,

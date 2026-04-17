@@ -180,6 +180,59 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys.VoidPortals
             }
         }
 
+        public override void ModifyDrawInfo(ref PlayerDrawSet drawInfo) {
+            if (CurrentStage != Stage.Suction && CurrentStage != Stage.BlackFlash) return;
+
+            VoidPortal portal = GetPortal();
+            if (portal == null) return;
+
+            //计算玩家朝传送门方向的旋转（身体被"拽"向裂隙）
+            Vector2 toPortal = portal.PortalCenter - Player.Center;
+            float angle = toPortal.ToRotation();
+            //修正：角色面朝右时0度是正常，面朝左时需要翻转
+            if (Player.direction == -1)
+                angle = MathHelper.Pi - angle;
+
+            float rotationStr = SuctionProgress * SuctionProgress;
+            float maxRotation = MathHelper.PiOver4 * 0.8f;
+            Player.fullRotation = MathHelper.Lerp(0f, maxRotation * MathF.Sign(angle), rotationStr)
+                * MathHelper.Clamp(MathF.Abs(angle) / MathHelper.PiOver2, 0f, 1f);
+            Player.fullRotationOrigin = new Vector2(Player.width / 2f, Player.height / 2f);
+
+            //暗红色调：随吸入进度加深
+            float darkening = 1f - SuctionProgress * 0.6f;
+            float redTint = darkening + SuctionProgress * 0.1f;
+            Color tint = new Color(
+                MathHelper.Clamp(redTint, 0f, 1f),
+                MathHelper.Clamp(darkening * 0.7f, 0f, 1f),
+                MathHelper.Clamp(darkening * 0.5f, 0f, 1f),
+                1f);
+
+            drawInfo.colorArmorBody = drawInfo.colorArmorBody.MultiplyRGBA(tint);
+            drawInfo.colorArmorHead = drawInfo.colorArmorHead.MultiplyRGBA(tint);
+            drawInfo.colorArmorLegs = drawInfo.colorArmorLegs.MultiplyRGBA(tint);
+            drawInfo.colorBodySkin = drawInfo.colorBodySkin.MultiplyRGBA(tint);
+            drawInfo.colorHead = drawInfo.colorHead.MultiplyRGBA(tint);
+            drawInfo.colorLegs = drawInfo.colorLegs.MultiplyRGBA(tint);
+            drawInfo.colorEyes = drawInfo.colorEyes.MultiplyRGBA(tint);
+            drawInfo.colorEyeWhites = drawInfo.colorEyeWhites.MultiplyRGBA(tint);
+
+            //黑闪阶段玩家完全变黑（即将被虚空吞噬）
+            if (BlackFlashAlpha > 0.5f) {
+                float blackout = MathHelper.Clamp((BlackFlashAlpha - 0.5f) * 2f, 0f, 1f);
+                float remain = 1f - blackout;
+                Color blackTint = new Color(remain, remain, remain, 1f);
+                drawInfo.colorArmorBody = drawInfo.colorArmorBody.MultiplyRGBA(blackTint);
+                drawInfo.colorArmorHead = drawInfo.colorArmorHead.MultiplyRGBA(blackTint);
+                drawInfo.colorArmorLegs = drawInfo.colorArmorLegs.MultiplyRGBA(blackTint);
+                drawInfo.colorBodySkin = drawInfo.colorBodySkin.MultiplyRGBA(blackTint);
+                drawInfo.colorHead = drawInfo.colorHead.MultiplyRGBA(blackTint);
+                drawInfo.colorLegs = drawInfo.colorLegs.MultiplyRGBA(blackTint);
+                drawInfo.colorEyes = drawInfo.colorEyes.MultiplyRGBA(blackTint);
+                drawInfo.colorEyeWhites = drawInfo.colorEyeWhites.MultiplyRGBA(blackTint);
+            }
+        }
+
         #region 阶段逻辑
 
         void UpdateWaitExpand(VoidPortal portal) {
@@ -300,6 +353,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys.VoidPortals
             currentZoom = savedZoom;
             Main.GameZoomTarget = savedZoom;
             cameraInit = false;
+            Player.fullRotation = 0f;
         }
 
         void LockControls() {
