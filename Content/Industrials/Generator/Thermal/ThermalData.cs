@@ -30,15 +30,15 @@ namespace CalamityOverhaul.Content.Industrials.Generator.Thermal
         /// <summary>
         /// 百分比散热系数，每tick散热 = MinDissipation + Temperature * DissipationRate
         /// </summary>
-        internal float DissipationRate = 0.002f;
+        internal float DissipationRate = 0.0015f;
         /// <summary>
         /// 最小固定散热量（每tick）
         /// </summary>
-        internal float MinDissipation = 0.1f;
+        internal float MinDissipation = 0.03f;
         /// <summary>
-        /// 每产生1UE消耗的温度
+        /// 每产生1UE消耗的温度（值越低，发电对温度的消耗越小）
         /// </summary>
-        internal float HeatCostPerUE = 1.0f;
+        internal float HeatCostPerUE = 0.08f;
         /// <summary>
         /// 最优工作温度，效率曲线在此温度附近趋于饱和
         /// </summary>
@@ -47,6 +47,10 @@ namespace CalamityOverhaul.Content.Industrials.Generator.Thermal
         /// 最大发电功率（UE/tick），实际输出 = MaxPowerPerTick * 效率
         /// </summary>
         internal float MaxPowerPerTick = 1.5f;
+        /// <summary>
+        /// 最低运行温度，低于此温度不发电（需要预热）
+        /// </summary>
+        internal float MinOperatingTemperature = 50f;
 
         internal Item FuelItem = new Item();
 
@@ -67,7 +71,7 @@ namespace CalamityOverhaul.Content.Industrials.Generator.Thermal
         /// </summary>
         internal float CurrentEfficiency {
             get {
-                if (OptimalTemperature <= 0 || Temperature <= 0) return 0f;
+                if (OptimalTemperature <= 0 || Temperature < MinOperatingTemperature) return 0f;
                 float ratio = Temperature / OptimalTemperature;
                 return MathHelper.Clamp(1f - (float)Math.Exp(-2f * ratio), 0f, 1f);
             }

@@ -94,7 +94,7 @@ namespace CalamityOverhaul.Content.UIs.StorageUIs
 
             Item slotItem = storage.GetItem(HoveredSlot);
             if (slotItem != null && slotItem.type > ItemID.None && slotItem.stack > 0) {
-                Main.HoverItem = slotItem;
+                Main.HoverItem = slotItem.Clone();
                 Main.hoverItemName = slotItem.Name;
             }
 

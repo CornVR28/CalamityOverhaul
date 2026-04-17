@@ -504,7 +504,7 @@ namespace CalamityOverhaul.Content.QuestLogs.Styles
                         }
                         if (itemRect.Contains(Main.MouseScreen.ToPoint())
                             && ContentSamples.ItemsByType.TryGetValue(obj.TargetItemID, out var item)) {
-                            Main.HoverItem = item;
+                            Main.HoverItem = item.Clone();
                             Main.hoverItemName = item.Name;
                         }
                     }
@@ -526,7 +526,7 @@ namespace CalamityOverhaul.Content.QuestLogs.Styles
 
                     if (rewardRect.Contains(Main.MouseScreen.ToPoint())
                         && ContentSamples.ItemsByType.TryGetValue(reward.ItemType, out var item)) {
-                        Main.HoverItem = item;
+                        Main.HoverItem = item.Clone();
                         Main.hoverItemName = item.Name;
                     }
 

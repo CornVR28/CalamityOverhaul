@@ -132,9 +132,10 @@ namespace CalamityOverhaul.Content.Industrials.Generator.Thermal
             data.MaxUEValue = MaxUEValue;
             data.OptimalTemperature = 420f;
             data.MaxPowerPerTick = 1.5f;
-            data.DissipationRate = 0.002f;
-            data.MinDissipation = 0.1f;
-            data.HeatCostPerUE = 1.0f;
+            data.DissipationRate = 0.0015f;
+            data.MinDissipation = 0.03f;
+            data.HeatCostPerUE = 0.08f;
+            data.MinOperatingTemperature = 50f;
             return data;
         }
 
@@ -189,6 +190,8 @@ namespace CalamityOverhaul.Content.Industrials.Generator.Thermal
             if (ThermalData.FuelItem == null || ThermalData.FuelItem.IsAir) return;
             if (!FuelItems.FuelItemToCombustion.TryGetValue(ThermalData.FuelItem.type, out int combustion)) return;
             if (ThermalData.Temperature >= ThermalData.MaxTemperature * 0.95f) return;
+            // 电力储满时不再消耗新燃料，避免浪费
+            if (ThermalData.UEvalue >= ThermalData.MaxUEValue * 0.99f) return;
 
             int burnDuration = FuelItems.GetBurnDuration(combustion);
             float heatPerTick = FuelItems.GetHeatPerTick(combustion);
@@ -235,6 +238,12 @@ namespace CalamityOverhaul.Content.Industrials.Generator.Thermal
 
             // 3. 热力学更新：发电 + 散热
             UpdateThermal();
+
+            // 4. 客户端：注册热浪视觉效果
+            if (!VaultUtils.isServer && ThermalData.Temperature > ThermalData.MinOperatingTemperature * 0.5f) {
+                float tempRatio = MathHelper.Clamp(ThermalData.Temperature / ThermalData.MaxTemperature, 0f, 1f);
+                ThermalHeatHazeRender.RegisterHeatSource(PosInWorld, tempRatio);
+            }
         }
 
         /// <summary>
