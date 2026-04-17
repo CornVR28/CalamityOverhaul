@@ -6,7 +6,6 @@ using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;
 using Terraria.Audio;
-using Terraria.GameContent;
 using Terraria.ModLoader;
 
 namespace CalamityOverhaul.Content.Projectiles.Weapons.Melee.Neutrons
@@ -79,14 +78,17 @@ namespace CalamityOverhaul.Content.Projectiles.Weapons.Melee.Neutrons
         public override bool PreDraw(ref Color lightColor) => false;
 
         public void Warp() {
-            Texture2D warpTex = TextureAssets.Projectile[Type].Value;
-            Color warpColor = new Color(45, 45, 45) * Projectile.ai[1];
-            Vector2 drawPos = Projectile.Center - Main.screenPosition;
-            Vector2 drawOrig = warpTex.Size() / 2;
-            for (int i = 0; i < 133; i++) {
-                Main.spriteBatch.Draw(warpTex, drawPos, null, warpColor, Projectile.ai[0] + i * 115f
-                    , drawOrig, Projectile.localAI[0] + i * 0.015f, SpriteEffects.None, 0f);
-            }
+            float scale = Math.Max(Projectile.localAI[0], 0.01f);
+            NeutronWarpHelper.DrawWarp(
+                Projectile.Center,
+                screenWidth: 1200f * scale,
+                screenHeight: 1200f * scale,
+                intensity: Projectile.ai[1] * 0.6f,
+                progress: Projectile.ai[1],
+                rotation: Projectile.ai[0],
+                technique: "GravitationalVortex",
+                radius: 0.48f
+            );
         }
 
         public void DrawCustom(SpriteBatch spriteBatch) { }

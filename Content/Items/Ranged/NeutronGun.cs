@@ -189,12 +189,16 @@ namespace CalamityOverhaul.Content.Items.Ranged
         }
 
         public void Warp() {
-            Texture2D warpTex = CWRUtils.GetT2DAsset(CWRConstant.Masking + "StarTexture_White").Value;
-            Color warpColor = new Color(45, 45, 45) * 0.1f;
-            for (int i = 0; i < 3; i++) {
-                Main.spriteBatch.Draw(warpTex, Projectile.Center - Main.screenPosition
-                    , null, warpColor, Projectile.rotation, warpTex.Size() / 2, 0.2f, SpriteEffects.None, 0f);
-            }
+            NeutronWarpHelper.DrawWarp(
+                Projectile.Center,
+                screenWidth: 80f,
+                screenHeight: 80f,
+                intensity: 0.08f,
+                progress: 1f,
+                rotation: Projectile.rotation,
+                technique: "GravitationalLens",
+                radius: 0.4f
+            );
         }
     }
 }

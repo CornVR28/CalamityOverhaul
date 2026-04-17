@@ -13,6 +13,7 @@ namespace CalamityOverhaul.Common
         public static Asset<Effect> PowerSFShader { get; set; }
         public static Asset<Effect> WarpShader { get; set; }
         public static Asset<Effect> NeutronRing { get; set; }
+        public static Asset<Effect> NeutronWarp { get; set; }
         public static Asset<Effect> PrimeHalo { get; set; }
         public static Asset<Effect> KnifeRendering { get; set; }
         public static Asset<Effect> KnifeDistortion { get; set; }
@@ -51,6 +52,7 @@ namespace CalamityOverhaul.Common
         public static Asset<Effect> RevelationPlague { get; set; }
         public static Asset<Effect> VoidPortal { get; set; }
         public static Asset<Effect> VoidSuction { get; set; }
+        public static Asset<Effect> CyberBossBar { get; set; }
         public override float Weight => 1.2f;
         public override void EndCaptureDraw(SpriteBatch spriteBatch, GraphicsDevice graphicsDevice, RenderTarget2D screenSwap) {
             DrawPrimitiveProjectile();

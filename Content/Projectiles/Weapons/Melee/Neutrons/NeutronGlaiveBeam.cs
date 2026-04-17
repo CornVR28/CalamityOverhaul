@@ -2,7 +2,6 @@
 using CalamityOverhaul.Content.PRTTypes;
 using InnoVault.PRT;
 using Microsoft.Xna.Framework.Graphics;
-using ReLogic.Content;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.ID;
@@ -14,10 +13,8 @@ namespace CalamityOverhaul.Content.Projectiles.Weapons.Melee.Neutrons
     {
         public override string Texture => CWRConstant.Projectile_Melee + "NeutronGlaiveBeam";
         public static int PType;
-        internal static Asset<Texture2D> warpTex;
         public void SetupData() {
             PType = ModContent.ProjectileType<NeutronGlaiveBeam>();
-            warpTex = CWRUtils.GetT2DAsset(CWRConstant.Masking + "DiffusionCircle");
         }
 
         public override void SetDefaults() {
@@ -106,12 +103,17 @@ namespace CalamityOverhaul.Content.Projectiles.Weapons.Melee.Neutrons
         public override bool PreDraw(ref Color lightColor) => false;
         bool IWarpDrawable.CanDrawCustom() => true;
         void IWarpDrawable.Warp() {
-            Color warpColor = new Color(45, 45, 45) * Projectile.ai[1];
-            Vector2 orig = warpTex.Size() / 2;
-            for (int i = 0; i < 3; i++) {
-                Main.spriteBatch.Draw(warpTex.Value, Projectile.Center - Main.screenPosition
-                    , null, warpColor, Projectile.ai[0] + i * 2f, orig, Projectile.localAI[0], SpriteEffects.None, 0f);
-            }
+            float scale = System.Math.Max(Projectile.localAI[0], 0.01f);
+            NeutronWarpHelper.DrawWarp(
+                Projectile.Center,
+                screenWidth: 200f * scale,
+                screenHeight: 200f * scale,
+                intensity: Projectile.ai[1] * 0.25f,
+                progress: Projectile.ai[1],
+                rotation: Projectile.ai[0],
+                technique: "GravitationalLens",
+                radius: 0.4f
+            );
         }
 
         public void DrawCustom(SpriteBatch spriteBatch) {
