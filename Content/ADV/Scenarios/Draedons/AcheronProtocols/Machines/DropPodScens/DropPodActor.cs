@@ -408,9 +408,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Machi
             //progress: 0=喷口(根部), 1=火焰远端
             float intensityFactor = MathHelper.Clamp(dropTimer / 120f, 0.3f, 1f);
 
-            //火焰根部宽，末端快速收窄
-            float baseWidth = 28f + reentryHeat * 12f;
-            float taper = 1f - MathF.Pow(progress, 0.6f);
+            //火焰根部宽，末端收窄——加粗基础宽度，收窄更平缓
+            float baseWidth = 55f + reentryHeat * 25f;
+            float taper = 1f - MathF.Pow(progress, 1.2f);
 
             //添加脉动感
             float pulse = 1f + MathF.Sin(dropTimer * 0.15f + progress * 4f) * 0.08f;

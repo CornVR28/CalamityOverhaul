@@ -199,7 +199,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
         /// [0]=喷口(脚底), [Length-1]=火焰远端
         /// </summary>
         private void UpdateJetTrailPoints() {
-            Vector2 nozzle = new(Center.X, Position.Y + Height / 2);
+            Vector2 nozzle = new(Center.X, Position.Y + Height - 10);
 
             float fullLength = 120f;
             float growProgress = MathHelper.Clamp(jetTimer / 15f, 0f, 1f);
@@ -250,8 +250,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.AcheronProtocols.Apoll
 
         private float GetJetTrailWidth(float progress) {
             float intensityFactor = MathHelper.Clamp(jetTimer / 20f, 0.2f, 1f);
-            float baseWidth = 10f;
-            float taper = 1f - MathF.Pow(progress, 0.5f);
+            float baseWidth = 32f;
+            float taper = 1f - MathF.Pow(progress, 1.0f);
             float pulse = 1f + MathF.Sin(jetTimer * 0.2f + progress * 5f) * 0.12f;
             return baseWidth * taper * intensityFactor * pulse;
         }

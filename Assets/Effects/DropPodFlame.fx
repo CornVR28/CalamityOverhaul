@@ -84,57 +84,61 @@ float4 PixelShaderFunction(PSInput input) : COLOR0
     // ---- 纵向衰减：能量沿尾焰渐消 ----
     float tailFade = pow(saturate(1.0 - progress), 1.3);
 
-    // ---- 高斯核心光柱——中央极亮的等离子束 ----
-    float coreWidth = lerp(0.18, 0.04, progress);
+    // ---- 高斯核心光柱——中央较亮的等离子束 ----
+    float coreWidth = lerp(0.15, 0.03, progress);
     float coreBrightness = exp(-crossDist * crossDist / (coreWidth * coreWidth * 2.0));
 
     // ---- 科幻能量配色 ----
-    float3 whiteCore  = float3(0.95, 0.97, 1.00);  // 白热核心
-    float3 blueInner  = float3(0.30, 0.75, 1.00);  // 亮青蓝
-    float3 cyanMid    = float3(0.10, 0.45, 0.90);  // 电光蓝
-    float3 warmOuter  = float3(0.85, 0.50, 0.15);  // 橙黄消散
+    float3 whiteCore  = float3(0.90, 0.93, 1.00);  // 淡蓝白核心
+    float3 blueInner  = float3(0.25, 0.65, 1.00);  // 亮青蓝
+    float3 cyanMid    = float3(0.08, 0.35, 0.85);  // 电光蓝
+    float3 warmOuter  = float3(0.80, 0.40, 0.10);  // 橙黄消散
 
     // 纵向颜色分布
     float3 flameColor;
-    if (progress < 0.12)
-        flameColor = lerp(whiteCore, blueInner, progress / 0.12);
-    else if (progress < 0.45)
-        flameColor = lerp(blueInner, cyanMid, (progress - 0.12) / 0.33);
+    if (progress < 0.10)
+        flameColor = lerp(whiteCore, blueInner, progress / 0.10);
+    else if (progress < 0.40)
+        flameColor = lerp(blueInner, cyanMid, (progress - 0.10) / 0.30);
     else
-        flameColor = lerp(cyanMid, warmOuter, (progress - 0.45) / 0.55);
+        flameColor = lerp(cyanMid, warmOuter, (progress - 0.40) / 0.60);
 
     // 与顶点色融合——根部由着色器主导，远端由顶点色主导
     float3 vertexRGB = input.Color.rgb;
-    flameColor = lerp(flameColor, vertexRGB * 1.2, saturate(progress * 1.5));
+    flameColor = lerp(flameColor, vertexRGB * 1.1, saturate(progress * 1.5));
 
-    // 横截面着色：中心偏白，边缘保留主色（降低白色比例）
-    flameColor = lerp(whiteCore * 0.7 + flameColor * 0.3, flameColor, saturate(crossDist * 2.5));
+    // 横截面着色：中心略亮带蓝调，边缘保留主色
+    float3 centerTint = flameColor * 0.4 + blueInner * 0.6;
+    flameColor = lerp(centerTint, flameColor, saturate(crossDist * 2.0));
 
     // ---- 亮度组合 ----
     float baseBrightness = edgeFade * tailFade * combinedNoise;
     float coreGlow = coreBrightness * tailFade;
 
-    // 热强度增幅
-    float heatBoost = 1.0 + heatIntensity * 1.8;
+    // 热强度增幅——大幅降低，避免Additive双绘过曝
+    float heatBoost = 1.0 + heatIntensity * 0.4;
     // 能量脉动
     float pulse = 1.0 + sin(globalTime * 28.0 + progress * 12.0) * 0.06;
 
     // ---- 能量丝缕——边缘的明亮细节 ----
     float wispSample = tex2D(noiseTex, uv * float2(3.5, 7.0) + float2(-globalTime * 6.0, globalTime * 0.4)).r;
-    float wispMask = smoothstep(0.62, 0.78, wispSample) * edgeFade * tailFade * 0.45;
+    float wispMask = smoothstep(0.62, 0.78, wispSample) * edgeFade * tailFade * 0.35;
 
     // ---- 外层蓝色光晕——让边缘有柔和的辉光扩散 ----
-    float haloFade = exp(-crossDist * crossDist / 0.32) * tailFade * 0.25;
-    float3 haloColor = blueInner * haloFade;
+    float haloFade = exp(-crossDist * crossDist / 0.32) * tailFade * 0.15;
+    float3 haloColor = cyanMid * haloFade;
 
-    // ---- 最终合成 ----
-    float3 finalColor = flameColor * baseBrightness * 1.6 * heatBoost * pulse
-                       + whiteCore * coreGlow * 1.2 * heatBoost
-                       + flameColor * wispMask * 0.8
+    // ---- 核心色：不再用纯白，用偏蓝白的火焰色 ----
+    float3 coreColor = lerp(whiteCore, blueInner, 0.3);
+
+    // ---- 最终合成——整体压低亮度，让颜色层次可见 ----
+    float3 finalColor = flameColor * baseBrightness * 0.9 * heatBoost * pulse
+                       + coreColor * coreGlow * 0.5 * heatBoost
+                       + flameColor * wispMask * 0.6
                        + haloColor;
 
-    float alpha = saturate(baseBrightness + coreGlow * 0.5 + wispMask * 0.3 + haloFade)
-                * input.Color.a * heatBoost;
+    float alpha = saturate(baseBrightness * 0.8 + coreGlow * 0.3 + wispMask * 0.2 + haloFade)
+                * input.Color.a;
 
     return float4(finalColor * alpha, alpha);
 }
