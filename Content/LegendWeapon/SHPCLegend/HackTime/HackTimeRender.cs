@@ -42,6 +42,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
 
             //骇客时间激活时绘制光圈和上传进度环（加法混合）
             if (hackTimeVisible) {
+                //物块赛博滤镜 RT pass（有自己的 Begin/End，必须放在外部批次之外）
+                HackTimeTileCyberPass.Draw(spriteBatch, Main.instance.GraphicsDevice);
+
                 spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive, SamplerState.PointWrap,
                     DepthStencilState.None, RasterizerState.CullNone, null,
                     Main.GameViewMatrix.TransformationMatrix);

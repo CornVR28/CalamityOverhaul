@@ -258,8 +258,51 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
         }
 
         /// <summary>
+        /// 判断是否为树木 trunk 物块
+        /// <br/>树木由单列 trunk tile 组成，树冠和分枝由 TileDrawing 独立绘制
+        /// </summary>
+        public static bool IsTreeTile(int type) {
+            return type == TileID.Trees
+                || type == TileID.PalmTree
+                || type == TileID.VanityTreeSakura
+                || type == TileID.VanityTreeYellowWillow
+                || type == TileID.TreeAsh
+                || type == TileID.MushroomTrees;
+        }
+
+        /// <summary>
+        /// 获取整棵树木的视觉包围盒
+        /// <br/>沿 trunk 向上/向下搜索完整 trunk 范围，再扩展树冠高度和分枝宽度
+        /// </summary>
+        public static Rectangle GetTreeFullBounds(int x, int y, int type) {
+            //向上找 trunk 顶（连续同类 HasTile）
+            int topY = y;
+            while (topY - 1 >= 0) {
+                Tile t = Main.tile[x, topY - 1];
+                if (!t.HasTile || t.TileType != type) break;
+                topY--;
+            }
+            //向下找 trunk 底
+            int botY = y;
+            while (botY + 1 < Main.maxTilesY) {
+                Tile t = Main.tile[x, botY + 1];
+                if (!t.HasTile || t.TileType != type) break;
+                botY++;
+            }
+            //树冠向上扩展 5 格约 80px，分枝左右扩展 ~2.5 格约 40px
+            const int canopyUp = 80;
+            const int branchSide = 40;
+            int px = x * 16 - branchSide;
+            int py = topY * 16 - canopyUp;
+            int w = 16 + branchSide * 2;
+            int h = (botY - topY + 1) * 16 + canopyUp;
+            return new Rectangle(px, py, w, h);
+        }
+
+        /// <summary>
         /// 获取物块对象在世界空间中的包围盒（像素坐标）
         /// <br/>对于多格物块会尝试找到其左上角并计算完整尺寸
+        /// <br/>对于树木返回整棵树的视觉范围
         /// </summary>
         public static Rectangle GetTileWorldBounds(int x, int y) {
             if (x < 0 || x >= Main.maxTilesX || y < 0 || y >= Main.maxTilesY)
@@ -269,6 +312,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             if (!tile.HasTile) return new Rectangle(x * 16, y * 16, 16, 16);
 
             int type = tile.TileType;
+            //树木特殊处理
+            if (IsTreeTile(type)) {
+                return GetTreeFullBounds(x, y, type);
+            }
+
             TileObjectData data = TileObjectData.GetTileData(type, 0);
             if (data == null) return new Rectangle(x * 16, y * 16, 16, 16);
 
