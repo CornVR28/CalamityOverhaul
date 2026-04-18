@@ -37,17 +37,23 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys.VoidPortals
         public const float BaseEnergyPower = 1.5f;
 
         // 展开burst持续帧数
-        private const int OpenBurstDuration = 18;
-        // 展开lerp速率
-        private const float OpenExpandLerp = 0.028f;
-        // 展开burst阶段lerp范围
-        private const float OpenBurstLerpMin = 0.06f;
-        private const float OpenBurstLerpMax = 0.28f;
+        private const int OpenBurstDuration = 22;
+        // 展开lerp速率（稳定阶段）
+        private const float OpenExpandLerp = 0.04f;
+        // 展开burst阶段lerp范围（更猛的初始爆发）
+        private const float OpenBurstLerpMin = 0.08f;
+        private const float OpenBurstLerpMax = 0.42f;
         // 收缩lerp速率
         private const float CloseContractLerp = 0.042f;
         // Intensity过渡速率
-        private const float IntensityOpenLerp = 0.045f;
+        private const float IntensityOpenLerp = 0.06f;
         private const float IntensityCloseLerp = 0.018f;
+        // 展开overshoot峰值（>1产生过冲回弹）
+        private const float OpenOvershoot = 1.18f;
+        // overshoot持续帧（之后回到1.0维持）
+        private const int OvershootDuration = 32;
+        // 冲击波生命周期（秒，与shader中阈值2.4保持一致）
+        private const float ShockwaveLifetime = 2.4f;
 
         #endregion
 
@@ -100,6 +106,11 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys.VoidPortals
 
         /// <summary>裂缝随机种子</summary>
         public float CrackSeed { get; private set; }
+
+        /// <summary>当前冲击波累计时间（秒），<0表示未激活</summary>
+        public float ShockwaveTime { get; private set; } = -1f;
+        /// <summary>overshoot剩余帧数</summary>
+        private int overshootTimer;
 
         /// <summary>传送门世界坐标中心</summary>
         public Vector2 PortalCenter => Projectile.Center;
@@ -158,14 +169,48 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys.VoidPortals
             }
             ActiveInstance = this;
 
-            //初始化：展开burst
+            //初始化：展开burst（带overshoot）
             CurrentPhase = Phase.Opening;
             phaseTimer = 0;
             targetIntensity = 1f;
-            targetExpand = 1f;
+            targetExpand = OpenOvershoot;
             Intensity = 0f;
             ExpandProgress = 0f;
             burstTimer = OpenBurstDuration;
+            overshootTimer = OvershootDuration;
+            //触发开启冲击波
+            ShockwaveTime = 0f;
+
+            //开启瞬间一次性环形爆发粒子
+            if (!Main.dedServ) {
+                SpawnOpeningBurstParticles();
+            }
+        }
+
+        /// <summary>
+        /// 传送门撕开瞬间的环形粒子爆发，用于强化打开冲击感
+        /// </summary>
+        private void SpawnOpeningBurstParticles() {
+            //放射状火花环
+            int sparkCount = 48;
+            for (int i = 0; i < sparkCount; i++) {
+                float ang = MathHelper.TwoPi * i / sparkCount + Main.rand.NextFloat(-0.05f, 0.05f);
+                float speed = Main.rand.NextFloat(6f, 14f);
+                Vector2 vel = ang.ToRotationVector2() * speed;
+                //垂直方向更快（裂隙力线方向）
+                vel.Y *= 1.4f;
+
+                Color c = Color.Lerp(new Color(255, 200, 110), new Color(220, 40, 18), Main.rand.NextFloat());
+                float scale = Main.rand.NextFloat(0.5f, 1.1f);
+                PRTLoader.AddParticle(new PRT_VoidSpark(PortalCenter, vel, c, scale));
+            }
+
+            //电弧
+            for (int i = 0; i < 14; i++) {
+                float ang = MathHelper.TwoPi * i / 14f + Main.rand.NextFloat(-0.15f, 0.15f);
+                Vector2 vel = ang.ToRotationVector2() * Main.rand.NextFloat(3f, 7f);
+                PRTLoader.AddParticle(new PRT_VoidArc(PortalCenter, vel, Main.rand.NextFloat(1.2f, 2.2f)));
+            }
         }
 
         public override void AI() {
@@ -175,6 +220,22 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys.VoidPortals
 
             EffectTime += 1f / 60f;
             phaseTimer++;
+
+            //冲击波时间推进
+            if (ShockwaveTime >= 0f) {
+                ShockwaveTime += 1f / 60f;
+                if (ShockwaveTime > ShockwaveLifetime) {
+                    ShockwaveTime = -1f;
+                }
+            }
+
+            //overshoot回收：到时间后将目标从1.18拉回1.0
+            if (overshootTimer > 0) {
+                overshootTimer--;
+                if (overshootTimer == 0 && CurrentPhase != Phase.Closing) {
+                    targetExpand = 1f;
+                }
+            }
 
             // ================================================================
             // Intensity 过渡（参考 Cyberspace.Update 的模式）
@@ -217,8 +278,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys.VoidPortals
             // ================================================================
             switch (CurrentPhase) {
                 case Phase.Opening:
-                    // 展开完毕（progress接近目标时切换为维持）
-                    if (ExpandProgress > 0.95f && burstTimer <= 0) {
+                    // 展开完毕（overshoot结束并回落到接近1时切换为维持）
+                    if (overshootTimer <= 0 && ExpandProgress > 0.95f && ExpandProgress < 1.05f && burstTimer <= 0) {
                         CurrentPhase = Phase.Sustaining;
                         phaseTimer = 0;
                     }
@@ -258,6 +319,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys.VoidPortals
             targetExpand = 0f;
             // 关闭时短暂burst（挣扎感）
             burstTimer = 6;
+            overshootTimer = 0;
+            //关闭瞬间触发反向冲击波
+            ShockwaveTime = 0f;
         }
 
         public override void OnKill(int timeLeft) {
@@ -269,20 +333,25 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys.VoidPortals
         #region 视觉效果
 
         private void ApplyScreenShake() {
-            // 展开burst期间震动最强
             float shakeIntensity = 0f;
 
             if (CurrentPhase == Phase.Opening && burstTimer > 0) {
+                //初始爆发：更强
                 float burstRatio = (float)burstTimer / OpenBurstDuration;
-                shakeIntensity = burstRatio * 3.5f;
+                shakeIntensity = burstRatio * 6f;
             }
-            else if (CurrentPhase == Phase.Opening) {
-                // 余震：随展开进度递减
-                float remaining = 1f - ExpandProgress;
-                shakeIntensity = remaining * 1.5f;
+            else if (CurrentPhase == Phase.Opening && overshootTimer > 0) {
+                //overshoot回弹震动
+                float t = (float)overshootTimer / OvershootDuration;
+                shakeIntensity = t * 2.2f;
             }
             else if (CurrentPhase == Phase.Closing && burstTimer > 0) {
-                shakeIntensity = 2f * ((float)burstTimer / 6f);
+                shakeIntensity = 2.4f * ((float)burstTimer / 6f);
+            }
+
+            //冲击波余震：前0.2s极猛震动（指数衰减），与shader爆发同步
+            if (ShockwaveTime >= 0f && ShockwaveTime < 0.25f) {
+                shakeIntensity += 8f * MathF.Exp(-ShockwaveTime * 18f);
             }
 
             if (shakeIntensity > 0.1f) {

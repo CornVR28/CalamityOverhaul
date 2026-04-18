@@ -82,6 +82,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys.VoidPortals
             shader.Parameters["dimStrength"]?.SetValue(VoidPortal.BaseDimStrength);
             shader.Parameters["energyPower"]?.SetValue(VoidPortal.BaseEnergyPower);
             shader.Parameters["crackSeed"]?.SetValue(portal.CrackSeed);
+            shader.Parameters["shockwaveTime"]?.SetValue(portal.ShockwaveTime);
             shader.Parameters["riftCenter"]?.SetValue(portal.PortalCenter);
             shader.Parameters["screenPosition"]?.SetValue(worldViewOrigin);
             shader.Parameters["worldViewSize"]?.SetValue(worldViewSize);
