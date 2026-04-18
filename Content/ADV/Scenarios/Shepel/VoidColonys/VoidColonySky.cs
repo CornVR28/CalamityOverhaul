@@ -1,4 +1,5 @@
 ﻿using CalamityOverhaul.Common;
+using InnoVault;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.GameContent;
@@ -64,11 +65,12 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys
                 return;//只绘制一次，并且保证图层最上
             }
 
-            var shader = EffectLoader.VoidColonySky?.Value;
             var gd = Main.instance.GraphicsDevice;
             //使用实际视口尺寸，确保覆盖完整屏幕
             int vpW = gd.Viewport.Width;
             int vpH = gd.Viewport.Height;
+            float time = (float)Main.timeForVisualEffects * 0.008f;
+            float aspectRatio = (float)vpW / vpH;
 
             spriteBatch.End();
             spriteBatch.Begin(
@@ -78,11 +80,12 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys
                 DepthStencilState.None,
                 RasterizerState.CullNone);
 
+            // ============ 第一层：天空背景着色器 ============
+            var shader = EffectLoader.VoidColonySky?.Value;
             //传递uniforms
-            float time = (float)Main.timeForVisualEffects * 0.008f;
             shader.Parameters["uTime"]?.SetValue(time);
             shader.Parameters["uIntensity"]?.SetValue(intensity);
-            shader.Parameters["uAspectRatio"]?.SetValue((float)vpW / vpH);
+            shader.Parameters["uAspectRatio"]?.SetValue(aspectRatio);
 
             shader.CurrentTechnique.Passes[0].Apply();
 

@@ -238,14 +238,6 @@ namespace CalamityOverhaul.Content.Industrials.Generator.Thermal
 
             // 3. 热力学更新：发电 + 散热
             UpdateThermal();
-
-            // 4. 客户端：注册热浪视觉效果
-            if (!VaultUtils.isServer && ThermalData.Temperature > ThermalData.MinOperatingTemperature * 0.5f) {
-                float tempRatio = MathHelper.Clamp(ThermalData.Temperature / ThermalData.MaxTemperature, 0f, 1f);
-                // 使用发电机中心偏上位置作为热源，模拟烤炉出口
-                Vector2 heatOrigin = CenterInWorld + new Vector2(0, -8);
-                ThermalHeatHazeRender.RegisterHeatSource(heatOrigin, tempRatio);
-            }
         }
 
         /// <summary>

@@ -46,6 +46,8 @@ namespace CalamityOverhaul
         [VaultLoaden(CWRConstant.Masking)]
         public static Asset<Texture2D> Fog = null;
         [VaultLoaden(CWRConstant.Masking)]
+        public static Asset<Texture2D> PerlinNoise = null;
+        [VaultLoaden(CWRConstant.Masking)]
         public static Asset<Texture2D> Cyclone = null;
         [VaultLoaden(CWRConstant.Masking)]
         public static Asset<Texture2D> DiffusionCircle = null;
