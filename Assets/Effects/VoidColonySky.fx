@@ -244,26 +244,26 @@ float4 PSVoidColonySky(float2 coords : TEXCOORD0, float4 vertexColor : COLOR0) :
     float vortexFade = smoothstep(0.05, 0.22, dist) * smoothstep(1.5, 0.35, dist);
     vortex *= vortexFade;
 
-    //漩涡渐变着色：暗赤到炽橙
+    //漩涡渐变着色：暗赤到炽橙，整体调暗
     float3 vortexCol = lerp(
-        float3(0.32, 0.04, 0.018),
-        float3(0.95, 0.28, 0.06),
-        saturate(vortex * 2.2)
+        float3(0.22, 0.025, 0.012),
+        float3(0.70, 0.20, 0.04),
+        saturate(vortex * 2.0)
     );
-    col += vortexCol * vortex * 1.05;
+    col += vortexCol * vortex * 0.78;
 
     // ====================================================================
     //Layer 5: 域弯曲能量流，宽大有机扭曲带，强化旋涡的能量流向
     // ====================================================================
     float2 streamUV = c * 1.15 + float2(t * 0.03, -t * 0.02);
     float stream = warpedFbm(streamUV, t * 0.6);
-    float streamEdge = smoothstep(0.46, 0.6, stream);
-    float streamBright = smoothstep(0.56, 0.74, stream);
+    float streamEdge = smoothstep(0.48, 0.62, stream);
+    float streamBright = smoothstep(0.6, 0.78, stream);
     float streamFade = smoothstep(0.06, 0.22, dist) * smoothstep(1.3, 0.3, dist);
-    streamEdge *= streamFade * 0.55;
-    streamBright *= streamFade * 0.45;
-    col += float3(0.78, 0.18, 0.04) * streamEdge;
-    col += float3(1.0, 0.6, 0.14) * streamBright;
+    streamEdge *= streamFade * 0.4;
+    streamBright *= streamFade * 0.3;
+    col += float3(0.55, 0.13, 0.03) * streamEdge;
+    col += float3(0.85, 0.45, 0.10) * streamBright;
 
     // ====================================================================
     //Layer 6: 锐利能量裂隙，对应概念图旋臂中的明亮缝光
@@ -279,10 +279,10 @@ float4 PSVoidColonySky(float2 coords : TEXCOORD0, float4 vertexColor : COLOR0) :
     rift *= riftFade;
     riftCore *= riftFade;
 
-    float riftGlow = smoothstep(0.38, 0.7, ridge) * riftFade * armBase * 0.42;
-    col += float3(0.55, 0.10, 0.02) * riftGlow;
-    float3 riftCol = lerp(float3(1.0, 0.42, 0.06), float3(1.0, 0.88, 0.45), riftCore);
-    col += riftCol * rift * 1.45;
+    float riftGlow = smoothstep(0.38, 0.7, ridge) * riftFade * armBase * 0.30;
+    col += float3(0.42, 0.08, 0.02) * riftGlow;
+    float3 riftCol = lerp(float3(0.85, 0.32, 0.05), float3(1.0, 0.72, 0.30), riftCore);
+    col += riftCol * rift * 0.95;
 
     // ====================================================================
     //Layer 7: 放射雷电，从核心向外随机抖动闪烁，强化体积感
@@ -294,9 +294,9 @@ float4 PSVoidColonySky(float2 coords : TEXCOORD0, float4 vertexColor : COLOR0) :
     bolt += lightningBolt(rot2(c, 2.3), 0.29, t * 1.3 + 1.7);
     bolt += lightningBolt(rot2(c, -2.55), 0.92, t * 1.3 + 2.3);
     bolt = saturate(bolt);
-    //雷电核心炽白，外围橙红辉散
-    col += float3(0.7, 0.18, 0.05) * bolt * 0.9;
-    col += float3(1.0, 0.85, 0.6) * pow(bolt, 3.0) * 1.6;
+    //雷电核心微白，外围橙红辉散，整体降低权重
+    col += float3(0.5, 0.13, 0.04) * bolt * 0.55;
+    col += float3(1.0, 0.78, 0.45) * pow(max(bolt, 0.0), 3.0) * 0.95;
 
     // ====================================================================
     //Layer 8: 中景视差星辰，中等亮度
@@ -317,37 +317,67 @@ float4 PSVoidColonySky(float2 coords : TEXCOORD0, float4 vertexColor : COLOR0) :
     col += (starsFarCol * starsFar + starsMidCol * starsMid + starsNearCol * starsNear) * starMask;
 
     // ====================================================================
-    //Layer 10: 中心炽热火眼，对应概念图中央竖直状的烈焰核心
-    //不再是纯黑暗洞，而是亮白炽核外披橙红
+    //Layer 10: 中心炽热火眼，混沌不规则燃烧核心
+    //完全使用笛卡尔坐标 + 多层域弯曲噪声，避免atan2接缝
+    //形态非规则，沿不同方向有撕裂的火舌
     // ====================================================================
-    //核心位置略微跳动模拟燃烧脉动
-    float pulse = 0.92 + 0.08 * sin(t * 4.7) + 0.04 * sin(t * 11.3 + 1.7);
-    //先做圆形发光底
-    float coreA = exp(-dist * dist * 240.0);
-    //再叠加竖直拉长的火焰形态，对应概念图中竖向劈裂的火眼
-    float2 fc = c * float2(2.4, 0.85);
-    float fAng = atan2(fc.y, fc.x);
-    float fR = length(fc);
-    float flameNoise = fbm(float2(fAng * 1.8, fR * 5.0 - t * 1.2), 4);
-    float flameShape = exp(-fR * fR * 35.0) * (0.55 + 0.55 * flameNoise);
-    float flameMid = exp(-fR * fR * 90.0) * (0.7 + 0.4 * flameNoise);
-    float flameHot = exp(-fR * fR * 260.0);
+    //核心呼吸脉动，叠加多频率获得自然感
+    float pulse = 0.86 + 0.10 * sin(t * 4.7 + 0.6 * sin(t * 1.3))
+        + 0.05 * sin(t * 11.3 + 1.7);
+
+    //火眼坐标：竖向略拉伸，避免对称感
+    float2 fc = c * float2(1.6, 1.05);
+    //第一层域弯曲，将坐标按低频噪声扰动以撕裂圆形轮廓
+    float2 wq = float2(
+        fbm(fc * 2.4 + t * 0.35, 3),
+        fbm(fc * 2.4 + float2(7.1, 3.7) - t * 0.28, 3)
+    );
+    float2 fcW = fc + (wq - 0.5) * 0.55;
+    //第二层更高频细节扰动
+    float2 wq2 = float2(
+        fbm(fc * 6.0 + t * 0.9, 3),
+        fbm(fc * 6.0 + float2(2.3, 8.9) - t * 0.7, 3)
+    );
+    fcW += (wq2 - 0.5) * 0.18;
+
+    float fRw = length(fcW);
+    //核心燃烧体：高斯衰减乘以噪声调制
+    float burnNoise = fbm(fcW * 3.5 - t * 0.6, 4);
+    burnNoise = burnNoise * burnNoise * (3.0 - 2.0 * burnNoise);
+
+    //不同尺度的火焰层
+    float flameOuter = exp(-fRw * fRw * 14.0) * (0.30 + 0.95 * burnNoise);
+    float flameMid   = exp(-fRw * fRw * 38.0) * (0.55 + 0.70 * burnNoise);
+    float flameHot   = exp(-fRw * fRw * 110.0) * (0.75 + 0.50 * burnNoise);
+    //最炽白的核，用未扰动的fc以保持一定的稳定亮点
+    float coreFR = length(fc);
+    float flameWhite = exp(-coreFR * coreFR * 320.0);
+
+    //撕裂的火舌：使用ridgedFbm制造长条状结构
+    float tongue = ridgedFbm(fcW * 4.5 + float2(t * 0.4, -t * 0.6), 4);
+    tongue = smoothstep(0.55, 0.85, tongue);
+    float tongueMask = exp(-fRw * fRw * 7.0);
+    tongue *= tongueMask * 0.6;
 
     float3 coreCol = float3(0.0, 0.0, 0.0);
-    coreCol += float3(0.55, 0.08, 0.02) * flameShape * 1.4;
-    coreCol += float3(1.0, 0.45, 0.10) * flameMid * 1.6;
-    coreCol += float3(1.0, 0.92, 0.65) * flameHot * 2.4;
-    coreCol += float3(0.95, 0.30, 0.06) * coreA * 0.55;
+    coreCol += float3(0.32, 0.04, 0.012) * flameOuter * 1.0;
+    coreCol += float3(0.85, 0.25, 0.06) * flameMid   * 1.0;
+    coreCol += float3(1.0, 0.60, 0.18) * flameHot   * 1.1;
+    coreCol += float3(1.0, 0.92, 0.70) * flameWhite * 1.4;
+    coreCol += float3(0.95, 0.40, 0.10) * tongue;
     coreCol *= pulse;
     col += coreCol;
 
-    //火眼外缘的灼热环，分隔核心和外圈漩涡
-    float ringR = 0.165;
-    float glowRing = exp(-(dist - ringR) * (dist - ringR) * 70.0) * 0.55;
-    col += float3(1.0, 0.35, 0.08) * glowRing * pulse;
-    //更远处的暗赤光晕
-    float outerHalo = exp(-(dist - 0.32) * (dist - 0.32) * 9.0) * 0.18;
-    col += float3(0.5, 0.06, 0.02) * outerHalo;
+    //不规则光晕：用噪声调制半径，避免完美圆环
+    float haloAng = atan2(c.y, c.x);
+    //用sin/cos代替直接喂给fbm，保证周期连续
+    float haloMod = fbm(float2(cos(haloAng) * 2.2, sin(haloAng) * 2.2) + t * 0.25, 3);
+    float haloR = 0.16 + 0.05 * (haloMod - 0.5);
+    float glowRing = exp(-(dist - haloR) * (dist - haloR) * 95.0) * 0.32;
+    col += float3(0.85, 0.28, 0.07) * glowRing * pulse;
+    //更远处暗赤弥散光晕，柔和
+    float outerHalo = exp(-(dist - 0.34) * (dist - 0.34) * 7.5) * 0.10;
+    col += float3(0.40, 0.05, 0.02) * outerHalo;
 
     // ====================================================================
     //Layer 11: 大气透视雾，越靠近水平边缘越偏冷蓝紫，模拟空间深度
@@ -361,9 +391,9 @@ float4 PSVoidColonySky(float2 coords : TEXCOORD0, float4 vertexColor : COLOR0) :
     //Layer 12: 漂浮尘埃，用细噪声做体积粒子的暗示
     // ====================================================================
     float dust = fbm(c * 12.0 + float2(t * 0.05, -t * 0.04), 3);
-    dust = smoothstep(0.62, 0.86, dust) * 0.18;
+    dust = smoothstep(0.62, 0.86, dust) * 0.10;
     dust *= smoothstep(0.08, 0.4, dist) * smoothstep(1.4, 0.4, dist);
-    col += float3(0.45, 0.18, 0.08) * dust;
+    col += float3(0.32, 0.13, 0.05) * dust;
 
     // ====================================================================
     //Post: 暗角 + 色彩调整 + 输出
@@ -374,8 +404,10 @@ float4 PSVoidColonySky(float2 coords : TEXCOORD0, float4 vertexColor : COLOR0) :
     vignette = max(vignette, 0.1);
     col *= vignette;
 
-    //轻微对比度提升，让火光更醒目
-    col = pow(max(col, 0.0), 0.95);
+    //加强暗部，压低中等亮度，提升对比度，整体偏暗
+    col = pow(max(col, 0.0), 1.15);
+    //最终亮度系数，整体向暗调拉
+    col *= 0.78;
 
     col *= uIntensity;
 
