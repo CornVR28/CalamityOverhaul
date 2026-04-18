@@ -17,8 +17,12 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys
         //着色器自身的累积时间，避免暂停时仍在翻腾
         private static float effectTime;
 
-        //雾的最浓厚度，1.0 接近完全遮挡远景
-        private const float FogDensityCap = 0.85f;
+        //雾的最浓厚度 1.0 接近完全遮挡远景
+        private const float FogDensityCap = 0.95f;
+        //玩家周围完全清雾的半径 像素
+        private const float ClearRadius = 220f;
+        //雾从清空到正常浓度的过渡半径 像素
+        private const float FalloffRadius = 720f;
 
         //权重略大于 EffectLoader 主权重，让雾在其它后处理稳定后再叠加
         public override float Weight => 1.5f;
@@ -34,7 +38,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys
             intensity = MathHelper.Lerp(intensity, target, 0.025f);
 
             if (!Main.gamePaused) {
-                effectTime += 1f / 60f;
+                //稍快的时间推进 配合 shader 内部速度形成显著翻滚
+                effectTime += 1f / 45f;
             }
         }
 
@@ -63,9 +68,16 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys
             shader.Parameters["uScreenSize"]?.SetValue(screenPixels);
             shader.Parameters["uWorldOffset"]?.SetValue(worldViewOrigin);
             shader.Parameters["uViewScale"]?.SetValue(viewScale);
-            //稀薄处偏冷暗紫，浓厚处偏苍白带紫色调
-            shader.Parameters["uFogColorLow"]?.SetValue(new Vector4(0.16f, 0.10f, 0.22f, 1f));
-            shader.Parameters["uFogColorHi"]?.SetValue(new Vector4(0.55f, 0.42f, 0.65f, 1f));
+            //玩家屏幕坐标 用于近距清雾
+            Vector2 playerScreen = Main.LocalPlayer.Center - Main.screenPosition;
+            shader.Parameters["uPlayerScreen"]?.SetValue(playerScreen);
+            shader.Parameters["uClearRadius"]?.SetValue(ClearRadius);
+            shader.Parameters["uFalloffRadius"]?.SetValue(FalloffRadius);
+            //血红主题 稍微提亮 Low 与 Mid 让远景仍然可读 Hi 保持深沉
+            shader.Parameters["uFogColorLow"]?.SetValue(new Vector4(0.50f, 0.14f, 0.10f, 1f));
+            shader.Parameters["uFogColorMid"]?.SetValue(new Vector4(0.62f, 0.10f, 0.06f, 1f));
+            shader.Parameters["uFogColorHi"]?.SetValue(new Vector4(0.20f, 0.03f, 0.02f, 1f));
+            shader.Parameters["uHighlightColor"]?.SetValue(new Vector4(1.0f, 0.66f, 0.22f, 1f));
 
             graphicsDevice.Textures[1] = noiseTex;
             graphicsDevice.SamplerStates[1] = SamplerState.LinearWrap;
