@@ -312,6 +312,12 @@ namespace CalamityOverhaul
         public static int Buff_GodSlayerInferno => Get();
         public static int Buff_Nightwither => Get();
         public static int Buff_GlacialState => Get();
+        public static int Buff_ArmorCrunch => Get();
+        public static int Buff_CrushDepth => Get();
+        public static int Buff_WhisperingDeath => Get();
+        public static int Buff_BanishingFire => Get();
+        public static int Buff_PearlAura => Get();
+        public static int Buff_Eutrophication => Get();
         #endregion
         #region 粒子效果ID引用
         public readonly static int Dust_SulphurousSeaAcid = 75;

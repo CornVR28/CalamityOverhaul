@@ -47,26 +47,6 @@ namespace CalamityOverhaul.Content.Projectiles.Weapons.Summon.Whips
             if (Projectile.damage <= 0)
                 Projectile.damage = 5;
             target.AddBuff(ModContent.BuffType<SoulBurning>(), 60);
-            if (Projectile.numHits == 0) {
-                for (int i = 0; i < 3; i++) {
-                    int proj = Projectile.NewProjectile(
-                        Projectile.FromObjectGetParent(),
-                        target.Center -
-                        Main.player[Projectile.owner].Center.To(target.Center).UnitVector()
-                        .RotatedBy(MathHelper.ToRadians(Main.rand.Next(-75, 75))) * 300,
-                        VaultUtils.RandVr(6, 9),
-                        ModContent.ProjectileType<FateCluster>(),
-                        Projectile.damage / 2,
-                        0,
-                        Projectile.owner,
-                        Projectile.whoAmI
-                    );
-                    Projectile newDoms = Main.projectile[proj];
-                    newDoms.DamageType = DamageClass.Summon;
-                    newDoms.timeLeft = 65;
-                    newDoms.ai[0] = 1;
-                }
-            }
         }
 
         private static void DrawLine(List<Vector2> list) {

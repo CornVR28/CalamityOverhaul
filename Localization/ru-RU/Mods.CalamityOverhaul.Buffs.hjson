@@ -1,4 +1,4 @@
-﻿SoulBurning: {
+SoulBurning: {
 	DisplayName: Огонь душ
 	Description: Из пламени Ада
 }
@@ -26,4 +26,9 @@ FrenziedMachineSoul: {
 FishoilBuff: {
 	DisplayName: Рыбий жир
 	Description: Вы чувствуете, что ваша кожа становится жирной
+}
+
+HyperDisintegration: {
+	// DisplayName: Hyper Disintegration
+	// Description: Mods.CalamityOverhaul.Buffs.HyperDisintegration.Description
 }

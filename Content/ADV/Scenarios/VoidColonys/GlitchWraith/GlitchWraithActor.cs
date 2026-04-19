@@ -35,8 +35,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.GlitchWraith
         private const float FadeOutStep = 0.08f;
 
         //失真影响的距离范围，越近失真越强
-        private const float DistortionMaxDistance = 800f;
-        private const float DistortionMinDistance = 200f;
+        private const float DistortionMaxDistance = 600f;
+        private const float DistortionMinDistance = 100f;
 
         /// <summary>当前可见度0到1，过去视角下逼近1</summary>
         private float visibility;
@@ -59,16 +59,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.GlitchWraith
         }
 
         public override void OnSpawn(params object[] args) {
-            //使用真实纹理尺寸作为碰撞与定位参考
-            Texture2D tex = ADVAsset.Glitchwraith;
-            if (tex != null) {
-                Width = tex.Width;
-                Height = tex.Height;
-            }
-            else {
-                Width = 64;
-                Height = 240;
-            }
+            Width = 204;
+            Height = 504;
             DrawLayer = ActorDrawLayer.AfterTiles;
             DrawExtendMode = 600;
             visibility = 0f;
