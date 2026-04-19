@@ -28,6 +28,7 @@ namespace CalamityOverhaul.Common
         public static ModKeybind CyberBanish_Key { get; private set; }
         public static ModKeybind CyberFreeze_Key { get; private set; }
         public static ModKeybind CyberwareSkill_Key { get; private set; }
+        public static ModKeybind VoidTimeShift_Key { get; private set; }
 
         void ICWRLoader.LoadData() {
             Mod mod = CWRMod.Instance;
@@ -55,6 +56,7 @@ namespace CalamityOverhaul.Common
             CyberBanish_Key = KeybindLoader.RegisterKeybind(mod, "CyberBanish_Key", "Y");
             CyberFreeze_Key = KeybindLoader.RegisterKeybind(mod, "CyberFreeze_Key", "U");
             CyberwareSkill_Key = KeybindLoader.RegisterKeybind(mod, "CyberwareSkill_Key", "V");
+            VoidTimeShift_Key = KeybindLoader.RegisterKeybind(mod, "VoidTimeShift_Key", "K");
         }
 
         void ICWRLoader.UnLoadData() {
@@ -82,6 +84,7 @@ namespace CalamityOverhaul.Common
             CyberBanish_Key = null;
             CyberFreeze_Key = null;
             CyberwareSkill_Key = null;
+            VoidTimeShift_Key = null;
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿ADS_Key.DisplayName: Firearms:Open the scope
+ADS_Key.DisplayName: Firearms:Open the scope
 QuestLog_Key.DisplayName: Quest Book: Toggle Main Interface
 QuestManager_Key.DisplayName: Quest Manager: Toggle Panel
 HeavenfallLongbowSkillKey.DisplayName: HeavenfallLongbow Skill Key
@@ -24,3 +24,4 @@ HackTime_Toggle.DisplayName: Hack Time_ Toggle
 CyberBanish_Key.DisplayName: Cyber Banish_ Key
 CyberFreeze_Key.DisplayName: Cyber Freeze_ Key
 CyberwareSkill_Key.DisplayName: Cyberware Skill_ Key
+VoidTimeShift_Key.DisplayName: Void Time Shift_ Key

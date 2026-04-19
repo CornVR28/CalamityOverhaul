@@ -58,6 +58,7 @@ namespace CalamityOverhaul.Common
         public static Asset<Effect> ThermalHeatHaze { get; set; }
         public static Asset<Effect> VoidColonySky { get; set; }
         public static Asset<Effect> VoidFog { get; set; }
+        public static Asset<Effect> VoidTimeShift { get; set; }
         public override float Weight => 1.2f;
         public override void EndCaptureDraw(SpriteBatch spriteBatch, GraphicsDevice graphicsDevice, RenderTarget2D screenSwap) {
             DrawPrimitiveProjectile();

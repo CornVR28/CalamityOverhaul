@@ -1,4 +1,4 @@
-﻿ADS_Key.DisplayName: 打开瞄准镜
+ADS_Key.DisplayName: 打开瞄准镜
 QuestLog_Key.DisplayName: 任务书:开关主界面
 QuestManager_Key.DisplayName: 委托任务:开关管理面板
 HeavenfallLongbowSkillKey.DisplayName: 天堂陨落长弓:万象审判
@@ -24,3 +24,4 @@ HackTime_Toggle.DisplayName: 骇客时间
 CyberBanish_Key.DisplayName: 赛博空间:放逐
 CyberFreeze_Key.DisplayName: 赛博空间:冻结
 CyberwareSkill_Key.DisplayName: 赛博义体技能
+// VoidTimeShift_Key.DisplayName: Void Time Shift_ Key
