@@ -114,6 +114,33 @@ float4 MainPS(float2 coords : TEXCOORD0) : COLOR0
         float breathe = 0.75 + 0.25 * sin(uTime * 0.6);
         color += float3(0.06, 0.04, 0.02) * cornerGlow * fi * breathe * 0.6;
 
+        //== 角落胶片破损磨砂层 ==
+        //仅在外沿区域叠加，不干扰玩家操作视野中央
+        //分三种层次：大颗磨砂斑块褪色、稀疏静态白色划痕、稀疏静态黑色尘点
+        float damageMask = smoothstep(0.20, 0.03, cornerDist);
+        if (damageMask > 0.001)
+        {
+            //低频斑块：大颗砂粒云，缓慢随时间偏移，营造"发霉胶片"质感
+            float2 patchCoord = floor(coords * 55.0) + floor(uTime * 0.5);
+            float patchNoise = hash12(patchCoord);
+            float patch = smoothstep(0.58, 0.96, patchNoise);
+            float3 frostTone = float3(0.46, 0.40, 0.33);
+            color = lerp(color, frostTone, damageMask * patch * fi * 0.55);
+
+            //静态细碎划痕：不随时间变化，稀疏白色高光点
+            float scratch = step(0.988, hash12(coords * 1900.0 + 17.3));
+            color += float3(0.35, 0.30, 0.24) * scratch * damageMask * fi;
+
+            //静态尘点：稀疏黑色斑点，模拟乳剂剥落
+            float speck = step(0.991, hash12(coords * 2300.0 + 91.7));
+            color -= float3(0.18, 0.18, 0.18) * speck * damageMask * fi;
+
+            //极角落轻度去饱和，让最外围褪色最重
+            float extremeCorner = smoothstep(0.09, 0.0, cornerDist);
+            float cornerLum = dot(color, float3(0.299, 0.587, 0.114));
+            color = lerp(color, float3(cornerLum, cornerLum, cornerLum), extremeCorner * fi * 0.35);
+        }
+
         //== 整体亮度补偿 ==
         //所有叠加后如果变暗则轻微补回，确保总亮度约等于原图的92%
         //不再有独立的压暗系数
