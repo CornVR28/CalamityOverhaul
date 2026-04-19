@@ -1,4 +1,4 @@
-using CalamityOverhaul.Common;
+﻿using CalamityOverhaul.Common;
 using System;
 using Terraria;
 using Terraria.ID;
@@ -6,7 +6,7 @@ using Terraria.IO;
 using Terraria.ModLoader;
 using Terraria.WorldBuilding;
 
-namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys
+namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys
 {
     /// <summary>
     /// 虚空聚落地形生成器
@@ -268,7 +268,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys
                     //密度噪声调节
                     threshold -= density * 0.2f;
 
-                    if (WorldGen.genRand.NextFloat() > (1f - threshold)) continue;
+                    if (WorldGen.genRand.NextFloat() > 1f - threshold) continue;
 
                     //在网格内随机抖动位置
                     int jitterX = WorldGen.genRand.Next(-gridSpacing / 3, gridSpacing / 3);

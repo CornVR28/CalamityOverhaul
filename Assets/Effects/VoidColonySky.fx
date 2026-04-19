@@ -10,6 +10,8 @@ sampler uImage0 : register(s0);
 float uTime;
 float uIntensity;       //整体强度0~1，淡入淡出
 float uAspectRatio;     //屏幕宽高比screenWidth/screenHeight
+float uPastBlend;       //过去时代混合0~1，0当前赤红，1百年前紫调狰狞
+float uTransitionBurst; //切换演出爆闪0~1，钟形曲线，仅在瞬发过渡中非零
 
 #define PI  3.14159265
 #define TAU 6.28318530
@@ -408,6 +410,42 @@ float4 PSVoidColonySky(float2 coords : TEXCOORD0, float4 vertexColor : COLOR0) :
     col = pow(max(col, 0.0), 1.15);
     //最终亮度系数，整体向暗调拉
     col *= 0.78;
+
+    // ====================================================================
+    //Post Past: 过去时代色相偏移，红赤旋涡平滑转为紫色狰狞调
+    //采用RGB矩阵映射而非HSV旋转，保证暗区稳定不出现色斑
+    //矩阵从经验拟合得到：红→深紫、橙→品红、亮白核心略冷化带淡青
+    // ====================================================================
+    if (uPastBlend > 0.001)
+    {
+        float3 pastCol;
+        pastCol.r = col.r * 0.72 + col.g * 0.10 + col.b * 0.85;
+        pastCol.g = col.r * 0.08 + col.g * 0.42 + col.b * 0.35;
+        pastCol.b = col.r * 1.05 + col.g * 0.18 + col.b * 1.10;
+        //过去氛围额外轻度冷压：暗部略拉向深紫蓝，营造不安定感
+        pastCol = lerp(pastCol, pastCol * float3(0.85, 0.80, 1.08), 0.35);
+        col = lerp(col, pastCol, saturate(uPastBlend));
+
+        //过去时段的微弱闪电强化：不改变闪电几何形状，仅提升最亮核心的曝光
+        //现有bolt值已写入col，这里通过对高亮区额外加一层紫白光模拟"更不稳定的能量"
+        float hotMask = smoothstep(0.5, 0.95, max(col.r, col.b));
+        col += float3(0.14, 0.04, 0.22) * hotMask * uPastBlend * 0.35;
+    }
+
+    // ====================================================================
+    //Post Transition: 切换演出期间一次性的核心爆闪，同步屏幕撕裂戏剧性
+    //仅按距离中心衰减提亮，不干扰远景结构
+    // ====================================================================
+    if (uTransitionBurst > 0.001)
+    {
+        float burstMask = exp(-dist * dist * 4.5);
+        float3 burstCol = lerp(
+            float3(0.70, 0.25, 0.15),  //偏红爆闪，对应现在→过去
+            float3(0.55, 0.20, 0.75),  //偏紫爆闪，对应过去→现在
+            saturate(uPastBlend)
+        );
+        col += burstCol * burstMask * uTransitionBurst * 0.55;
+    }
 
     col *= uIntensity;
 

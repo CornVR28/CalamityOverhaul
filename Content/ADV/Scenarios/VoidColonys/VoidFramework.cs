@@ -1,8 +1,8 @@
-using Terraria;
+﻿using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 
-namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys
+namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys
 {
     /// <summary>
     /// 虚空骨架 - 实验室深层结构材料，深色机械方块

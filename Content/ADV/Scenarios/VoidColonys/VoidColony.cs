@@ -1,11 +1,12 @@
-﻿using SubworldLibrary;
+﻿using CalamityOverhaul.Content.ADV.Scenarios.VoidColonys;
+using SubworldLibrary;
 using System.Collections.Generic;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ModLoader;
 using Terraria.WorldBuilding;
 
-namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys
+namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys
 {
     /// <summary>
     /// 虚空聚落 - 嘉登虚空实验室集群所在的亚空间维度

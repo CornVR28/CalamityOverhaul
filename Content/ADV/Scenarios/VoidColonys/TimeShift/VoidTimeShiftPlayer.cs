@@ -1,9 +1,10 @@
 ﻿using CalamityOverhaul.Common;
+using CalamityOverhaul.Content.ADV.Scenarios.VoidColonys;
 using Terraria;
 using Terraria.GameInput;
 using Terraria.ModLoader;
 
-namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys.TimeShift
+namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.TimeShift
 {
     /// <summary>
     /// 虚空聚落时空叠加玩家输入处理

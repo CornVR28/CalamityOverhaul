@@ -1,10 +1,10 @@
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using System;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ModLoader;
 
-namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys.VoidPortals
+namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.VoidPortals
 {
     /// <summary>
     /// 虚空传送完整演出编排器

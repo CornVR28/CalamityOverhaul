@@ -4,7 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;
 
-namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys.TimeShift
+namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.TimeShift
 {
     /// <summary>
     /// 虚空聚落过去时代的环境尘粒
@@ -45,7 +45,17 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys.TimeShift
 
             //两端淡入淡出，用sin钟形避免突兀
             float t = LifetimeCompletion;
-            Opacity = MathF.Sin(t * MathHelper.Pi) * baseOpacity;
+            float envelope = MathF.Sin(t * MathHelper.Pi) * baseOpacity;
+            //附加过去滤镜强度作为可见性乘子，离开过去时尘粒几乎立即隐形
+            Opacity = envelope * VoidTimeShiftSystem.FilterIntensity;
+
+            //回到现在时加速消亡，防止残留占用粒子槽位
+            if (VoidTimeShiftSystem.FilterIntensity < 0.15f) {
+                int remaining = Lifetime - Time;
+                if (remaining > 15) {
+                    Lifetime = Time + 15;
+                }
+            }
         }
 
         public override bool PreDraw(SpriteBatch spriteBatch) {

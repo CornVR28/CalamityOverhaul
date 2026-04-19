@@ -1,10 +1,11 @@
-using CalamityOverhaul.Common;
+﻿using CalamityOverhaul.Common;
+using CalamityOverhaul.Content.ADV.Scenarios.VoidColonys;
 using InnoVault.RenderHandles;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 
-namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys.TimeShift
+namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.TimeShift
 {
     /// <summary>
     /// 虚空聚落时空叠加屏幕后处理渲染

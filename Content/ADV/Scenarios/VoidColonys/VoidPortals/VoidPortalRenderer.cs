@@ -1,4 +1,4 @@
-using CalamityOverhaul.Common;
+﻿using CalamityOverhaul.Common;
 using InnoVault.RenderHandles;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -6,7 +6,7 @@ using ReLogic.Content;
 using System;
 using Terraria;
 
-namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys.VoidPortals
+namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.VoidPortals
 {
     /// <summary>
     /// 虚空传送门屏幕空间渲染器

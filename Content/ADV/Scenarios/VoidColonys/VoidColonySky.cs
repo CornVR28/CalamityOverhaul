@@ -1,4 +1,5 @@
 ﻿using CalamityOverhaul.Common;
+using CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.TimeShift;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.GameContent;
@@ -6,7 +7,7 @@ using Terraria.Graphics.Effects;
 using Terraria.Graphics.Shaders;
 using Terraria.ModLoader;
 
-namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys
+namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys
 {
     /// <summary>
     /// 虚空聚落天空场景效果注册
@@ -83,6 +84,10 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys
             shader.Parameters["uTime"]?.SetValue(time);
             shader.Parameters["uIntensity"]?.SetValue(intensity);
             shader.Parameters["uAspectRatio"]?.SetValue((float)vpW / vpH);
+            //时空叠加状态：过去时代混合与切换演出爆闪
+            //两者都由VoidTimeShiftSystem统一驱动，保证与屏幕后处理完全同步
+            shader.Parameters["uPastBlend"]?.SetValue(VoidTimeShiftSystem.FilterIntensity);
+            shader.Parameters["uTransitionBurst"]?.SetValue(VoidTimeShiftSystem.TransitionStrength);
 
             shader.CurrentTechnique.Passes[0].Apply();
 

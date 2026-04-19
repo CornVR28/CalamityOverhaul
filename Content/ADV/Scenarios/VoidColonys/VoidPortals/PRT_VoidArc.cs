@@ -4,7 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;
 
-namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys.VoidPortals
+namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.VoidPortals
 {
     /// <summary>
     /// 虚空电弧粒子 — 裂隙边缘的不稳定闪烁/闪电效果

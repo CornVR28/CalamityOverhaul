@@ -1,9 +1,9 @@
-using CalamityOverhaul.Common;
+﻿using CalamityOverhaul.Common;
 using InnoVault.RenderHandles;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 
-namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys
+namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys
 {
     /// <summary>
     /// 虚空聚落世界雾气渲染

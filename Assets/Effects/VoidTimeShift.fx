@@ -41,7 +41,8 @@ float4 MainPS(float2 coords : TEXCOORD0) : COLOR0
     float3 color = original.rgb;
 
     //========================================
-    //1.过去滤镜：褪色冷蓝+琥珀暖部+轻微vignette+低噪点
+    //1.过去滤镜：分离色调胶片+S曲线对比+可读性边缘增强
+    //核心策略：不整体压暗，通过暗部冷蓝与亮部琥珀的色相分离提供"过去感"
     //========================================
     if (filterIntensity > 0.001)
     {
@@ -51,7 +52,6 @@ float4 MainPS(float2 coords : TEXCOORD0) : COLOR0
         float lum = dot(color, float3(0.299, 0.587, 0.114));
 
         //采样四邻域亮度差，构造廉价边缘增强让地形轮廓在褪色画面中依然清晰可读
-        //采样尺度：外部未传入时退化为较小固定值
         float2 px = (pixelSize.x > 0) ? pixelSize : float2(1.0 / 1920.0, 1.0 / 1080.0);
         float lumL = dot(tex2D(uImage0, coords - float2(px.x, 0)).rgb, float3(0.299, 0.587, 0.114));
         float lumR = dot(tex2D(uImage0, coords + float2(px.x, 0)).rgb, float3(0.299, 0.587, 0.114));
@@ -59,42 +59,65 @@ float4 MainPS(float2 coords : TEXCOORD0) : COLOR0
         float lumD = dot(tex2D(uImage0, coords + float2(0, px.y)).rgb, float3(0.299, 0.587, 0.114));
         float edge = saturate((abs(lum - lumL) + abs(lum - lumR) + abs(lum - lumU) + abs(lum - lumD)) * 1.2);
 
-        //去饱和，保留约45%原色，避免完全灰掉失去阅读线索
+        //去饱和仅到40%，仍需要足够色彩信息承载后续的分离色调
         float3 gray = float3(lum, lum, lum);
-        color = lerp(color, gray, 0.55 * fi);
+        color = lerp(color, gray, 0.40 * fi);
 
-        //三档色调：暗部偏死寂冷蓝，中间调轻灰，亮部偏褪色琥珀，复古胶片感
-        float3 shadowTint = float3(0.14, 0.18, 0.24);
-        float3 midTint = float3(0.32, 0.34, 0.33);
-        float3 highlightTint = float3(0.68, 0.62, 0.50);
-        float3 tone;
-        if (lum < 0.45)
-            tone = lerp(shadowTint, midTint, lum / 0.45);
-        else
-            tone = lerp(midTint, highlightTint, saturate((lum - 0.45) / 0.55));
-        //色调混合幅度克制
-        color = lerp(color, tone * (lum + 0.18), 0.35 * fi);
+        //== 分离色调Split Toning ==
+        //暗部色调加法：按 smoothstep(lum) 选择性推进阴影区RGB
+        //亮部色调加法：对亮区推进暖琥珀
+        //避免了"色调乘亮度"导致暗区色相被吃掉的问题
+        float shadowMask = 1.0 - smoothstep(0.0, 0.55, lum);
+        float highlightMask = smoothstep(0.35, 0.9, lum);
 
-        //轻微压暗
-        color *= lerp(1.0, 0.82, fi);
+        //暗部推冷蓝：负R负G正B
+        float3 shadowPush = float3(-0.08, -0.03, 0.10);
+        //亮部推琥珀：正R正G负B
+        float3 highlightPush = float3(0.15, 0.06, -0.12);
 
-        //柔和vignette，幅度低于HackTime
+        color += shadowPush * shadowMask * fi;
+        color += highlightPush * highlightMask * fi;
+
+        //== 中间调整体轻微偏青灰 ==
+        //仅在中段亮度做小幅横推，让画面不至于红绿对比过强
+        float midMask = (1.0 - abs(lum - 0.5) * 2.0);
+        midMask = saturate(midMask);
+        color += float3(-0.02, 0.00, 0.03) * midMask * fi * 0.6;
+
+        //== S曲线对比度 ==
+        //用平滑step以中点0.5拉伸，暗处更暗亮处更亮，形成胶片感对比
+        //力度系数0.35适中，避免过曝
+        float3 contrast = smoothstep(0.0, 1.0, color);
+        color = lerp(color, contrast, 0.35 * fi);
+
+        //== 柔和vignette，幅度更低 ==
         float2 vc = (coords - 0.5) * 2.0;
         float vd = dot(vc, vc);
-        float vignette = 1.0 - vd * 0.35 * fi;
+        float vignette = 1.0 - vd * 0.22 * fi;
         color *= saturate(vignette);
 
-        //极轻微胶片颗粒，幅度0.015，每秒约18步刷新避免纯静态
+        //== 边缘轮廓增强，让地形在褪色里依然清晰可读 ==
+        //系数从0.6×0.1提升到1.0×0.15，差距可见但不到描边程度
+        color += float3(0.10, 0.13, 0.16) * edge * fi;
+
+        //== 胶片颗粒 ==
         float grainTime = floor(uTime * 18.0);
         float grain = hash12(coords * 640.0 + grainTime) - 0.5;
-        color += grain * 0.015 * fi;
+        color += grain * 0.018 * fi;
 
-        //边缘高光补偿：将tile等高对比区域提亮一点点，抵消去饱和造成的可读性损失
-        //幅度控制在0.14上限以内，不会出现描边感
-        color += float3(0.08, 0.10, 0.12) * edge * fi * 0.6;
+        //== 角落漏光bloom暗示 ==
+        //四角随时间缓慢呼吸的琥珀色柔光，面积小幅度低，补足"老胶片曝光不均"的质感
+        float cornerX = min(coords.x, 1.0 - coords.x);
+        float cornerY = min(coords.y, 1.0 - coords.y);
+        float cornerDist = length(float2(cornerX, cornerY));
+        float cornerGlow = smoothstep(0.25, 0.0, cornerDist);
+        float breathe = 0.75 + 0.25 * sin(uTime * 0.6);
+        color += float3(0.06, 0.04, 0.02) * cornerGlow * fi * breathe * 0.6;
 
-        //轻度对比度压缩模拟"蒙尘"
-        color = lerp(float3(0.28, 0.30, 0.32), color, lerp(1.0, 0.92, fi));
+        //== 整体亮度补偿 ==
+        //所有叠加后如果变暗则轻微补回，确保总亮度约等于原图的92%
+        //不再有独立的压暗系数
+        color *= lerp(1.0, 0.95, fi);
     }
 
     //========================================

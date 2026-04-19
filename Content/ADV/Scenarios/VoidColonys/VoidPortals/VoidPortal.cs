@@ -1,4 +1,5 @@
 ﻿using CalamityOverhaul.Common;
+using CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.VoidPortals;
 using InnoVault.PRT;
 using Microsoft.Xna.Framework;
 using System;
@@ -6,7 +7,7 @@ using Terraria;
 using Terraria.DataStructures;
 using Terraria.ModLoader;
 
-namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys.VoidPortals
+namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.VoidPortals
 {
     internal class VoidPortal : ModProjectile
     {
@@ -346,7 +347,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys.VoidPortals
                 shakeIntensity = t * 2.2f;
             }
             else if (CurrentPhase == Phase.Closing && burstTimer > 0) {
-                shakeIntensity = 2.4f * ((float)burstTimer / 6f);
+                shakeIntensity = 2.4f * (burstTimer / 6f);
             }
 
             //冲击波余震：前0.2s极猛震动（指数衰减），与shader爆发同步

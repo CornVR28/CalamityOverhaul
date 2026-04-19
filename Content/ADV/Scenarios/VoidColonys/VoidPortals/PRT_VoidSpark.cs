@@ -1,10 +1,10 @@
-using InnoVault.PRT;
+﻿using InnoVault.PRT;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;
 
-namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys.VoidPortals
+namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.VoidPortals
 {
     /// <summary>
     /// 虚空火花粒子 — 从裂隙边缘逸散的红色/橙色能量碎片
