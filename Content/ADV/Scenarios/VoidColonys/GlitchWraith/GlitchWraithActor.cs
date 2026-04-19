@@ -1,4 +1,5 @@
-﻿using CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.TimeShift;
+﻿using CalamityOverhaul.Common;
+using CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.TimeShift;
 using InnoVault.Actors;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -209,51 +210,43 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.GlitchWraith
             Color baseColor = Color.White * visibility;
             spriteBatch.Draw(tex, drawPos, null, baseColor, 0f, origin, 1f, SpriteEffects.None, 0f);
 
-            //头部与轮廓溢出的高频乱码像素碎片
-            DrawGlitchScatter(spriteBatch, drawPos, origin, tex.Width, tex.Height);
+            //头部球形乱码：使用着色器生成团状有机乱码斑块
+            DrawGlitchHead(spriteBatch, drawPos, origin, tex.Width);
 
             return false;
         }
 
         /// <summary>
-        /// 在纹理头部上方与整体轮廓周围撒布高频闪烁乱码像素块
-        /// 溢出纹理边界强化数据错误观感
+        /// 使用GlitchHead着色器绘制头顶球形乱码区域
+        /// 中心位于纹理头部附近，覆盖区域为边长约纹理宽度1.6倍的正方形
         /// </summary>
-        private void DrawGlitchScatter(SpriteBatch sb, Vector2 drawPos, Vector2 origin, int texW, int texH) {
+        private void DrawGlitchHead(SpriteBatch sb, Vector2 drawPos, Vector2 origin, int texW) {
+            Effect shader = EffectLoader.GlitchHead?.Value;
             Texture2D pixel = TextureAssets.MagicPixel.Value;
-            int s = glitchSeed;
-            float alpha = visibility;
-            int baseX = (int)(drawPos.X - origin.X);
-            int baseY = (int)(drawPos.Y - origin.Y);
+            if (shader == null || pixel == null) return;
 
-            //头部乱码密集层，纹理上方约22%区域稀疏铺4px乱码块并向上溢出一段
-            int headBand = (int)(texH * 0.22f);
-            int overflow = 28;
-            for (int y = -overflow; y < headBand; y += 4) {
-                for (int x = 0; x < texW; x += 4) {
-                    s = unchecked(s * 1103515245 + 12345);
-                    if ((s & 3) != 0) continue;
-                    int g = (s >> 8) & 0xFF;
-                    int b = (s >> 16) & 0xFF;
-                    bool purpleFamily = (s & 1) == 0;
-                    Color c = purpleFamily
-                        ? new Color(180 + (g & 0x3F), 40 + (b & 0x3F), 255)
-                        : new Color(255, 40 + (g & 0x3F), 60 + (b & 0x3F));
-                    if ((s & 0x1F) == 0) c = new Color(0, 0, 0);
-                    sb.Draw(pixel, new Rectangle(baseX + x, baseY + y, 4, 4), c * alpha);
-                }
-            }
+            //头部乱码正方形尺寸与锚点：覆盖纹理顶部区域并向上溢出
+            int size = (int)(texW * 1.6f);
+            Vector2 topCenter = new(drawPos.X, drawPos.Y - origin.Y + texW * 0.08f);
+            Vector2 quadTopLeft = topCenter - new Vector2(size * 0.5f, size * 0.6f);
+            Rectangle dest = new((int)quadTopLeft.X, (int)quadTopLeft.Y, size, size);
 
-            //轮廓周边飞散碎片少量点缀
-            for (int i = 0; i < 10; i++) {
-                s = unchecked(s * 1103515245 + 12345);
-                int ox = (s & 0xFF) - 128;
-                s = unchecked(s * 1103515245 + 12345);
-                int oy = Math.Abs(s) % texH;
-                int size = 2 + ((s >> 8) & 0x3);
-                Color c = (s & 2) == 0 ? new Color(255, 60, 90) : new Color(200, 70, 255);
-                sb.Draw(pixel, new Rectangle(baseX + texW / 2 + ox, baseY + oy, size, size), c * alpha);
-            }
+            shader.Parameters["uTime"]?.SetValue(Main.GlobalTimeWrappedHourly);
+            shader.Parameters["intensity"]?.SetValue(visibility);
+            //块尺寸0.025相当于每个乱码块占40分之一UV，颗粒感明显
+            shader.Parameters["pixelSize"]?.SetValue(0.025f);
+
+            //结束当前批次，切换到Immediate以便绑定着色器
+            sb.End();
+            sb.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, Main.DefaultSamplerState,
+                DepthStencilState.None, Main.Rasterizer, shader, Main.GameViewMatrix.TransformationMatrix);
+
+            sb.Draw(pixel, dest, Color.White);
+
+            //恢复默认批次配置，保证后续Actor正常绘制
+            sb.End();
+            sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState,
+                DepthStencilState.None, Main.Rasterizer, null, Main.GameViewMatrix.TransformationMatrix);
         }
 
         /// <summary>
