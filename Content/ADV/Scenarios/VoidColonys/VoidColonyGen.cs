@@ -1,4 +1,5 @@
 ﻿using CalamityOverhaul.Common;
+using CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.PastBridges;
 using System;
 using Terraria;
 using Terraria.ID;
@@ -95,6 +96,10 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys
 
             //============ 最终：扫描表面 & 设置出生点 ============
             IslandRegistry.ScanAllSurfaces();
+
+            //============ 第六步：记录过去桥梁数据，入侵过去时批量放置 ============
+            progress.Message = "正在烙印过去桥梁的残响...";
+            PastBridgeGen.BuildAll();
 
             var coreIsland = IslandRegistry.FindByTag("核心实验室");
             if (coreIsland != null) {

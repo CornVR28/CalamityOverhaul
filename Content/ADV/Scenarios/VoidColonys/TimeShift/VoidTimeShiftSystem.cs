@@ -2,6 +2,7 @@
 using System;
 using InnoVault.PRT;
 using Terraria;
+using CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.PastBridges;
 
 namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.TimeShift
 {
@@ -77,6 +78,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.TimeShift
         /// 强制重置到现在，用于离开虚空聚落或进入游戏菜单
         /// </summary>
         public static void Reset() {
+            if (CurrentEra == VoidEra.Past) {
+                PastBridgeRegistry.Restore();
+            }
             CurrentEra = VoidEra.Present;
             FilterIntensity = 0f;
             TransitionStrength = 0f;
@@ -91,6 +95,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.TimeShift
         public static void Update(bool active) {
             if (!active) {
                 //离开虚空聚落强制回到现在并平滑淡出
+                if (CurrentEra == VoidEra.Past) {
+                    PastBridgeRegistry.Restore();
+                }
                 CurrentEra = VoidEra.Present;
                 toggleRequested = false;
                 transitionTimer = 0;
@@ -104,6 +111,13 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.TimeShift
                 toggleRequested = false;
                 transitionTimer = TransitionDuration;
                 CurrentEra = CurrentEra == VoidEra.Present ? VoidEra.Past : VoidEra.Present;
+                //Era翻转同一帧立即同步方块，切换演出覆盖突变帧
+                if (CurrentEra == VoidEra.Past) {
+                    PastBridgeRegistry.Apply();
+                }
+                else {
+                    PastBridgeRegistry.Restore();
+                }
             }
 
             if (transitionTimer > 0) {
