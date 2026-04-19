@@ -1,5 +1,7 @@
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using System;
+using InnoVault.PRT;
+using Terraria;
 
 namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys.TimeShift
 {
@@ -122,6 +124,61 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys.TimeShift
             else if (FilterIntensity > target) {
                 FilterIntensity = Math.Max(target, FilterIntensity - FilterEaseRate);
             }
+
+            //滤镜显著时在屏幕外缘生成环境尘粒
+            SpawnAmbientMotes();
+        }
+
+        /// <summary>
+        /// 过去滤镜生效期间，在屏幕边缘随机生成缓慢漂入的尘粒
+        /// 生成概率与滤镜强度正相关，避免切入切出瞬间突兀
+        /// </summary>
+        private static void SpawnAmbientMotes() {
+            if (FilterIntensity < 0.35f) {
+                return;
+            }
+            if (Main.netMode == Terraria.ID.NetmodeID.Server) {
+                return;
+            }
+
+            //单帧最多尝试一次，基础概率约每秒2粒
+            if (Main.rand.NextFloat() > 0.04f * FilterIntensity) {
+                return;
+            }
+
+            int side = Main.rand.Next(3);
+            Vector2 pos;
+            Vector2 vel;
+            //从左右或上方边缘进入，下沉速度统一较低
+            if (side == 0) {
+                pos = new Vector2(Main.screenPosition.X - 24f,
+                    Main.screenPosition.Y + Main.rand.NextFloat(0f, Main.screenHeight));
+                vel = new Vector2(Main.rand.NextFloat(0.25f, 0.55f), Main.rand.NextFloat(-0.05f, 0.15f));
+            }
+            else if (side == 1) {
+                pos = new Vector2(Main.screenPosition.X + Main.screenWidth + 24f,
+                    Main.screenPosition.Y + Main.rand.NextFloat(0f, Main.screenHeight));
+                vel = new Vector2(Main.rand.NextFloat(-0.55f, -0.25f), Main.rand.NextFloat(-0.05f, 0.15f));
+            }
+            else {
+                pos = new Vector2(Main.screenPosition.X + Main.rand.NextFloat(0f, Main.screenWidth),
+                    Main.screenPosition.Y - 24f);
+                vel = new Vector2(Main.rand.NextFloat(-0.2f, 0.2f), Main.rand.NextFloat(0.1f, 0.25f));
+            }
+
+            //配色与shader滤镜调色板保持同族：琥珀灰或冷蓝灰随机二选一
+            Color color = Main.rand.NextBool(2)
+                ? new Color(188, 172, 138)
+                : new Color(142, 158, 184);
+
+            var mote = new PRT_VoidAshMote {
+                Position = pos,
+                Velocity = vel,
+                Color = color,
+                Scale = Main.rand.NextFloat(0.18f, 0.28f) * 10,
+                Lifetime = Main.rand.Next(260, 420),
+            };
+            PRTLoader.AddParticle(mote);
         }
     }
 

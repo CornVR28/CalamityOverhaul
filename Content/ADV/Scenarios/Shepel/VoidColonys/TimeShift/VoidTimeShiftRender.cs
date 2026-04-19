@@ -55,6 +55,10 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.VoidColonys.TimeShift
             shader.Parameters["filterIntensity"]?.SetValue(filter);
             shader.Parameters["transitionStrength"]?.SetValue(transition);
             shader.Parameters["uTime"]?.SetValue(Main.GlobalTimeWrappedHourly);
+            //传入像素尺寸倒数用于邻域边缘检测
+            int sw = Main.screenWidth > 0 ? Main.screenWidth : 1920;
+            int sh = Main.screenHeight > 0 ? Main.screenHeight : 1080;
+            shader.Parameters["pixelSize"]?.SetValue(new Vector2(1f / sw, 1f / sh));
 
             //应用着色器后绘回主屏
             graphicsDevice.SetRenderTarget(Main.screenTarget);

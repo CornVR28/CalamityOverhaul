@@ -10,6 +10,9 @@ float filterIntensity;
 float transitionStrength;
 //动画时间
 float uTime;
+//采样偏移尺度，期望外部传入1/screenWidth与1/screenHeight
+//未传入时使用保底常量，保证边缘提取仍能工作
+float2 pixelSize;
 
 //廉价伪随机哈希，用于低幅度胶片颗粒
 float hash12(float2 p)
@@ -47,6 +50,15 @@ float4 MainPS(float2 coords : TEXCOORD0) : COLOR0
         //亮度
         float lum = dot(color, float3(0.299, 0.587, 0.114));
 
+        //采样四邻域亮度差，构造廉价边缘增强让地形轮廓在褪色画面中依然清晰可读
+        //采样尺度：外部未传入时退化为较小固定值
+        float2 px = (pixelSize.x > 0) ? pixelSize : float2(1.0 / 1920.0, 1.0 / 1080.0);
+        float lumL = dot(tex2D(uImage0, coords - float2(px.x, 0)).rgb, float3(0.299, 0.587, 0.114));
+        float lumR = dot(tex2D(uImage0, coords + float2(px.x, 0)).rgb, float3(0.299, 0.587, 0.114));
+        float lumU = dot(tex2D(uImage0, coords - float2(0, px.y)).rgb, float3(0.299, 0.587, 0.114));
+        float lumD = dot(tex2D(uImage0, coords + float2(0, px.y)).rgb, float3(0.299, 0.587, 0.114));
+        float edge = saturate((abs(lum - lumL) + abs(lum - lumR) + abs(lum - lumU) + abs(lum - lumD)) * 1.2);
+
         //去饱和，保留约45%原色，避免完全灰掉失去阅读线索
         float3 gray = float3(lum, lum, lum);
         color = lerp(color, gray, 0.55 * fi);
@@ -77,9 +89,9 @@ float4 MainPS(float2 coords : TEXCOORD0) : COLOR0
         float grain = hash12(coords * 640.0 + grainTime) - 0.5;
         color += grain * 0.015 * fi;
 
-        //疏朗扫描线，振幅很小仅用于胶片质感暗示
-        float scan = sin(coords.y * 600.0) * 0.5 + 0.5;
-        color -= scan * 0.008 * fi;
+        //边缘高光补偿：将tile等高对比区域提亮一点点，抵消去饱和造成的可读性损失
+        //幅度控制在0.14上限以内，不会出现描边感
+        color += float3(0.08, 0.10, 0.12) * edge * fi * 0.6;
 
         //轻度对比度压缩模拟"蒙尘"
         color = lerp(float3(0.28, 0.30, 0.32), color, lerp(1.0, 0.92, fi));
