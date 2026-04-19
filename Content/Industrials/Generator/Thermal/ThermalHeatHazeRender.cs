@@ -1,9 +1,10 @@
-using CalamityOverhaul.Common;
+﻿using CalamityOverhaul.Common;
 using InnoVault.RenderHandles;
 using InnoVault.TileProcessors;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Terraria;
 
 namespace CalamityOverhaul.Content.Industrials.Generator.Thermal
@@ -37,7 +38,7 @@ namespace CalamityOverhaul.Content.Industrials.Generator.Thermal
             _sourceCount = 0;
             _candidates.Clear();
 
-            if (Main.dedServ) {
+            if (Main.dedServ || !TileProcessorLoader.LoadenTP) {
                 return;
             }
 
