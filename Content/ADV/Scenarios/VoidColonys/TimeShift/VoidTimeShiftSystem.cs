@@ -79,7 +79,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.TimeShift
         /// </summary>
         public static void Reset() {
             if (CurrentEra == VoidEra.Past) {
-                PastBridgeRegistry.Restore();
+                PastTileRegistry.Restore();
             }
             CurrentEra = VoidEra.Present;
             FilterIntensity = 0f;
@@ -96,7 +96,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.TimeShift
             if (!active) {
                 //离开虚空聚落强制回到现在并平滑淡出
                 if (CurrentEra == VoidEra.Past) {
-                    PastBridgeRegistry.Restore();
+                    PastTileRegistry.Restore();
                 }
                 CurrentEra = VoidEra.Present;
                 toggleRequested = false;
@@ -113,10 +113,10 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.TimeShift
                 CurrentEra = CurrentEra == VoidEra.Present ? VoidEra.Past : VoidEra.Present;
                 //Era翻转同一帧立即同步方块，切换演出覆盖突变帧
                 if (CurrentEra == VoidEra.Past) {
-                    PastBridgeRegistry.Apply();
+                    PastTileRegistry.Apply();
                 }
                 else {
-                    PastBridgeRegistry.Restore();
+                    PastTileRegistry.Restore();
                 }
             }
 

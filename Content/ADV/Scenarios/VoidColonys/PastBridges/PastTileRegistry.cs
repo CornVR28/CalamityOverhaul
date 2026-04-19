@@ -1,32 +1,31 @@
 using System;
 using Terraria;
-using Terraria.ModLoader;
 
 namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.PastBridges
 {
     /// <summary>
-    /// 过去桥梁全局注册表，记录每个"过去方块"的坐标与类型
-    /// 使用SOA数组布局，减少GC压力并提升批量遍历缓存命中
-    /// Apply在入侵过去时放置方块，Restore在回到现在时清除
+    /// 过去物块全局注册表
+    /// 每条记录描述一个格子的"过去形态"与"现在形态"配对
+    /// 过去态的typePast必填，现在态的typePresent为0表示"现在该格为空气"
+    /// 入侵过去时将记录替换为过去态，回到现在时还原为现在态
+    /// 采用SOA数组布局以减少GC压力并提升批量遍历缓存命中
     /// </summary>
-    internal static class PastBridgeRegistry
+    internal static class PastTileRegistry
     {
         //结构初始化容量，按4千砖估算，可自动增长
         private const int InitialCapacity = 4096;
 
         private static int[] xs = new int[InitialCapacity];
         private static int[] ys = new int[InitialCapacity];
-        private static ushort[] types = new ushort[InitialCapacity];
+        private static ushort[] typePast = new ushort[InitialCapacity];
+        private static ushort[] typePresent = new ushort[InitialCapacity];
         private static int count;
 
         //批量刷新边界框，Apply/Restore完成后一次性RangeFrame
         private static int minX, minY, maxX, maxY;
         private static bool hasBounds;
 
-        //过去方块类型缓存，避免Apply每次ModContent.TileType查找
-        private static ushort pastFrameworkType;
-
-        /// <summary>当前记录的过去方块数</summary>
+        /// <summary>当前记录的格子数</summary>
         public static int Count => count;
 
         /// <summary>清空注册表，世界生成开始时调用</summary>
@@ -36,19 +35,21 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.PastBridges
         }
 
         /// <summary>
-        /// 追加一个过去方块记录
-        /// 地图生成阶段被PastBridgeGen频繁调用
+        /// 追加一条过去态记录
+        /// typePresentValue为0代表"现在该格应保持空气"，常用于桥梁类纯过去结构
         /// </summary>
-        public static void Add(int x, int y, ushort type) {
+        public static void Add(int x, int y, ushort typePastValue, ushort typePresentValue = 0) {
             if (count >= xs.Length) {
                 int newCap = xs.Length * 2;
                 Array.Resize(ref xs, newCap);
                 Array.Resize(ref ys, newCap);
-                Array.Resize(ref types, newCap);
+                Array.Resize(ref typePast, newCap);
+                Array.Resize(ref typePresent, newCap);
             }
             xs[count] = x;
             ys[count] = y;
-            types[count] = type;
+            typePast[count] = typePastValue;
+            typePresent[count] = typePresentValue;
             count++;
 
             if (!hasBounds) {
@@ -64,20 +65,13 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.PastBridges
             }
         }
 
-        /// <summary>解析并缓存过去方块类型</summary>
-        private static void EnsureTypeCache() {
-            if (pastFrameworkType == 0) {
-                pastFrameworkType = (ushort)ModContent.TileType<VoidFrameworkPast>();
-            }
-        }
-
         /// <summary>
-        /// 将所有记录的过去方块放置到世界中
-        /// 只在当前格为空时写入，避免覆盖现有岛屿地形
+        /// 切换到过去态
+        /// 空格直接置为过去方块；已有"现在态"的格替换为过去方块
+        /// 跳过既不是空也不是现在态的格，防止覆盖玩家放置
         /// </summary>
         public static void Apply() {
             if (count == 0) return;
-            EnsureTypeCache();
 
             int w = Main.maxTilesX;
             int h = Main.maxTilesY;
@@ -86,22 +80,34 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.PastBridges
                 int y = ys[i];
                 if ((uint)x >= (uint)w || (uint)y >= (uint)h) continue;
                 Tile tile = Main.tile[x, y];
-                if (tile.HasTile) continue;
-                tile.HasTile = true;
-                tile.TileType = types[i];
-                tile.IsHalfBlock = false;
+                ushort past = typePast[i];
+                ushort present = typePresent[i];
+
+                if (!tile.HasTile) {
+                    //现在为空气，允许放置过去方块
+                    if (present != 0) continue;
+                    tile.HasTile = true;
+                    tile.TileType = past;
+                    tile.IsHalfBlock = false;
+                }
+                else if (tile.TileType == present) {
+                    //现在态匹配，原地替换为过去态
+                    tile.TileType = past;
+                    tile.IsHalfBlock = false;
+                }
+                //其他情况视为玩家修改或生成意外，保持不动
             }
 
             FrameBounds();
         }
 
         /// <summary>
-        /// 抹除所有记录的过去方块
-        /// 仅当当前格为过去方块类型时清除，防止误删玩家放置或岛屿方块
+        /// 切换回现在态
+        /// 仅当当前格确实是过去方块时才动手，避免误删
+        /// typePresent为0时清除格子，否则替换回现在态
         /// </summary>
         public static void Restore() {
             if (count == 0) return;
-            EnsureTypeCache();
 
             int w = Main.maxTilesX;
             int h = Main.maxTilesY;
@@ -111,15 +117,23 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.PastBridges
                 if ((uint)x >= (uint)w || (uint)y >= (uint)h) continue;
                 Tile tile = Main.tile[x, y];
                 if (!tile.HasTile) continue;
-                if (tile.TileType != types[i]) continue;
-                tile.HasTile = false;
-                tile.TileType = 0;
+                if (tile.TileType != typePast[i]) continue;
+
+                ushort present = typePresent[i];
+                if (present == 0) {
+                    tile.HasTile = false;
+                    tile.TileType = 0;
+                }
+                else {
+                    tile.TileType = present;
+                    tile.IsHalfBlock = false;
+                }
             }
 
             FrameBounds();
         }
 
-        /// <summary>一次性刷新所有桥梁边界框内的视觉分帧</summary>
+        /// <summary>一次性刷新所有记录外接矩形内的视觉分帧</summary>
         private static void FrameBounds() {
             if (!hasBounds) return;
             int x0 = Math.Max(0, minX - 1);
