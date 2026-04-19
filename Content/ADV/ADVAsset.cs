@@ -97,5 +97,7 @@ namespace CalamityOverhaul.Content.ADV
         public static Texture2D Shepel_Sleep = null;
         [VaultLoaden(CWRConstant.ADV + "Shepel/")]
         public static Texture2D Shepel_Smirk = null;
+        [VaultLoaden(CWRConstant.ADV + "VoidColony/")]
+        public static Texture2D Glitchwraith = null;
     }
 }

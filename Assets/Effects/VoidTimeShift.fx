@@ -8,6 +8,8 @@ sampler uImage0 : register(s0);
 float filterIntensity;
 //切换演出强度0到1的钟形曲线
 float transitionStrength;
+//鬼乱码临近失真强度0到1，越近屏幕扰动越强
+float glitchProximity;
 //动画时间
 float uTime;
 //采样偏移尺度，期望外部传入1/screenWidth与1/screenHeight
@@ -25,6 +27,24 @@ float hash12(float2 p)
 float4 MainPS(float2 coords : TEXCOORD0) : COLOR0
 {
     float2 uv = coords;
+
+    //鬼乱码临近的采样位移：扫描块式水平抖动+高频抖动噪声，越近幅度越大
+    if (glitchProximity > 0.01)
+    {
+        float gp = saturate(glitchProximity);
+        //大块水平位移：按屏幕竖向分段，每段整体左右抖
+        float blockRow = floor(uv.y * 24.0);
+        float blockShift = (hash12(float2(blockRow, floor(uTime * 9.0))) - 0.5) * 0.035 * gp;
+        //稀疏强位移块：少数竖条被剧烈错位
+        float strongPick = hash12(float2(blockRow + 37.0, floor(uTime * 7.0)));
+        if (strongPick > 1.0 - 0.35 * gp)
+        {
+            blockShift += (hash12(float2(blockRow + 91.0, floor(uTime * 11.0))) - 0.5) * 0.09 * gp;
+        }
+        //细密微抖
+        float microShift = (hash12(float2(floor(uv.y * 200.0), floor(uTime * 40.0))) - 0.5) * 0.008 * gp;
+        uv.x += blockShift + microShift;
+    }
 
     //切换演出的采样位移：高速水平信号错位带，仅在transitionStrength显著时出现
     if (transitionStrength > 0.01)
@@ -169,6 +189,37 @@ float4 MainPS(float2 coords : TEXCOORD0) : COLOR0
         //中间水平裂缝亮带
         float seam = smoothstep(0.008, 0.0, bandCenterDist) * ts;
         color += float3(0.25, 0.22, 0.18) * seam;
+    }
+
+    //========================================
+    //3.鬼乱码临近扰动：色散+扫描闪带+冷色相偏移
+    //即使不在过去视角下也以弱强度呈现作为心理提示
+    //========================================
+    if (glitchProximity > 0.01)
+    {
+        float gp = saturate(glitchProximity);
+
+        //水平RGB色散，随时间抖动
+        float caJitter = (hash12(float2(floor(uv.y * 80.0), floor(uTime * 25.0))) - 0.5) * 0.012 * gp;
+        float caAmt = 0.008 * gp + abs(caJitter);
+        float r2 = tex2D(uImage0, uv + float2(caAmt, 0)).r;
+        float b2 = tex2D(uImage0, uv - float2(caAmt, 0)).b;
+        color.r = lerp(color.r, r2, 0.85 * gp);
+        color.b = lerp(color.b, b2, 0.85 * gp);
+
+        //高频扫描闪带，每帧选几条竖向扫描行暗化或亮化
+        float scanBand = hash12(float2(floor(uv.y * 300.0), floor(uTime * 55.0)));
+        float scanFlicker = step(1.0 - 0.12 * gp, scanBand);
+        color = lerp(color, float3(0.0, 0.0, 0.0), scanFlicker * 0.55 * gp);
+        float scanGlow = step(1.0 - 0.04 * gp, scanBand);
+        color += float3(0.35, 0.12, 0.42) * scanGlow * gp;
+
+        //整体向荧光紫偏，距离越近色相越失真
+        color += float3(-0.03, -0.05, 0.08) * gp * 0.6;
+
+        //噪声颗粒叠加
+        float gnoise = hash12(coords * 900.0 + floor(uTime * 30.0)) - 0.5;
+        color += gnoise * 0.04 * gp;
     }
 
     color = saturate(color);

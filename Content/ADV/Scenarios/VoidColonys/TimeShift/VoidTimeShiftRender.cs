@@ -1,5 +1,6 @@
 ﻿using CalamityOverhaul.Common;
 using CalamityOverhaul.Content.ADV.Scenarios.VoidColonys;
+using CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.GlitchWraith;
 using InnoVault.RenderHandles;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -31,7 +32,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.TimeShift
 
             float filter = VoidTimeShiftSystem.FilterIntensity;
             float transition = VoidTimeShiftSystem.TransitionStrength;
-            if (filter < 0.001f && transition < 0.001f) {
+            float glitch = GlitchWraithActor.GetLocalDistortionStrength();
+            if (filter < 0.001f && transition < 0.001f && glitch < 0.001f) {
                 return;
             }
 
@@ -54,6 +56,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.TimeShift
             spriteBatch.End();
 
             shader.Parameters["filterIntensity"]?.SetValue(filter);
+            shader.Parameters["glitchProximity"]?.SetValue(glitch);
             shader.Parameters["transitionStrength"]?.SetValue(transition);
             shader.Parameters["uTime"]?.SetValue(Main.GlobalTimeWrappedHourly);
             //传入像素尺寸倒数用于邻域边缘检测
