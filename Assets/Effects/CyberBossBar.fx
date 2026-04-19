@@ -1,6 +1,6 @@
 // ============================================================================
-// CyberBossBar.fx — 赛博朋克2077风格Boss血条着色器
-// 弧形band + 管状明暗 + 高光条 + 分段 + 末端辉光
+// CyberBossBar.fx 赛博朋克2077风格敌人血条(精简版 ps_2_0)
+// 平行四边形 / 刻度 / 扫描线 / 威胁色渐变 / 受击白闪
 // ============================================================================
 
 sampler uImage0 : register(s0);
@@ -10,49 +10,56 @@ float uLifeRatio;
 float uHitFlash;
 float2 uBarSize;
 
-float4 PixelShaderFunction(float2 coords : TEXCOORD0, float4 vertexColor : COLOR0) : COLOR0
+float4 PixelShaderFunction(float2 uv : TEXCOORD0, float4 vertexColor : COLOR0) : COLOR0
 {
-    float2 uv = coords;
+    //平行四边形边界：上边右移下边左移
+    float skew = 0.06;
+    float leftEdge  = skew * (1.0 - uv.y);
+    float rightEdge = 1.0 - skew * uv.y;
+    float inside = step(leftEdge, uv.x) * step(uv.x, rightEdge);
 
-    float3 darkRed = float3(0.40, 0.02, 0.02);
-    float3 coreRed = float3(0.84, 0.10, 0.06);
-    float3 hot = float3(1.0, 0.42, 0.28);
+    float t = (uv.x - leftEdge) / (rightEdge - leftEdge);
 
-    //弧形band中心：中间上凸两端下沉
-    float dx = uv.x - 0.5;
-    float bandY = 0.5 - dx * dx * 0.45;
-    float dist = abs(uv.y - bandY);
+    //威胁色渐变(红→琥珀黄)
+    float3 high = float3(1.00, 0.82, 0.08);
+    float3 low  = float3(1.00, 0.12, 0.16);
+    float3 barCol = lerp(low, high, smoothstep(0.15, 0.85, uLifeRatio));
 
-    //band遮罩含管状明暗
-    float band = smoothstep(0.28, 0.10, dist);
+    //填充遮罩
+    float filled = step(t, uLifeRatio);
 
-    //分段
-    float seg = frac(uv.x * 20.0);
-    float gap = step(0.025, seg) * step(seg, 0.975);
+    //管状渐变(中心亮)
+    float dy = uv.y - 0.5;
+    float vert = 1.0 - dy * dy * 2.0;
 
-    //填充
-    float fill = step(uv.x, uLifeRatio);
+    //扫描线
+    float scan = 1.0 - step(0.5, frac(uv.y * uBarSize.y * 0.6)) * 0.15;
 
-    //高光条偏向band上沿
-    float relY = uv.y - bandY;
-    float spec = saturate(1.0 - abs(relY + 0.065) * 16.0) * 0.38 * band;
+    //刻度：每10%一条
+    float tickPos = abs(frac(t * 10.0) - 0.5);
+    float tick = step(0.46, tickPos);
 
-    //填充色
-    float hitGlow = uHitFlash * band * 0.25;
-    float3 barCol = coreRed * band * gap + hot * gap * (spec + hitGlow);
+    //领先缘亮
+    float lead = saturate(1.0 - abs(t - uLifeRatio) * 80.0) * filled;
 
-    //空区暗色轮廓
-    float3 emptyCol = darkRed * gap * band * 0.05;
+    //沿斜边的左右亮线(平行四边形侧缘)
+    float edgeLeft  = smoothstep(0.012, 0.0, (uv.x - leftEdge));
+    float edgeRight = smoothstep(0.012, 0.0, (rightEdge - uv.x));
+    float sideEdge = (edgeLeft + edgeRight) * inside;
 
-    float3 color = lerp(emptyCol, barCol, fill);
-    float a = lerp(gap * band * 0.025, gap * band + spec * 0.1, fill);
+    //空区底色
+    float3 emptyCol = float3(0.08, 0.04, 0.02);
 
-    //末端辉光
-    float endG = saturate(1.0 - abs(uv.x - uLifeRatio) * 18.0) * 0.25 * fill * band;
-    color += hot * endG;
-    a = saturate(a + endG);
+    //填充着色
+    float3 fillCol = barCol * vert * scan;
+    fillCol += barCol * lead * 1.8;
+    fillCol = lerp(fillCol, float3(1.0, 0.95, 0.8), uHitFlash * 0.45);
 
-    return float4(color * a, a) * vertexColor;
+    float3 color = lerp(emptyCol, fillCol, filled);
+    color -= tick * 0.18;
+    color += barCol * sideEdge * 0.9;
+
+    return float4(color, inside) * vertexColor;
 }
 
 technique Technique1

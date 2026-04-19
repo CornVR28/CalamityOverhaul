@@ -988,15 +988,6 @@ namespace CalamityOverhaul
                 CWRUtils.LogFailedLoad("BossHealthBarManager_Draw_Method", "CalamityMod.BossHealthBarManager");
             }
 
-            calamityUtils_GetReworkedReforge_Method = typeof(CalamityUtils)
-                .GetMethod("GetReworkedReforge", BindingFlags.Static | BindingFlags.NonPublic);
-            if (calamityUtils_GetReworkedReforge_Method != null) {
-                VaultHook.Add(calamityUtils_GetReworkedReforge_Method, OnGetReworkedReforgeHook);
-            }
-            else {
-                CWRUtils.LogFailedLoad("calamityUtils_GetReworkedReforge_Method", "CalamityUtils.GetReworkedReforge");
-            }
-
             MethodInfo methodInfo = typeof(CalamityUtils).GetMethod("BroadcastLocalizedText", BindingFlags.Static | BindingFlags.Public);
             if (methodInfo != null) {
                 VaultHook.Add(methodInfo, OnDisplayLocalizedTextHook);
@@ -1031,14 +1022,6 @@ namespace CalamityOverhaul
                 ui.Draw(spriteBatch, x, y);
                 y -= BossHealthBarManager.BossHPUI.VerticalOffsetPerBar;
             }
-        }
-
-        [CWRJITEnabled]
-        internal static int OnGetReworkedReforgeHook(On_GetReworkedReforge_Dalegate orig
-            , Item item, UnifiedRandom rand, int currentPrefix) {
-            int reset = orig.Invoke(item, rand, currentPrefix);
-            reset = OnCalamityReforgeEvent.HandleCalamityReforgeModificationDueToMissingItemLoader(item, rand, currentPrefix);
-            return reset;
         }
 
         [CWRJITEnabled]

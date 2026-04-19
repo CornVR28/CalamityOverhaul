@@ -1,6 +1,7 @@
 ﻿using CalamityOverhaul.Common;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using ReLogic.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,10 +18,10 @@ namespace CalamityOverhaul.Content.UIs.BossBars
     public class CyberBossBarStyle : ModBossBarStyle
     {
         public const int MaxBars = 4;
-        public const int BarWidth = 520;
-        public const int BarHeight = 14;
-        public const int TopMargin = 36;
-        public const int VerticalSpacing = 72;
+        public const int BarWidth = 560;
+        public const int BarHeight = 18;
+        public const int TopMargin = 42;
+        public const int VerticalSpacing = 88;
 
         public static List<CyberBossHPUI> Bars;
         public static List<int> ExclusionList;
@@ -84,7 +85,7 @@ namespace CalamityOverhaul.Content.UIs.BossBars
     {
         public const int OpenTime = 50;
         public const int CloseTime = 80;
-        public const int HitFlashFrames = 20;
+        public const int HitFlashFrames = 22;
 
         public int NPCIndex;
         public int IntendedType;
@@ -96,11 +97,13 @@ namespace CalamityOverhaul.Content.UIs.BossBars
         public float TrailRatio = 1f;
         public float HitFlash;
 
-        private static readonly Color PrimaryRed = new(210, 28, 28);
-        private static readonly Color DimRed = new(90, 12, 12);
-        private static readonly Color TrailColor = new(140, 20, 20, 120);
-        private static readonly Color GlowCore = new(255, 60, 40, 55);
-        private static readonly Color GlowSoft = new(200, 25, 15, 22);
+        //赛博朋克2077 HUD标志色：琥珀黄与危险红
+        private static readonly Color AmberHigh = new(255, 210, 30);
+        private static readonly Color AmberMid = new(255, 138, 30);
+        private static readonly Color AmberLow = new(255, 50, 55);
+        private static readonly Color InkBlack = new(8, 6, 4);
+        private static readonly Color ChromaCyan = new(0, 210, 255);
+        private static readonly Color ChromaRed = new(255, 40, 60);
 
         public NPC Target => Main.npc.IndexInRange(NPCIndex) ? Main.npc[NPCIndex] : null;
 
@@ -148,6 +151,28 @@ namespace CalamityOverhaul.Content.UIs.BossBars
             if (HitFlash < 0f) HitFlash = 0f;
         }
 
+        //威胁色插值(高=琥珀黄,中=橘,低=红)
+        private static Color ThreatColor(float r) {
+            if (r > 0.6f) return Color.Lerp(AmberMid, AmberHigh, (r - 0.6f) / 0.4f);
+            if (r > 0.3f) return Color.Lerp(AmberLow, AmberMid, (r - 0.3f) / 0.3f);
+            return AmberLow;
+        }
+
+        //lifeMax对数映射出威胁等级(仅视觉)
+        private static int ComputeLevel(long maxLife) {
+            if (maxLife <= 1) return 1;
+            double lv = Math.Log10(maxLife) * 9.5;
+            return Math.Clamp((int)lv, 1, 99);
+        }
+
+        private string StatusTag() {
+            NPC npc = Target;
+            if (npc == null || !npc.active) return "[ NEUTRALIZED ]";
+            if (LifeRatio < 0.2f) return "[ CRITICAL ]";
+            if (LifeRatio < 0.5f) return "[ WOUNDED ]";
+            return "[ HOSTILE ]";
+        }
+
         public void Draw(SpriteBatch sb, float cx, float y) {
             NPC npc = Target;
             if (npc == null) return;
@@ -166,66 +191,112 @@ namespace CalamityOverhaul.Content.UIs.BossBars
             Texture2D px = TextureAssets.MagicPixel.Value;
             float barW = CyberBossBarStyle.BarWidth;
             float left = cx - barW / 2f;
+            Color primary = ThreatColor(LifeRatio);
+            Color primaryDim = primary * 0.35f;
 
-            //名称（左对齐，实心黑边）
-            var titleFont = FontAssets.DeathText.Value;
-            const float nameScale = 0.44f;
-            string name = npc.FullName;
-            Vector2 nameSize = titleFont.MeasureString(name) * nameScale;
-            Utils.DrawBorderStringFourWay(sb, titleFont, name,
-                left, y, PrimaryRed * alpha, Color.Black * alpha, Vector2.Zero, nameScale);
+            var nameFont = FontAssets.DeathText.Value;
+            var sFont = FontAssets.MouseText.Value;
+            const float nameScale = 0.48f;
+            const float smallScale = 0.82f;
+            const float tagScale = 0.72f;
 
-            y += nameSize.Y + 2;
+            string name = npc.FullName.ToUpperInvariant();
+            string lvText = $"LV.{ComputeLevel(InitMaxLife):00}";
+            string hpText = $"{Math.Max(npc.life, 0):N0} / {InitMaxLife:N0}";
 
-            //分隔线
-            sb.Draw(px, new Rectangle((int)left, (int)y, (int)barW, 1), PrimaryRed * (alpha * 0.65f));
-            y += 4;
+            Vector2 nameSize = nameFont.MeasureString(name) * nameScale;
+            Vector2 lvSize = sFont.MeasureString(lvText) * smallScale;
+            Vector2 hpSize = sFont.MeasureString(hpText) * smallScale;
 
-            //百分比（左对齐）
-            var textFont = FontAssets.MouseText.Value;
-            const float pctScale = 0.8f;
-            string pctText = $"{(int)(LifeRatio * 100)}%";
-            Vector2 pctSize = textFont.MeasureString(pctText) * pctScale;
-            Utils.DrawBorderStringFourWay(sb, textFont, pctText,
-                left, y, PrimaryRed * alpha, Color.Black * alpha, Vector2.Zero, pctScale);
+            float topH = nameSize.Y;
 
-            //血条区域
-            float bLeft = left + pctSize.X + 8;
-            float bWidth = barW - pctSize.X - 8;
+            //———— 等级章(始终琥珀黄底黑字,带斜切) ————
+            //LV底色固定使用高威胁琥珀黄,与威胁色解耦保证黄底黑字可读
+            Color lvBg = AmberHigh;
+            float lvBoxW = lvSize.X + 18;
+            float lvBoxH = lvSize.Y + 4;
+            float lvBoxY = y + (topH - lvBoxH) / 2f;
+            sb.Draw(px, new Rectangle((int)left, (int)lvBoxY, (int)lvBoxW, (int)lvBoxH), lvBg * alpha);
+            //右下切角(用透明扣除外形)
+            sb.Draw(px, new Rectangle((int)(left + lvBoxW - 4), (int)(lvBoxY + lvBoxH - 3), 4, 3), Color.Transparent);
+            sb.Draw(px, new Rectangle((int)(left + lvBoxW - 7), (int)(lvBoxY + lvBoxH - 2), 3, 2), Color.Transparent);
+            //黑字无描边以避免覆盖字芯
+            Utils.DrawBorderStringFourWay(sb, sFont, lvText,
+                left + 9, lvBoxY + 1, Color.Black * alpha, Color.Transparent, Vector2.Zero, smallScale);
+
+            //———— 名称(仅受击时色散) ————
+            float nameX = left + lvBoxW + 10;
+            float chroma = HitFlash * 4f;
+            if (chroma > 0.5f) {
+                Utils.DrawBorderStringFourWay(sb, nameFont, name,
+                    nameX - chroma, y, ChromaCyan * (alpha * 0.55f), Color.Transparent, Vector2.Zero, nameScale);
+                Utils.DrawBorderStringFourWay(sb, nameFont, name,
+                    nameX + chroma, y, ChromaRed * (alpha * 0.55f), Color.Transparent, Vector2.Zero, nameScale);
+            }
+            Utils.DrawBorderStringFourWay(sb, nameFont, name,
+                nameX, y, primary * alpha, InkBlack * alpha, Vector2.Zero, nameScale);
+
+            //———— HP数值(右对齐) ————
+            float hpY = y + (topH - hpSize.Y) / 2f;
+            Utils.DrawBorderStringFourWay(sb, sFont, hpText,
+                left + barW - hpSize.X, hpY, primary * alpha, InkBlack * alpha, Vector2.Zero, smallScale);
+
+            y += topH + 6;
+
+            //———— 血条区 ————
+            float bLeft = left;
+            float bWidth = barW;
             int bH = CyberBossBarStyle.BarHeight;
 
-            //拖尾
+            //灰色拖尾
             int trailW = (int)(bWidth * TrailRatio);
-            if (trailW > 0)
-                sb.Draw(px, new Rectangle((int)bLeft, (int)y + 1, trailW, bH - 2), TrailColor * alpha);
+            if (trailW > 0) {
+                sb.Draw(px, new Rectangle((int)bLeft + 2, (int)y + 3, trailW - 4, bH - 6),
+                    new Color(130, 120, 100) * (alpha * 0.45f));
+            }
 
-            //Additive辉光层
+            //着色器主条(外扩以容纳斜边)
+            DrawShaderBar(sb, bLeft - 4, y - 2, bWidth + 8, bH + 4, alpha);
+
+            //———— Additive辉光层 ————
             sb.End();
             sb.Begin(SpriteSortMode.Deferred, BlendState.Additive, SamplerState.PointClamp,
                 DepthStencilState.None, RasterizerState.CullNone, null, Main.UIScaleMatrix);
 
             int glowW = (int)(bWidth * SmoothRatio);
             if (glowW > 0) {
-                sb.Draw(px, new Rectangle((int)bLeft, (int)y - 3, glowW, bH + 6), GlowSoft * alpha);
-                sb.Draw(px, new Rectangle((int)bLeft, (int)y - 1, glowW, bH + 2), GlowSoft * (alpha * 0.5f));
+                sb.Draw(px, new Rectangle((int)bLeft, (int)y - 5, glowW, bH + 10),
+                    primary * (alpha * 0.18f));
+                if (glowW > 8) {
+                    sb.Draw(px, new Rectangle((int)(bLeft + glowW - 6), (int)y - 6, 12, bH + 12),
+                        primary * (alpha * 0.55f));
+                }
+                if (HitFlash > 0.01f) {
+                    sb.Draw(px, new Rectangle((int)bLeft, (int)y - 4, glowW, bH + 8),
+                        new Color(255, 240, 180) * (alpha * HitFlash * 0.55f));
+                }
             }
-            if (glowW > 6)
-                sb.Draw(px, new Rectangle((int)(bLeft + glowW - 5), (int)(y - 4), 10, bH + 8), GlowCore * alpha);
-            if (HitFlash > 0.01f)
-                sb.Draw(px, new Rectangle((int)bLeft, (int)y - 2, glowW, bH + 4), GlowCore * (alpha * HitFlash * 0.5f));
 
             sb.End();
             sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp,
                 DepthStencilState.None, RasterizerState.CullNone, null, Main.UIScaleMatrix);
 
-            //着色器血条（加高矩形适配弧度）
-            int shaderH = bH + 12;
-            float shaderY = y - 6;
-            DrawShaderBar(sb, bLeft, shaderY, bWidth, shaderH, alpha);
+            //———— 底部状态标签 ————
+            float botY = y + bH + 6;
 
-            //底部细线
-            //float bottomY = y + bH + 3;
-            //sb.Draw(px, new Rectangle((int)left, (int)bottomY, (int)barW, 1), DimRed * (alpha * 0.4f));
+            //左下ID(小字直接用主色,不加描边)
+            string idTag = $"TYPE:{npc.type:0000}";
+            sb.Draw(px, new Rectangle((int)left, (int)(botY + 4), 4, 4), primary * (alpha * 0.85f));
+            sb.DrawString(sFont, idTag, new Vector2(left + 8, botY + 2), primary * (alpha * 0.85f), 0f, Vector2.Zero, tagScale, SpriteEffects.None, 0f);
+
+            //右下状态标签(危急闪烁)
+            string tag = StatusTag();
+            float tagAlpha = alpha;
+            if (LifeRatio < 0.2f) {
+                tagAlpha *= 0.6f + 0.4f * (float)Math.Sin(Main.GameUpdateCount * 0.25f);
+            }
+            Vector2 tagSize = sFont.MeasureString(tag) * tagScale;
+            sb.DrawString(sFont, tag, new Vector2(left + barW - tagSize.X, botY + 2), primary * tagAlpha, 0f, Vector2.Zero, tagScale, SpriteEffects.None, 0f);
         }
 
         private void DrawShaderBar(SpriteBatch sb, float x, float y, float w, float h, float alpha) {
@@ -252,6 +323,7 @@ namespace CalamityOverhaul.Content.UIs.BossBars
             }
             else {
                 //降级绘制
+                Color fallback = ThreatColor(LifeRatio);
                 int fillW = (int)(w * SmoothRatio);
                 float segW = w / 20f;
                 for (int i = 0; i < 20; i++) {
@@ -262,7 +334,7 @@ namespace CalamityOverhaul.Content.UIs.BossBars
                     if (end <= segStart) continue;
                     sb.Draw(px, new Rectangle(
                         (int)(x + segStart), (int)y,
-                        (int)(end - segStart), (int)h), PrimaryRed * alpha);
+                        (int)(end - segStart), (int)h), fallback * alpha);
                 }
             }
         }
