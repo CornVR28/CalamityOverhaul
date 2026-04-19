@@ -569,7 +569,6 @@ namespace CalamityOverhaul
         public static Type GetItem_SHPC_Type() => FindCalamityType("CalamityMod.Items.Weapons.Magic.SHPC");
         public static Type GetNPC_WITCH_Type() => FindCalamityType("CalamityMod.NPCs.TownNPCs.BrimstoneWitch");
         public static Type GetNPC_SupCal_Type() => FindCalamityType("CalamityMod.NPCs.SupremeCalamitas.SupremeCalamitas");
-        public static Type GetTEBaseTurret_Type() => FindCalamityType("CalamityMod.TileEntities.TEBaseTurret");
 
         /// <summary>
         /// 设置SHPC的装填魂魄类型

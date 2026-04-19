@@ -5,7 +5,6 @@ using CalamityOverhaul.Content.ADV.Scenarios.Draedons;
 using CalamityOverhaul.Content.ADV.Scenarios.Draedons.Quest.DeploySignaltowers.SignalTower;
 using CalamityOverhaul.Content.ADV.Scenarios.Draedons.Tzeentch;
 using CalamityOverhaul.Content.ADV.Scenarios.SupCal.End.EternalBlazingNows;
-using CalamityOverhaul.Content.Industrials.Modifys;
 using CalamityOverhaul.Content.Items.Tools;
 using CalamityOverhaul.Content.LegendWeapon.HalibutLegend;
 using CalamityOverhaul.Content.LegendWeapon.HalibutLegend.Resurrections;
@@ -22,7 +21,6 @@ namespace CalamityOverhaul
     {
         NPCbasicData,
         ProjectileDyeItemID,
-        KillTileEntity,
         TruffleSleep,
         GlobalSleep,
         CrabulonFeed,
@@ -57,9 +55,6 @@ namespace CalamityOverhaul
             }
             else if (type == CWRMessageType.ProjectileDyeItemID) {
                 CWRProjectile.HandleProjectileDyeItemID(reader, whoAmI);
-            }
-            else if (type == CWRMessageType.KillTileEntity) {
-                ModifyTurretLoader.HandlerNetKillTE(reader, whoAmI);
             }
             else if (type == CWRMessageType.TruffleSleep) {
                 ModifyTruffle.HandleNetwork(reader, whoAmI);
