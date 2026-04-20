@@ -91,6 +91,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             shader.Parameters["uTime"]?.SetValue(Main.GlobalTimeWrappedHourly);
             shader.Parameters["vignetteStrength"]?.SetValue(0.6f);
             shader.Parameters["tintStrength"]?.SetValue(1.0f);
+            shader.Parameters["uScreenSize"]?.SetValue(new Vector2(Main.screenWidth, Main.screenHeight));
 
             //应用着色器并绘制回主屏幕
             graphicsDevice.SetRenderTarget(Main.screenTarget);
