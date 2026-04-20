@@ -22,6 +22,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures
         [SyncVar]
         public int EndX;
 
+        /// <summary>当前可见度，机制与ArchitectureActor保持一致</summary>
+        private float visibility;
+
         public PortKind Kind => (PortKind)KindByte;
 
         public override void OnSpawn(params object[] args) {
@@ -32,7 +35,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures
         public override void AI() {
             if (!VoidColony.Active) {
                 ActorLoader.KillActor(WhoAmI);
+                return;
             }
+            ArchitectureWarpDraw.TickVisibility(ref visibility);
         }
 
         private void ApplyBoundingBox() {
@@ -49,6 +54,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures
                 ? ArchitectureAsset.ConnectionBridgeSegment
                 : ArchitectureAsset.TubularConnectorTunnel;
             if (tex == null) return false;
+            if (!ArchitectureWarpDraw.ShouldDraw(visibility)) return false;
 
             int leftX = Math.Min(StartX, EndX);
             int rightX = Math.Max(StartX, EndX);
@@ -56,20 +62,15 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures
             if (span < 4) return false;
 
             int segWidth = tex.Width;
-            int segHeight = tex.Height;
-            //贴图锚点位于其竖直中线，这样端点Y对应桥面/管腔中心
-            Vector2 origin = new(0f, segHeight * 0.5f);
-
             int segCount = Math.Max(1, (int)Math.Ceiling(span / (float)segWidth));
-            for (int i = 0; i < segCount; i++) {
-                //最后一段回退对齐到右端，避免超出或缝隙
-                int segLeft = i == segCount - 1 ? rightX - segWidth : leftX + i * segWidth;
-                int sampleTileX = Math.Clamp((segLeft + segWidth / 2) / 16, 0, Main.maxTilesX - 1);
-                int sampleTileY = Math.Clamp(StartY / 16, 0, Main.maxTilesY - 1);
-                Color light = Lighting.GetColor(sampleTileX, sampleTileY);
+            float warp = ArchitectureWarpDraw.ComputeWarp();
+            //贴图锚点位于竖直中线，因此左上角Y = 端点Y - 半高
+            int topY = StartY - tex.Height / 2;
 
-                Vector2 drawPos = new Vector2(segLeft, StartY) - Main.screenPosition;
-                spriteBatch.Draw(tex, drawPos, null, light, 0f, origin, 1f, SpriteEffects.None, 0f);
+            for (int i = 0; i < segCount; i++) {
+                int segLeft = i == segCount - 1 ? rightX - segWidth : leftX + i * segWidth;
+                Vector2 drawPos = new Vector2(segLeft, topY) - Main.screenPosition;
+                ArchitectureWarpDraw.DrawWithShader(spriteBatch, tex, drawPos, visibility, warp);
             }
             return false;
         }

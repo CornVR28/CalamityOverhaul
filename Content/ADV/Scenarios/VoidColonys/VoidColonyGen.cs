@@ -1,5 +1,4 @@
 ﻿using CalamityOverhaul.Common;
-using CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.PastBridges;
 using System;
 using Terraria;
 using Terraria.ID;
@@ -100,10 +99,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys
             //============ 第六步：规划并登记科技建筑，由ArchitectureSpawner负责生成Actor ============
             progress.Message = "正在部署虚空科技建筑...";
             Architectures.ArchitecturePlacer.BuildAll();
-
-            //============ 第七步：记录过去形态方块，入侵过去时批量放置 ============
-            progress.Message = "正在烙印过去残垣的残响...";
-            PastRoomGen.BuildAll();
 
             var coreIsland = IslandRegistry.FindByTag("核心实验室");
             if (coreIsland != null) {

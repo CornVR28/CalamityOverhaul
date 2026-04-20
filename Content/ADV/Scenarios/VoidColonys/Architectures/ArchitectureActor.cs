@@ -20,6 +20,12 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures
         /// <summary>是否已根据贴图尺寸完成初始化</summary>
         private bool initialized;
 
+        /// <summary>
+        /// 当前可见度，过去时逼近1，现在时逼近0
+        /// 初始为0以便玩家首次进入过去时也能播一次扭曲浮现
+        /// </summary>
+        private float visibility;
+
         public ArchitectureType Type => (ArchitectureType)TypeByte;
 
         public override void OnSpawn(params object[] args) {
@@ -36,6 +42,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures
                 ActorLoader.KillActor(WhoAmI);
                 return;
             }
+            ArchitectureWarpDraw.TickVisibility(ref visibility);
             Velocity = Vector2.Zero;
         }
 
@@ -52,16 +59,11 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures
         public override bool PreDraw(SpriteBatch spriteBatch, ref Color drawColor) {
             Texture2D tex = ArchitectureAsset.Get(Type);
             if (tex == null) return false;
+            if (!ArchitectureWarpDraw.ShouldDraw(visibility)) return false;
 
-            //按贴图中心采样光照，保证整座建筑拿到统一但合理的亮度
-            int lx = (int)((Position.X + tex.Width * 0.5f) / 16f);
-            int ly = (int)((Position.Y + tex.Height * 0.5f) / 16f);
-            lx = Math.Clamp(lx, 0, Main.maxTilesX - 1);
-            ly = Math.Clamp(ly, 0, Main.maxTilesY - 1);
-            Color lightColor = Lighting.GetColor(lx, ly);
-
+            float warp = ArchitectureWarpDraw.ComputeWarp();
             Vector2 drawPos = Position - Main.screenPosition;
-            spriteBatch.Draw(tex, drawPos, null, lightColor, 0f, Vector2.Zero, 1f, SpriteEffects.None, 0f);
+            ArchitectureWarpDraw.DrawWithShader(spriteBatch, tex, drawPos, visibility, warp);
             return false;
         }
     }
