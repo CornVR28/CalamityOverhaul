@@ -1,160 +1,275 @@
+using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 using Terraria;
+using Terraria.ModLoader;
 
 namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures
 {
     /// <summary>
+    /// 已放置建筑的运行时记录，坐标单位为像素
+    /// </summary>
+    internal class PlacedBuilding
+    {
+        public ArchitectureType Type;
+        public int PixelX;
+        public int PixelY;
+        public int WidthPx;
+        public int HeightPx;
+
+        public Vector2 GetPortWorld(int portIndex) {
+            var port = ArchitecturePorts.Get(Type)[portIndex];
+            return ArchitecturePorts.ToWorldPixel(port, PixelX, PixelY);
+        }
+
+        public ArchitecturePort GetPort(int portIndex) => ArchitecturePorts.Get(Type)[portIndex];
+    }
+
+    /// <summary>
     /// 虚空聚落建筑布局规划器
-    /// 在世界生成末尾按岛屿布局自动选点放置建筑，并用桥段与管段串联核心与各卫星岛
+    /// 以核心岛为中心排布一条水平的建筑群：观测哨-能源站-核心实验室-分析实验室-观测哨
+    /// 所有连接为纯水平桥梁，端点Y通过端口对齐计算保证直线贴合
+    /// 卫星岛与外圈哨站岛各自独立放置一栋建筑，不做跨岛连接，避免需要拐角的错配
     /// 只负责计算位置与写入<see cref="ArchitectureRegistry"/>，不直接生成Actor
     /// </summary>
     internal static class ArchitecturePlacer
     {
-        //卫星岛标签到建筑类型的映射表
-        private static readonly (string tag, ArchitectureType type)[] SatelliteBuildings = [
-            ("能量控制站", ArchitectureType.EnergyControlStation),
-            ("核心亚空间能量分析站", ArchitectureType.EnergyControlStation),
-            ("超凡材料分析实验室", ArchitectureType.MidSizeMaterialAnalysisLab),
-            ("亚空间异界生物实验室_上", ArchitectureType.MidSizeMaterialAnalysisLab),
-            ("亚空间异界生物实验室_下", ArchitectureType.MidSizeMaterialAnalysisLab),
-        ];
+        private const int PixelsPerTile = 16;
+        //相邻建筑之间的水平间距，留给桥段一段整齐的展开距离
+        private const int InterBuildingGapPx = 320;
 
-        //观测哨数量上限
-        private const int ObservationPostCount = 4;
-        //观测哨挑选时与其他观测哨的最小距离（格）
-        private const int ObservationPostMinSpacing = 260;
+        //卫星岛标签→建筑类型
+        private static readonly Dictionary<string, ArchitectureType> SatelliteBuildings = new() {
+            ["能量控制站"] = ArchitectureType.EnergyControlStation,
+            ["核心亚空间能量分析站"] = ArchitectureType.EnergyControlStation,
+            ["超凡材料分析实验室"] = ArchitectureType.MidSizeMaterialAnalysisLab,
+            ["亚空间异界生物实验室_上"] = ArchitectureType.MidSizeMaterialAnalysisLab,
+            ["亚空间异界生物实验室_下"] = ArchitectureType.MidSizeMaterialAnalysisLab,
+        };
 
-        //桥段高度像素，用于垂直居中放置
-        private const int BridgeHeightPx = 150;
-        //管段相对于桥段的垂直偏移（管段位于桥段之上）
-        private const int TunnelOffsetAboveBridge = 140;
-        private const int TunnelHeightPx = 122;
-        //每段桥和管道的宽度（px），略小于贴图宽以允许少量重叠避免接缝
-        private const int BridgeSegmentSpacingPx = 540;
-        private const int TunnelSegmentSpacingPx = 376;
-
-        /// <summary>
-        /// 执行完整的建筑布局规划
-        /// 需要在<see cref="IslandRegistry.ScanAllSurfaces"/>之后调用，以便使用各岛屿的精确表面高度
-        /// </summary>
         public static void BuildAll() {
             ArchitectureRegistry.Clear();
 
             var core = IslandRegistry.FindByTag("核心实验室");
-            if (core == null) {
-                return;
-            }
+            if (core == null) return;
 
-            //核心实验室落在核心岛上表面正中
-            PlaceBuildingOnIsland(core, ArchitectureType.CoreVoidLab);
-
-            //按映射表放置所有卫星建筑，同时为每座卫星向核心方向搭桥+铺管
-            foreach (var (tag, type) in SatelliteBuildings) {
-                var sat = IslandRegistry.FindByTag(tag);
-                if (sat == null) continue;
-                PlaceBuildingOnIsland(sat, type);
-                ConnectToCore(sat, core);
-            }
-
-            //外圈挑选数座观测哨
-            PlaceObservationPosts(core);
+            BuildCoreCluster(core);
+            BuildSatelliteStandalones();
+            BuildOutpostStandalones(core);
         }
 
-        /// <summary>
-        /// 将建筑贴图以"底部中心对齐岛屿表面、水平居中对齐岛屿中心"的方式放置
-        /// </summary>
-        private static void PlaceBuildingOnIsland(IslandData island, ArchitectureType type) {
-            var tex = ArchitectureAsset.Get(type);
-            if (tex == null) return;
-
-            int surfaceTileY = island.SurfaceY > 0 ? island.SurfaceY : island.CenterY;
-            int pixelX = island.CenterX * 16 - tex.Width / 2;
-            int pixelY = surfaceTileY * 16 - tex.Height;
-
-            ArchitectureRegistry.Add(type, pixelX, pixelY);
-        }
+        #region 核心岛簇：直线桥梁串联
 
         /// <summary>
-        /// 从卫星岛向核心岛搭建一条水平的"桥段+管段"并行廊道
-        /// 桥段位于卫星表面高度，管段沿桥段之上平行铺设
+        /// 在核心岛上沿中心横轴一字排开五栋建筑，按端口对齐Y逐对牵直线桥梁
+        /// 核心建筑落在岛面，其余建筑依靠端口Y强制对齐而浮空，由桁架平台补地
         /// </summary>
-        private static void ConnectToCore(IslandData satellite, IslandData core) {
-            var bridgeTex = ArchitectureAsset.Get(ArchitectureType.ConnectionBridgeSegment);
-            var tunnelTex = ArchitectureAsset.Get(ArchitectureType.TubularConnectorTunnel);
-            if (bridgeTex == null || tunnelTex == null) return;
+        private static void BuildCoreCluster(IslandData core) {
+            var coreTex = ArchitectureAsset.Get(ArchitectureType.CoreVoidLab);
+            if (coreTex == null) return;
 
-            bool satRightOfCore = satellite.CenterX >= core.CenterX;
-            //起点为卫星朝向核心那一侧的边缘
-            int startTileX = satRightOfCore
-                ? satellite.CenterX - satellite.HalfWidth
-                : satellite.CenterX + satellite.HalfWidth;
-            //终点为核心朝向卫星那一侧的边缘
-            int endTileX = satRightOfCore
-                ? core.CenterX + core.HalfWidth
-                : core.CenterX - core.HalfWidth;
+            //核心建筑以底边对齐岛面中心柱的方式落点
+            int surfacePx = core.SurfaceY * PixelsPerTile;
+            int coreCenterPx = core.CenterX * PixelsPerTile;
+            int corePixelX = coreCenterPx - coreTex.Width / 2;
+            int corePixelY = surfacePx - coreTex.Height;
+            var coreBuilding = RegisterPlaced(ArchitectureType.CoreVoidLab, corePixelX, corePixelY, coreTex);
 
-            int spanPx = Math.Abs(endTileX - startTileX) * 16;
-            if (spanPx < BridgeSegmentSpacingPx) return;
+            //核心的左右桥梁口（使用上层，LocalY=580）
+            int coreLeftBridgeIdx = FindPortIndex(coreBuilding, PortKind.Bridge, PortSide.Left);
+            int coreRightBridgeIdx = FindPortIndex(coreBuilding, PortKind.Bridge, PortSide.Right);
 
-            //桥段Y：让桥段中心对齐卫星表面的略上方，让玩家视觉上看到桥挂在岛边
-            int bridgeCenterPxY = satellite.SurfaceY * 16 - 8;
-            int bridgePxY = bridgeCenterPxY - BridgeHeightPx / 2;
-
-            int bridgeCount = Math.Max(1, spanPx / BridgeSegmentSpacingPx);
-            int direction = satRightOfCore ? -1 : 1;
-            //桥段起始X，让起始段的外侧刚好贴在卫星边缘
-            int bridgeStartPxX = startTileX * 16;
-            if (direction < 0) bridgeStartPxX -= bridgeTex.Width;
-
-            for (int i = 0; i < bridgeCount; i++) {
-                int px = bridgeStartPxX + direction * i * BridgeSegmentSpacingPx;
-                ArchitectureRegistry.Add(ArchitectureType.ConnectionBridgeSegment, px, bridgePxY);
-            }
-
-            //管段：位于桥段上方，独立计算数量，段间距略小
-            int tunnelPxY = bridgePxY - TunnelOffsetAboveBridge - TunnelHeightPx;
-            int tunnelCount = Math.Max(1, spanPx / TunnelSegmentSpacingPx);
-            int tunnelStartPxX = startTileX * 16;
-            if (direction < 0) tunnelStartPxX -= tunnelTex.Width;
-
-            for (int i = 0; i < tunnelCount; i++) {
-                int px = tunnelStartPxX + direction * i * TunnelSegmentSpacingPx;
-                ArchitectureRegistry.Add(ArchitectureType.TubularConnectorTunnel, px, tunnelPxY);
-            }
-        }
-
-        /// <summary>
-        /// 在距离核心较远的哨站岛上放置观测哨
-        /// 每座观测哨之间保持一定间距，避免挤成一团
-        /// </summary>
-        private static void PlaceObservationPosts(IslandData core) {
-            var outposts = IslandRegistry.GetByTier(IslandTier.Outpost);
-            if (outposts.Count == 0) return;
-
-            //按与核心距离降序排序，优先选择外圈
-            outposts.Sort((a, b) => core.DistanceTo(b).CompareTo(core.DistanceTo(a)));
-
-            List<IslandData> chosen = [];
-            foreach (var candidate in outposts) {
-                if (candidate.HalfWidth < 12) continue;
-                bool tooClose = false;
-                foreach (var picked in chosen) {
-                    float dx = candidate.CenterX - picked.CenterX;
-                    float dy = candidate.CenterY - picked.CenterY;
-                    if (dx * dx + dy * dy < ObservationPostMinSpacing * ObservationPostMinSpacing) {
-                        tooClose = true;
-                        break;
+            //向左依次挂接：能源站→观测哨
+            var leftAnchorPort = coreLeftBridgeIdx >= 0
+                ? (PlacedBuilding)coreBuilding
+                : null;
+            int leftAnchorPortIndex = coreLeftBridgeIdx;
+            if (leftAnchorPort != null) {
+                var energy = AppendFlankTowardsLeft(coreBuilding, coreLeftBridgeIdx,
+                    ArchitectureType.EnergyControlStation, surfacePx);
+                if (energy != null) {
+                    int energyOuterLeft = FindPortIndex(energy, PortKind.Bridge, PortSide.Left);
+                    if (energyOuterLeft >= 0) {
+                        AppendFlankTowardsLeft(energy, energyOuterLeft,
+                            ArchitectureType.ObservationPostTelescope, surfacePx);
                     }
                 }
-                if (tooClose) continue;
-                chosen.Add(candidate);
-                if (chosen.Count >= ObservationPostCount) break;
             }
 
-            foreach (var island in chosen) {
-                PlaceBuildingOnIsland(island, ArchitectureType.ObservationPostTelescope);
+            //向右依次挂接：分析实验室→观测哨
+            if (coreRightBridgeIdx >= 0) {
+                var midlab = AppendFlankTowardsRight(coreBuilding, coreRightBridgeIdx,
+                    ArchitectureType.MidSizeMaterialAnalysisLab, surfacePx);
+                if (midlab != null) {
+                    int midOuterRight = FindPortIndex(midlab, PortKind.Bridge, PortSide.Right);
+                    if (midOuterRight >= 0) {
+                        AppendFlankTowardsRight(midlab, midOuterRight,
+                            ArchitectureType.ObservationPostTelescope, surfacePx);
+                    }
+                }
             }
         }
+
+        /// <summary>
+        /// 在给定基准建筑的左侧追加一栋邻居，端口Y对齐后生成直线桥梁并补桁架地基
+        /// </summary>
+        private static PlacedBuilding AppendFlankTowardsLeft(PlacedBuilding anchor, int anchorPortIdx,
+            ArchitectureType type, int surfacePx) {
+            var tex = ArchitectureAsset.Get(type);
+            if (tex == null) return null;
+
+            //邻居使用其Right桥梁口与基准的Left桥梁口对齐
+            var ports = ArchitecturePorts.Get(type);
+            int neighborPortIdx = FindPortIndexInTable(ports, PortKind.Bridge, PortSide.Right);
+            if (neighborPortIdx < 0) return null;
+
+            Vector2 anchorPortWorld = anchor.GetPortWorld(anchorPortIdx);
+            var neighborPort = ports[neighborPortIdx];
+            int pixelY = (int)anchorPortWorld.Y - neighborPort.LocalY;
+            //邻居右端口X = 基准左端口X - 间距，倒推出pixelX
+            int pixelX = (int)anchorPortWorld.X - InterBuildingGapPx - neighborPort.LocalX;
+
+            var placed = RegisterPlaced(type, pixelX, pixelY, tex);
+            FillTrussUnderFootprint(placed, surfacePx);
+
+            //桥梁：Y使用对齐后的端口Y
+            int bridgeY = (int)anchorPortWorld.Y;
+            int bridgeLeftX = pixelX + neighborPort.LocalX;
+            int bridgeRightX = (int)anchorPortWorld.X;
+            ArchitectureRegistry.AddConnector(PortKind.Bridge, bridgeLeftX, bridgeY, bridgeRightX);
+            return placed;
+        }
+
+        /// <summary>
+        /// 在给定基准建筑的右侧追加一栋邻居，端口Y对齐后生成直线桥梁并补桁架地基
+        /// </summary>
+        private static PlacedBuilding AppendFlankTowardsRight(PlacedBuilding anchor, int anchorPortIdx,
+            ArchitectureType type, int surfacePx) {
+            var tex = ArchitectureAsset.Get(type);
+            if (tex == null) return null;
+
+            var ports = ArchitecturePorts.Get(type);
+            int neighborPortIdx = FindPortIndexInTable(ports, PortKind.Bridge, PortSide.Left);
+            if (neighborPortIdx < 0) return null;
+
+            Vector2 anchorPortWorld = anchor.GetPortWorld(anchorPortIdx);
+            var neighborPort = ports[neighborPortIdx];
+            int pixelY = (int)anchorPortWorld.Y - neighborPort.LocalY;
+            int pixelX = (int)anchorPortWorld.X + InterBuildingGapPx - neighborPort.LocalX;
+
+            var placed = RegisterPlaced(type, pixelX, pixelY, tex);
+            FillTrussUnderFootprint(placed, surfacePx);
+
+            int bridgeY = (int)anchorPortWorld.Y;
+            int bridgeLeftX = (int)anchorPortWorld.X;
+            int bridgeRightX = pixelX + neighborPort.LocalX;
+            ArchitectureRegistry.AddConnector(PortKind.Bridge, bridgeLeftX, bridgeY, bridgeRightX);
+            return placed;
+        }
+
+        #endregion
+
+        #region 卫星岛 / 哨站岛独立建筑
+
+        private static void BuildSatelliteStandalones() {
+            foreach (var island in IslandRegistry.Islands) {
+                if (island.Tier != IslandTier.Satellite) continue;
+                if (!SatelliteBuildings.TryGetValue(island.Tag ?? "", out var type)) continue;
+                PlaceOnIslandSurface(island, type);
+            }
+        }
+
+        /// <summary>
+        /// 哨站岛随机点缀一些观测哨，作为远景装饰
+        /// </summary>
+        private static void BuildOutpostStandalones(IslandData core) {
+            var outposts = IslandRegistry.GetByTier(IslandTier.Outpost);
+            if (outposts.Count == 0) return;
+            //按距核心岛由远到近选取前若干，突出边缘存在感
+            outposts.Sort((a, b) => core.DistanceTo(b).CompareTo(core.DistanceTo(a)));
+            const int MaxOutpostBuildings = 3;
+            int placed = 0;
+            foreach (var island in outposts) {
+                if (placed >= MaxOutpostBuildings) break;
+                if (island.HalfWidth < 12) continue;
+                if (PlaceOnIslandSurface(island, ArchitectureType.ObservationPostTelescope) != null) {
+                    placed++;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 以贴图底部中心对齐岛屿表面Y的方式放置建筑
+        /// </summary>
+        private static PlacedBuilding PlaceOnIslandSurface(IslandData island, ArchitectureType type) {
+            var tex = ArchitectureAsset.Get(type);
+            if (tex == null) return null;
+            int surfaceTileY = island.SurfaceY > 0 ? island.SurfaceY : island.CenterY;
+            int pixelX = island.CenterX * PixelsPerTile - tex.Width / 2;
+            int pixelY = surfaceTileY * PixelsPerTile - tex.Height;
+            return RegisterPlaced(type, pixelX, pixelY, tex);
+        }
+
+        #endregion
+
+        #region 桁架地基与注册
+
+        /// <summary>
+        /// 在建筑浮空时，沿其底部到岛面之间填充一层一层VoidPlating/VoidFramework作支撑
+        /// 只在当前格为空时落砖，避免破坏已有地面或岛屿外缘的自然剖面
+        /// </summary>
+        private static void FillTrussUnderFootprint(PlacedBuilding building, int surfacePx) {
+            int bottomPx = building.PixelY + building.HeightPx;
+            if (bottomPx >= surfacePx) return;
+
+            int leftTile = building.PixelX / PixelsPerTile;
+            int rightTile = (building.PixelX + building.WidthPx - 1) / PixelsPerTile;
+            int topTile = bottomPx / PixelsPerTile;
+            int bottomTile = surfacePx / PixelsPerTile;
+
+            int plating = ModContent.TileType<VoidPlating>();
+            int framework = ModContent.TileType<VoidFramework>();
+
+            for (int x = leftTile; x <= rightTile; x++) {
+                if (x < 0 || x >= Main.maxTilesX) continue;
+                for (int y = topTile; y < bottomTile; y++) {
+                    if (y < 0 || y >= Main.maxTilesY) continue;
+                    if (Main.tile[x, y].HasTile) continue;
+                    //外边沿走桁架，内部走装甲板
+                    bool isEdge = x == leftTile || x == rightTile || y == topTile;
+                    int tileType = isEdge ? framework : plating;
+                    WorldGen.PlaceTile(x, y, tileType, mute: true, forced: true);
+                }
+            }
+        }
+
+        private static PlacedBuilding RegisterPlaced(ArchitectureType type,
+            int pixelX, int pixelY, Microsoft.Xna.Framework.Graphics.Texture2D tex) {
+            ArchitectureRegistry.Add(type, pixelX, pixelY);
+            var placed = new PlacedBuilding {
+                Type = type,
+                PixelX = pixelX,
+                PixelY = pixelY,
+                WidthPx = tex.Width,
+                HeightPx = tex.Height,
+            };
+            return placed;
+        }
+
+        #endregion
+
+        #region 端口查询
+
+        private static int FindPortIndex(PlacedBuilding b, PortKind kind, PortSide side)
+            => FindPortIndexInTable(ArchitecturePorts.Get(b.Type), kind, side);
+
+        private static int FindPortIndexInTable(ArchitecturePort[] ports, PortKind kind, PortSide side) {
+            for (int i = 0; i < ports.Length; i++) {
+                if (ports[i].Kind == kind && ports[i].Side == side) return i;
+            }
+            return -1;
+        }
+
+        #endregion
     }
 }

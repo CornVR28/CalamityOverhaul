@@ -22,15 +22,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures
 
         public ArchitectureType Type => (ArchitectureType)TypeByte;
 
-        public new Vector2 Center {
-            get => Position + new Vector2(Width * 0.5f, Height * 0.5f);
-            set => Position = value - new Vector2(Width * 0.5f, Height * 0.5f);
-        }
-
         public override void OnSpawn(params object[] args) {
-            if (args != null && args.Length > 0 && args[0] is ArchitectureType explicitType) {
-                TypeByte = (byte)explicitType;
-            }
             DrawLayer = ActorDrawLayer.AfterTiles;
             ApplyTextureSize();
         }

@@ -1,5 +1,6 @@
 using InnoVault.Actors;
 using Microsoft.Xna.Framework;
+using System;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -24,9 +25,23 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures
                 return;
             }
             if (spawned) return;
-            if (ArchitectureRegistry.Entries.Count == 0) return;
+            if (ArchitectureRegistry.Entries.Count == 0 && ArchitectureRegistry.Connectors.Count == 0) return;
 
-            //注册表已有规划数据时，按记录一次性生成所有建筑Actor
+            //先刷连接段（与建筑Actor同层AfterTiles），再刷建筑
+            //同层内先生成的WhoAmI较小者更早绘制，因而桥/管位于建筑之后绘制不会遮挡主建筑
+            foreach (var link in ArchitectureRegistry.Connectors) {
+                Vector2 position = new(Math.Min(link.StartX, link.EndX), link.StartY);
+                int idx = ActorLoader.NewActor<ArchitectureConnectorActor>(position, Vector2.Zero);
+                if (idx < 0 || idx >= ActorLoader.Actors.Length) continue;
+                if (ActorLoader.Actors[idx] is not ArchitectureConnectorActor connector) continue;
+                connector.KindByte = (byte)link.Kind;
+                connector.StartX = link.StartX;
+                connector.StartY = link.StartY;
+                connector.EndX = link.EndX;
+                connector.OnSpawn();
+                connector.NetUpdate = true;
+            }
+
             foreach (var entry in ArchitectureRegistry.Entries) {
                 Vector2 position = new(entry.PixelX, entry.PixelY);
                 int idx = ActorLoader.NewActor<ArchitectureActor>(position, Vector2.Zero);
@@ -34,7 +49,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures
                 if (ActorLoader.Actors[idx] is not ArchitectureActor actor) continue;
                 //显式设置SyncVar字段并触发网络同步，确保客户端也能拿到正确的建筑类型
                 actor.TypeByte = (byte)entry.Type;
-                actor.OnSpawn(entry.Type);
+                actor.OnSpawn();
                 actor.NetUpdate = true;
             }
             spawned = true;
