@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using CalamityOverhaul.Common;
+using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;
 using Terraria.GameContent;
@@ -82,21 +83,103 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             float totalGapAngle = (maxRam - 1) * CellGap;
             float cellAngle = (totalSweep - totalGapAngle) / maxRam;
 
-            //弧线中心（在弧线正下方，使弧线呈穹顶拱形）
+            //弧线中心（在弧线正下方,使弧线呈穹顶拱形）
             float cx = Main.screenWidth - RMargin - ArcSpanPx * 0.5f;
             float flyOff = (1f - EaseOutCubic(flyInProgress)) * -50f;
             float cy = TopY + InnerR + flyOff;
             Vector2 center = new(cx, cy);
 
-            //分层渲染
+            //阴影层(保留在quad下方绘制,便于整体浮起感)
             DrawShadow(sb, px, center, aStart, totalSweep, alpha);
-            DrawOuterDecoRing(sb, px, center, aStart, totalSweep, maxRam, cellAngle, alpha);
-            DrawCells(sb, px, center, aStart, cellAngle, maxRam, alpha);
-            DrawInnerDecoRing(sb, px, center, aStart, totalSweep, alpha);
-            DrawDataFlow(sb, center, aStart, totalSweep, alpha);
+
+            //优先使用着色器渲染主弧带+装饰环
+            bool shaderOK = TryDrawShaderArc(sb, px, center, aStart, cellAngle,
+                totalSweep, maxRam, alpha);
+
+            if (!shaderOK) {
+                //CPU回退路径
+                DrawOuterDecoRing(sb, px, center, aStart, totalSweep, maxRam, cellAngle, alpha);
+                DrawCells(sb, px, center, aStart, cellAngle, maxRam, alpha);
+                DrawInnerDecoRing(sb, px, center, aStart, totalSweep, alpha);
+                DrawDataFlow(sb, center, aStart, totalSweep, alpha);
+            }
+
+            //端点角标 + 标签文字(始终CPU绘制,文字更锐利)
             DrawEndCaps(sb, px, center, aStart, totalSweep, alpha);
             DrawLabels(sb, center, alpha, maxRam);
         }
+
+        #region 着色器渲染
+
+        //使用HackRamArc.fx绘制主弧带+内外装饰环
+        //通过单个quad把弧形几何、格子、扫描、故障等全部用GPU完成
+        private bool TryDrawShaderArc(SpriteBatch sb, Texture2D px, Vector2 center,
+            float aStart, float cellAngle, float totalSweep, int maxRam, float alpha) {
+            Effect effect = EffectLoader.HackRamArc?.Value;
+            if (effect == null) return false;
+
+            //quad包围盒:覆盖外侧装饰环到内侧装饰环
+            float decoOuterR = OuterR + DecoGap;
+            float decoInnerR = InnerR - InnerDecoGap;
+            //外侧刻度最长9px + 外侧漏光4px,内侧粒子可下探到decoInnerR-4
+            const float PadTop = 18f;
+            const float PadBottom = 10f;
+            const float PadSide = 30f;
+
+            //quad上下边界按顶角(最高点)计算,两侧按aStart点的y计算取最小
+            //简化:quad顶 = cy - (decoOuterR + PadTop)
+            //quad底 = cy - (decoInnerR * MathF.Cos(halfSweep)) + PadBottom
+            //但直接用简单估算即可,因为弧顶在正上方最靠上
+            float qLeft = center.X - ArcSpanPx * 0.5f - PadSide;
+            float qTop = center.Y - decoOuterR - PadTop;
+            float qRight = center.X + ArcSpanPx * 0.5f + PadSide;
+            float qBottom = center.Y - decoInnerR * MathF.Cos(totalSweep * 0.5f) + PadBottom;
+
+            int qW = (int)MathF.Ceiling(qRight - qLeft);
+            int qH = (int)MathF.Ceiling(qBottom - qTop);
+            if (qW <= 0 || qH <= 0) return true;
+
+            Rectangle dest = new((int)qLeft, (int)qTop, qW, qH);
+            Vector2 relCenter = new(center.X - qLeft, center.Y - qTop);
+
+            //低RAM警告强度(平滑)
+            float lowRam = 0f;
+            if (!HackTime.InfiniteHack) {
+                if (HackTimeRAM.CurrentRam < 0.5f) lowRam = 1f;
+                else if (HackTimeRAM.CurrentRam <= 2f)
+                    lowRam = MathHelper.Clamp(1f - (HackTimeRAM.CurrentRam - 0.5f) / 1.5f, 0f, 1f);
+            }
+
+            effect.Parameters["uTime"]?.SetValue(timer);
+            effect.Parameters["uAlpha"]?.SetValue(alpha);
+            effect.Parameters["uResolution"]?.SetValue(new Vector2(qW, qH));
+            effect.Parameters["uArcCenter"]?.SetValue(relCenter);
+            effect.Parameters["uInnerR"]?.SetValue(InnerR);
+            effect.Parameters["uOuterR"]?.SetValue(OuterR);
+            effect.Parameters["uAStart"]?.SetValue(aStart);
+            effect.Parameters["uCellAngle"]?.SetValue(cellAngle);
+            effect.Parameters["uCellGap"]?.SetValue(CellGap);
+            effect.Parameters["uCellCount"]?.SetValue((float)maxRam);
+            effect.Parameters["uFillValue"]?.SetValue(displayRam);
+            effect.Parameters["uLowRam"]?.SetValue(lowRam);
+            effect.Parameters["uInfinite"]?.SetValue(HackTime.InfiniteHack ? 1f : 0f);
+            effect.Parameters["uDecoOuterR"]?.SetValue(decoOuterR);
+            effect.Parameters["uDecoInnerR"]?.SetValue(decoInnerR);
+
+            sb.End();
+            sb.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.LinearClamp,
+                DepthStencilState.None, RasterizerState.CullNone, effect, Main.UIScaleMatrix);
+
+            sb.Draw(px, dest, Color.White);
+
+            sb.End();
+            sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState,
+                DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.UIScaleMatrix);
+
+            return true;
+        }
+
+        #endregion
 
         #region 阴影层
 
