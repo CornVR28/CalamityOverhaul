@@ -1,5 +1,6 @@
 ﻿using CalamityOverhaul.Common;
 using CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.TimeShift;
+using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime;
 using InnoVault.Actors;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -15,7 +16,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.GlitchWraith
     /// 遵循123木头人规则，玩家在过去视角下注视时绝对静止，其余时间缓慢移动并偶发乱码瞬移
     /// 完全无视地形碰撞
     /// </summary>
-    internal class GlitchWraithActor : Actor
+    internal class GlitchWraithActor : Actor, IScannable
     {
         //缓慢的基础爬行速度，像素每帧
         private const float CreepSpeed = 1.4f;
@@ -54,6 +55,25 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.GlitchWraith
         /// <summary>是否已触发处决演出，避免重复</summary>
         private bool hasExecuted;
 
+        //骇客时间相关状态
+        /// <summary>死机状态剩余帧数，大于0时完全冻结</summary>
+        private int stunFrames;
+        /// <summary>虚假记忆剩余帧数，大于0时无法锁定玩家</summary>
+        private int falseMemoryFrames;
+        /// <summary>自我肢解演出剩余帧数，大于0时正在自毁</summary>
+        private int dismemberFrames;
+        /// <summary>自我肢解演出总时长</summary>
+        private const int DismemberDuration = 120;
+
+        /// <summary>当前是否处于死机状态</summary>
+        public bool IsStunned => stunFrames > 0;
+        /// <summary>当前是否处于虚假记忆状态</summary>
+        public bool IsMemoryAltered => falseMemoryFrames > 0;
+        /// <summary>当前是否正在自我肢解</summary>
+        public bool IsDismembering => dismemberFrames > 0;
+        /// <summary>当前可见度，0到1</summary>
+        public float Visibility => visibility;
+
         public new Vector2 Center {
             get => Position + new Vector2(Width * 0.5f, Height * 0.5f);
             set => Position = value - new Vector2(Width * 0.5f, Height * 0.5f);
@@ -74,6 +94,28 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.GlitchWraith
                 Velocity = Vector2.Zero;
                 return;
             }
+
+            //自我肢解演出优先，演出期间完全停下并逐步消亡
+            if (dismemberFrames > 0) {
+                Velocity = Vector2.Zero;
+                UpdateDismember();
+                return;
+            }
+
+            //死机状态：完全冻结，其他计时推进照常
+            if (stunFrames > 0) {
+                stunFrames--;
+                Velocity = Vector2.Zero;
+                //死机期间仍维持可见度变化，便于玩家观察
+                bool inPastStun = VoidTimeShiftSystem.InPast;
+                float targetVisStun = inPastStun ? 1f : 0f;
+                if (visibility < targetVisStun) visibility = MathF.Min(targetVisStun, visibility + FadeInStep);
+                else if (visibility > targetVisStun) visibility = MathF.Max(targetVisStun, visibility - FadeOutStep);
+                glitchSeed = unchecked(glitchSeed * 1664525 + 1013904223);
+                return;
+            }
+
+            if (falseMemoryFrames > 0) falseMemoryFrames--;
 
             Player target = AcquireTarget();
             if (target == null) {
@@ -107,6 +149,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.GlitchWraith
                 }
                 else {
                     Vector2 dir = toTarget / dist;
+                    //虚假记忆期间反向游离，失去追击意图
+                    if (falseMemoryFrames > 0) dir = -dir;
                     //始终缓慢蠕动，速度不随时代改变
                     Velocity = dir * MathF.Min(CreepSpeed, dist);
 
@@ -137,6 +181,53 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.GlitchWraith
                     ExecutePlayer(target);
                 }
             }
+        }
+
+        /// <summary>
+        /// 推进自我肢解演出，结束时清除actor
+        /// </summary>
+        private void UpdateDismember() {
+            dismemberFrames--;
+            //演出期间加速乱码滚动，视觉上持续裂解
+            glitchSeed = unchecked(glitchSeed * 1664525 + 1013904223);
+            //可见度线性衰减至0
+            float t = dismemberFrames / (float)DismemberDuration;
+            visibility = MathHelper.Clamp(t, 0f, 1f);
+            if (dismemberFrames <= 0) {
+                ActorLoader.KillActor(WhoAmI);
+            }
+        }
+
+        /// <summary>
+        /// 对乱码鬼施加死机效果
+        /// </summary>
+        public void ApplySystemHalt(int frames) {
+            if (dismemberFrames > 0) return;
+            stunFrames = Math.Max(stunFrames, frames);
+            teleportFlash = TeleportFlashFrames;
+            glitchSeed = Main.rand.Next(int.MaxValue);
+        }
+
+        /// <summary>
+        /// 对乱码鬼施加虚假记忆效果，期间失去追击意图
+        /// </summary>
+        public void ApplyFalseMemory(int frames) {
+            if (dismemberFrames > 0) return;
+            falseMemoryFrames = Math.Max(falseMemoryFrames, frames);
+            //记忆修改会让其当前锁定目标松脱
+            targetPlayer = -1;
+            teleportTimer = Main.rand.Next(TeleportIntervalMin, TeleportIntervalMax);
+        }
+
+        /// <summary>
+        /// 触发自我肢解，短暂演出后从场景中移除
+        /// </summary>
+        public void ApplySelfDismember() {
+            if (dismemberFrames > 0) return;
+            dismemberFrames = DismemberDuration;
+            stunFrames = 0;
+            falseMemoryFrames = 0;
+            teleportFlash = TeleportFlashFrames;
         }
 
         /// <summary>
@@ -195,6 +286,23 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.GlitchWraith
 
             Vector2 drawPos = Center - Main.screenPosition;
             Vector2 origin = new(tex.Width * 0.5f, tex.Height * 0.5f);
+
+            //自我肢解演出：越靠近结束抖动越剧烈，分层撕裂残影向外飞散
+            if (dismemberFrames > 0) {
+                float t = 1f - dismemberFrames / (float)DismemberDuration;
+                float shake = t * 24f;
+                Vector2 shakeOffset = new(
+                    (MathF.Sin(glitchSeed * 0.0001f) * 2f - 1f) * shake,
+                    (MathF.Cos(glitchSeed * 0.00013f) * 2f - 1f) * shake);
+                drawPos += shakeOffset;
+                for (int i = 0; i < 4; i++) {
+                    float ang = i * MathHelper.PiOver2 + t * MathHelper.TwoPi;
+                    Vector2 limbOffset = ang.ToRotationVector2() * (t * 80f);
+                    Color limbColor = new Color(255, 40, 80) * (visibility * 0.4f * (1f - t));
+                    spriteBatch.Draw(tex, drawPos + limbOffset, null, limbColor,
+                        ang * 0.3f, origin, 1f + t * 0.1f, SpriteEffects.None, 0f);
+                }
+            }
 
             //瞬移后余辉闪烁，分两层红紫残影左右抖动位移
             if (teleportFlash > 0) {
@@ -278,5 +386,67 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.GlitchWraith
             float eraBoost = 1f + 0.3f * bestVis;
             return MathHelper.Clamp(t * eraBoost, 0f, 1f);
         }
+
+        #region IScannable 实现
+
+        Vector2 IScannable.WorldCenter => Center;
+
+        bool IScannable.IsValid => Active && !hasExecuted && dismemberFrames <= 0;
+
+        bool IScannable.IsHackable => true;
+
+        int IScannable.ScanRowCount => 6;
+
+        void IScannable.BuildScanData(string[] labels, string[] values, Color[] colors) {
+            //NAME
+            labels[0] = HackTime.WraithScanName.Value;
+            values[0] = HackTime.WraithScanNameValue.Value;
+            colors[0] = HackTheme.Danger;
+
+            //TYPE
+            labels[1] = HackTime.TypeLabel.Value;
+            values[1] = HackTime.WraithScanType.Value;
+            colors[1] = HackTheme.Danger;
+
+            //THREAT
+            labels[2] = HackTime.ThreatLabel.Value;
+            values[2] = HackTime.WraithScanThreat.Value;
+            colors[2] = HackTheme.Danger;
+
+            //STATUS
+            labels[3] = HackTime.WraithScanStatus.Value;
+            if (dismemberFrames > 0) {
+                values[3] = HackTime.WraithScanStatusDismember.Value;
+                colors[3] = HackTheme.Danger;
+            }
+            else if (stunFrames > 0) {
+                values[3] = HackTime.WraithScanStatusHalt.Value;
+                colors[3] = HackTheme.Uploading;
+            }
+            else if (falseMemoryFrames > 0) {
+                values[3] = HackTime.WraithScanStatusMemory.Value;
+                colors[3] = HackTheme.AccentAlt;
+            }
+            else if (isWatched) {
+                values[3] = HackTime.WraithScanStatusWatched.Value;
+                colors[3] = HackTheme.Accent;
+            }
+            else {
+                values[3] = HackTime.WraithScanStatusStalking.Value;
+                colors[3] = HackTheme.Danger;
+            }
+
+            //DATA（数据完整性）
+            labels[4] = HackTime.WraithScanIntegrity.Value;
+            values[4] = HackTime.WraithScanIntegrityValue.Value;
+            colors[4] = HackTheme.Danger;
+
+            //ORIGIN（来源）
+            labels[5] = HackTime.WraithScanOrigin.Value;
+            values[5] = HackTime.WraithScanOriginValue.Value;
+            colors[5] = HackTheme.TextDim;
+        }
+
+        #endregion
     }
 }

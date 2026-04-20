@@ -31,6 +31,10 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
         /// 物块操控型：对物块施加效果
         /// </summary>
         TileManip,
+        /// <summary>
+        /// 灵异型：对非实体灵异目标起效的特殊协议
+        /// </summary>
+        Paranormal,
     }
 
     /// <summary>
@@ -230,6 +234,18 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
                 return false;
             return Main.tile[tileX, tileY].HasTile;
         }
+
+        #endregion
+
+        #region 灵异目标虚方法
+
+        /// <summary>
+        /// 当协议上传完成时对灵异Actor目标施加效果
+        /// </summary>
+        /// <param name="wraith">骇入的灵异Actor</param>
+        /// <param name="caster">发起骇入的玩家</param>
+        /// <returns>返回true表示效果成功施加</returns>
+        public virtual bool OnApplyToWraith(ADV.Scenarios.VoidColonys.GlitchWraith.GlitchWraithActor wraith, Player caster) => false;
 
         #endregion
 

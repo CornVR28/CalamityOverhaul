@@ -1,4 +1,5 @@
 ﻿using CalamityOverhaul.Common;
+using CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.GlitchWraith;
 using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
 using Terraria;
 using Terraria.Audio;
@@ -64,6 +65,23 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
         public static LocalizedText CatContagion { get; private set; }
         public static LocalizedText CatUnknown { get; private set; }
         public static LocalizedText CatTileManip { get; private set; }
+        public static LocalizedText CatParanormal { get; private set; }
+
+        //乱码鬼扫描本地化字段
+        public static LocalizedText WraithScanName { get; private set; }
+        public static LocalizedText WraithScanNameValue { get; private set; }
+        public static LocalizedText WraithScanType { get; private set; }
+        public static LocalizedText WraithScanThreat { get; private set; }
+        public static LocalizedText WraithScanStatus { get; private set; }
+        public static LocalizedText WraithScanStatusStalking { get; private set; }
+        public static LocalizedText WraithScanStatusWatched { get; private set; }
+        public static LocalizedText WraithScanStatusHalt { get; private set; }
+        public static LocalizedText WraithScanStatusMemory { get; private set; }
+        public static LocalizedText WraithScanStatusDismember { get; private set; }
+        public static LocalizedText WraithScanIntegrity { get; private set; }
+        public static LocalizedText WraithScanIntegrityValue { get; private set; }
+        public static LocalizedText WraithScanOrigin { get; private set; }
+        public static LocalizedText WraithScanOriginValue { get; private set; }
 
         //物块扫描本地化字段
         public static LocalizedText TileScanName { get; private set; }
@@ -133,6 +151,22 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             CatContagion = this.GetLocalization(nameof(CatContagion));
             CatUnknown = this.GetLocalization(nameof(CatUnknown));
             CatTileManip = this.GetLocalization(nameof(CatTileManip));
+            CatParanormal = this.GetLocalization(nameof(CatParanormal));
+
+            WraithScanName = this.GetLocalization(nameof(WraithScanName));
+            WraithScanNameValue = this.GetLocalization(nameof(WraithScanNameValue));
+            WraithScanType = this.GetLocalization(nameof(WraithScanType));
+            WraithScanThreat = this.GetLocalization(nameof(WraithScanThreat));
+            WraithScanStatus = this.GetLocalization(nameof(WraithScanStatus));
+            WraithScanStatusStalking = this.GetLocalization(nameof(WraithScanStatusStalking));
+            WraithScanStatusWatched = this.GetLocalization(nameof(WraithScanStatusWatched));
+            WraithScanStatusHalt = this.GetLocalization(nameof(WraithScanStatusHalt));
+            WraithScanStatusMemory = this.GetLocalization(nameof(WraithScanStatusMemory));
+            WraithScanStatusDismember = this.GetLocalization(nameof(WraithScanStatusDismember));
+            WraithScanIntegrity = this.GetLocalization(nameof(WraithScanIntegrity));
+            WraithScanIntegrityValue = this.GetLocalization(nameof(WraithScanIntegrityValue));
+            WraithScanOrigin = this.GetLocalization(nameof(WraithScanOrigin));
+            WraithScanOriginValue = this.GetLocalization(nameof(WraithScanOriginValue));
 
             TileScanName = this.GetLocalization(nameof(TileScanName));
             TileScanClass = this.GetLocalization(nameof(TileScanClass));
@@ -313,6 +347,31 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             bool freshSelect = CurrentScanTarget == null;
             CurrentScanTarget = new TileScannable(tileX, tileY);
             cameraTo = CurrentScanTarget.WorldCenter;
+
+            if (freshSelect) {
+                CameraProgress = 0f;
+                ZoomProgress = 0f;
+            }
+
+            if (!VaultUtils.isServer) {
+                SoundEngine.PlaySound(CWRSound.Hacker, Main.LocalPlayer.Center);
+            }
+        }
+
+        /// <summary>
+        /// 选中一个乱码鬼等灵异Actor进行扫描和骇入
+        /// </summary>
+        public static void SelectWraithScan(GlitchWraithActor wraith) {
+            if (!Active || wraith == null || !wraith.Active) return;
+
+            if (SelectedTargetIndex >= 0) {
+                HackTimeUI.Instance?.Panel.CancelUpload();
+            }
+            SelectedTargetIndex = -1;
+
+            bool freshSelect = CurrentScanTarget == null;
+            CurrentScanTarget = wraith;
+            cameraTo = wraith.Center;
 
             if (freshSelect) {
                 CameraProgress = 0f;

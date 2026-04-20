@@ -187,6 +187,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
                     //物块目标入队
                     enqueued = Queue.EnqueueTile(hack, globalIdx, tileScan.TileCoordX, tileScan.TileCoordY);
                 }
+                else if (currentTargetKind == HackTargetKind.Wraith
+                    && HackTime.CurrentScanTarget is ADV.Scenarios.VoidColonys.GlitchWraith.GlitchWraithActor wraith) {
+                    //灵异目标入队
+                    enqueued = Queue.EnqueueWraith(hack, globalIdx, wraith);
+                }
                 else {
                     enqueued = Queue.Enqueue(hack, globalIdx, HackTime.SelectedTargetIndex);
                 }

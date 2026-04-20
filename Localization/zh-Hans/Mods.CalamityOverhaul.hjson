@@ -108,6 +108,21 @@ QuickHack: {
 		DisplayName: 炮塔劫持
 		Description: 篡改IFF识别模块，临时翻转炮塔敌我判定
 	}
+
+	FalseMemory: {
+		DisplayName: 记忆修改
+		Description: 植入虚假记忆，令其短暂中断追杀行为或抑制其杀人规律
+	}
+
+	SelfDismember: {
+		DisplayName: 自我肢解
+		Description: 令其肢解自身的灵异
+	}
+
+	SystemHalt: {
+		DisplayName: 死机
+		Description: 令目标短暂陷入沉寂并停止一切活动
+	}
 }
 
 // NPCs.Hierophant.DisplayName: Hierophant

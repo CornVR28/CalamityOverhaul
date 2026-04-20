@@ -1,5 +1,7 @@
 ﻿namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
 {
+    using CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.GlitchWraith;
+
     //队列条目状态
     internal enum HackQueueState
     {
@@ -34,6 +36,8 @@
         //骇入目标物块坐标（TargetKind为Tile时有效）
         public int TileX;
         public int TileY;
+        //骇入目标灵异Actor引用（TargetKind为Wraith时有效）
+        public GlitchWraithActor WraithTarget;
         //当前队列状态
         public HackQueueState State;
         //上传进度0~1
@@ -75,6 +79,22 @@
             GlitchSeed = Terraria.Main.rand?.Next(10000) / 100f ?? 0f;
         }
 
+        //灵异目标构造
+        public HackQueueEntry(QuickHackDef hack, int slotIndex, GlitchWraithActor wraith) {
+            Hack = hack;
+            SlotIndex = slotIndex;
+            TargetKind = HackTargetKind.Wraith;
+            TargetIndex = -1;
+            TileX = -1;
+            TileY = -1;
+            WraithTarget = wraith;
+            State = HackQueueState.Waiting;
+            UploadProgress = 0f;
+            FlyIn = 0f;
+            CompletedTimer = 0f;
+            GlitchSeed = Terraria.Main.rand?.Next(10000) / 100f ?? 0f;
+        }
+
         //目标是否仍然有效
         public bool IsTargetValid {
             get {
@@ -86,6 +106,9 @@
                     return TileX >= 0 && TileX < Terraria.Main.maxTilesX
                         && TileY >= 0 && TileY < Terraria.Main.maxTilesY
                         && Terraria.Main.tile[TileX, TileY].HasTile;
+                }
+                if (TargetKind == HackTargetKind.Wraith) {
+                    return WraithTarget != null && WraithTarget.Active;
                 }
                 return false;
             }

@@ -108,6 +108,21 @@ QuickHack: {
 		DisplayName: Turret Hijack
 		Description: Overrides IFF module, flipping turret allegiance for a limited time
 	}
+
+	FalseMemory: {
+		DisplayName: False Memory
+		Description: ""
+	}
+
+	SelfDismember: {
+		DisplayName: Self Dismember
+		Description: ""
+	}
+
+	SystemHalt: {
+		DisplayName: System Halt
+		Description: ""
+	}
 }
 
 NPCs.Hierophant.DisplayName: Hierophant

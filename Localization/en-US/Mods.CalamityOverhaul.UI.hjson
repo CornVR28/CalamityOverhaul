@@ -522,4 +522,19 @@ HackTime: {
 	TileScanSealed: SEALED
 	TileScanOnline: ONLINE
 	TileScanIntact: INTACT
+	CatParanormal: Mods.CalamityOverhaul.UI.HackTime.CatParanormal
+	WraithScanName: Mods.CalamityOverhaul.UI.HackTime.WraithScanName
+	WraithScanNameValue: Mods.CalamityOverhaul.UI.HackTime.WraithScanNameValue
+	WraithScanType: Mods.CalamityOverhaul.UI.HackTime.WraithScanType
+	WraithScanThreat: Mods.CalamityOverhaul.UI.HackTime.WraithScanThreat
+	WraithScanStatus: Mods.CalamityOverhaul.UI.HackTime.WraithScanStatus
+	WraithScanStatusStalking: Mods.CalamityOverhaul.UI.HackTime.WraithScanStatusStalking
+	WraithScanStatusWatched: Mods.CalamityOverhaul.UI.HackTime.WraithScanStatusWatched
+	WraithScanStatusHalt: Mods.CalamityOverhaul.UI.HackTime.WraithScanStatusHalt
+	WraithScanStatusMemory: Mods.CalamityOverhaul.UI.HackTime.WraithScanStatusMemory
+	WraithScanStatusDismember: Mods.CalamityOverhaul.UI.HackTime.WraithScanStatusDismember
+	WraithScanIntegrity: Mods.CalamityOverhaul.UI.HackTime.WraithScanIntegrity
+	WraithScanIntegrityValue: Mods.CalamityOverhaul.UI.HackTime.WraithScanIntegrityValue
+	WraithScanOrigin: Mods.CalamityOverhaul.UI.HackTime.WraithScanOrigin
+	WraithScanOriginValue: Mods.CalamityOverhaul.UI.HackTime.WraithScanOriginValue
 }

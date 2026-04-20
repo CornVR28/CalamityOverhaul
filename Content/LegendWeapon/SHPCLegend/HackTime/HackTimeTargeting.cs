@@ -1,4 +1,7 @@
 ﻿using CalamityOverhaul.Common;
+using CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.GlitchWraith;
+using InnoVault.Actors;
+using System.Collections.Generic;
 using Terraria;
 using Terraria.ModLoader;
 
@@ -21,6 +24,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
         /// </summary>
         public static int HoveredTileX { get; set; } = -1;
         public static int HoveredTileY { get; set; } = -1;
+
+        /// <summary>
+        /// 当前悬停的灵异Actor引用，null表示无悬停
+        /// </summary>
+        public static GlitchWraithActor HoveredWraith { get; set; }
 
         public override void ProcessTriggers(Terraria.GameInput.TriggersSet triggersSet) {
             if (Player.whoAmI != Main.myPlayer) return;
@@ -72,21 +80,60 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
 
             HackTime.HoveredTargetIndex = bestIndex;
 
-            //NPC优先，没有悬停NPC时再检测物块
+            //NPC优先，没有悬停NPC时再检测灵异Actor和物块
             if (bestIndex >= 0) {
                 HoveredTileX = -1;
                 HoveredTileY = -1;
+                HoveredWraith = null;
             }
             else {
-                if (TileScannable.TryGetScannableTile(mouseWorld, out int tx, out int ty)) {
-                    HoveredTileX = tx;
-                    HoveredTileY = ty;
-                }
-                else {
+                GlitchWraithActor wraith = TryGetHoveredWraith(mouseWorld);
+                if (wraith != null) {
+                    HoveredWraith = wraith;
                     HoveredTileX = -1;
                     HoveredTileY = -1;
                 }
+                else {
+                    HoveredWraith = null;
+                    if (TileScannable.TryGetScannableTile(mouseWorld, out int tx, out int ty)) {
+                        HoveredTileX = tx;
+                        HoveredTileY = ty;
+                    }
+                    else {
+                        HoveredTileX = -1;
+                        HoveredTileY = -1;
+                    }
+                }
             }
+        }
+
+        /// <summary>
+        /// 判定鼠标下方是否有足够可见的灵异Actor可供骇入
+        /// </summary>
+        private static GlitchWraithActor TryGetHoveredWraith(Vector2 mouseWorld) {
+            List<GlitchWraithActor> list = ActorLoader.GetActiveActors<GlitchWraithActor>();
+            if (list == null || list.Count == 0) return null;
+            GlitchWraithActor best = null;
+            float bestDistSq = float.MaxValue;
+            foreach (GlitchWraithActor w in list) {
+                //可见度过低的灵异体无法被扫描锁定，避免玩家隔空选中隐形目标
+                if (w.Visibility < 0.3f) continue;
+                float expandMargin = 16f;
+                float left = w.Position.X - expandMargin;
+                float top = w.Position.Y - expandMargin;
+                float right = w.Position.X + w.Width + expandMargin;
+                float bottom = w.Position.Y + w.Height + expandMargin;
+                if (mouseWorld.X < left || mouseWorld.X > right) continue;
+                if (mouseWorld.Y < top || mouseWorld.Y > bottom) continue;
+                float dx = mouseWorld.X - w.Center.X;
+                float dy = mouseWorld.Y - w.Center.Y;
+                float distSq = dx * dx + dy * dy;
+                if (distSq < bestDistSq) {
+                    bestDistSq = distSq;
+                    best = w;
+                }
+            }
+            return best;
         }
 
         /// <summary>

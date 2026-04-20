@@ -15,5 +15,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
         Npc = 1,
         //物块目标
         Tile = 2,
+        //灵异目标（如乱码鬼等Actor类实体）
+        Wraith = 4,
     }
 }

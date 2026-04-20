@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
+using CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.GlitchWraith;
 using Terraria;
 using Terraria.GameContent;
 
@@ -53,6 +54,15 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
             return true;
         }
 
+        //灵异目标入队
+        public bool EnqueueWraith(QuickHackDef hack, int slotIndex, GlitchWraithActor wraith) {
+            for (int i = 0; i < queue.Count; i++) {
+                if (queue[i].SlotIndex == slotIndex) return false;
+            }
+            queue.Add(new HackQueueEntry(hack, slotIndex, wraith));
+            return true;
+        }
+
         //取消队列中指定slot的协议
         public void Cancel(int slotIndex) {
             for (int i = queue.Count - 1; i >= 0; i--) {
@@ -82,6 +92,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
                 if (entry.State == HackQueueState.Completed && entry.CompletedTimer <= 0f) {
                     if (entry.TargetKind == HackTargetKind.Tile) {
                         HackEffectTracker.ApplyToTile(entry.Hack, entry.TileX, entry.TileY, Main.myPlayer);
+                    }
+                    else if (entry.TargetKind == HackTargetKind.Wraith) {
+                        entry.Hack.OnApplyToWraith(entry.WraithTarget, Main.LocalPlayer);
                     }
                     else {
                         HackEffectTracker.Apply(entry.Hack, entry.TargetIndex, Main.myPlayer);

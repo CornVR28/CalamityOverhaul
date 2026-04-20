@@ -51,6 +51,7 @@
             QuickHackCategory.Covert => AccentAlt,
             QuickHackCategory.Contagion => Contagion,
             QuickHackCategory.TileManip => new Color(80, 200, 255),
+            QuickHackCategory.Paranormal => new Color(180, 60, 220),
             _ => Accent,
         };
 
@@ -60,6 +61,7 @@
             QuickHackCategory.Covert => "○",
             QuickHackCategory.Contagion => "◎",
             QuickHackCategory.TileManip => "▣",
+            QuickHackCategory.Paranormal => "☠",
             _ => "●",
         };
 
@@ -69,6 +71,7 @@
             QuickHackCategory.Covert => HackTime.CatCovert.Value,
             QuickHackCategory.Contagion => HackTime.CatContagion.Value,
             QuickHackCategory.TileManip => HackTime.CatTileManip.Value,
+            QuickHackCategory.Paranormal => HackTime.CatParanormal.Value,
             _ => HackTime.CatUnknown.Value,
         };
 

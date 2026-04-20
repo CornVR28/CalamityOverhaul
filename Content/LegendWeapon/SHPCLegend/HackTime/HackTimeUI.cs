@@ -86,6 +86,14 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime
                     Panel.Show(HackTargetKind.Npc);
                 }
             }
+            else if (HackTimeTargeting.HoveredWraith != null) {
+                //点击灵异Actor目标
+                var wraith = HackTimeTargeting.HoveredWraith;
+                if (HackTime.CurrentScanTarget != wraith) {
+                    HackTime.SelectWraithScan(wraith);
+                    Panel.Show(HackTargetKind.Wraith);
+                }
+            }
             else if (HackTimeTargeting.HoveredTileX >= 0) {
                 //点击可扫描物块，同时显示物块协议面板
                 HackTime.SelectTileScan(HackTimeTargeting.HoveredTileX, HackTimeTargeting.HoveredTileY);
