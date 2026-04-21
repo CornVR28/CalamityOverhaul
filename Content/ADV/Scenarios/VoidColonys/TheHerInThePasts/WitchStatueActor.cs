@@ -51,11 +51,17 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.TheHerInThePasts
         //鬼手数量上限，避免过多
         private const int MaxHands = 6;
 
+        //自动感知鬼乱码的半径，进入该范围雕像自动苏醒展开鬼域
+        private const float WraithDetectRadius = 900f;
+
         /// <summary>过去时代下的可见度，0到1</summary>
         private float visibility;
 
         /// <summary>当前演出阶段</summary>
         public PhaseKind Phase { get; private set; } = PhaseKind.Idle;
+
+        /// <summary>是否已经展开鬼域并把鬼乱码钉住，供场景判断是否可以弹对话</summary>
+        public bool IsSuppressing => Phase == PhaseKind.Suppress;
 
         /// <summary>抬头进度0到1</summary>
         private float awakenT;
@@ -139,7 +145,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.TheHerInThePasts
 
             switch (Phase) {
                 case PhaseKind.Idle:
-                    //雕像完全静止
+                    //过去时代且可见度足够时，自行扫描近距离的鬼乱码
+                    TryAutoAwaken();
                     break;
                 case PhaseKind.Awaken:
                     UpdateAwaken();
@@ -150,6 +157,23 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.TheHerInThePasts
                 case PhaseKind.Dissolve:
                     UpdateDissolve();
                     break;
+            }
+        }
+
+        /// <summary>
+        /// Idle阶段扫描范围内的鬼乱码，若存在则自动进入苏醒流程
+        /// </summary>
+        private void TryAutoAwaken() {
+            //可见度不足或不在过去时代，不触发
+            if (visibility < 0.4f || !VoidTimeShiftSystem.InPast) return;
+
+            float radiusSqr = WraithDetectRadius * WraithDetectRadius;
+            foreach (var wraith in ActorLoader.GetActiveActors<GlitchWraithActor>()) {
+                if (wraith == null) continue;
+                if (Vector2.DistanceSquared(wraith.Center, Center) <= radiusSqr) {
+                    BeginPerformance();
+                    return;
+                }
             }
         }
 
