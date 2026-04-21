@@ -29,8 +29,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios
                 if (sc == null) return false;
                 Register(sc);
             }
-            if (active != null && (DialogueUIRegistry.Current?.Active ?? false)) {
-                return false;//已有场景在运行
+            //允许从 OnScenarioComplete 内链式启动新场景：当前active已完成则放行
+            if (active != null && !active.IsCompleted && (DialogueUIRegistry.Current?.Active ?? false)) {
+                return false;//已有未完成场景在运行
             }
             active = sc;
             sc.Start();
