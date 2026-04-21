@@ -11,10 +11,7 @@ using Terraria.ModLoader;
 
 namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.TheHerInThePasts
 {
-    /// <summary>
-    /// 过去的她——虚空聚落过去时代的一段演出
-    /// 单一场景，统一使用硫磺火对话框，立绘由 TheHerInThePastPortrait 承载并按行切换角色
-    /// </summary>
+    //在制作这个的过场中我他妈意识到千万别试图不靠选项分支来启动子场景，因为目前的对话框框架根本不支持你从一个对话场景中直接启动另一个新的场景，会有他妈的一堆bug！
     internal class TheHerInThePast : ADVScenarioBase, ILocalizedModType, IWorldInfo
     {
         public override string Key => nameof(TheHerInThePast);
