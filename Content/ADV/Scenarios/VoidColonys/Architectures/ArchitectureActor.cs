@@ -1,15 +1,18 @@
+﻿using CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Collision;
 using InnoVault.Actors;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
+using System.Collections.Generic;
 using Terraria;
+using Terraria.DataStructures;
 
 namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures
 {
     /// <summary>
     /// 虚空聚落建筑Actor
-    /// 用于承载整张建筑贴图的静态装饰实体，不参与碰撞，只负责绘制
-    /// 通过<see cref="TypeByte"/>决定贴图，在首次AI时根据贴图尺寸补齐Width和Height
+    /// 用于承载整张建筑贴图的静态装饰实体，贴图绘制由shader负责
+    /// 过去时代实体显像时通过<see cref="Collision.ArchitectureTilePlacer"/>就地放置隐形碰撞tile，形成与原版完全兼容的物理
     /// </summary>
     internal class ArchitectureActor : Actor
     {
@@ -26,6 +29,13 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures
         /// </summary>
         private float visibility;
 
+        /// <summary>已放置的隐形碰撞tile坐标列表，供擦除时精准回收</summary>
+        private readonly List<Point16> placedCollisionTiles = [];
+        /// <summary>当前是否处于"碰撞tile已写入世界"的状态</summary>
+        private bool collisionPlaced;
+        //碰撞显现/消失的可见度阈值，与shader的凝实感同步
+        private const float CollisionThreshold = 0.5f;
+
         public ArchitectureType Type => (ArchitectureType)TypeByte;
 
         public override void OnSpawn(params object[] args) {
@@ -39,10 +49,14 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures
                 ApplyTextureSize();
             }
             if (!VoidColony.Active) {
+                //离开维度前先回收已放置的碰撞方块，防止残留
+                ArchitectureTilePlacer.Clear(placedCollisionTiles);
+                collisionPlaced = false;
                 ActorLoader.KillActor(WhoAmI);
                 return;
             }
             ArchitectureWarpDraw.TickVisibility(ref visibility);
+            UpdateCollision();
             Velocity = Vector2.Zero;
         }
 
@@ -56,6 +70,28 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures
             initialized = true;
         }
 
+        /// <summary>
+        /// 根据可见度状态切换碰撞tile的存在与否
+        /// 只在主机与单机上执行放置/清除，客户端会自动通过SendTileSquare接收同步
+        /// </summary>
+        private void UpdateCollision() {
+            bool shouldPlace = visibility >= CollisionThreshold;
+            if (shouldPlace == collisionPlaced) return;
+
+            if (shouldPlace) {
+                string[] mask = ArchitectureCollisionMask.Get(Type);
+                if (mask == null) { collisionPlaced = true; return; }
+                int tileX = (int)Math.Round(Position.X / 16f);
+                int tileY = (int)Math.Round(Position.Y / 16f);
+                ArchitectureTilePlacer.Place(mask, tileX, tileY, placedCollisionTiles);
+                collisionPlaced = true;
+            }
+            else {
+                ArchitectureTilePlacer.Clear(placedCollisionTiles);
+                collisionPlaced = false;
+            }
+        }
+
         public override bool PreDraw(SpriteBatch spriteBatch, ref Color drawColor) {
             Texture2D tex = ArchitectureAsset.Get(Type);
             if (tex == null) return false;
@@ -63,8 +99,10 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures
 
             float warp = ArchitectureWarpDraw.ComputeWarp();
             Vector2 drawPos = Position - Main.screenPosition;
+
             ArchitectureWarpDraw.DrawWithShader(spriteBatch, tex, drawPos, visibility, warp);
             return false;
         }
     }
 }
+
