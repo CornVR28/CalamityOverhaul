@@ -1,0 +1,217 @@
+﻿using CalamityOverhaul.Common;
+using CalamityOverhaul.Content.ADV.Scenarios.Shepel;
+using Microsoft.Xna.Framework.Graphics;
+using System;
+using Terraria;
+using Terraria.GameContent;
+
+namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.TheHerInThePasts
+{
+    /// <summary>
+    /// 过去的她——双角色立绘，统一承载在硫磺火对话框上
+    /// 通过Role切换显示硫火女巫雕像或SHPC立绘，女巫带着色进度与像素剥落
+    /// SHPC带表情切换与故障扭曲效果
+    /// </summary>
+    internal class TheHerInThePastPortrait : FullBodyPortraitBase
+    {
+        public enum Role { Witch, SHPC }
+
+        public override string PortraitKey => "TheHerInThePast";
+
+        protected override float FadeInDuration => 45f;
+        protected override float FadeOutDuration => 60f;
+
+        public Role CurrentRole { get; private set; } = Role.Witch;
+        public ShepelFullBodyPortrait.Face SHPCFace { get; private set; } = ShepelFullBodyPortrait.Face.Blank;
+        public float Coloration => colorationT;
+        public bool IsDissolving => dissolving;
+
+        //女巫着色进度0到1
+        private float colorationT;
+        //像素剥落进度
+        private float dissolveT;
+        private bool dissolving;
+        private int localTimer;
+
+        //SHPC故障扭曲
+        private float glitchTimer;
+        private float glitchIntensity;
+        private float glitchTimeAccum;
+
+        public void SwitchTo(Role role) => CurrentRole = role;
+
+        public void SetColoration(float value) {
+            colorationT = MathHelper.Clamp(value, 0f, 1f);
+        }
+
+        public void SetSHPCFace(ShepelFullBodyPortrait.Face face) {
+            SHPCFace = face;
+        }
+
+        /// <summary>
+        /// 触发SHPC故障扭曲
+        /// </summary>
+        public void TriggerGlitch(float intensity = 0.6f, float duration = 0.7f) {
+            glitchIntensity = MathHelper.Clamp(intensity, 0f, 1f);
+            glitchTimer = MathF.Max(glitchTimer, duration * 60f);
+        }
+
+        /// <summary>
+        /// 开始女巫像素剥落消散
+        /// </summary>
+        public void StartPixelDissolve() {
+            if (dissolving) return;
+            dissolving = true;
+            dissolveT = 0f;
+            BlockDialogueClose = true;
+            EnterCustomPhase();
+        }
+
+        protected override void OnInitialize() {
+            scale = 1.2f;
+            colorationT = 0f;
+            dissolveT = 0f;
+            dissolving = false;
+            localTimer = 0;
+            glitchTimer = 0f;
+            glitchIntensity = 0f;
+            glitchTimeAccum = 0f;
+        }
+
+        protected override void OnUpdate() {
+            localTimer++;
+            if (glitchTimer > 0f) {
+                glitchTimer--;
+                glitchTimeAccum += 0.016f;
+                if (glitchTimer <= 0f) {
+                    glitchTimer = 0f;
+                    glitchIntensity = 0f;
+                }
+            }
+        }
+
+        protected override void OnCustomPhaseUpdate() {
+            localTimer++;
+            dissolveT = MathF.Min(1f, dissolveT + 1f / 180f);
+            CurrentFade = MathHelper.Clamp(1f - dissolveT, 0f, 1f);
+            if (dissolveT >= 1f) {
+                BlockDialogueClose = false;
+                ForceDeactivate();
+            }
+        }
+
+        protected override void OnDraw(SpriteBatch spriteBatch, float alpha) {
+            if (CurrentRole == Role.Witch) {
+                DrawWitch(spriteBatch, alpha);
+            }
+            else {
+                DrawSHPC(spriteBatch, alpha);
+            }
+        }
+
+        private void DrawWitch(SpriteBatch spriteBatch, float alpha) {
+            Texture2D portrait = ADVAsset.SupCalADV;
+            if (portrait == null || portrait.IsDisposed) return;
+
+            Rectangle rectangle = new Rectangle(0, 0, portrait.Width, portrait.Height);
+            position = OwnerDialogue.GetPanelRect().Top() + new Vector2(-160, -portrait.Height + 100) * scale;
+
+            Color stone = new(180, 175, 170);
+            Color vivid = Color.White;
+            Color blended = Color.Lerp(stone, vivid, colorationT) * alpha;
+
+            spriteBatch.Draw(portrait, position, rectangle, blended, rotation, Vector2.Zero, scale, SpriteEffects.None, 0f);
+
+            if (colorationT > 0.05f) {
+                Color glow = new Color(220, 60, 40, 0) * alpha * colorationT * 0.4f;
+                spriteBatch.Draw(portrait, position, rectangle, glow, rotation, Vector2.Zero, scale * 1.015f, SpriteEffects.None, 0f);
+            }
+
+            if (dissolving && dissolveT > 0.01f) {
+                DrawPixelDissolve(spriteBatch, portrait, position, alpha);
+            }
+        }
+
+        private void DrawSHPC(SpriteBatch spriteBatch, float alpha) {
+            Texture2D portrait = ADVAsset.Shepel;
+            if (portrait == null || portrait.IsDisposed) return;
+
+            Rectangle rectangle = new Rectangle(0, 0, portrait.Width, portrait.Height);
+            position = OwnerDialogue.GetPanelRect().Top() + new Vector2(-160, -portrait.Height + 100) * scale;
+
+            Color color = Color.White * alpha;
+            bool useGlitch = glitchTimer > 0f && glitchIntensity > 0f && EffectLoader.ShepelGlitch?.Value != null;
+
+            if (useGlitch) {
+                Effect effect = EffectLoader.ShepelGlitch.Value;
+                effect.Parameters["uTime"]?.SetValue(glitchTimeAccum);
+                effect.Parameters["uIntensity"]?.SetValue(glitchIntensity);
+
+                spriteBatch.End();
+                spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend,
+                    SamplerState.AnisotropicClamp, DepthStencilState.None,
+                    RasterizerState.CullNone, effect, Main.UIScaleMatrix);
+            }
+
+            spriteBatch.Draw(portrait, position, rectangle, color, rotation, Vector2.Zero, scale, SpriteEffects.None, 0f);
+            Vector2 facePos = position + new Vector2(18 * scale, 0);
+
+            Texture2D faceTexture = SHPCFace switch {
+                ShepelFullBodyPortrait.Face.Blank => ADVAsset.Shepel_Blank,
+                ShepelFullBodyPortrait.Face.Happy => ADVAsset.Shepel_Happy,
+                ShepelFullBodyPortrait.Face.Pain => ADVAsset.Shepel_Pain,
+                ShepelFullBodyPortrait.Face.Sad => ADVAsset.Shepel_Sad,
+                ShepelFullBodyPortrait.Face.Serious => ADVAsset.Shepel_Serious,
+                ShepelFullBodyPortrait.Face.Shocked => ADVAsset.Shepel_Shocked,
+                ShepelFullBodyPortrait.Face.Sleep => ADVAsset.Shepel_Sleep,
+                ShepelFullBodyPortrait.Face.Smirk => ADVAsset.Shepel_Smirk,
+                _ => null
+            };
+
+            if (faceTexture != null) {
+                spriteBatch.Draw(faceTexture, facePos, null, color, rotation, Vector2.Zero, scale, SpriteEffects.None, 0f);
+            }
+
+            if (useGlitch) {
+                spriteBatch.End();
+                spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                    SamplerState.AnisotropicClamp, DepthStencilState.None,
+                    RasterizerState.CullNone, null, Main.UIScaleMatrix);
+            }
+        }
+
+        private void DrawPixelDissolve(SpriteBatch spriteBatch, Texture2D portrait, Vector2 drawPos, float alpha) {
+            Texture2D pixel = CWRAsset.Placeholder_White?.Value ?? TextureAssets.MagicPixel.Value;
+            if (pixel == null) return;
+
+            int blockSize = 6;
+            int cols = portrait.Width / blockSize;
+            int rows = portrait.Height / blockSize;
+            float threshold = dissolveT;
+            int seed = 9173;
+
+            for (int y = 0; y < rows; y++) {
+                float rowProgress = y / (float)rows;
+                float localT = MathHelper.Clamp((threshold - rowProgress) * 2f, 0f, 1f);
+                if (localT <= 0f) continue;
+                for (int x = 0; x < cols; x++) {
+                    int hash = unchecked(seed + x * 73856093 + y * 19349663);
+                    float rnd = (hash & 0xFFFF) / 65535f;
+                    if (rnd > localT) continue;
+
+                    Vector2 pos = drawPos + new Vector2(x * blockSize, y * blockSize) * scale;
+                    Color cover = Color.Black * alpha * MathHelper.Clamp(localT * 1.3f, 0f, 1f);
+                    spriteBatch.Draw(pixel, pos, null, cover, 0f, Vector2.Zero, blockSize * scale, SpriteEffects.None, 0f);
+
+                    if (rnd < localT * 0.4f) {
+                        float driftY = -MathF.Sin(localTimer * 0.03f + x * 0.4f) * 20f * localT;
+                        float driftX = MathF.Cos(localTimer * 0.02f + y * 0.3f) * 5f * localT;
+                        Vector2 shardPos = pos + new Vector2(driftX, driftY - localT * 36f);
+                        Color shardColor = Color.Lerp(new Color(180, 175, 170), new Color(100, 30, 30), localT) * alpha * (1f - localT);
+                        spriteBatch.Draw(pixel, shardPos, null, shardColor, 0f, Vector2.Zero, blockSize * scale * 0.8f, SpriteEffects.None, 0f);
+                    }
+                }
+            }
+        }
+    }
+}

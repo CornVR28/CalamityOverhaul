@@ -12,10 +12,8 @@ using Terraria.ModLoader;
 namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.TheHerInThePasts
 {
     /// <summary>
-    /// 过去的她——虚空聚落过去时代的一段演出入口
-    /// 按说话者切分为多个独立的嵌套子场景，链式推进：
-    /// 父场景=女巫L1 → SHPC01 → 女巫02 → SHPC02 → 女巫03 → SHPC03 → 女巫04 → SHPC04
-    /// 每个子场景独自声明 DefaultDialogueStyle 与初始立绘，切换对话框由 ADV 框架自动处理
+    /// 过去的她——虚空聚落过去时代的一段演出
+    /// 单一场景，统一使用硫磺火对话框，立绘由 TheHerInThePastPortrait 承载并按行切换角色
     /// </summary>
     internal class TheHerInThePast : ADVScenarioBase, ILocalizedModType, IWorldInfo
     {
@@ -71,44 +69,77 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.TheHerInThePasts
                 () => "……");
         }
 
-        //父场景初始化女巫立绘，一次性执行
+        //取当前活动立绘，场景内所有切换都在它上面操作
+        private static TheHerInThePastPortrait GetPortrait()
+            => BrimstoneDialogueBox.Instance?.GetActiveFullBodyPortrait() as TheHerInThePastPortrait;
+
+        //切到女巫，并推进着色
+        private static void ToWitch(float coloration) {
+            var portrait = GetPortrait();
+            if (portrait == null) return;
+            portrait.SwitchTo(TheHerInThePastPortrait.Role.Witch);
+            if (!portrait.IsDissolving) portrait.SetColoration(coloration);
+        }
+
+        //切到SHPC，并设置表情与可选故障
+        private static void ToSHPC(ShepelFullBodyPortrait.Face face, bool glitch = false) {
+            var portrait = GetPortrait();
+            if (portrait == null) return;
+            portrait.SwitchTo(TheHerInThePastPortrait.Role.SHPC);
+            portrait.SetSHPCFace(face);
+            if (glitch) portrait.TriggerGlitch(0.6f, 0.7f);
+        }
+
         protected override void OnScenarioStart() {
-            BrimstoneDialogueBox.Instance?.ShowFullBodyPortrait<WitchPastFullBodyPortrait>();
-            BrimstoneDialogueBox.Instance?.GetActiveFullBodyPortrait()?.SkipFadeIn();
-            SetWitchColoration(0.35f);
+            BrimstoneDialogueBox.Instance?.ShowFullBodyPortrait<TheHerInThePastPortrait>();
+            var portrait = GetPortrait();
+            portrait?.SkipFadeIn();
+            portrait?.SwitchTo(TheHerInThePastPortrait.Role.Witch);
+            portrait?.SetColoration(0.35f);
         }
 
         protected override void Build() {
-            Add(RolenameWitch.Value, WitchLine1.Value);
+            //女巫1——起始着色
+            Add(RolenameWitch.Value, WitchLine1.Value,
+                onStart: () => ToWitch(0.35f));
+            //SHPC1——震惊+故障
+            Add(RolenameSHPC.Value, ShpcLine1.Value,
+                onStart: () => ToSHPC(ShepelFullBodyPortrait.Face.Shocked, glitch: true));
+            //女巫2
+            Add(RolenameWitch.Value, WitchLine2.Value,
+                onStart: () => ToWitch(0.5f));
+            //女巫3——继续推进
+            Add(RolenameWitch.Value, WitchLine3.Value,
+                onStart: () => ToWitch(0.65f));
+            //SHPC2——继续震惊
+            Add(RolenameSHPC.Value, ShpcLine2.Value,
+                onStart: () => ToSHPC(ShepelFullBodyPortrait.Face.Shocked));
+            //女巫4
+            Add(RolenameWitch.Value, WitchLine4.Value,
+                onStart: () => ToWitch(0.8f));
+            //女巫5
+            Add(RolenameWitch.Value, WitchLine5.Value,
+                onStart: () => ToWitch(0.9f));
+            //SHPC3——严肃
+            Add(RolenameSHPC.Value, ShpcLine3.Value,
+                onStart: () => ToSHPC(ShepelFullBodyPortrait.Face.Serious));
+            //女巫6
+            Add(RolenameWitch.Value, WitchLine6.Value,
+                onStart: () => ToWitch(1f));
+            //女巫7
+            Add(RolenameWitch.Value, WitchLine7.Value,
+                onStart: () => ToWitch(1f));
+            //SHPC4——沉默收尾
+            Add(RolenameSHPC.Value, ShpcLine4.Value,
+                onStart: () => ToSHPC(ShepelFullBodyPortrait.Face.Sad));
         }
 
         protected override void OnScenarioComplete() {
-            ScenarioManager.Reset<Segment_SHPC_01>();
-            ScenarioManager.Start<Segment_SHPC_01>();
-        }
-
-        //仅更新着色进度，不重复 ShowFullBodyPortrait
-        protected static void SetWitchColoration(float coloration) {
-            if (BrimstoneDialogueBox.Instance?.GetActiveFullBodyPortrait() is WitchPastFullBodyPortrait portrait
-                && !portrait.IsDissolving) {
-                portrait.SetColoration(coloration);
-            }
-        }
-
-        //仅更新SHPC表情，不重复 ShowFullBodyPortrait
-        protected static void SetSHPCFace(ShepelFullBodyPortrait.Face face, bool glitch = false) {
-            if (SHPCDialogueBox.Instance?.GetActiveFullBodyPortrait() is ShepelFullBodyPortrait portrait) {
-                portrait.currentFace = face;
-                if (glitch) portrait.TriggerGlitch(0.6f, 0.7f);
-            }
-        }
-
-        //演出收尾：雕像剥落+立绘剥落+鬼乱码自毁+写存档
-        protected static void FinishPerformance() {
             WitchStatueActor.Current?.BeginDissolve();
-            if (BrimstoneDialogueBox.Instance?.GetActiveFullBodyPortrait() is WitchPastFullBodyPortrait portrait) {
-                portrait.StartPixelDissolve();
-            }
+            var portrait = GetPortrait();
+            //结束前确保在女巫形态上完成像素剥落
+            portrait?.SwitchTo(TheHerInThePastPortrait.Role.Witch);
+            portrait?.StartPixelDissolve();
 
             foreach (var wraith in ActorLoader.GetActiveActors<GlitchWraithActor>()) {
                 wraith?.ApplySelfDismember();
@@ -133,165 +164,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.TheHerInThePasts
             if (++triggerDelay < 45) return;
 
             if (StartScenario()) {
-                //写入存档，避免多次触发
                 save.Get<VoidColonyADVData>().TheHerInThePast = true;
                 triggerDelay = 0;
-            }
-        }
-
-        //SHPC第1段：识破身份前的震惊
-        internal class Segment_SHPC_01 : ADVScenarioBase
-        {
-            public override string Key => nameof(Segment_SHPC_01);
-            protected override Func<DialogueBoxBase> DefaultDialogueStyle => () => SHPCDialogueBox.Instance;
-
-            protected override void OnScenarioStart() {
-                SHPCDialogueBox.Instance?.ShowFullBodyPortrait<ShepelFullBodyPortrait>();
-                SHPCDialogueBox.Instance?.GetActiveFullBodyPortrait()?.SkipFadeIn();
-                SetSHPCFace(ShepelFullBodyPortrait.Face.Shocked, glitch: true);
-            }
-
-            protected override void Build() {
-                Add(RolenameSHPC.Value, ShpcLine1.Value);
-            }
-
-            protected override void OnScenarioComplete() {
-                ScenarioManager.Reset<Segment_Witch_02>();
-                ScenarioManager.Start<Segment_Witch_02>();
-            }
-        }
-
-        //女巫第2段：解释能动+影子自白
-        internal class Segment_Witch_02 : ADVScenarioBase
-        {
-            public override string Key => nameof(Segment_Witch_02);
-            protected override Func<DialogueBoxBase> DefaultDialogueStyle => () => BrimstoneDialogueBox.Instance;
-
-            protected override void OnScenarioStart() {
-                BrimstoneDialogueBox.Instance?.ShowFullBodyPortrait<WitchPastFullBodyPortrait>();
-                BrimstoneDialogueBox.Instance?.GetActiveFullBodyPortrait()?.SkipFadeIn();
-                SetWitchColoration(0.5f);
-            }
-
-            protected override void Build() {
-                Add(RolenameWitch.Value, WitchLine2.Value);
-                Add(RolenameWitch.Value, WitchLine3.Value,
-                    onStart: () => SetWitchColoration(0.65f));
-            }
-
-            protected override void OnScenarioComplete() {
-                ScenarioManager.Reset<Segment_SHPC_02>();
-                ScenarioManager.Start<Segment_SHPC_02>();
-            }
-        }
-
-        //SHPC第2段：追问
-        internal class Segment_SHPC_02 : ADVScenarioBase
-        {
-            public override string Key => nameof(Segment_SHPC_02);
-            protected override Func<DialogueBoxBase> DefaultDialogueStyle => () => SHPCDialogueBox.Instance;
-
-            protected override void OnScenarioStart() {
-                SHPCDialogueBox.Instance?.ShowFullBodyPortrait<ShepelFullBodyPortrait>();
-                SHPCDialogueBox.Instance?.GetActiveFullBodyPortrait()?.SkipFadeIn();
-                SetSHPCFace(ShepelFullBodyPortrait.Face.Shocked);
-            }
-
-            protected override void Build() {
-                Add(RolenameSHPC.Value, ShpcLine2.Value);
-            }
-
-            protected override void OnScenarioComplete() {
-                ScenarioManager.Reset<Segment_Witch_03>();
-                ScenarioManager.Start<Segment_Witch_03>();
-            }
-        }
-
-        //女巫第3段：打趣+叫住SHPC
-        internal class Segment_Witch_03 : ADVScenarioBase
-        {
-            public override string Key => nameof(Segment_Witch_03);
-            protected override Func<DialogueBoxBase> DefaultDialogueStyle => () => BrimstoneDialogueBox.Instance;
-
-            protected override void OnScenarioStart() {
-                BrimstoneDialogueBox.Instance?.ShowFullBodyPortrait<WitchPastFullBodyPortrait>();
-                BrimstoneDialogueBox.Instance?.GetActiveFullBodyPortrait()?.SkipFadeIn();
-                SetWitchColoration(0.8f);
-            }
-
-            protected override void Build() {
-                Add(RolenameWitch.Value, WitchLine4.Value);
-                Add(RolenameWitch.Value, WitchLine5.Value,
-                    onStart: () => SetWitchColoration(0.9f));
-            }
-
-            protected override void OnScenarioComplete() {
-                ScenarioManager.Reset<Segment_SHPC_03>();
-                ScenarioManager.Start<Segment_SHPC_03>();
-            }
-        }
-
-        //SHPC第3段：回应
-        internal class Segment_SHPC_03 : ADVScenarioBase
-        {
-            public override string Key => nameof(Segment_SHPC_03);
-            protected override Func<DialogueBoxBase> DefaultDialogueStyle => () => SHPCDialogueBox.Instance;
-
-            protected override void OnScenarioStart() {
-                SHPCDialogueBox.Instance?.ShowFullBodyPortrait<ShepelFullBodyPortrait>();
-                SHPCDialogueBox.Instance?.GetActiveFullBodyPortrait()?.SkipFadeIn();
-                SetSHPCFace(ShepelFullBodyPortrait.Face.Serious);
-            }
-
-            protected override void Build() {
-                Add(RolenameSHPC.Value, ShpcLine3.Value);
-            }
-
-            protected override void OnScenarioComplete() {
-                ScenarioManager.Reset<Segment_Witch_04>();
-                ScenarioManager.Start<Segment_Witch_04>();
-            }
-        }
-
-        //女巫第4段：关键台词
-        internal class Segment_Witch_04 : ADVScenarioBase
-        {
-            public override string Key => nameof(Segment_Witch_04);
-            protected override Func<DialogueBoxBase> DefaultDialogueStyle => () => BrimstoneDialogueBox.Instance;
-
-            protected override void OnScenarioStart() {
-                BrimstoneDialogueBox.Instance?.ShowFullBodyPortrait<WitchPastFullBodyPortrait>();
-                BrimstoneDialogueBox.Instance?.GetActiveFullBodyPortrait()?.SkipFadeIn();
-                SetWitchColoration(1f);
-            }
-
-            protected override void Build() {
-                Add(RolenameWitch.Value, WitchLine6.Value);
-                Add(RolenameWitch.Value, WitchLine7.Value);
-            }
-
-            protected override void OnScenarioComplete() {
-                ScenarioManager.Reset<Segment_SHPC_04>();
-                ScenarioManager.Start<Segment_SHPC_04>();
-            }
-        }
-
-        //SHPC第4段：沉默，由末行自动触发 Complete → OnScenarioComplete 收尾
-        internal class Segment_SHPC_04 : ADVScenarioBase
-        {
-            public override string Key => nameof(Segment_SHPC_04);
-            protected override Func<DialogueBoxBase> DefaultDialogueStyle => () => SHPCDialogueBox.Instance;
-
-            protected override void OnScenarioStart() {
-                SHPCDialogueBox.Instance?.ShowFullBodyPortrait<ShepelFullBodyPortrait>();
-                SHPCDialogueBox.Instance?.GetActiveFullBodyPortrait()?.SkipFadeIn();
-                SetSHPCFace(ShepelFullBodyPortrait.Face.Sad);
-            }
-
-            protected override void OnScenarioComplete() => FinishPerformance();
-
-            protected override void Build() {
-                Add(RolenameSHPC.Value, ShpcLine4.Value);
             }
         }
     }
