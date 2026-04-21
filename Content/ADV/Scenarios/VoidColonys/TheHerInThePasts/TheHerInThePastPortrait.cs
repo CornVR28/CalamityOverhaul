@@ -123,7 +123,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.TheHerInThePasts
             spriteBatch.Draw(portrait, position, rectangle, blended, rotation, Vector2.Zero, scale, SpriteEffects.None, 0f);
 
             if (colorationT > 0.05f) {
-                Color glow = new Color(220, 60, 40, 0) * alpha * colorationT * 0.4f;
+                Color glow = Color.White * alpha * colorationT * 0.4f;
                 spriteBatch.Draw(portrait, position, rectangle, glow, rotation, Vector2.Zero, scale * 1.015f, SpriteEffects.None, 0f);
             }
 
