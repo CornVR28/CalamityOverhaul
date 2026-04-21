@@ -18,5 +18,11 @@ namespace CalamityOverhaul.Content.HackTimes
         /// </summary>
         [VaultLoaden(CWRConstant.Effects)]
         public static Effect HackTimeNPCHighlight { get; private set; }
+
+        /// <summary>
+        /// 骇客时间灵异目标高亮着色器（有机撕裂+血雾+紫红色差）
+        /// </summary>
+        [VaultLoaden(CWRConstant.Effects)]
+        public static Effect HackWraithHighlight { get; private set; }
     }
 }

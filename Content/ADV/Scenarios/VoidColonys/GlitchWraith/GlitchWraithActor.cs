@@ -13,8 +13,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.GlitchWraith
 {
     /// <summary>
     /// 鬼乱码：仅在过去视角下可见的致命威胁
-    /// 遵循123木头人规则，玩家在过去视角下注视时绝对静止，其余时间缓慢移动并偶发乱码瞬移
-    /// 完全无视地形碰撞
+    /// 无视地形碰撞，持续向最近玩家缓慢蠕动并偶发乱码瞬移
+    /// 骇客时间激活期间会被暂停，可被玩家作为灵异目标骇入
     /// </summary>
     internal class GlitchWraithActor : Actor, IScannable
     {
@@ -28,8 +28,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.GlitchWraith
         //瞬移后的乱码闪烁余辉帧数
         private const int TeleportFlashFrames = 16;
 
-        //玩家注视判定所需的屏幕内安全边距
-        private const int ScreenMargin = 64;
         //触碰判定可见度阈值
         private const float ContactVisibility = 0.6f;
         //过去视角淡入速度与现在视角淡出速度
@@ -42,8 +40,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.GlitchWraith
 
         /// <summary>当前可见度0到1，过去视角下逼近1</summary>
         private float visibility;
-        /// <summary>过去视角下是否被玩家注视，冻结中</summary>
-        private bool isWatched;
         /// <summary>瞬移冷却帧数</summary>
         private int teleportTimer;
         /// <summary>瞬移后余辉闪烁帧数</summary>
@@ -102,6 +98,17 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.GlitchWraith
                 return;
             }
 
+            //骇客时间冻结：与NPC同步被暂停，保留可见度与乱码视觉循环
+            if (HackTimeFreeze.IsActive) {
+                Velocity = Vector2.Zero;
+                bool inPastHack = VoidTimeShiftSystem.InPast;
+                float targetVisHack = inPastHack ? 1f : 0f;
+                if (visibility < targetVisHack) visibility = MathF.Min(targetVisHack, visibility + FadeInStep);
+                else if (visibility > targetVisHack) visibility = MathF.Max(targetVisHack, visibility - FadeOutStep);
+                glitchSeed = unchecked(glitchSeed * 1664525 + 1013904223);
+                return;
+            }
+
             //死机状态：完全冻结，其他计时推进照常
             if (stunFrames > 0) {
                 stunFrames--;
@@ -125,8 +132,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.GlitchWraith
             }
 
             bool inPast = VoidTimeShiftSystem.InPast;
-            //现在视角下鬼乱码完全不可见，因此不参与注视判定
-            isWatched = inPast && IsBeingWatched(target);
 
             //可见度根据时代平滑变化
             float targetVis = inPast ? 1f : 0f;
@@ -137,35 +142,29 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.GlitchWraith
                 visibility = MathF.Max(targetVis, visibility - FadeOutStep);
             }
 
-            if (isWatched) {
-                //绝对静止
+            Vector2 toTarget = target.Center - Center;
+            float dist = toTarget.Length();
+            if (dist <= 1f) {
                 Velocity = Vector2.Zero;
             }
             else {
-                Vector2 toTarget = target.Center - Center;
-                float dist = toTarget.Length();
-                if (dist <= 1f) {
-                    Velocity = Vector2.Zero;
-                }
-                else {
-                    Vector2 dir = toTarget / dist;
-                    //虚假记忆期间反向游离，失去追击意图
-                    if (falseMemoryFrames > 0) dir = -dir;
-                    //始终缓慢蠕动，速度不随时代改变
-                    Velocity = dir * MathF.Min(CreepSpeed, dist);
+                Vector2 dir = toTarget / dist;
+                //虚假记忆期间反向游离，失去追击意图
+                if (falseMemoryFrames > 0) dir = -dir;
+                //始终缓慢蠕动，速度不随时代改变
+                Velocity = dir * MathF.Min(CreepSpeed, dist);
 
-                    //乱码瞬移倒计时推进，触发时一次性跳跃一小段距离
-                    teleportTimer--;
-                    if (teleportTimer <= 0) {
-                        teleportTimer = Main.rand.Next(TeleportIntervalMin, TeleportIntervalMax);
-                        float teleDist = Main.rand.NextFloat(TeleportDistanceMin, TeleportDistanceMax);
-                        teleDist = MathF.Min(teleDist, MathF.Max(0f, dist - 80f));
-                        if (teleDist > 0f) {
-                            Position += dir * teleDist;
-                            teleportFlash = TeleportFlashFrames;
-                            //瞬移同帧重置种子，让余辉闪烁更离散
-                            glitchSeed = Main.rand.Next(int.MaxValue);
-                        }
+                //乱码瞬移倒计时推进，触发时一次性跳跃一小段距离
+                teleportTimer--;
+                if (teleportTimer <= 0) {
+                    teleportTimer = Main.rand.Next(TeleportIntervalMin, TeleportIntervalMax);
+                    float teleDist = Main.rand.NextFloat(TeleportDistanceMin, TeleportDistanceMax);
+                    teleDist = MathF.Min(teleDist, MathF.Max(0f, dist - 80f));
+                    if (teleDist > 0f) {
+                        Position += dir * teleDist;
+                        teleportFlash = TeleportFlashFrames;
+                        //瞬移同帧重置种子，让余辉闪烁更离散
+                        glitchSeed = Main.rand.Next(int.MaxValue);
                     }
                 }
             }
@@ -175,7 +174,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.GlitchWraith
             glitchSeed = unchecked(glitchSeed * 1664525 + 1013904223);
 
             //过去视角下与玩家碰撞触发处决
-            if (inPast && visibility > ContactVisibility && !target.dead && !target.immune) {
+            if (VoidTimeShiftSystem.InPast && visibility > ContactVisibility && !target.dead && !target.immune) {
                 Rectangle myBox = new((int)Position.X, (int)Position.Y, Width, Height);
                 if (myBox.Intersects(target.Hitbox)) {
                     ExecutePlayer(target);
@@ -254,23 +253,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.GlitchWraith
         }
 
         /// <summary>
-        /// 判定本地玩家是否正在注视鬼乱码
-        /// 必要条件过去视角鬼在屏幕内玩家朝向指向鬼一侧
-        /// </summary>
-        private bool IsBeingWatched(Player player) {
-            if (player.whoAmI != Main.myPlayer) return false;
-
-            Vector2 screenCenter = Center - Main.screenPosition;
-            if (screenCenter.X < -ScreenMargin || screenCenter.X > Main.screenWidth + ScreenMargin) return false;
-            if (screenCenter.Y < -ScreenMargin || screenCenter.Y > Main.screenHeight + ScreenMargin) return false;
-
-            int dx = MathF.Sign(Center.X - player.Center.X);
-            if (dx != 0 && player.direction != dx) return false;
-
-            return true;
-        }
-
-        /// <summary>
         /// 触发处决演出
         /// </summary>
         private void ExecutePlayer(Player player) {
@@ -314,14 +296,59 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.GlitchWraith
                 spriteBatch.Draw(tex, drawPos + new Vector2(off, 0f), null, purpleGhost, 0f, origin, 1f, SpriteEffects.None, 0f);
             }
 
-            //本体纹理
-            Color baseColor = Color.White * visibility;
-            spriteBatch.Draw(tex, drawPos, null, baseColor, 0f, origin, 1f, SpriteEffects.None, 0f);
+            //骇入滤镜：被骇客时间悬停或选中时通过灵异专用着色器渲染本体
+            bool isSelected = ReferenceEquals(HackTime.CurrentScanTarget, this);
+            bool isHovered = ReferenceEquals(HackTimeTargeting.HoveredWraith, this);
+            float hackMark = (isSelected ? 1f : isHovered ? 0.55f : 0f) * HackTime.Intensity;
+            if (hackMark > 0.01f) {
+                DrawBodyWithHackShader(spriteBatch, tex, drawPos, origin, hackMark, isSelected);
+            }
+            else {
+                //未进入骇客时间高亮时按常规绘制
+                Color baseColor = Color.White * visibility;
+                spriteBatch.Draw(tex, drawPos, null, baseColor, 0f, origin, 1f, SpriteEffects.None, 0f);
+            }
 
             //头部球形乱码：使用着色器生成团状有机乱码斑块
             DrawGlitchHead(spriteBatch, drawPos, origin, tex.Width);
 
             return false;
+        }
+
+        /// <summary>
+        /// 使用HackWraithHighlight着色器绘制本体
+        /// 切到Immediate模式绑定着色器，由着色器内部完成撕裂、血雾、紫红色差、心跳脉冲等全部高亮效果
+        /// 结束后恢复默认批次配置
+        /// </summary>
+        private void DrawBodyWithHackShader(SpriteBatch sb, Texture2D tex, Vector2 drawPos,
+            Vector2 origin, float strength, bool selected) {
+            Effect shader = HackTimeAssets.HackWraithHighlight;
+            if (shader == null) {
+                //着色器未加载时回落到普通绘制，确保始终可见
+                Color fallback = Color.White * visibility;
+                sb.Draw(tex, drawPos, null, fallback, 0f, origin, 1f, SpriteEffects.None, 0f);
+                return;
+            }
+
+            //着色器参数：纹素大小、强度、选中标志、动画时间
+            shader.Parameters["texelSize"]?.SetValue(new Vector2(1f / tex.Width, 1f / tex.Height));
+            shader.Parameters["intensity"]?.SetValue(strength);
+            shader.Parameters["isSelected"]?.SetValue(selected ? 1f : 0f);
+            shader.Parameters["uTime"]?.SetValue(Main.GlobalTimeWrappedHourly);
+
+            //切到Immediate并绑定像素着色器
+            sb.End();
+            sb.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, Main.DefaultSamplerState,
+                DepthStencilState.None, Main.Rasterizer, shader, Main.GameViewMatrix.TransformationMatrix);
+
+            //顶点色携带visibility作为透明度，着色器里的smpColor即此值
+            Color bodyColor = Color.White * visibility;
+            sb.Draw(tex, drawPos, null, bodyColor, 0f, origin, 1f, SpriteEffects.None, 0f);
+
+            //恢复默认批次配置
+            sb.End();
+            sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState,
+                DepthStencilState.None, Main.Rasterizer, null, Main.GameViewMatrix.TransformationMatrix);
         }
 
         /// <summary>
@@ -426,10 +453,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.GlitchWraith
             else if (falseMemoryFrames > 0) {
                 values[3] = HackTime.WraithScanStatusMemory.Value;
                 colors[3] = HackTheme.AccentAlt;
-            }
-            else if (isWatched) {
-                values[3] = HackTime.WraithScanStatusWatched.Value;
-                colors[3] = HackTheme.Accent;
             }
             else {
                 values[3] = HackTime.WraithScanStatusStalking.Value;
