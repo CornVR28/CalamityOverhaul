@@ -99,5 +99,8 @@ namespace CalamityOverhaul.Content.ADV
         public static Texture2D Shepel_Smirk = null;
         [VaultLoaden(CWRConstant.ADV + "VoidColony/")]
         public static Texture2D Glitchwraith = null;
+        //过去的她场景里女巫的留影雕像贴图，直接位于Content目录下
+        [VaultLoaden("CalamityOverhaul/Content/ADV/Scenarios/VoidColonys/TheHerInThePasts/Wach")]
+        public static Texture2D WitchStatue = null;
     }
 }

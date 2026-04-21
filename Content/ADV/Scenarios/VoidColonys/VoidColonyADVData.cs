@@ -1,0 +1,11 @@
+namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys
+{
+    /// <summary>
+    /// 虚空聚落剧情线的存档数据
+    /// </summary>
+    public class VoidColonyADVData : ADVDataModule
+    {
+        //过去的她场景是否已经触发过
+        public bool TheHerInThePast;
+    }
+}
