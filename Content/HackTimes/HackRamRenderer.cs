@@ -31,8 +31,6 @@ namespace CalamityOverhaul.Content.HackTimes
         private const float TopY = 76f;
         //弧线水平像素跨度
         private const float ArcSpanPx = 400f;
-        //屏幕右边距
-        private const float RMargin = 36f;
         //格间间隙弧度
         private const float CellGap = 0.007f;
 
@@ -84,7 +82,8 @@ namespace CalamityOverhaul.Content.HackTimes
             float cellAngle = (totalSweep - totalGapAngle) / maxRam;
 
             //弧线中心（在弧线正下方,使弧线呈穹顶拱形）
-            float cx = Main.screenWidth - RMargin - ArcSpanPx * 0.5f;
+            //水平居中于屏幕顶部中间偏上位置，作为整个骇客HUD的主焦点
+            float cx = Main.screenWidth * 0.5f;
             float flyOff = (1f - EaseOutCubic(flyInProgress)) * -50f;
             float cy = TopY + InnerR + flyOff;
             Vector2 center = new(cx, cy);

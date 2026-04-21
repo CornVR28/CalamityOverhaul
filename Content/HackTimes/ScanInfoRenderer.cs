@@ -147,14 +147,15 @@ namespace CalamityOverhaul.Content.HackTimes
             float alpha = HackTime.Intensity * flyInProgress;
             if (alpha < 0.01f) return;
 
-            //计算面板位置(协议列表上方)
+            //计算面板位置(协议列表下方)
             int protocolCount = QuickHackDef.Count;
             float listTotalH = protocolCount * (78f + 5f) - 5f;
             float listStartY = (Main.screenHeight - listTotalH) * 0.5f;
             float panelH = TopPad + HeaderHeight + SepHeight
                 + currentDataRowCount * RowHeight + SepHeight + StatusHeight + BottomPad;
             float baseX = Main.screenWidth / 2 - PanelWidth / 2;
-            float panelTop = Math.Max(listStartY - GapToList - panelH, 6f);
+            float panelTop = Math.Min(listStartY + listTotalH + GapToList,
+                Main.screenHeight - panelH - 6f);
 
             //飞入偏移
             float flyOffset = (1f - EaseOutCubic(flyInProgress)) * 300f;
