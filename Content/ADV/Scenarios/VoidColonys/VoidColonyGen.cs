@@ -66,17 +66,22 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys
 
             //============ 第二步：核心岛 ============
             progress.Message = "正在凝聚核心岛屿...";
-            PlaceAndRegister(IslandTier.Core, centerX, centerY, 130, 28, 90, seed + 5000,
+            //半宽收窄到刚好覆盖核心实验室贴图与两侧外挑桁架，两翼留出虚空便于桥梁演出
+            PlaceAndRegister(IslandTier.Core, centerX, centerY, 70, 28, 90, seed + 5000,
                 "核心实验室", worldWidth, worldHeight);
 
             //============ 第三步：卫星岛（固定布局，对应草图标注位置） ============
             progress.Message = "正在牵引卫星岛屿...";
+            //前两条为核心岛左右等高配对的桥梁中继浮岛，TopT对齐核心岛的极高，两翼的附属建筑然将落在它们上面
+            //ox=±158 tile使能源站/分析实验室恰好忽岛面中心，中间虚空⍈2×123tile，足够三段横桥跨越
             (int ox, int oy, int hw, int topT, int botD, string tag)[] satellites = [
+                (-158, 0, 42, 28, 48, "桥梁中继_左"),
+                (158, 0, 42, 28, 48, "桥梁中继_右"),
                 (-280, -180, 55, 18, 48, "亚空间异界生物实验室_上"),
                 (200, -220, 50, 16, 42, "超凡材料分析实验室"),
                 (-320, 60, 45, 15, 38, "亚空间异界生物实验室_下"),
-                (300, -50, 48, 16, 40, "能量控制站"),
-                (0, 220, 52, 17, 44, "核心亚空间能量分析站"),
+                (380, -50, 48, 16, 40, "能量控制站"),
+                (0, 280, 52, 17, 44, "核心亚空间能量分析站"),
             ];
 
             for (int i = 0; i < satellites.Length; i++) {

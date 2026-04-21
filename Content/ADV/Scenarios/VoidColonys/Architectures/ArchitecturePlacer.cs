@@ -35,8 +35,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures
     internal static class ArchitecturePlacer
     {
         private const int PixelsPerTile = 16;
-        //相邻建筑之间的水平间距，留给桥段一段整齐的展开距离
-        private const int InterBuildingGapPx = 320;
+        //相邻建筑之间的水平间距px
+        //桥段贴图宽552px，设为1700约等于三段拼接，保证渡桥演出的穿越感
+        private const int InterBuildingGapPx = 1700;
 
         //卫星岛标签→建筑类型
         private static readonly Dictionary<string, ArchitectureType> SatelliteBuildings = new() {
