@@ -11,7 +11,7 @@ using Terraria.ModLoader;
 
 namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.TheHerInThePasts
 {
-    //在制作这个的过场中我他妈意识到千万别试图不靠选项分支来启动子场景，因为目前的对话框框架根本不支持你从一个对话场景中直接启动另一个新的场景，会有他妈的一堆bug！
+    //在制作这个的过场中我他妈意识到千万别试图不靠选项分支来启动子场景，因为目前的对话框框架根本不支持你从一个对话场景中直接启动另一个新的场景，会有他妈的一堆bug
     internal class TheHerInThePast : ADVScenarioBase, ILocalizedModType, IWorldInfo
     {
         public override string Key => nameof(TheHerInThePast);
