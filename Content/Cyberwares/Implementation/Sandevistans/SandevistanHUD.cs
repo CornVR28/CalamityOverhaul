@@ -1,5 +1,5 @@
 ﻿using CalamityOverhaul.Content.ADV.EntrustManager;
-using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.HackTime;
+using CalamityOverhaul.Content.HackTimes;
 using CalamityOverhaul.Content.QuestLogs;
 using InnoVault.UIHandles;
 using Microsoft.Xna.Framework.Graphics;
