@@ -43,7 +43,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Laser
         /// <summary>炮身贴图上枪口的X像素（炮管末端）</summary>
         public static float GunMuzzleLocalX => 200f;
         /// <summary>炮身贴图上枪口的Y像素（对准炮身中线）</summary>
-        public static float GunMuzzleLocalY => 124f;
+        public static float GunMuzzleLocalY => 120f;
 
         //锁定相关
         /// <summary>触发锁定距离，超过此距离不会主动挑衅玩家</summary>
@@ -137,14 +137,19 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Laser
         /// <summary>世界像素下的炮身枢轴</summary>
         private Vector2 MountWorld => Position + new Vector2(PedestalMountLocalX, PedestalMountLocalY);
 
-        /// <summary>世界像素下的枪口，沿当前朝向由枢轴外推</summary>
+        /// <summary>世界像素下的枪口，沿当前朝向由枢轴外推
+        /// 炮身在朝左时会做垂直翻转绘制(FlipVertically)，此时贴图上枪口的有效Y会镜像
+        /// 这里同步对perpOffset取反，确保激光起点始终对齐实际枪管开口</summary>
         private Vector2 MuzzleWorld {
             get {
                 Vector2 mount = MountWorld;
                 Vector2 forward = currentRotation.ToRotationVector2();
                 Vector2 up = new(-forward.Y, forward.X);
-                return mount + forward * (GunMuzzleLocalX - GunPivotLocalX)
-                    + up * (GunMuzzleLocalY - GunPivotLocalY);
+                float parallel = GunMuzzleLocalX - GunPivotLocalX;
+                float perp = GunMuzzleLocalY - GunPivotLocalY;
+                //与PreDraw中flipVertical保持同步：cos<0时贴图垂直翻转，垂直偏移需取反
+                if (MathF.Cos(currentRotation) < 0f) perp = -perp;
+                return mount + forward * parallel + up * perp;
             }
         }
 
