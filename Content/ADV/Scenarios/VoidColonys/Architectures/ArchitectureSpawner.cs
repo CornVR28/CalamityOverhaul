@@ -1,3 +1,4 @@
+using CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.GatlinTurrets;
 using InnoVault.Actors;
 using Microsoft.Xna.Framework;
 using System;
@@ -25,7 +26,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures
                 return;
             }
             if (spawned) return;
-            if (ArchitectureRegistry.Entries.Count == 0 && ArchitectureRegistry.Connectors.Count == 0) return;
+            if (ArchitectureRegistry.Entries.Count == 0
+                && ArchitectureRegistry.Connectors.Count == 0
+                && GatlinTurretRegistry.Entries.Count == 0) return;
 
             //先刷连接段（与建筑Actor同层AfterTiles），再刷建筑
             //同层内先生成的WhoAmI较小者更早绘制，因而桥/管位于建筑之后绘制不会遮挡主建筑
@@ -49,6 +52,17 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures
                 if (ActorLoader.Actors[idx] is not ArchitectureActor actor) continue;
                 //显式设置SyncVar字段并触发网络同步，确保客户端也能拿到正确的建筑类型
                 actor.TypeByte = (byte)entry.Type;
+                actor.OnSpawn();
+                actor.NetUpdate = true;
+            }
+
+            //加特林炮台：沿核心桥刷出，与建筑共用同样的扭曲可见度管线
+            foreach (var turret in GatlinTurretRegistry.Entries) {
+                Vector2 position = new(turret.PedestalPixelX, turret.PedestalPixelY);
+                int idx = ActorLoader.NewActor<GatlinTurretActor>(position, Vector2.Zero);
+                if (idx < 0 || idx >= ActorLoader.Actors.Length) continue;
+                if (ActorLoader.Actors[idx] is not GatlinTurretActor actor) continue;
+                actor.InitialFaceLeft = turret.InitialFaceLeft;
                 actor.OnSpawn();
                 actor.NetUpdate = true;
             }

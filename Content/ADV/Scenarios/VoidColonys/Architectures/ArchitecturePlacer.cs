@@ -1,3 +1,4 @@
+using CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.GatlinTurrets;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
@@ -50,6 +51,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures
 
         public static void BuildAll() {
             ArchitectureRegistry.Clear();
+            GatlinTurretRegistry.Clear();
 
             var core = IslandRegistry.FindByTag("核心实验室");
             if (core == null) return;
@@ -89,6 +91,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures
                 var energy = AppendFlankTowardsLeft(coreBuilding, coreLeftBridgeIdx,
                     ArchitectureType.EnergyControlStation, surfacePx);
                 if (energy != null) {
+                    //在核心左桥刚离开核心的一段位置落炮台，静止朝向外侧
+                    PlaceGatlinOnCoreBridge(coreBuilding, coreLeftBridgeIdx, side: -1);
                     int energyOuterLeft = FindPortIndex(energy, PortKind.Bridge, PortSide.Left);
                     if (energyOuterLeft >= 0) {
                         AppendFlankTowardsLeft(energy, energyOuterLeft,
@@ -102,6 +106,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures
                 var midlab = AppendFlankTowardsRight(coreBuilding, coreRightBridgeIdx,
                     ArchitectureType.MidSizeMaterialAnalysisLab, surfacePx);
                 if (midlab != null) {
+                    //在核心右桥刚离开核心的一段位置落炮台
+                    PlaceGatlinOnCoreBridge(coreBuilding, coreRightBridgeIdx, side: +1);
                     int midOuterRight = FindPortIndex(midlab, PortKind.Bridge, PortSide.Right);
                     if (midOuterRight >= 0) {
                         AppendFlankTowardsRight(midlab, midOuterRight,
@@ -109,6 +115,29 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures
                     }
                 }
             }
+        }
+
+        //加特林炮台底座贴图尺寸，与源素材GatlinPedestal.png一致
+        private const int GatlinPedestalWidthPx = 354;
+        private const int GatlinPedestalHeightPx = 166;
+        //底座中心离核心桥梁端口的水平距离，确保炮台清晰站在桥上且不遮挡核心外墙
+        private const int GatlinBridgeInwardPx = 260;
+
+        /// <summary>
+        /// 在核心的某一侧桥梁端口附近，落一座加特林炮台
+        /// side=-1表示左侧，炮台中心位于端口左方GatlinBridgeInwardPx处，且静止朝左
+        /// side=+1表示右侧，炮台中心位于端口右方GatlinBridgeInwardPx处，且静止朝右
+        /// </summary>
+        private static void PlaceGatlinOnCoreBridge(PlacedBuilding coreBuilding, int corePortIdx, int side) {
+            if (corePortIdx < 0) return;
+            Vector2 portWorld = coreBuilding.GetPortWorld(corePortIdx);
+            int pedestalCenterX = (int)portWorld.X + side * GatlinBridgeInwardPx;
+            //桥梁的可行走表面位于端口Y向下1格，与ArchitectureConnectorActor里的tileY=StartY/16+1保持一致
+            int bridgeDeckY = (((int)portWorld.Y / PixelsPerTile) + 1) * PixelsPerTile;
+            int pedestalLeftX = pedestalCenterX - GatlinPedestalWidthPx / 2;
+            int pedestalTopY = bridgeDeckY - GatlinPedestalHeightPx;
+            bool faceLeft = side < 0;
+            GatlinTurretRegistry.Add(pedestalLeftX, pedestalTopY, faceLeft);
         }
 
         /// <summary>
