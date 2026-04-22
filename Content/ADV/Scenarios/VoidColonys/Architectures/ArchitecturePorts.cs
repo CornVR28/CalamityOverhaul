@@ -69,6 +69,12 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures
                 new(PortKind.Bridge, PortSide.Left, 0, 142),
                 new(PortKind.Bridge, PortSide.Right, 130, 142),
             ],
+
+            //信号塔 218x516：纵向塔，仅在底部两侧开桥梁口，桥面正好托住塔基
+            [ArchitectureType.SignalTower] = [
+                new(PortKind.Bridge, PortSide.Left, 0, 506),
+                new(PortKind.Bridge, PortSide.Right, 218, 506),
+            ],
         };
 
         /// <summary>获取指定建筑的全部端口，类型未注册时返回空数组</summary>

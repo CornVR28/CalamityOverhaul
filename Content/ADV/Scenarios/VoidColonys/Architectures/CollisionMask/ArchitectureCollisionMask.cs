@@ -77,6 +77,13 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Colli
                     new PlatformRow(21, 11, 25),
                 ]
             ),
+            //信号塔 218x516 -> 14x33：塔身高耸装饰，只在塔基处铺一条平台让玩家能站到塔脚下
+            //塔顶天线/碟盘等纯装饰，不加碰撞免得玩家被卡在天线丛里
+            [ArchitectureType.SignalTower] = new Spec(
+                cols: 14, rows: 33,
+                solids: [],
+                platforms: [new PlatformRow(31, 0, 13)]
+            ),
         };
 
         //字符网格缓存，避免每次放置都重新生成

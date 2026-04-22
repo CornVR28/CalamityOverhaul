@@ -61,6 +61,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures
             BuildCoreCluster(core);
             BuildSatelliteStandalones();
             BuildOutpostStandalones(core);
+            //外围基地：零号站点等独立基地由Stronghold子系统负责，与岛屿无关
+            Strongholds.StrongholdPlacer.BuildAll();
         }
 
         #region 核心岛簇：直线桥梁串联

@@ -19,6 +19,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures
         ConnectionBridgeSegment,
         /// <summary>管状连接通道，可平铺的输送管段</summary>
         TubularConnectorTunnel,
+        /// <summary>信号塔，瘦高塔形地标，作为零号站点的中心建筑</summary>
+        SignalTower,
     }
 
     /// <summary>
@@ -40,6 +42,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures
         public static Texture2D ConnectionBridgeSegment = null;
         [VaultLoaden(Root + "TubularConnectorTunnel")]
         public static Texture2D TubularConnectorTunnel = null;
+        [VaultLoaden(Root + "SignalTower")]
+        public static Texture2D SignalTower = null;
 
         /// <summary>根据类型查表得到对应纹理</summary>
         public static Texture2D Get(ArchitectureType type) => type switch {
@@ -49,6 +53,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures
             ArchitectureType.ObservationPostTelescope => ObservationPostTelescope,
             ArchitectureType.ConnectionBridgeSegment => ConnectionBridgeSegment,
             ArchitectureType.TubularConnectorTunnel => TubularConnectorTunnel,
+            ArchitectureType.SignalTower => SignalTower,
             _ => null,
         };
     }
