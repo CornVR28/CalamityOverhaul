@@ -1,6 +1,6 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
-namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Collision
+namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.CollisionMask
 {
     /// <summary>
     /// 虚空聚落建筑的物块级碰撞蒙版

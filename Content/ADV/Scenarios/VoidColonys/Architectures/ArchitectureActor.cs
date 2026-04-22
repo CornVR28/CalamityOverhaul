@@ -1,4 +1,4 @@
-﻿using CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Collision;
+﻿using CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.CollisionMask;
 using InnoVault.Actors;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -12,7 +12,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures
     /// <summary>
     /// 虚空聚落建筑Actor
     /// 用于承载整张建筑贴图的静态装饰实体，贴图绘制由shader负责
-    /// 过去时代实体显像时通过<see cref="Collision.ArchitectureTilePlacer"/>就地放置隐形碰撞tile，形成与原版完全兼容的物理
+    /// 过去时代实体显像时通过<see cref="CollisionMask.ArchitectureTilePlacer"/>就地放置隐形碰撞tile，形成与原版完全兼容的物理
     /// </summary>
     internal class ArchitectureActor : Actor
     {

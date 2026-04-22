@@ -1,4 +1,4 @@
-﻿using CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Collision;
+﻿using CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.CollisionMask;
 using InnoVault.Actors;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
