@@ -400,13 +400,19 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Gatli
             float warp = ArchitectureWarpDraw.ComputeWarp();
             //骇客时间高亮强度，底座与枪身共用
             float hackMark = ComputeHackHighlight();
+            //电路故障强度，被短路/过载时覆盖骇客高亮
+            float faultMark = ComputeFaultMark();
+            float faultMode = circuitOverloaded ? 1f : 0f;
 
             //底座走与其他建筑一致的扭曲shader
             Vector2 pedestalDrawPos = Position - Main.screenPosition;
             pedestalDrawPos.Y += 2;//向下偏移2像素用于贴合地面
             ArchitectureWarpDraw.DrawWithShader(spriteBatch, pedestal, pedestalDrawPos, visibility, warp);
-            //被扫描选中或悬停时在底座上再叠加一层骇客高亮
-            if (hackMark > 0.01f) {
+            //故障优先：整机表现断电与电弧，不再展示扫描高亮
+            if (faultMark > 0.01f) {
+                DrawPedestalFaultOverlay(spriteBatch, pedestal, pedestalDrawPos, faultMark, faultMode);
+            }
+            else if (hackMark > 0.01f) {
                 DrawPedestalHackOverlay(spriteBatch, pedestal, pedestalDrawPos, hackMark);
             }
 
@@ -425,8 +431,13 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Gatli
 
             Color gunColor = Color.White * MathHelper.Clamp(visibility, 0f, 1f);
 
+            //电路故障优先：整机故障滤镜替换常规绘制
+            if (faultMark > 0.01f) {
+                DrawGunWithFaultShader(spriteBatch, gun, drawCenter, origin, currentRotation,
+                    effects, gunColor, faultMark, faultMode);
+            }
             //骇客时间高亮：被扫描选中或悬停时套用同一套灵异/实体高亮shader
-            if (hackMark > 0.01f) {
+            else if (hackMark > 0.01f) {
                 DrawGunWithHackShader(spriteBatch, gun, drawCenter, origin, currentRotation,
                     effects, gunColor, hackMark);
             }
@@ -435,6 +446,12 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Gatli
             }
 
             return false;
+        }
+
+        /// <summary>电路失效滤镜强度：失效期间为1，临近恢复时20帧淡出</summary>
+        private float ComputeFaultMark() {
+            if (circuitDisabledFrames <= 0) return 0f;
+            return MathHelper.Clamp(circuitDisabledFrames / 20f, 0f, 1f);
         }
 
         /// <summary>计算骇客时间高亮强度，选中=1、悬停=0.55，乘全局Intensity</summary>
@@ -477,6 +494,49 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Gatli
             shader.Parameters["texelSize"]?.SetValue(new Vector2(1f / tex.Width, 1f / tex.Height));
             shader.Parameters["intensity"]?.SetValue(strength);
             shader.Parameters["isSelected"]?.SetValue(strength > 0.9f ? 1f : 0f);
+            shader.Parameters["uTime"]?.SetValue(Main.GlobalTimeWrappedHourly);
+
+            sb.End();
+            sb.Begin(SpriteSortMode.Immediate, BlendState.Additive, Main.DefaultSamplerState,
+                DepthStencilState.None, Main.Rasterizer, shader, Main.GameViewMatrix.TransformationMatrix);
+            sb.Draw(tex, drawPos, null, Color.White * strength, 0f, Vector2.Zero, 1f, SpriteEffects.None, 0f);
+            sb.End();
+            sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState,
+                DepthStencilState.None, Main.Rasterizer, null, Main.GameViewMatrix.TransformationMatrix);
+        }
+
+        /// <summary>炮身故障滤镜：完整替换绘制，短路 mode=0 冷蓝，过载 mode=1 热红</summary>
+        private static void DrawGunWithFaultShader(SpriteBatch sb, Texture2D tex, Vector2 drawPos,
+            Vector2 origin, float rotation, SpriteEffects effects, Color baseColor, float strength, float mode) {
+            Effect shader = HackTimeAssets.HackTurretCircuitFault;
+            if (shader == null) {
+                sb.Draw(tex, drawPos, null, baseColor, rotation, origin, 1f, effects, 0f);
+                return;
+            }
+
+            shader.Parameters["texelSize"]?.SetValue(new Vector2(1f / tex.Width, 1f / tex.Height));
+            shader.Parameters["intensity"]?.SetValue(strength);
+            shader.Parameters["mode"]?.SetValue(mode);
+            shader.Parameters["uTime"]?.SetValue(Main.GlobalTimeWrappedHourly);
+
+            sb.End();
+            sb.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, Main.DefaultSamplerState,
+                DepthStencilState.None, Main.Rasterizer, shader, Main.GameViewMatrix.TransformationMatrix);
+            sb.Draw(tex, drawPos, null, baseColor, rotation, origin, 1f, effects, 0f);
+            sb.End();
+            sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState,
+                DepthStencilState.None, Main.Rasterizer, null, Main.GameViewMatrix.TransformationMatrix);
+        }
+
+        /// <summary>底座故障叠加层：Additive 仅补色调与电弧，保留warp凝实感</summary>
+        private static void DrawPedestalFaultOverlay(SpriteBatch sb, Texture2D tex, Vector2 drawPos,
+            float strength, float mode) {
+            Effect shader = HackTimeAssets.HackTurretCircuitFault;
+            if (shader == null) return;
+
+            shader.Parameters["texelSize"]?.SetValue(new Vector2(1f / tex.Width, 1f / tex.Height));
+            shader.Parameters["intensity"]?.SetValue(strength);
+            shader.Parameters["mode"]?.SetValue(mode);
             shader.Parameters["uTime"]?.SetValue(Main.GlobalTimeWrappedHourly);
 
             sb.End();

@@ -24,5 +24,11 @@ namespace CalamityOverhaul.Content.HackTimes
         /// </summary>
         [VaultLoaden(CWRConstant.Effects)]
         public static Effect HackWraithHighlight { get; private set; }
+
+        /// <summary>
+        /// 骇客炮台电路故障着色器（短路冷蓝/过载热红，强RGB色散+电弧闪烁）
+        /// </summary>
+        [VaultLoaden(CWRConstant.Effects)]
+        public static Effect HackTurretCircuitFault { get; private set; }
     }
 }
