@@ -537,4 +537,18 @@ HackTime: {
 	WraithScanIntegrityValue: Mods.CalamityOverhaul.UI.HackTime.WraithScanIntegrityValue
 	WraithScanOrigin: Mods.CalamityOverhaul.UI.HackTime.WraithScanOrigin
 	WraithScanOriginValue: Mods.CalamityOverhaul.UI.HackTime.WraithScanOriginValue
+	TurretScanName: Mods.CalamityOverhaul.UI.HackTime.TurretScanName
+	TurretScanLaserName: Mods.CalamityOverhaul.UI.HackTime.TurretScanLaserName
+	TurretScanGatlinName: Mods.CalamityOverhaul.UI.HackTime.TurretScanGatlinName
+	TurretScanType: Mods.CalamityOverhaul.UI.HackTime.TurretScanType
+	TurretScanPhase: Mods.CalamityOverhaul.UI.HackTime.TurretScanPhase
+	TurretScanPhaseIdle: Mods.CalamityOverhaul.UI.HackTime.TurretScanPhaseIdle
+	TurretScanPhaseCharging: Mods.CalamityOverhaul.UI.HackTime.TurretScanPhaseCharging
+	TurretScanPhaseFiring: Mods.CalamityOverhaul.UI.HackTime.TurretScanPhaseFiring
+	TurretScanPhaseCooldown: Mods.CalamityOverhaul.UI.HackTime.TurretScanPhaseCooldown
+	TurretScanPhaseLocking: Mods.CalamityOverhaul.UI.HackTime.TurretScanPhaseLocking
+	TurretScanCircuit: Mods.CalamityOverhaul.UI.HackTime.TurretScanCircuit
+	TurretScanCircuitOnline: Mods.CalamityOverhaul.UI.HackTime.TurretScanCircuitOnline
+	TurretScanCircuitShorted: Mods.CalamityOverhaul.UI.HackTime.TurretScanCircuitShorted
+	TurretScanCircuitOverload: Mods.CalamityOverhaul.UI.HackTime.TurretScanCircuitOverload
 }

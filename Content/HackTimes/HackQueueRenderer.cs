@@ -63,6 +63,15 @@ namespace CalamityOverhaul.Content.HackTimes
             return true;
         }
 
+        //炮台目标入队
+        public bool EnqueueTurret(QuickHackDef hack, int slotIndex, IHackableTurret turret) {
+            for (int i = 0; i < queue.Count; i++) {
+                if (queue[i].SlotIndex == slotIndex) return false;
+            }
+            queue.Add(new HackQueueEntry(hack, slotIndex, turret));
+            return true;
+        }
+
         //取消队列中指定slot的协议
         public void Cancel(int slotIndex) {
             for (int i = queue.Count - 1; i >= 0; i--) {
@@ -95,6 +104,9 @@ namespace CalamityOverhaul.Content.HackTimes
                     }
                     else if (entry.TargetKind == HackTargetKind.Wraith) {
                         entry.Hack.OnApplyToWraith(entry.WraithTarget, Main.LocalPlayer);
+                    }
+                    else if (entry.TargetKind == HackTargetKind.Turret) {
+                        entry.Hack.OnApplyToTurret(entry.TurretTarget, Main.LocalPlayer);
                     }
                     else {
                         HackEffectTracker.Apply(entry.Hack, entry.TargetIndex, Main.myPlayer);
@@ -177,6 +189,17 @@ namespace CalamityOverhaul.Content.HackTimes
             for (int i = 0; i < queue.Count; i++) {
                 if (queue[i].TargetKind == HackTargetKind.Tile
                     && queue[i].TileX == tileX && queue[i].TileY == tileY)
+                    result.Add(queue[i]);
+            }
+        }
+
+        //获取指定炮台上所有正在上传的队列条目
+        public void GetEntriesForTurret(IHackableTurret turret, List<HackQueueEntry> result) {
+            result.Clear();
+            if (turret == null) return;
+            for (int i = 0; i < queue.Count; i++) {
+                if (queue[i].TargetKind == HackTargetKind.Turret
+                    && ReferenceEquals(queue[i].TurretTarget, turret))
                     result.Add(queue[i]);
             }
         }

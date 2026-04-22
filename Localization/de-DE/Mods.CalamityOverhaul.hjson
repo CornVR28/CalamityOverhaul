@@ -123,4 +123,14 @@ QuickHack: {
 		// DisplayName: System Halt
 		// Description: ""
 	}
+
+	TurretCircuitOverload: {
+		// DisplayName: Turret Circuit Overload
+		// Description: ""
+	}
+
+	TurretShortCircuit: {
+		// DisplayName: Turret Short Circuit
+		// Description: ""
+	}
 }

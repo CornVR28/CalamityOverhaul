@@ -1,0 +1,50 @@
+using CalamityOverhaul.Content.PRTTypes;
+using InnoVault.PRT;
+using Terraria;
+using Terraria.Audio;
+using Terraria.ID;
+
+namespace CalamityOverhaul.Content.HackTimes.Protocols
+{
+    /// <summary>
+    /// 炮台电路过载：向供电回路灌入反向电流，使炮台长时间彻底失效
+    /// 演出用途：在关键阶段让塔防沉默足够久，创造突破窗口
+    /// </summary>
+    internal class TurretCircuitOverload : QuickHackDef
+    {
+        //失效帧数（大约12秒）
+        private const int DisableFrames = 60 * 12;
+
+        public override void SetDefaults() {
+            UploadTime = 180;
+            RamCost = 6;
+            Category = QuickHackCategory.TileManip;
+            SupportedTargets = HackTargetKind.Turret;
+        }
+
+        public override bool OnApplyToTurret(IHackableTurret turret, Player caster) {
+            if (turret == null) return false;
+            turret.ApplyCircuitOverload(DisableFrames, caster);
+            Vector2 center = turret.WorldCenter;
+
+            if (!VaultUtils.isServer) {
+                //大范围电浆爆裂：外围紫红色+内核炽白
+                for (int i = 0; i < 34; i++) {
+                    Vector2 vel = Main.rand.NextVector2CircularEdge(10f, 10f);
+                    Color c = Color.Lerp(new Color(255, 120, 200), new Color(255, 240, 255), Main.rand.NextFloat());
+                    PRTLoader.AddParticle(new PRT_Spark(center, vel, false, 32, 1.4f, c));
+                }
+                //烧毁冒烟般的外圈火花
+                for (int i = 0; i < 16; i++) {
+                    float angle = MathHelper.TwoPi * i / 16f + Main.rand.NextFloat(-0.1f, 0.1f);
+                    Vector2 dir = angle.ToRotationVector2();
+                    PRTLoader.AddParticle(new PRT_Spark(center + dir * 32f, dir * 5.5f,
+                        false, 30, 0.9f, new Color(220, 60, 140, 180)));
+                }
+                SoundEngine.PlaySound(SoundID.Zombie104 with { Volume = 0.8f, Pitch = -0.4f }, center);
+                SoundEngine.PlaySound(SoundID.Item93 with { Volume = 0.9f, Pitch = -0.45f }, center);
+            }
+            return true;
+        }
+    }
+}

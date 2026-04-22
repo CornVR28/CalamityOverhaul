@@ -534,4 +534,18 @@ HackTime: {
 	WraithScanIntegrityValue: 0x??%  损坏
 	WraithScanOrigin: 来源
 	WraithScanOriginValue: 查无此档
+	TurretScanName: 代号
+	TurretScanLaserName: 虚空·主炮阵列
+	TurretScanGatlinName: 虚空·速射塔
+	TurretScanType: 自动防御机械
+	TurretScanPhase: 当前阶段
+	TurretScanPhaseIdle: 待机
+	TurretScanPhaseCharging: 能量蓄积
+	TurretScanPhaseFiring: 开火
+	TurretScanPhaseCooldown: 冷却
+	TurretScanPhaseLocking: 目标锁定中
+	TurretScanCircuit: 电路状态
+	TurretScanCircuitOnline: 在线
+	TurretScanCircuitShorted: 短路中
+	TurretScanCircuitOverload: 过载瘫痪
 }

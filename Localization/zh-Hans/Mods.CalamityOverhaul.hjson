@@ -123,4 +123,14 @@ QuickHack: {
 		DisplayName: 死机
 		Description: 令目标短暂陷入沉寂并停止一切活动
 	}
+
+	TurretCircuitOverload: {
+		DisplayName: 电路过载
+		Description: 向炮台供电回路灌入反向电流，令其长时间彻底失效
+	}
+
+	TurretShortCircuit: {
+		DisplayName: 炮台短路
+		Description: 瞬时泄放炮台电能使其短暂停摆，恢复后立即重新上线
+	}
 }

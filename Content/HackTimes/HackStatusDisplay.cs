@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
+using InnoVault.Actors;
 using Terraria;
 using Terraria.GameContent;
 
@@ -26,10 +27,13 @@ namespace CalamityOverhaul.Content.HackTimes
         private static readonly List<HackQueueEntry> queueBuf = [];
         private static readonly List<ActiveTileHackEffect> tileEffectBuf = [];
         private static readonly List<HackQueueEntry> tileQueueBuf = [];
+        private static readonly List<HackQueueEntry> turretQueueBuf = [];
         //收集需要绘制的NPC索引集合（避免重复）
         private static readonly HashSet<int> npcSet = [];
         //收集需要绘制的物块坐标集合（避免重复，用long编码x|y）
         private static readonly HashSet<long> tileSet = [];
+        //收集需要绘制的炮台集合（避免重复）
+        private static readonly HashSet<IHackableTurret> turretSet = [];
 
         public static void Draw(SpriteBatch sb) {
             Texture2D px = CWRAsset.Placeholder_White?.Value;
@@ -82,6 +86,23 @@ namespace CalamityOverhaul.Content.HackTimes
                 if (!Main.tile[tx, ty].HasTile) continue;
                 DrawTileStatus(sb, px, tx, ty, queue);
             }
+
+            //收集所有需要绘制的炮台
+            turretSet.Clear();
+            if (queue != null) {
+                var entries = queue.Entries;
+                for (int i = 0; i < entries.Count; i++) {
+                    if (entries[i].TargetKind == HackTargetKind.Turret && entries[i].TurretTarget != null)
+                        turretSet.Add(entries[i].TurretTarget);
+                }
+            }
+
+            //逐炮台绘制
+            foreach (IHackableTurret turret in turretSet) {
+                Actor actor = turret?.AsActor;
+                if (actor == null || !actor.Active) continue;
+                DrawTurretStatus(sb, px, turret, actor, queue);
+            }
         }
 
         private static long PackTileCoord(int x, int y) => (long)x << 32 | (uint)y;
@@ -123,6 +144,25 @@ namespace CalamityOverhaul.Content.HackTimes
                 float y = startY + cardIndex * (CardHeight + CardGap);
                 DrawActiveCard(sb, px, baseX, y, eff);
                 cardIndex++;
+            }
+        }
+
+        private static void DrawTurretStatus(SpriteBatch sb, Texture2D px, IHackableTurret turret, Actor actor, HackQueueRenderer queue) {
+            if (queue == null) return;
+            queue.GetEntriesForTurret(turret, turretQueueBuf);
+            if (turretQueueBuf.Count == 0) return;
+
+            //以炮台顶部中心为锚，卡片从头顶向上排列
+            Vector2 topCenter = new(
+                actor.Position.X + actor.Width * 0.5f - Main.screenPosition.X,
+                actor.Position.Y - Main.screenPosition.Y);
+            float totalHeight = turretQueueBuf.Count * (CardHeight + CardGap) - CardGap;
+            float startY = topCenter.Y - TopOffset - totalHeight;
+            float baseX = topCenter.X - CardWidth * 0.5f;
+
+            for (int i = 0; i < turretQueueBuf.Count; i++) {
+                float y = startY + i * (CardHeight + CardGap);
+                DrawUploadCard(sb, px, baseX, y, turretQueueBuf[i]);
             }
         }
 

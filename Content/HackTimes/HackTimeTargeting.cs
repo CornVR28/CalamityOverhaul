@@ -30,6 +30,11 @@ namespace CalamityOverhaul.Content.HackTimes
         /// </summary>
         public static GlitchWraithActor HoveredWraith { get; set; }
 
+        /// <summary>
+        /// 当前悬停的可骇入炮台Actor引用，null表示无悬停
+        /// </summary>
+        public static IHackableTurret HoveredTurret { get; set; }
+
         public override void ProcessTriggers(Terraria.GameInput.TriggersSet triggersSet) {
             if (Player.whoAmI != Main.myPlayer) return;
             if (CWRKeySystem.HackTime_Toggle != null && CWRKeySystem.HackTime_Toggle.JustPressed) {
@@ -85,23 +90,34 @@ namespace CalamityOverhaul.Content.HackTimes
                 HoveredTileX = -1;
                 HoveredTileY = -1;
                 HoveredWraith = null;
+                HoveredTurret = null;
             }
             else {
                 GlitchWraithActor wraith = TryGetHoveredWraith(mouseWorld);
                 if (wraith != null) {
                     HoveredWraith = wraith;
+                    HoveredTurret = null;
                     HoveredTileX = -1;
                     HoveredTileY = -1;
                 }
                 else {
                     HoveredWraith = null;
-                    if (TileScannable.TryGetScannableTile(mouseWorld, out int tx, out int ty)) {
-                        HoveredTileX = tx;
-                        HoveredTileY = ty;
-                    }
-                    else {
+                    IHackableTurret turret = TryGetHoveredTurret(mouseWorld);
+                    if (turret != null) {
+                        HoveredTurret = turret;
                         HoveredTileX = -1;
                         HoveredTileY = -1;
+                    }
+                    else {
+                        HoveredTurret = null;
+                        if (TileScannable.TryGetScannableTile(mouseWorld, out int tx, out int ty)) {
+                            HoveredTileX = tx;
+                            HoveredTileY = ty;
+                        }
+                        else {
+                            HoveredTileX = -1;
+                            HoveredTileY = -1;
+                        }
                     }
                 }
             }
@@ -131,6 +147,35 @@ namespace CalamityOverhaul.Content.HackTimes
                 if (distSq < bestDistSq) {
                     bestDistSq = distSq;
                     best = w;
+                }
+            }
+            return best;
+        }
+
+        /// <summary>
+        /// 扫描所有Actor并挑选出鼠标下方最近的可骇入炮台
+        /// </summary>
+        private static IHackableTurret TryGetHoveredTurret(Vector2 mouseWorld) {
+            List<Actor> list = ActorLoader.GetActiveActors<Actor>();
+            if (list == null || list.Count == 0) return null;
+            IHackableTurret best = null;
+            float bestDistSq = float.MaxValue;
+            foreach (Actor actor in list) {
+                if (actor is not IHackableTurret turret) continue;
+                if (!turret.IsValid) continue;
+                float expandMargin = 24f;
+                float left = actor.Position.X - expandMargin;
+                float top = actor.Position.Y - expandMargin;
+                float right = actor.Position.X + actor.Width + expandMargin;
+                float bottom = actor.Position.Y + actor.Height + expandMargin;
+                if (mouseWorld.X < left || mouseWorld.X > right) continue;
+                if (mouseWorld.Y < top || mouseWorld.Y > bottom) continue;
+                float dx = mouseWorld.X - turret.WorldCenter.X;
+                float dy = mouseWorld.Y - turret.WorldCenter.Y;
+                float distSq = dx * dx + dy * dy;
+                if (distSq < bestDistSq) {
+                    bestDistSq = distSq;
+                    best = turret;
                 }
             }
             return best;

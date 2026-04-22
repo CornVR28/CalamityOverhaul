@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.GlitchWraith;
+using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;
 using Terraria.GameContent;
@@ -59,6 +60,30 @@ namespace CalamityOverhaul.Content.HackTimes
                     hpStr = TileScannable.GetTileClass(tileType);
                     hpColor = TileScannable.GetTileClassColor(tileType);
                 }
+            }
+            else if (HackTime.CurrentScanTarget is IHackableTurret turret && turret.IsValid) {
+                //炮台锁定框：尺寸取底座贴图实际宽高
+                var actor = turret.AsActor;
+                baseHalfW = Math.Max(actor.Width, 32) * 0.45f + 24f;
+                baseHalfH = Math.Max(actor.Height, 32) * 0.45f + 24f;
+                targetName = GetTurretDisplayName(turret);
+                if (turret.IsCircuitDisabled) {
+                    int seconds = turret.CircuitDisabledFrames / 60 + 1;
+                    hpStr = HackTime.TurretScanCircuit.Value + ": " + seconds + "s";
+                    hpColor = HackTheme.Uploading;
+                }
+                else {
+                    hpStr = HackTime.TurretScanCircuitOnline.Value;
+                    hpColor = HackTheme.AccentAlt;
+                }
+            }
+            else if (HackTime.CurrentScanTarget is GlitchWraithActor wraith && wraith.Active) {
+                //灵异目标锁定框：尺寸取Actor贴图宽高，外放一点以贴合身形
+                baseHalfW = Math.Max(wraith.Width, 32) * 0.6f + 30f;
+                baseHalfH = Math.Max(wraith.Height, 32) * 0.6f + 30f;
+                targetName = HackTime.WraithScanNameValue.Value;
+                hpStr = HackTime.WraithScanIntegrityValue.Value;
+                hpColor = HackTheme.Contagion;
             }
             else {
                 return;
@@ -200,6 +225,17 @@ namespace CalamityOverhaul.Content.HackTimes
         private static float EaseOutCubic(float t) {
             float inv = 1f - t;
             return 1f - inv * inv * inv;
+        }
+
+        /// <summary>返回炮台锁定框上的目标名，按具体炮台类型选用对应本地化</summary>
+        private static string GetTurretDisplayName(IHackableTurret turret) {
+            return turret switch {
+                ADV.Scenarios.VoidColonys.Architectures.LaserCannons.LaserCannonTurretActor
+                    => HackTime.TurretScanLaserName.Value,
+                ADV.Scenarios.VoidColonys.Architectures.GatlinTurrets.GatlinTurretActor
+                    => HackTime.TurretScanGatlinName.Value,
+                _ => HackTime.TurretScanName.Value,
+            };
         }
     }
 }

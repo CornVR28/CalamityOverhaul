@@ -94,6 +94,14 @@ namespace CalamityOverhaul.Content.HackTimes
                     Panel.Show(HackTargetKind.Wraith);
                 }
             }
+            else if (HackTimeTargeting.HoveredTurret != null) {
+                //点击可骇入炮台Actor目标
+                var turret = HackTimeTargeting.HoveredTurret;
+                if (HackTime.CurrentScanTarget != turret) {
+                    HackTime.SelectTurretScan(turret);
+                    Panel.Show(HackTargetKind.Turret);
+                }
+            }
             else if (HackTimeTargeting.HoveredTileX >= 0) {
                 //点击可扫描物块，同时显示物块协议面板
                 HackTime.SelectTileScan(HackTimeTargeting.HoveredTileX, HackTimeTargeting.HoveredTileY);

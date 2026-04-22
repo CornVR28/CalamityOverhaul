@@ -249,6 +249,15 @@ namespace CalamityOverhaul.Content.HackTimes
 
         #endregion
 
+        #region 炮台目标虚方法
+
+        /// <summary>
+        /// 当协议上传完成时对可骇入炮台目标施加效果
+        /// </summary>
+        public virtual bool OnApplyToTurret(IHackableTurret turret, Player caster) => false;
+
+        #endregion
+
         #region 工具方法
 
         /// <summary>

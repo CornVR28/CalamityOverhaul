@@ -38,6 +38,8 @@
         public int TileY;
         //骇入目标灵异Actor引用（TargetKind为Wraith时有效）
         public GlitchWraithActor WraithTarget;
+        //骇入目标炮台Actor引用（TargetKind为Turret时有效）
+        public IHackableTurret TurretTarget;
         //当前队列状态
         public HackQueueState State;
         //上传进度0~1
@@ -95,6 +97,22 @@
             GlitchSeed = Terraria.Main.rand?.Next(10000) / 100f ?? 0f;
         }
 
+        //炮台目标构造
+        public HackQueueEntry(QuickHackDef hack, int slotIndex, IHackableTurret turret) {
+            Hack = hack;
+            SlotIndex = slotIndex;
+            TargetKind = HackTargetKind.Turret;
+            TargetIndex = -1;
+            TileX = -1;
+            TileY = -1;
+            TurretTarget = turret;
+            State = HackQueueState.Waiting;
+            UploadProgress = 0f;
+            FlyIn = 0f;
+            CompletedTimer = 0f;
+            GlitchSeed = Terraria.Main.rand?.Next(10000) / 100f ?? 0f;
+        }
+
         //目标是否仍然有效
         public bool IsTargetValid {
             get {
@@ -109,6 +127,10 @@
                 }
                 if (TargetKind == HackTargetKind.Wraith) {
                     return WraithTarget != null && WraithTarget.Active;
+                }
+                if (TargetKind == HackTargetKind.Turret) {
+                    return TurretTarget != null && TurretTarget.AsActor != null
+                        && TurretTarget.AsActor.Active && TurretTarget.IsValid;
                 }
                 return false;
             }

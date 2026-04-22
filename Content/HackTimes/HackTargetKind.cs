@@ -17,5 +17,7 @@ namespace CalamityOverhaul.Content.HackTimes
         Tile = 2,
         //灵异目标（如乱码鬼等Actor类实体）
         Wraith = 4,
+        //虚空聚落炮台等可被电路骇入的Actor机械
+        Turret = 8,
     }
 }

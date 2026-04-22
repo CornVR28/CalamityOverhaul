@@ -1,5 +1,6 @@
 ﻿using CalamityOverhaul.Common;
 using CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.TimeShift;
+using CalamityOverhaul.Content.HackTimes;
 using InnoVault.Actors;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -18,7 +19,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Gatli
     /// 玩家进入触发半径后开始蓄势，再过短暂延迟后连续点射，保持节奏感
     /// 仅在过去时代显现与开火，与整个建筑群的时空扭曲视觉保持同步
     /// </summary>
-    internal class GatlinTurretActor : Actor
+    internal class GatlinTurretActor : Actor, IHackableTurret
     {
         /// <summary>默认静止朝向，true=朝左，同步用于初始化静止朝向</summary>
         [SyncVar]
@@ -85,6 +86,11 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Gatli
         /// <summary>底座世界像素尺寸由贴图决定</summary>
         private bool pedestalSized;
 
+        /// <summary>电路失效剩余帧数：大于0时炮台整体停摆</summary>
+        private int circuitDisabledFrames;
+        /// <summary>是否由过载协议引发</summary>
+        private bool circuitOverloaded;
+
         public override void OnSpawn(params object[] args) {
             DrawLayer = ActorDrawLayer.AfterTiles;
             ApplyPedestalSize();
@@ -95,6 +101,13 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Gatli
 
             if (!VoidColony.Active) {
                 ActorLoader.KillActor(WhoAmI);
+                return;
+            }
+
+            //骇客时间冻结：完全暂停炮台AI与开火节奏，但保留可见度演算让蟍烨过渡不突兑
+            if (HackTimeFreeze.IsActive) {
+                Velocity = Vector2.Zero;
+                ArchitectureWarpDraw.TickVisibility(ref visibility);
                 return;
             }
 
@@ -118,6 +131,19 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Gatli
                 burstRemaining = 0;
                 fireTimer = 0;
                 if (burstCooldown > 0) burstCooldown--;
+                if (recoil > 0f) recoil = MathF.Max(0f, recoil - 0.5f);
+                return;
+            }
+
+            //电路失效期间：取消锁定、冷却所有射击计时、只衰减后坐
+            if (circuitDisabledFrames > 0) {
+                circuitDisabledFrames--;
+                if (circuitDisabledFrames == 0) circuitOverloaded = false;
+                lockedPlayer = -1;
+                lockOnDelay = 0;
+                burstRemaining = 0;
+                fireTimer = 0;
+                burstCooldown = Math.Max(burstCooldown, 10);
                 if (recoil > 0f) recoil = MathF.Max(0f, recoil - 0.5f);
                 return;
             }
@@ -303,10 +329,16 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Gatli
             if (!ArchitectureWarpDraw.ShouldDraw(visibility)) return false;
 
             float warp = ArchitectureWarpDraw.ComputeWarp();
+            //骇客时间高亮强度，底座与枪身共用
+            float hackMark = ComputeHackHighlight();
 
             //底座走与其他建筑一致的扭曲shader
             Vector2 pedestalDrawPos = Position - Main.screenPosition;
             ArchitectureWarpDraw.DrawWithShader(spriteBatch, pedestal, pedestalDrawPos, visibility, warp);
+            //被扫描选中或悬停时在底座上再叠加一层骇客高亮
+            if (hackMark > 0.01f) {
+                DrawPedestalHackOverlay(spriteBatch, pedestal, pedestalDrawPos, hackMark);
+            }
 
             //枪身绕枢轴旋转，单独普通绘制避免旋转传入shader增加参数
             Vector2 mountScreen = MountWorld - Main.screenPosition;
@@ -322,9 +354,139 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Gatli
                 : new Vector2(GunPivotLocalX, GunPivotLocalY);
 
             Color gunColor = Color.White * MathHelper.Clamp(visibility, 0f, 1f);
-            spriteBatch.Draw(gun, drawCenter, null, gunColor, currentRotation, origin, 1f, effects, 0f);
+
+            //骇客时间高亮：被扫描选中或悬停时套用同一套灵异/实体高亮shader
+            if (hackMark > 0.01f) {
+                DrawGunWithHackShader(spriteBatch, gun, drawCenter, origin, currentRotation,
+                    effects, gunColor, hackMark);
+            }
+            else {
+                spriteBatch.Draw(gun, drawCenter, null, gunColor, currentRotation, origin, 1f, effects, 0f);
+            }
 
             return false;
         }
+
+        /// <summary>计算骇客时间高亮强度，选中=1、悬停=0.55，乘全局Intensity</summary>
+        private float ComputeHackHighlight() {
+            bool selected = ReferenceEquals(HackTime.CurrentScanTarget, this);
+            bool hovered = ReferenceEquals(HackTimeTargeting.HoveredTurret, this);
+            float baseMark = selected ? 1f : hovered ? 0.55f : 0f;
+            return baseMark * HackTime.Intensity;
+        }
+
+        /// <summary>套用骇客高亮shader绘制枪身，给选中/悬停的炮台一致风格</summary>
+        private static void DrawGunWithHackShader(SpriteBatch sb, Texture2D tex, Vector2 drawPos,
+            Vector2 origin, float rotation, SpriteEffects effects, Color baseColor, float strength) {
+            //炮台属于机械实体，套用NPC高亮shader而非灵异专用的撕裂shader
+            Effect shader = HackTimeAssets.HackTimeNPCHighlight;
+            if (shader == null) {
+                sb.Draw(tex, drawPos, null, baseColor, rotation, origin, 1f, effects, 0f);
+                return;
+            }
+
+            shader.Parameters["texelSize"]?.SetValue(new Vector2(1f / tex.Width, 1f / tex.Height));
+            shader.Parameters["intensity"]?.SetValue(strength);
+            shader.Parameters["isSelected"]?.SetValue(strength > 0.9f ? 1f : 0f);
+            shader.Parameters["uTime"]?.SetValue(Main.GlobalTimeWrappedHourly);
+
+            sb.End();
+            sb.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, Main.DefaultSamplerState,
+                DepthStencilState.None, Main.Rasterizer, shader, Main.GameViewMatrix.TransformationMatrix);
+            sb.Draw(tex, drawPos, null, baseColor, rotation, origin, 1f, effects, 0f);
+            sb.End();
+            sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState,
+                DepthStencilState.None, Main.Rasterizer, null, Main.GameViewMatrix.TransformationMatrix);
+        }
+
+        /// <summary>底座骇客高亮叠加层：Additive方式补扫描线与脉冲光晟，不改变warp凝实感</summary>
+        private static void DrawPedestalHackOverlay(SpriteBatch sb, Texture2D tex, Vector2 drawPos, float strength) {
+            Effect shader = HackTimeAssets.HackTimeNPCHighlight;
+            if (shader == null) return;
+
+            shader.Parameters["texelSize"]?.SetValue(new Vector2(1f / tex.Width, 1f / tex.Height));
+            shader.Parameters["intensity"]?.SetValue(strength);
+            shader.Parameters["isSelected"]?.SetValue(strength > 0.9f ? 1f : 0f);
+            shader.Parameters["uTime"]?.SetValue(Main.GlobalTimeWrappedHourly);
+
+            sb.End();
+            sb.Begin(SpriteSortMode.Immediate, BlendState.Additive, Main.DefaultSamplerState,
+                DepthStencilState.None, Main.Rasterizer, shader, Main.GameViewMatrix.TransformationMatrix);
+            sb.Draw(tex, drawPos, null, Color.White * strength, 0f, Vector2.Zero, 1f, SpriteEffects.None, 0f);
+            sb.End();
+            sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState,
+                DepthStencilState.None, Main.Rasterizer, null, Main.GameViewMatrix.TransformationMatrix);
+        }
+
+        #region IHackableTurret 实现
+
+        Actor IHackableTurret.AsActor => this;
+
+        Vector2 IScannable.WorldCenter => MountWorld;
+
+        bool IScannable.IsValid => Active && VoidColony.Active && visibility > 0.05f;
+
+        bool IScannable.IsHackable => true;
+
+        int IScannable.ScanRowCount => 5;
+
+        public bool IsCircuitDisabled => circuitDisabledFrames > 0;
+
+        public int CircuitDisabledFrames => circuitDisabledFrames;
+
+        void IScannable.BuildScanData(string[] labels, string[] values, Color[] colors) {
+            labels[0] = HackTime.TurretScanName.Value;
+            values[0] = HackTime.TurretScanGatlinName.Value;
+            colors[0] = HackTheme.Danger;
+
+            labels[1] = HackTime.TypeLabel.Value;
+            values[1] = HackTime.TurretScanType.Value;
+            colors[1] = HackTheme.Accent;
+
+            labels[2] = HackTime.ThreatLabel.Value;
+            values[2] = HackTime.ThreatHigh.Value;
+            colors[2] = HackTheme.Uploading;
+
+            labels[3] = HackTime.TurretScanPhase.Value;
+            if (burstRemaining > 0) {
+                values[3] = HackTime.TurretScanPhaseFiring.Value;
+                colors[3] = HackTheme.Danger;
+            }
+            else if (lockOnDelay > 0) {
+                values[3] = HackTime.TurretScanPhaseLocking.Value;
+                colors[3] = HackTheme.Uploading;
+            }
+            else if (burstCooldown > 0) {
+                values[3] = HackTime.TurretScanPhaseCooldown.Value;
+                colors[3] = HackTheme.TextNormal;
+            }
+            else {
+                values[3] = HackTime.TurretScanPhaseIdle.Value;
+                colors[3] = HackTheme.TextBright;
+            }
+
+            labels[4] = HackTime.TurretScanCircuit.Value;
+            if (circuitDisabledFrames > 0) {
+                values[4] = circuitOverloaded
+                    ? HackTime.TurretScanCircuitOverload.Value
+                    : HackTime.TurretScanCircuitShorted.Value;
+                colors[4] = HackTheme.Uploading;
+            }
+            else {
+                values[4] = HackTime.TurretScanCircuitOnline.Value;
+                colors[4] = HackTheme.Accent;
+            }
+        }
+
+        public void ApplyShortCircuit(int frames, Player caster) {
+            if (frames > circuitDisabledFrames) circuitDisabledFrames = frames;
+        }
+
+        public void ApplyCircuitOverload(int frames, Player caster) {
+            if (frames > circuitDisabledFrames) circuitDisabledFrames = frames;
+            circuitOverloaded = true;
+        }
+
+        #endregion
     }
 }

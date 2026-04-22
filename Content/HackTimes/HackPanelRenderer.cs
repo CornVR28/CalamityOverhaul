@@ -192,6 +192,11 @@ namespace CalamityOverhaul.Content.HackTimes
                     //灵异目标入队
                     enqueued = Queue.EnqueueWraith(hack, globalIdx, wraith);
                 }
+                else if (currentTargetKind == HackTargetKind.Turret
+                    && HackTime.CurrentScanTarget is IHackableTurret turret) {
+                    //炮台目标入队
+                    enqueued = Queue.EnqueueTurret(hack, globalIdx, turret);
+                }
                 else {
                     enqueued = Queue.Enqueue(hack, globalIdx, HackTime.SelectedTargetIndex);
                 }

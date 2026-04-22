@@ -106,6 +106,22 @@ namespace CalamityOverhaul.Content.HackTimes
         public static LocalizedText TileScanOnline { get; private set; }
         public static LocalizedText TileScanIntact { get; private set; }
 
+        //炮台扫描本地化字段
+        public static LocalizedText TurretScanName { get; private set; }
+        public static LocalizedText TurretScanLaserName { get; private set; }
+        public static LocalizedText TurretScanGatlinName { get; private set; }
+        public static LocalizedText TurretScanType { get; private set; }
+        public static LocalizedText TurretScanPhase { get; private set; }
+        public static LocalizedText TurretScanPhaseIdle { get; private set; }
+        public static LocalizedText TurretScanPhaseCharging { get; private set; }
+        public static LocalizedText TurretScanPhaseFiring { get; private set; }
+        public static LocalizedText TurretScanPhaseCooldown { get; private set; }
+        public static LocalizedText TurretScanPhaseLocking { get; private set; }
+        public static LocalizedText TurretScanCircuit { get; private set; }
+        public static LocalizedText TurretScanCircuitOnline { get; private set; }
+        public static LocalizedText TurretScanCircuitShorted { get; private set; }
+        public static LocalizedText TurretScanCircuitOverload { get; private set; }
+
         public override void SetStaticDefaults() {
             Locked = this.GetLocalization(nameof(Locked));
             Done = this.GetLocalization(nameof(Done));
@@ -189,6 +205,21 @@ namespace CalamityOverhaul.Content.HackTimes
             TileScanSealed = this.GetLocalization(nameof(TileScanSealed));
             TileScanOnline = this.GetLocalization(nameof(TileScanOnline));
             TileScanIntact = this.GetLocalization(nameof(TileScanIntact));
+
+            TurretScanName = this.GetLocalization(nameof(TurretScanName));
+            TurretScanLaserName = this.GetLocalization(nameof(TurretScanLaserName));
+            TurretScanGatlinName = this.GetLocalization(nameof(TurretScanGatlinName));
+            TurretScanType = this.GetLocalization(nameof(TurretScanType));
+            TurretScanPhase = this.GetLocalization(nameof(TurretScanPhase));
+            TurretScanPhaseIdle = this.GetLocalization(nameof(TurretScanPhaseIdle));
+            TurretScanPhaseCharging = this.GetLocalization(nameof(TurretScanPhaseCharging));
+            TurretScanPhaseFiring = this.GetLocalization(nameof(TurretScanPhaseFiring));
+            TurretScanPhaseCooldown = this.GetLocalization(nameof(TurretScanPhaseCooldown));
+            TurretScanPhaseLocking = this.GetLocalization(nameof(TurretScanPhaseLocking));
+            TurretScanCircuit = this.GetLocalization(nameof(TurretScanCircuit));
+            TurretScanCircuitOnline = this.GetLocalization(nameof(TurretScanCircuitOnline));
+            TurretScanCircuitShorted = this.GetLocalization(nameof(TurretScanCircuitShorted));
+            TurretScanCircuitOverload = this.GetLocalization(nameof(TurretScanCircuitOverload));
         }
 
         #endregion
@@ -372,6 +403,31 @@ namespace CalamityOverhaul.Content.HackTimes
             bool freshSelect = CurrentScanTarget == null;
             CurrentScanTarget = wraith;
             cameraTo = wraith.Center;
+
+            if (freshSelect) {
+                CameraProgress = 0f;
+                ZoomProgress = 0f;
+            }
+
+            if (!VaultUtils.isServer) {
+                SoundEngine.PlaySound(CWRSound.Hacker, Main.LocalPlayer.Center);
+            }
+        }
+
+        /// <summary>
+        /// 选中一个可骇入炮台Actor进行扫描和骇入
+        /// </summary>
+        public static void SelectTurretScan(IHackableTurret turret) {
+            if (!Active || turret == null || turret.AsActor == null || !turret.AsActor.Active) return;
+
+            if (SelectedTargetIndex >= 0) {
+                HackTimeUI.Instance?.Panel.CancelUpload();
+            }
+            SelectedTargetIndex = -1;
+
+            bool freshSelect = CurrentScanTarget == null;
+            CurrentScanTarget = turret;
+            cameraTo = turret.WorldCenter;
 
             if (freshSelect) {
                 CameraProgress = 0f;
