@@ -23,8 +23,10 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.GlitchWraith
 
             //厉鬼唯一，已经存在就不再生成
             if (ActorLoader.GetActiveActors<GlitchWraithActor>().Count > 0) return;
+            //Spawner(Main.LocalPlayer);
+        }
 
-            Player target = Main.LocalPlayer;
+        public static void Spawner(Player target) {
             if (target == null || !target.active || target.dead) return;
 
             float angle = Main.rand.NextFloat(MathHelper.TwoPi);

@@ -1,4 +1,5 @@
-using CalamityOverhaul.Common;
+﻿using CalamityOverhaul.Common;
+using CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.TimeShift;
 using InnoVault.GameSystem;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -35,13 +36,13 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.VoidPortals
 
         #region 配置
         //顶部起始位置相对出生点的像素偏移(向上为负Y)
-        private const float PanStartOffsetY = -1200f;
+        private const float PanStartOffsetY = -2000f;
         //运镜终点（镜头最终位置）相对出生点的像素偏移
         private const float PanEndOffsetY = -200f;
         //传送门世界坐标相对出生点的偏移
         private const float PortalOffsetY = -140f;
         //阶段时长（帧）
-        private const int SkyPanDuration = 180;
+        private const int SkyPanDuration = 330;
         private const int PortalSummonDuration = 60;
         private const int EjectionDuration = 40;
         private const int SettleDuration = 60;
@@ -51,6 +52,14 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.VoidPortals
         private const float EjectVelocity = 14f;
         //首次进入虚空聚落后，等待几帧再触发演出，保证 Player/子世界状态稳定
         private const int FirstEntryWaitFrames = 12;
+
+        //过去闪现节拍：在 SkyPan 阶段内按 stageTimer 触发，数据为 (中心帧, 半宽帧, 峰值滤镜)
+        //越往后滤镜越强，营造"越接近地面，过去越浓厚"的递进
+        private static readonly (int center, int halfWidth, float peak)[] PastFlashes = new[] {
+            (70, 18, 0.55f),
+            (150, 22, 0.75f),
+            (235, 28, 0.95f),
+        };
         #endregion
 
         #region 运行时
@@ -109,8 +118,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.VoidPortals
             float worldW = Main.maxTilesX * 16f;
             float worldH = Main.maxTilesY * 16f;
             const float edgePad = 1600f;
-            //需要为上方 1200px 的起镜位置预留空间
-            const float topPad = 1400f;
+            //需要为上方 2000px 的起镜位置预留空间
+            const float topPad = 2200f;
             anchor.X = MathHelper.Clamp(anchor.X, edgePad, worldW - edgePad);
             anchor.Y = MathHelper.Clamp(anchor.Y, topPad, worldH - edgePad);
             return anchor;
@@ -133,6 +142,10 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.VoidPortals
             cameraInit = false;
             playerRevealed = false;
             onDone = onFinished;
+
+            //接管时空叠加系统，用于在 SkyPan 中闪现过去
+            VoidTimeShiftSystem.BeginExternalDrive();
+            VoidTimeShiftSystem.DriveState(0f, 0f);
 
             TransitionTo(Stage.SkyPan);
         }
@@ -271,7 +284,12 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.VoidPortals
             Player.immune = true;
             Player.immuneTime = 2;
 
+            //每帧驱动过去滤镜：多段三角脉冲叠加
+            DrivePastFlashesForSkyPan();
+
             if (stageTimer >= SkyPanDuration) {
+                //落镜前强制把时空叠加拉回现在，避免与传送门演出冲突
+                VoidTimeShiftSystem.DriveState(0f, 0f);
                 //生成传送门
                 if (!Main.dedServ) {
                     portalIndex = VoidArrivalPortal.Spawn(
@@ -282,6 +300,54 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.VoidPortals
                 }
                 TransitionTo(Stage.PortalSummon);
             }
+        }
+
+        /// <summary>
+        /// SkyPan 阶段内按 <see cref="PastFlashes"/> 节拍驱动时空叠加滤镜
+        /// 每段是一个三角脉冲，在中心帧达到峰值，向两侧线性衰减到零
+        /// 过渡闪光使用前 1/3 段的钟形曲线模拟"撕开现实"的瞬间
+        /// </summary>
+        private void DrivePastFlashesForSkyPan() {
+            float filter = 0f;
+            float burst = 0f;
+            for (int i = 0; i < PastFlashes.Length; i++) {
+                var (center, halfWidth, peak) = PastFlashes[i];
+                int dt = stageTimer - center;
+                int absDt = Math.Abs(dt);
+                if (absDt >= halfWidth) continue;
+
+                float tri = 1f - (float)absDt / halfWidth;
+                //平方让峰值更尖锐
+                float pulse = tri * tri * peak;
+                if (pulse > filter) filter = pulse;
+
+                //撕裂闪光：在进入段（dt 接近 -halfWidth/2）集中爆发
+                if (dt > -halfWidth && dt < halfWidth / 2) {
+                    float bt = (dt + halfWidth) / (float)(halfWidth + halfWidth / 2);
+                    float flash = MathF.Sin(MathHelper.Pi * MathHelper.Clamp(bt, 0f, 1f));
+                    flash *= flash;
+                    if (flash > burst) burst = flash;
+                }
+
+                //每段进入/离开瞬间触发一次低频音效
+                if (stageTimer == center - halfWidth + 1) {
+                    if (!Main.dedServ) {
+                        SoundEngine.PlaySound(SoundID.Item122 with {
+                            Volume = 0.55f,
+                            Pitch = -0.6f + 0.15f * i,
+                        }, portalCenter);
+                    }
+                }
+                //if (stageTimer == center) {
+                //    if (!Main.dedServ) {
+                //        SoundEngine.PlaySound(SoundID.Item67 with {
+                //            Volume = 0.45f + 0.12f * i,
+                //            Pitch = -0.4f,
+                //        }, portalCenter);
+                //    }
+                //}
+            }
+            VoidTimeShiftSystem.DriveState(filter, burst);
         }
 
         private void UpdatePortalSummon() {
@@ -368,6 +434,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.VoidPortals
         private void Restore() {
             cameraInit = false;
             Main.GameZoomTarget = savedZoom;
+            //释放时空叠加系统接管
+            VoidTimeShiftSystem.EndExternalDrive();
         }
 
         private void LockAll() {

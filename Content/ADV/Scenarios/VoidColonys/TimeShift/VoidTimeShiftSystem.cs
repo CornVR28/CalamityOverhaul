@@ -63,6 +63,45 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.TimeShift
         public static bool InTransition => transitionTimer > 0;
 
         /// <summary>
+        /// 外部演出是否正在接管本系统的滤镜/过渡状态
+        /// 接管期间 <see cref="Update"/> 内部逻辑完全让位，尘粒与插值都暂停
+        /// </summary>
+        public static bool ExternallyDriven { get; private set; }
+
+        /// <summary>
+        /// 由演出代码调用，进入接管模式；在此模式下外部以 <see cref="DriveState"/> 直接写入数据
+        /// </summary>
+        public static void BeginExternalDrive() {
+            ExternallyDriven = true;
+            toggleRequested = false;
+            transitionTimer = 0;
+        }
+
+        /// <summary>
+        /// 结束接管，回归正常规则，并立即清零滤镜与过渡
+        /// </summary>
+        public static void EndExternalDrive() {
+            ExternallyDriven = false;
+            toggleRequested = false;
+            transitionTimer = 0;
+            FilterIntensity = 0f;
+            TransitionStrength = 0f;
+            CurrentEra = VoidEra.Present;
+        }
+
+        /// <summary>
+        /// 接管模式下，由外部每帧写入滤镜与过渡强度
+        /// </summary>
+        public static void DriveState(float filterIntensity, float transitionStrength) {
+            if (!ExternallyDriven) {
+                return;
+            }
+            FilterIntensity = MathHelper.Clamp(filterIntensity, 0f, 1f);
+            TransitionStrength = MathHelper.Clamp(transitionStrength, 0f, 1f);
+            CurrentEra = FilterIntensity > 0.5f ? VoidEra.Past : VoidEra.Present;
+        }
+
+        /// <summary>
         /// 由玩家按键调用，请求切换时代
         /// 过渡期间忽略后续请求，避免连按造成闪屏
         /// </summary>
@@ -89,6 +128,11 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.TimeShift
         /// </summary>
         /// <param name="active">当前是否仍在虚空聚落维度</param>
         public static void Update(bool active) {
+            //演出接管期间完全让位
+            if (ExternallyDriven) {
+                return;
+            }
+
             if (!active) {
                 //离开虚空聚落强制回到现在并平滑淡出
                 CurrentEra = VoidEra.Present;
