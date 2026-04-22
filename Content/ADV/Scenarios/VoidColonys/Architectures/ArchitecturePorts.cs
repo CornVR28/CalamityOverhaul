@@ -34,37 +34,40 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures
     /// </summary>
     internal static class ArchitecturePorts
     {
+        //端口坐标以当前贴图左上角为原点，数值随贴图尺寸等比缩放
+        //当前建筑贴图相较最初版本已统一缩小到一半（桥梁/管道同样）
+        //右侧端口的X直接使用真实贴图宽度作为边界，避免四舍五入带来的1像素错位
         private static readonly Dictionary<ArchitectureType, ArchitecturePort[]> Table = new() {
-            //核心虚空实验室：两侧底部外挑桁架上下双层桥梁口，两侧中部一对管道口
+            //核心虚空实验室 580x378：两侧底部外挑桁架上下双层桥梁口+两侧中部一对管道口
             [ArchitectureType.CoreVoidLab] = [
-                new(PortKind.Bridge, PortSide.Left, 0, 580),
-                new(PortKind.Bridge, PortSide.Left, 60, 660),
-                new(PortKind.Bridge, PortSide.Right, 1162, 580),
-                new(PortKind.Bridge, PortSide.Right, 1102, 660),
-                new(PortKind.Tunnel, PortSide.Left, 8, 360),
-                new(PortKind.Tunnel, PortSide.Right, 1154, 360),
+                new(PortKind.Bridge, PortSide.Left, 0, 290),
+                new(PortKind.Bridge, PortSide.Left, 30, 330),
+                new(PortKind.Bridge, PortSide.Right, 580, 290),
+                new(PortKind.Bridge, PortSide.Right, 550, 330),
+                new(PortKind.Tunnel, PortSide.Left, 4, 180),
+                new(PortKind.Tunnel, PortSide.Right, 576, 180),
             ],
 
-            //能源控制站：平直基座两侧桥梁口+高位两侧管道口
+            //能源控制站 240x136：平直基座两侧桥梁口+高位两侧管道口
             [ArchitectureType.EnergyControlStation] = [
-                new(PortKind.Bridge, PortSide.Left, 0, 250),
-                new(PortKind.Bridge, PortSide.Right, 482, 250),
-                new(PortKind.Tunnel, PortSide.Left, 8, 120),
-                new(PortKind.Tunnel, PortSide.Right, 474, 120),
+                new(PortKind.Bridge, PortSide.Left, 0, 125),
+                new(PortKind.Bridge, PortSide.Right, 240, 125),
+                new(PortKind.Tunnel, PortSide.Left, 4, 60),
+                new(PortKind.Tunnel, PortSide.Right, 236, 60),
             ],
 
-            //中型物料分析实验室：基座两侧桥梁口+侧壁两侧管道口
+            //中型物料分析实验室 382x184：基座两侧桥梁口+侧壁两侧管道口
             [ArchitectureType.MidSizeMaterialAnalysisLab] = [
-                new(PortKind.Bridge, PortSide.Left, 0, 348),
-                new(PortKind.Bridge, PortSide.Right, 766, 348),
-                new(PortKind.Tunnel, PortSide.Left, 8, 140),
-                new(PortKind.Tunnel, PortSide.Right, 758, 140),
+                new(PortKind.Bridge, PortSide.Left, 0, 174),
+                new(PortKind.Bridge, PortSide.Right, 382, 174),
+                new(PortKind.Tunnel, PortSide.Left, 4, 70),
+                new(PortKind.Tunnel, PortSide.Right, 378, 70),
             ],
 
-            //观测哨：塔身较窄，仅提供基座两侧桥梁口
+            //观测哨 130x154：塔身较窄，仅提供基座两侧桥梁口
             [ArchitectureType.ObservationPostTelescope] = [
-                new(PortKind.Bridge, PortSide.Left, 0, 285),
-                new(PortKind.Bridge, PortSide.Right, 262, 285),
+                new(PortKind.Bridge, PortSide.Left, 0, 142),
+                new(PortKind.Bridge, PortSide.Right, 130, 142),
             ],
         };
 

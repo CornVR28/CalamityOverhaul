@@ -102,7 +102,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures
             for (int i = 0; i < segCount; i++) {
                 int segLeft = i == segCount - 1 ? rightX - segWidth : leftX + i * segWidth;
                 Vector2 drawPos = new Vector2(segLeft, topY) - Main.screenPosition;
-                drawPos.Y -= 16;//一个魔法矫正值，这些桥梁往上16像素几乎刚刚好
+                drawPos.Y -= 8;//一个魔法矫正值，这些桥梁往上16像素几乎刚刚好
                 ArchitectureWarpDraw.DrawWithShader(spriteBatch, tex, drawPos, visibility, warp);
             }
             return false;

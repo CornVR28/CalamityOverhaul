@@ -38,7 +38,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures
     {
         private const int PixelsPerTile = 16;
         //相邻建筑之间的水平间距px
-        //桥段贴图宽552px，设为2800约等于五段拼接，拉开核心与附属建筑的跨距
+        //桥段贴图当前宽276px（已缩至原始的一半），设为2800约等于十段拼接，拉开核心与附属建筑的跨距
         private const int InterBuildingGapPx = 2800;
 
         //卫星岛标签→建筑类型

@@ -33,48 +33,48 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Colli
             public PlatformRow[] Platforms { get; } = platforms ?? [];
         }
 
-        //贴图ceil尺寸参考：
-        //CoreVoidLab 1162x756 -> 73x48
-        //EnergyControlStation 482x272 -> 31x17
-        //MidSizeMaterialAnalysisLab 766x368 -> 48x23
-        //ObservationPostTelescope 262x310 -> 17x20
+        //贴图ceil尺寸参考（当前建筑贴图已缩至最初版本的一半）：
+        //CoreVoidLab 580x378 -> 37x24
+        //EnergyControlStation 240x136 -> 15x9
+        //MidSizeMaterialAnalysisLab 382x184 -> 24x12
+        //ObservationPostTelescope 130x154 -> 9x10
         //设计原则：只为建筑提供落脚用的地板/甲板平台，绝不覆盖装饰物（储罐、草木、管道）
         //墙体碰撞会让这些氛围型装饰变成真正的实心，反而妨碍玩家走动与战斗
         private static readonly Dictionary<ArchitectureType, Spec> _specs = new() {
             //观测塔：只在塔楼甲板上铺一层平台，玩家可踩上望远镜基座
             //入口区不加碰撞，方便从正面自由穿行
             [ArchitectureType.ObservationPostTelescope] = new Spec(
-                cols: 17, rows: 20,
+                cols: 9, rows: 10,
                 solids: [],
-                platforms: [new PlatformRow(7, 2, 13)]
+                platforms: [new PlatformRow(3, 1, 6)]
             ),
             //能源控制站：只在底部金属地台表面铺一条地板平台
             //罐体、管道、控制台全部保持装饰性，不做实心
             [ArchitectureType.EnergyControlStation] = new Spec(
-                cols: 31, rows: 17,
+                cols: 15, rows: 9,
                 solids: [],
-                platforms: [new PlatformRow(15, 1, 29)]
+                platforms: [new PlatformRow(7, 0, 14)]
             ),
             //中型分析实验室：只在底部金属基座表面铺地板
             //右下角的草丛区域故意留出来
             [ArchitectureType.MidSizeMaterialAnalysisLab] = new Spec(
-                cols: 48, rows: 23,
+                cols: 24, rows: 12,
                 solids: [],
-                platforms: [new PlatformRow(20, 1, 43)]
+                platforms: [new PlatformRow(10, 0, 21)]
             ),
             //核心实验室：主屋楼板 + 两侧桁架露台 + 底部工作甲板，都用平台
             //玩家可自由在各层之间跳跃穿行，符合多层结构观感
             [ArchitectureType.CoreVoidLab] = new Spec(
-                cols: 73, rows: 48,
+                cols: 37, rows: 24,
                 solids: [],
                 platforms: [
                     //主屋内部楼板
-                    new PlatformRow(25, 12, 60),
+                    new PlatformRow(12, 6, 30),
                     //左右两侧伸出的桁架露台
-                    new PlatformRow(34, 2, 20),
-                    new PlatformRow(34, 52, 70),
+                    new PlatformRow(17, 1, 10),
+                    new PlatformRow(17, 26, 35),
                     //底部工作甲板
-                    new PlatformRow(43, 22, 50),
+                    new PlatformRow(21, 11, 25),
                 ]
             ),
         };
