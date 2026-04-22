@@ -52,6 +52,7 @@ namespace CalamityOverhaul.Common
         public static Asset<Effect> RevelationPlague { get; set; }
         public static Asset<Effect> VoidPortal { get; set; }
         public static Asset<Effect> VoidSuction { get; set; }
+        public static Asset<Effect> VoidArrival { get; set; }
         public static Asset<Effect> CyberBossBar { get; set; }
         public static Asset<Effect> HackRamArc { get; set; }
         public static Asset<Effect> ThermalPanel { get; set; }
