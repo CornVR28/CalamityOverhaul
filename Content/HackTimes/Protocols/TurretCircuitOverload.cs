@@ -1,4 +1,4 @@
-using CalamityOverhaul.Content.PRTTypes;
+﻿using CalamityOverhaul.Content.PRTTypes;
 using InnoVault.PRT;
 using Terraria;
 using Terraria.Audio;
@@ -41,8 +41,6 @@ namespace CalamityOverhaul.Content.HackTimes.Protocols
                     PRTLoader.AddParticle(new PRT_Spark(center + dir * 32f, dir * 5.5f,
                         false, 30, 0.9f, new Color(220, 60, 140, 180)));
                 }
-                SoundEngine.PlaySound(SoundID.Zombie104 with { Volume = 0.8f, Pitch = -0.4f }, center);
-                SoundEngine.PlaySound(SoundID.Item93 with { Volume = 0.9f, Pitch = -0.45f }, center);
             }
             return true;
         }
