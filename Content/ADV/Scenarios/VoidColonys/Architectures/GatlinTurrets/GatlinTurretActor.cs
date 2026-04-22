@@ -1,5 +1,6 @@
 ﻿using CalamityOverhaul.Common;
 using CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.TimeShift;
+using CalamityOverhaul.Content.GoreEntity;
 using CalamityOverhaul.Content.HackTimes;
 using InnoVault.Actors;
 using Microsoft.Xna.Framework;
@@ -266,6 +267,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Gatli
 
             //开火特效所有端都触发
             SoundEngine.PlaySound(CWRSound.Gun_AUTO_Shoot with { Volume = 0.6f, Pitch = 0.1f }, MountWorld);
+            SpawnMuzzleEffects();
+            EjectCasing();
             recoil = 6f;
             barrelSpin += 0.8f;
 
@@ -276,6 +279,71 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Gatli
             else {
                 fireTimer = FireInterval;
             }
+        }
+
+        /// <summary>
+        /// 枪口喷焰视觉：亮光Dust与烟雾Gore，仅在客户端生成
+        /// </summary>
+        private void SpawnMuzzleEffects() {
+            if (Main.dedServ) return;
+
+            Vector2 mount = MountWorld;
+            Vector2 forward = currentRotation.ToRotationVector2();
+            Vector2 sideNormal = new Vector2(-forward.Y, forward.X);
+            //枪身贴图垂直翻转时侧向也要跟着翻，保证弹壳往顶部方向抛
+            if (MathF.Cos(currentRotation) < 0f) sideNormal = -sideNormal;
+
+            Vector2 muzzle = mount + forward * (GunMuzzleLocalX - GunPivotLocalX)
+                + sideNormal * MathF.Abs(GunMuzzleLocalY - GunPivotLocalY);
+            muzzle += VaultUtils.RandVr(32);
+            muzzle.Y -= 20;
+
+            //橙黄火焰Dust锥形喷射
+            for (int i = 0; i < 10; i++) {
+                Vector2 vel = forward.RotatedByRandom(0.35f) * Main.rand.NextFloat(3f, 7f);
+                Dust d = Dust.NewDustPerfect(muzzle, DustID.Torch, vel, 0, default, Main.rand.NextFloat(1.2f, 1.8f));
+                d.noGravity = true;
+                d.fadeIn = 1.2f;
+            }
+            //少量烟雾Gore作为发射后残留
+            if (Main.rand.NextBool(2)) {
+                int gore = Gore.NewGore(new EntitySource_WorldEvent("GatlinTurret_Muzzle"),
+                    muzzle, forward * Main.rand.NextFloat(0.6f, 1.4f) + Main.rand.NextVector2Circular(0.8f, 0.8f),
+                    GoreID.Smoke1 + Main.rand.Next(3), Main.rand.NextFloat(0.6f, 0.9f));
+                if (gore >= 0 && gore < Main.maxGore) {
+                    Main.gore[gore].alpha = 80;
+                }
+            }
+            //亮黄闪光核心
+            Dust flash = Dust.NewDustPerfect(muzzle, DustID.GoldFlame, forward * 1.5f, 0, Color.White, 1.6f);
+            flash.noGravity = true;
+
+            Lighting.AddLight(muzzle, 1.3f, 0.85f, 0.3f);
+        }
+
+        /// <summary>
+        /// 抛出弹壳Gore，位置位于枪身弹膛处，方向与枪身垂直且朝上
+        /// 受CWRServerConfig.EnableCasingsEntity开关控制
+        /// </summary>
+        private void EjectCasing() {
+            if (Main.dedServ) return;
+            if (!CWRServerConfig.Instance.EnableCasingsEntity) return;
+
+            Vector2 mount = MountWorld;
+            Vector2 forward = currentRotation.ToRotationVector2();
+            Vector2 sideNormal = new Vector2(-forward.Y, forward.X);
+            //枪身上下翻转时让弹壳抛射方向跟着翻，确保始终从枪身顶面弹出
+            if (MathF.Cos(currentRotation) < 0f) sideNormal = -sideNormal;
+
+            //弹膛位于枢轴后方稍靠顶部的位置，比照枪身贴图上弹仓凸出的范围
+            Vector2 chamber = mount + forward * -8f + sideNormal * -6f;
+            //抛射速度：向上偏射，略带后向分量，随机抖动制造节奏感
+            Vector2 vel = sideNormal * Main.rand.NextFloat(2.2f, 4.2f)
+                + -forward * Main.rand.NextFloat(0.6f, 1.6f)
+                - Vector2.UnitY * Main.rand.NextFloat(0.4f, 1.2f);
+
+            Gore.NewGore(new EntitySource_WorldEvent("GatlinTurret_Casing"),
+                chamber, vel, CaseGore.PType, Main.rand.NextFloat(0.9f, 1.15f));
         }
 
         /// <summary>
@@ -293,6 +361,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Gatli
                 velocity = velocity.RotatedByRandom(0.02f);
 
                 muzzle += VaultUtils.RandVr(32);
+                muzzle -= velocity.UnitVector() * 16;
 
                 int proj = Projectile.NewProjectile(src, muzzle, velocity,
                 ModContent.ProjectileType<GatlinBullet>(),
@@ -334,6 +403,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Gatli
 
             //底座走与其他建筑一致的扭曲shader
             Vector2 pedestalDrawPos = Position - Main.screenPosition;
+            pedestalDrawPos.Y += 2;//向下偏移2像素用于贴合地面
             ArchitectureWarpDraw.DrawWithShader(spriteBatch, pedestal, pedestalDrawPos, visibility, warp);
             //被扫描选中或悬停时在底座上再叠加一层骇客高亮
             if (hackMark > 0.01f) {
