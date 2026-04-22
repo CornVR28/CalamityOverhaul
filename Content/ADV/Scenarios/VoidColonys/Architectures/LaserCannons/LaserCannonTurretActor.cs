@@ -57,11 +57,11 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Laser
 
         //节奏控制
         /// <summary>蓄能阶段持续时间（帧），期间枪口延伸预警细光并逐步加宽</summary>
-        public static int ChargeDuration => 150;
+        public static int ChargeDuration => 80;
         /// <summary>激光发射阶段持续时间（帧），期间造成持续伤害</summary>
         public static int FireDuration => 240;
         /// <summary>发射结束后的冷却时间（帧），强制炮身解锁休整</summary>
-        public static int CooldownDuration => 300;
+        public static int CooldownDuration => 180;
 
         //光束几何
         /// <summary>激光最大射程，决定主光束贴图的拉伸长度</summary>
@@ -345,11 +345,11 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Laser
                         core *= MathHelper.Lerp(2.2f, 1f, k);
                         targetWidth = MathHelper.Lerp(FireBeamWidth * 1.35f, FireBeamWidth, k);
                     }
-                    else if (life > 0.9f) {
-                        //收束消散
-                        float k = (life - 0.9f) / 0.1f;
-                        core *= MathHelper.Lerp(1f, 0.3f, k);
-                        targetWidth = MathHelper.Lerp(FireBeamWidth, 10f, k);
+                    else if (life > 0.94f) {
+                        //收束：短促干脆地熄灭，直接把宽度和强度压到极低
+                        float k = (life - 0.94f) / 0.06f;
+                        core *= MathHelper.Lerp(1f, 0f, k);
+                        targetWidth = MathHelper.Lerp(FireBeamWidth, 0f, k);
                     }
                     else {
                         targetWidth = FireBeamWidth;
@@ -358,15 +358,24 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Laser
                     break;
                 }
                 case 3: {
-                    targetIntensity = MathHelper.Lerp(0.3f, 0f, 1f - phaseTimer / (float)Math.Max(1, CooldownDuration));
-                    targetWidth = MathHelper.Lerp(6f, 0f, 1f - phaseTimer / (float)Math.Max(1, CooldownDuration));
+                    //冷却：立即让目标归零并使用更激进的插值速度，避免细线残留
+                    targetIntensity = 0f;
+                    targetWidth = 0f;
                     break;
                 }
             }
 
-            //平滑逼近
-            beamIntensity = MathHelper.Lerp(beamIntensity, targetIntensity, 0.35f);
-            beamWidth = MathHelper.Lerp(beamWidth, targetWidth, 0.4f);
+            //平滑逼近(冷却阶段采用更快速度，让光束干脆消失)
+            float intLerp = phase == 3 ? 0.7f : 0.35f;
+            float widLerp = phase == 3 ? 0.7f : 0.4f;
+            beamIntensity = MathHelper.Lerp(beamIntensity, targetIntensity, intLerp);
+            beamWidth = MathHelper.Lerp(beamWidth, targetWidth, widLerp);
+
+            //冷却阶段当宽度低到一定阈值就直接归零，杜绝极细残影
+            if (phase == 3 && beamWidth < 3f) {
+                beamWidth = 0f;
+                beamIntensity = 0f;
+            }
 
             //脉动基线
             float pulseTarget = phase == 2 ? 1f + MathF.Sin(Main.GlobalTimeWrappedHourly * 18f) * 0.18f : 0.7f;
