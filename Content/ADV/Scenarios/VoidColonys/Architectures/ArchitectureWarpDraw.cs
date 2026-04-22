@@ -45,14 +45,15 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures
         /// <param name="visibility">可见度0到1</param>
         /// <param name="warpStrength">切换演出额外扰动，0到1</param>
         public static void DrawWithShader(SpriteBatch spriteBatch, Texture2D tex,
-            Vector2 drawPos, float visibility, float warpStrength) {
+            Vector2 drawPos, float visibility, float warpStrength, bool flipX = false) {
             if (tex == null) return;
             Effect shader = EffectLoader.ArchitectureWarp?.Value;
             //完全显示且无切换演出时直接普通绘制，避免稳定期持续闪烁
             bool stableVisible = visibility >= 0.999f && warpStrength <= 0.001f;
+            SpriteEffects fx = flipX ? SpriteEffects.FlipHorizontally : SpriteEffects.None;
             if (shader == null || stableVisible) {
                 spriteBatch.Draw(tex, drawPos, null, Color.White * visibility, 0f,
-                    Vector2.Zero, 1f, SpriteEffects.None, 0f);
+                    Vector2.Zero, 1f, fx, 0f);
                 return;
             }
 
@@ -66,7 +67,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures
                 DepthStencilState.None, Main.Rasterizer, shader, Main.GameViewMatrix.TransformationMatrix);
 
             //整张贴图一次性送给着色器，所有时空效果在像素着色器中完成
-            spriteBatch.Draw(tex, drawPos, null, Color.White, 0f, Vector2.Zero, 1f, SpriteEffects.None, 0f);
+            spriteBatch.Draw(tex, drawPos, null, Color.White, 0f, Vector2.Zero, 1f, fx, 0f);
 
             spriteBatch.End();
             spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState,

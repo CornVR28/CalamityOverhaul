@@ -54,6 +54,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures
                 if (ActorLoader.Actors[idx] is not ArchitectureActor actor) continue;
                 //显式设置SyncVar字段并触发网络同步，确保客户端也能拿到正确的建筑类型
                 actor.TypeByte = (byte)entry.Type;
+                actor.FlipX = entry.FlipX;
                 actor.OnSpawn();
                 actor.NetUpdate = true;
             }

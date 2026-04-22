@@ -75,7 +75,42 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures
                 new(PortKind.Bridge, PortSide.Left, 0, 506),
                 new(PortKind.Bridge, PortSide.Right, 218, 506),
             ],
+
+            //X桁架斜桥 266x178：左下低端、右上高端，两端共同负责抬升垂直差
+            //端口Y放在主梁中线附近，让与其相接的水平桥面平齐
+            [ArchitectureType.ConnectionBridgeSlope] = [
+                new(PortKind.Bridge, PortSide.Left, 0, 160),
+                new(PortKind.Bridge, PortSide.Right, 266, 30),
+            ],
+
+            //铁锈加固阶梯 362x208：完整阶梯走廊，左下低端、右上高端
+            //端口Y同样取阶梯两端的主体踏面中线
+            [ArchitectureType.ReinforcedRustedPathway] = [
+                new(PortKind.Bridge, PortSide.Left, 0, 188),
+                new(PortKind.Bridge, PortSide.Right, 362, 42),
+            ],
         };
+
+        /// <summary>
+        /// 获取水平镜像后的端口列表
+        /// Side互换，LocalX反向，LocalY不变
+        /// </summary>
+        public static ArchitecturePort[] GetMirrored(ArchitectureType type, int widthPx) {
+            var raw = Get(type);
+            if (raw.Length == 0) return [];
+            var mirrored = new ArchitecturePort[raw.Length];
+            for (int i = 0; i < raw.Length; i++) {
+                PortSide newSide = raw[i].Side == PortSide.Left ? PortSide.Right : PortSide.Left;
+                mirrored[i] = new ArchitecturePort(raw[i].Kind, newSide, widthPx - raw[i].LocalX, raw[i].LocalY);
+            }
+            return mirrored;
+        }
+
+        /// <summary>
+        /// 根据flipX返回应使用的端口数组，true时自动镜像
+        /// </summary>
+        public static ArchitecturePort[] GetEffective(ArchitectureType type, int widthPx, bool flipX)
+            => flipX ? GetMirrored(type, widthPx) : Get(type);
 
         /// <summary>获取指定建筑的全部端口，类型未注册时返回空数组</summary>
         public static ArchitecturePort[] Get(ArchitectureType type)

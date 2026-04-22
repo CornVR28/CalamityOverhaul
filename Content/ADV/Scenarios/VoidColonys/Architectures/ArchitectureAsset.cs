@@ -21,6 +21,10 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures
         TubularConnectorTunnel,
         /// <summary>信号塔，瘦高塔形地标，作为零号站点的中心建筑</summary>
         SignalTower,
+        /// <summary>X桁架斜桥段，左下→右上，可FlipX得到右下→左上</summary>
+        ConnectionBridgeSlope,
+        /// <summary>铁锈加固阶梯，完整阶梯走廊，左下→右上，可FlipX得到右下→左上</summary>
+        ReinforcedRustedPathway,
     }
 
     /// <summary>
@@ -44,6 +48,10 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures
         public static Texture2D TubularConnectorTunnel = null;
         [VaultLoaden(Root + "SignalTower")]
         public static Texture2D SignalTower = null;
+        [VaultLoaden(Root + "ConnectionBridgeSlope")]
+        public static Texture2D ConnectionBridgeSlope = null;
+        [VaultLoaden(Root + "ReinforcedRustedPathway")]
+        public static Texture2D ReinforcedRustedPathway = null;
 
         /// <summary>根据类型查表得到对应纹理</summary>
         public static Texture2D Get(ArchitectureType type) => type switch {
@@ -54,6 +62,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures
             ArchitectureType.ConnectionBridgeSegment => ConnectionBridgeSegment,
             ArchitectureType.TubularConnectorTunnel => TubularConnectorTunnel,
             ArchitectureType.SignalTower => SignalTower,
+            ArchitectureType.ConnectionBridgeSlope => ConnectionBridgeSlope,
+            ArchitectureType.ReinforcedRustedPathway => ReinforcedRustedPathway,
             _ => null,
         };
     }

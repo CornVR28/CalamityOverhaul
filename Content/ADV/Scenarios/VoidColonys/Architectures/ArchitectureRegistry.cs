@@ -3,11 +3,12 @@ using System.Collections.Generic;
 namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures
 {
     /// <summary>一条建筑放置记录，坐标为贴图左上角的世界像素</summary>
-    internal readonly struct ArchitectureEntry(ArchitectureType type, int pixelX, int pixelY)
+    internal readonly struct ArchitectureEntry(ArchitectureType type, int pixelX, int pixelY, bool flipX = false)
     {
         public readonly ArchitectureType Type = type;
         public readonly int PixelX = pixelX;
         public readonly int PixelY = pixelY;
+        public readonly bool FlipX = flipX;
     }
 
     /// <summary>一条水平连接段记录，端点为世界像素坐标整数</summary>
@@ -36,6 +37,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures
 
         public static void Add(ArchitectureType type, int pixelX, int pixelY)
             => Entries.Add(new ArchitectureEntry(type, pixelX, pixelY));
+
+        public static void Add(ArchitectureType type, int pixelX, int pixelY, bool flipX)
+            => Entries.Add(new ArchitectureEntry(type, pixelX, pixelY, flipX));
 
         public static void AddConnector(PortKind kind, int startX, int startY, int endX)
             => Connectors.Add(new ConnectorEntry(kind, startX, startY, endX));

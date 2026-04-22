@@ -84,6 +84,14 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Colli
                 solids: [],
                 platforms: [new PlatformRow(31, 0, 13)]
             ),
+            //X桁架斜桥 266x178 -> 17x12：踏面位于对角线顶面
+            //步进斜坡由<see cref="BuildStaircaseSpec"/>生成，左下→右上
+            [ArchitectureType.ConnectionBridgeSlope] = BuildStaircaseSpec(cols: 17, rows: 12,
+                startCol: 0, endCol: 16, startRow: 10, endRow: 2),
+
+            //铁锈加固阶梯 362x208 -> 23x13：完整阶梯走廊，踏面覆盖整条对角线
+            [ArchitectureType.ReinforcedRustedPathway] = BuildStaircaseSpec(cols: 23, rows: 13,
+                startCol: 0, endCol: 22, startRow: 11, endRow: 3),
         };
 
         //字符网格缓存，避免每次放置都重新生成
@@ -150,6 +158,36 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Colli
             if (v < lo) return lo;
             if (v > hi) return hi;
             return v;
+        }
+
+        /// <summary>
+        /// 为斜坡类建筑生成按列阶梯分布的平台Spec
+        /// 每一列都会放一格平台，其Y在<paramref name="startRow"/>到<paramref name="endRow"/>之间线性插值
+        /// 相邻两列同Y时合并成宽平台行，减少<see cref="PlatformRow"/>数量
+        /// </summary>
+        private static Spec BuildStaircaseSpec(int cols, int rows, int startCol, int endCol, int startRow, int endRow) {
+            List<PlatformRow> rowList = [];
+            int spanCols = endCol - startCol;
+            int spanRows = endRow - startRow;
+            int currentRow = -1;
+            int currentStartCol = 0;
+            for (int c = startCol; c <= endCol; c++) {
+                float t = spanCols == 0 ? 0 : (c - startCol) / (float)spanCols;
+                int r = (int)System.Math.Round(startRow + spanRows * t);
+                r = Clamp(r, 0, rows - 1);
+                if (r != currentRow) {
+                    //前一段结束，落笔
+                    if (currentRow >= 0) {
+                        rowList.Add(new PlatformRow(currentRow, currentStartCol, c - 1));
+                    }
+                    currentRow = r;
+                    currentStartCol = c;
+                }
+            }
+            if (currentRow >= 0) {
+                rowList.Add(new PlatformRow(currentRow, currentStartCol, endCol));
+            }
+            return new Spec(cols, rows, solids: [], platforms: rowList.ToArray());
         }
     }
 }

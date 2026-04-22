@@ -36,13 +36,13 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Strongholds
         /// 返回登记后的建筑信息，便于继续布桥
         /// </summary>
         protected static PlacedArchitecture RegisterAlignedToBridgeY(ArchitectureType type,
-            int pixelXLeft, int bridgePortWorldY, int portLocalX, int portLocalY) {
+            int pixelXLeft, int bridgePortWorldY, int portLocalX, int portLocalY, bool flipX = false) {
             Texture2D tex = ArchitectureAsset.Get(type);
             if (tex == null) return null;
             int pixelX = pixelXLeft - portLocalX;
             int pixelY = bridgePortWorldY - portLocalY;
-            ArchitectureRegistry.Add(type, pixelX, pixelY);
-            return new PlacedArchitecture(type, pixelX, pixelY, tex.Width, tex.Height);
+            ArchitectureRegistry.Add(type, pixelX, pixelY, flipX);
+            return new PlacedArchitecture(type, pixelX, pixelY, tex.Width, tex.Height, flipX);
         }
 
         /// <summary>
@@ -73,17 +73,18 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Strongholds
     /// <summary>
     /// Stronghold已完成放置后留下的运行时记录，仅用于在基地内部串联桥梁
     /// </summary>
-    internal sealed class PlacedArchitecture(ArchitectureType type, int pixelX, int pixelY, int widthPx, int heightPx)
+    internal sealed class PlacedArchitecture(ArchitectureType type, int pixelX, int pixelY, int widthPx, int heightPx, bool flipX = false)
     {
         public readonly ArchitectureType Type = type;
         public readonly int PixelX = pixelX;
         public readonly int PixelY = pixelY;
         public readonly int WidthPx = widthPx;
         public readonly int HeightPx = heightPx;
+        public readonly bool FlipX = flipX;
 
-        /// <summary>查表获取该建筑指定方向、指定类型的端口在世界像素中的位置</summary>
+        /// <summary>查表获取该建筑指定方向、指定类型的端口在世界像素中的位置，自动考虑FlipX</summary>
         public Microsoft.Xna.Framework.Vector2 GetPortWorld(PortKind kind, PortSide side) {
-            var ports = ArchitecturePorts.Get(Type);
+            var ports = ArchitecturePorts.GetEffective(Type, WidthPx, FlipX);
             for (int i = 0; i < ports.Length; i++) {
                 if (ports[i].Kind == kind && ports[i].Side == side) {
                     return ArchitecturePorts.ToWorldPixel(ports[i], PixelX, PixelY);
