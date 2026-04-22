@@ -63,6 +63,7 @@ namespace CalamityOverhaul.Common
         public static Asset<Effect> VoidTimeShift { get; set; }
         public static Asset<Effect> GlitchHead { get; set; }
         public static Asset<Effect> ArchitectureWarp { get; set; }
+        public static Asset<Effect> VoidLaserCannon { get; set; }
         public override float Weight => 1.2f;
         public override void EndCaptureDraw(SpriteBatch spriteBatch, GraphicsDevice graphicsDevice, RenderTarget2D screenSwap) {
             DrawPrimitiveProjectile();

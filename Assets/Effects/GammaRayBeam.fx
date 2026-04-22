@@ -1,7 +1,7 @@
-sampler uImage0 : register(s0); //������
-sampler uImage1 : register(s1); //��������
-sampler uImage2 : register(s2); //�ǹ�����
-sampler uImage3 : register(s3); //��������
+sampler uImage0 : register(s0);
+sampler uImage1 : register(s1);
+sampler uImage2 : register(s2);
+sampler uImage3 : register(s3);
 
 float3 uColor;
 float3 uSecondaryColor;
@@ -21,7 +21,6 @@ float uSaturation;
 float4 uSourceRect;
 float2 uZoom;
 
-//٤�������ض�����
 float uBeamWidth;
 float uBeamLength;
 float uPulseSpeed;
@@ -58,13 +57,11 @@ VertexShaderOutput VertexShaderFunction(VertexShaderInput input)
     return output;
 }
 
-//�򻯵���������
 float noise(float2 uv)
 {
     return frac(sin(dot(uv, float2(12.9898, 78.233))) * 43758.5453);
 }
 
-//ƽ������
 float smoothNoise(float2 uv)
 {
     float2 i = floor(uv);
@@ -79,7 +76,6 @@ float smoothNoise(float2 uv)
     return lerp(lerp(a, b, f.x), lerp(c, d, f.x), f.y);
 }
 
-//���β����˶�
 float fbm(float2 uv, int octaves)
 {
     float value = 0.0;

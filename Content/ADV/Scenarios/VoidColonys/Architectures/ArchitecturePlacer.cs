@@ -1,4 +1,5 @@
 using CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.GatlinTurrets;
+using CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.LaserCannons;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
@@ -52,6 +53,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures
         public static void BuildAll() {
             ArchitectureRegistry.Clear();
             GatlinTurretRegistry.Clear();
+            LaserCannonRegistry.Clear();
 
             var core = IslandRegistry.FindByTag("核心实验室");
             if (core == null) return;
@@ -93,8 +95,12 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures
                     PlaceGatlinOnBridgeFarEnd(energy, energyInnerPortIdx, side: -1);
                     int energyOuterLeft = FindPortIndex(energy, PortKind.Bridge, PortSide.Left);
                     if (energyOuterLeft >= 0) {
-                        AppendFlankTowardsLeft(energy, energyOuterLeft,
+                        var leftPost = AppendFlankTowardsLeft(energy, energyOuterLeft,
                             ArchitectureType.ObservationPostTelescope, surfacePx);
+                        if (leftPost != null) {
+                            //激光炮台悬浮在最外端观测哨更远处的高空，朝核心方向瞄准
+                            PlaceLaserCannonBeyond(leftPost, side: -1);
+                        }
                     }
                 }
             }
@@ -108,11 +114,41 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures
                     PlaceGatlinOnBridgeFarEnd(midlab, midInnerPortIdx, side: +1);
                     int midOuterRight = FindPortIndex(midlab, PortKind.Bridge, PortSide.Right);
                     if (midOuterRight >= 0) {
-                        AppendFlankTowardsRight(midlab, midOuterRight,
+                        var rightPost = AppendFlankTowardsRight(midlab, midOuterRight,
                             ArchitectureType.ObservationPostTelescope, surfacePx);
+                        if (rightPost != null) {
+                            PlaceLaserCannonBeyond(rightPost, side: +1);
+                        }
                     }
                 }
             }
+        }
+
+        //激光炮底座像素尺寸，与LaserCannonPedestal.png一致
+        private const int LaserCannonPedestalWidthPx = 870;
+        private const int LaserCannonPedestalHeightPx = 472;
+        //激光炮中心距邻居建筑外侧端口的水平距离，留出远景悬浮感
+        private const int LaserCannonOutwardPx = 900;
+        //激光炮悬浮在观测哨上方的垂直抬升距离，营造俯冲压迫视角
+        private const int LaserCannonFloatLiftPx = 720;
+
+        /// <summary>
+        /// 在最外端观测哨的外侧悬空处放置巨型激光炮
+        /// side=-1代表左侧，炮朝右瞄准核心；side=+1代表右侧，炮朝左瞄准核心
+        /// </summary>
+        private static void PlaceLaserCannonBeyond(PlacedBuilding outerPost, int side) {
+            //观测哨外侧端口：左侧观测哨的外端是Left，右侧观测哨的外端是Right
+            PortSide outerSide = side < 0 ? PortSide.Left : PortSide.Right;
+            int outerIdx = FindPortIndex(outerPost, PortKind.Bridge, outerSide);
+            if (outerIdx < 0) return;
+
+            Vector2 outerPortWorld = outerPost.GetPortWorld(outerIdx);
+            int pedestalCenterX = (int)outerPortWorld.X + side * LaserCannonOutwardPx;
+            int pedestalTopY = (int)outerPortWorld.Y - LaserCannonPedestalHeightPx - LaserCannonFloatLiftPx;
+            int pedestalLeftX = pedestalCenterX - LaserCannonPedestalWidthPx / 2;
+            //朝核心方向：左侧激光炮朝右(faceLeft=false)，右侧激光炮朝左(faceLeft=true)
+            bool faceLeft = side > 0;
+            LaserCannonRegistry.Add(pedestalLeftX, pedestalTopY, faceLeft);
         }
 
         //加特林炮台底座贴图尺寸，与源素材GatlinPedestal.png一致

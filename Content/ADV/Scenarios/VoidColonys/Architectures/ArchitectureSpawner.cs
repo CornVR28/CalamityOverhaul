@@ -1,4 +1,5 @@
 using CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.GatlinTurrets;
+using CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.LaserCannons;
 using InnoVault.Actors;
 using Microsoft.Xna.Framework;
 using System;
@@ -28,7 +29,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures
             if (spawned) return;
             if (ArchitectureRegistry.Entries.Count == 0
                 && ArchitectureRegistry.Connectors.Count == 0
-                && GatlinTurretRegistry.Entries.Count == 0) return;
+                && GatlinTurretRegistry.Entries.Count == 0
+                && LaserCannonRegistry.Entries.Count == 0) return;
 
             //先刷连接段（与建筑Actor同层AfterTiles），再刷建筑
             //同层内先生成的WhoAmI较小者更早绘制，因而桥/管位于建筑之后绘制不会遮挡主建筑
@@ -63,6 +65,17 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures
                 if (idx < 0 || idx >= ActorLoader.Actors.Length) continue;
                 if (ActorLoader.Actors[idx] is not GatlinTurretActor actor) continue;
                 actor.InitialFaceLeft = turret.InitialFaceLeft;
+                actor.OnSpawn();
+                actor.NetUpdate = true;
+            }
+
+            //巨型激光炮台：悬浮在两侧浮岛外缘上空
+            foreach (var cannon in LaserCannonRegistry.Entries) {
+                Vector2 position = new(cannon.PedestalPixelX, cannon.PedestalPixelY);
+                int idx = ActorLoader.NewActor<LaserCannonTurretActor>(position, Vector2.Zero);
+                if (idx < 0 || idx >= ActorLoader.Actors.Length) continue;
+                if (ActorLoader.Actors[idx] is not LaserCannonTurretActor actor) continue;
+                actor.InitialFaceLeft = cannon.InitialFaceLeft;
                 actor.OnSpawn();
                 actor.NetUpdate = true;
             }
