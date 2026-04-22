@@ -41,9 +41,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Signa
             int pickedIdx = -1;
             var actors = ActorLoader.Actors;
             for (int i = 0; i < actors.Length; i++) {
-                if (actors[i] is ArchitectureActor arch
-                    && arch.Active
-                    && arch.Type == ArchitectureType.SignalTower) {
+                if (actors[i] is SignalTowerActor tower && tower.Active) {
                     towerCount++;
                     //水库抽样：等概率随机挑一座
                     if (Main.rand.Next(towerCount) == 0) pickedIdx = i;
@@ -56,7 +54,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Signa
                 return;
             }
 
-            if (actors[pickedIdx] is not ArchitectureActor target) {
+            if (actors[pickedIdx] is not SignalTowerActor target) {
                 cooldown = CooldownMin;
                 return;
             }
@@ -68,7 +66,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Signa
             cooldown = Main.rand.Next(CooldownMin, CooldownMax + 1);
         }
 
-        private static void TrySpawnBolt(Vector2 strikePoint, ArchitectureActor tower) {
+        private static void TrySpawnBolt(Vector2 strikePoint, SignalTowerActor tower) {
             int w = SignalTowerLightningActor.BoltWidthPx;
             int h = SignalTowerLightningActor.BoltHeightPx;
             //画布底部中点锚在打击点，因此画布左上角在打击点的(-W/2, -H)处
@@ -85,14 +83,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Signa
             bolt.OnSpawn();
             bolt.NetUpdate = true;
 
-            //同步触发信号塔的过电滤镜，过电持续时间比闪电长以体现余韵
-            if (tower != null) {
-                int electrifyFrames = lifeFrames + 60;
-                tower.ElectrifyTimer = electrifyFrames;
-                tower.ElectrifyMax = electrifyFrames;
-                tower.ElectrifySeed = seedValue;
-                tower.NetUpdate = true;
-            }
+            //同步触发信号塔自身的过电滤镜，过电持续时间比闪电长以体现余韵
+            tower?.BeginElectrify(lifeFrames + 60, seedValue);
 
             //雷击音效
             SoundEngine.PlaySound(SoundID.Thunder, strikePoint);

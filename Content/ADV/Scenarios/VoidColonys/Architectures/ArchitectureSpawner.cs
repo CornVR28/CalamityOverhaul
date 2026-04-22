@@ -49,6 +49,16 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures
 
             foreach (var entry in ArchitectureRegistry.Entries) {
                 Vector2 position = new(entry.PixelX, entry.PixelY);
+                //信号塔是独立的复杂建筑，从通用ArchitectureActor管线中分叉出来
+                if (entry.Type == ArchitectureType.SignalTower) {
+                    int towerIdx = ActorLoader.NewActor<SignalTowers.SignalTowerActor>(position, Vector2.Zero);
+                    if (towerIdx < 0 || towerIdx >= ActorLoader.Actors.Length) continue;
+                    if (ActorLoader.Actors[towerIdx] is not SignalTowers.SignalTowerActor tower) continue;
+                    tower.OnSpawn();
+                    tower.NetUpdate = true;
+                    continue;
+                }
+
                 int idx = ActorLoader.NewActor<ArchitectureActor>(position, Vector2.Zero);
                 if (idx < 0 || idx >= ActorLoader.Actors.Length) continue;
                 if (ActorLoader.Actors[idx] is not ArchitectureActor actor) continue;

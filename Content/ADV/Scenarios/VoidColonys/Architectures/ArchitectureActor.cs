@@ -24,16 +24,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures
         [SyncVar]
         public bool FlipX;
 
-        /// <summary>被雷击后过电滤镜剩余帧数，服务端写入后同步到客户端</summary>
-        [SyncVar]
-        public int ElectrifyTimer;
-        /// <summary>本次过电总时长，供进度归一化使用</summary>
-        [SyncVar]
-        public int ElectrifyMax;
-        /// <summary>本次过电的随机种子，传给shader避免每次都一样</summary>
-        [SyncVar]
-        public float ElectrifySeed;
-
         /// <summary>是否已根据贴图尺寸完成初始化</summary>
         private bool initialized;
 
@@ -71,8 +61,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures
             }
             ArchitectureWarpDraw.TickVisibility(ref visibility);
             UpdateCollision();
-            //过电计时逐帧递减，服务端与客户端各自消耗以减少同步频率
-            if (ElectrifyTimer > 0) ElectrifyTimer--;
             Velocity = Vector2.Zero;
         }
 
@@ -119,36 +107,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures
             Vector2 drawPos = Position - Main.screenPosition;
 
             ArchitectureWarpDraw.DrawWithShader(spriteBatch, tex, drawPos, visibility, warp, FlipX);
-
-            //过电滤镜：在建筑之上再以Additive混合跑一遍过电shader，值随计时器衰减
-            if (ElectrifyTimer > 0 && ElectrifyMax > 0) {
-                DrawElectrifiedOverlay(spriteBatch, tex, drawPos);
-            }
             return false;
-        }
-
-        /// <summary>
-        /// 在建筑贴图上额外绘制一层过电辉光，Additive混合确保不抹黑背景
-        /// </summary>
-        private void DrawElectrifiedOverlay(SpriteBatch spriteBatch, Texture2D tex, Vector2 drawPos) {
-            Effect shader = CalamityOverhaul.Common.EffectLoader.SignalTowerElectrified?.Value;
-            if (shader == null) return;
-
-            float progress = 1f - ElectrifyTimer / (float)ElectrifyMax;
-            shader.Parameters["uTime"]?.SetValue(Main.GlobalTimeWrappedHourly);
-            shader.Parameters["electrifyProgress"]?.SetValue(MathHelper.Clamp(progress, 0f, 1f));
-            shader.Parameters["seed"]?.SetValue(ElectrifySeed);
-            shader.Parameters["texelSize"]?.SetValue(new Vector2(1f / tex.Width, 1f / tex.Height));
-            shader.Parameters["intensity"]?.SetValue(MathHelper.Clamp(visibility, 0f, 1f));
-
-            SpriteEffects fx = FlipX ? SpriteEffects.FlipHorizontally : SpriteEffects.None;
-            spriteBatch.End();
-            spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive, Main.DefaultSamplerState,
-                DepthStencilState.None, Main.Rasterizer, shader, Main.GameViewMatrix.TransformationMatrix);
-            spriteBatch.Draw(tex, drawPos, null, Color.White, 0f, Vector2.Zero, 1f, fx, 0f);
-            spriteBatch.End();
-            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState,
-                DepthStencilState.None, Main.Rasterizer, null, Main.GameViewMatrix.TransformationMatrix);
         }
 
         /// <summary>
