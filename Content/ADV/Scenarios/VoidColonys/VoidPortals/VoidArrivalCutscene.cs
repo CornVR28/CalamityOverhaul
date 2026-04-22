@@ -146,6 +146,17 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.VoidPortals
             cs.StartArrival();
         }
 
+        /// <summary>开发者用：清除"已看过抵达演出"旗标，使下次进入虚空聚落重新触发</summary>
+        public static void ResetSeenFlag(Player player = null) {
+            player ??= Main.LocalPlayer;
+            if (player == null || !player.active) return;
+            if (!player.TryGetADVSave(out var save)) return;
+            save.Get<VoidColonyADVData>().HasSeenArrival = false;
+            if (player.TryGetModPlayer(out VoidArrivalCutscene cs)) {
+                cs.firstEntryWaitTimer = 0;
+            }
+        }
+
         /// <summary>检查并首次触发：由虚空聚落进入时调用</summary>
         internal static void TryTriggerFirstEntry(Player player) {
             if (player == null || !player.active) return;
@@ -161,8 +172,11 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.VoidPortals
             cs.firstEntryWaitTimer++;
             if (cs.firstEntryWaitTimer < FirstEntryWaitFrames) return;
 
-            data.HasSeenArrival = true;
+            //演出启动成功后再置位旗标，避免中途失败导致永久屏蔽
             cs.StartArrival();
+            if (cs.CurrentStage != Stage.Idle) {
+                data.HasSeenArrival = true;
+            }
         }
 
         /// <summary>强制中断并复位</summary>
