@@ -37,7 +37,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Gatli
         private static float GunMuzzleLocalY => 50f;
 
         //触发玩家瞄准的距离，贴近用户指定的200像素
-        private static float TriggerRangeSq => 600f * 600f;
+        private static float TriggerRangeSq => 1200f * 800f;
         //锁定后的持续射程，离开触发距离仍会追射一段距离再松手
         private static float DisengageRangeSq => 1060f * 1060f;
 

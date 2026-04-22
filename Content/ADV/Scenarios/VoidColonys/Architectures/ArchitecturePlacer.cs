@@ -37,8 +37,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures
     {
         private const int PixelsPerTile = 16;
         //相邻建筑之间的水平间距px
-        //桥段贴图宽552px，设为1700约等于三段拼接，保证渡桥演出的穿越感
-        private const int InterBuildingGapPx = 1700;
+        //桥段贴图宽552px，设为2800约等于五段拼接，拉开核心与附属建筑的跨距
+        private const int InterBuildingGapPx = 2800;
 
         //卫星岛标签→建筑类型
         private static readonly Dictionary<string, ArchitectureType> SatelliteBuildings = new() {
@@ -83,16 +83,14 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures
             int coreRightBridgeIdx = FindPortIndex(coreBuilding, PortKind.Bridge, PortSide.Right);
 
             //向左依次挂接：能源站→观测哨
-            var leftAnchorPort = coreLeftBridgeIdx >= 0
-                ? (PlacedBuilding)coreBuilding
-                : null;
-            int leftAnchorPortIndex = coreLeftBridgeIdx;
-            if (leftAnchorPort != null) {
+            if (coreLeftBridgeIdx >= 0) {
                 var energy = AppendFlankTowardsLeft(coreBuilding, coreLeftBridgeIdx,
                     ArchitectureType.EnergyControlStation, surfacePx);
                 if (energy != null) {
-                    //在核心左桥刚离开核心的一段位置落炮台，静止朝向外侧
-                    PlaceGatlinOnCoreBridge(coreBuilding, coreLeftBridgeIdx, side: -1);
+                    //炮台立在桥远离核心的一端（能源站朝核心那侧的端口前方一小段）
+                    //玩家从核心过来要先走完长桥才会进入触发圈，避免刚出生就被扫射
+                    int energyInnerPortIdx = FindPortIndex(energy, PortKind.Bridge, PortSide.Right);
+                    PlaceGatlinOnBridgeFarEnd(energy, energyInnerPortIdx, side: -1);
                     int energyOuterLeft = FindPortIndex(energy, PortKind.Bridge, PortSide.Left);
                     if (energyOuterLeft >= 0) {
                         AppendFlankTowardsLeft(energy, energyOuterLeft,
@@ -106,8 +104,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures
                 var midlab = AppendFlankTowardsRight(coreBuilding, coreRightBridgeIdx,
                     ArchitectureType.MidSizeMaterialAnalysisLab, surfacePx);
                 if (midlab != null) {
-                    //在核心右桥刚离开核心的一段位置落炮台
-                    PlaceGatlinOnCoreBridge(coreBuilding, coreRightBridgeIdx, side: +1);
+                    int midInnerPortIdx = FindPortIndex(midlab, PortKind.Bridge, PortSide.Left);
+                    PlaceGatlinOnBridgeFarEnd(midlab, midInnerPortIdx, side: +1);
                     int midOuterRight = FindPortIndex(midlab, PortKind.Bridge, PortSide.Right);
                     if (midOuterRight >= 0) {
                         AppendFlankTowardsRight(midlab, midOuterRight,
@@ -120,23 +118,26 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures
         //加特林炮台底座贴图尺寸，与源素材GatlinPedestal.png一致
         private const int GatlinPedestalWidthPx = 354;
         private const int GatlinPedestalHeightPx = 166;
-        //底座中心离核心桥梁端口的水平距离，确保炮台清晰站在桥上且不遮挡核心外墙
+        //底座中心离邻居端口的水平距离，向桥中间内缩避免贴着邻居建筑墙体
         private const int GatlinBridgeInwardPx = 260;
 
         /// <summary>
-        /// 在核心的某一侧桥梁端口附近，落一座加特林炮台
-        /// side=-1表示左侧，炮台中心位于端口左方GatlinBridgeInwardPx处，且静止朝左
-        /// side=+1表示右侧，炮台中心位于端口右方GatlinBridgeInwardPx处，且静止朝右
+        /// 在桥远离核心的一端（邻居建筑一侧）放置炮台
+        /// side=-1表示邻居位于核心左方，炮台静止朝右（迎接从核心方向过来的玩家）
+        /// side=+1表示邻居位于核心右方，炮台静止朝左
         /// </summary>
-        private static void PlaceGatlinOnCoreBridge(PlacedBuilding coreBuilding, int corePortIdx, int side) {
-            if (corePortIdx < 0) return;
-            Vector2 portWorld = coreBuilding.GetPortWorld(corePortIdx);
-            int pedestalCenterX = (int)portWorld.X + side * GatlinBridgeInwardPx;
+        private static void PlaceGatlinOnBridgeFarEnd(PlacedBuilding neighbor, int neighborInnerPortIdx, int side) {
+            if (neighborInnerPortIdx < 0) return;
+            Vector2 portWorld = neighbor.GetPortWorld(neighborInnerPortIdx);
+            //从邻居的内侧端口朝核心方向内缩一段，使炮台清晰落在桥面而不是嵌进邻居墙体
+            int inward = -side * GatlinBridgeInwardPx;
+            int pedestalCenterX = (int)portWorld.X + inward;
             //桥梁的可行走表面位于端口Y向下1格，与ArchitectureConnectorActor里的tileY=StartY/16+1保持一致
             int bridgeDeckY = (((int)portWorld.Y / PixelsPerTile) + 1) * PixelsPerTile;
             int pedestalLeftX = pedestalCenterX - GatlinPedestalWidthPx / 2;
             int pedestalTopY = bridgeDeckY - GatlinPedestalHeightPx;
-            bool faceLeft = side < 0;
+            //朝向核心方向即玩家来向：side=-1(邻居在左，核心在右)朝右；side=+1反之
+            bool faceLeft = side > 0;
             GatlinTurretRegistry.Add(pedestalLeftX, pedestalTopY, faceLeft);
         }
 
