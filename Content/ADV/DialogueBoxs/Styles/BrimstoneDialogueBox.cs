@@ -1,4 +1,5 @@
-﻿using CalamityOverhaul.Content.ADV.UIEffect;
+﻿using CalamityOverhaul.Common;
+using CalamityOverhaul.Content.ADV.UIEffect;
 using InnoVault.UIHandles;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -17,6 +18,7 @@ namespace CalamityOverhaul.Content.ADV.DialogueBoxs.Styles
 
         //风格参数
         private const float FixedWidth = 540f;
+        private const int ShaderEdgePad = 16;
         protected override float PanelWidth => FixedWidth;
 
         //火焰动画参数
@@ -24,6 +26,8 @@ namespace CalamityOverhaul.Content.ADV.DialogueBoxs.Styles
         private float emberGlowTimer = 0f;
         private float heatWavePhase = 0f;
         private float infernoPulse = 0f;
+        //着色器专用单调递增时间,避免循环回绕导致噪声跳变
+        private float shaderTime = 0f;
 
         //粒子系统
         private readonly List<EmberPRT> embers = new();
@@ -127,10 +131,13 @@ namespace CalamityOverhaul.Content.ADV.DialogueBoxs.Styles
             emberGlowTimer += 0.038f;
             heatWavePhase += 0.025f;
             infernoPulse += 0.012f;
+            shaderTime += 0.016f;
             if (flameTimer > MathHelper.TwoPi) flameTimer -= MathHelper.TwoPi;
             if (emberGlowTimer > MathHelper.TwoPi) emberGlowTimer -= MathHelper.TwoPi;
             if (heatWavePhase > MathHelper.TwoPi) heatWavePhase -= MathHelper.TwoPi;
             if (infernoPulse > MathHelper.TwoPi) infernoPulse -= MathHelper.TwoPi;
+            //shader时间在远大于噪声循环周期的数值后再回绕
+            if (shaderTime > 10000f) shaderTime -= 10000f;
 
             emberSpawnTimer++;
             if (Active && emberSpawnTimer >= 8 && embers.Count < 35) {
@@ -179,9 +186,73 @@ namespace CalamityOverhaul.Content.ADV.DialogueBoxs.Styles
         protected override void DrawStyle(SpriteBatch spriteBatch, Rectangle panelRect, float alpha, float contentAlpha, float easedProgress) {
             Texture2D vaule = VaultAsset.placeholder2.Value;
 
+            //阴影:漂浮于屏幕的厚重感
             Rectangle shadow = panelRect;
             shadow.Offset(7, 9);
             spriteBatch.Draw(vaule, shadow, new Rectangle(0, 0, 1, 1), new Color(20, 0, 0) * (alpha * 0.65f));
+
+            //专属着色器面板,降级时回退简化底色
+            if (EffectLoader.BrimstoneDialogueBox?.Value != null) {
+                DrawShaderPanel(spriteBatch, panelRect, alpha);
+            }
+            else {
+                DrawFallbackPanel(spriteBatch, panelRect, alpha);
+            }
+
+            //CPU粒子叠层,增强近景物理感
+            foreach (var ash in ashes) {
+                ash.Draw(spriteBatch, alpha * 0.7f);
+            }
+            foreach (var wisp in flameWisps) {
+                wisp.Draw(spriteBatch, alpha * 0.8f);
+            }
+            foreach (var ember in embers) {
+                ember.Draw(spriteBatch, alpha * 0.95f);
+            }
+
+            //定时对话进度指示器
+            DrawTimedProgressIndicator(spriteBatch, panelRect, alpha);
+
+            if (current == null || contentAlpha <= 0.01f) {
+                return;
+            }
+
+            DrawPortraitAndText(spriteBatch, panelRect, alpha, contentAlpha);
+        }
+
+        #region 样式工具函数
+
+        //使用BrimstoneDialogueBox着色器渲染面板底图
+        private void DrawShaderPanel(SpriteBatch sb, Rectangle rect, float alpha) {
+            Effect effect = EffectLoader.BrimstoneDialogueBox.Value;
+            Rectangle extRect = rect;
+            extRect.Inflate(ShaderEdgePad, ShaderEdgePad);
+
+            //infernoPulse转换为0~1脉动,驱动火焰整体节拍
+            float pulse01 = (float)Math.Sin(infernoPulse * 1.8f) * 0.5f + 0.5f;
+
+            effect.Parameters["uTime"]?.SetValue(shaderTime);
+            effect.Parameters["uAlpha"]?.SetValue(alpha * 0.97f);
+            effect.Parameters["uResolution"]?.SetValue(new Vector2(extRect.Width, extRect.Height));
+            effect.Parameters["uEdgePad"]?.SetValue((float)ShaderEdgePad);
+            effect.Parameters["uInfernoPulse"]?.SetValue(pulse01);
+
+            sb.End();
+            sb.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend,
+                SamplerState.AnisotropicClamp, DepthStencilState.None,
+                RasterizerState.CullNone, effect, Main.UIScaleMatrix);
+
+            sb.Draw(VaultAsset.placeholder2.Value, extRect, Color.White);
+
+            sb.End();
+            sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                SamplerState.PointClamp, DepthStencilState.None,
+                RasterizerState.CullNone, null, Main.UIScaleMatrix);
+        }
+
+        //降级背景:无shader环境沿用原CPU混合底色
+        private void DrawFallbackPanel(SpriteBatch sb, Rectangle panelRect, float alpha) {
+            Texture2D vaule = VaultAsset.placeholder2.Value;
 
             int segments = 35;
             for (int i = 0; i < segments; i++) {
@@ -202,105 +273,15 @@ namespace CalamityOverhaul.Content.ADV.DialogueBoxs.Styles
                 Color finalColor = Color.Lerp(baseColor, brimstoneHot, t * 0.5f * (0.3f + breathing * 0.7f));
                 finalColor *= alpha * 0.92f;
 
-                spriteBatch.Draw(vaule, r, new Rectangle(0, 0, 1, 1), finalColor);
+                sb.Draw(vaule, r, new Rectangle(0, 0, 1, 1), finalColor);
             }
-
-            float pulseBrightness = (float)Math.Sin(infernoPulse * 1.8f) * 0.5f + 0.5f;
-            Color pulseOverlay = new Color(120, 25, 15) * (alpha * 0.25f * pulseBrightness);
-            spriteBatch.Draw(vaule, panelRect, new Rectangle(0, 0, 1, 1), pulseOverlay);
-
-            DrawHeatWaveOverlay(spriteBatch, panelRect, alpha * 0.85f);
 
             float glowPulse = (float)Math.Sin(emberGlowTimer * 1.5f) * 0.5f + 0.5f;
-            Rectangle inner = panelRect;
-            inner.Inflate(-7, -7);
-            spriteBatch.Draw(vaule, inner, new Rectangle(0, 0, 1, 1), new Color(180, 60, 30) * (alpha * 0.12f * (0.5f + glowPulse * 0.5f)));
-
-            DrawBrimstoneFrame(spriteBatch, panelRect, alpha, glowPulse);
-
-            foreach (var ash in ashes) {
-                ash.Draw(spriteBatch, alpha * 0.7f);
-            }
-            foreach (var wisp in flameWisps) {
-                wisp.Draw(spriteBatch, alpha * 0.8f);
-            }
-            foreach (var ember in embers) {
-                ember.Draw(spriteBatch, alpha * 0.95f);
-            }
-
-            //绘制定时对话进度指示器(在对话框之后绘制，作为叠加层)
-            DrawTimedProgressIndicator(spriteBatch, panelRect, alpha);
-
-            if (current == null || contentAlpha <= 0.01f) {
-                return;
-            }
-
-            DrawPortraitAndText(spriteBatch, panelRect, alpha, contentAlpha);
-        }
-
-        #region 样式工具函数
-        private void DrawHeatWaveOverlay(SpriteBatch sb, Rectangle rect, float alpha) {
-            Texture2D vaule = VaultAsset.placeholder2.Value;
-            int waveCount = 8;
-            for (int i = 0; i < waveCount; i++) {
-                float t = i / (float)waveCount;
-                float baseY = rect.Y + 25 + t * (rect.Height - 50);
-                float amplitude = 5f + (float)Math.Sin((heatWavePhase + t * 1.2f) * 2.5f) * 3.5f;
-                float thickness = 1.8f;
-
-                int segments = 50;
-                Vector2 prevPoint = Vector2.Zero;
-                for (int s = 0; s <= segments; s++) {
-                    float progress = s / (float)segments;
-                    float waveY = baseY + (float)Math.Sin(heatWavePhase * 3f + progress * MathHelper.TwoPi * 1.5f + t * 2f) * amplitude;
-                    Vector2 point = new(rect.X + 12 + progress * (rect.Width - 24), waveY);
-
-                    if (s > 0) {
-                        Vector2 diff = point - prevPoint;
-                        float len = diff.Length();
-                        if (len > 0.01f) {
-                            float rot = diff.ToRotation();
-                            Color waveColor = new Color(180, 60, 30) * (alpha * 0.08f);
-                            sb.Draw(vaule, prevPoint, new Rectangle(0, 0, 1, 1), waveColor, rot, Vector2.Zero, new Vector2(len, thickness), SpriteEffects.None, 0f);
-                        }
-                    }
-                    prevPoint = point;
-                }
-            }
-        }
-
-        private static void DrawBrimstoneFrame(SpriteBatch sb, Rectangle rect, float alpha, float pulse) {
-            Texture2D vaule = VaultAsset.placeholder2.Value;
-
-            Color outerEdge = Color.Lerp(new Color(180, 60, 30), new Color(255, 140, 70), pulse) * (alpha * 0.85f);
-            sb.Draw(vaule, new Rectangle(rect.X, rect.Y, rect.Width, 3), new Rectangle(0, 0, 1, 1), outerEdge);
-            sb.Draw(vaule, new Rectangle(rect.X, rect.Bottom - 3, rect.Width, 3), new Rectangle(0, 0, 1, 1), outerEdge * 0.75f);
-            sb.Draw(vaule, new Rectangle(rect.X, rect.Y, 3, rect.Height), new Rectangle(0, 0, 1, 1), outerEdge * 0.9f);
-            sb.Draw(vaule, new Rectangle(rect.Right - 3, rect.Y, 3, rect.Height), new Rectangle(0, 0, 1, 1), outerEdge * 0.9f);
-
-            Rectangle inner = rect;
-            inner.Inflate(-6, -6);
-            Color innerGlow = new Color(220, 100, 50) * (alpha * 0.22f * pulse);
-            sb.Draw(vaule, new Rectangle(inner.X, inner.Y, inner.Width, 1), new Rectangle(0, 0, 1, 1), innerGlow);
-            sb.Draw(vaule, new Rectangle(inner.X, inner.Bottom - 1, inner.Width, 1), new Rectangle(0, 0, 1, 1), innerGlow * 0.7f);
-            sb.Draw(vaule, new Rectangle(inner.X, inner.Y, 1, inner.Height), new Rectangle(0, 0, 1, 1), innerGlow * 0.85f);
-            sb.Draw(vaule, new Rectangle(inner.Right - 1, inner.Y, 1, inner.Height), new Rectangle(0, 0, 1, 1), innerGlow * 0.85f);
-
-            DrawFlameMark(sb, new Vector2(rect.X + 12, rect.Y + 12), alpha * 0.95f);
-            DrawFlameMark(sb, new Vector2(rect.Right - 12, rect.Y + 12), alpha * 0.95f);
-            DrawFlameMark(sb, new Vector2(rect.X + 12, rect.Bottom - 12), alpha * 0.65f);
-            DrawFlameMark(sb, new Vector2(rect.Right - 12, rect.Bottom - 12), alpha * 0.65f);
-        }
-
-        private static void DrawFlameMark(SpriteBatch sb, Vector2 pos, float alpha) {
-            Texture2D vaule = VaultAsset.placeholder2.Value;
-            float size = 6f;
-            Color flameColor = new Color(255, 150, 70) * alpha;
-
-            sb.Draw(vaule, pos, new Rectangle(0, 0, 1, 1), flameColor, 0f, new Vector2(0.5f, 0.5f), new Vector2(size * 1.2f, size * 0.3f), SpriteEffects.None, 0f);
-            sb.Draw(vaule, pos, new Rectangle(0, 0, 1, 1), flameColor * 0.85f, MathHelper.PiOver2, new Vector2(0.5f, 0.5f), new Vector2(size * 1.2f, size * 0.3f), SpriteEffects.None, 0f);
-            sb.Draw(vaule, pos, new Rectangle(0, 0, 1, 1), flameColor * 0.7f, MathHelper.PiOver4, new Vector2(0.5f, 0.5f), new Vector2(size * 0.9f, size * 0.25f), SpriteEffects.None, 0f);
-            sb.Draw(vaule, pos, new Rectangle(0, 0, 1, 1), flameColor * 0.7f, -MathHelper.PiOver4, new Vector2(0.5f, 0.5f), new Vector2(size * 0.9f, size * 0.25f), SpriteEffects.None, 0f);
+            Color outerEdge = Color.Lerp(new Color(180, 60, 30), new Color(255, 140, 70), glowPulse) * (alpha * 0.85f);
+            sb.Draw(vaule, new Rectangle(panelRect.X, panelRect.Y, panelRect.Width, 3), new Rectangle(0, 0, 1, 1), outerEdge);
+            sb.Draw(vaule, new Rectangle(panelRect.X, panelRect.Bottom - 3, panelRect.Width, 3), new Rectangle(0, 0, 1, 1), outerEdge * 0.75f);
+            sb.Draw(vaule, new Rectangle(panelRect.X, panelRect.Y, 3, panelRect.Height), new Rectangle(0, 0, 1, 1), outerEdge * 0.9f);
+            sb.Draw(vaule, new Rectangle(panelRect.Right - 3, panelRect.Y, 3, panelRect.Height), new Rectangle(0, 0, 1, 1), outerEdge * 0.9f);
         }
 
         private static void DrawFlameGradientLine(SpriteBatch spriteBatch, Vector2 start, Vector2 end, Color startColor, Color endColor, float thickness) {

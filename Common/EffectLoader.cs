@@ -73,6 +73,7 @@ namespace CalamityOverhaul.Common
         public static Asset<Effect> BreachMatrixAxisHighlight { get; set; }
         public static Asset<Effect> GatlinTracer { get; set; }
         public static Asset<Effect> GatlinImpactBurst { get; set; }
+        public static Asset<Effect> BrimstoneDialogueBox { get; set; }
         public override float Weight => 1.2f;
         public override void EndCaptureDraw(SpriteBatch spriteBatch, GraphicsDevice graphicsDevice, RenderTarget2D screenSwap) {
             DrawPrimitiveProjectile();
