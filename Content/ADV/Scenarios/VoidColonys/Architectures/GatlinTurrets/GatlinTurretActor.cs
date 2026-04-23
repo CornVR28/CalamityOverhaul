@@ -359,9 +359,12 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Gatli
                 Vector2 velocity = forward * BulletSpeed;
                 //轻微散布，避免连发子弹完全重合
                 velocity = velocity.RotatedByRandom(0.02f);
+                velocity *= Main.rand.NextFloat(0.9f, 1f);
 
-                muzzle += VaultUtils.RandVr(32);
-                muzzle -= velocity.UnitVector() * 16;
+                muzzle += VaultUtils.RandVr(22);
+                if (forward.X < 0) {
+                    muzzle.Y -= 16;
+                }
 
                 int proj = Projectile.NewProjectile(src, muzzle, velocity,
                 ModContent.ProjectileType<GatlinBullet>(),

@@ -43,10 +43,10 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Laser
         public static float GunPivotLocalX => 180f;
         /// <summary>炮身贴图上旋转枢轴的Y像素（炮身中线）</summary>
         public static float GunPivotLocalY => 124f;
-        /// <summary>炮身贴图上枪口的X像素（炮管末端）</summary>
-        public static float GunMuzzleLocalX => 200f;
+        /// <summary>炮身贴图上枪口的X像素（炮管末端，距枢轴前方460像素）</summary>
+        public static float GunMuzzleLocalX => 660f;
         /// <summary>炮身贴图上枪口的Y像素（对准炮身中线）</summary>
-        public static float GunMuzzleLocalY => 120f;
+        public static float GunMuzzleLocalY => 116f;
 
         //锁定相关
         /// <summary>触发锁定距离，超过此距离不会主动挑衅玩家</summary>
