@@ -1,16 +1,17 @@
 // ============================================================================
 // WitchBrimstoneDomain.fx — 硫火女巫留影鬼域
-// 主题：被焚毁经文的灰烬回响，吊挂着一只未合拢的凝视之眼
-// 视觉组成：
-//   A 深渊暗炉底色，带缓慢翻涌的岩浆暗流
-//   B 核心凝视瞳孔（椭圆长瞳缝，带冷硫磺火辉光）
-//   C 从中心辐射而出的破碎裂纹（像烧裂的玻璃，硫火光从缝隙渗出）
-//   D 悬浮的焚毁经文残片（在中圈漂浮，点状燃烧）
-//   E 垂直上升的幽火细柱（像残魂）
-//   F 四向烙印封印（十字刻在最外层的焦灰符印）
-//   G 向上飘散的灰烬余烬
-//   H 外缘硫磺烟雾消散
-// 单DrawCall一次性绘制所有层
+// 沿用硫磺火领域的分层语言，但以一位残存女巫的个人签印替代规律冲击波
+// 组成：
+//   A 硫火等离子底色（warped湍流火焰）
+//   B 同心魔法阵环 + 符文刻蚀
+//   C 多层星形几何（外层多边形）
+//   D 可辨识符文光环带
+//   E 逆五芒星女巫签印（缓慢旋转，取代原darkPulseWave的节律冲击）
+//   F 硫火余烬粒子上升
+//   G 核心凝视漩涡 + 竖瞳
+//   H 环间电弧闪光
+//   I 外层暗能量涌动
+// 单DrawCall输出
 // ============================================================================
 
 sampler uImage0 : register(s0);
@@ -27,14 +28,15 @@ sampler noiseSamp = sampler_state
 };
 
 float uTime;
-float fadeAlpha;        //整体透明度0到1
-float expandProgress;   //鬼域展开进度0到1
-float dissolveProgress; //剥落消散进度0到1，1时鬼域即将完全熄灭
-float pulseIntensity;   //核心瞳孔呼吸强度
-float3 coreColor;       //核心硫火亮橙
-float3 midColor;        //中层暗红
-float3 edgeColor;       //边缘焦紫黑
-float3 voidColor;       //虚空底色
+float fadeAlpha;
+float expandProgress;
+float dissolveProgress;
+float pulseIntensity;
+
+float3 coreColor;
+float3 midColor;
+float3 edgeColor;
+float3 voidColor;
 
 #define PI 3.14159265
 #define TAU 6.28318530
@@ -67,262 +69,238 @@ float valueNoise(float2 p)
     return lerp(lerp(a, b, f.x), lerp(c, d, f.x), f.y);
 }
 
-float fbm(float2 p)
+// ---- A 硫火等离子底色 ----
+float3 brimstonePlasma(float2 centered, float dist, float angle, float time)
 {
-    float v = 0.0;
-    float a = 0.5;
-    for (int i = 0; i < 4; i++)
-    {
-        v += a * valueNoise(p);
-        p = p * 2.13 + float2(1.7, 9.2);
-        a *= 0.5;
-    }
-    return v;
+    float normAngle = (angle + PI) / TAU;
+
+    float2 fireUV1 = float2(normAngle * 3.0 + time * 0.35, dist * 2.5 - time * 0.2);
+    float2 warp1 = tex2D(noiseSamp, frac(fireUV1)).rg * 0.4;
+    float fire1 = tex2D(noiseSamp, frac(float2(
+        normAngle * 5.0 + warp1.x + time * 0.25,
+        dist * 3.0 + warp1.y - time * 0.18
+    ))).r;
+
+    float2 fireUV2 = float2(normAngle * 7.0 - time * 0.28, dist * 4.0 + time * 0.15);
+    float2 warp2 = tex2D(noiseSamp, frac(fireUV2 + 0.37)).gb * 0.35;
+    float fire2 = tex2D(noiseSamp, frac(float2(
+        normAngle * 4.0 - warp2.x - time * 0.2,
+        dist * 2.0 + warp2.y + time * 0.22
+    ))).g;
+
+    float2 magmaUV = float2(centered.x * 0.8 + time * 0.06, centered.y * 0.8 - time * 0.04);
+    float magma = tex2D(noiseSamp, frac(magmaUV)).r;
+    magma = smoothstep(0.3, 0.7, magma);
+
+    float fireMix = max(fire1 * 0.7, fire2 * 0.6);
+    fireMix = pow(abs(fireMix), 1.5) * 1.8;
+
+    float centerIntensity = smoothstep(0.9, 0.0, dist);
+    fireMix *= 0.3 + centerIntensity * 0.7;
+
+    float3 fireColor = lerp(edgeColor, coreColor, fireMix);
+    fireColor = lerp(fireColor, midColor, magma * 0.4);
+    fireColor *= 0.7;
+
+    return fireColor * fireMix;
 }
 
-//二维旋转
-float2 rot2(float2 p, float a)
+// ---- B 魔法阵环 ----
+float magicCircleRing(float dist, float angle, float ringRadius, float time,
+    float rotSpeed, float runeCount, float runeSize)
 {
-    float s = sin(a);
-    float c = cos(a);
-    return float2(c * p.x - s * p.y, s * p.x + c * p.y);
+    float normAngle = (angle + PI) / TAU;
+
+    float ringDist = abs(dist - ringRadius);
+    float ringLine = 1.0 - smoothstep(0.0, 0.008, ringDist);
+    float glow = exp(-ringDist * ringDist * 3000.0);
+
+    float runeAngle = frac(normAngle * runeCount + time * rotSpeed);
+    float runeSlot = frac(runeAngle);
+
+    float runePattern = 0.0;
+    float2 runeUV = float2((runeSlot - 0.5) * 2.0, (dist - ringRadius) / runeSize);
+    float diamond = abs(runeUV.x) + abs(runeUV.y);
+    runePattern += (1.0 - smoothstep(0.5, 0.55, diamond)) * step(diamond, 0.8);
+
+    float innerLine = (abs(runeUV.x) < 0.02 || abs(runeUV.y) < 0.02) ? 0.5 : 0.0;
+    runePattern += innerLine * step(diamond, 0.5);
+
+    float runePulse = 0.7 + 0.3 * sin(time * 3.0 + floor(normAngle * runeCount) * 1.7);
+    runePattern *= runePulse;
+
+    float runeZone = 1.0 - smoothstep(0.0, runeSize, abs(dist - ringRadius));
+    runePattern *= runeZone;
+
+    return ringLine + glow * 0.6 + runePattern * 0.5;
 }
 
-//到直线段距离
-float segDist(float2 p, float2 a, float2 b)
-{
-    float2 pa = p - a;
-    float2 ba = b - a;
-    float h = saturate(dot(pa, ba) / dot(ba, ba));
-    return length(pa - ba * h);
-}
-
-// ---- A 暗炉底色 ----
-float3 abyssBase(float2 centered, float dist, float time)
-{
-    //岩浆缓流，方向近似切向 + 轻微径向
-    float2 flowUV = centered * 1.4 + float2(time * 0.05, -time * 0.07);
-    float magma = fbm(flowUV);
-    magma = smoothstep(0.35, 0.75, magma);
-
-    //中心越黑、外缘渐进到焦色
-    float depth = smoothstep(0.0, 0.9, dist);
-    float3 base = lerp(voidColor * 0.35, edgeColor * 0.45, depth);
-    base = lerp(base, midColor * 0.55, magma * 0.45 * (1.0 - depth * 0.5));
-    return base;
-}
-
-// ---- B 核心凝视瞳孔 ----
-//椭圆竖缝瞳孔，带呼吸脉动
-float witchEye(float2 centered, float time, float pulse, out float iris)
-{
-    //眼球整体大小受expandProgress缩放，这里默认单位参考0.18
-    float2 p = centered;
-    //横向拉扁，形成眼球
-    float2 eyeball = float2(p.x / 1.2, p.y);
-    float eyeR = length(eyeball);
-    float ballMask = 1.0 - smoothstep(0.13, 0.16, eyeR);
-
-    //呼吸：瞳孔宽度随时间变化
-    float breath = 0.6 + 0.4 * sin(time * 1.3) * pulse;
-    float2 pup = float2(p.x / (0.035 + breath * 0.02), p.y / 0.12);
-    float pupR = length(pup);
-    iris = 1.0 - smoothstep(0.9, 1.0, pupR);
-
-    //瞳孔内侧的纵向光芒
-    float slit = exp(-pow(p.x / 0.01, 2.0)) * exp(-pow(p.y / 0.14, 2.0));
-
-    //虹膜高亮
-    float halo = (1.0 - smoothstep(0.07, 0.14, eyeR)) * ballMask;
-    halo *= 0.4 + 0.6 * sin(time * 2.0 + eyeR * 40.0) * 0.3 + 0.7;
-
-    //合成RGB：深黑眼球 + 硫火虹膜 + 核心亮斑
-    float3 col = voidColor * ballMask * 1.2;
-    col += midColor * halo * 0.6;
-    col += coreColor * iris * 1.4;
-    col += float3(1.0, 0.9, 0.55) * slit * 1.6;
-    return col;
-}
-
-// ---- C 辐射裂纹 ----
-//以中心为原点的放射状不规则裂纹，内部透出硫火
-float radialCracks(float2 centered, float dist, float angle, float time)
-{
-    //每条裂纹是一条从某半径开始、角度近似固定、末端分叉的折线
-    //这里用简化方式：对角度进行量化取样，形成若干主轴
-    float a = angle;
-    float ringFade = smoothstep(0.12, 0.2, dist) * (1.0 - smoothstep(0.55, 0.78, dist));
-    if (ringFade <= 0.001) return 0.0;
-
-    //主裂纹：12道
-    float crack = 0.0;
-    for (int i = 0; i < 12; i++)
-    {
-        float id = (float)i;
-        //主角度 + 微小摇晃
-        float baseAng = id * (TAU / 12.0) + 0.13;
-        //给每条裂纹一个偏心扭动
-        float jitter = sin(dist * 12.0 + id * 2.3 + time * 0.6) * 0.08;
-        float diff = a - (baseAng + jitter);
-        //角度折叠到[-PI,PI]
-        diff = diff - TAU * floor((diff + PI) / TAU);
-        //每条裂纹的可见半径范围
-        float life = 0.5 + 0.5 * sin(time * 0.4 + id * 1.7);
-        float rStart = 0.1 + hash11(id * 3.17) * 0.04;
-        float rEnd = 0.55 + 0.1 * life;
-        float rMask = smoothstep(rStart, rStart + 0.03, dist) *
-                      (1.0 - smoothstep(rEnd - 0.08, rEnd, dist));
-        //裂纹宽度随半径收窄
-        float width = 0.004 + 0.01 * (1.0 - saturate((dist - rStart) / max(rEnd - rStart, 0.01)));
-        float streak = exp(-(diff * diff) / (width * width)) * rMask;
-        crack = max(crack, streak);
-    }
-
-    //在裂纹上叠加闪烁
-    float flick = 0.65 + 0.35 * sin(time * 4.0 + dist * 30.0);
-    return crack * ringFade * flick;
-}
-
-// ---- D 焚毁经文残片 ----
-//中圈漂浮的小型燃烧方块，代表从经卷上飞落的残片
-float burningScriptures(float2 centered, float time)
-{
-    float total = 0.0;
-    //12片残片
-    for (int i = 0; i < 12; i++)
-    {
-        float id = (float)i;
-        float h1 = hash11(id * 1.93);
-        float h2 = hash11(id * 4.71);
-        float h3 = hash11(id * 7.19);
-
-        //角度围绕圆周分布，附加缓慢旋转
-        float ang = id * (TAU / 12.0) + time * (0.05 + h1 * 0.08) * (h2 > 0.5 ? 1.0 : -1.0);
-        float r = 0.33 + h3 * 0.08 + sin(time * 0.6 + id * 1.3) * 0.015;
-
-        //残片所处位置
-        float2 pos = float2(cos(ang), sin(ang)) * r;
-        //残片随身携带的局部坐标系，带自旋
-        float spin = time * (0.8 + h1 * 1.4) + id * 0.7;
-        float2 local = rot2(centered - pos, spin);
-        //拉长成小纸片
-        float2 rect = local / float2(0.018, 0.012);
-        //矩形SDF近似
-        float2 q = abs(rect) - 1.0;
-        float d = length(max(q, 0.0)) + min(max(q.x, q.y), 0.0);
-        float paper = 1.0 - smoothstep(0.0, 0.35, d);
-
-        //残片中央的燃烧核心
-        float burn = exp(-dot(local, local) * 9000.0);
-
-        //生命周期：残片会周期性燃烧殆尽再点燃
-        float life = frac(time * (0.18 + h2 * 0.12) + h3);
-        float alive = sin(life * PI);
-
-        total += (paper * 0.5 + burn * 1.2) * alive;
-    }
-    return saturate(total);
-}
-
-// ---- E 垂直幽火 ----
-//从下方升起的细长火柱，代表残魂
-float risingSoulFlames(float2 centered, float time)
-{
-    //将坐标映射到圆内：仅在垂直轴附近+随机分布
-    float total = 0.0;
-    for (int i = 0; i < 10; i++)
-    {
-        float id = (float)i;
-        float h1 = hash11(id * 2.17);
-        float h2 = hash11(id * 5.73);
-        //起始底部位置（圆下半部）
-        float xBase = (h1 - 0.5) * 1.4;
-        float life = frac(time * (0.25 + h2 * 0.2) + h1 * 3.1);
-        //y从底部升起
-        float yTop = 0.75 - life * 1.35;
-        //火柱局部坐标
-        float2 local = float2(centered.x - xBase - sin(life * PI * 2.0 + id) * 0.03,
-                              centered.y - yTop);
-        //高斯拉高：竖向窄，纵向长
-        float width = 0.012 * (1.0 - life * 0.5);
-        float height = 0.14;
-        float gauss = exp(-pow(local.x / width, 2.0)) *
-                      exp(-pow(max(local.y, 0.0) / height, 2.0));
-        //生命淡入淡出
-        gauss *= sin(life * PI);
-        //限制只在鬼域内
-        float r = length(float2(xBase, yTop));
-        gauss *= 1.0 - smoothstep(0.7, 0.85, r);
-        total += gauss;
-    }
-    return saturate(total);
-}
-
-// ---- F 四向烙印封印 ----
-//四个方位的十字焦印，象征钉在鬼域边缘的封印
-float brandSeals(float2 centered, float dist, float angle, float time)
+// ---- C 星形/多边形几何 ----
+float starGeometry(float2 centered, float dist, float angle, float radius,
+    int points, float rotation, float thickness)
 {
     float result = 0.0;
-    //在半径0.68的位置上布置4个封印
-    float sealR = 0.68;
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < points; i++)
     {
-        float id = (float)i;
-        //角度正对上下左右，并随时间缓慢顺时针偏移
-        float ang = id * (PI * 0.5) + time * 0.03;
-        float2 sealPos = float2(cos(ang), sin(ang)) * sealR;
-        //局部坐标需要跟随角度旋转，让十字朝向中心
-        float2 local = rot2(centered - sealPos, -ang - PI * 0.5);
-        //绘制十字：两条正交线段
-        float l1 = exp(-pow(local.x / 0.003, 2.0)) * step(abs(local.y), 0.04);
-        float l2 = exp(-pow(local.y / 0.003, 2.0)) * step(abs(local.x), 0.04);
-        //外圈小环
-        float ringR = length(local);
-        float ring = exp(-pow((ringR - 0.045) / 0.004, 2.0));
-        //脉动
-        float pulse = 0.6 + 0.4 * sin(time * 2.5 + id * 1.9);
-        result += (l1 + l2 + ring * 0.7) * pulse;
+        float a1 = rotation + TAU * (float)i / (float)points;
+        int skip = points == 5 ? 2 : (points == 6 ? 2 : 1);
+        float a2 = rotation + TAU * (float)((i + skip) % points) / (float)points;
+
+        float2 p1 = float2(cos(a1), sin(a1)) * radius;
+        float2 p2 = float2(cos(a2), sin(a2)) * radius;
+
+        float2 pa = centered - p1;
+        float2 ba = p2 - p1;
+        float h = saturate(dot(pa, ba) / dot(ba, ba));
+        float lineDist = length(pa - ba * h);
+
+        float lineGlow = exp(-lineDist * lineDist / (thickness * thickness * 0.5));
+        float lineSharp = 1.0 - smoothstep(0.0, thickness * 0.5, lineDist);
+
+        result += lineSharp * 0.6 + lineGlow * 0.3;
+    }
+    for (int j = 0; j < points; j++)
+    {
+        float a = rotation + TAU * (float)j / (float)points;
+        float2 vertex = float2(cos(a), sin(a)) * radius;
+        float vDist = length(centered - vertex);
+        result += exp(-vDist * vDist * 800.0) * 0.5;
     }
     return saturate(result);
 }
 
-// ---- G 飘散灰烬 ----
-float floatingAsh(float2 centered, float time)
+// ---- D 符文光环带 ----
+float runeArcBand(float dist, float angle, float bandRadius, float bandWidth,
+    float time, float rotSpeed, float segCount)
 {
-    float total = 0.0;
-    for (int i = 0; i < 26; i++)
+    float normAngle = (angle + PI) / TAU;
+    float rotAngle = frac(normAngle + time * rotSpeed);
+
+    float bandMask = 1.0 - smoothstep(0.0, bandWidth, abs(dist - bandRadius));
+    if (bandMask < 0.001)
+        return 0.0;
+
+    float segAngle = frac(rotAngle * segCount);
+    float segID = floor(rotAngle * segCount);
+    float h = hash11(segID * 7.13 + bandRadius * 3.7);
+
+    float2 runeUV = float2((segAngle - 0.5) * 2.0, (dist - bandRadius) / bandWidth);
+    float pattern = 0.0;
+    float type = frac(h * 7.0);
+
+    if (type < 0.2)
     {
-        float id = (float)i;
-        float h1 = hash11(id * 1.13);
-        float h2 = hash11(id * 3.37);
-        float h3 = hash11(id * 7.91);
-
-        float ang = h1 * TAU;
-        float baseR = 0.15 + h2 * 0.6;
-        float life = frac(time * (0.2 + h3 * 0.25) + h1 * 2.0);
-
-        //粒子会从某半径逐渐向上升并向外飘
-        float2 basePos = float2(cos(ang), sin(ang)) * baseR;
-        basePos.y -= life * 0.35;
-        basePos.x += sin(life * TAU + h2 * 6.0) * 0.05;
-
-        float r = length(centered - basePos);
-        float scale = 0.004 + h3 * 0.003;
-        float puff = exp(-r * r / (scale * scale));
-        puff *= sin(life * PI);
-        total += puff;
+        pattern = (abs(runeUV.x) < 0.06 ? 1.0 : 0.0) + (abs(runeUV.y) < 0.06 ? 1.0 : 0.0);
+        pattern = saturate(pattern);
     }
-    return saturate(total);
+    else if (type < 0.4)
+    {
+        float r = length(runeUV) * 1.5;
+        pattern = 1.0 - smoothstep(0.3, 0.35, abs(r - 0.5));
+    }
+    else if (type < 0.6)
+    {
+        float tri = abs(runeUV.x) + runeUV.y * 0.5 + 0.25;
+        pattern = 1.0 - smoothstep(0.3, 0.35, tri);
+        pattern *= step(-0.4, runeUV.y);
+    }
+    else if (type < 0.8)
+    {
+        float lines = sin(runeUV.x * 25.0);
+        pattern = step(0.7, lines) * step(abs(runeUV.y), 0.35);
+    }
+    else
+    {
+        float d1 = abs(runeUV.x) + abs(runeUV.y);
+        float d2 = abs(runeUV.x * 0.7) + abs(runeUV.y * 1.3);
+        pattern = (1.0 - smoothstep(0.3, 0.35, d1)) + (1.0 - smoothstep(0.2, 0.25, d2)) * 0.5;
+        pattern = saturate(pattern);
+    }
+
+    float gap = smoothstep(0.0, 0.08, segAngle) * smoothstep(1.0, 0.92, segAngle);
+    pattern *= gap;
+
+    float flicker = 0.6 + 0.4 * sin(time * 2.5 + segID * 2.3 + bandRadius * 5.0);
+    return pattern * bandMask * flicker;
 }
 
-// ---- H 外缘烟雾 ----
-float outerSmoke(float2 centered, float dist, float time)
+// ---- E 女巫签印（逆五芒星 + 外圈） ----
+//缓慢旋转的倒置五芒星作为女巫个人签印，替代darkPulseWave的节律冲击
+float witchSigil(float2 centered, float time, float expand)
 {
-    //仅在最外环可见，噪声驱动慢速翻滚
-    float2 uv = centered * 2.2 + float2(time * 0.05, time * 0.08);
-    float n = fbm(uv);
-    float mask = smoothstep(0.6, 0.95, dist);
-    return smoothstep(0.35, 0.8, n) * mask;
+    //签印整体旋转速度慢
+    float rot = time * 0.18 + PI;
+    //签印半径：最内环外、中环内
+    float sigilR = 0.3 * expand;
+    float dist = length(centered);
+
+    float circleDist = abs(dist - sigilR);
+    float ringLine = 1.0 - smoothstep(0.0, 0.004, circleDist);
+    float ringGlow = exp(-circleDist * circleDist * 5000.0);
+
+    //五芒星连线（跨2个顶点形成星形）
+    float star = 0.0;
+    for (int i = 0; i < 5; i++)
+    {
+        float a1 = rot + TAU * (float)i / 5.0;
+        float a2 = rot + TAU * (float)((i + 2) % 5) / 5.0;
+        float2 p1 = float2(cos(a1), sin(a1)) * sigilR;
+        float2 p2 = float2(cos(a2), sin(a2)) * sigilR;
+        float2 pa = centered - p1;
+        float2 ba = p2 - p1;
+        float h = saturate(dot(pa, ba) / dot(ba, ba));
+        float ld = length(pa - ba * h);
+        float lineSharp = 1.0 - smoothstep(0.0, 0.004, ld);
+        float lineGlow = exp(-ld * ld * 9000.0);
+        star += lineSharp * 0.7 + lineGlow * 0.3;
+    }
+
+    //顶点辉光
+    float verts = 0.0;
+    for (int j = 0; j < 5; j++)
+    {
+        float a = rot + TAU * (float)j / 5.0;
+        float2 v = float2(cos(a), sin(a)) * sigilR;
+        float vd = length(centered - v);
+        verts += exp(-vd * vd * 1200.0) * 0.6;
+    }
+
+    //整体呼吸
+    float breath = 0.7 + 0.3 * sin(time * 0.9);
+    return saturate((ringLine * 0.7 + ringGlow * 0.4 + star + verts) * breath);
+}
+
+// ---- F 硫火余烬 ----
+float risingEmbers(float2 centered, float time)
+{
+    float embers = 0.0;
+    float count = 28.0;
+    for (int i = 0; i < 30; i++)
+    {
+        if ((float)i >= count)
+            break;
+
+        float id = (float)i;
+        float h1 = hash11(id * 1.731);
+        float h2 = hash11(id * 3.147);
+        float h3 = hash11(id * 5.891);
+
+        float emAngle = h1 * TAU;
+        float emDist = 0.15 + h2 * 0.65;
+        float speed = 0.3 + h3 * 0.5;
+        float life = frac(time * speed + h1);
+
+        float2 emPos = float2(cos(emAngle), sin(emAngle)) * emDist;
+        emPos.y -= life * 0.3;
+        emPos.x += sin(life * PI * 2.0 + h2 * TAU) * 0.05;
+
+        float emR = length(centered - emPos);
+        float emScale = sin(life * PI) * (0.008 + h3 * 0.005);
+        float em = exp(-emR * emR / (emScale * emScale));
+        em *= smoothstep(0.85, 0.2, length(emPos));
+        embers += em;
+    }
+    return saturate(embers);
 }
 
 // ============================================================
@@ -330,92 +308,144 @@ float outerSmoke(float2 centered, float dist, float time)
 // ============================================================
 float4 PixelShaderFunction(float2 coords : TEXCOORD0, float4 vertexColor : COLOR0) : COLOR0
 {
-    //归一化到[-1,1]
     float2 centered = coords * 2.0 - 1.0;
     float dist = length(centered);
     float angle = atan2(centered.y, centered.x);
-
-    //域外直接裁掉
-    float edgeFade = 1.0 - smoothstep(0.88, 1.02, dist);
-    if (edgeFade <= 0.001)
-        return float4(0, 0, 0, 0);
+    float normAngle = (angle + PI) / TAU;
 
     float time = uTime;
     float expand = saturate(expandProgress);
     float dissolve = saturate(dissolveProgress);
 
-    //扩张时整体缩放剪裁：未展开的位置裁成透明
-    float expandMask = 1.0 - smoothstep(expand, expand + 0.08, dist);
+    float edgeFade = 1.0 - smoothstep(0.82, 1.0, dist);
+    if (edgeFade <= 0.001)
+        return float4(0, 0, 0, 0);
+
+    float expandMask = 1.0 - smoothstep(expand, expand + 0.06, dist);
 
     //A 底色
-    float3 finalColor = abyssBase(centered, dist, time);
+    float3 plasma = brimstonePlasma(centered, dist, angle, time);
+    float depthGrad = smoothstep(0.0, 0.85, dist);
+    float3 baseColor = lerp(voidColor * 0.5, edgeColor * 0.3, depthGrad);
 
-    //B 核心瞳孔
-    float iris;
-    float3 eyeCol = witchEye(centered, time, pulseIntensity, iris);
-    //瞳孔仅在展开超过一半后浮现
-    float eyeReveal = smoothstep(0.45, 0.85, expand);
-    finalColor += eyeCol * eyeReveal * (1.0 - dissolve * 0.6);
+    //B 魔法阵环
+    float ringTotal = 0.0;
+    ringTotal += magicCircleRing(dist, angle, 0.18 * expand, time, 0.12, 8.0, 0.04);
+    ringTotal += magicCircleRing(dist, angle, 0.42 * expand, time, -0.08, 14.0, 0.034) * 0.8;
+    ringTotal += magicCircleRing(dist, angle, 0.66 * expand, time, 0.06, 20.0, 0.028) * 0.65;
+    ringTotal = saturate(ringTotal);
 
-    //C 裂纹
-    float cracks = radialCracks(centered, dist, angle, time);
-    //裂纹颜色：中到核心间插值，内部透亮
-    float3 crackCol = lerp(midColor, coreColor, saturate(cracks * 1.4));
-    finalColor += crackCol * cracks * (0.8 + pulseIntensity * 0.2);
+    //C 几何
+    float geomTotal = 0.0;
+    geomTotal += starGeometry(centered, dist, angle, 0.22 * expand, 5, time * 0.5, 0.006);
+    geomTotal += starGeometry(centered, dist, angle, 0.5 * expand, 6, -time * 0.35, 0.005) * 0.85;
+    geomTotal += starGeometry(centered, dist, angle, 0.72 * expand, 8, time * 0.15, 0.004) * 0.6;
+    geomTotal = saturate(geomTotal);
 
-    //D 经文残片
-    float scrip = burningScriptures(centered, time);
-    float3 scripCol = lerp(midColor, float3(1.0, 0.85, 0.5), 0.6);
-    finalColor += scripCol * scrip * 0.85;
+    //D 符文光环带
+    float runeTotal = 0.0;
+    runeTotal += runeArcBand(dist, angle, 0.3 * expand, 0.035, time, 0.15, 12.0) * 0.6;
+    runeTotal += runeArcBand(dist, angle, 0.56 * expand, 0.03, time, -0.1, 18.0) * 0.5;
+    runeTotal = saturate(runeTotal);
 
-    //E 幽火
-    float souls = risingSoulFlames(centered, time);
-    //幽火颜色偏冷硫火，加一点青灰
-    float3 soulCol = lerp(coreColor, float3(1.0, 0.95, 0.7), 0.4);
-    finalColor += soulCol * souls;
+    //E 女巫签印
+    float sigil = witchSigil(centered, time, expand);
 
-    //F 封印
-    float brands = brandSeals(centered, dist, angle, time);
-    float brandReveal = smoothstep(0.4, 0.9, expand);
-    float3 brandCol = lerp(coreColor, float3(1.0, 0.9, 0.55), 0.3);
-    finalColor += brandCol * brands * 0.8 * brandReveal;
+    //F 余烬
+    float embers = risingEmbers(centered, time);
 
-    //G 灰烬
-    float ash = floatingAsh(centered, time);
-    float3 ashCol = lerp(edgeColor, coreColor, 0.35);
-    finalColor += ashCol * ash * 0.8;
+    //G 核心凝视漩涡 + 竖瞳
+    float vortexDist = smoothstep(0.18, 0.0, dist);
+    float vortexSwirl = sin(angle * 3.0 + time * 2.5 + dist * 18.0) * 0.5 + 0.5;
+    float2 vortexUV = float2(normAngle * 2.0 + time * 0.5, dist * 5.0);
+    float vortexNoise = tex2D(noiseSamp, frac(vortexUV)).r;
+    float vortex = vortexDist * (0.45 + vortexSwirl * 0.3 + vortexNoise * 0.25);
 
-    //H 烟雾
-    float smoke = outerSmoke(centered, dist, time);
-    finalColor += edgeColor * smoke * 0.6;
+    //竖瞳
+    float slit = exp(-pow(centered.x / 0.012, 2.0)) * exp(-pow(centered.y / 0.11, 2.0));
+    slit *= smoothstep(0.25, 0.0, dist);
 
-    //--------------- 消散阶段：整体向黑化去饱和 ---------------
-    //像素块化地变黑（与WitchStatueActor中的剥落呼应）
+    //H 环间电弧
+    float arcEffect = 0.0;
+    {
+        float2 arcUV = float2(normAngle * 20.0 + time * 3.0, dist * 8.0);
+        float arcNoise = tex2D(noiseSamp, frac(arcUV)).r;
+        float arcLine = pow(arcNoise, 8.0) * 3.0;
+
+        float arcZone = 0.0;
+        arcZone += smoothstep(0.0, 0.03, abs(dist - 0.26 * expand))
+                 * (1.0 - smoothstep(0.0, 0.03, abs(dist - 0.38 * expand)));
+        arcZone += smoothstep(0.0, 0.03, abs(dist - 0.44 * expand))
+                 * (1.0 - smoothstep(0.0, 0.03, abs(dist - 0.56 * expand)));
+        arcEffect = arcLine * saturate(arcZone) * 0.35;
+
+        float arcFlicker = step(0.85, hash21(float2(floor(normAngle * 30.0), floor(time * 12.0))));
+        arcEffect *= 0.3 + arcFlicker * 0.7;
+    }
+
+    //I 外层暗能量
+    float2 darkFlowUV = float2(normAngle * 3.0 + time * 0.18, dist * 2.0 - time * 0.12);
+    float darkFlow = tex2D(noiseSamp, frac(darkFlowUV)).r;
+    float2 darkFlowUV2 = float2(normAngle * 5.0 - time * 0.14, dist * 3.0 + time * 0.1);
+    float darkFlow2 = tex2D(noiseSamp, frac(darkFlowUV2)).g;
+    float outerDark = (darkFlow + darkFlow2) * 0.5;
+    outerDark = smoothstep(0.3, 0.7, outerDark) * 0.2;
+    outerDark *= smoothstep(0.4, 0.85, dist);
+
+    //合成
+    float3 finalColor = baseColor;
+    finalColor += plasma * 0.6;
+    finalColor += voidColor * outerDark;
+
+    float3 ringColor = lerp(midColor, coreColor, ringTotal * 0.6);
+    finalColor += ringColor * ringTotal * (0.7 + pulseIntensity * 0.3);
+
+    float3 geomColor = lerp(coreColor, float3(1.0, 0.85, 0.6), geomTotal * 0.3);
+    finalColor += geomColor * geomTotal * 0.6;
+
+    float3 runeColor = lerp(midColor, coreColor, 0.5);
+    finalColor += runeColor * runeTotal * 0.5;
+
+    //签印偏血红，略暗于普通几何，体现其"旧签印"的阴郁气质
+    float3 sigilColor = lerp(midColor, coreColor, 0.6);
+    finalColor += sigilColor * sigil * (0.55 + pulseIntensity * 0.25);
+
+    float3 emberColor = lerp(coreColor, float3(1.0, 0.9, 0.5), 0.4);
+    finalColor += emberColor * embers * 0.9;
+
+    float3 vortexColor = lerp(voidColor, coreColor, vortex);
+    finalColor += vortexColor * vortex * 1.4;
+
+    //竖瞳用最亮的硫火白橙
+    finalColor += float3(1.0, 0.85, 0.5) * slit * 1.6;
+
+    float3 arcColor = lerp(coreColor, float3(1.0, 0.95, 0.8), 0.5);
+    finalColor += arcColor * arcEffect;
+
+    //消散阶段整体去饱和向黑
     if (dissolve > 0.01)
     {
         float charFade = smoothstep(0.0, 1.0, dissolve);
         finalColor = lerp(finalColor, voidColor * 0.3, charFade * 0.8);
     }
 
-    //--------------- 透明度合成 ---------------
+    //透明度合成
     float alpha = 0.0;
-
-    //基础雾填充
-    float fill = lerp(0.05, 0.22, smoothstep(0.9, 0.0, dist));
-    alpha += fill;
-
-    //元素贡献
-    alpha += iris * eyeReveal * 0.9;
-    alpha += cracks * 0.85;
-    alpha += scrip * 0.7;
-    alpha += souls * 0.8;
-    alpha += brands * 0.6 * brandReveal;
-    alpha += ash * 0.6;
-    alpha += smoke * 0.35;
+    float fillAlpha = lerp(0.08, 0.25, smoothstep(0.8, 0.0, dist));
+    fillAlpha += length(plasma) * 0.3;
+    alpha += fillAlpha;
+    alpha += ringTotal * 0.6;
+    alpha += geomTotal * 0.5;
+    alpha += runeTotal * 0.4;
+    alpha += sigil * 0.55;
+    alpha += embers * 0.7;
+    alpha += vortex * 0.8;
+    alpha += slit * 0.9;
+    alpha += arcEffect * 0.6;
+    alpha += outerDark * 0.3;
 
     alpha = saturate(alpha);
     alpha *= edgeFade * fadeAlpha * expand * expandMask;
-    //消散时整体透明度下降
     alpha *= 1.0 - dissolve * 0.75;
 
     return float4(finalColor * alpha, alpha) * vertexColor;

@@ -115,7 +115,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.TheHerInThePasts
             if (portrait == null || portrait.IsDisposed) return;
 
             Rectangle rectangle = new Rectangle(0, 0, portrait.Width, portrait.Height);
-            position = OwnerDialogue.GetPanelRect().Top() + new Vector2(-160, -portrait.Height + 100) * scale2;
+            position = OwnerDialogue.GetPanelRect().Top() + new Vector2(-160, -portrait.Height + 90) * scale2;
 
             Color stone = new(180, 175, 170);
             Color vivid = Color.White;
