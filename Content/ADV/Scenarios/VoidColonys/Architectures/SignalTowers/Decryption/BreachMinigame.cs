@@ -46,6 +46,11 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Signa
         public bool HasSolved { get; private set; }
         public bool HasFailedAttempt { get; private set; }
 
+        /// <summary>破译成功后至今经过的秒数，用于成功过渡演出</summary>
+        public float SolvedHoldTime { get; private set; }
+        /// <summary>成功后在进入数据洪流前的挑逗期时长（秒）</summary>
+        public const float SolvedHoldDuration = 1.35f;
+
         public (int row, int col)? HoverCell { get; private set; }
 
         /// <summary>最近一次选中的行号，-1表示尚无选择，用于行列高亮脉冲反馈</summary>
@@ -75,6 +80,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Signa
             Cooldown = 0f;
             HasSolved = false;
             HasFailedAttempt = false;
+            SolvedHoldTime = 0f;
             GenerateMatrix();
             GenerateTargets();
             ResetAttempt();
@@ -86,6 +92,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Signa
             Cooldown = 0f;
             HasSolved = false;
             HasFailedAttempt = false;
+            SolvedHoldTime = 0f;
             Buffer.Clear();
             Targets.Clear();
             SolutionPath.Clear();
@@ -133,7 +140,11 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Signa
         public void Update(float dt) {
             //选择脉冲计时始终推进，用于高亮演给渐歧行列的神速带
             SelectionPulseTime += dt;
-            if (HasSolved) return;
+            if (HasSolved) {
+                //成功后保持一段时间播过渡动画，DecryptionSession将监听SolvedHoldTime达阈后转入数据洪流
+                SolvedHoldTime += dt;
+                return;
+            }
             if (Cooldown > 0f) {
                 Cooldown -= dt;
                 if (Cooldown <= 0f) {

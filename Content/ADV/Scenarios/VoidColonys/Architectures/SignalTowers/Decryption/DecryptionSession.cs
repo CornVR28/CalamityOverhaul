@@ -121,7 +121,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Signa
             //小游戏驱动
             if (Phase == DecryptionPhase.Breaching) {
                 Minigame.Update(1f / 60f);
-                if (Minigame.HasSolved) {
+                //破译完成后不立即切换，先保持SolvedHoldDuration秒展示成功过渡，再进入数据洪流
+                if (Minigame.HasSolved && Minigame.SolvedHoldTime >= BreachMinigame.SolvedHoldDuration) {
                     TransitionTo(DecryptionPhase.DataFlood);
                 }
             }

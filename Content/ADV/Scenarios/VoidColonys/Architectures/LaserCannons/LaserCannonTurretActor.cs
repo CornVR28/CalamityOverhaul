@@ -1,7 +1,9 @@
 ﻿using CalamityOverhaul.Common;
 using CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.TimeShift;
 using CalamityOverhaul.Content.HackTimes;
+using CalamityOverhaul.Content.PRTTypes;
 using InnoVault.Actors;
+using InnoVault.PRT;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -111,6 +113,11 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Laser
         /// <summary>开火后坐视觉位移</summary>
         private float recoil;
 
+        /// <summary>炮口光晕当前展示强度，0~1，跟随蓄能进度上升，发射阶段保持高位，冷却衰减</summary>
+        private float muzzleGlow;
+        /// <summary>点火冲击光环的扩散计时器，>0时环在扩散，由阶段1→2切换触发</summary>
+        private float muzzleFlashRing;
+
         private bool pedestalSized;
 
         /// <summary>电路失效剩余帧数：大于0时炮台整体停摆</summary>
@@ -208,6 +215,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Laser
             UpdateRotationTracking();
             UpdatePhaseMachine();
             UpdateBeamVisuals();
+            UpdateMuzzleFX();
             UpdateBeamDamage();
 
             if (recoil > 0f) recoil = MathF.Max(0f, recoil - 0.6f);
@@ -224,6 +232,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Laser
             beamIntensity = MathF.Max(0f, beamIntensity - 0.08f);
             beamWidth = MathHelper.Lerp(beamWidth, 0f, 0.15f);
             beamPulse = MathHelper.Lerp(beamPulse, 0f, 0.2f);
+            muzzleGlow = MathHelper.Lerp(muzzleGlow, 0f, 0.2f);
+            if (muzzleFlashRing > 0f) muzzleFlashRing = MathF.Max(0f, muzzleFlashRing - 0.05f);
             if (recoil > 0f) recoil = MathF.Max(0f, recoil - 0.6f);
         }
 
@@ -307,6 +317,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Laser
                         phaseTimer = FireDuration;
                         damageTimer = 0;
                         recoil = 18f;
+                        //触发一次点火冲击光环扩散，并制造一圈爆发粒子
+                        muzzleFlashRing = 1f;
+                        SpawnIgnitionBurst();
                         SoundEngine.PlaySound(SoundID.Zombie118 with {
                             Volume = 0.95f, Pitch = -0.4f, MaxInstances = 2,
                         }, MuzzleWorld);
@@ -404,6 +417,123 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Laser
             beamPulse = MathHelper.Lerp(beamPulse, pulseTarget, 0.3f);
         }
 
+        //==================== 炮口粒子与光晕 ====================
+
+        /// <summary>
+        /// 推进炮口视觉强度，并在蓄能/发射阶段生成对应粒子
+        /// 蓄能时聚集吸入感，发射时脉冲喷溅感，两套颜色共用紫白主调以贴合shader光束
+        /// </summary>
+        private void UpdateMuzzleFX() {
+            //炮口光晕强度目标：蓄能随进度增长，发射维持高位，冷却自然衰减
+            float glowTarget = phase switch {
+                1 => MathHelper.Lerp(0.1f, 0.95f, 1f - phaseTimer / (float)Math.Max(1, ChargeDuration)),
+                2 => 1f,
+                3 => 0f,
+                _ => 0f,
+            };
+            muzzleGlow = MathHelper.Lerp(muzzleGlow, glowTarget, phase == 3 ? 0.5f : 0.25f);
+
+            //点火环扩散：每帧衰减，绘制时根据1-值展开半径
+            if (muzzleFlashRing > 0f) muzzleFlashRing = MathF.Max(0f, muzzleFlashRing - 0.04f);
+
+            //粒子生成在客户端进行
+            if (Main.netMode == NetmodeID.Server) return;
+            if (PRTLoader.NumberUsablePRT() < 32) return;
+
+            Vector2 muzzle = MuzzleWorld;
+            Vector2 forward = currentRotation.ToRotationVector2();
+            Vector2 up = new(-forward.Y, forward.X);
+
+            if (phase == 1) {
+                float progress = 1f - phaseTimer / (float)Math.Max(1, ChargeDuration);
+                //汇聚粒子：随进度加速且收紧半径，越接近满蓄越密
+                float radius = MathHelper.Lerp(240f, 70f, progress);
+                int convergeCount = 1 + (int)(progress * 3f);
+
+                Color coreColor = Color.Lerp(new Color(170, 140, 255), new Color(240, 220, 255), progress);
+                Color edgeColor = Color.Lerp(new Color(110, 60, 220), new Color(200, 130, 255), progress);
+
+                for (int i = 0; i < convergeCount; i++) {
+                    float ang = Main.rand.NextFloat(MathHelper.TwoPi);
+                    Vector2 offset = ang.ToRotationVector2() * Main.rand.NextFloat(radius * 0.55f, radius);
+                    //稍微沿炮口前向做偏移，形成向枪口前方喇叭口汇聚的方向感
+                    Vector2 spawnPos = muzzle + offset + forward * Main.rand.NextFloat(-40f, 70f);
+                    PRTLoader.AddParticle(new PRT_CyberConverge(
+                        spawnPos, muzzle,
+                        coreColor, edgeColor,
+                        Main.rand.NextFloat(0.45f, 0.95f),
+                        Main.rand.Next(22, 38),
+                        progress
+                    ));
+                }
+
+                //蓄能中后段迸发电弧火花，频率随进度爬升
+                if (progress > 0.3f && Main.rand.NextFloat() < progress * 0.55f) {
+                    Vector2 src = muzzle + up * Main.rand.NextFloat(-14f, 14f) + forward * Main.rand.NextFloat(-12f, 30f);
+                    Vector2 vel = forward * Main.rand.NextFloat(-1.5f, 3.5f) + up * Main.rand.NextFloat(-3f, 3f);
+                    Color sparkCol = Color.Lerp(new Color(210, 160, 255), Color.White, 0.35f);
+                    PRT_Spark spark = new(src, vel, false, Main.rand.Next(10, 20),
+                        Main.rand.NextFloat(0.5f, 0.9f), sparkCol);
+                    PRTLoader.AddParticle(spark);
+                }
+            }
+            else if (phase == 2) {
+                //发射期间：枪口附近间歇性迸射火花，强化燃烧感
+                if (Main.rand.NextBool(2)) {
+                    Vector2 src = muzzle + up * Main.rand.NextFloat(-18f, 18f) + forward * Main.rand.NextFloat(-8f, 26f);
+                    Vector2 vel = forward * Main.rand.NextFloat(2f, 7f) + up * Main.rand.NextFloat(-3.5f, 3.5f);
+                    Color sparkCol = Color.Lerp(new Color(220, 170, 255), Color.White, 0.55f);
+                    PRT_Spark spark = new(src, vel, false, Main.rand.Next(10, 18),
+                        Main.rand.NextFloat(0.6f, 1.1f), sparkCol);
+                    PRTLoader.AddParticle(spark);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 蓄能结束瞬间的点火迸发：朝炮口正前方扇形喷溅大量汇聚式粒子与火花
+        /// 与音效和recoil同步触发，配合冲击光环营造炮口爆裂一瞬
+        /// </summary>
+        private void SpawnIgnitionBurst() {
+            if (Main.netMode == NetmodeID.Server) return;
+            if (PRTLoader.NumberUsablePRT() < 48) return;
+
+            Vector2 muzzle = MuzzleWorld;
+            Vector2 forward = currentRotation.ToRotationVector2();
+            Vector2 up = new(-forward.Y, forward.X);
+
+            Color coreColor = new(240, 220, 255);
+            Color edgeColor = new(180, 110, 255);
+
+            //向前方喷出的汇聚粒子：起点偏后，目标在炮口稍前方，形成朝前拉伸的光束头部
+            Vector2 burstTarget = muzzle + forward * 40f;
+            for (int i = 0; i < 18; i++) {
+                float ang = currentRotation + Main.rand.NextFloat(-0.9f, 0.9f);
+                float dist = Main.rand.NextFloat(40f, 160f);
+                Vector2 spawnPos = muzzle - forward * Main.rand.NextFloat(10f, 50f)
+                                    + ang.ToRotationVector2() * dist;
+                PRTLoader.AddParticle(new PRT_CyberConverge(
+                    spawnPos, burstTarget,
+                    coreColor, edgeColor,
+                    Main.rand.NextFloat(0.6f, 1.1f),
+                    Main.rand.Next(16, 28),
+                    1f
+                ));
+            }
+
+            //炮口电弧火花
+            for (int i = 0; i < 14; i++) {
+                float ang = currentRotation + Main.rand.NextFloat(-0.6f, 0.6f);
+                Vector2 vel = ang.ToRotationVector2() * Main.rand.NextFloat(4f, 11f)
+                              + up * Main.rand.NextFloat(-2f, 2f);
+                Vector2 src = muzzle + forward * Main.rand.NextFloat(0f, 18f);
+                PRT_Spark spark = new(src, vel, false, Main.rand.Next(12, 22),
+                    Main.rand.NextFloat(0.7f, 1.2f),
+                    Color.Lerp(new Color(220, 170, 255), Color.White, 0.65f));
+                PRTLoader.AddParticle(spark);
+            }
+        }
+
         //==================== 伤害 ====================
 
         private void UpdateBeamDamage() {
@@ -498,6 +628,11 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Laser
             }
             else {
                 spriteBatch.Draw(gun, drawCenter, null, gunColor, currentRotation, origin, 1f, effects, 0f);
+            }
+
+            //炮口光晕与冲击光环：叠加在炮身之上，蓄能阶段渐亮，发射阶段维持爆裂
+            if (muzzleGlow > 0.01f || muzzleFlashRing > 0.01f) {
+                DrawMuzzleHalo(spriteBatch);
             }
 
             return false;
@@ -614,6 +749,65 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Laser
             sb.Draw(tex, drawPos, null, Color.White * strength, 0f, Vector2.Zero, 1f, SpriteEffects.None, 0f);
             sb.End();
             sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState,
+                DepthStencilState.None, Main.Rasterizer, null, Main.GameViewMatrix.TransformationMatrix);
+        }
+
+        /// <summary>
+        /// 炮口光晕与点火冲击光环绘制
+        /// SoftGlow承担基础球型光斑，StarTexture给满蓄叠加十字耀斑，DiffusionCircle负责点火瞬间扩散的冲击圈
+        /// 全部使用Additive叠加，以配合激光主束的超曝观感
+        /// </summary>
+        private void DrawMuzzleHalo(SpriteBatch spriteBatch) {
+            Texture2D glow = CWRAsset.SoftGlow?.Value;
+            Texture2D star = CWRAsset.StarTexture?.Value;
+            Texture2D ring = CWRAsset.DiffusionCircle?.Value;
+            if (glow == null) return;
+
+            Vector2 muzzleScreen = MuzzleWorld - Main.screenPosition;
+            float visFactor = MathHelper.Clamp(visibility, 0f, 1f);
+            float pulse = 0.85f + 0.15f * MathF.Sin(Main.GlobalTimeWrappedHourly * 22f + WhoAmI * 0.37f);
+
+            spriteBatch.End();
+            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive, Main.DefaultSamplerState,
+                DepthStencilState.None, Main.Rasterizer, null, Main.GameViewMatrix.TransformationMatrix);
+
+            //基础紫白球形光斑：先外层大范围晕染，再叠加核心高光
+            Color outerCol = new Color(160, 90, 255) * (muzzleGlow * visFactor * 0.9f);
+            Color innerCol = new Color(230, 210, 255) * (muzzleGlow * visFactor);
+            float baseScale = MathHelper.Lerp(0.5f, 1.6f, muzzleGlow) * pulse;
+            spriteBatch.Draw(glow, muzzleScreen, null, outerCol, 0f,
+                glow.Size() * 0.5f, baseScale * 2.2f, SpriteEffects.None, 0f);
+            spriteBatch.Draw(glow, muzzleScreen, null, innerCol, 0f,
+                glow.Size() * 0.5f, baseScale * 1.1f, SpriteEffects.None, 0f);
+
+            //满蓄 / 发射阶段叠加十字耀斑，强化打击感
+            if (star != null && muzzleGlow > 0.45f) {
+                float starK = (muzzleGlow - 0.45f) / 0.55f;
+                Color starCol = new Color(220, 180, 255) * (starK * visFactor * pulse * 0.85f);
+                float starScale = MathHelper.Lerp(0.2f, 0.55f, starK);
+                spriteBatch.Draw(star, muzzleScreen, null, starCol,
+                    Main.GlobalTimeWrappedHourly * 1.3f,
+                    star.Size() * 0.5f, starScale, SpriteEffects.None, 0f);
+                spriteBatch.Draw(star, muzzleScreen, null, starCol * 0.7f,
+                    -Main.GlobalTimeWrappedHourly * 0.9f,
+                    star.Size() * 0.5f, starScale * 0.55f, SpriteEffects.None, 0f);
+            }
+
+            //点火冲击光环：启动瞬间为1，向外扩散同时淡出
+            if (ring != null && muzzleFlashRing > 0.01f) {
+                float k = 1f - muzzleFlashRing;
+                float ringScale = MathHelper.Lerp(0.2f, 1.35f, k);
+                float ringAlpha = muzzleFlashRing * visFactor;
+                Color ringCol = new Color(220, 180, 255) * ringAlpha;
+                spriteBatch.Draw(ring, muzzleScreen, null, ringCol, 0f,
+                    ring.Size() * 0.5f, ringScale, SpriteEffects.None, 0f);
+                //再叠一圈更宽更暗的次级环，制造厚度
+                spriteBatch.Draw(ring, muzzleScreen, null, ringCol * 0.5f, 0f,
+                    ring.Size() * 0.5f, ringScale * 1.25f, SpriteEffects.None, 0f);
+            }
+
+            spriteBatch.End();
+            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState,
                 DepthStencilState.None, Main.Rasterizer, null, Main.GameViewMatrix.TransformationMatrix);
         }
 

@@ -27,6 +27,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Signa
             DrawMatrixPane(sb, game, leftArea, eased, accent);
             DrawInfoPane(sb, game, rightArea, eased, accent);
             DrawCooldownOverlay(sb, game, body, eased);
+            DrawBreachSuccessOverlay(sb, game, body, eased);
         }
 
         //═══════════════════════════════════════════════════════════
@@ -385,6 +386,93 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Signa
                 new Color(70, 170, 255) * (eased * 0.7f), Color.Black * eased, Vector2.Zero, scale);
             Utils.DrawBorderStringFourWay(sb, font, msg, pos.X, pos.Y,
                 HackTheme.Danger * eased, Color.Black * eased, Vector2.Zero, scale);
+        }
+
+        //═══════════════════════════════════════════════════════════
+        // 破译成功过渡演出：白色泛光闪屏 + 打字机"BREACH COMPLETE" + 扫描线扩散
+        // 持续BreachMinigame.SolvedHoldDuration秒，结束后DecryptionSession切入数据洪流
+        //═══════════════════════════════════════════════════════════
+        private static void DrawBreachSuccessOverlay(SpriteBatch sb, BreachMinigame game, Rectangle body, float eased) {
+            if (!game.HasSolved) return;
+            Texture2D px = TextureAssets.MagicPixel.Value;
+            DynamicSpriteFont font = FontAssets.MouseText.Value;
+
+            float hold = game.SolvedHoldTime;
+            float dur = BreachMinigame.SolvedHoldDuration;
+            float tn = MathHelper.Clamp(hold / dur, 0f, 1f);
+
+            //① 初始白屏闪光：前0.18秒内快速拉起随后淡出
+            float flash;
+            if (hold < 0.18f) flash = hold / 0.18f;
+            else flash = MathHelper.Clamp(1f - (hold - 0.18f) / 0.5f, 0f, 1f);
+            flash *= flash;
+            sb.Draw(px, body, new Color(220, 245, 255) * (0.55f * flash * eased));
+
+            //② 整体淡蓝着色遮罩：长驻到过渡结束，强度随tn稳步增加
+            sb.Draw(px, body, new Color(40, 120, 200) * (0.22f * eased));
+
+            //③ 上下两条扫描线从中心向外扩散，暗示"解码完成，管道打开"
+            Color beam = new Color(150, 220, 255) * eased;
+            float spread = MathHelper.Lerp(0f, body.Height * 0.55f, MathHelper.Clamp(tn * 1.6f, 0f, 1f));
+            int cy = body.Y + body.Height / 2;
+            int thick = 3;
+            //主线
+            sb.Draw(px, new Rectangle(body.X, cy - thick / 2, body.Width, thick), beam * 0.9f);
+            //上下扩散线
+            int topY = (int)(cy - spread);
+            int botY = (int)(cy + spread);
+            sb.Draw(px, new Rectangle(body.X, topY, body.Width, 2), beam * (1f - tn) * 0.8f);
+            sb.Draw(px, new Rectangle(body.X, botY, body.Width, 2), beam * (1f - tn) * 0.8f);
+            //内外两条光晕线
+            sb.Draw(px, new Rectangle(body.X, topY - 1, body.Width, 1), beam * (1f - tn) * 0.35f);
+            sb.Draw(px, new Rectangle(body.X, botY + 1, body.Width, 1), beam * (1f - tn) * 0.35f);
+
+            //④ 中央文字：打字机揭示"BREACH COMPLETE"，后半段追加"...INJECTING DATAFLOW"
+            string title = "BREACH COMPLETE";
+            int revealed = (int)MathHelper.Clamp(hold / 0.06f, 0f, title.Length);
+            string shown = title.Substring(0, revealed);
+            //光标
+            if (hold < dur - 0.25f && (int)(hold * 8f) % 2 == 0) shown += "_";
+
+            float scale = 1.25f + MathF.Sin(hold * 5f) * 0.02f;
+            Vector2 ms = font.MeasureString(title) * scale;
+            Vector2 pos = new Vector2(body.X + (body.Width - ms.X) / 2f, body.Y + body.Height * 0.32f);
+
+            //主体青色文字带轻微色散
+            float aber = 1.4f;
+            Color main = new Color(180, 240, 255) * eased;
+            Color ghostR = new Color(255, 120, 160) * (eased * 0.55f);
+            Color ghostB = new Color(100, 180, 255) * (eased * 0.55f);
+            Utils.DrawBorderStringFourWay(sb, font, shown, pos.X - aber, pos.Y,
+                ghostR, Color.Black * (eased * 0.4f), Vector2.Zero, scale);
+            Utils.DrawBorderStringFourWay(sb, font, shown, pos.X + aber, pos.Y + 0.4f,
+                ghostB, Color.Black * (eased * 0.4f), Vector2.Zero, scale);
+            Utils.DrawBorderStringFourWay(sb, font, shown, pos.X, pos.Y,
+                main, Color.Black * eased, Vector2.Zero, scale);
+
+            //副标题"INJECTING DATAFLOW..."
+            if (hold > 0.55f) {
+                string sub = "▸ INJECTING DATAFLOW";
+                int dots = (int)((hold - 0.55f) * 6f) % 4;
+                sub += new string('.', dots);
+                float subScale = 0.7f;
+                Vector2 sms = font.MeasureString(sub) * subScale;
+                Vector2 spos = new Vector2(body.X + (body.Width - sms.X) / 2f, pos.Y + ms.Y + 6);
+                float subA = MathHelper.Clamp((hold - 0.55f) / 0.25f, 0f, 1f);
+                Utils.DrawBorderString(sb, sub, spos, main * subA * 0.9f, subScale);
+            }
+
+            //⑤ 进度条：底部横向填充，表达"即将切入数据洪流"
+            int barH = 3;
+            Rectangle bar = new Rectangle(body.X + 20, body.Bottom - 18, body.Width - 40, barH);
+            sb.Draw(px, bar, Color.Black * (0.55f * eased));
+            int fillW = (int)(bar.Width * tn);
+            sb.Draw(px, new Rectangle(bar.X, bar.Y, fillW, bar.Height), main * 0.95f);
+            //进度条端头光点
+            if (fillW > 0) {
+                sb.Draw(px, new Rectangle(bar.X + fillW - 2, bar.Y - 2, 4, bar.Height + 4),
+                    new Color(255, 255, 255) * eased);
+            }
         }
     }
 }
