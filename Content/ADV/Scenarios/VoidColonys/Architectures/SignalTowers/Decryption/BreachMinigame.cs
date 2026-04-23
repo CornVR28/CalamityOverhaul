@@ -71,6 +71,11 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Signa
             for (int r = 0; r < MatrixSize; r++) for (int c = 0; c < MatrixSize; c++) Taken[r, c] = false;
         }
 
+        /// <summary>调试：强制标记为已解</summary>
+        public void ForceSolve() {
+            HasSolved = true;
+        }
+
         /// <summary>失败或手动重置后的新一次尝试，不重新生成矩阵</summary>
         public void ResetAttempt() {
             Buffer.Clear();
@@ -176,12 +181,21 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Signa
         private void GenerateTargets() {
             Targets.Clear();
             var rng = new FastRandom(unchecked((long)((ulong)Main.GameUpdateCount * 48271 + 11)));
-            //三条目标：2 / 3 / 4 长度，从矩阵沿合法路径采样以保证理论可解
+            //关键修复：先沿合法交替规则在矩阵上采样一条主解题路径（长度=BufferCapacity）
+            //再从主路径上切出三条有重叠的目标子串（长2/3/4），保证玩家按主路径选择即可通关
+            int masterLen = BufferCapacity;
+            byte[] master = SamplePath(masterLen, ref rng);
+
+            //三条目标长度 2/3/4，其中长4必然能放下，2/3的起点在允许范围内随机；允许相互重叠与包含
             int[] lens = [2, 3, 4];
             string[] names = ["DATAMINE_V1", "DATAMINE_V2", "DATAMINE_V3"];
             Color[] cols = [new(160, 240, 255), new(255, 200, 120), new(200, 255, 160)];
             for (int i = 0; i < 3; i++) {
-                byte[] seq = SamplePath(lens[i], ref rng);
+                int len = lens[i];
+                int maxStart = masterLen - len;
+                int start = maxStart <= 0 ? 0 : rng.Next(maxStart + 1);
+                byte[] seq = new byte[len];
+                for (int k = 0; k < len; k++) seq[k] = master[start + k];
                 Targets.Add(new Target { Sequence = seq, Name = names[i], TintColor = cols[i], Matched = false });
             }
         }

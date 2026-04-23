@@ -133,6 +133,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Signa
             float target = mouseOver ? 1f : 0f;
             hoverStrength = MathHelper.Lerp(hoverStrength, target, 0.18f);
             if (Math.Abs(hoverStrength - target) < 0.005f) hoverStrength = target;
+            //面板打开后立刻归零，避免在屏幕外绘制shader残留矩形
+            if (DecryptionSession.IsOpen) hoverStrength = 0f;
 
             //悬停时锁定tile/item交互，避免打字/打架误操作
             if (mouseOver) {
@@ -177,8 +179,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Signa
 
             ArchitectureWarpDraw.DrawWithShader(spriteBatch, tex, drawPos, visibility, warp, flipX: false);
 
-            //本地悬停描边：在骇客时间外的日常右键交互反馈
-            if (hoverStrength > 0.01f) {
+            //本地悬停描边：在黑客时间外的日常右键交互反馈，面板打开时不画
+            if (hoverStrength > 0.01f && !DecryptionSession.IsOpen) {
                 DrawHoverOutline(spriteBatch, tex, drawPos, hoverStrength);
             }
 

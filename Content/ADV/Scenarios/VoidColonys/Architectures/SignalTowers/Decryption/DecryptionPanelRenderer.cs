@@ -1,4 +1,4 @@
-using CalamityOverhaul.Common;
+﻿using CalamityOverhaul.Common;
 using CalamityOverhaul.Content.HackTimes;
 using InnoVault.UIHandles;
 using Microsoft.Xna.Framework;
@@ -157,6 +157,23 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Signa
                 Main.LocalPlayer.mouseInterface = true;
                 Main.LocalPlayer.cursorItemIconEnabled = false;
             }
+
+            //4) 调试HUD
+            if (DecryptionDebug.Enabled) {
+                DrawDebugHud(sb, rect);
+            }
+        }
+
+        private static void DrawDebugHud(SpriteBatch sb, Rectangle panel) {
+            var font = FontAssets.MouseText.Value;
+            string text = DecryptionDebug.GetHudText();
+            Vector2 pos = new Vector2(panel.X, panel.Bottom + 8);
+            //背板
+            Vector2 size = font.MeasureString(text);
+            var px = TextureAssets.MagicPixel.Value;
+            sb.Draw(px, new Rectangle((int)pos.X - 6, (int)pos.Y - 4, (int)size.X + 12, (int)size.Y + 8), Color.Black * 0.72f);
+            sb.Draw(px, new Rectangle((int)pos.X - 6, (int)pos.Y - 4, (int)size.X + 12, 2), new Color(255, 180, 60));
+            Utils.DrawBorderString(sb, text, pos, new Color(255, 220, 140));
         }
 
         //═══════════════════════════════════════════════════════════
@@ -216,12 +233,12 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Signa
             sb.Draw(px, new Rectangle(rect.X, rect.Y - 2, rect.Width, 1), lineCol * 0.7f);
             sb.Draw(px, new Rectangle(rect.X, rect.Bottom + 1, rect.Width, 1), lineCol * 0.55f);
 
-            //左侧电子角标（三道45度斜线）
-            int ct = rect.Y + rect.Height / 2;
+            //左侧电子角标：三道竖向短线（之前用旋转DrawLine画45度，
+            //在某些SamplerState/缩放组合下会被拉伸成贯穿屏幕的巨型色块，改用轴向矩形稳妥）
             for (int k = 0; k < 3; k++) {
                 int sx = rect.X + 6 + k * 5;
                 Color cc = lineCol * (0.6f + k * 0.15f);
-                DrawLine(sb, new Vector2(sx, rect.Y + 10), new Vector2(sx + 18, rect.Bottom - 10), cc, 1.8f);
+                sb.Draw(px, new Rectangle(sx, rect.Y + 10, 2, rect.Height - 20), cc);
             }
 
             //标题 + 副标题
