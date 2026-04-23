@@ -29,13 +29,11 @@ namespace CalamityOverhaul.Content.ADV.DialogueBoxs.Styles
         //着色器专用单调递增时间,避免循环回绕导致噪声跳变
         private float shaderTime = 0f;
 
-        //粒子系统
+        //粒子系统:只保留火星余烬与细灰,舍弃大体积焰魂
         private readonly List<EmberPRT> embers = new();
         private int emberSpawnTimer = 0;
         private readonly List<AshPRT> ashes = new();
         private int ashSpawnTimer = 0;
-        private readonly List<FlameWispPRT> flameWisps = new();
-        private int wispSpawnTimer = 0;
         private const float ParticleSideMargin = 30f;
 
         #region 样式配置重写
@@ -139,12 +137,18 @@ namespace CalamityOverhaul.Content.ADV.DialogueBoxs.Styles
             //shader时间在远大于噪声循环周期的数值后再回绕
             if (shaderTime > 10000f) shaderTime -= 10000f;
 
+            //火星:更稀疏更小,营造缓慢升腾的点状余烬
             emberSpawnTimer++;
-            if (Active && emberSpawnTimer >= 8 && embers.Count < 35) {
+            if (Active && emberSpawnTimer >= 18 && embers.Count < 14) {
                 emberSpawnTimer = 0;
                 float xPos = Main.rand.NextFloat(panelPos.X + ParticleSideMargin, panelPos.X + panelSize.X - ParticleSideMargin);
                 Vector2 startPos = new(xPos, panelPos.Y + panelSize.Y - 5f);
-                embers.Add(new EmberPRT(startPos));
+                var e = new EmberPRT(startPos) {
+                    Size = Main.rand.NextFloat(1.1f, 2.0f),
+                    RiseSpeed = Main.rand.NextFloat(0.25f, 0.6f),
+                    Drift = Main.rand.NextFloat(-0.18f, 0.18f)
+                };
+                embers.Add(e);
             }
             for (int i = embers.Count - 1; i >= 0; i--) {
                 if (embers[i].Update(panelPos, panelSize)) {
@@ -153,7 +157,7 @@ namespace CalamityOverhaul.Content.ADV.DialogueBoxs.Styles
             }
 
             ashSpawnTimer++;
-            if (Active && ashSpawnTimer >= 12 && ashes.Count < 25) {
+            if (Active && ashSpawnTimer >= 24 && ashes.Count < 14) {
                 ashSpawnTimer = 0;
                 float xPos = Main.rand.NextFloat(panelPos.X + ParticleSideMargin, panelPos.X + panelSize.X - ParticleSideMargin);
                 Vector2 startPos = new(xPos, panelPos.Y + panelSize.Y);
@@ -162,23 +166,6 @@ namespace CalamityOverhaul.Content.ADV.DialogueBoxs.Styles
             for (int i = ashes.Count - 1; i >= 0; i--) {
                 if (ashes[i].Update(panelPos, panelSize)) {
                     ashes.RemoveAt(i);
-                }
-            }
-
-            wispSpawnTimer++;
-            if (Active && wispSpawnTimer >= 45 && flameWisps.Count < 8) {
-                wispSpawnTimer = 0;
-                Vector2 startPos = new(
-                    Main.rand.NextFloat(panelPos.X + 40f, panelPos.X + panelSize.X - 40f),
-                    Main.rand.NextFloat(panelPos.Y + 60f, panelPos.Y + panelSize.Y - 60f)
-                );
-                var prt = new FlameWispPRT(startPos);
-                prt.Size = Main.rand.NextFloat(8f, 12f);
-                flameWisps.Add(prt);
-            }
-            for (int i = flameWisps.Count - 1; i >= 0; i--) {
-                if (flameWisps[i].Update(panelPos, panelSize)) {
-                    flameWisps.RemoveAt(i);
                 }
             }
         }
@@ -199,15 +186,12 @@ namespace CalamityOverhaul.Content.ADV.DialogueBoxs.Styles
                 DrawFallbackPanel(spriteBatch, panelRect, alpha);
             }
 
-            //CPU粒子叠层,增强近景物理感
+            //CPU粒子叠层:只保留灰与火星,整体透明度降低
             foreach (var ash in ashes) {
-                ash.Draw(spriteBatch, alpha * 0.7f);
-            }
-            foreach (var wisp in flameWisps) {
-                wisp.Draw(spriteBatch, alpha * 0.8f);
+                ash.Draw(spriteBatch, alpha * 0.55f);
             }
             foreach (var ember in embers) {
-                ember.Draw(spriteBatch, alpha * 0.95f);
+                ember.Draw(spriteBatch, alpha * 0.7f);
             }
 
             //定时对话进度指示器
