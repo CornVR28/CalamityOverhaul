@@ -110,22 +110,18 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.TheHerInThePasts
         }
 
         private void DrawWitch(SpriteBatch spriteBatch, float alpha) {
+            float scale2 = scale * 1.16f;
             Texture2D portrait = ADVAsset.SupCalADV;
             if (portrait == null || portrait.IsDisposed) return;
 
             Rectangle rectangle = new Rectangle(0, 0, portrait.Width, portrait.Height);
-            position = OwnerDialogue.GetPanelRect().Top() + new Vector2(-160, -portrait.Height + 100) * scale;
+            position = OwnerDialogue.GetPanelRect().Top() + new Vector2(-160, -portrait.Height + 100) * scale2;
 
             Color stone = new(180, 175, 170);
             Color vivid = Color.White;
             Color blended = Color.Lerp(stone, vivid, colorationT) * alpha;
 
-            spriteBatch.Draw(portrait, position, rectangle, blended, rotation, Vector2.Zero, scale, SpriteEffects.None, 0f);
-
-            if (colorationT > 0.05f) {
-                Color glow = Color.White * alpha * colorationT * 0.4f;
-                spriteBatch.Draw(portrait, position, rectangle, glow, rotation, Vector2.Zero, scale * 1.015f, SpriteEffects.None, 0f);
-            }
+            spriteBatch.Draw(portrait, position, rectangle, blended, rotation, Vector2.Zero, scale2, SpriteEffects.None, 0f);
 
             if (dissolving && dissolveT > 0.01f) {
                 DrawPixelDissolve(spriteBatch, portrait, position, alpha);

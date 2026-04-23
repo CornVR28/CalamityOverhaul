@@ -1,9 +1,6 @@
 ﻿using CalamityOverhaul.Content.ADV.DialogueBoxs;
 using CalamityOverhaul.Content.ADV.DialogueBoxs.Styles;
 using CalamityOverhaul.Content.ADV.Scenarios.Shepel;
-using CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.GlitchWraith;
-using CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.TimeShift;
-using InnoVault.Actors;
 using System;
 using Terraria;
 using Terraria.Localization;
@@ -16,8 +13,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.TheHerInThePasts
     {
         public override string Key => nameof(TheHerInThePast);
         protected override Func<DialogueBoxBase> DefaultDialogueStyle => () => BrimstoneDialogueBox.Instance;
-
-        private static int triggerDelay;
 
         public static LocalizedText RolenameWitch { get; private set; }
         public static LocalizedText RolenameSHPC { get; private set; }
@@ -35,7 +30,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.TheHerInThePasts
         public static LocalizedText ShpcLine4 { get; private set; }
 
         void IWorldInfo.OnWorldLoad() {
-            triggerDelay = 0;
         }
 
         public override void SetStaticDefaults() {
@@ -138,31 +132,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.TheHerInThePasts
             portrait?.SwitchTo(TheHerInThePastPortrait.Role.Witch);
             portrait?.StartPixelDissolve();
 
-            foreach (var wraith in ActorLoader.GetActiveActors<GlitchWraithActor>()) {
-                wraith?.ApplySelfDismember();
-            }
-
             if (Main.LocalPlayer.TryGetADVSave(out var save)) {
                 save.Get<VoidColonyADVData>().TheHerInThePast = true;
-            }
-        }
-
-        public override void Update(ADVSave save, Player player) {
-            if (save.Get<VoidColonyADVData>().TheHerInThePast) return;
-            if (!VoidColony.Active) return;
-            if (!VoidTimeShiftSystem.InPast) return;
-
-            var statue = WitchStatueActor.Current;
-            if (statue == null || !statue.IsSuppressing) {
-                triggerDelay = 0;
-                return;
-            }
-
-            if (++triggerDelay < 45) return;
-
-            if (StartScenario()) {
-                save.Get<VoidColonyADVData>().TheHerInThePast = true;
-                triggerDelay = 0;
             }
         }
     }

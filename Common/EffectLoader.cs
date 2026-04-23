@@ -47,6 +47,7 @@ namespace CalamityOverhaul.Common
         public static Asset<Effect> CelestialStar { get; set; }
         public static Asset<Effect> BrimstoneDomain { get; set; }
         public static Asset<Effect> BrimstoneBlastWave { get; set; }
+        public static Asset<Effect> WitchBrimstoneDomain { get; set; }
         public static Asset<Effect> CelestialDomain { get; set; }
         public static Asset<Effect> ProverbsGhostDomain { get; set; }
         public static Asset<Effect> RevelationPlague { get; set; }
