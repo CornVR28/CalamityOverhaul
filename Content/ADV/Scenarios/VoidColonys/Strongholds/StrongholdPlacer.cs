@@ -12,6 +12,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Strongholds
         /// <summary>当前世界生成中所有需要放置的基地实例</summary>
         private static readonly List<Stronghold> Strongholds = [
             new ZeroSiteStronghold(),
+            new TwinDeckCannonStronghold(),
         ];
 
         public static void BuildAll() {

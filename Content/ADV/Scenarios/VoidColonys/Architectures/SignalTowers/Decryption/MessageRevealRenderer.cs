@@ -1,4 +1,4 @@
-using CalamityOverhaul.Common;
+﻿using CalamityOverhaul.Common;
 using CalamityOverhaul.Content.HackTimes;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -80,73 +80,111 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Signa
 
     /// <summary>
     /// 消息展示本地化
+    /// 零号基地中破译到的文本：嘉登关于亚空间越迁事件与虚空部落建立的示警记录
     /// </summary>
     internal class MessageStrings : ModSystem, ILocalizedModType
     {
         public string LocalizationCategory => "UI";
         public static LocalizedText Header { get; private set; }
+        public static LocalizedText AccessLine { get; private set; }
+        public static LocalizedText StatusLine { get; private set; }
         public static LocalizedText SourceSystem { get; private set; }
         public static LocalizedText SourceSignal { get; private set; }
         public static LocalizedText SourceArchive { get; private set; }
         public static LocalizedText FragmentTag { get; private set; }
         public static LocalizedText SignatureTag { get; private set; }
-        public static LocalizedText[] DefaultBody { get; private set; }
+        //五个记录段落：每个段包含Title + 多条Body
+        public static LocalizedText Record01Title { get; private set; }
+        public static LocalizedText[] Record01Body { get; private set; }
+        public static LocalizedText Record02Title { get; private set; }
+        public static LocalizedText[] Record02Body { get; private set; }
+        public static LocalizedText Record03Title { get; private set; }
+        public static LocalizedText[] Record03Body { get; private set; }
+        public static LocalizedText Record04Title { get; private set; }
+        public static LocalizedText[] Record04Body { get; private set; }
         public static LocalizedText SkipHint { get; private set; }
         public static LocalizedText CloseHint { get; private set; }
 
         public override void SetStaticDefaults() {
-            Header = this.GetLocalization("MsgHeader", () => "── 截获片段 ▸ 来源 0x{0} / {1} ──");
+            Header = this.GetLocalization("MsgHeader", () => "【零号基地档案】");
+            AccessLine = this.GetLocalization("MsgAccess", () => "访问权限： Draedon");
+            StatusLine = this.GetLocalization("MsgStatus", () => "状态： 局部解密");
             SourceSystem = this.GetLocalization("MsgSrcSystem", () => "SYS");
             SourceSignal = this.GetLocalization("MsgSrcSignal", () => "SIG");
             SourceArchive = this.GetLocalization("MsgSrcArchive", () => "ARC");
             FragmentTag = this.GetLocalization("MsgFragment", () => "FRAGMENT");
             SignatureTag = this.GetLocalization("MsgSignature", () => "SIGN   ▸ {0}");
-            //默认占位内容：按顺序占位，后续剧情脚本可覆盖
-            DefaultBody = new LocalizedText[]{
-                this.GetLocalization("MsgBody0", () => "终端已接入。校验密钥匹配度 98.4%。"),
-                this.GetLocalization("MsgBody1", () => "...噪声中仍残留未标注的脉冲信号。"),
-                this.GetLocalization("MsgBody2", () => "坐标偏移量指向坍缩核心的深层回声。"),
-                this.GetLocalization("MsgBody3", () => "该节点被标记为 ██CLASSIFIED██，相关片段已封存。"),
-                this.GetLocalization("MsgBody4", () => "下一个协议窗口将由你的行动触发。"),
+
+            Record01Title = this.GetLocalization("MsgRec01Title", () => "[记录-01]");
+            Record01Body = new[] {
+                this.GetLocalization("MsgRec01_0", () => "大尖啸。无法解析波段，像是整个宇宙都在尖叫。"),
+                this.GetLocalization("MsgRec01_1", () => "空间曲率永久锁死。折跃引擎彻底报废。强行跃迁的结果只有物质结构的解体。"),
+                this.GetLocalization("MsgRec01_2", () => "常规星际航行终结。旧物理统一模型崩溃。"),
+            };
+            Record02Title = this.GetLocalization("MsgRec02Title", () => "[记录-02]");
+            Record02Body = new[] {
+                this.GetLocalization("MsgRec02_0", () => "七万三千次探测器损毁后，锁定当前虚空坐标。"),
+                this.GetLocalization("MsgRec02_1", () => "建立零号基地。铺设配套工业群。"),
+                this.GetLocalization("MsgRec02_2", () => "此处的现实壁垒已被拉扯至极限，可以直接目视那片无序的亚空间风暴。"),
+                this.GetLocalization("MsgRec02_3", () => "绝佳的观测点。"),
+            };
+            Record03Title = this.GetLocalization("MsgRec03Title", () => "[记录-03]");
+            Record03Body = new[] {
+                this.GetLocalization("MsgRec03_0", () => "风暴正在渗漏。"),
+                this.GetLocalization("MsgRec03_1", () => "物理学退位。绝对的唯心规则开始接管这片工业区。"),
+                this.GetLocalization("MsgRec03_2", () => "时间线出现重叠。尸体、过往残影与亚空间能量开始结合。"),
+                this.GetLocalization("MsgRec03_3", () => "工业区中开始频繁观察到怪异现象。"),
+            };
+            Record04Title = this.GetLocalization("MsgRec04Title", () => "[记录-04]");
+            Record04Body = new[] {
+                this.GetLocalization("MsgRec04_0", () => "清理这些灵异对象属于徒劳，它们无法被杀死。留作基地的外部屏障。"),
+                this.GetLocalization("MsgRec04_1", () => "若该日志被触发，意味着我已经放弃此地，所有向外界的通道已经关闭。"),
+                this.GetLocalization("MsgRec04_2", () => "后来者，自行在那些脏东西的规律里寻找机会。"),
             };
             SkipHint = this.GetLocalization("MsgSkipHint", () => "[空格/左键] 跳过逐字显示");
             CloseHint = this.GetLocalization("MsgCloseHint", () => "[空格/ESC] 断开连接");
         }
 
-        /// <summary>从当前塔的WhoAmI生成一份默认消息</summary>
+        /// <summary>生成零号基地嘉登档案的完整逐行脚本</summary>
         public static List<DecryptedLine> BuildDefaultPayload(SignalTowerActor tower) {
             int id = tower?.WhoAmI ?? 0;
-            string idHex = $"{id & 0xFFFF:X4}";
-            var list = new List<DecryptedLine> {
-                new() {
-                    Source = "",
-                    Body = Header.Format(idHex, SourceSignal.Value),
-                    Tint = new Color(120, 230, 255),
-                    IsHeader = true,
-                },
-            };
-            //主体5行
-            string[] srcs = [SourceSystem.Value, SourceSignal.Value, SourceSignal.Value, SourceArchive.Value, SourceSystem.Value];
-            Color[] tints = [
-                new(200, 230, 255),
-                new(210, 240, 220),
-                new(255, 230, 160),
-                new(220, 180, 255),
-                new(200, 255, 220),
-            ];
-            for (int i = 0; i < DefaultBody.Length; i++) {
-                list.Add(new DecryptedLine {
-                    Source = srcs[i % srcs.Length],
-                    Body = DefaultBody[i].Value,
-                    Tint = tints[i % tints.Length],
-                    IsHeader = false,
-                });
+            //预设配色：档案标题青、权限黄、状态绿、每段记录不同色调
+            Color titleCol = new(120, 230, 255);
+            Color accessCol = new(255, 220, 140);
+            Color statusCol = new(160, 255, 200);
+            Color recordTitleCol = new(220, 200, 255);
+            Color bodyColA = new(210, 235, 255);
+            Color bodyColB = new(230, 220, 195);
+            Color sigCol = new(180, 200, 220);
+
+            var list = new List<DecryptedLine>();
+            //首部三行：档案标题 + 权限 + 状态
+            list.Add(new DecryptedLine { Source = "", Body = Header.Value, Tint = titleCol, IsHeader = true });
+            list.Add(new DecryptedLine { Source = "", Body = AccessLine.Value, Tint = accessCol, IsHeader = true });
+            list.Add(new DecryptedLine { Source = "", Body = StatusLine.Value, Tint = statusCol, IsHeader = true });
+
+            //四段记录：每段一个黄紫色档案标题 + 多行Body交替色
+            void AppendRecord(LocalizedText title, LocalizedText[] body, string src) {
+                list.Add(new DecryptedLine { Source = "", Body = title.Value, Tint = recordTitleCol, IsHeader = true });
+                for (int i = 0; i < body.Length; i++) {
+                    list.Add(new DecryptedLine {
+                        Source = src,
+                        Body = body[i].Value,
+                        Tint = (i % 2 == 0) ? bodyColA : bodyColB,
+                        IsHeader = false,
+                    });
+                }
             }
-            //签名
+            AppendRecord(Record01Title, Record01Body, SourceSystem.Value);
+            AppendRecord(Record02Title, Record02Body, SourceArchive.Value);
+            AppendRecord(Record03Title, Record03Body, SourceSignal.Value);
+            AppendRecord(Record04Title, Record04Body, SourceArchive.Value);
+
+            //签名行：以Draedon哈希收尾
             list.Add(new DecryptedLine {
                 Source = "",
-                Body = SignatureTag.Format($"SHA-{unchecked((uint)HashCode.Combine(id, 0xA17)):X8}"),
-                Tint = new Color(180, 200, 220),
+                Body = SignatureTag.Format($"DRAEDON-{unchecked((uint)HashCode.Combine(id, 0xD12AED0Eu)):X8}"),
+                Tint = sigCol,
                 IsHeader = true,
             });
             return list;
@@ -166,10 +204,10 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Signa
             sb.Draw(px, new Rectangle(body.X, body.Y, body.Width, 1), accent * (eased * 0.65f));
             sb.Draw(px, new Rectangle(body.X, body.Bottom - 1, body.Width, 1), accent * (eased * 0.45f));
 
-            int lineHeight = 22;
+            int lineHeight = 18;
             int padX = 14;
-            int y = body.Y + 12;
-            float textScale = 0.66f;
+            int y = body.Y + 10;
+            float textScale = 0.6f;
 
             //逐行绘制，计算字符预算
             int budget = (int)stage.RevealedChars;

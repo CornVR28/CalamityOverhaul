@@ -1,4 +1,4 @@
-using InnoVault.Actors;
+﻿using InnoVault.Actors;
 using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ID;
@@ -16,28 +16,28 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.TheHerInThePasts
         private const float OffsetX = 480f;
 
         public override void PostUpdateEverything() {
-            if (Main.dedServ) return;
-            if (Main.netMode == NetmodeID.MultiplayerClient) return;
-            if (!VoidColony.Active) return;
+            //if (Main.dedServ) return;
+            //if (Main.netMode == NetmodeID.MultiplayerClient) return;
+            //if (!VoidColony.Active) return;
 
-            //已有实例则不再生成
-            if (ActorLoader.GetActiveActors<WitchStatueActor>().Count > 0) return;
+            ////已有实例则不再生成
+            //if (ActorLoader.GetActiveActors<WitchStatueActor>().Count > 0) return;
 
-            //使用世界出生点作为基准位置
-            int spawnTileX = Main.spawnTileX;
-            int spawnTileY = Main.spawnTileY;
-            Vector2 basePos = new Vector2(spawnTileX * 16f + OffsetX, spawnTileY * 16f);
+            ////使用世界出生点作为基准位置
+            //int spawnTileX = Main.spawnTileX;
+            //int spawnTileY = Main.spawnTileY;
+            //Vector2 basePos = new Vector2(spawnTileX * 16f + OffsetX, spawnTileY * 16f);
 
-            //向下吸附到地面：找到第一个实心物块
-            int probeY = spawnTileY;
-            int guard = 0;
-            while (guard++ < 200) {
-                if (WorldGen.SolidTile(spawnTileX + (int)(OffsetX / 16f), probeY)) break;
-                probeY++;
-            }
-            basePos.Y = probeY * 16f - 4f;
+            ////向下吸附到地面：找到第一个实心物块
+            //int probeY = spawnTileY;
+            //int guard = 0;
+            //while (guard++ < 200) {
+            //    if (WorldGen.SolidTile(spawnTileX + (int)(OffsetX / 16f), probeY)) break;
+            //    probeY++;
+            //}
+            //basePos.Y = probeY * 16f - 4f;
 
-            ActorLoader.NewActor<WitchStatueActor>(basePos, Vector2.Zero);
+            //ActorLoader.NewActor<WitchStatueActor>(basePos, Vector2.Zero);
         }
     }
 }
