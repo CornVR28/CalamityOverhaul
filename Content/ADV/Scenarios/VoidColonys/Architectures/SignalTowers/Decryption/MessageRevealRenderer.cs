@@ -214,17 +214,43 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Signa
 
             int lineHeight = 18;
             int padX = 14;
-            int y = body.Y + 10;
             float textScale = 0.6f;
+            int viewTop = body.Y + 10;
+            int viewBottom = textBottom - 4;
+            int viewH = viewBottom - viewTop;
+            int totalH = stage.Lines.Count * lineHeight;
+
+            //定位当前正在打字的行索引，用于滚动锚点
+            int activeIdx = stage.Lines.Count - 1;
+            {
+                int acc = 0;
+                int reveal = (int)stage.RevealedChars;
+                for (int i = 0; i < stage.Lines.Count; i++) {
+                    int len = stage.Lines[i].Body?.Length ?? 0;
+                    if (acc + len >= reveal) { activeIdx = i; break; }
+                    acc += len;
+                }
+            }
+
+            //滚动偏移：当总高超过可视区时，让活动行保持在底部的1/3区域
+            int scroll = 0;
+            if (totalH > viewH) {
+                int desired = (activeIdx + 1) * lineHeight - (viewH - lineHeight);
+                scroll = Math.Clamp(desired, 0, totalH - viewH);
+            }
 
             //逐行绘制，计算字符预算
             int budget = (int)stage.RevealedChars;
+            int yLogical = 0;
             foreach (var ln in stage.Lines) {
-                //保留hint区高度，避免最后几行被遮挡
-                if (y + lineHeight > textBottom - 4) break;
+                int y = viewTop + yLogical - scroll;
+                yLogical += lineHeight;
                 int want = ln.Body?.Length ?? 0;
                 int show = Math.Min(want, budget);
                 budget -= show;
+                //超出可视区直接跳过，绝不绘制到hint条上
+                if (y + lineHeight > viewBottom + 1) continue;
+                if (y < viewTop - lineHeight) continue;
                 string shownText = ln.Body == null ? string.Empty : ln.Body.Substring(0, show);
 
                 //源tag
@@ -255,7 +281,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Signa
                         accent * (eased * blink));
                     break;
                 }
-                y += lineHeight;
             }
 
             //底部状态栏：定位在已预留的hintArea中央
