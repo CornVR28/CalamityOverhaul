@@ -1,13 +1,13 @@
 // ============================================================================
 // DecryptionPanelBackground.fx
 // 信号塔解密面板背景
-// 风格：废土机械科幻 × 赛博朋克2077接入界面
-//   - 锈蚀金属底板（暖棕铜色、粗糙拉丝、铆钉接缝）
-//   - 六边形能量栅格（冷青蓝色，局部脉冲）
-//   - 垂直条状干扰（霓虹洋红断续扫过）
-//   - 水平CRT扫描线
-//   - 边缘故障色散（青红RGB分离的数字噪点带）
-//   - 破损电路节点闪烁
+// 风格：克制的工业HUD，强调层次与质感而非视觉噪声
+//   - 锈蚀金属底板（暖棕铜色、轻微拉丝、铆钉接缝）
+//   - 六边形能量栅格（冷青蓝，作为微弱底纹存在）
+//   - 极淡水平CRT扫描线
+//   - 单道缓慢全息扫描带
+//   - 浮雕斜面 + 阶段0警戒斜纹
+//   - 暗角
 // ============================================================================
 
 sampler uImage0 : register(s0);
@@ -106,10 +106,10 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0, float4 vertexColor : COLOR
     float3 bg = baseCol * (0.55 + brushH * 0.55 + brushL * 0.35);
     bg *= 0.72 + dirt * 0.45;
 
-    //锈斑：细粒度噪声相乘得到明暗斑点
+    //锈斑：细粒度噪声相乘得到明暗斑点（克制使用）
     float rustSpot = valueNoise(pixelPos * 0.22) * valueNoise(pixelPos * 0.55 + 99.0);
-    rustSpot = pow(saturate(rustSpot), 1.8);
-    bg += accent * rustSpot * 0.18;
+    rustSpot = pow(saturate(rustSpot), 2.0);
+    bg += accent * rustSpot * 0.09;
 
     //═══ 2. 金属板接缝（上下两道水平厚接缝 + 铆钉） ═══
     float seamDist = min(abs(uv.y - 0.18), abs(uv.y - 0.82)) * innerSize.y;
@@ -129,61 +129,32 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0, float4 vertexColor : COLOR
     bg -= float3(0.02, 0.012, 0.008) * rivet;//铆钉暗底
     bg += float3(0.20, 0.16, 0.11) * rivetShine;//铆钉亮面
 
-    //═══ 3. 六边形能量栅格（冷青） ═══
-    float2 hexPos = (pixelPos - center) + float2(0.0, uTime * 6.0);
-    float2 hexR = hexDist(hexPos, 22.0);
-    //hexR.x在靠近边时越大，使用距离作为线宽
-    float hexEdge = smoothstep(1.2, 0.2, hexR.x);
-    //格子自身的节奏脉冲（每个格子独立相位）
-    float hexPhase = frac(uTime * 0.35 + hash11(hexR.y * 13.0));
-    float hexPulse = smoothstep(0.0, 0.1, hexPhase) * smoothstep(0.35, 0.1, hexPhase);
-    bg += cyber * hexEdge * (0.10 + 0.35 * hexPulse) * uOpenProgress;
+    //═══ 3. 六边形能量栅格（冷青，仅作底纹微提示） ═══
+    float2 hexPos = (pixelPos - center) + float2(0.0, uTime * 4.0);
+    float2 hexR = hexDist(hexPos, 26.0);
+    //仅渲染细线轮廓
+    float hexEdge = smoothstep(0.9, 0.1, hexR.x);
+    //格子节奏脉冲减弱
+    float hexPhase = frac(uTime * 0.22 + hash11(hexR.y * 13.0));
+    float hexPulse = smoothstep(0.0, 0.15, hexPhase) * smoothstep(0.45, 0.15, hexPhase);
+    bg += cyber * hexEdge * (0.035 + 0.10 * hexPulse) * uOpenProgress;
 
-    //═══ 4. 垂直霓虹干扰条（洋红，断续闪过） ═══
-    float barPhase = uTime * 0.18;
-    for (int bi = 0; bi < 3; bi++) {
-        float seedV = hash11(floor(barPhase * 1.9 + bi * 11.0)) * 2.0 - 1.0;
-        float barCenterX = innerMin.x + innerSize.x * (0.5 + seedV * 0.45);
-        float life = frac(barPhase * 1.9 + bi * 11.0);
-        float alive = smoothstep(0.0, 0.08, life) * smoothstep(1.0, 0.7, life);
-        float barDist = abs(pixelPos.x - barCenterX);
-        float barCore = exp(-barDist * 0.18);
-        float barGlow = exp(-barDist * 0.04) * 0.5;
-        bg += neonHL * (barCore + barGlow) * 0.22 * alive * uOpenProgress;
-    }
-
-    //═══ 5. 水平CRT扫描线 ═══
+    //═══ 5. 极淡水平CRT扫描线 ═══
     float scanY = frac(pixelPos.y * 0.3333);
-    bg *= 0.88 + 0.12 * smoothstep(0.0, 0.25, scanY) * smoothstep(1.0, 0.75, scanY);
+    bg *= 0.96 + 0.04 * smoothstep(0.0, 0.25, scanY) * smoothstep(1.0, 0.75, scanY);
 
-    //═══ 6. 慢速全息扫描光带 ═══
-    float swPhase = frac(uTime * 0.07);
+    //═══ 6. 单道缓慢全息扫描带（克制） ═══
+    float swPhase = frac(uTime * 0.06);
     float swDist = uv.y - swPhase;
     if (swDist < -0.5) swDist += 1.0;
     if (swDist > 0.5) swDist -= 1.0;
-    float swCore = exp(-abs(swDist) * 22.0);
-    float swGlow = exp(-abs(swDist) * 5.0);
-    bg += cyber * swCore * 0.45;
-    bg += cyber * swGlow * 0.08;
+    float swCore = exp(-abs(swDist) * 28.0);
+    float swGlow = exp(-abs(swDist) * 6.0);
+    bg += cyber * swCore * 0.22;
+    bg += cyber * swGlow * 0.035;
 
-    //═══ 7. 边缘故障色散带（靠近边1/10范围内） ═══
+    //仅保留边缘带遮罩供警戒斜纹使用
     float edgeBand = 1.0 - smoothstep(0.0, 14.0, -panelSDF);
-    float glitch = valueNoise(float2(uv.y * 120.0, uTime * 7.0));
-    glitch = step(0.82, glitch);
-    bg.r += glitch * edgeBand * 0.25;
-    bg.b += glitch * edgeBand * 0.18;
-
-    //═══ 8. 破损电路节点（稀疏随机闪烁亮点） ═══
-    float2 nodeCell = floor(pixelPos / 55.0);
-    float nodeSeed = hash21(nodeCell);
-    if (nodeSeed > 0.88) {
-        float2 nodeLocal = fmod(pixelPos, 55.0) - 27.5;
-        float nodeDist = length(nodeLocal);
-        float nodeBlink = sin(uTime * (3.0 + nodeSeed * 6.0) + nodeSeed * 20.0) * 0.5 + 0.5;
-        float nodeCore = exp(-nodeDist * 0.75);
-        float nodeGlow = exp(-nodeDist * 0.18);
-        bg += (nodeSeed > 0.94 ? neonHL : cyber) * (nodeCore + nodeGlow * 0.2) * nodeBlink * 0.6;
-    }
 
     //═══ 9. 浮雕斜面 + 警戒斜纹 ═══
     float bevelW = 14.0;

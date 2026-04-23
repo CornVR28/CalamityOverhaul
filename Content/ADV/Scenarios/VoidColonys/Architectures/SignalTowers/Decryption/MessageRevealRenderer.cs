@@ -204,6 +204,14 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Signa
             sb.Draw(px, new Rectangle(body.X, body.Y, body.Width, 1), accent * (eased * 0.65f));
             sb.Draw(px, new Rectangle(body.X, body.Bottom - 1, body.Width, 1), accent * (eased * 0.45f));
 
+            //底部hint栏：先预留出独立区域，避免与正文叠绘
+            int hintAreaH = 22;
+            int textBottom = body.Bottom - hintAreaH;
+            //hint区背景，吸住下方的文本，与正文形成视觉分隔
+            Rectangle hintArea = new Rectangle(body.X, textBottom, body.Width, hintAreaH);
+            sb.Draw(px, hintArea, Color.Black * (0.42f * eased));
+            sb.Draw(px, new Rectangle(hintArea.X, hintArea.Y, hintArea.Width, 1), accent * (eased * 0.35f));
+
             int lineHeight = 18;
             int padX = 14;
             int y = body.Y + 10;
@@ -212,7 +220,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Signa
             //逐行绘制，计算字符预算
             int budget = (int)stage.RevealedChars;
             foreach (var ln in stage.Lines) {
-                if (y > body.Bottom - lineHeight) break;
+                //保留hint区高度，避免最后几行被遮挡
+                if (y + lineHeight > textBottom - 4) break;
                 int want = ln.Body?.Length ?? 0;
                 int show = Math.Min(want, budget);
                 budget -= show;
@@ -249,13 +258,13 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Signa
                 y += lineHeight;
             }
 
-            //底部状态栏
+            //底部状态栏：定位在已预留的hintArea中央
             string hintStr = stage.FullyRevealed
                 ? MessageStrings.CloseHint.Value
                 : MessageStrings.SkipHint.Value;
             Vector2 hs = font.MeasureString(hintStr) * 0.6f;
             Utils.DrawBorderString(sb, hintStr,
-                new Vector2(body.X + (body.Width - hs.X) / 2, body.Bottom - hs.Y - 6),
+                new Vector2(body.X + (body.Width - hs.X) / 2, textBottom + (hintAreaH - hs.Y) / 2),
                 new Color(180, 220, 255) * (eased * 0.9f), 0.6f);
         }
     }

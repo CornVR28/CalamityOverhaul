@@ -42,27 +42,28 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Strongholds
     {
         public override string Name => "TwinDeckCannonBattery";
 
-        //X桁架斜桥贴图与端口常量，与ArchitecturePorts登记一致
-        private const int SlopeWidthPx = 266;
-        private const int SlopeHighLocalY = 30;
-        private const int SlopeLowLocalY = 160;
-        //单段斜桥两端的Y差，用于按段累加估算双层垂直落差
-        private const int SlopeYDiffPx = SlopeLowLocalY - SlopeHighLocalY;
+        //铁锈阶梯贴图与端口常量，与ArchitecturePorts登记一致
+        //铁锈阶梯本身就是完整阶梯走廊，多段级联贴图上的踏面能连为一体，比X桁架斜桥作阶梯拼接更整齐
+        private const int StairWidthPx = 362;
+        private const int StairHighLocalY = 42;
+        private const int StairLowLocalY = 188;
+        //单段阶梯两端的Y差，用于按段累加估算双层垂直落差
+        private const int StairYDiffPx = StairLowLocalY - StairHighLocalY;
 
-        //每侧级联斜桥段数，控制双层桥纵深；段数越多上下层落差越大、级联水平跨度也越大
-        //4段≈ 520px落差/1064px水平跨，已能完整容纳一座激光炮的高度
-        private const int SlopeSegmentsPerSide = 4;
-        //双层桥的垂直落差，由级联斜桥总Y差决定
-        private const int DeckGapPx = SlopeSegmentsPerSide * SlopeYDiffPx;
-        //一侧级联斜桥总水平跨度
-        private const int SlopeChainSpanPx = SlopeSegmentsPerSide * SlopeWidthPx;
+        //每侧级联阶梯段数，用来拉开上下层的纵深
+        //4段≈ 584px落差/1448px水平跨，恰好超过激光炮底座472px高，上下层炮台不会互相遮挡
+        private const int StairSegmentsPerSide = 4;
+        //双层桥的垂直落差，由级联阶梯总Y差决定
+        private const int DeckGapPx = StairSegmentsPerSide * StairYDiffPx;
+        //一侧级联阶梯总水平跨度
+        private const int StairChainSpanPx = StairSegmentsPerSide * StairWidthPx;
 
         //上层桥单侧外延，回到与零号站点接近的尺寸，避免炮台拉得过远
         private const int UpperHalfSpanPx = 1800;
-        //下层桥端相对斜桥低端再向外延伸的距离，给底层激光炮底座留出整段桥面
+        //下层桥端相对阶梯低端再向外延伸的距离，给底层激光炮底座留出整段桥面
         private const int LowerDeckExtraSpanPx = 750;
-        //下层桥单侧外延：斜桥低端世界X = ±(UpperHalfSpan - SlopeChainSpan)，再向外推 LowerDeckExtraSpan
-        private const int LowerHalfSpanPx = UpperHalfSpanPx - SlopeChainSpanPx + LowerDeckExtraSpanPx;
+        //下层桥单侧外延：阶梯低端世界X = ±(UpperHalfSpan - StairChainSpan)，再向外推 LowerDeckExtraSpan
+        private const int LowerHalfSpanPx = UpperHalfSpanPx - StairChainSpanPx + LowerDeckExtraSpanPx;
 
         //巨型激光炮底座尺寸，与LaserCannonPedestal.png一致
         private const int LaserCannonPedestalWidthPx = 870;
@@ -128,27 +129,27 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Strongholds
             RegisterBridge(towerRightPortX, rightMidLabLeftPortX, upperBridgeY);
             RegisterBridge(rightMidLabRightPortX, upperRightEndX, upperBridgeY);
 
-            //倒梯形阶梯：左侧斜桥从上层外端向下向内级联，右侧镜像
-            //左侧使用FlipX：每段Left(0,30)为高端、Right(266,160)为低端，按段叠加向右下延伸
+            //倒梯形阶梯：左侧从上层外端向下向内级联，右侧镜像
+            //左侧使用FlipX：每段Left(0,42)为高端、Right(362,188)为低端，按段叠加向右下延伸
             int leftStairTopWorldX = upperLeftEndX;
-            for (int i = 0; i < SlopeSegmentsPerSide; i++) {
-                int segLeftPortWorldX = leftStairTopWorldX + i * SlopeWidthPx;
-                int segLeftPortWorldY = upperBridgeY + i * SlopeYDiffPx;
-                RegisterAlignedToBridgeY(ArchitectureType.ConnectionBridgeSlope,
-                    segLeftPortWorldX, segLeftPortWorldY, 0, SlopeHighLocalY, flipX: true);
+            for (int i = 0; i < StairSegmentsPerSide; i++) {
+                int segLeftPortWorldX = leftStairTopWorldX + i * StairWidthPx;
+                int segLeftPortWorldY = upperBridgeY + i * StairYDiffPx;
+                RegisterAlignedToBridgeY(ArchitectureType.ReinforcedRustedPathway,
+                    segLeftPortWorldX, segLeftPortWorldY, 0, StairHighLocalY, flipX: true);
             }
-            int leftStairBottomWorldX = leftStairTopWorldX + SlopeChainSpanPx;
+            int leftStairBottomWorldX = leftStairTopWorldX + StairChainSpanPx;
 
-            //右侧未翻转：每段Left(0,160)为低端、Right(266,30)为高端，按段叠加向左下延伸
-            //从上层右端Right端口出发，每往内一段，左端口位于右端口X-266，Y较高端低SlopeYDiff
+            //右侧未翻转：每段Left(0,188)为低端、Right(362,42)为高端，按段叠加向左下延伸
+            //从上层右端Right端口出发，每往内一段，左端口位于右端口X-362，Y较高端低StairYDiff
             int rightStairTopWorldX = upperRightEndX;
-            for (int i = 0; i < SlopeSegmentsPerSide; i++) {
-                int segRightPortWorldX = rightStairTopWorldX - i * SlopeWidthPx;
-                int segRightPortWorldY = upperBridgeY + i * SlopeYDiffPx;
-                RegisterAlignedToBridgeY(ArchitectureType.ConnectionBridgeSlope,
-                    segRightPortWorldX, segRightPortWorldY, SlopeWidthPx, SlopeHighLocalY);
+            for (int i = 0; i < StairSegmentsPerSide; i++) {
+                int segRightPortWorldX = rightStairTopWorldX - i * StairWidthPx;
+                int segRightPortWorldY = upperBridgeY + i * StairYDiffPx;
+                RegisterAlignedToBridgeY(ArchitectureType.ReinforcedRustedPathway,
+                    segRightPortWorldX, segRightPortWorldY, StairWidthPx, StairHighLocalY);
             }
-            int rightStairBottomWorldX = rightStairTopWorldX - SlopeChainSpanPx;
+            int rightStairBottomWorldX = rightStairTopWorldX - StairChainSpanPx;
 
             //下层桥两端外延位置：斜桥低端再向外推一段
             int lowerLeftEndX = anchorPixelX - LowerHalfSpanPx;
