@@ -1,4 +1,4 @@
-﻿CWRServerConfig: {
+CWRServerConfig: {
 	DisplayName: Конфигурация контента
 
 	WeaponOverhaul: {
@@ -168,5 +168,10 @@
 	GenSylvanOutpost: {
 		Label: Генерация лесного аванпоста
 		Tooltip: Создает деревянные посты эльфов или лесных стражей в глубине чащи.
+	}
+
+	SignalTowerDecryptionAutoPlay: {
+		// Label: Signal Tower Decryption Auto Play
+		// Tooltip: ""
 	}
 }

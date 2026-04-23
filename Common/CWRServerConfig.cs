@@ -148,6 +148,10 @@ namespace CalamityOverhaul.Common
         [DefaultValue(1)]
         public float DialogueBox_Scale_Value { get; set; }//对话框缩放比例
 
+        [BackgroundColor(45, 175, 225, 255)]
+        [DefaultValue(false)]
+        public bool SignalTowerDecryptionAutoPlay { get; set; }//信号塔破译傻瓜模式：开启后小游戏自动演示正确解答
+
         public override void OnLoaded() {
             Instance = this;
             Data.OldWeaponHandheldDisplay = WeaponHandheldDisplay;

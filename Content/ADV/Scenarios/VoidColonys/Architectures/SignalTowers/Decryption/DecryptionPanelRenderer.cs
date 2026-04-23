@@ -157,23 +157,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Signa
                 Main.LocalPlayer.mouseInterface = true;
                 Main.LocalPlayer.cursorItemIconEnabled = false;
             }
-
-            //4) 调试HUD
-            if (DecryptionDebug.Enabled) {
-                DrawDebugHud(sb, rect);
-            }
-        }
-
-        private static void DrawDebugHud(SpriteBatch sb, Rectangle panel) {
-            var font = FontAssets.MouseText.Value;
-            string text = DecryptionDebug.GetHudText();
-            Vector2 pos = new Vector2(panel.X, panel.Bottom + 8);
-            //背板
-            Vector2 size = font.MeasureString(text);
-            var px = TextureAssets.MagicPixel.Value;
-            sb.Draw(px, new Rectangle((int)pos.X - 6, (int)pos.Y - 4, (int)size.X + 12, (int)size.Y + 8), Color.Black * 0.72f);
-            sb.Draw(px, new Rectangle((int)pos.X - 6, (int)pos.Y - 4, (int)size.X + 12, 2), new Color(255, 180, 60));
-            Utils.DrawBorderString(sb, text, pos, new Color(255, 220, 140));
         }
 
         //═══════════════════════════════════════════════════════════

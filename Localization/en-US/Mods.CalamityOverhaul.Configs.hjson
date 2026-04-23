@@ -1,4 +1,4 @@
-﻿CWRServerConfig: {
+CWRServerConfig: {
 	DisplayName: Content Config
 
 	WeaponOverhaul: {
@@ -159,5 +159,10 @@
 	GenSylvanOutpost: {
 		Label: Generate Sylvan Outpost
 		Tooltip: Spawns wooden elven or forest guardian outposts deep within the forest.
+	}
+
+	SignalTowerDecryptionAutoPlay: {
+		Label: Signal Tower Decryption Auto Play
+		Tooltip: ""
 	}
 }

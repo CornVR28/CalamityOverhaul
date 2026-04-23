@@ -48,6 +48,18 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Signa
 
         public (int row, int col)? HoverCell { get; private set; }
 
+        /// <summary>主解题路径的单元格坐标，长度为BufferCapacity，供“答题代劳”模式自动点击</summary>
+        public List<(int row, int col)> SolutionPath { get; } = [];
+        /// <summary>是否正在自动播放解题演示</summary>
+        public bool IsAutoPlaying { get; private set; }
+        //自动播放计时与指针
+        private float autoPlayTimer;
+        private int autoPlayIndex;
+        //每两次自动点击之间的间隔，秒
+        private const float AutoPlayStepInterval = 0.28f;
+        //首次点击前的预健盘延时，令玩家能看清答题完整过程
+        private const float AutoPlayWarmUp = 0.55f;
+
         /// <summary>新一轮破译：重新生成矩阵与目标</summary>
         public void NewPuzzle() {
             AttemptCount = 0;
@@ -67,13 +79,10 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Signa
             HasFailedAttempt = false;
             Buffer.Clear();
             Targets.Clear();
+            SolutionPath.Clear();
+            IsAutoPlaying = false;
             HoverCell = null;
             for (int r = 0; r < MatrixSize; r++) for (int c = 0; c < MatrixSize; c++) Taken[r, c] = false;
-        }
-
-        /// <summary>调试：强制标记为已解</summary>
-        public void ForceSolve() {
-            HasSolved = true;
         }
 
         /// <summary>失败或手动重置后的新一次尝试，不重新生成矩阵</summary>
@@ -81,11 +90,31 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Signa
             Buffer.Clear();
             for (int r = 0; r < MatrixSize; r++) for (int c = 0; c < MatrixSize; c++) Taken[r, c] = false;
             foreach (var t in Targets) t.Matched = false;
-            AxisLock = 0;
-            AxisIndex = 0;
+            //初始轴约束根据主解路径首格而定（常为行约束 + 首格所在行），而非写死的行0
+            //这样保证主解路径的首格始终合法，自动代劳与手动解题都能从正确起点开始
+            if (SolutionPath.Count > 0) {
+                var (fr, _) = SolutionPath[0];
+                AxisLock = 0;
+                AxisIndex = fr;
+            }
+            else {
+                AxisLock = 0;
+                AxisIndex = 0;
+            }
             TimeLeft = AttemptTimeSeconds;
             HasFailedAttempt = false;
             AttemptCount++;
+
+            //每次重置时根据当前配置决定是否启用傻瓜自动演示
+            //使得玩家中途切换配置、或先手动失败再交给自动模式的场景都能生效
+            if (CWRServerConfig.Instance?.SignalTowerDecryptionAutoPlay == true && SolutionPath.Count > 0) {
+                IsAutoPlaying = true;
+                autoPlayTimer = -AutoPlayWarmUp;
+                autoPlayIndex = 0;
+            }
+            else {
+                IsAutoPlaying = false;
+            }
         }
 
         public void Update(float dt) {
@@ -103,18 +132,44 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Signa
                 TimeLeft = 0f;
                 TriggerFail();
             }
+
+            //答题代劳：按预计间隔顺次点亮主解路径上的每一格
+            if (IsAutoPlaying) {
+                autoPlayTimer += dt;
+                if (autoPlayTimer >= AutoPlayStepInterval && autoPlayIndex < SolutionPath.Count) {
+                    autoPlayTimer = 0f;
+                    var (r, c) = SolutionPath[autoPlayIndex];
+                    if (TrySelectInternal(r, c, allowAuto: true)) {
+                        autoPlayIndex++;
+                        SoundEngine.PlaySound(SoundID.MenuTick);
+                    }
+                    else {
+                        //主解路径格不合法（理论不应发生）——放弃自动模式，把控制权还给玩家
+                        IsAutoPlaying = false;
+                    }
+                }
+                if (autoPlayIndex >= SolutionPath.Count) {
+                    IsAutoPlaying = false;
+                }
+            }
         }
 
-        public bool CanSelect(int r, int c) {
+        public bool CanSelect(int r, int c) => CanSelectInternal(r, c, allowAuto: false);
+
+        /// <summary>内部选择校验：allowAuto=true表示来自自动代劳逻辑，跳过IsAutoPlaying判定</summary>
+        private bool CanSelectInternal(int r, int c, bool allowAuto) {
             if (Cooldown > 0f || HasSolved) return false;
+            if (!allowAuto && IsAutoPlaying) return false;
             if (r < 0 || r >= MatrixSize || c < 0 || c >= MatrixSize) return false;
             if (Taken[r, c]) return false;
             if (Buffer.Count >= BufferCapacity) return false;
             return AxisLock == 0 ? r == AxisIndex : c == AxisIndex;
         }
 
-        public bool TrySelect(int r, int c) {
-            if (!CanSelect(r, c)) return false;
+        public bool TrySelect(int r, int c) => TrySelectInternal(r, c, allowAuto: false);
+
+        private bool TrySelectInternal(int r, int c, bool allowAuto) {
+            if (!CanSelectInternal(r, c, allowAuto)) return false;
             Buffer.Add(Matrix[r, c]);
             Taken[r, c] = true;
             //轴翻转：行约束→下次只能在此列选择；反之亦然
@@ -180,9 +235,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Signa
 
         private void GenerateTargets() {
             Targets.Clear();
+            SolutionPath.Clear();
             var rng = new FastRandom(unchecked((long)((ulong)Main.GameUpdateCount * 48271 + 11)));
-            //关键修复：先沿合法交替规则在矩阵上采样一条主解题路径（长度=BufferCapacity）
-            //再从主路径上切出三条有重叠的目标子串（长2/3/4），保证玩家按主路径选择即可通关
             int masterLen = BufferCapacity;
             byte[] master = SamplePath(masterLen, ref rng);
 
@@ -221,6 +275,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Signa
                 int cc = axis == 0 ? pick : idx;
                 used[rr, cc] = true;
                 result[k] = Matrix[rr, cc];
+                //同步记录主解路径用于自动答题代劳模式
+                SolutionPath.Add((rr, cc));
                 //轴翻转
                 if (axis == 0) { axis = 1; idx = cc; }
                 else { axis = 0; idx = rr; }

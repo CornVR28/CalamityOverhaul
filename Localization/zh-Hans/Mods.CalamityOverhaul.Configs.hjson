@@ -1,4 +1,4 @@
-﻿CWRServerConfig: {
+CWRServerConfig: {
 	DisplayName: 内容设置
 
 	WeaponOverhaul: {
@@ -159,5 +159,16 @@
 	GenSylvanOutpost: {
 		Label: 生成森之哨站
 		Tooltip: 在森林深处生成木制的精灵或森林守卫哨站
+	}
+
+	SignalTowerDecryptionAutoPlay: {
+		Label: 信号塔破译傻瓜模式
+		Tooltip:
+			'''
+			开启后，信号塔解密的破译小游戏将自动演示正确解答
+			游戏会在新一轮生成后自动按正确路径点击字节块
+			既保证演出完整性，也解决玩家卡关的困扰
+			默认关闭，保留原有交互挑战
+			'''
 	}
 }
