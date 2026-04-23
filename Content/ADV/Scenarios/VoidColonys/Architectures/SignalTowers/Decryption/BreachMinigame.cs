@@ -48,6 +48,15 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Signa
 
         public (int row, int col)? HoverCell { get; private set; }
 
+        /// <summary>最近一次选中的行号，-1表示尚无选择，用于行列高亮脉冲反馈</summary>
+        public int LastSelRow { get; private set; } = -1;
+        /// <summary>最近一次选中的列号</summary>
+        public int LastSelCol { get; private set; } = -1;
+        /// <summary>最近一次选中后经过的时间，用于脉冲淡出，约1秒衰减到无</summary>
+        public float SelectionPulseTime { get; private set; } = 999f;
+        /// <summary>脉冲持续时长，秒</summary>
+        public const float SelectionPulseDuration = 0.9f;
+
         /// <summary>主解题路径的单元格坐标，长度为BufferCapacity，供“答题代劳”模式自动点击</summary>
         public List<(int row, int col)> SolutionPath { get; } = [];
         /// <summary>是否正在自动播放解题演示</summary>
@@ -90,6 +99,10 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Signa
             Buffer.Clear();
             for (int r = 0; r < MatrixSize; r++) for (int c = 0; c < MatrixSize; c++) Taken[r, c] = false;
             foreach (var t in Targets) t.Matched = false;
+            //重置时清理选择高亮状态，避免新一轮仍留有上次高亮十字
+            LastSelRow = -1;
+            LastSelCol = -1;
+            SelectionPulseTime = 999f;
             //初始轴约束根据主解路径首格而定（常为行约束 + 首格所在行），而非写死的行0
             //这样保证主解路径的首格始终合法，自动代劳与手动解题都能从正确起点开始
             if (SolutionPath.Count > 0) {
@@ -118,6 +131,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Signa
         }
 
         public void Update(float dt) {
+            //选择脉冲计时始终推进，用于高亮演给渐歧行列的神速带
+            SelectionPulseTime += dt;
             if (HasSolved) return;
             if (Cooldown > 0f) {
                 Cooldown -= dt;
@@ -172,6 +187,10 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Signa
             if (!CanSelectInternal(r, c, allowAuto)) return false;
             Buffer.Add(Matrix[r, c]);
             Taken[r, c] = true;
+            //记录本次选择位置与脉冲起点时间，用于行列高亮闪灵反馈
+            LastSelRow = r;
+            LastSelCol = c;
+            SelectionPulseTime = 0f;
             //轴翻转：行约束→下次只能在此列选择；反之亦然
             if (AxisLock == 0) { AxisLock = 1; AxisIndex = c; }
             else { AxisLock = 0; AxisIndex = r; }

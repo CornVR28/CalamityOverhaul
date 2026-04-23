@@ -68,19 +68,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Signa
             //背景浅色带
             sb.Draw(px, cellArea, Color.Black * (0.22f * eased));
 
-            //高亮整行或整列（轴约束提示）
-            if (!game.HasSolved && game.Cooldown <= 0f) {
-                if (game.AxisLock == 0) {
-                    int y = cellArea.Y + game.AxisIndex * (cellSize + gap);
-                    sb.Draw(px, new Rectangle(cellArea.X - 2, y - 2, cellArea.Width + 4, cellSize + 4),
-                        accent * (0.12f * eased));
-                }
-                else {
-                    int x = cellArea.X + game.AxisIndex * (cellSize + gap);
-                    sb.Draw(px, new Rectangle(x - 2, cellArea.Y - 2, cellSize + 4, cellArea.Height + 4),
-                        accent * (0.12f * eased));
-                }
-            }
+            //轴约束条 + 最近点击行列双梁，均用着色器渲染以获得流光质感
+            DrawAxisHighlightBeams(sb, game, cellArea, cellSize, gap, eased, accent);
 
             //处理输入（仅Breaching且面板完全展开时）
             if (eased > 0.85f && !game.HasSolved && game.Cooldown <= 0f) {
@@ -126,6 +115,125 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Signa
                     Utils.DrawBorderString(sb, sVal, tp, tc, scale);
                 }
             }
+        }
+
+        //═══════════════════════════════════════════════════════════
+        // 轴约束 & 最近点击 的行列高亮（Shader驱动，干净的蓝色科技色带）
+        //═══════════════════════════════════════════════════════════
+        private static void DrawAxisHighlightBeams(SpriteBatch sb, BreachMinigame game,
+            Rectangle cellArea, int cellSize, int gap, float eased, Color accent) {
+            Effect shader = EffectLoader.BreachMatrixAxisHighlight?.Value;
+            if (shader == null) return;
+            Texture2D px = TextureAssets.MagicPixel.Value;
+
+            //科技蓝统一色：不跟随阶段accent，避免在橙色阶段变得刺眼
+            Color beamCol = new Color(130, 205, 255);
+
+            sb.End();
+            sb.Begin(SpriteSortMode.Immediate, BlendState.Additive,
+                SamplerState.LinearClamp, DepthStencilState.None,
+                RasterizerState.CullNone, shader, Main.UIScaleMatrix);
+
+            //① 轴约束条：恒常存在的弱面光，表达“下一步允许的方向”
+            bool canPlay = !game.HasSolved && game.Cooldown <= 0f;
+            if (canPlay) {
+                DrawBeam(sb, shader, px, cellArea, cellSize, gap,
+                    game.AxisLock == 0, game.AxisIndex,
+                    beamCol, intensity: 0.75f * eased, coreWeight: 0.7f);
+            }
+
+            //② 点击反馈：最近一次点击行列交叉的高亮带，强度大但快速淡出
+            if (game.LastSelRow >= 0 && game.SelectionPulseTime < BreachMinigame.SelectionPulseDuration) {
+                float t = MathHelper.Clamp(game.SelectionPulseTime / BreachMinigame.SelectionPulseDuration, 0f, 1f);
+                float strength = (1f - t) * (1f - t);
+                DrawBeam(sb, shader, px, cellArea, cellSize, gap,
+                    horizontal: true, index: game.LastSelRow,
+                    beamCol, intensity: strength * eased * 1.3f, coreWeight: 1f);
+                DrawBeam(sb, shader, px, cellArea, cellSize, gap,
+                    horizontal: false, index: game.LastSelCol,
+                    beamCol, intensity: strength * eased * 1.3f, coreWeight: 1f);
+            }
+
+            sb.End();
+            sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                SamplerState.AnisotropicClamp, DepthStencilState.None,
+                RasterizerState.CullNone, null, Main.UIScaleMatrix);
+
+            //③ 被选中单元格的外框辉光：不使用着色器，纯加色矩形拼接，更锐利地呼应图二风格
+            DrawSelectedCellGlow(sb, game, cellArea, cellSize, gap, eased, beamCol);
+        }
+
+        private static void DrawBeam(SpriteBatch sb, Effect shader, Texture2D px,
+            Rectangle cellArea, int cellSize, int gap,
+            bool horizontal, int index,
+            Color color, float intensity, float coreWeight) {
+            if (intensity <= 0.001f) return;
+            Rectangle rc;
+            if (horizontal) {
+                int y = cellArea.Y + index * (cellSize + gap);
+                rc = new Rectangle(cellArea.X - 4, y - 2, cellArea.Width + 8, cellSize + 4);
+            }
+            else {
+                int x = cellArea.X + index * (cellSize + gap);
+                rc = new Rectangle(x - 2, cellArea.Y - 4, cellSize + 4, cellArea.Height + 8);
+            }
+            shader.Parameters["uTime"]?.SetValue(DecryptionSession.SessionTime);
+            shader.Parameters["uIntensity"]?.SetValue(intensity);
+            shader.Parameters["uColor"]?.SetValue(color.ToVector4());
+            shader.Parameters["uResolution"]?.SetValue(new Vector2(rc.Width, rc.Height));
+            shader.Parameters["uOrientation"]?.SetValue(horizontal ? 0f : 1f);
+            shader.Parameters["uCoreWeight"]?.SetValue(coreWeight);
+            shader.CurrentTechnique.Passes[0].Apply();
+            sb.Draw(px, rc, Color.White);
+        }
+
+        /// <summary>被选中字节块自身的外框辉光：锐利的内描边 + 四角L形标记 + 外扩柔光，随SelectionPulseTime淡出</summary>
+        private static void DrawSelectedCellGlow(SpriteBatch sb, BreachMinigame game,
+            Rectangle cellArea, int cellSize, int gap, float eased, Color beamCol) {
+            if (game.LastSelRow < 0) return;
+            float t = MathHelper.Clamp(game.SelectionPulseTime / BreachMinigame.SelectionPulseDuration, 0f, 1f);
+            //前半段强亮、后半段缓落
+            float strength = MathHelper.Clamp(1f - t * 0.65f, 0f, 1f);
+            float pulseAlpha = strength * eased;
+            Texture2D px = TextureAssets.MagicPixel.Value;
+            int x = cellArea.X + game.LastSelCol * (cellSize + gap);
+            int y = cellArea.Y + game.LastSelRow * (cellSize + gap);
+            Rectangle cell = new Rectangle(x, y, cellSize, cellSize);
+
+            //外扩柔光：连续几层递减Alpha的矩形向外扩张，近似halo
+            for (int k = 1; k <= 4; k++) {
+                float falloff = 1f - k / 5f;
+                float a = pulseAlpha * 0.22f * falloff;
+                Rectangle halo = new Rectangle(cell.X - k * 2, cell.Y - k * 2,
+                    cell.Width + k * 4, cell.Height + k * 4);
+                sb.Draw(px, new Rectangle(halo.X, halo.Y, halo.Width, 1), beamCol * a);
+                sb.Draw(px, new Rectangle(halo.X, halo.Bottom - 1, halo.Width, 1), beamCol * a);
+                sb.Draw(px, new Rectangle(halo.X, halo.Y, 1, halo.Height), beamCol * a);
+                sb.Draw(px, new Rectangle(halo.Right - 1, halo.Y, 1, halo.Height), beamCol * a);
+            }
+
+            //内描边：亮蓝色双层描边
+            Color sharp = beamCol * pulseAlpha;
+            Color inner = Color.Lerp(beamCol, Color.White, 0.35f) * pulseAlpha;
+            sb.Draw(px, new Rectangle(cell.X - 1, cell.Y - 1, cell.Width + 2, 2), sharp);
+            sb.Draw(px, new Rectangle(cell.X - 1, cell.Bottom - 1, cell.Width + 2, 2), sharp);
+            sb.Draw(px, new Rectangle(cell.X - 1, cell.Y - 1, 2, cell.Height + 2), sharp);
+            sb.Draw(px, new Rectangle(cell.Right - 1, cell.Y - 1, 2, cell.Height + 2), sharp);
+
+            //四角L形标记：向外伸出，提高瞄准感
+            int armLen = Math.Max(4, cellSize / 4);
+            //左上
+            sb.Draw(px, new Rectangle(cell.X - 3, cell.Y - 3, armLen, 2), inner);
+            sb.Draw(px, new Rectangle(cell.X - 3, cell.Y - 3, 2, armLen), inner);
+            //右上
+            sb.Draw(px, new Rectangle(cell.Right - armLen + 3, cell.Y - 3, armLen, 2), inner);
+            sb.Draw(px, new Rectangle(cell.Right + 1, cell.Y - 3, 2, armLen), inner);
+            //左下
+            sb.Draw(px, new Rectangle(cell.X - 3, cell.Bottom + 1, armLen, 2), inner);
+            sb.Draw(px, new Rectangle(cell.X - 3, cell.Bottom - armLen + 3, 2, armLen), inner);
+            //右下
+            sb.Draw(px, new Rectangle(cell.Right - armLen + 3, cell.Bottom + 1, armLen, 2), inner);
+            sb.Draw(px, new Rectangle(cell.Right + 1, cell.Bottom - armLen + 3, 2, armLen), inner);
         }
 
         //═══════════════════════════════════════════════════════════
