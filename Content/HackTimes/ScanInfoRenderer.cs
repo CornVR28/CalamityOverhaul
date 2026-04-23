@@ -32,28 +32,30 @@ namespace CalamityOverhaul.Content.HackTimes
         //故障抖动强度
         private float glitchIntensity;
 
-        //===== 布局常量 =====
-        private const float PanelWidth = 420f;
-        private const float RowHeight = 19f;
-        private const float HeaderHeight = 26f;
-        private const float SepHeight = 8f;
-        private const float StatusHeight = 22f;
-        private const float GapToList = 18f;
-        private const float TopPad = 8f;
-        private const float BottomPad = 8f;
+        //===== 布局参数（可实时调整）=====
+        public static float PanelWidth => 420f;
+        public static float RowHeight => 22f;
+        public static float HeaderHeight => 34f;
+        public static float SepHeight => 10f;
+        public static float StatusHeight => 28f;
+        public static float GapToList => 18f;
+        public static float TopPad => 10f;
+        public static float BottomPad => 10f;
         //扫描时长(帧)
-        private const float ScanDuration = 30f;
+        public static float ScanDuration => 30f;
         //每行揭示间隔(秒)
-        private const float RowRevealInterval = 0.13f;
+        public static float RowRevealInterval => 0.13f;
         //打字机速度(字符/帧)
-        private const float TypewriterSpeed = 2.5f;
-        //固定数据行数（数组最大容量）
+        public static float TypewriterSpeed => 2.5f;
+        //固定数据行数（数组最大容量，绑定到数组长度，不能运行时修改）
         private const int MaxDataRowCount = 10;
         //字体大小
-        private const float FontHeader = 0.58f;
-        private const float FontRow = 0.50f;
-        private const float FontStatus = 0.50f;
-        private const float FontNoise = 0.44f;
+        public static float FontHeader => 0.78f;
+        public static float FontRow => 0.68f;
+        public static float FontStatus => 0.68f;
+        public static float FontNoise => 0.58f;
+        //面板纵向锚点偏移倍率（相对listTotalH），越大越偏下
+        public static float PanelVerticalOffsetRatio => 0.12f;
 
         //缓存的扫描数据
         private readonly string[] rowLabels = new string[MaxDataRowCount];
@@ -153,8 +155,8 @@ namespace CalamityOverhaul.Content.HackTimes
             float panelH = TopPad + HeaderHeight + SepHeight
                 + currentDataRowCount * RowHeight + SepHeight + StatusHeight + BottomPad;
             float baseX = Main.screenWidth / 2 - PanelWidth / 2;
-            //使用屏幕中线 + 固定偏移作为锚点，让分析框整体上移靠近协议列表底部
-            float desiredTop = Main.screenHeight * 0.5f + listTotalH * 0.25f;
+            //使用屏幕中线 + 固定偏移作为锚点，让分析框位于下半屏但不贴底
+            float desiredTop = Main.screenHeight * 0.5f + listTotalH * PanelVerticalOffsetRatio;
             float panelTop = Math.Min(desiredTop, Main.screenHeight - panelH - 6f);
 
             //飞入偏移
@@ -254,8 +256,8 @@ namespace CalamityOverhaul.Content.HackTimes
                     statusColor * (alpha * statusPulse), FontStatus);
 
                 string hexTag = $"0x{(int)(timer * 50) % 0xFFFF:X4}";
-                Utils.DrawBorderString(sb, hexTag, new Vector2(baseX + PanelWidth - 80, curY),
-                    HackTheme.Accent * (alpha * 0.18f), 0.22f);
+                Utils.DrawBorderString(sb, hexTag, new Vector2(baseX + PanelWidth - 96, curY),
+                    HackTheme.Accent * (alpha * 0.22f), 0.32f);
             }
 
             DrawScanLineOverlay(sb, px, panelRect, alpha);
@@ -293,11 +295,11 @@ namespace CalamityOverhaul.Content.HackTimes
             }
 
             //扫描状态文字
-            curY += 16f;
+            curY += 18f;
             string scanText = $"SCANNING... {(int)(scanProgress * 100)}%";
             float pulse = MathF.Sin(timer * 6f) * 0.2f + 0.8f;
             Utils.DrawBorderString(sb, scanText, new Vector2(baseX + 14, curY),
-                HackTheme.Uploading * (alpha * pulse), 0.32f);
+                HackTheme.Uploading * (alpha * pulse), 0.48f);
 
             //滚动数据噪声(模拟数据流)
             curY += 22f;
