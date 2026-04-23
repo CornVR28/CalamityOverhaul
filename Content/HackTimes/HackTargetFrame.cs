@@ -77,6 +77,15 @@ namespace CalamityOverhaul.Content.HackTimes
                     hpColor = HackTheme.AccentAlt;
                 }
             }
+            else if (HackTime.CurrentScanTarget is IHackableSignalTower signalTower && signalTower.IsValid) {
+                //信号塔锁定框：以Actor贴图宽高收缩，避免庞大矩形框吃屏
+                var actor = signalTower.AsActor;
+                baseHalfW = Math.Max(actor.Width, 32) * 0.40f + 22f;
+                baseHalfH = Math.Max(actor.Height, 32) * 0.32f + 22f;
+                targetName = HackTime.SignalTowerScanName.Value;
+                hpStr = HackTime.SignalTowerScanStatusOnline.Value;
+                hpColor = HackTheme.AccentAlt;
+            }
             else if (HackTime.CurrentScanTarget is GlitchWraithActor wraith && wraith.Active) {
                 //灵异目标锁定框：尺寸取Actor贴图宽高，外放一点以贴合身形
                 baseHalfW = Math.Max(wraith.Width, 32) * 0.6f + 30f;

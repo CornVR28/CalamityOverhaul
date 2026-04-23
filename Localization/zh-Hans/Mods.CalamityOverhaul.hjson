@@ -133,4 +133,9 @@ QuickHack: {
 		DisplayName: 炮台短路
 		Description: 瞬时泄放炮台电能使其短暂停摆，恢复后立即重新上线
 	}
+
+	VirusBroadcast: {
+		DisplayName: 病毒广播
+		Description: 向信号塔注入蠕虫代码，令其向四周发射赛博电磁冲击波，长时间短路广播范围内的所有炮台
+	}
 }

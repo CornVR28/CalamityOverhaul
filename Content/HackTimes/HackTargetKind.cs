@@ -19,5 +19,7 @@ namespace CalamityOverhaul.Content.HackTimes
         Wraith = 4,
         //虚空聚落炮台等可被电路骇入的Actor机械
         Turret = 8,
+        //虚空聚落信号塔等承担广播/扫描职能的核心Actor
+        SignalTower = 16,
     }
 }

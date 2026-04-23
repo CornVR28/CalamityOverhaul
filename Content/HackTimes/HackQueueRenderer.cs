@@ -72,6 +72,15 @@ namespace CalamityOverhaul.Content.HackTimes
             return true;
         }
 
+        //信号塔目标入队
+        public bool EnqueueSignalTower(QuickHackDef hack, int slotIndex, IHackableSignalTower tower) {
+            for (int i = 0; i < queue.Count; i++) {
+                if (queue[i].SlotIndex == slotIndex) return false;
+            }
+            queue.Add(new HackQueueEntry(hack, slotIndex, tower));
+            return true;
+        }
+
         //取消队列中指定slot的协议
         public void Cancel(int slotIndex) {
             for (int i = queue.Count - 1; i >= 0; i--) {
@@ -107,6 +116,9 @@ namespace CalamityOverhaul.Content.HackTimes
                     }
                     else if (entry.TargetKind == HackTargetKind.Turret) {
                         entry.Hack.OnApplyToTurret(entry.TurretTarget, Main.LocalPlayer);
+                    }
+                    else if (entry.TargetKind == HackTargetKind.SignalTower) {
+                        entry.Hack.OnApplyToSignalTower(entry.SignalTowerTarget, Main.LocalPlayer);
                     }
                     else {
                         HackEffectTracker.Apply(entry.Hack, entry.TargetIndex, Main.myPlayer);
@@ -200,6 +212,17 @@ namespace CalamityOverhaul.Content.HackTimes
             for (int i = 0; i < queue.Count; i++) {
                 if (queue[i].TargetKind == HackTargetKind.Turret
                     && ReferenceEquals(queue[i].TurretTarget, turret))
+                    result.Add(queue[i]);
+            }
+        }
+
+        //获取指定信号塔上所有正在上传的队列条目
+        public void GetEntriesForSignalTower(IHackableSignalTower tower, List<HackQueueEntry> result) {
+            result.Clear();
+            if (tower == null) return;
+            for (int i = 0; i < queue.Count; i++) {
+                if (queue[i].TargetKind == HackTargetKind.SignalTower
+                    && ReferenceEquals(queue[i].SignalTowerTarget, tower))
                     result.Add(queue[i]);
             }
         }

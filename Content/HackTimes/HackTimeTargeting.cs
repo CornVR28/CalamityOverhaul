@@ -35,6 +35,11 @@ namespace CalamityOverhaul.Content.HackTimes
         /// </summary>
         public static IHackableTurret HoveredTurret { get; set; }
 
+        /// <summary>
+        /// 当前悬停的可骇入信号塔Actor引用，null表示无悬停
+        /// </summary>
+        public static IHackableSignalTower HoveredSignalTower { get; set; }
+
         public override void ProcessTriggers(Terraria.GameInput.TriggersSet triggersSet) {
             if (Player.whoAmI != Main.myPlayer) return;
             if (CWRKeySystem.HackTime_Toggle != null && CWRKeySystem.HackTime_Toggle.JustPressed) {
@@ -91,32 +96,45 @@ namespace CalamityOverhaul.Content.HackTimes
                 HoveredTileY = -1;
                 HoveredWraith = null;
                 HoveredTurret = null;
+                HoveredSignalTower = null;
             }
             else {
                 GlitchWraithActor wraith = TryGetHoveredWraith(mouseWorld);
                 if (wraith != null) {
                     HoveredWraith = wraith;
                     HoveredTurret = null;
+                    HoveredSignalTower = null;
                     HoveredTileX = -1;
                     HoveredTileY = -1;
                 }
                 else {
                     HoveredWraith = null;
-                    IHackableTurret turret = TryGetHoveredTurret(mouseWorld);
-                    if (turret != null) {
-                        HoveredTurret = turret;
+                    //信号塔优先于炮台：信号塔贴图包围区较大而有时与炮台重叠，应允许玩家优先选中塔
+                    IHackableSignalTower tower = TryGetHoveredSignalTower(mouseWorld);
+                    if (tower != null) {
+                        HoveredSignalTower = tower;
+                        HoveredTurret = null;
                         HoveredTileX = -1;
                         HoveredTileY = -1;
                     }
                     else {
-                        HoveredTurret = null;
-                        if (TileScannable.TryGetScannableTile(mouseWorld, out int tx, out int ty)) {
-                            HoveredTileX = tx;
-                            HoveredTileY = ty;
-                        }
-                        else {
+                        HoveredSignalTower = null;
+                        IHackableTurret turret = TryGetHoveredTurret(mouseWorld);
+                        if (turret != null) {
+                            HoveredTurret = turret;
                             HoveredTileX = -1;
                             HoveredTileY = -1;
+                        }
+                        else {
+                            HoveredTurret = null;
+                            if (TileScannable.TryGetScannableTile(mouseWorld, out int tx, out int ty)) {
+                                HoveredTileX = tx;
+                                HoveredTileY = ty;
+                            }
+                            else {
+                                HoveredTileX = -1;
+                                HoveredTileY = -1;
+                            }
                         }
                     }
                 }
@@ -176,6 +194,35 @@ namespace CalamityOverhaul.Content.HackTimes
                 if (distSq < bestDistSq) {
                     bestDistSq = distSq;
                     best = turret;
+                }
+            }
+            return best;
+        }
+
+        /// <summary>
+        /// 扫描所有Actor并挑选出鼠标下方最近的可骇入信号塔
+        /// </summary>
+        private static IHackableSignalTower TryGetHoveredSignalTower(Vector2 mouseWorld) {
+            List<Actor> list = ActorLoader.GetActiveActors<Actor>();
+            if (list == null || list.Count == 0) return null;
+            IHackableSignalTower best = null;
+            float bestDistSq = float.MaxValue;
+            foreach (Actor actor in list) {
+                if (actor is not IHackableSignalTower tower) continue;
+                if (!tower.IsValid) continue;
+                float expandMargin = 24f;
+                float left = actor.Position.X - expandMargin;
+                float top = actor.Position.Y - expandMargin;
+                float right = actor.Position.X + actor.Width + expandMargin;
+                float bottom = actor.Position.Y + actor.Height + expandMargin;
+                if (mouseWorld.X < left || mouseWorld.X > right) continue;
+                if (mouseWorld.Y < top || mouseWorld.Y > bottom) continue;
+                float dx = mouseWorld.X - tower.WorldCenter.X;
+                float dy = mouseWorld.Y - tower.WorldCenter.Y;
+                float distSq = dx * dx + dy * dy;
+                if (distSq < bestDistSq) {
+                    bestDistSq = distSq;
+                    best = tower;
                 }
             }
             return best;

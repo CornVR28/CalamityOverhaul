@@ -133,4 +133,9 @@ QuickHack: {
 		// DisplayName: Turret Short Circuit
 		// Description: ""
 	}
+
+	VirusBroadcast: {
+		// DisplayName: Virus Broadcast
+		// Description: ""
+	}
 }

@@ -94,6 +94,14 @@ namespace CalamityOverhaul.Content.HackTimes
                     Panel.Show(HackTargetKind.Wraith);
                 }
             }
+            else if (HackTimeTargeting.HoveredSignalTower != null) {
+                //点击可骇入信号塔Actor目标
+                var tower = HackTimeTargeting.HoveredSignalTower;
+                if (HackTime.CurrentScanTarget != tower) {
+                    HackTime.SelectSignalTowerScan(tower);
+                    Panel.Show(HackTargetKind.SignalTower);
+                }
+            }
             else if (HackTimeTargeting.HoveredTurret != null) {
                 //点击可骇入炮台Actor目标
                 var turret = HackTimeTargeting.HoveredTurret;

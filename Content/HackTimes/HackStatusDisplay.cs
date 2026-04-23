@@ -28,12 +28,15 @@ namespace CalamityOverhaul.Content.HackTimes
         private static readonly List<ActiveTileHackEffect> tileEffectBuf = [];
         private static readonly List<HackQueueEntry> tileQueueBuf = [];
         private static readonly List<HackQueueEntry> turretQueueBuf = [];
+        private static readonly List<HackQueueEntry> signalTowerQueueBuf = [];
         //收集需要绘制的NPC索引集合（避免重复）
         private static readonly HashSet<int> npcSet = [];
         //收集需要绘制的物块坐标集合（避免重复，用long编码x|y）
         private static readonly HashSet<long> tileSet = [];
         //收集需要绘制的炮台集合（避免重复）
         private static readonly HashSet<IHackableTurret> turretSet = [];
+        //收集需要绘制的信号塔集合（避免重复）
+        private static readonly HashSet<IHackableSignalTower> signalTowerSet = [];
 
         public static void Draw(SpriteBatch sb) {
             Texture2D px = CWRAsset.Placeholder_White?.Value;
@@ -103,6 +106,23 @@ namespace CalamityOverhaul.Content.HackTimes
                 if (actor == null || !actor.Active) continue;
                 DrawTurretStatus(sb, px, turret, actor, queue);
             }
+
+            //收集所有需要绘制的信号塔
+            signalTowerSet.Clear();
+            if (queue != null) {
+                var entries = queue.Entries;
+                for (int i = 0; i < entries.Count; i++) {
+                    if (entries[i].TargetKind == HackTargetKind.SignalTower && entries[i].SignalTowerTarget != null)
+                        signalTowerSet.Add(entries[i].SignalTowerTarget);
+                }
+            }
+
+            //逐信号塔绘制
+            foreach (IHackableSignalTower tower in signalTowerSet) {
+                Actor actor = tower?.AsActor;
+                if (actor == null || !actor.Active) continue;
+                DrawSignalTowerStatus(sb, px, tower, actor, queue);
+            }
         }
 
         private static long PackTileCoord(int x, int y) => (long)x << 32 | (uint)y;
@@ -163,6 +183,26 @@ namespace CalamityOverhaul.Content.HackTimes
             for (int i = 0; i < turretQueueBuf.Count; i++) {
                 float y = startY + i * (CardHeight + CardGap);
                 DrawUploadCard(sb, px, baseX, y, turretQueueBuf[i]);
+            }
+        }
+
+        private static void DrawSignalTowerStatus(SpriteBatch sb, Texture2D px, IHackableSignalTower tower, Actor actor, HackQueueRenderer queue) {
+            if (queue == null) return;
+            queue.GetEntriesForSignalTower(tower, signalTowerQueueBuf);
+            if (signalTowerQueueBuf.Count == 0) return;
+
+            //信号塔体型高耸，将锚点上移至扫描标定区以避免卡片被身后天空吞没
+            Vector2 scanCenter = tower.WorldCenter;
+            Vector2 topCenter = new(
+                scanCenter.X - Main.screenPosition.X,
+                scanCenter.Y - Main.screenPosition.Y - actor.Height * 0.25f);
+            float totalHeight = signalTowerQueueBuf.Count * (CardHeight + CardGap) - CardGap;
+            float startY = topCenter.Y - TopOffset - totalHeight;
+            float baseX = topCenter.X - CardWidth * 0.5f;
+
+            for (int i = 0; i < signalTowerQueueBuf.Count; i++) {
+                float y = startY + i * (CardHeight + CardGap);
+                DrawUploadCard(sb, px, baseX, y, signalTowerQueueBuf[i]);
             }
         }
 

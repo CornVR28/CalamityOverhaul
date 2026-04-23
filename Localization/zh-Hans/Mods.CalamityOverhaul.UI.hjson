@@ -152,7 +152,7 @@ QuestLog: {
 	ResetViewText: 重置视图
 	SunModeText: 日间模式
 	LauncherHoverText: 左键交互，右键拖动
-	// QuestManagerText: 委托任务
+	QuestManagerText: 委托任务
 }
 
 QuestNotificationSystem.Text1: 任务完成
@@ -353,45 +353,45 @@ GalacticCrisisRender: {
 	KortoThreatCritical: 威胁：危急
 	KortoPlanetCountInfo: 科尔托星系 — 6颗行星
 	KortoStatusCompromised: 状态：已沦陷
-	// HeaderAndroidProfile: ◢ TACTICAL ANDROID DOSSIER ◣
-	// AndroidArtisName: ARTIS
-	// AndroidApolaName: APOLA
-	// AndroidCodename: CODENAME
-	// AndroidClassLabel: CLASS: TACTICAL ANDROID
-	// AndroidStatusLabel: STATUS
-	// AndroidStatusLost: SIGNAL LOST
+	HeaderAndroidProfile: ◢ TACTICAL ANDROID DOSSIER ◣
+	AndroidArtisName: ARTIS
+	AndroidApolaName: APOLA
+	AndroidCodename: CODENAME
+	AndroidClassLabel: CLASS: TACTICAL ANDROID
+	AndroidStatusLabel: STATUS
+	AndroidStatusLost: SIGNAL LOST
 }
 
 TransitionScene: {
-	// LoadingText: 数据链接中
-	// InitializingText: 正在初始化协议
-	// Hint0: 不要问为什么杀异形，而是要问为何不杀
-	// Hint1: 阿切隆协议是嘉登最高级别的应急方案之一
-	// Hint2: 战术人形无所畏惧，因为恐惧本身就是他们的武器
-	// Hint3: 嘉登的机械造物已经超越了现实的极限
-	// Hint4: 没有大到无法接受的牺牲，没有小到可以原谅的背叛
-	// Hint5: 任何足够先进的技术，皆与魔法无异
-	// Hint6: 灾厄之中蕴藏着超越一切的可能性
-	// Hint7: 嘉登从不做无意义的事，每一步都是精密计算的结果
-	// Hint8: 数据即是力量，知识即是武装
-	// Hint9: 机械不会背叛，但操控机械的人或许会
+	LoadingText: 数据链接中
+	InitializingText: 正在初始化协议
+	Hint0: 不要问为什么杀异形，而是要问为何不杀
+	Hint1: 阿切隆协议是嘉登最高级别的应急方案之一
+	Hint2: 战术人形无所畏惧，因为恐惧本身就是他们的武器
+	Hint3: 嘉登的机械造物已经超越了现实的极限
+	Hint4: 没有大到无法接受的牺牲，没有小到可以原谅的背叛
+	Hint5: 任何足够先进的技术，皆与魔法无异
+	Hint6: 灾厄之中蕴藏着超越一切的可能性
+	Hint7: 嘉登从不做无意义的事，每一步都是精密计算的结果
+	Hint8: 数据即是力量，知识即是武装
+	Hint9: 机械不会背叛，但操控机械的人或许会
 }
 
 StarStreamDialogueBox: {
-	// ContinueHint: 继续
-	// FastHint: 加速
+	ContinueHint: 继续
+	FastHint: 加速
 }
 
 ApolliaHeroPanelUI: {
-	// TitleText: 阿波利娅
-	// HPLabel: 生命值
-	// DamageLabel: 伤害
-	// DefenseLabel: 防御
-	// CommandLabel: 作战指令
-	// CmdFollow: 跟随
-	// CmdHold: 驻守
-	// CmdAggressive: 进攻
-	// CmdDefensive: 防御
+	TitleText: 阿波利娅
+	HPLabel: 生命值
+	DamageLabel: 伤害
+	DefenseLabel: 防御
+	CommandLabel: 作战指令
+	CmdFollow: 跟随
+	CmdHold: 驻守
+	CmdAggressive: 进攻
+	CmdDefensive: 防御
 }
 
 DraedonIncomingCall: {
@@ -406,18 +406,18 @@ DraedonIncomingCall: {
 }
 
 QuestManagerUI: {
-	// TitleText: 任务管理
-	// CategoryAll: 全部
-	// CategoryActive: 进行中
-	// CategoryCompleted: 已完成
-	// CategorySuspended: 挂起
-	// EmptyHintText: 暂无任务...
-	// TrackHintText: "[右键] 关注/取消关注"
-	// SuspendHintText: "[中键] 挂起/恢复"
-	// OpenHintText: 按 [L] 打开任务管理
-	// HeaderStatusTag: ◈ ACTIVE
-	// FooterStatsFormat: TOTAL: {0}  |  ACTIVE: {1}
-	// ExpandHintText: "[左键] 展开/收起详情"
+	TitleText: 任务管理
+	CategoryAll: 全部
+	CategoryActive: 进行中
+	CategoryCompleted: 已完成
+	CategorySuspended: 挂起
+	EmptyHintText: 暂无任务...
+	TrackHintText: "[右键] 关注/取消关注"
+	SuspendHintText: "[中键] 挂起/恢复"
+	OpenHintText: 按 [L] 打开任务管理
+	HeaderStatusTag: ◈ ACTIVE
+	FooterStatsFormat: TOTAL: {0}  |  ACTIVE: {1}
+	ExpandHintText: "[左键] 展开/收起详情"
 }
 
 CyberwareUI: {
@@ -440,17 +440,17 @@ CyberwareUI: {
 }
 
 SHPCDialogueBox: {
-	// ContinueHint: 继续
-	// FastHint: 加速
+	ContinueHint: 继续
+	FastHint: 加速
 }
 
 EntrustManagerNotification: {
-	// LabelNewQuest: 新委托
-	// LabelTracked: 已关注
-	// LabelUntracked: 取消关注
-	// LabelSuspended: 已挂起
-	// LabelUnsuspended: 已恢复
-	// LabelCompleted: 委托完成
+	LabelNewQuest: 新委托
+	LabelTracked: 已关注
+	LabelUntracked: 取消关注
+	LabelSuspended: 已挂起
+	LabelUnsuspended: 已恢复
+	LabelCompleted: 委托完成
 }
 
 HackTime: {
@@ -458,10 +458,10 @@ HackTime: {
 	Done: 完成
 	Queued: 排队中
 	UploadingText: 上传中...
-	BreachReady: 破防协议 // 就绪
+	BreachReady: 破防协议 就绪
 	UploadComplete: >> 上传完成 <<
-	UploadQueue: "// 上传队列"
-	TargetLocked: "// 目标锁定"
+	UploadQueue: 上传队列
+	TargetLocked: 目标锁定
 	HpFormat: HP {0}%
 	Protocols: "[{0} 协议]"
 	RamDepleted: !! RAM已耗尽 !!
@@ -481,8 +481,8 @@ HackTime: {
 	DmgLabel: 伤害
 	KbResLabel: 击退抗性
 	Breach: 入侵
-	InitBreach: "// 初始化入侵"
-	SystemBreach: "// 系统入侵"
+	InitBreach: 初始化入侵
+	SystemBreach: 系统入侵
 	Rebooting: 重启中...
 	SystemOnline: 系统上线
 	MemoryWiped: ???
@@ -523,7 +523,7 @@ HackTime: {
 	WraithScanName: 标识
 	WraithScanNameValue: 未知厉鬼
 	WraithScanType: 灵异对象
-	WraithScanThreat: 无法评估 // ERR://-∞
+	WraithScanThreat: 无法评估 ERR://-∞
 	WraithScanStatus: 状态
 	WraithScanStatusStalking: 潜行追猎
 	WraithScanStatusWatched: 被凝视中
@@ -548,4 +548,12 @@ HackTime: {
 	TurretScanCircuitOnline: 在线
 	TurretScanCircuitShorted: 短路中
 	TurretScanCircuitOverload: 过载瘫痪
+	SignalTowerScanName: 虚空·信号塔
+	SignalTowerScanType: 广域核心机械
+	SignalTowerScanThreat: 战略资产
+	SignalTowerScanStatus: 塔体状态
+	SignalTowerScanStatusOnline: 在线·待广播
+	SignalTowerScanStatusBroadcasting: 正在广播
+	SignalTowerScanStatusElectrified: 过电残留
+	SignalTowerScanProtocol: 可用协议
 }

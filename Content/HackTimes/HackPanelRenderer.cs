@@ -197,6 +197,11 @@ namespace CalamityOverhaul.Content.HackTimes
                     //炮台目标入队
                     enqueued = Queue.EnqueueTurret(hack, globalIdx, turret);
                 }
+                else if (currentTargetKind == HackTargetKind.SignalTower
+                    && HackTime.CurrentScanTarget is IHackableSignalTower tower) {
+                    //信号塔目标入队
+                    enqueued = Queue.EnqueueSignalTower(hack, globalIdx, tower);
+                }
                 else {
                     enqueued = Queue.Enqueue(hack, globalIdx, HackTime.SelectedTargetIndex);
                 }
@@ -619,12 +624,23 @@ namespace CalamityOverhaul.Content.HackTimes
                     new Rectangle(0, 0, 1, 1), sepColor);
             }
 
-            //=== 效果描述（第二行渐淡文字） ===
+            //=== 效果描述（第二行渐淡文字，超宽自动换行） ===
             Vector2 descPos = new(rect.X + SlashWidth + 48, rect.Y + 44);
             Color descColor = isDisabled
                 ? HackTheme.TextNormal * 0.3f
                 : Color.Lerp(HackTheme.TextNormal, HackTheme.TextBright, 0.3f + hover * 0.4f);
-            Utils.DrawBorderString(sb, hack.Description.Value, descPos, descColor * (alpha * 0.85f), FontDesc);
+            //右侧数值/状态区域占用约95px，从描述起点到rect右侧内边距需扣除这部分防止压叠
+            //Utils.WordwrapString按已缩放前的像素宽度分行，所以传入maxWidth需要除以缩放
+            var descFont = FontAssets.MouseText.Value;
+            int descWrapPx = Math.Max(32, (int)((rect.Right - descPos.X - 30f) / FontDesc));
+            string[] descLines = Utils.WordwrapString(hack.Description.Value, descFont, descWrapPx, 2, out _);
+            float descLineH = descFont.MeasureString("汉").Y * FontDesc;
+            for (int li = 0; li < descLines.Length; li++) {
+                if (string.IsNullOrEmpty(descLines[li])) continue;
+                Utils.DrawBorderString(sb, descLines[li].TrimEnd('-', ' '),
+                    new Vector2(descPos.X, descPos.Y + li * descLineH),
+                    descColor * (alpha * 0.85f), FontDesc);
+            }
 
             //=== 右侧状态区 ===
             if (isDisabled && !isUploading && !isQueued) {

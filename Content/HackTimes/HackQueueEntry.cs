@@ -40,6 +40,8 @@
         public GlitchWraithActor WraithTarget;
         //骇入目标炮台Actor引用（TargetKind为Turret时有效）
         public IHackableTurret TurretTarget;
+        //骇入目标信号塔Actor引用（TargetKind为SignalTower时有效）
+        public IHackableSignalTower SignalTowerTarget;
         //当前队列状态
         public HackQueueState State;
         //上传进度0~1
@@ -113,6 +115,22 @@
             GlitchSeed = Terraria.Main.rand?.Next(10000) / 100f ?? 0f;
         }
 
+        //信号塔目标构造
+        public HackQueueEntry(QuickHackDef hack, int slotIndex, IHackableSignalTower tower) {
+            Hack = hack;
+            SlotIndex = slotIndex;
+            TargetKind = HackTargetKind.SignalTower;
+            TargetIndex = -1;
+            TileX = -1;
+            TileY = -1;
+            SignalTowerTarget = tower;
+            State = HackQueueState.Waiting;
+            UploadProgress = 0f;
+            FlyIn = 0f;
+            CompletedTimer = 0f;
+            GlitchSeed = Terraria.Main.rand?.Next(10000) / 100f ?? 0f;
+        }
+
         //目标是否仍然有效
         public bool IsTargetValid {
             get {
@@ -131,6 +149,10 @@
                 if (TargetKind == HackTargetKind.Turret) {
                     return TurretTarget != null && TurretTarget.AsActor != null
                         && TurretTarget.AsActor.Active && TurretTarget.IsValid;
+                }
+                if (TargetKind == HackTargetKind.SignalTower) {
+                    return SignalTowerTarget != null && SignalTowerTarget.AsActor != null
+                        && SignalTowerTarget.AsActor.Active && SignalTowerTarget.IsValid;
                 }
                 return false;
             }

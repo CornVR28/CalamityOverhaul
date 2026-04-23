@@ -66,6 +66,7 @@ namespace CalamityOverhaul.Common
         public static Asset<Effect> VoidLaserCannon { get; set; }
         public static Asset<Effect> SignalTowerLightning { get; set; }
         public static Asset<Effect> SignalTowerElectrified { get; set; }
+        public static Asset<Effect> SignalTowerVirusBroadcast { get; set; }
         public override float Weight => 1.2f;
         public override void EndCaptureDraw(SpriteBatch spriteBatch, GraphicsDevice graphicsDevice, RenderTarget2D screenSwap) {
             DrawPrimitiveProjectile();

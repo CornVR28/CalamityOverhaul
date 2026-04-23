@@ -551,4 +551,12 @@ HackTime: {
 	TurretScanCircuitOnline: Mods.CalamityOverhaul.UI.HackTime.TurretScanCircuitOnline
 	TurretScanCircuitShorted: Mods.CalamityOverhaul.UI.HackTime.TurretScanCircuitShorted
 	TurretScanCircuitOverload: Mods.CalamityOverhaul.UI.HackTime.TurretScanCircuitOverload
+	SignalTowerScanName: Mods.CalamityOverhaul.UI.HackTime.SignalTowerScanName
+	SignalTowerScanType: Mods.CalamityOverhaul.UI.HackTime.SignalTowerScanType
+	SignalTowerScanThreat: Mods.CalamityOverhaul.UI.HackTime.SignalTowerScanThreat
+	SignalTowerScanStatus: Mods.CalamityOverhaul.UI.HackTime.SignalTowerScanStatus
+	SignalTowerScanStatusOnline: Mods.CalamityOverhaul.UI.HackTime.SignalTowerScanStatusOnline
+	SignalTowerScanStatusBroadcasting: Mods.CalamityOverhaul.UI.HackTime.SignalTowerScanStatusBroadcasting
+	SignalTowerScanStatusElectrified: Mods.CalamityOverhaul.UI.HackTime.SignalTowerScanStatusElectrified
+	SignalTowerScanProtocol: Mods.CalamityOverhaul.UI.HackTime.SignalTowerScanProtocol
 }

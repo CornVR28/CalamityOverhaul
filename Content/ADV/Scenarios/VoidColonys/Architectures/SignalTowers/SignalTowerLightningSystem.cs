@@ -1,4 +1,5 @@
 ﻿using CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.TimeShift;
+using CalamityOverhaul.Content.HackTimes;
 using InnoVault.Actors;
 using Microsoft.Xna.Framework;
 using Terraria;
@@ -28,6 +29,14 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Signa
 
             if (!VoidColony.Active || !VoidTimeShiftSystem.InPast) {
                 cooldown = 0;
+                return;
+            }
+
+            //骇客时间中整个世界处于时停演出，信号塔雷击也应完全暂停
+            //否则冻结画面中仍会周期性打雷，破坏演出节奏与聚焦感
+            if (HackTime.Active || HackTime.Intensity > 0.01f) {
+                //重置冷却避免退出骇客时间时立即连打
+                cooldown = Main.rand.Next(CooldownMin, CooldownMax + 1);
                 return;
             }
 

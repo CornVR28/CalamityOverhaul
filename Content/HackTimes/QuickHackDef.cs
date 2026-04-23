@@ -258,6 +258,15 @@ namespace CalamityOverhaul.Content.HackTimes
 
         #endregion
 
+        #region 信号塔目标虚方法
+
+        /// <summary>
+        /// 当协议上传完成时对可骇入信号塔目标施加效果
+        /// </summary>
+        public virtual bool OnApplyToSignalTower(IHackableSignalTower tower, Player caster) => false;
+
+        #endregion
+
         #region 工具方法
 
         /// <summary>

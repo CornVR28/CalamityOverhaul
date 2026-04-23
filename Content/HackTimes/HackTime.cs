@@ -122,6 +122,16 @@ namespace CalamityOverhaul.Content.HackTimes
         public static LocalizedText TurretScanCircuitShorted { get; private set; }
         public static LocalizedText TurretScanCircuitOverload { get; private set; }
 
+        //信号塔扫描本地化字段
+        public static LocalizedText SignalTowerScanName { get; private set; }
+        public static LocalizedText SignalTowerScanType { get; private set; }
+        public static LocalizedText SignalTowerScanThreat { get; private set; }
+        public static LocalizedText SignalTowerScanStatus { get; private set; }
+        public static LocalizedText SignalTowerScanStatusOnline { get; private set; }
+        public static LocalizedText SignalTowerScanStatusBroadcasting { get; private set; }
+        public static LocalizedText SignalTowerScanStatusElectrified { get; private set; }
+        public static LocalizedText SignalTowerScanProtocol { get; private set; }
+
         public override void SetStaticDefaults() {
             Locked = this.GetLocalization(nameof(Locked));
             Done = this.GetLocalization(nameof(Done));
@@ -220,6 +230,15 @@ namespace CalamityOverhaul.Content.HackTimes
             TurretScanCircuitOnline = this.GetLocalization(nameof(TurretScanCircuitOnline));
             TurretScanCircuitShorted = this.GetLocalization(nameof(TurretScanCircuitShorted));
             TurretScanCircuitOverload = this.GetLocalization(nameof(TurretScanCircuitOverload));
+
+            SignalTowerScanName = this.GetLocalization(nameof(SignalTowerScanName));
+            SignalTowerScanType = this.GetLocalization(nameof(SignalTowerScanType));
+            SignalTowerScanThreat = this.GetLocalization(nameof(SignalTowerScanThreat));
+            SignalTowerScanStatus = this.GetLocalization(nameof(SignalTowerScanStatus));
+            SignalTowerScanStatusOnline = this.GetLocalization(nameof(SignalTowerScanStatusOnline));
+            SignalTowerScanStatusBroadcasting = this.GetLocalization(nameof(SignalTowerScanStatusBroadcasting));
+            SignalTowerScanStatusElectrified = this.GetLocalization(nameof(SignalTowerScanStatusElectrified));
+            SignalTowerScanProtocol = this.GetLocalization(nameof(SignalTowerScanProtocol));
         }
 
         #endregion
@@ -428,6 +447,31 @@ namespace CalamityOverhaul.Content.HackTimes
             bool freshSelect = CurrentScanTarget == null;
             CurrentScanTarget = turret;
             cameraTo = turret.WorldCenter;
+
+            if (freshSelect) {
+                CameraProgress = 0f;
+                ZoomProgress = 0f;
+            }
+
+            if (!VaultUtils.isServer) {
+                SoundEngine.PlaySound(CWRSound.Hacker, Main.LocalPlayer.Center);
+            }
+        }
+
+        /// <summary>
+        /// 选中一个可骇入信号塔Actor进行扫描和骇入
+        /// </summary>
+        public static void SelectSignalTowerScan(IHackableSignalTower tower) {
+            if (!Active || tower == null || tower.AsActor == null || !tower.AsActor.Active) return;
+
+            if (SelectedTargetIndex >= 0) {
+                HackTimeUI.Instance?.Panel.CancelUpload();
+            }
+            SelectedTargetIndex = -1;
+
+            bool freshSelect = CurrentScanTarget == null;
+            CurrentScanTarget = tower;
+            cameraTo = tower.WorldCenter;
 
             if (freshSelect) {
                 CameraProgress = 0f;
