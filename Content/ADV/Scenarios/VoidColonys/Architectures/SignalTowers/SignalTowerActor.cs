@@ -1,5 +1,6 @@
 using CalamityOverhaul.Common;
 using CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.CollisionMask;
+using CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.SignalTowers.Decryption;
 using CalamityOverhaul.Content.HackTimes;
 using InnoVault.Actors;
 using Microsoft.Xna.Framework;
@@ -7,7 +8,9 @@ using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using Terraria;
+using Terraria.Audio;
 using Terraria.DataStructures;
+using Terraria.ID;
 
 namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.SignalTowers
 {
@@ -37,6 +40,19 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Signa
         //时空可见度，过去时逼近1，现在时逼近0
         private float visibility;
 
+        //悬停描边状态：仅本地客户端参与
+        private float hoverStrength;//0~1，缓动到目标值供shader使用
+        private float hoverSeed;//每塔一份的扰动种子
+        private bool lastMouseOver;//缘检测，避免重复对自己触发
+
+        /// <summary>本客户端当前是否把本信号塔纳入悬停交互候选（决定描边/右键处理）</summary>
+        private bool IsLocallyHovered => hoverStrength > 0.02f;
+
+        /// <summary>
+        /// 信号塔的可交互半径，超出此距离即便鼠标悬停也不亮描边，防止远距离随意点开
+        /// </summary>
+        private const float InteractRangePixels = 640f;
+
         //隐形碰撞tile记录，与ArchitectureActor共用tile放置器
         private readonly List<Point16> placedCollisionTiles = [];
         private bool collisionPlaced;
@@ -56,6 +72,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Signa
 
         public override void OnSpawn(params object[] args) {
             DrawLayer = ActorDrawLayer.AfterTiles;
+            hoverSeed = Main.rand.NextFloat() * 100f;
             ApplyTextureSize();
         }
 
@@ -71,6 +88,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Signa
             UpdateCollision();
             if (ElectrifyTimer > 0) ElectrifyTimer--;
             if (BroadcastCooldown > 0) BroadcastCooldown--;
+            UpdateLocalHoverAndInteract();
             Velocity = Vector2.Zero;
         }
 
@@ -83,8 +101,56 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Signa
             initialized = true;
         }
 
-        private void UpdateCollision() {
-            bool shouldPlace = visibility >= CollisionThreshold;
+        /// <summary>
+        /// 本地客户端悬停与右键交互驱动
+        /// 处理：hoverStrength缓动；条件判定；描边shader启用；右键打开解密面板；鼠标事件消费
+        /// </summary>
+        private void UpdateLocalHoverAndInteract() {
+            if (Main.netMode == NetmodeID.Server) return;
+            Player local = Main.LocalPlayer;
+            if (local == null || !local.active || local.dead) {
+                hoverStrength = 0f;
+                lastMouseOver = false;
+                return;
+            }
+
+            //条件：时空可见度足够、非骇客时间、非他塔正在解密
+            bool canHover =
+                VoidColony.Active
+                && visibility > 0.55f
+                && !HackTime.Active && HackTime.Intensity <= 0.01f
+                && !DecryptionSession.IsOpen
+                && !Main.LocalPlayer.mouseInterface;
+
+            //鼠标AABB检测 + 距离检测
+            Rectangle aabb = new Rectangle((int)Position.X, (int)Position.Y, (int)Width, (int)Height);
+            bool mouseOver = canHover
+                && aabb.Contains((int)Main.MouseWorld.X, (int)Main.MouseWorld.Y)
+                && local.Center.DistanceSQ(Position + new Vector2(Width * 0.5f, Height * 0.5f))
+                   < InteractRangePixels * InteractRangePixels;
+
+            //缓动hoverStrength到目标
+            float target = mouseOver ? 1f : 0f;
+            hoverStrength = MathHelper.Lerp(hoverStrength, target, 0.18f);
+            if (Math.Abs(hoverStrength - target) < 0.005f) hoverStrength = target;
+
+            //悬停时锁定tile/item交互，避免打字/打架误操作
+            if (mouseOver) {
+                local.mouseInterface = true;
+                local.cursorItemIconEnabled = false;
+                local.cursorItemIconID = ItemID.None;
+
+                //右键释放瞬间打开解密面板
+                if (Main.mouseRight && Main.mouseRightRelease) {
+                    DecryptionSession.Open(this);
+                    Main.mouseRightRelease = false;
+                    SoundEngine.PlaySound(SoundID.MenuOpen);
+                }
+            }
+            lastMouseOver = mouseOver;
+        }
+
+        private void UpdateCollision() {            bool shouldPlace = visibility >= CollisionThreshold;
             if (shouldPlace == collisionPlaced) return;
 
             if (shouldPlace) {
@@ -111,6 +177,11 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Signa
 
             ArchitectureWarpDraw.DrawWithShader(spriteBatch, tex, drawPos, visibility, warp, flipX: false);
 
+            //本地悬停描边：在骇客时间外的日常右键交互反馈
+            if (hoverStrength > 0.01f) {
+                DrawHoverOutline(spriteBatch, tex, drawPos, hoverStrength);
+            }
+
             //骇客时间中被悬停/选中时套一层NPC高亮shader，让玩家知晓信号塔可被骇入
             float hackMark = ComputeHackHighlight();
             if (hackMark > 0.01f) {
@@ -130,6 +201,28 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Signa
             bool hovered = ReferenceEquals(HackTimeTargeting.HoveredSignalTower, this);
             float baseMark = selected ? 1f : hovered ? 0.55f : 0f;
             return baseMark * HackTime.Intensity;
+        }
+
+        /// <summary>
+        /// 日常右键交互的悬停描边：使用SignalTowerHoverOutline shader
+        /// 混合废土机械（锈橙+热白）与赛博2077（冷青扫描条）风格
+        /// </summary>
+        private void DrawHoverOutline(SpriteBatch sb, Texture2D tex, Vector2 drawPos, float strength) {
+            Effect shader = EffectLoader.SignalTowerHoverOutline?.Value;
+            if (shader == null) return;
+
+            shader.Parameters["uTime"]?.SetValue(Main.GlobalTimeWrappedHourly);
+            shader.Parameters["intensity"]?.SetValue(MathHelper.Clamp(strength, 0f, 1f));
+            shader.Parameters["texelSize"]?.SetValue(new Vector2(1f / tex.Width, 1f / tex.Height));
+            shader.Parameters["seed"]?.SetValue(hoverSeed);
+
+            sb.End();
+            sb.Begin(SpriteSortMode.Immediate, BlendState.Additive, Main.DefaultSamplerState,
+                DepthStencilState.None, Main.Rasterizer, shader, Main.GameViewMatrix.TransformationMatrix);
+            sb.Draw(tex, drawPos, null, Color.White, 0f, Vector2.Zero, 1f, SpriteEffects.None, 0f);
+            sb.End();
+            sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState,
+                DepthStencilState.None, Main.Rasterizer, null, Main.GameViewMatrix.TransformationMatrix);
         }
 
         /// <summary>Additive叠一层NPC骇入高亮，与炮台选中风格一致</summary>

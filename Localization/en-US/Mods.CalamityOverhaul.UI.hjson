@@ -560,3 +560,50 @@ HackTime: {
 	SignalTowerScanStatusElectrified: Mods.CalamityOverhaul.UI.HackTime.SignalTowerScanStatusElectrified
 	SignalTowerScanProtocol: Mods.CalamityOverhaul.UI.HackTime.SignalTowerScanProtocol
 }
+
+DecryptionStrings: {
+	DecryptionPanelTitle: 虚空·信号终端接入
+	DecryptionPanelSubtitleLocked: 协议封锁·需要人工破译
+	DecryptionPanelSubtitleBreaching: 破译进行中
+	DecryptionPanelSubtitleDataFlood: 数据洪流注入
+	DecryptionPanelSubtitleMessage: 解码信号回放
+	DecryptionPanelTerminalId: TERM-ID ▸ {0}
+	DecryptionPanelCoordinate: ΔPOS ▸ {0}, {1}
+	DecryptionPanelSignalLock: 信号锁定强度
+	DecryptionPanelSignalLockValue: "{0}%"
+	DecryptionPanelFooter: "[ESC] 断开连接    [左键] 交互    [?] 帮助"
+	DecryptionPanelHintLocked: 信号层被加密栅格封闭。按 [空格] 或点击 [启动破译] 进入输入序列。
+	DecryptionPanelHintBreaching: 按序点击矩阵单元，填入目标序列。
+	DecryptionPanelHintDataFlood: 协议通道打开，正在注入数据洪流...
+	DecryptionPanelHintMessage: 解码完成，以下为截获片段。
+	DecryptionPanelBeginBreach: ▷ 启动破译
+	DecryptionPanelClose: ✕ 断开
+	DecryptionPanelStatusLocked: LOCKED
+	DecryptionPanelStatusBreaching: BREACHING
+	DecryptionPanelStatusDataFlood: INJECTING
+	DecryptionPanelStatusMessage: DECODED
+	BreachBuffer: 缓冲区 {0}/{1}
+	BreachTargets: 目标序列
+	BreachTimer: 剩余时间
+	BreachAxisRow: 行约束 ▸ 第{0}行
+	BreachAxisCol: 列约束 ▸ 第{0}列
+	BreachCooldown: 协议重置中 {0:0.0}s
+	BreachAttempt: 尝试 #{0}
+	BreachRestart: ⟳ 重试
+}
+
+MessageStrings: {
+	MsgHeader: ── 截获片段 ▸ 来源 0x{0} / {1} ──
+	MsgSrcSystem: SYS
+	MsgSrcSignal: SIG
+	MsgSrcArchive: ARC
+	MsgFragment: FRAGMENT
+	MsgSignature: SIGN   ▸ {0}
+	MsgBody0: 终端已接入。校验密钥匹配度 98.4%。
+	MsgBody1: ...噪声中仍残留未标注的脉冲信号。
+	MsgBody2: 坐标偏移量指向坍缩核心的深层回声。
+	MsgBody3: 该节点被标记为 ██CLASSIFIED██，相关片段已封存。
+	MsgBody4: 下一个协议窗口将由你的行动触发。
+	MsgSkipHint: "[空格/左键] 跳过逐字显示"
+	MsgCloseHint: "[空格/ESC] 断开连接"
+}
