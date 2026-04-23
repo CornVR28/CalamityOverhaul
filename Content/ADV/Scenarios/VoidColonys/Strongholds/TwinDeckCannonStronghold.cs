@@ -49,26 +49,27 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Strongholds
         //单段斜桥两端的Y差，用于按段累加估算双层垂直落差
         private const int SlopeYDiffPx = SlopeLowLocalY - SlopeHighLocalY;
 
-        //每侧级联斜桥段数，巨型激光炮单侧像素跨度极大，需要足够的级数才能拉开上下层的纵深
-        private const int SlopeSegmentsPerSide = 8;
+        //每侧级联斜桥段数，控制双层桥纵深；段数越多上下层落差越大、级联水平跨度也越大
+        //4段≈ 520px落差/1064px水平跨，已能完整容纳一座激光炮的高度
+        private const int SlopeSegmentsPerSide = 4;
         //双层桥的垂直落差，由级联斜桥总Y差决定
         private const int DeckGapPx = SlopeSegmentsPerSide * SlopeYDiffPx;
         //一侧级联斜桥总水平跨度
         private const int SlopeChainSpanPx = SlopeSegmentsPerSide * SlopeWidthPx;
 
-        //上层桥单侧外延，必须大于斜桥级联跨度并预留出激光炮底座空间
-        private const int UpperHalfSpanPx = 3600;
+        //上层桥单侧外延，回到与零号站点接近的尺寸，避免炮台拉得过远
+        private const int UpperHalfSpanPx = 1800;
         //下层桥端相对斜桥低端再向外延伸的距离，给底层激光炮底座留出整段桥面
-        private const int LowerDeckExtraSpanPx = 700;
+        private const int LowerDeckExtraSpanPx = 750;
         //下层桥单侧外延：斜桥低端世界X = ±(UpperHalfSpan - SlopeChainSpan)，再向外推 LowerDeckExtraSpan
         private const int LowerHalfSpanPx = UpperHalfSpanPx - SlopeChainSpanPx + LowerDeckExtraSpanPx;
 
         //巨型激光炮底座尺寸，与LaserCannonPedestal.png一致
         private const int LaserCannonPedestalWidthPx = 870;
         private const int LaserCannonPedestalHeightPx = 472;
-        //上层激光炮中心相对锚点的水平偏移，靠近上层桥外端
-        private const int UpperLaserCenterOffsetPx = UpperHalfSpanPx - 500;
-        //下层激光炮中心相对锚点的水平偏移，靠近下层桥外端
+        //上层激光炮中心相对锚点的水平偏移，落在上层桥外端略向内一段
+        private const int UpperLaserCenterOffsetPx = UpperHalfSpanPx - 450;
+        //下层激光炮中心相对锚点的水平偏移，落在下层桥外端略向内一段
         private const int LowerLaserCenterOffsetPx = LowerHalfSpanPx - 350;
 
         //中型物料分析实验室常量，作为辅助建筑摆在上层桥上塔与炮台之间
@@ -110,7 +111,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Strongholds
             int upperRightEndX = anchorPixelX + UpperHalfSpanPx;
 
             //在塔与上层桥端之间各放一座中型物料分析实验室作为辅助建筑
-            int midLabInsetPx = 1100;
+            int midLabInsetPx = 700;
             int leftMidLabRightPortX = anchorPixelX - midLabInsetPx;
             int rightMidLabLeftPortX = anchorPixelX + midLabInsetPx;
             RegisterAlignedToBridgeY(ArchitectureType.MidSizeMaterialAnalysisLab,
