@@ -1,5 +1,4 @@
-using CalamityOverhaul.Common;
-using CalamityOverhaul.Content.Buffs;
+﻿using CalamityOverhaul.Content.Buffs;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;

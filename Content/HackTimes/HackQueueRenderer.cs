@@ -1,7 +1,7 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.GlitchWraith;
+using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
-using CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.GlitchWraith;
 using Terraria;
 using Terraria.GameContent;
 

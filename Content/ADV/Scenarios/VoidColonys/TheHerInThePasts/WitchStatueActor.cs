@@ -1,6 +1,4 @@
-﻿using CalamityOverhaul.Common;
-using InnoVault.Actors;
-using Microsoft.Xna.Framework;
+﻿using InnoVault.Actors;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;

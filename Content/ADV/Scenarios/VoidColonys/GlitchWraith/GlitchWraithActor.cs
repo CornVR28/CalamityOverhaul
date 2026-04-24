@@ -2,7 +2,6 @@
 using CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.TimeShift;
 using CalamityOverhaul.Content.HackTimes;
 using InnoVault.Actors;
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;

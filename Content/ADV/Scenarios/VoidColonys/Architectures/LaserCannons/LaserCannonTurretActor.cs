@@ -4,7 +4,6 @@ using CalamityOverhaul.Content.HackTimes;
 using CalamityOverhaul.Content.PRTTypes;
 using InnoVault.Actors;
 using InnoVault.PRT;
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;
@@ -12,7 +11,6 @@ using Terraria.Audio;
 using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.Localization;
-using Terraria.ModLoader;
 
 namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.LaserCannons
 {
@@ -305,7 +303,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Laser
                         phase = 1;
                         phaseTimer = ChargeDuration;
                         SoundEngine.PlaySound(SoundID.Zombie104 with {
-                            Volume = 0.8f, Pitch = -0.3f, MaxInstances = 2,
+                            Volume = 0.8f,
+                            Pitch = -0.3f,
+                            MaxInstances = 2,
                         }, MountWorld);
                     }
                     break;
@@ -321,10 +321,13 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Laser
                         muzzleFlashRing = 1f;
                         SpawnIgnitionBurst();
                         SoundEngine.PlaySound(SoundID.Zombie118 with {
-                            Volume = 0.95f, Pitch = -0.4f, MaxInstances = 2,
+                            Volume = 0.95f,
+                            Pitch = -0.4f,
+                            MaxInstances = 2,
                         }, MuzzleWorld);
                         SoundEngine.PlaySound(SoundID.Item122 with {
-                            Volume = 0.8f, Pitch = -0.2f,
+                            Volume = 0.8f,
+                            Pitch = -0.2f,
                         }, MuzzleWorld);
                     }
                     break;
@@ -335,7 +338,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Laser
                         phase = 3;
                         phaseTimer = CooldownDuration;
                         SoundEngine.PlaySound(SoundID.Item62 with {
-                            Volume = 0.7f, Pitch = -0.1f,
+                            Volume = 0.7f,
+                            Pitch = -0.1f,
                         }, MuzzleWorld);
                     }
                     break;

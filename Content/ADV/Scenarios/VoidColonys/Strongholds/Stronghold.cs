@@ -1,7 +1,6 @@
 ﻿using CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures;
 using CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.GatlinTurrets;
 using Microsoft.Xna.Framework.Graphics;
-using Terraria;
 
 namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Strongholds
 {

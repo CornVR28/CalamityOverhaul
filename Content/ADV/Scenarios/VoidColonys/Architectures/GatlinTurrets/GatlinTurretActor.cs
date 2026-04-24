@@ -3,7 +3,6 @@ using CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.TimeShift;
 using CalamityOverhaul.Content.GoreEntity;
 using CalamityOverhaul.Content.HackTimes;
 using InnoVault.Actors;
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;

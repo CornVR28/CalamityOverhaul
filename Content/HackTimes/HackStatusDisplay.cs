@@ -1,7 +1,7 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using InnoVault.Actors;
+using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
-using InnoVault.Actors;
 using Terraria;
 using Terraria.GameContent;
 

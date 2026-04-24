@@ -1,6 +1,5 @@
 ﻿using CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.CollisionMask;
 using InnoVault.Actors;
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;

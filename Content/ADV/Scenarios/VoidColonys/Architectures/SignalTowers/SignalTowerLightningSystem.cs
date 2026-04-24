@@ -1,7 +1,6 @@
 ﻿using CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.TimeShift;
 using CalamityOverhaul.Content.HackTimes;
 using InnoVault.Actors;
-using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;

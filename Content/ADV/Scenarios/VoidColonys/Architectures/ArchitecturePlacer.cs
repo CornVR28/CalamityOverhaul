@@ -1,7 +1,5 @@
-using CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.GatlinTurrets;
+﻿using CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.GatlinTurrets;
 using CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.LaserCannons;
-using Microsoft.Xna.Framework;
-using System;
 using System.Collections.Generic;
 using Terraria;
 using Terraria.ModLoader;

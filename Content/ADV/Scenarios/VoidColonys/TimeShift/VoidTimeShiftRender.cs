@@ -1,8 +1,6 @@
 ﻿using CalamityOverhaul.Common;
-using CalamityOverhaul.Content.ADV.Scenarios.VoidColonys;
 using CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.GlitchWraith;
 using InnoVault.RenderHandles;
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 

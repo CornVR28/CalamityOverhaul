@@ -1,9 +1,8 @@
-using CalamityOverhaul.Common;
+﻿using CalamityOverhaul.Common;
 using CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.CollisionMask;
 using CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.SignalTowers.Decryption;
 using CalamityOverhaul.Content.HackTimes;
 using InnoVault.Actors;
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
@@ -152,7 +151,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Signa
             lastMouseOver = mouseOver;
         }
 
-        private void UpdateCollision() {            bool shouldPlace = visibility >= CollisionThreshold;
+        private void UpdateCollision() {
+            bool shouldPlace = visibility >= CollisionThreshold;
             if (shouldPlace == collisionPlaced) return;
 
             if (shouldPlace) {

@@ -1,9 +1,7 @@
-using CalamityOverhaul.Common;
-using CalamityOverhaul.Content.Items.Ranged;
+﻿using CalamityOverhaul.Content.Items.Ranged;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;
-using Terraria.ID;
 using Terraria.ModLoader;
 
 namespace CalamityOverhaul.Content.Projectiles.Weapons.Ranged.StarshipProj

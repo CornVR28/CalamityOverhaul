@@ -3,7 +3,6 @@ using CalamityOverhaul.Content.ADV.Scenarios.Shepel;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;
-using Terraria.GameContent;
 
 namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.TheHerInThePasts
 {

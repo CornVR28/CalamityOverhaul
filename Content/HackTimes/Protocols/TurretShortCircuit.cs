@@ -1,8 +1,6 @@
 ﻿using CalamityOverhaul.Content.PRTTypes;
 using InnoVault.PRT;
 using Terraria;
-using Terraria.Audio;
-using Terraria.ID;
 
 namespace CalamityOverhaul.Content.HackTimes.Protocols
 {

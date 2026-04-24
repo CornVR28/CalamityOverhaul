@@ -1,6 +1,4 @@
-﻿using CalamityOverhaul.Common;
-using CalamityOverhaul.Content.HackTimes;
-using Microsoft.Xna.Framework;
+﻿using CalamityOverhaul.Content.HackTimes;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Graphics;
 using System;

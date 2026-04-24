@@ -1,5 +1,4 @@
 ﻿using CalamityOverhaul.Content.Buffs;
-using CalamityOverhaul.Content.Projectiles.Weapons.Magic;
 using CalamityOverhaul.Content.PRTTypes;
 using InnoVault.PRT;
 using Microsoft.Xna.Framework.Graphics;

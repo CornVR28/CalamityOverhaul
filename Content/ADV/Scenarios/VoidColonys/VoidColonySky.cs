@@ -2,7 +2,6 @@
 using CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.TimeShift;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
-using Terraria.GameContent;
 using Terraria.Graphics.Effects;
 using Terraria.Graphics.Shaders;
 using Terraria.ModLoader;

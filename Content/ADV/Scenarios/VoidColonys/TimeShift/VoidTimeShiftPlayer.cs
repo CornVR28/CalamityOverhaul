@@ -1,5 +1,4 @@
 ﻿using CalamityOverhaul.Common;
-using CalamityOverhaul.Content.ADV.Scenarios.VoidColonys;
 using Terraria;
 using Terraria.GameInput;
 using Terraria.ModLoader;

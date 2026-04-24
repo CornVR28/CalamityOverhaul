@@ -1,6 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using InnoVault.PRT;
 using System;
-using InnoVault.PRT;
 using Terraria;
 
 namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.TimeShift

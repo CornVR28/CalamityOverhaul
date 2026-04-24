@@ -1,15 +1,7 @@
-﻿using CalamityOverhaul.Common;
-using CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.TimeShift;
-using InnoVault.GameSystem;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
+﻿using CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.TimeShift;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using Terraria;
 using Terraria.Audio;
-using Terraria.DataStructures;
-using Terraria.Graphics;
 using Terraria.ID;
 using Terraria.ModLoader;
 

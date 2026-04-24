@@ -28,7 +28,6 @@ using Terraria.GameContent.UI.BigProgressBar;
 using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
-using Terraria.Utilities;
 using static CalamityOverhaul.Common.ModGanged;
 
 namespace CalamityOverhaul

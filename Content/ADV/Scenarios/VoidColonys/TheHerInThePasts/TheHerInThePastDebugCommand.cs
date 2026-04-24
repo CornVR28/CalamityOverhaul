@@ -1,6 +1,5 @@
-#if DEBUG
+﻿#if DEBUG
 using InnoVault.Actors;
-using Microsoft.Xna.Framework;
 using Terraria;
 using Terraria.ModLoader;
 

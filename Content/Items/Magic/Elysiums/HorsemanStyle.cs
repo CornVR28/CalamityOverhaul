@@ -1,5 +1,4 @@
-using Microsoft.Xna.Framework;
-using Terraria.ID;
+﻿using Terraria.ID;
 
 namespace CalamityOverhaul.Content.Items.Magic.Elysiums
 {
@@ -95,8 +94,7 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
             }
         ];
 
-        public static HorsemanStyle Get(int horsemanIndex)
-        {
+        public static HorsemanStyle Get(int horsemanIndex) {
             if (horsemanIndex < 0 || horsemanIndex >= Styles.Length) {
                 return Styles[0];
             }

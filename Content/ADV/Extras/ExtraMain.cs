@@ -1,5 +1,4 @@
 ﻿using CalamityOverhaul.Content.ADV.Extras.Styles;
-using InnoVault;
 using InnoVault.UIHandles;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;

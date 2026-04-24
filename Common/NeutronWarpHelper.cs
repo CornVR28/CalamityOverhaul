@@ -1,5 +1,4 @@
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.GameContent;
 
@@ -29,8 +28,7 @@ namespace CalamityOverhaul.Common
             float progress,
             float rotation,
             string technique,
-            float radius = 0.45f)
-        {
+            float radius = 0.45f) {
             if (EffectLoader.NeutronWarp == null) {
                 return;
             }

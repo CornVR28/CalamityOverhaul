@@ -1,7 +1,4 @@
-﻿using CalamityOverhaul.Common;
-using CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.VoidPortals;
-using InnoVault.PRT;
-using Microsoft.Xna.Framework;
+﻿using InnoVault.PRT;
 using System;
 using Terraria;
 using Terraria.DataStructures;

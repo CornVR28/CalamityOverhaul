@@ -1,9 +1,7 @@
-﻿using CalamityOverhaul.Content.ADV.Scenarios.VoidColonys;
-using SubworldLibrary;
+﻿using SubworldLibrary;
 using System.Collections.Generic;
 using Terraria;
 using Terraria.DataStructures;
-using Terraria.ModLoader;
 using Terraria.WorldBuilding;
 
 namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys

@@ -1,13 +1,7 @@
-using CalamityOverhaul.Common;
-using CalamityOverhaul.Content.HackTimes;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using ReLogic.Graphics;
-using System;
+﻿using CalamityOverhaul.Common;
 using System.Collections.Generic;
 using Terraria;
 using Terraria.Audio;
-using Terraria.GameContent;
 using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;

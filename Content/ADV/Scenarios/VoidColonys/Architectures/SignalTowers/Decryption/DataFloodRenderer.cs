@@ -1,13 +1,9 @@
-using CalamityOverhaul.Common;
-using CalamityOverhaul.Content.HackTimes;
-using Microsoft.Xna.Framework;
+﻿using CalamityOverhaul.Content.HackTimes;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Graphics;
 using System;
 using Terraria;
 using Terraria.GameContent;
-using Terraria.Localization;
-using Terraria.ModLoader;
 
 namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.SignalTowers.Decryption
 {
