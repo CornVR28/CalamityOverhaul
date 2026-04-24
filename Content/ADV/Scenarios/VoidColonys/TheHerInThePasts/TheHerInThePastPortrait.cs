@@ -118,7 +118,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.TheHerInThePasts
             Rectangle rectangle = new Rectangle(0, 0, portrait.Width, portrait.Height);
             position = OwnerDialogue.GetPanelRect().Top() + new Vector2(-160, -portrait.Height + 90) * scale2;
 
-            Color stone = new(180, 175, 170);
+            Color stone = Color.White;
             Color vivid = Color.White;
             Color blended = Color.Lerp(stone, vivid, colorationT) * alpha;
 

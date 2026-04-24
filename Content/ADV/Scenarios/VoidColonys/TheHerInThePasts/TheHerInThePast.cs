@@ -87,6 +87,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.TheHerInThePasts
             portrait?.SkipFadeIn();
             portrait?.SwitchTo(TheHerInThePastPortrait.Role.Witch);
             portrait?.SetColoration(0.35f);
+            portrait.smile = false;
         }
 
         protected override void Build() {
@@ -107,7 +108,11 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.TheHerInThePasts
                 onStart: () => ToSHPC(ShepelFullBodyPortrait.Face.Shocked));
             //女巫4
             Add(RolenameWitch.Value, WitchLine4.Value,
-                onStart: () => ToWitch(0.8f));
+                onStart: () => {
+                    ToWitch(0.8f);
+                    var portrait = GetPortrait();
+                    portrait.smile = true;
+                });
             //女巫5
             Add(RolenameWitch.Value, WitchLine5.Value,
                 onStart: () => ToWitch(0.9f));
