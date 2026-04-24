@@ -111,7 +111,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.TheHerInThePasts
 
         private void DrawWitch(SpriteBatch spriteBatch, float alpha) {
             float scale2 = scale * 1.16f;
-            Texture2D portrait = ADVAsset.SupCalADV;
+            Texture2D portrait = ADVAsset.Lain;
             if (portrait == null || portrait.IsDisposed) return;
 
             Rectangle rectangle = new Rectangle(0, 0, portrait.Width, portrait.Height);

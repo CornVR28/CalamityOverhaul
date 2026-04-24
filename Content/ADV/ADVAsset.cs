@@ -9,6 +9,10 @@ namespace CalamityOverhaul.Content.ADV
         public static IList<Texture2D> SupCalsADV = null;
         [VaultLoaden(CWRConstant.ADV + "SupCal/SupCal")]
         public static Texture2D SupCalADV = null;
+        [VaultLoaden(CWRConstant.ADV + "SupCal/")]
+        public static Texture2D Lain = null;
+        [VaultLoaden(CWRConstant.ADV + "SupCal/")]
+        public static Texture2D Lain_smile = null;
         [VaultLoaden(CWRConstant.ADV + "SupCal/SupCal_closeEyes")]
         public static Texture2D SupCal_closeEyesADV = null;
         [VaultLoaden(CWRConstant.ADV + "SupCal/SupCal_smile")]
@@ -102,5 +106,6 @@ namespace CalamityOverhaul.Content.ADV
         //过去的她场景里女巫的留影雕像贴图，直接位于Content目录下
         [VaultLoaden("CalamityOverhaul/Content/ADV/Scenarios/VoidColonys/TheHerInThePasts/Wach")]
         public static Texture2D WitchStatue = null;
+
     }
 }
