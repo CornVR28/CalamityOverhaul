@@ -127,7 +127,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.TheHerInThePasts
             if (smile) {
                 portrait = ADVAsset.Lain_smile;
                 position.X += 38 * scale2;
-                spriteBatch.Draw(portrait, position, rectangle, blended, rotation, Vector2.Zero, scale2, SpriteEffects.None, 0f);
+                spriteBatch.Draw(portrait, position, null, blended, rotation, Vector2.Zero, scale2, SpriteEffects.None, 0f);
             }
         }
 
