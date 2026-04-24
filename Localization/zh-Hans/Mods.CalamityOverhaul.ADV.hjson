@@ -1049,15 +1049,15 @@ FirstMetShepel: {
 TheHerInThePast: {
 	RolenameWitch: 硫火女巫
 	RolenameSHPC: SHPC
-	WitchLine1: 被这种脏东西追挺不好受的吧，幸好你们遇到了我。
+	WitchLine1: 被这种脏东西追挺不好受的吧，幸好我赶上了
 	ShpcLine1: 谢谢……但怎么可能，你属于过去，却可以动起来……
-	WitchLine2: 你们可以从百年后入侵到这里，我自然也能做到类似的事情。
-	WitchLine3: 不过我确实只是一个留在此处的影子。
-	ShpcLine2: 这样的话，你这么使用能力，会让你消散掉的啊。
-	WitchLine4: 你的关注点真是温柔的可爱。快点离开吧，这些脏东西，还是和我一起葬在过去比较好。
-	WitchLine5: 对了，小女仆。
+	WitchLine2: 你们可以从百年后入侵到这里，我自然也能做到类似的事情
+	WitchLine3: 不过，你说的对，我确实只是一道留在这里的残影
+	ShpcLine2: 这样的话，你这么使用能力，会让你消散掉的啊
+	WitchLine4: 你的关注点真是温柔的可爱。快点离开吧，这些脏东西，还是和我一起葬在过去比较好
+	WitchLine5: 对了，那位小女仆
 	ShpcLine3: 什么？
-	WitchLine6: 你的疲惫简直透彻骨髓呢。
-	WitchLine7: 别总是想着改变过去，要学会接受未来。
+	WitchLine6: 你的疲惫简直透彻骨髓呢
+	WitchLine7: 别总是想着改变过去，学会接受属于你们的未来
 	ShpcLine4: ……
 }
