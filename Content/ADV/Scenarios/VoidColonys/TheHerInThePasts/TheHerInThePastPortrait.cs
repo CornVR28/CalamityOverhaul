@@ -23,6 +23,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.TheHerInThePasts
 
         public Role CurrentRole { get; private set; } = Role.Witch;
         public ShepelFullBodyPortrait.Face SHPCFace { get; private set; } = ShepelFullBodyPortrait.Face.Blank;
+        public bool smile { get; set; } = false;
         public float Coloration => colorationT;
         public bool IsDissolving => dissolving;
 
@@ -123,8 +124,10 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.TheHerInThePasts
 
             spriteBatch.Draw(portrait, position, rectangle, blended, rotation, Vector2.Zero, scale2, SpriteEffects.None, 0f);
 
-            if (dissolving && dissolveT > 0.01f) {
-                DrawPixelDissolve(spriteBatch, portrait, position, alpha);
+            if (smile) {
+                portrait = ADVAsset.Lain_smile;
+                position.X += 38 * scale2;
+                spriteBatch.Draw(portrait, position, rectangle, blended, rotation, Vector2.Zero, scale2, SpriteEffects.None, 0f);
             }
         }
 
@@ -173,40 +176,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.TheHerInThePasts
                 spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
                     SamplerState.AnisotropicClamp, DepthStencilState.None,
                     RasterizerState.CullNone, null, Main.UIScaleMatrix);
-            }
-        }
-
-        private void DrawPixelDissolve(SpriteBatch spriteBatch, Texture2D portrait, Vector2 drawPos, float alpha) {
-            Texture2D pixel = CWRAsset.Placeholder_White?.Value ?? TextureAssets.MagicPixel.Value;
-            if (pixel == null) return;
-
-            int blockSize = 6;
-            int cols = portrait.Width / blockSize;
-            int rows = portrait.Height / blockSize;
-            float threshold = dissolveT;
-            int seed = 9173;
-
-            for (int y = 0; y < rows; y++) {
-                float rowProgress = y / (float)rows;
-                float localT = MathHelper.Clamp((threshold - rowProgress) * 2f, 0f, 1f);
-                if (localT <= 0f) continue;
-                for (int x = 0; x < cols; x++) {
-                    int hash = unchecked(seed + x * 73856093 + y * 19349663);
-                    float rnd = (hash & 0xFFFF) / 65535f;
-                    if (rnd > localT) continue;
-
-                    Vector2 pos = drawPos + new Vector2(x * blockSize, y * blockSize) * scale;
-                    Color cover = Color.Black * alpha * MathHelper.Clamp(localT * 1.3f, 0f, 1f);
-                    spriteBatch.Draw(pixel, pos, null, cover, 0f, Vector2.Zero, blockSize * scale, SpriteEffects.None, 0f);
-
-                    if (rnd < localT * 0.4f) {
-                        float driftY = -MathF.Sin(localTimer * 0.03f + x * 0.4f) * 20f * localT;
-                        float driftX = MathF.Cos(localTimer * 0.02f + y * 0.3f) * 5f * localT;
-                        Vector2 shardPos = pos + new Vector2(driftX, driftY - localT * 36f);
-                        Color shardColor = Color.Lerp(new Color(180, 175, 170), new Color(100, 30, 30), localT) * alpha * (1f - localT);
-                        spriteBatch.Draw(pixel, shardPos, null, shardColor, 0f, Vector2.Zero, blockSize * scale * 0.8f, SpriteEffects.None, 0f);
-                    }
-                }
             }
         }
     }
