@@ -32,7 +32,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                     return false;
                 }
                 //仅在手持SHPC时显示
-                Item held = p.HeldItem;
+                Item held = p.GetItem();
                 if (held == null || held.IsAir || held.type != CWRID.Item_SHPC) {
                     return false;
                 }
