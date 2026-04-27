@@ -42,7 +42,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
                 return;
             }
 
-            if (!Cyberspace.Active || Cyberspace.Intensity < 0.001f) {
+            //仅按视觉强度判定，确保Active翻转后收缩动画仍能完整播完
+            if (Cyberspace.Intensity < 0.001f) {
                 return;
             }
 
