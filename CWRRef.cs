@@ -569,32 +569,6 @@ namespace CalamityOverhaul
         public static Type GetNPC_WITCH_Type() => FindCalamityType("CalamityMod.NPCs.TownNPCs.BrimstoneWitch");
         public static Type GetNPC_SupCal_Type() => FindCalamityType("CalamityMod.NPCs.SupremeCalamitas.SupremeCalamitas");
 
-        /// <summary>
-        /// 设置SHPC的装填魂魄类型
-        /// </summary>
-        public static void SetSHPCStoredSoulType(Item item, int soulType) {
-            if (!Has) return;
-            SetSHPCStoredSoulTypeInner(item, soulType);
-        }
-        [CWRJITEnabled]
-        private static void SetSHPCStoredSoulTypeInner(Item item, int soulType) {
-            if (item.ModItem is SHPC shpc) {
-                shpc.storedSoulType = soulType;
-            }
-        }
-
-        /// <summary>
-        /// 获取SHPC的装填魂魄类型
-        /// </summary>
-        public static int GetSHPCStoredSoulType(Item item) => Has ? GetSHPCStoredSoulTypeInner(item) : ItemID.SoulofLight;
-        [CWRJITEnabled]
-        private static int GetSHPCStoredSoulTypeInner(Item item) {
-            if (item.ModItem is SHPC shpc) {
-                return shpc.storedSoulType;
-            }
-            return ItemID.SoulofLight;
-        }
-
         public static bool GetEarlyHardmodeProgressionReworkBool() => Has && GetEarlyHardmodeProgressionReworkBoolInner();
         [CWRJITEnabled]
         private static bool GetEarlyHardmodeProgressionReworkBoolInner() => CalamityServerConfig.Instance.EarlyHardmodeProgressionRework;
@@ -776,10 +750,6 @@ namespace CalamityOverhaul
         }
         [CWRJITEnabled]
         private static LocalizedText ConstructRecipeConditionInner(int tier, out Func<bool> condition) => ArsenalTierGatedRecipe.ConstructRecipeCondition(tier, out condition);
-
-        public static List<Vector2> BezierCurveGetPoints(int count, params Vector2[] pos) => Has ? BezierCurveGetPointsInner(count, pos) : new List<Vector2>();
-        [CWRJITEnabled]
-        private static List<Vector2> BezierCurveGetPointsInner(int count, Vector2[] pos) => new BezierCurve(pos).GetPoints(count);
 
         #region 炼铸系统包装器
         /// <summary>

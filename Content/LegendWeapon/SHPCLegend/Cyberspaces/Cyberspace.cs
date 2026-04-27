@@ -148,6 +148,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         //环境故障闪电计时器（二层以上生效）
         private static int ambientBoltTimer;
 
+        //上次关闭前的层数，用于下次激活时恢复
+        private static int lastLayer = 1;
+
         /// <summary>
         /// 激活赛博空间领域第一层（带爆发式展开+视觉特效）
         /// <br/>支持在前一次收缩动画尚未完成时立即重新展开，避免吞操作
@@ -155,14 +158,17 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         public static void Activate(Player owner) {
             //平滑接管：保留当前 layerExpand/Intensity，让动画从当前进度连续过渡
             //仅对超出层（>=1）清掉残留 burst，确保第一层独享爆发动画
-            for (int i = 1; i < MaxLayerCount; i++) {
+            int resumeLayer = Math.Clamp(lastLayer, 1, MaxLayerCount);
+            for (int i = resumeLayer; i < MaxLayerCount; i++) {
                 layerBurstTimer[i] = 0;
             }
             Active = true;
-            CurrentLayer = 1;
+            CurrentLayer = resumeLayer;
             targetIntensity = 1f;
-            //第一层每次激活都重新触发爆发动画，让演出效果完整
-            layerBurstTimer[0] = BurstDurations[0];
+            //所有需要展开的层都触发爆发动画
+            for (int i = 0; i < resumeLayer; i++) {
+                layerBurstTimer[i] = BurstDurations[i];
+            }
             SpawnActivationVFX(owner);
 
             if (!VaultUtils.isServer) {
@@ -203,6 +209,10 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             //立即翻转激活意图，避免在收缩动画期间 UI/外部判定仍认为领域处于开启状态
             Active = false;
             targetIntensity = 0f;
+            //记住当前层以便下次恢复
+            if (CurrentLayer > 0) {
+                lastLayer = CurrentLayer;
+            }
             CurrentLayer = 0;
             //清掉所有未消费的爆发计时，避免下次激活与残余 burst 叠加产生抖动
             for (int i = 0; i < MaxLayerCount; i++) {
@@ -295,6 +305,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             Intensity = 0f;
             EffectTime = 0f;
             CurrentLayer = 0;
+            lastLayer = 1;
             targetIntensity = 0f;
             ambientBoltTimer = 0;
             for (int i = 0; i < MaxLayerCount; i++) {
