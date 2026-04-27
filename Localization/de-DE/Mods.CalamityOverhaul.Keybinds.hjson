@@ -5,7 +5,7 @@ HeavenfallLongbowSkillKey.DisplayName: Himmelsfallenlangbogen: Kosmisches Urteil
 InfinitePickSkillKey.DisplayName: Endloser Spitzhacke: Formwechsel
 Murasama_TriggerKey.DisplayName: Murasama: Auslösetaste
 Murasama_DownKey.DisplayName: Murasama: Hinunterstoßen
-// Halibut_Domain.DisplayName: Halibut: Oceanic Domain
+// Legend_Domain.DisplayName: Domain Trigger
 // Halibut_Clone.DisplayName: Halibut: Invasion of the Former Self
 // Halibut_Restart.DisplayName: Halibut: Reboot
 // Halibut_Superposition.DisplayName: Halibut: Superposition
@@ -25,3 +25,4 @@ Murasama_DownKey.DisplayName: Murasama: Hinunterstoßen
 // CyberFreeze_Key.DisplayName: Cyber Freeze_ Key
 // CyberwareSkill_Key.DisplayName: Cyberware Skill_ Key
 // VoidTimeShift_Key.DisplayName: Void Time Shift_ Key
+// Legend_UIControl.DisplayName: Legend_ U I Control

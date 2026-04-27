@@ -41,5 +41,10 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
         /// 点击回调，可空
         /// </summary>
         public Action OnClick;
+        /// <summary>
+        /// 是否在按下后弹出固定二级面板，由UI层负责面板的渲染与命中
+        /// 设为true时，<see cref="OnClick"/>仅作为面板开关切换的附加回调
+        /// </summary>
+        public bool UsesFixedPanel;
     }
 }

@@ -5,7 +5,7 @@ HeavenfallLongbowSkillKey.DisplayName: HeavenfallLongbow Skill Key
 InfinitePickSkillKey.DisplayName: Endless Pick form switch key
 Murasama_TriggerKey.DisplayName: Murasama: Trigger Key
 Murasama_DownKey.DisplayName: Murasama:Down Key
-Halibut_Domain.DisplayName: Halibut: Oceanic Domain
+Legend_Domain.DisplayName: Domain Trigger
 Halibut_Clone.DisplayName: Halibut: Invasion of the Former Self
 Halibut_Restart.DisplayName: Halibut: Reboot
 Halibut_Superposition.DisplayName: Halibut: Superposition
@@ -25,3 +25,4 @@ CyberBanish_Key.DisplayName: Cyber Banish_ Key
 CyberFreeze_Key.DisplayName: Cyber Freeze_ Key
 CyberwareSkill_Key.DisplayName: Cyberware Skill_ Key
 VoidTimeShift_Key.DisplayName: Void Time Shift_ Key
+Legend_UIControl.DisplayName: Legend_ U I Control

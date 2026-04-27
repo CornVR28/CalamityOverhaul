@@ -5,7 +5,7 @@ HeavenfallLongbowSkillKey.DisplayName: 天堂陨落长弓:万象审判
 InfinitePickSkillKey.DisplayName: 无尽之镐:形态切换
 Murasama_TriggerKey.DisplayName: 鬼妖村正:扳机键
 Murasama_DownKey.DisplayName: 鬼妖村正:下砸
-Halibut_Domain.DisplayName: 大比目鱼:海洋领域
+Legend_Domain.DisplayName: 领域展开
 Halibut_Clone.DisplayName: 大比目鱼:过去身入侵
 Halibut_Restart.DisplayName: 大比目鱼:重启
 Halibut_Superposition.DisplayName: 大比目鱼:叠加
@@ -25,3 +25,4 @@ CyberBanish_Key.DisplayName: 赛博空间:放逐
 CyberFreeze_Key.DisplayName: 赛博空间:冻结
 CyberwareSkill_Key.DisplayName: 赛博义体技能
 // VoidTimeShift_Key.DisplayName: Void Time Shift_ Key
+// Legend_UIControl.DisplayName: Legend_ U I Control

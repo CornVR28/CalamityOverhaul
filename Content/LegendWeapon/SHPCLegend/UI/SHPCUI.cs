@@ -1,4 +1,6 @@
-﻿using CalamityOverhaul.Content.ADV.EntrustManager;
+﻿using CalamityOverhaul.Common;
+using CalamityOverhaul.Content.ADV.EntrustManager;
+using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
 using CalamityOverhaul.Content.QuestLogs;
 using InnoVault.UIHandles;
 using Microsoft.Xna.Framework.Graphics;
@@ -75,6 +77,12 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
         private float infoPanelProgress;
         //当前用于展示的信息面板按钮索引，-1表示无
         private int infoButtonIdx = -1;
+        //当前固定二级面板锁定的按钮索引，-1表示无
+        private int pinnedSector = -1;
+        //固定二级面板的不透明度，平滑跟随
+        private float pinnedPanelProgress;
+        //缓存上一帧赛博面板悬停的子控件
+        private SHPCCyberPanel.HitKind cyberHover;
 
         //全局时间，单位秒
         private float time;
@@ -96,14 +104,19 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             }
             buttons = new List<SHPCButtonDef>(4) {
                 new SHPCButtonDef {
-                    Title = "SOUL CORE",
-                    Subtitle = "魂能装填",
-                    Description = "切换当前装填的魂能种类",
-                    Glyph = "S",
+                    Title = "CYBER DOMAIN",
+                    Subtitle = "赛博领域",
+                    Description = "展开/管理多层赛博空间",
+                    Glyph = "D",
                     Enabled = () => true,
-                    StatusValue = () => -1f,
-                    StatusText = () => SoulTypeShortName(SHPCOverride.SelectedSoulType),
-                    OnClick = CycleSoulType,
+                    StatusValue = () => Cyberspace.Active
+                        ? Cyberspace.CurrentLayer / (float)Cyberspace.MaxLayerCount
+                        : -1f,
+                    StatusText = () => Cyberspace.Active
+                        ? "L" + Cyberspace.CurrentLayer
+                        : "OFF",
+                    OnClick = null,
+                    UsesFixedPanel = true,
                 },
                 new SHPCButtonDef {
                     Title = "FIRE MODE",
@@ -187,33 +200,12 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             return -1;
         }
 
-        private static string SoulTypeShortName(int soulType) {
-            return soulType switch {
-                ItemID.SoulofLight => "LIGHT",
-                ItemID.SoulofNight => "NIGHT",
-                ItemID.SoulofFlight => "FLIGHT",
-                ItemID.SoulofMight => "MIGHT",
-                ItemID.SoulofSight => "SIGHT",
-                ItemID.SoulofFright => "FRIGHT",
-                _ => "?",
-            };
-        }
-
-        private static void CycleSoulType() {
-            int[] order = [
-                ItemID.SoulofLight,
-                ItemID.SoulofNight,
-                ItemID.SoulofFlight,
-                ItemID.SoulofMight,
-                ItemID.SoulofSight,
-                ItemID.SoulofFright,
-            ];
-            int current = SHPCOverride.SelectedSoulType;
-            int idx = Array.IndexOf(order, current);
-            if (idx < 0) {
-                idx = 0;
-            }
-            SHPCOverride.SelectedSoulType = order[(idx + 1) % order.Length];
+        //计算指定按钮固定二级面板的锚点与中线方向
+        private void GetFixedPanelAnchor(int idx, out Vector2 anchor, out float midA) {
+            int count = buttons.Count;
+            GetSectorAngles(idx, count, out float a0, out float a1);
+            midA = (a0 + a1) * 0.5f;
+            anchor = GetCorePosition() + SHPCRenderer.AngleDir(midA) * SHPCTheme.ButtonOuterR;
         }
 
         #endregion
@@ -256,10 +248,27 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                 selectAmts[i] = MathHelper.Lerp(selectAmts[i], st, 0.18f);
             }
 
-            //信息面板逻辑：优先展示悬停项，否则展示选中项
+            //固定二级面板进度与子控件命中
+            float pinnedTarget = pinnedSector >= 0 && expandProgress > 0.7f ? 1f : 0f;
+            pinnedPanelProgress = MathHelper.Lerp(pinnedPanelProgress, pinnedTarget, 0.22f);
+            if (pinnedSector < 0 && pinnedPanelProgress < 0.02f) {
+                pinnedPanelProgress = 0f;
+            }
+            cyberHover = SHPCCyberPanel.HitKind.None;
+            SHPCCyberPanel.Layout cyberLayout = default;
+            bool cyberPanelHit = false;
+            if (pinnedSector >= 0 && pinnedSector < buttons.Count
+                && buttons[pinnedSector].UsesFixedPanel && pinnedPanelProgress > 0.4f) {
+                GetFixedPanelAnchor(pinnedSector, out Vector2 panelAnchor, out float panelMidA);
+                cyberLayout = SHPCCyberPanel.Compute(panelAnchor, panelMidA, pinnedPanelProgress);
+                cyberHover = SHPCCyberPanel.HitTest(cyberLayout, MousePosition);
+                cyberPanelHit = cyberLayout.Panel.Contains((int)MousePosition.X, (int)MousePosition.Y);
+            }
+
+            //信息面板逻辑：优先展示悬停项，其次选中项；锁定面板期间隐藏例行信息面板以免重叠
             int targetInfo = hoveredSector >= 0 ? hoveredSector : selectedSector;
             float targetInfoAlpha = 0f;
-            if (targetInfo >= 0 && expandProgress > 0.7f) {
+            if (targetInfo >= 0 && expandProgress > 0.7f && pinnedSector < 0) {
                 targetInfoAlpha = 1f;
                 infoButtonIdx = targetInfo;
             }
@@ -268,9 +277,20 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                 infoButtonIdx = -1;
             }
 
+            //领域快捷键：在手持SHPC且HUD可见时热键切换领域开关
+            if (CWRKeySystem.Legend_Domain != null && CWRKeySystem.Legend_Domain.JustPressed) {
+                if (Cyberspace.Active) {
+                    Cyberspace.Deactivate();
+                }
+                else {
+                    Cyberspace.Activate(player);
+                }
+            }
+
             //鼠标交互占用
             bool inHotArea = isCore || hit >= 0 ||
-                (offset.Length() < SHPCTheme.ButtonOuterR + 8f && expandProgress > 0.4f);
+                (offset.Length() < SHPCTheme.ButtonOuterR + 8f && expandProgress > 0.4f) ||
+                cyberPanelHit;
             if (inHotArea) {
                 player.mouseInterface = true;
                 player.CWR().DontSwitchWeaponTime = 2;
@@ -278,10 +298,17 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
 
             //左键处理
             if (keyLeftPressState == KeyPressState.Pressed) {
-                if (isCore) {
+                if (cyberHover != SHPCCyberPanel.HitKind.None) {
+                    SHPCCyberPanel.HandleClick(cyberHover, player);
+                    SoundEngine.PlaySound(SoundID.MenuTick);
+                }
+                else if (isCore) {
                     expanded = !expanded;
                     clickFlash = 1f;
                     corePulse = 1f;
+                    if (!expanded) {
+                        pinnedSector = -1;
+                    }
                     SoundEngine.PlaySound(SoundID.MenuTick);
                 }
                 else if (hit >= 0 && expandProgress > 0.6f) {
@@ -289,6 +316,13 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                     bool enabled = def.Enabled?.Invoke() ?? true;
                     if (enabled) {
                         selectedSector = hit;
+                        if (def.UsesFixedPanel) {
+                            //切换锁定状态：同一按钮再点击则收起
+                            pinnedSector = pinnedSector == hit ? -1 : hit;
+                        }
+                        else if (pinnedSector >= 0 && pinnedSector != hit) {
+                            pinnedSector = -1;
+                        }
                         def.OnClick?.Invoke();
                         SoundEngine.PlaySound(SoundID.MenuTick);
                     }
@@ -296,6 +330,14 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                         SoundEngine.PlaySound(SoundID.MenuClose);
                     }
                 }
+                else if (!cyberPanelHit) {
+                    //面板外点击不取消锁定，仅需保证收起总HUD时同步清除
+                }
+            }
+
+            //总HUD收起同步收起锁定面板
+            if (!expanded) {
+                pinnedSector = -1;
             }
 
             //更新命中盒，便于上层屏蔽世界点击
@@ -356,6 +398,13 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                     infoPanelProgress, globalAlpha,
                     def.Title, def.Subtitle, def.Description,
                     def.StatusText?.Invoke());
+            }
+
+            //固定二级面板（赛博领域）
+            if (pinnedSector >= 0 && pinnedSector < buttons.Count && pinnedPanelProgress > 0.02f) {
+                GetFixedPanelAnchor(pinnedSector, out Vector2 fAnchor, out float fMidA);
+                SHPCCyberPanel.Layout layout = SHPCCyberPanel.Compute(fAnchor, fMidA, pinnedPanelProgress);
+                SHPCCyberPanel.Draw(sb, px, layout, pinnedPanelProgress, globalAlpha, cyberHover);
             }
         }
 
