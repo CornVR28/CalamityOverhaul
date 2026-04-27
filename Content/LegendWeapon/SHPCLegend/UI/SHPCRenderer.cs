@@ -1,3 +1,5 @@
+using CalamityOverhaul.Common;
+using CalamityOverhaul.Content.HackTimes;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Graphics;
 using System;
@@ -410,6 +412,144 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             //右下
             DrawLine(sb, px, new Vector2(rect.Right - size, rect.Bottom), new Vector2(rect.Right, rect.Bottom), thickness, color);
             DrawLine(sb, px, new Vector2(rect.Right, rect.Bottom - size), new Vector2(rect.Right, rect.Bottom), thickness, color);
+        }
+
+        #endregion
+
+        #region RAM弧形条
+
+        //弧形几何常量，与SHPC核心环尺寸匹配
+        private const float RamArcStart = 2.5f;
+        private const float RamArcEnd = 4.65f;
+        private const float RamInnerR = 28f;
+        private const float RamOuterR = 50f;
+        private const float RamCellGap = 0.04f;
+        //装饰环稍微超出弧带边缘
+        private const float RamDecoOuterR = RamOuterR + 5f;
+        private const float RamDecoInnerR = RamInnerR - 4f;
+
+        /// <summary>
+        /// 绘制环绕核心左侧的RAM弧形资源条
+        /// 优先使用HackRamArc.fx着色器渲染，降级时回退到CPU绘制
+        /// 弧段从左下方(2.5rad)扫至接近正上(4.65rad)
+        /// </summary>
+        public static void DrawRAMBar(SpriteBatch sb, Texture2D px, Vector2 center,
+            float currentRam, int maxRam, float time, float globalAlpha) {
+            if (maxRam <= 0 || globalAlpha < 0.01f) {
+                return;
+            }
+            float totalSweep = RamArcEnd - RamArcStart;
+            float totalGap = (maxRam - 1) * RamCellGap;
+            float cellAngle = (totalSweep - totalGap) / maxRam;
+            if (cellAngle <= 0.01f) {
+                return;
+            }
+            float lowRam = 0f;
+            if (!HackTime.InfiniteHack) {
+                if (currentRam < 0.5f) {
+                    lowRam = 1f;
+                }
+                else if (currentRam <= 2f) {
+                    lowRam = MathHelper.Clamp(1f - (currentRam - 0.5f) / 1.5f, 0f, 1f);
+                }
+            }
+
+            Effect effect = EffectLoader.HackRamArc?.Value;
+            if (effect != null) {
+                DrawRAMBar_Shader(sb, px, center, currentRam, maxRam,
+                    cellAngle, lowRam, time, globalAlpha, effect);
+            }
+            else {
+                DrawRAMBar_CPU(sb, px, center, currentRam, maxRam,
+                    cellAngle, time, globalAlpha);
+            }
+
+            //数值标签，始终CPU绘制
+            float midAngle = (RamArcStart + RamArcEnd) * 0.5f;
+            Vector2 labelDir = AngleDir(midAngle);
+            Vector2 labelPos = center + labelDir * (RamOuterR + 14f);
+            string ramStr = $"{(int)currentRam}/{maxRam}";
+            DynamicSpriteFont font = FontAssets.MouseText.Value;
+            Vector2 sz = font.MeasureString(ramStr) * 0.38f;
+            Utils.DrawBorderString(sb, ramStr, labelPos - sz * 0.5f, SHPCTheme.TextDim * globalAlpha, 0.38f);
+        }
+
+        private static void DrawRAMBar_Shader(SpriteBatch sb, Texture2D px, Vector2 center,
+            float currentRam, int maxRam, float cellAngle, float lowRam,
+            float time, float globalAlpha, Effect effect) {
+            //包围盒：以核心为圆心，覆盖整个弧圈（含装饰环+余量）
+            const float pad = 14f;
+            float boxR = RamDecoOuterR + pad;
+            float qLeft = MathF.Max(0f, center.X - boxR);
+            float qTop = MathF.Max(0f, center.Y - boxR);
+            float qRight = MathF.Min(Main.screenWidth, center.X + boxR);
+            float qBottom = MathF.Min(Main.screenHeight, center.Y + boxR);
+            int qW = (int)MathF.Ceiling(qRight - qLeft);
+            int qH = (int)MathF.Ceiling(qBottom - qTop);
+            if (qW <= 0 || qH <= 0) {
+                return;
+            }
+            Rectangle dest = new((int)qLeft, (int)qTop, qW, qH);
+            Vector2 relCenter = new(center.X - qLeft, center.Y - qTop);
+
+            effect.Parameters["uTime"]?.SetValue(time);
+            effect.Parameters["uAlpha"]?.SetValue(globalAlpha);
+            effect.Parameters["uResolution"]?.SetValue(new Vector2(qW, qH));
+            effect.Parameters["uArcCenter"]?.SetValue(relCenter);
+            effect.Parameters["uInnerR"]?.SetValue(RamInnerR);
+            effect.Parameters["uOuterR"]?.SetValue(RamOuterR);
+            effect.Parameters["uAStart"]?.SetValue(RamArcStart);
+            effect.Parameters["uCellAngle"]?.SetValue(cellAngle);
+            effect.Parameters["uCellGap"]?.SetValue(RamCellGap);
+            effect.Parameters["uCellCount"]?.SetValue((float)maxRam);
+            effect.Parameters["uFillValue"]?.SetValue(currentRam);
+            effect.Parameters["uLowRam"]?.SetValue(lowRam);
+            effect.Parameters["uInfinite"]?.SetValue(HackTime.InfiniteHack ? 1f : 0f);
+            effect.Parameters["uDecoOuterR"]?.SetValue(RamDecoOuterR);
+            effect.Parameters["uDecoInnerR"]?.SetValue(RamDecoInnerR);
+
+            sb.End();
+            sb.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.LinearClamp,
+                DepthStencilState.None, RasterizerState.CullNone, effect, Main.UIScaleMatrix);
+            sb.Draw(px, dest, Color.White);
+            sb.End();
+            sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState,
+                DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.UIScaleMatrix);
+        }
+
+        private static void DrawRAMBar_CPU(SpriteBatch sb, Texture2D px, Vector2 center,
+            float currentRam, int maxRam, float cellAngle, float time, float globalAlpha) {
+            float a = globalAlpha;
+            DrawArc(sb, px, center + new Vector2(1.5f, 2f),
+                RamInnerR, RamOuterR, RamArcStart, RamArcEnd,
+                SHPCTheme.ShadowDark * (0.5f * a));
+            for (int i = 0; i < maxRam; i++) {
+                float cStart = RamArcStart + i * (cellAngle + RamCellGap);
+                float cEnd = cStart + cellAngle;
+                float fill = MathHelper.Clamp(currentRam - i, 0f, 1f);
+                DrawArc(sb, px, center, RamInnerR + 1f, RamOuterR - 1f, cStart, cEnd,
+                    SHPCTheme.SlotBg * (0.92f * a));
+                DrawArc(sb, px, center, RamInnerR + 1f, RamInnerR + 3f, cStart, cEnd,
+                    SHPCTheme.ShadowDark * (0.5f * a));
+                if (fill > 0.01f) {
+                    Color fillCol = fill >= 0.98f ? SHPCTheme.Cyan : Color.Lerp(SHPCTheme.Border, SHPCTheme.Cyan, fill);
+                    float fillEnd = MathHelper.Lerp(cStart, cEnd, fill);
+                    DrawArc(sb, px, center, RamInnerR + 1f, RamOuterR - 2f, cStart, fillEnd, fillCol * (0.6f * a));
+                    DrawArc(sb, px, center, RamOuterR - 4f, RamOuterR - 1f, cStart, fillEnd, SHPCTheme.CyanHi * (fill * 0.85f * a));
+                }
+                Color borderCol = fill >= 0.98f ? SHPCTheme.BorderHi : SHPCTheme.Border;
+                DrawArcStroke(sb, px, center, RamOuterR - 0.5f, cStart, cEnd, 1.2f, borderCol * (0.75f * a));
+                DrawArcStroke(sb, px, center, RamInnerR + 0.5f, cStart, cEnd, 1.0f, borderCol * (0.55f * a));
+                DrawLine(sb, px, center + AngleDir(cStart) * (RamInnerR + 1f), center + AngleDir(cStart) * (RamOuterR - 1f), 1.2f, borderCol * (0.55f * a));
+                DrawLine(sb, px, center + AngleDir(cEnd) * (RamInnerR + 1f), center + AngleDir(cEnd) * (RamOuterR - 1f), 1.2f, borderCol * (0.55f * a));
+            }
+            float scanT = (time * 0.35f) % 1f;
+            float scanA = MathHelper.Lerp(RamArcStart, RamArcEnd, scanT);
+            float scanW = (RamArcEnd - RamArcStart) * 0.07f;
+            DrawArc(sb, px, center, RamInnerR + 2f, RamOuterR - 2f,
+                MathF.Max(RamArcStart, scanA - scanW * 0.5f),
+                MathF.Min(RamArcEnd, scanA + scanW * 0.5f),
+                SHPCTheme.CyanHi * (0.1f * a));
         }
 
         #endregion

@@ -1,6 +1,7 @@
 ﻿using CalamityOverhaul.Common;
 using CalamityOverhaul.Content.ADV.EntrustManager;
 using CalamityOverhaul.Content.Cyberwares.UIs;
+using CalamityOverhaul.Content.HackTimes;
 using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
 using CalamityOverhaul.Content.QuestLogs;
 using InnoVault.UIHandles;
@@ -151,6 +152,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
         //全局时间，单位秒
         private float time;
 
+        //RAM值平滑显示量，跟随HackTimeRAM.CurrentRam
+        private float ramDisplayValue;
+
         //按钮配置列表
         private List<SHPCButtonDef> buttons;
 
@@ -286,6 +290,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
         public override void Update() {
             EnsureButtons();
             time += 1f / 60f;
+
+            //平滑跟随RAM当前值
+            ramDisplayValue = MathHelper.Lerp(ramDisplayValue, HackTimeRAM.CurrentRam, 0.12f);
 
             //展开进度推进
             float targetExpand = expanded ? 1f : 0f;
@@ -453,6 +460,10 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                     MathHelper.Clamp(status, 0f, 1f),
                     def.Glyph, time, globalAlpha);
             }
+
+            //RAM弧形条（始终显示，不受展开状态影响）
+            SHPCRenderer.DrawRAMBar(sb, px, corePos,
+                ramDisplayValue, HackTimeRAM.MaxRam, time, globalAlpha);
 
             //核心
             SHPCRenderer.DrawCore(sb, px, corePos, expandProgress,
