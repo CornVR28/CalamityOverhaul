@@ -1,5 +1,6 @@
 ﻿using CalamityOverhaul.Common;
 using CalamityOverhaul.Content.ADV.EntrustManager;
+using CalamityOverhaul.Content.Cyberwares.UIs;
 using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
 using CalamityOverhaul.Content.QuestLogs;
 using InnoVault.UIHandles;
@@ -31,10 +32,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
         public static LocalizedText CyberDomain_Title { get; private set; }
         public static LocalizedText CyberDomain_Subtitle { get; private set; }
         public static LocalizedText CyberDomain_Description { get; private set; }
-        public static LocalizedText FireMode_Title { get; private set; }
-        public static LocalizedText FireMode_Subtitle { get; private set; }
-        public static LocalizedText FireMode_Description { get; private set; }
-        public static LocalizedText FireMode_Status_Std { get; private set; }
+        public static LocalizedText Cyberware_Title { get; private set; }
+        public static LocalizedText Cyberware_Subtitle { get; private set; }
+        public static LocalizedText Cyberware_Description { get; private set; }
+        public static LocalizedText Cyberware_Status_Open { get; private set; }
+        public static LocalizedText Cyberware_Status_Closed { get; private set; }
         public static LocalizedText Status_Title { get; private set; }
         public static LocalizedText Status_Subtitle { get; private set; }
         public static LocalizedText Status_Description { get; private set; }
@@ -58,10 +60,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             CyberDomain_Title = this.GetLocalization(nameof(CyberDomain_Title), () => "CYBER DOMAIN");
             CyberDomain_Subtitle = this.GetLocalization(nameof(CyberDomain_Subtitle), () => "Domain Control");
             CyberDomain_Description = this.GetLocalization(nameof(CyberDomain_Description), () => "Deploy and manage multi-layer cyberspace");
-            FireMode_Title = this.GetLocalization(nameof(FireMode_Title), () => "FIRE MODE");
-            FireMode_Subtitle = this.GetLocalization(nameof(FireMode_Subtitle), () => "Weapon Loadout");
-            FireMode_Description = this.GetLocalization(nameof(FireMode_Description), () => "Switch primary weapon attack mode");
-            FireMode_Status_Std = this.GetLocalization(nameof(FireMode_Status_Std), () => "STD");
+            Cyberware_Title = this.GetLocalization(nameof(Cyberware_Title), () => "CYBERWARE");
+            Cyberware_Subtitle = this.GetLocalization(nameof(Cyberware_Subtitle), () => "Body Augmentation");
+            Cyberware_Description = this.GetLocalization(nameof(Cyberware_Description), () => "Open cyberware augmentation manager");
+            Cyberware_Status_Open = this.GetLocalization(nameof(Cyberware_Status_Open), () => "OPEN");
+            Cyberware_Status_Closed = this.GetLocalization(nameof(Cyberware_Status_Closed), () => "CLOSED");
             Status_Title = this.GetLocalization(nameof(Status_Title), () => "STATUS");
             Status_Subtitle = this.GetLocalization(nameof(Status_Subtitle), () => "System Diagnostics");
             Status_Description = this.GetLocalization(nameof(Status_Description), () => "View current overload and cooldown info");
@@ -180,14 +183,16 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                     UsesFixedPanel = true,
                 },
                 new SHPCButtonDef {
-                    Title = () => FireMode_Title.Value,
-                    Subtitle = () => FireMode_Subtitle.Value,
-                    Description = () => FireMode_Description.Value,
-                    Glyph = "F",
+                    Title = () => Cyberware_Title.Value,
+                    Subtitle = () => Cyberware_Subtitle.Value,
+                    Description = () => Cyberware_Description.Value,
+                    Glyph = "C",
                     Enabled = () => true,
                     StatusValue = () => 0f,
-                    StatusText = () => FireMode_Status_Std.Value,
-                    OnClick = null,
+                    StatusText = () => CyberwareUI.Instance?.Active == true
+                        ? Cyberware_Status_Open.Value
+                        : Cyberware_Status_Closed.Value,
+                    OnClick = () => CyberwareUI.Instance?.Toggle(),
                 },
                 new SHPCButtonDef {
                     Title = () => Status_Title.Value,
@@ -203,7 +208,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                     Title = () => Config_Title.Value,
                     Subtitle = () => Config_Subtitle.Value,
                     Description = () => Config_Description.Value,
-                    Glyph = "C",
+                    Glyph = "S",
                     Enabled = () => true,
                     StatusValue = () => -1f,
                     StatusText = () => string.Empty,

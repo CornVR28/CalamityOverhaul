@@ -629,10 +629,11 @@ SHPCUI: {
 	// CyberDomain_Title: CYBER DOMAIN
 	// CyberDomain_Subtitle: Domain Control
 	// CyberDomain_Description: Deploy and manage multi-layer cyberspace
-	// FireMode_Title: FIRE MODE
-	// FireMode_Subtitle: Weapon Loadout
-	// FireMode_Description: Switch primary weapon attack mode
-	// FireMode_Status_Std: STD
+	// Cyberware_Title: CYBERWARE
+	// Cyberware_Subtitle: Body Augmentation
+	// Cyberware_Description: Open cyberware augmentation manager
+	// Cyberware_Status_Open: OPEN
+	// Cyberware_Status_Closed: CLOSED
 	// Status_Title: STATUS
 	// Status_Subtitle: System Diagnostics
 	// Status_Description: View current overload and cooldown info

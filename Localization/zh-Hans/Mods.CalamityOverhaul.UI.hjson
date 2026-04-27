@@ -629,10 +629,11 @@ SHPCUI: {
 	CyberDomain_Title: 赛博领域
 	CyberDomain_Subtitle: CYBER DOMAIN
 	CyberDomain_Description: 展开/管理多层赛博空间
-	FireMode_Title: 射击模式
-	FireMode_Subtitle: FIRE MODE
-	FireMode_Description: 切换主武器的攻击模式
-	FireMode_Status_Std: STD
+	Cyberware_Title: 赛博义体
+	Cyberware_Subtitle: CYBERWARE
+	Cyberware_Description: 打开义体强化管理器
+	Cyberware_Status_Open: 已打开
+	Cyberware_Status_Closed: 已关闭
 	Status_Title: 状态信息
 	Status_Subtitle: STATUS
 	Status_Description: 查看当前过载与冷却信息
