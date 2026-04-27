@@ -150,17 +150,18 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
 
         /// <summary>
         /// 激活赛博空间领域第一层（带爆发式展开+视觉特效）
+        /// <br/>支持在前一次收缩动画尚未完成时立即重新展开，避免吞操作
         /// </summary>
         public static void Activate(Player owner) {
-            //重置所有层展开进度，确保每次激活都从零开始展开
-            for (int i = 0; i < MaxLayerCount; i++) {
-                layerExpand[i] = 0f;
+            //平滑接管：保留当前 layerExpand/Intensity，让动画从当前进度连续过渡
+            //仅对超出层（>=1）清掉残留 burst，确保第一层独享爆发动画
+            for (int i = 1; i < MaxLayerCount; i++) {
                 layerBurstTimer[i] = 0;
             }
             Active = true;
             CurrentLayer = 1;
             targetIntensity = 1f;
-            Intensity = 0f;
+            //第一层每次激活都重新触发爆发动画，让演出效果完整
             layerBurstTimer[0] = BurstDurations[0];
             SpawnActivationVFX(owner);
 
@@ -175,7 +176,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         /// </summary>
         public static void SetLayer(int layer, Player owner = null) {
             layer = Math.Clamp(layer, 1, MaxLayerCount);
-            if (!Active || layer == CurrentLayer) return;
+            if (!Active) return;
+            if (layer == CurrentLayer) return;
 
             int oldLayer = CurrentLayer;
             CurrentLayer = layer;
@@ -195,10 +197,17 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
 
         /// <summary>
         /// 关闭赛博空间领域（所有层带收缩动画）
+        /// <br/>立即把 Active 置为 false 表示用户意图，残余收缩动画不会阻挡再次激活
         /// </summary>
         public static void Deactivate() {
+            //立即翻转激活意图，避免在收缩动画期间 UI/外部判定仍认为领域处于开启状态
+            Active = false;
             targetIntensity = 0f;
             CurrentLayer = 0;
+            //清掉所有未消费的爆发计时，避免下次激活与残余 burst 叠加产生抖动
+            for (int i = 0; i < MaxLayerCount; i++) {
+                layerBurstTimer[i] = 0;
+            }
 
             if (!VaultUtils.isServer) {
                 SoundEngine.PlaySound(CWRSound.Faultrelease, Main.LocalPlayer.Center);
@@ -261,8 +270,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
                 }
             }
 
-            //所有层收缩完毕且Intensity足够低后彻底关闭
-            if (CurrentLayer == 0) {
+            //所有层收缩完毕且Intensity足够低后清掉残余状态（不影响 Active，已在 Deactivate 时立即翻转）
+            if (!Active && CurrentLayer == 0) {
                 bool allCollapsed = true;
                 for (int i = 0; i < MaxLayerCount; i++) {
                     if (layerExpand[i] >= 0.005f) {
@@ -271,7 +280,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
                     }
                 }
                 if (allCollapsed && Intensity < 0.005f) {
-                    Reset();
+                    Intensity = 0f;
+                    EffectTime = 0f;
+                    ambientBoltTimer = 0;
                 }
             }
         }
@@ -348,7 +359,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         /// 判断指定世界坐标是否处于当前赛博空间领域内
         /// </summary>
         public static bool IsInsideDomain(Vector2 worldPos) {
-            if (!Active || Intensity < 0.01f) return false;
+            //仅按视觉强度判定，避免Active翻转后与正在收缩的画面不一致
+            if (Intensity < 0.01f) return false;
             float dx = worldPos.X - Main.LocalPlayer.Center.X;
             float dy = worldPos.Y - Main.LocalPlayer.Center.Y;
             return dx * dx + dy * dy <= EffectiveOuterRadius * EffectiveOuterRadius;
