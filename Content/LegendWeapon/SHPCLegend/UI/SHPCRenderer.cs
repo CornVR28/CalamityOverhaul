@@ -299,26 +299,34 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
         #region 二级信息面板
 
         /// <summary>
-        /// 绘制二级信息面板，沿扇区中线法线方向延展，整体为线框矩形
+        /// 绘制二级信息面板，作为tooltip依附于光标位置
+        /// <br/>cursor为当前鼠标位置，面板会自动避免越过屏幕边缘
         /// </summary>
         public static void DrawInfoPanel(SpriteBatch sb, Texture2D px,
-            Vector2 anchor, float midAngle, float panelAlpha, float globalAlpha,
+            Vector2 cursor, float panelAlpha, float globalAlpha,
             string title, string subtitle, string description, string statusText) {
             if (panelAlpha < 0.02f) {
                 return;
             }
             float a = panelAlpha * globalAlpha;
 
-            //面板尺寸与位置：从anchor沿外切线方向铺开
             const float panelW = 168f;
             const float panelH = 70f;
-            Vector2 outDir = AngleDir(midAngle);
 
-            //入场偏移，沿外切方向滑入
-            float slide = (1f - panelAlpha) * 12f;
-            Vector2 panelPos = anchor + outDir * (SHPCTheme.InfoPanelGap + slide);
-            //垂直对齐到anchor所在水平线，避免面板倾斜
-            panelPos.Y -= panelH * 0.5f;
+            //入场偏移，沿光标右下方向滑入
+            float slide = (1f - panelAlpha) * 8f;
+            //tooltip式定位：默认在光标右下偏移
+            Vector2 panelPos = cursor + new Vector2(18f + slide, 14f);
+            //屏幕边缘自适应：右越界翻转到光标左侧，下越界翻转到光标上方
+            if (panelPos.X + panelW > Main.screenWidth - 8f) {
+                panelPos.X = cursor.X - panelW - 18f - slide;
+            }
+            if (panelPos.Y + panelH > Main.screenHeight - 8f) {
+                panelPos.Y = cursor.Y - panelH - 14f;
+            }
+            //最终再做一次硬限位防止极端情况下越界
+            panelPos.X = MathHelper.Clamp(panelPos.X, 4f, Main.screenWidth - panelW - 4f);
+            panelPos.Y = MathHelper.Clamp(panelPos.Y, 4f, Main.screenHeight - panelH - 4f);
             Rectangle rect = new((int)panelPos.X, (int)panelPos.Y, (int)panelW, (int)panelH);
 
             //投影

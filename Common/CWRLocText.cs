@@ -163,6 +163,32 @@ namespace CalamityOverhaul.Common
         public LocalizedText Notbound { get; private set; }
         public LocalizedText DisableMotionInterpolationMessage { get; private set; }
         public LocalizedText LegendItemUpgradeDisable { get; private set; }
+        //SHPC HUD相关本地化
+        public LocalizedText SHPC_HUD_CyberDomain_Title { get; private set; }
+        public LocalizedText SHPC_HUD_CyberDomain_Subtitle { get; private set; }
+        public LocalizedText SHPC_HUD_CyberDomain_Description { get; private set; }
+        public LocalizedText SHPC_HUD_FireMode_Title { get; private set; }
+        public LocalizedText SHPC_HUD_FireMode_Subtitle { get; private set; }
+        public LocalizedText SHPC_HUD_FireMode_Description { get; private set; }
+        public LocalizedText SHPC_HUD_FireMode_Status_Std { get; private set; }
+        public LocalizedText SHPC_HUD_Status_Title { get; private set; }
+        public LocalizedText SHPC_HUD_Status_Subtitle { get; private set; }
+        public LocalizedText SHPC_HUD_Status_Description { get; private set; }
+        public LocalizedText SHPC_HUD_Status_OK { get; private set; }
+        public LocalizedText SHPC_HUD_Config_Title { get; private set; }
+        public LocalizedText SHPC_HUD_Config_Subtitle { get; private set; }
+        public LocalizedText SHPC_HUD_Config_Description { get; private set; }
+        public LocalizedText SHPC_HUD_State_On { get; private set; }
+        public LocalizedText SHPC_HUD_State_Off { get; private set; }
+        public LocalizedText SHPC_HUD_State_Layer { get; private set; }
+        public LocalizedText SHPC_HUD_Cyber_PanelTitle { get; private set; }
+        public LocalizedText SHPC_HUD_Cyber_PanelSubtitle { get; private set; }
+        public LocalizedText SHPC_HUD_Cyber_BtnActivate { get; private set; }
+        public LocalizedText SHPC_HUD_Cyber_BtnDeactivate { get; private set; }
+        public LocalizedText SHPC_HUD_Cyber_LayerLabel { get; private set; }
+        public LocalizedText SHPC_HUD_Cyber_StateOnline { get; private set; }
+        public LocalizedText SHPC_HUD_Cyber_StateOffline { get; private set; }
+        public LocalizedText SHPC_HUD_Cyber_Hint { get; private set; }
         #endregion
         protected override void Register() => Instance = this;
         #region Utils

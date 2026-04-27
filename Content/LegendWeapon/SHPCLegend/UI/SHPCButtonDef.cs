@@ -11,15 +11,15 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
         /// <summary>
         /// 短标题，绘制于二级信息面板顶部
         /// </summary>
-        public string Title;
+        public Func<string> Title;
         /// <summary>
         /// 副标题或类别标签
         /// </summary>
-        public string Subtitle;
+        public Func<string> Subtitle;
         /// <summary>
         /// 信息面板下方的简短说明，可包含一处换行
         /// </summary>
-        public string Description;
+        public Func<string> Description;
         /// <summary>
         /// 程序化图标符号，单字符或两字符，用于按钮中心
         /// </summary>

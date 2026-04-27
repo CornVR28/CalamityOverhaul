@@ -102,50 +102,51 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             if (buttons != null) {
                 return;
             }
+            CWRLocText loc = CWRLocText.Instance;
             buttons = new List<SHPCButtonDef>(4) {
                 new SHPCButtonDef {
-                    Title = "CYBER DOMAIN",
-                    Subtitle = "赛博领域",
-                    Description = "展开/管理多层赛博空间",
+                    Title = () => loc.SHPC_HUD_CyberDomain_Title.Value,
+                    Subtitle = () => loc.SHPC_HUD_CyberDomain_Subtitle.Value,
+                    Description = () => loc.SHPC_HUD_CyberDomain_Description.Value,
                     Glyph = "D",
                     Enabled = () => true,
                     StatusValue = () => Cyberspace.Active
                         ? Cyberspace.CurrentLayer / (float)Cyberspace.MaxLayerCount
                         : -1f,
                     StatusText = () => Cyberspace.Active
-                        ? "L" + Cyberspace.CurrentLayer
-                        : "OFF",
+                        ? loc.SHPC_HUD_State_Layer.Value + Cyberspace.CurrentLayer
+                        : loc.SHPC_HUD_State_Off.Value,
                     OnClick = null,
                     UsesFixedPanel = true,
                 },
                 new SHPCButtonDef {
-                    Title = "FIRE MODE",
-                    Subtitle = "射击模式",
-                    Description = "切换主武器的攻击模式",
+                    Title = () => loc.SHPC_HUD_FireMode_Title.Value,
+                    Subtitle = () => loc.SHPC_HUD_FireMode_Subtitle.Value,
+                    Description = () => loc.SHPC_HUD_FireMode_Description.Value,
                     Glyph = "F",
                     Enabled = () => true,
                     StatusValue = () => 0f,
-                    StatusText = () => "STD",
+                    StatusText = () => loc.SHPC_HUD_FireMode_Status_Std.Value,
                     OnClick = null,
                 },
                 new SHPCButtonDef {
-                    Title = "STATUS",
-                    Subtitle = "状态信息",
-                    Description = "查看当前过载与冷却信息",
+                    Title = () => loc.SHPC_HUD_Status_Title.Value,
+                    Subtitle = () => loc.SHPC_HUD_Status_Subtitle.Value,
+                    Description = () => loc.SHPC_HUD_Status_Description.Value,
                     Glyph = "I",
                     Enabled = () => true,
                     StatusValue = () => 0f,
-                    StatusText = () => "OK",
+                    StatusText = () => loc.SHPC_HUD_Status_OK.Value,
                     OnClick = null,
                 },
                 new SHPCButtonDef {
-                    Title = "CONFIG",
-                    Subtitle = "系统设置",
-                    Description = "调整辅助选项与显示参数",
+                    Title = () => loc.SHPC_HUD_Config_Title.Value,
+                    Subtitle = () => loc.SHPC_HUD_Config_Subtitle.Value,
+                    Description = () => loc.SHPC_HUD_Config_Description.Value,
                     Glyph = "C",
                     Enabled = () => true,
                     StatusValue = () => -1f,
-                    StatusText = () => "",
+                    StatusText = () => string.Empty,
                     OnClick = null,
                 },
             };
@@ -201,11 +202,16 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
         }
 
         //计算指定按钮固定二级面板的锚点与中线方向
+        //为了避免面板从不同角度的按钮顶出时遮挡其他UI，这里采用与按钮位置无关的固定锚点
+        //（在扇形右侧、底边对齐核心高度），连续处于同一位置不随点击跳变
         private void GetFixedPanelAnchor(int idx, out Vector2 anchor, out float midA) {
-            int count = buttons.Count;
-            GetSectorAngles(idx, count, out float a0, out float a1);
-            midA = (a0 + a1) * 0.5f;
-            anchor = GetCorePosition() + SHPCRenderer.AngleDir(midA) * SHPCTheme.ButtonOuterR;
+            //中线使用水平向右，面板只会沿水平方向滑入
+            midA = 0f;
+            Vector2 corePos = GetCorePosition();
+            //X：贴在扇形外环右侧，Y：让面板底部基本贴齐核心高度，整体落在扇形右上区域
+            anchor = new Vector2(
+                corePos.X + SHPCTheme.ButtonOuterR + 2f,
+                corePos.Y - SHPCCyberPanel.PanelH * 0.5f + 6f);
         }
 
         #endregion
@@ -265,14 +271,13 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                 cyberPanelHit = cyberLayout.Panel.Contains((int)MousePosition.X, (int)MousePosition.Y);
             }
 
-            //信息面板逻辑：优先展示悬停项，其次选中项；锁定面板期间隐藏例行信息面板以免重叠
-            int targetInfo = hoveredSector >= 0 ? hoveredSector : selectedSector;
+            //信息面板逻辑：仅在光标悬停按钮时显示（tooltip语义），锁定面板期间隐藏以免重叠
             float targetInfoAlpha = 0f;
-            if (targetInfo >= 0 && expandProgress > 0.7f && pinnedSector < 0) {
+            if (hoveredSector >= 0 && expandProgress > 0.7f && pinnedSector < 0) {
                 targetInfoAlpha = 1f;
-                infoButtonIdx = targetInfo;
+                infoButtonIdx = hoveredSector;
             }
-            infoPanelProgress = MathHelper.Lerp(infoPanelProgress, targetInfoAlpha, 0.2f);
+            infoPanelProgress = MathHelper.Lerp(infoPanelProgress, targetInfoAlpha, 0.25f);
             if (infoPanelProgress < 0.02f) {
                 infoButtonIdx = -1;
             }
@@ -390,13 +395,10 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
 
             //二级信息面板，最后绘制保证置顶
             if (infoButtonIdx >= 0 && infoButtonIdx < buttons.Count && infoPanelProgress > 0.02f) {
-                GetSectorAngles(infoButtonIdx, count, out float a0, out float a1);
-                float midA = (a0 + a1) * 0.5f;
-                Vector2 anchor = corePos + SHPCRenderer.AngleDir(midA) * SHPCTheme.ButtonOuterR;
                 SHPCButtonDef def = buttons[infoButtonIdx];
-                SHPCRenderer.DrawInfoPanel(sb, px, anchor, midA,
+                SHPCRenderer.DrawInfoPanel(sb, px, MousePosition,
                     infoPanelProgress, globalAlpha,
-                    def.Title, def.Subtitle, def.Description,
+                    def.Title?.Invoke(), def.Subtitle?.Invoke(), def.Description?.Invoke(),
                     def.StatusText?.Invoke());
             }
 
