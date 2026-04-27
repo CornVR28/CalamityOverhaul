@@ -1,4 +1,4 @@
-﻿ItemFilterUI: {
+ItemFilterUI: {
 	HintText: 左键点击可添加项目
 	HintText2: 左键点击可移除项目
 	CloseHint: "[ESC]键或[右键点击]可关闭"
@@ -623,4 +623,32 @@ MessageStrings: {
 	MsgRec04_0: 清理这些灵异对象属于徒劳，它们无法被杀死。留作基地的外部屏障。
 	MsgRec04_1: 若该日志被触发，意味着我已经放弃此地，所有向外界的通道已经关闭。
 	MsgRec04_2: 后来者，自行在那些脏东西的规律里寻找机会。
+}
+
+SHPCUI: {
+	CyberDomain_Title: 赛博领域
+	CyberDomain_Subtitle: CYBER DOMAIN
+	CyberDomain_Description: 展开/管理多层赛博空间
+	FireMode_Title: 射击模式
+	FireMode_Subtitle: FIRE MODE
+	FireMode_Description: 切换主武器的攻击模式
+	FireMode_Status_Std: STD
+	Status_Title: 状态信息
+	Status_Subtitle: STATUS
+	Status_Description: 查看当前过载与冷却信息
+	Status_OK: OK
+	Config_Title: 系统设置
+	Config_Subtitle: CONFIG
+	Config_Description: 调整辅助选项与显示参数
+	State_On: 开启
+	State_Off: 关闭
+	State_Layer: L
+	Cyber_PanelTitle: 赛博领域
+	Cyber_PanelSubtitle: BLACKWALL ACCESS
+	Cyber_BtnActivate: 激活领域
+	Cyber_BtnDeactivate: 关闭领域
+	Cyber_LayerLabel: 层级
+	Cyber_StateOnline: 在线
+	Cyber_StateOffline: 离线
+	Cyber_Hint: "[{0}] 切换领域 / 点击环段切换层级"
 }

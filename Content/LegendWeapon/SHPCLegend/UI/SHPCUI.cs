@@ -10,6 +10,8 @@ using Terraria;
 using Terraria.Audio;
 using Terraria.GameContent;
 using Terraria.ID;
+using Terraria.Localization;
+using Terraria.ModLoader;
 
 namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
 {
@@ -19,9 +21,68 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
     /// 仅在玩家手持SHPC时显示，避让全屏UI
     /// 全部使用程序化绘制，不依赖纹理资产
     /// </summary>
-    internal class SHPCUI : UIHandle
+    internal class SHPCUI : UIHandle, ILocalizedModType
     {
+        public string LocalizationCategory => "UI";
         public static SHPCUI Instance => UIHandleLoader.GetUIHandleOfType<SHPCUI>();
+
+        #region 本地化
+
+        public static LocalizedText CyberDomain_Title { get; private set; }
+        public static LocalizedText CyberDomain_Subtitle { get; private set; }
+        public static LocalizedText CyberDomain_Description { get; private set; }
+        public static LocalizedText FireMode_Title { get; private set; }
+        public static LocalizedText FireMode_Subtitle { get; private set; }
+        public static LocalizedText FireMode_Description { get; private set; }
+        public static LocalizedText FireMode_Status_Std { get; private set; }
+        public static LocalizedText Status_Title { get; private set; }
+        public static LocalizedText Status_Subtitle { get; private set; }
+        public static LocalizedText Status_Description { get; private set; }
+        public static LocalizedText Status_OK { get; private set; }
+        public static LocalizedText Config_Title { get; private set; }
+        public static LocalizedText Config_Subtitle { get; private set; }
+        public static LocalizedText Config_Description { get; private set; }
+        public static LocalizedText State_On { get; private set; }
+        public static LocalizedText State_Off { get; private set; }
+        public static LocalizedText State_Layer { get; private set; }
+        public static LocalizedText Cyber_PanelTitle { get; private set; }
+        public static LocalizedText Cyber_PanelSubtitle { get; private set; }
+        public static LocalizedText Cyber_BtnActivate { get; private set; }
+        public static LocalizedText Cyber_BtnDeactivate { get; private set; }
+        public static LocalizedText Cyber_LayerLabel { get; private set; }
+        public static LocalizedText Cyber_StateOnline { get; private set; }
+        public static LocalizedText Cyber_StateOffline { get; private set; }
+        public static LocalizedText Cyber_Hint { get; private set; }
+
+        public override void SetStaticDefaults() {
+            CyberDomain_Title = this.GetLocalization(nameof(CyberDomain_Title), () => "CYBER DOMAIN");
+            CyberDomain_Subtitle = this.GetLocalization(nameof(CyberDomain_Subtitle), () => "Domain Control");
+            CyberDomain_Description = this.GetLocalization(nameof(CyberDomain_Description), () => "Deploy and manage multi-layer cyberspace");
+            FireMode_Title = this.GetLocalization(nameof(FireMode_Title), () => "FIRE MODE");
+            FireMode_Subtitle = this.GetLocalization(nameof(FireMode_Subtitle), () => "Weapon Loadout");
+            FireMode_Description = this.GetLocalization(nameof(FireMode_Description), () => "Switch primary weapon attack mode");
+            FireMode_Status_Std = this.GetLocalization(nameof(FireMode_Status_Std), () => "STD");
+            Status_Title = this.GetLocalization(nameof(Status_Title), () => "STATUS");
+            Status_Subtitle = this.GetLocalization(nameof(Status_Subtitle), () => "System Diagnostics");
+            Status_Description = this.GetLocalization(nameof(Status_Description), () => "View current overload and cooldown info");
+            Status_OK = this.GetLocalization(nameof(Status_OK), () => "OK");
+            Config_Title = this.GetLocalization(nameof(Config_Title), () => "CONFIG");
+            Config_Subtitle = this.GetLocalization(nameof(Config_Subtitle), () => "System Settings");
+            Config_Description = this.GetLocalization(nameof(Config_Description), () => "Adjust assist options and display parameters");
+            State_On = this.GetLocalization(nameof(State_On), () => "ON");
+            State_Off = this.GetLocalization(nameof(State_Off), () => "OFF");
+            State_Layer = this.GetLocalization(nameof(State_Layer), () => "L");
+            Cyber_PanelTitle = this.GetLocalization(nameof(Cyber_PanelTitle), () => "CYBER DOMAIN");
+            Cyber_PanelSubtitle = this.GetLocalization(nameof(Cyber_PanelSubtitle), () => "BLACKWALL ACCESS");
+            Cyber_BtnActivate = this.GetLocalization(nameof(Cyber_BtnActivate), () => "ACTIVATE");
+            Cyber_BtnDeactivate = this.GetLocalization(nameof(Cyber_BtnDeactivate), () => "DEACTIVATE");
+            Cyber_LayerLabel = this.GetLocalization(nameof(Cyber_LayerLabel), () => "LAYER");
+            Cyber_StateOnline = this.GetLocalization(nameof(Cyber_StateOnline), () => "ONLINE");
+            Cyber_StateOffline = this.GetLocalization(nameof(Cyber_StateOffline), () => "OFFLINE");
+            Cyber_Hint = this.GetLocalization(nameof(Cyber_Hint), () => "[{0}] Toggle domain / Click ring segment to switch layer");
+        }
+
+        #endregion
 
         #region 显隐与生命周期
 
@@ -102,47 +163,46 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             if (buttons != null) {
                 return;
             }
-            CWRLocText loc = CWRLocText.Instance;
             buttons = new List<SHPCButtonDef>(4) {
                 new SHPCButtonDef {
-                    Title = () => loc.SHPC_HUD_CyberDomain_Title.Value,
-                    Subtitle = () => loc.SHPC_HUD_CyberDomain_Subtitle.Value,
-                    Description = () => loc.SHPC_HUD_CyberDomain_Description.Value,
+                    Title = () => CyberDomain_Title.Value,
+                    Subtitle = () => CyberDomain_Subtitle.Value,
+                    Description = () => CyberDomain_Description.Value,
                     Glyph = "D",
                     Enabled = () => true,
                     StatusValue = () => Cyberspace.Active
                         ? Cyberspace.CurrentLayer / (float)Cyberspace.MaxLayerCount
                         : -1f,
                     StatusText = () => Cyberspace.Active
-                        ? loc.SHPC_HUD_State_Layer.Value + Cyberspace.CurrentLayer
-                        : loc.SHPC_HUD_State_Off.Value,
+                        ? State_Layer.Value + Cyberspace.CurrentLayer
+                        : State_Off.Value,
                     OnClick = null,
                     UsesFixedPanel = true,
                 },
                 new SHPCButtonDef {
-                    Title = () => loc.SHPC_HUD_FireMode_Title.Value,
-                    Subtitle = () => loc.SHPC_HUD_FireMode_Subtitle.Value,
-                    Description = () => loc.SHPC_HUD_FireMode_Description.Value,
+                    Title = () => FireMode_Title.Value,
+                    Subtitle = () => FireMode_Subtitle.Value,
+                    Description = () => FireMode_Description.Value,
                     Glyph = "F",
                     Enabled = () => true,
                     StatusValue = () => 0f,
-                    StatusText = () => loc.SHPC_HUD_FireMode_Status_Std.Value,
+                    StatusText = () => FireMode_Status_Std.Value,
                     OnClick = null,
                 },
                 new SHPCButtonDef {
-                    Title = () => loc.SHPC_HUD_Status_Title.Value,
-                    Subtitle = () => loc.SHPC_HUD_Status_Subtitle.Value,
-                    Description = () => loc.SHPC_HUD_Status_Description.Value,
+                    Title = () => Status_Title.Value,
+                    Subtitle = () => Status_Subtitle.Value,
+                    Description = () => Status_Description.Value,
                     Glyph = "I",
                     Enabled = () => true,
                     StatusValue = () => 0f,
-                    StatusText = () => loc.SHPC_HUD_Status_OK.Value,
+                    StatusText = () => Status_OK.Value,
                     OnClick = null,
                 },
                 new SHPCButtonDef {
-                    Title = () => loc.SHPC_HUD_Config_Title.Value,
-                    Subtitle = () => loc.SHPC_HUD_Config_Subtitle.Value,
-                    Description = () => loc.SHPC_HUD_Config_Description.Value,
+                    Title = () => Config_Title.Value,
+                    Subtitle = () => Config_Subtitle.Value,
+                    Description = () => Config_Description.Value,
                     Glyph = "C",
                     Enabled = () => true,
                     StatusValue = () => -1f,

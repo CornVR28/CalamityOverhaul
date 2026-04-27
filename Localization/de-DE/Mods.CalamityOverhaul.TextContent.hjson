@@ -388,29 +388,4 @@ CWRLocText: {
 		This legendary weapon has been set to disable upgrades in the current world.
 		To lift this restriction, please re-enter the world.
 		''' */
-	// SHPC_HUD_CyberDomain_Title: CYBER DOMAIN
-	// SHPC_HUD_CyberDomain_Subtitle: Domain Control
-	// SHPC_HUD_CyberDomain_Description: Deploy and manage multi-layer cyberspace
-	// SHPC_HUD_FireMode_Title: FIRE MODE
-	// SHPC_HUD_FireMode_Subtitle: Weapon Loadout
-	// SHPC_HUD_FireMode_Description: Switch primary weapon attack mode
-	// SHPC_HUD_FireMode_Status_Std: STD
-	// SHPC_HUD_Status_Title: STATUS
-	// SHPC_HUD_Status_Subtitle: System Diagnostics
-	// SHPC_HUD_Status_Description: View current overload and cooldown info
-	// SHPC_HUD_Status_OK: OK
-	// SHPC_HUD_Config_Title: CONFIG
-	// SHPC_HUD_Config_Subtitle: System Settings
-	// SHPC_HUD_Config_Description: Adjust assist options and display parameters
-	// SHPC_HUD_State_On: ON
-	// SHPC_HUD_State_Off: OFF
-	// SHPC_HUD_State_Layer: L
-	// SHPC_HUD_Cyber_PanelTitle: CYBER DOMAIN
-	// SHPC_HUD_Cyber_PanelSubtitle: BLACKWALL ACCESS
-	// SHPC_HUD_Cyber_BtnActivate: ACTIVATE
-	// SHPC_HUD_Cyber_BtnDeactivate: DEACTIVATE
-	// SHPC_HUD_Cyber_LayerLabel: LAYER
-	// SHPC_HUD_Cyber_StateOnline: ONLINE
-	// SHPC_HUD_Cyber_StateOffline: OFFLINE
-	// SHPC_HUD_Cyber_Hint: "[{0}] Toggle domain / Click ring segment to switch layer"
 }

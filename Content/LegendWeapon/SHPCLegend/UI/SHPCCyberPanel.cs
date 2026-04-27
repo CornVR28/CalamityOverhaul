@@ -125,12 +125,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             SHPCRenderer.DrawRectStroke(sb, px, rect, 1.2f, new Color(140, 30, 30) * (0.9f * a));
 
             DynamicSpriteFont font = FontAssets.MouseText.Value;
-            CWRLocText loc = CWRLocText.Instance;
 
             //标题
-            Utils.DrawBorderString(sb, loc.SHPC_HUD_Cyber_PanelTitle.Value,
+            Utils.DrawBorderString(sb, SHPCUI.Cyber_PanelTitle.Value,
                 new Vector2(rect.X + 10, rect.Y + 7), new Color(255, 230, 230) * a, 0.62f);
-            Utils.DrawBorderString(sb, loc.SHPC_HUD_Cyber_PanelSubtitle.Value,
+            Utils.DrawBorderString(sb, SHPCUI.Cyber_PanelSubtitle.Value,
                 new Vector2(rect.X + 10, rect.Y + 24), new Color(180, 60, 60) * a, 0.40f);
 
             //右上ID码，每秒滚动
@@ -154,7 +153,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                 && CWRKeySystem.Legend_Domain.GetAssignedKeys().Count > 0
                 ? CWRKeySystem.Legend_Domain.GetAssignedKeys()[0]
                 : "?";
-            string hint = string.Format(loc.SHPC_HUD_Cyber_Hint.Value, keyName);
+            string hint = string.Format(SHPCUI.Cyber_Hint.Value, keyName);
             Vector2 hintSize = font.MeasureString(hint) * 0.36f;
             Utils.DrawBorderString(sb, hint,
                 new Vector2(rect.X + (rect.Width - hintSize.X) * 0.5f, rect.Bottom - 12),
@@ -242,7 +241,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                 center - size * 0.5f + new Vector2(0f, -2f), textCol * a, 0.95f);
 
             //中央上方LAYER小字
-            string label = CWRLocText.Instance.SHPC_HUD_Cyber_LayerLabel.Value;
+            string label = SHPCUI.Cyber_LayerLabel.Value;
             Vector2 lblSize = font.MeasureString(label) * 0.35f;
             Utils.DrawBorderString(sb, label,
                 center + new Vector2(-lblSize.X * 0.5f, -RingInnerR + 6f),
@@ -322,8 +321,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             float lineH = 18f;
 
             string state = Cyberspace.Active
-                ? CWRLocText.Instance.SHPC_HUD_Cyber_StateOnline.Value
-                : CWRLocText.Instance.SHPC_HUD_Cyber_StateOffline.Value;
+                ? SHPCUI.Cyber_StateOnline.Value
+                : SHPCUI.Cyber_StateOffline.Value;
             Color stateCol = Cyberspace.Active ? new Color(255, 200, 180) : new Color(140, 80, 80);
             Utils.DrawBorderString(sb, state, new Vector2(colX, colY), stateCol * a, 0.46f);
             colY += lineH;
@@ -345,8 +344,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             DynamicSpriteFont font, Rectangle r, bool hover, float a) {
             bool active = Cyberspace.Active;
             string txt = active
-                ? CWRLocText.Instance.SHPC_HUD_Cyber_BtnDeactivate.Value
-                : CWRLocText.Instance.SHPC_HUD_Cyber_BtnActivate.Value;
+                ? SHPCUI.Cyber_BtnDeactivate.Value
+                : SHPCUI.Cyber_BtnActivate.Value;
 
             Color bg = active ? new Color(140, 30, 30) : new Color(60, 12, 18);
             if (hover) bg = active ? new Color(200, 60, 50) : new Color(110, 30, 30);
