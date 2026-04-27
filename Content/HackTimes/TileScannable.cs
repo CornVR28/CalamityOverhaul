@@ -88,7 +88,8 @@ namespace CalamityOverhaul.Content.HackTimes
             MapTile mapTile = MapHelper.CreateMapTile(x, y, 255);
             if (mapTile.Type > 0) {
                 string mapName = Lang.GetMapObjectName(mapTile.Type);
-                if (!string.IsNullOrEmpty(mapName)) return mapName;
+                //若名称非空且不是纯数字则直接使用
+                if (!string.IsNullOrEmpty(mapName) && !IsNumericOnly(mapName)) return mapName;
             }
 
             //Mod物块回退到ModTile名称
@@ -97,7 +98,22 @@ namespace CalamityOverhaul.Content.HackTimes
                 if (modTile != null) return modTile.Name;
             }
 
+            //无法解析出正常名称时，通过掉落物获取物品名作为兜底
+            Tile tile = Main.tile[x, y];
+            int dropId = tile.GetTileDrop(x, y);
+            if (dropId > 0) {
+                string itemName = VaultUtils.GetLocalizedItemName(dropId).Value;
+                if (!string.IsNullOrEmpty(itemName)) return itemName;
+            }
+
             return $"TILE#{type:X3}";
+        }
+
+        private static bool IsNumericOnly(string s) {
+            foreach (char c in s) {
+                if (c < '0' || c > '9') return false;
+            }
+            return s.Length > 0;
         }
 
         /// <summary>
@@ -234,7 +250,7 @@ namespace CalamityOverhaul.Content.HackTimes
 
         /// <summary>
         /// 判断指定世界坐标处是否存在可扫描的物块
-        /// <br/>只扫描frameImportant的物块（家具、工作站等）或特殊方块
+        /// <br/>任何存在实体物块的格子均可扫描
         /// </summary>
         public static bool TryGetScannableTile(Vector2 worldPos, out int outX, out int outY) {
             outX = (int)(worldPos.X / 16f);
@@ -245,16 +261,7 @@ namespace CalamityOverhaul.Content.HackTimes
             }
 
             Tile tile = Main.tile[outX, outY];
-            if (!tile.HasTile) return false;
-
-            //frameImportant通常是家具、工作站等可交互物块
-            if (Main.tileFrameImportant[tile.TileType]) return true;
-
-            //也允许扫描一些特殊方块（矿石、地牢砖等）
-            if (Main.tileDungeon[tile.TileType]) return true;
-            if (tile.TileType == TileID.LihzahrdBrick) return true;
-
-            return false;
+            return tile.HasTile;
         }
 
         /// <summary>
