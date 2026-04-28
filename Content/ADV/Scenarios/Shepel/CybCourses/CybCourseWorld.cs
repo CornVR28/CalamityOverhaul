@@ -26,6 +26,10 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
             //固定为永夜，强化赛博朋克氛围
             Main.dayTime = false;
             Main.time = 0;
+            //把地表线和岩层线推到世界底部，令游戏认为整个世界处于地面以上
+            //这样环境光照正常工作，不会出现地下黑暗
+            Main.worldSurface = Height - 5;
+            Main.rockLayer = Height - 4;
         }
 
         public override void Update() { }

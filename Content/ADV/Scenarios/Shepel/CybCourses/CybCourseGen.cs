@@ -26,26 +26,27 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
             int width = Main.maxTilesX;
             int height = Main.maxTilesY;
 
-            //第一步：用虚空填充整个世界（所有格子置为空气+深渊墙）
-            FillVoid(width, height);
+            //第一步：清空全图所有默认方块和背景墙，让天空着色器透出来
+            ClearWorld(width, height);
 
-            //第二步：铺设封闭边界（上下左右厚板）
+            //铺设封闭边界（上下左右厚板）
             FillBorders(width, height);
 
-            //第三步：生成主通道地板和顶板
+            //生成主通道地板和顶板，通道内壁使用铁砖墙
             BuildMainCorridor(width);
 
-            //第四步：在主通道内放置若干高低平台
+            //在主通道内放置若干高低平台
             PlacePlatforms(width);
         }
 
-        //用黑暗虚空填充整个世界，背景墙使用深黑色砖墙
-        private static void FillVoid(int width, int height) {
+        //清空全图：移除所有默认方块和背景墙，背景墙清为0（无墙）让天空可见
+        private static void ClearWorld(int width, int height) {
             for (int x = 0; x < width; x++) {
                 for (int y = 0; y < height; y++) {
                     Tile tile = Main.tile[x, y];
                     tile.HasTile = false;
-                    tile.WallType = WallID.EbonstoneUnsafe;
+                    tile.WallType = WallID.None;
+                    tile.LiquidAmount = 0;
                 }
             }
         }
