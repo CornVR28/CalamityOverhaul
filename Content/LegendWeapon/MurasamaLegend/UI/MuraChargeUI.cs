@@ -180,7 +180,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.MurasamaLegend.UI
 
             Vector2 barOrigin = barBG.Size() * 0.5f;
 
-            if (MurasamaOverride.GetLevel(MurasamaItem) == 14 || MurasamaOverride.NameIsSam(Main.LocalPlayer)) {
+            if (MurasamaOverride.GetLevel(MurasamaItem) == 28 || MurasamaOverride.NameIsSam(Main.LocalPlayer)) {
                 Main.spriteBatch.Draw(Mura.Value, DrawPosition + new Vector2(-110, -88), null, color, 0f, barOrigin, scale, 0, 0f);
             }
 

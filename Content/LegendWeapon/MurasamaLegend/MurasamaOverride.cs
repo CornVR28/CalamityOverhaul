@@ -282,7 +282,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.MurasamaLegend
         public override void ModifyTooltips(Item item, List<TooltipLine> tooltips) => TooltipHandler.SetTooltip(item, ref tooltips);
 
         public override bool On_ModifyWeaponDamage(Item item, Player player, ref StatModifier damage) {
-            DataHandler.DamageModify(item, player, ref damage);
+            int onDamage = GetOnDamage(item);
+            CWRUtils.ModifyLegendWeaponDamageFunc(item, onDamage, GetStartDamage, ref damage);
+            float meleeSpeedRoad = player.GetWeaponAttackSpeed(item);
+            float SpeedToMelee = 1f + (float)Math.Log(meleeSpeedRoad) * 0.48f;
+            damage *= SpeedToMelee;
             return false;
         }
 
