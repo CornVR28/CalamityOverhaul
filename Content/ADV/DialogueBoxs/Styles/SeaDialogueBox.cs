@@ -1,4 +1,5 @@
-﻿using CalamityOverhaul.Content.ADV.UIEffect;
+﻿using CalamityOverhaul.Common;
+using CalamityOverhaul.Content.ADV.UIEffect;
 using InnoVault.UIHandles;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -17,6 +18,7 @@ namespace CalamityOverhaul.Content.ADV.DialogueBoxs.Styles
 
         //风格参数
         private const float FixedWidth = 520f;
+        private const int ShaderEdgePad = 16;
         protected override float PanelWidth => FixedWidth;
 
         //背景动画参数
@@ -24,6 +26,8 @@ namespace CalamityOverhaul.Content.ADV.DialogueBoxs.Styles
         private float scanTimer = 0f;
         private float wavePhase = 0f;
         private float abyssPulse = 0f;
+        //着色器专用单调递增时间,避免循环回绕造成噪声跳变
+        private float shaderTime = 0f;
 
         //视觉粒子
         private readonly List<SeaStarPRT> starFx = [];
@@ -100,10 +104,13 @@ namespace CalamityOverhaul.Content.ADV.DialogueBoxs.Styles
             scanTimer += 0.022f;
             wavePhase += 0.018f;
             abyssPulse += 0.01f;
+            shaderTime += 0.016f;
             if (panelPulseTimer > MathHelper.TwoPi) panelPulseTimer -= MathHelper.TwoPi;
             if (scanTimer > MathHelper.TwoPi) scanTimer -= MathHelper.TwoPi;
             if (wavePhase > MathHelper.TwoPi) wavePhase -= MathHelper.TwoPi;
             if (abyssPulse > MathHelper.TwoPi) abyssPulse -= MathHelper.TwoPi;
+            //shader时间在远大于噪声循环周期的数值后再回绕
+            if (shaderTime > 10000f) shaderTime -= 10000f;
 
             starSpawnTimer++;
             if (Active && starSpawnTimer >= 30 && starFx.Count < 10) {
@@ -138,32 +145,13 @@ namespace CalamityOverhaul.Content.ADV.DialogueBoxs.Styles
             Rectangle shadow = panelRect; shadow.Offset(6, 8);
             spriteBatch.Draw(vaule, shadow, new Rectangle(0, 0, 1, 1), Color.Black * (alpha * 0.50f));
 
-            int segs = 30;
-            for (int i = 0; i < segs; i++) {
-                float t = i / (float)segs;
-                float t2 = (i + 1) / (float)segs;
-                int y1 = panelRect.Y + (int)(t * panelRect.Height);
-                int y2 = panelRect.Y + (int)(t2 * panelRect.Height);
-                Rectangle r = new(panelRect.X, y1, panelRect.Width, Math.Max(1, y2 - y1));
-                Color abyssDeep = new Color(2, 10, 18);
-                Color abyssMid = new Color(6, 32, 48);
-                Color bioEdge = new Color(12, 80, 110);
-                float breathing = (float)Math.Sin(abyssPulse) * 0.5f + 0.5f;
-                Color blendBase = Color.Lerp(abyssDeep, abyssMid, (float)Math.Sin(panelPulseTimer * 0.4f + t * 1.6f) * 0.5f + 0.5f);
-                Color c = Color.Lerp(blendBase, bioEdge, t * 0.6f * (0.4f + breathing * 0.6f));
-                c *= alpha * 0.95f;
-                spriteBatch.Draw(vaule, r, new Rectangle(0, 0, 1, 1), c);
+            //专属着色器面板,降级时回退到原CPU混合底色
+            if (EffectLoader.SeaDialogueBox?.Value != null) {
+                DrawShaderPanel(spriteBatch, panelRect, alpha);
             }
-
-            float darkPulse = (float)Math.Sin(abyssPulse * 1.3f) * 0.5f + 0.5f;
-            Color vignette = new Color(0, 20, 28) * (alpha * 0.35f * darkPulse);
-            spriteBatch.Draw(vaule, panelRect, new Rectangle(0, 0, 1, 1), vignette);
-            DrawWaveOverlay(spriteBatch, panelRect, alpha * 0.9f);
-
-            float pulse = (float)Math.Sin(Main.GlobalTimeWrappedHourly * 1.8f) * 0.5f + 0.5f;
-            Rectangle inner = panelRect; inner.Inflate(-6, -6);
-            spriteBatch.Draw(vaule, inner, new Rectangle(0, 0, 1, 1), new Color(30, 120, 150) * (alpha * 0.07f * (0.4f + pulse * 0.6f)));
-            DrawFrameOcean(spriteBatch, panelRect, alpha, pulse);
+            else {
+                DrawFallbackPanel(spriteBatch, panelRect, alpha);
+            }
 
             foreach (var b in bubbles) {
                 b.DrawEnhanced(spriteBatch, alpha * 0.9f);
@@ -183,6 +171,67 @@ namespace CalamityOverhaul.Content.ADV.DialogueBoxs.Styles
         }
 
         #region 样式工具函数
+
+        //使用SeaDialogueBox着色器渲染面板底图
+        private void DrawShaderPanel(SpriteBatch sb, Rectangle rect, float alpha) {
+            Effect effect = EffectLoader.SeaDialogueBox.Value;
+            Rectangle extRect = rect;
+            extRect.Inflate(ShaderEdgePad, ShaderEdgePad);
+
+            //abyssPulse转0~1脉动,驱动焦散与内边整体呼吸
+            float pulse01 = (float)Math.Sin(abyssPulse * 1.6f) * 0.5f + 0.5f;
+
+            effect.Parameters["uTime"]?.SetValue(shaderTime);
+            effect.Parameters["uAlpha"]?.SetValue(alpha * 0.97f);
+            effect.Parameters["uResolution"]?.SetValue(new Vector2(extRect.Width, extRect.Height));
+            effect.Parameters["uEdgePad"]?.SetValue((float)ShaderEdgePad);
+            effect.Parameters["uAbyssPulse"]?.SetValue(pulse01);
+
+            sb.End();
+            sb.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend,
+                SamplerState.AnisotropicClamp, DepthStencilState.None,
+                RasterizerState.CullNone, effect, Main.UIScaleMatrix);
+
+            sb.Draw(VaultAsset.placeholder2.Value, extRect, Color.White);
+
+            sb.End();
+            sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                SamplerState.PointClamp, DepthStencilState.None,
+                RasterizerState.CullNone, null, Main.UIScaleMatrix);
+        }
+
+        //降级背景:无shader环境沿用原CPU混合底色
+        private void DrawFallbackPanel(SpriteBatch sb, Rectangle panelRect, float alpha) {
+            Texture2D vaule = VaultAsset.placeholder2.Value;
+
+            int segs = 30;
+            for (int i = 0; i < segs; i++) {
+                float t = i / (float)segs;
+                float t2 = (i + 1) / (float)segs;
+                int y1 = panelRect.Y + (int)(t * panelRect.Height);
+                int y2 = panelRect.Y + (int)(t2 * panelRect.Height);
+                Rectangle r = new(panelRect.X, y1, panelRect.Width, Math.Max(1, y2 - y1));
+                Color abyssDeep = new Color(2, 10, 18);
+                Color abyssMid = new Color(6, 32, 48);
+                Color bioEdge = new Color(12, 80, 110);
+                float breathing = (float)Math.Sin(abyssPulse) * 0.5f + 0.5f;
+                Color blendBase = Color.Lerp(abyssDeep, abyssMid, (float)Math.Sin(panelPulseTimer * 0.4f + t * 1.6f) * 0.5f + 0.5f);
+                Color c = Color.Lerp(blendBase, bioEdge, t * 0.6f * (0.4f + breathing * 0.6f));
+                c *= alpha * 0.95f;
+                sb.Draw(vaule, r, new Rectangle(0, 0, 1, 1), c);
+            }
+
+            float darkPulse = (float)Math.Sin(abyssPulse * 1.3f) * 0.5f + 0.5f;
+            Color vignette = new Color(0, 20, 28) * (alpha * 0.35f * darkPulse);
+            sb.Draw(vaule, panelRect, new Rectangle(0, 0, 1, 1), vignette);
+            DrawWaveOverlay(sb, panelRect, alpha * 0.9f);
+
+            float pulse = (float)Math.Sin(Main.GlobalTimeWrappedHourly * 1.8f) * 0.5f + 0.5f;
+            Rectangle inner = panelRect; inner.Inflate(-6, -6);
+            sb.Draw(vaule, inner, new Rectangle(0, 0, 1, 1), new Color(30, 120, 150) * (alpha * 0.07f * (0.4f + pulse * 0.6f)));
+            DrawFrameOcean(sb, panelRect, alpha, pulse);
+        }
+
         private void DrawWaveOverlay(SpriteBatch sb, Rectangle rect, float alpha) {
             Texture2D vaule = VaultAsset.placeholder2.Value;
             int bands = 6;
