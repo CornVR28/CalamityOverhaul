@@ -1,4 +1,4 @@
-using SubworldLibrary;
+﻿using SubworldLibrary;
 using System.Collections.Generic;
 using Terraria;
 using Terraria.WorldBuilding;
@@ -33,5 +33,13 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
         }
 
         public override void Update() { }
+
+        public override void DrawMenu(GameTime gameTime) {
+            base.DrawMenu(gameTime);
+        }
+
+        public override void DrawSetup(GameTime gameTime) {
+            base.DrawSetup(gameTime);
+        }
     }
 }
