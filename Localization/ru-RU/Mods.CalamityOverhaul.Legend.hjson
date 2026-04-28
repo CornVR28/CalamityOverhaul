@@ -270,6 +270,54 @@ MurasamaTrialQuestLine: {
 	// Trial_11: 丛林之炎
 	// Trial_12: 核心终结
 	// Trial_13: 原初回归
+	/* TrialSummary_0:
+		'''
+		Recruit. Prove yourself to me.
+		That slimy blue brute, and the siren-spawn beneath the sands...
+		Destroy them. That is your first step.
+		''' */
+	// TrialSummary_1: The moon is high. Let's go poke out that giant, careening eyeball and blind that false god for good.
+	/* TrialSummary_2:
+		'''
+		The false god's remains taint this land. Heresy breeds at the world's end, and abominations run rampant.
+		Go and liberate the corrupted lands. Hack apart that false god's putrid brain. Mince that purple worm!
+		I want to see my blade dance in their alien flesh!
+		''' */
+	// TrialSummary_3: The corrupted lands still throb like a heart. The flesh-parasites still squirm. The corrupted tumors still *think*. Go and banish them all!
+	/* TrialSummary_4:
+		'''
+		There is a legend in the Slime Kingdom... of a fallen, alien god.
+		It is weak. Now is the time to banish it back to the void.
+		The curse on the dungeon is failing. I feel a psychic power stirring in the deep... screams... wails... whispers...
+		''' */
+	/* TrialSummary_5:
+		'''
+		The outcast of the Sulphurous Sea bars our path to the abyss's treasures. End its endless consumption and wandering.
+		A great iron worm blocks our march. Mince it to pieces.
+		''' */
+	// TrialSummary_6: That witch who gave herself to the chaos... she has a warped clone-sister. Kill that aberration. Anoint this blade with its blood and fire.
+	// TrialSummary_7: The foolish Lihzahrds worship inert stone. Let us grind their idol to dust and shatter their faith. WE are what they should be worshipping.
+	// TrialSummary_8: That false god hiding behind the moon is nothing but a flawed, patchwork thing. Go. Sever its tentacles, carve out its heart, and let us drink deep of its blood.
+	// TrialSummary_9: A pathetic god, merely prolonging its wretched life by siphoning stellar heat. Its heretical fire must be extinguished.
+	// TrialSummary_10: That arrogant cosmic serpent stirs behind the veil of this world. End its ambition.
+	/* TrialSummary_11:
+		'''
+		The Jungle Dragon... the last of the Auric Dragons. Unlike these other abominations, it... deserves our respect.
+		And yet, we must make it die again. We must strip it of its Auric soul.
+		These materials will forge wargear of supreme quality.
+		''' */
+	/* TrialSummary_12:
+		'''
+		That heretic of the mechanical cult... he truly believes his 'Titans' surpass the power of gods.
+		Such conviction is absurd. Let us return those Titans to their natural state—a pile of scrap.
+		And that witch... a gifted psyker who should have been a great asset, now lost to chaos.
+		We can only banish her. Plunge this blade into her heart and let the fire of loyalty burn her corrupted soul to ash.
+		''' */
+	/* TrialSummary_13:
+		'''
+		Our path to conquest is inevitable. Shatter the armor of that abyssal dragon.
+		Use the Terminus Stone. Begin the final battle against these alien things.
+		''' */
 }
 
 SHPCTrialQuestLine: {
