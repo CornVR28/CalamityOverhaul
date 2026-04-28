@@ -81,7 +81,7 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
         }
 
         /// <summary>矩形线框</summary>
-        protected static void StrokeRect(SpriteBatch sb, Rectangle rect, int bw, Color c) {
+        internal static void StrokeRect(SpriteBatch sb, Rectangle rect, int bw, Color c) {
             sb.Draw(Px, new Rectangle(rect.X, rect.Y, rect.Width, bw), new Rectangle(0, 0, 1, 1), c);
             sb.Draw(Px, new Rectangle(rect.X, rect.Bottom - bw, rect.Width, bw), new Rectangle(0, 0, 1, 1), c);
             sb.Draw(Px, new Rectangle(rect.X, rect.Y, bw, rect.Height), new Rectangle(0, 0, 1, 1), c);
