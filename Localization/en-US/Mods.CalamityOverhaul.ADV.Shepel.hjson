@@ -1,21 +1,21 @@
 ﻿ShepelCyberActiveDialogue: {
-	// RoleName: SHPC
-	// Line_Intro: 领域已激活，主人。当前层级 {0}，外部信号已完全隔离。
-	// Line_LayerReport: 领域越深，可干预的目标范围越广，但能量消耗也成倍增加。请注意RAM余量。
-	// Line_Warning: 检测到领域边界有波动迹象，建议提高警惕。
-	// Line_MaxLayer: 主人，当前已处于最深层级。此处的规则已与外界完全分离，请谨慎行动。
+	RoleName: SHPC
+	Line_Intro: 领域已激活，主人。当前层级 {0}，外部信号已完全隔离。
+	Line_LayerReport: 领域越深，可干预的目标范围越广，但能量消耗也成倍增加。请注意RAM余量。
+	Line_Warning: 检测到领域边界有波动迹象，建议提高警惕。
+	Line_MaxLayer: 主人，当前已处于最深层级。此处的规则已与外界完全分离，请谨慎行动。
 }
 
 ShepelIdleDialogue: {
-	// RoleName: SHPC
-	// Idle0_Line1: 主人，有什么需要我协助的吗？
-	// Idle0_Reply: 系统运行正常，所有模块待命中。
-	// Idle0_Choice_HowAreYou: 你还好吗？
-	// Idle0_Choice_Nothing: 没事，随便看看
-	// Idle0_HowAreYou_Response: 我很好，主人。只要您在，我就在。
-	// Idle0_Nothing_Response: 好的，有需要随时呼叫。
-	// Idle1_Line1: 主人，您似乎在思考什么问题。
-	// Idle1_Line2: 如果是关于SHPC的性能数据，我可以随时调出报告。
-	// Idle2_Line1: 主人，这附近的电磁环境有些不稳定。
-	// Idle2_Line2: 建议保持警惕，SHPC随时准备接管应急协议。
+	RoleName: SHPC
+	Idle0_Line1: 主人，有什么需要我协助的吗？
+	Idle0_Reply: 系统运行正常，所有模块待命中。
+	Idle0_Choice_HowAreYou: 你还好吗？
+	Idle0_Choice_Nothing: 没事，随便看看
+	Idle0_HowAreYou_Response: 我很好，主人。只要您在，我就在。
+	Idle0_Nothing_Response: 好的，有需要随时呼叫。
+	Idle1_Line1: 主人，您似乎在思考什么问题。
+	Idle1_Line2: 如果是关于SHPC的性能数据，我可以随时调出报告。
+	Idle2_Line1: 主人，这附近的电磁环境有些不稳定。
+	Idle2_Line2: 建议保持警惕，SHPC随时准备接管应急协议。
 }
