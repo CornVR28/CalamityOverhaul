@@ -1,5 +1,7 @@
 ﻿using CalamityOverhaul.Common;
 using CalamityOverhaul.Content.ADV.EntrustManager;
+using CalamityOverhaul.Content.ADV.Scenarios;
+using CalamityOverhaul.Content.ADV.Scenarios.Shepel;
 using CalamityOverhaul.Content.Cyberwares.UIs;
 using CalamityOverhaul.Content.HackTimes;
 using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
@@ -42,9 +44,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
         public static LocalizedText Status_Subtitle { get; private set; }
         public static LocalizedText Status_Description { get; private set; }
         public static LocalizedText Status_OK { get; private set; }
-        public static LocalizedText Config_Title { get; private set; }
-        public static LocalizedText Config_Subtitle { get; private set; }
-        public static LocalizedText Config_Description { get; private set; }
+        public static LocalizedText Talk_Title { get; private set; }
+        public static LocalizedText Talk_Subtitle { get; private set; }
+        public static LocalizedText Talk_Description { get; private set; }
+        public static LocalizedText Talk_Status_Busy { get; private set; }
+        public static LocalizedText Talk_Status_Ready { get; private set; }
         public static LocalizedText Modify_Title { get; private set; }
         public static LocalizedText Modify_Subtitle { get; private set; }
         public static LocalizedText Modify_Description { get; private set; }
@@ -74,9 +78,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             Status_Subtitle = this.GetLocalization(nameof(Status_Subtitle), () => "System Diagnostics");
             Status_Description = this.GetLocalization(nameof(Status_Description), () => "View current overload and cooldown info");
             Status_OK = this.GetLocalization(nameof(Status_OK), () => "OK");
-            Config_Title = this.GetLocalization(nameof(Config_Title), () => "CONFIG");
-            Config_Subtitle = this.GetLocalization(nameof(Config_Subtitle), () => "System Settings");
-            Config_Description = this.GetLocalization(nameof(Config_Description), () => "Adjust assist options and display parameters");
+            Talk_Title = this.GetLocalization(nameof(Talk_Title), () => "TALK");
+            Talk_Subtitle = this.GetLocalization(nameof(Talk_Subtitle), () => "Neural Link");
+            Talk_Description = this.GetLocalization(nameof(Talk_Description), () => "Open a direct channel to SHPC");
+            Talk_Status_Busy = this.GetLocalization(nameof(Talk_Status_Busy), () => "BUSY");
+            Talk_Status_Ready = this.GetLocalization(nameof(Talk_Status_Ready), () => "READY");
             Modify_Title = this.GetLocalization(nameof(Modify_Title), () => "MODIFY");
             Modify_Subtitle = this.GetLocalization(nameof(Modify_Subtitle), () => "Gun Augmentation");
             Modify_Description = this.GetLocalization(nameof(Modify_Description), () => "Install modification parts into SHPC chassis");
@@ -217,14 +223,16 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                     UsesFixedPanel = true,
                 },
                 new SHPCButtonDef {
-                    Title = () => Config_Title.Value,
-                    Subtitle = () => Config_Subtitle.Value,
-                    Description = () => Config_Description.Value,
-                    Glyph = "S",
+                    Title = () => Talk_Title.Value,
+                    Subtitle = () => Talk_Subtitle.Value,
+                    Description = () => Talk_Description.Value,
+                    Glyph = "T",
                     Enabled = () => true,
                     StatusValue = () => -1f,
-                    StatusText = () => string.Empty,
-                    OnClick = null,
+                    StatusText = () => ScenarioManager.IsActive()
+                        ? Talk_Status_Busy.Value
+                        : Talk_Status_Ready.Value,
+                    OnClick = () => SHPCDialogueRouter.TryStart(Main.LocalPlayer),
                 },
             };
             hoverAmts = new float[buttons.Count];

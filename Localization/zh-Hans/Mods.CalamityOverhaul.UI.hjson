@@ -656,4 +656,9 @@ SHPCUI: {
 	// Modify_Subtitle: Gun Augmentation
 	// Modify_Description: Install modification parts into SHPC chassis
 	// Modify_SlotEmpty: EMPTY
+	// Talk_Title: TALK
+	// Talk_Subtitle: Neural Link
+	// Talk_Description: Open a direct channel to SHPC
+	// Talk_Status_Busy: BUSY
+	// Talk_Status_Ready: READY
 }
