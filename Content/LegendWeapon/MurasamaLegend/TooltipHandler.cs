@@ -9,6 +9,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.MurasamaLegend
     internal class TooltipHandler
     {
         public static void SetTooltip(Item item, ref List<TooltipLine> tooltips) {
+            tooltips.ReplacePlaceholder("legend_Text", CWRLocText.GetTextValue("Murasama_No_legend_Content_3"), "");
             tooltips.InsertHotkeyBinding(CWRKeySystem.Murasama_TriggerKey, "[KEY1]", noneTip: CWRLocText.Instance.Notbound.Value);
             tooltips.InsertHotkeyBinding(CWRKeySystem.Murasama_DownKey, "[KEY2]", noneTip: CWRLocText.Instance.Notbound.Value);
 
@@ -19,15 +20,16 @@ namespace CalamityOverhaul.Content.LegendWeapon.MurasamaLegend
             tooltips.ReplacePlaceholder("[Lang2]", UnlockSkill2(item) ? $"[c/00ff00:{text2}]" : $"[c/808080:{CWRLocText.GetTextValue("Murasama_Text2")}]");
             tooltips.ReplacePlaceholder("[Lang3]", UnlockSkill3(item) ? $"[c/00ff00:{text2}]" : $"[c/808080:{CWRLocText.GetTextValue("Murasama_Text3")}]");
 
-            tooltips.ReplacePlaceholder("legend_Text", CWRLocText.GetTextValue("Murasama_No_legend_Content_3"));
-
-            //移除已迁移到委托系统的占位行，避免空行
-            for (int i = tooltips.Count - 1; i >= 0; i--) {
-                string text = tooltips[i].Text;
-                if (text == "[Lang4]" || text == "[Text]") {
-                    tooltips.RemoveAt(i);
-                }
+            int index = InWorldBossPhase.Mura_Level();
+            string num = (index + 1).ToString();
+            if (index == 28) {
+                num = CWRLocText.GetTextValue("Murasama_Text_Lang_End");
             }
+
+            string text = LegendData.GetLevelTrialPreText(item.CWR(), "Murasama_Text_Lang_0", num);
+
+            tooltips.ReplacePlaceholder("[Lang4]", text, "");
+            tooltips.ReplacePlaceholder("[Text]", "", "");
         }
     }
 }

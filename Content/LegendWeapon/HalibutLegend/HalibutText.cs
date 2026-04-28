@@ -35,13 +35,13 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend
         public static void SetTooltip(Item item, ref List<TooltipLine> tooltips) {
             //试炼文本已迁移至委托系统(HalibutQuestLine)，此处仅保留传奇状态文本
             tooltips.ReplacePlaceholder("legend_Text", CWRLocText.GetTextValue("Halibut_No_legend_Content_3"), "");
-            //移除已迁移到委托系统的占位行，避免空行
-            for (int i = tooltips.Count - 1; i >= 0; i--) {
-                string text = tooltips[i].Text;
-                if (text == "[Lang4]" || text == "[Text]") {
-                    tooltips.RemoveAt(i);
-                }
+            int index = InWorldBossPhase.Halibut_Level();
+            string num = (index + 1).ToString();
+            if (index == 16) {
+                num = CWRLocText.GetTextValue("Murasama_Text_Lang_End");
             }
+            string text = LegendData.GetLevelTrialPreText(item.CWR(), "Murasama_Text_Lang_0", num);
+            tooltips.ReplacePlaceholder("[Lang4]", text, "");
         }
     }
 }

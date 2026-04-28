@@ -5,7 +5,6 @@
 		Converts Musket balls into a stream of Ocean Current
 		legend_Text
 		[Lang4]
-		[Text]
 		'''
 }
 
@@ -22,10 +21,9 @@ MurasamaOverride: {
 		Press [KEY2] to consume 1 point of weapon charge and perform a downward strike. [Lang2]
 		When the weapon charge reaches the maximum value of 10 points, 
 		hitting an enemy with the Ascending Slash again will trigger a finishing move. [Lang3]
-		legend_Text
 		[c/ff4500:" It would be better if this were a chainsaw sword "]
+		legend_Text
 		[Lang4]
-		[Text]
 		'''
 }
 
@@ -41,7 +39,6 @@ SHPCOverride: {
 		Hold Shift to open the Soul Core control panel
 		legend_Text
 		[Lang4]
-		[Text]
 		'''
 }
 

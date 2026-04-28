@@ -1,11 +1,10 @@
-HalibutOverride: {
+﻿HalibutOverride: {
 	DisplayName: "{$Mods.CalamityMod.Items.Weapons.Ranged.HalibutCannon.DisplayName}"
 	Tooltip:
 		'''
 		Превращает мушкетные пули в глубоководные пули
 		legend_Text
 		[Lang4]
-		[Text]
 		'''
 }
 
@@ -22,10 +21,9 @@ MurasamaOverride: {
 		Нажмите [KEY2], чтобы потратить 1 ур. перезаряда и совершить удар в падении [Lang2]
 		При достижении 10 ур. перезаряда, повторное попадание по врагу
 		с помощью «Восходящего удара» приведёт к «Последнему удару правосудия» [Lang3]
-		legend_Text
 		[c/ff4500:«Было бы лучше, если бы это был меч-бензопила»]
+		legend_Text
 		[Lang4]
-		[Text]
 		'''
 }
 
@@ -41,7 +39,6 @@ SHPCOverride: {
 		Удерживайте Shift для открытия панели управления душами
 		legend_Text
 		[Lang4]
-		[Text]
 		'''
 }
 

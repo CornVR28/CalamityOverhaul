@@ -275,17 +275,14 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
         }
 
         public static void SetTooltip(Item item, ref List<TooltipLine> tooltips) {
+            tooltips.ReplacePlaceholder("legend_Text", CWRLocText.GetTextValue("SHPC_No_legend_Content_3"), "");
             int index = SHPC_Level();
             string num = (index + 1).ToString();
             if (index == 16) {
                 num = CWRLocText.GetTextValue("Murasama_Text_Lang_End");
             }
-
             string text = LegendData.GetLevelTrialPreText(item.CWR(), "Murasama_Text_Lang_0", num);
-
             tooltips.ReplacePlaceholder("[Lang4]", text, "");
-            tooltips.ReplacePlaceholder("legend_Text", CWRLocText.GetTextValue("SHPC_No_legend_Content_3"), "");
-            tooltips.ReplacePlaceholder("[Text]", "", "");
         }
     }
 }

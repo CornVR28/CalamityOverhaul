@@ -1,11 +1,10 @@
-HalibutOverride: {
+﻿HalibutOverride: {
 	DisplayName: Canon Hippoglosse
 	Tooltip:
 		'''
 		Transforme les balles de fusil en projectiles marins
 		legend_Text
 		[Lang4]
-		[Text]
 		'''
 }
 
@@ -18,10 +17,9 @@ MurasamaOverride: {
 		Une fois que l'énergie de l'épée est pleine, appuyer sur [KEY1] pour lancer la lame. En cours de vol, appuyer sur le clic gauche pour exécuter un coup Ascension de Dragon [Lang1]
 		Ascension de Dragon recharge l'arme 1 après avoir touché un ennemi. Appuyer sur [KEY2] consomme 1 point de recharge d'arme, effectuant une attaque de plongée [Lang2]
 		Une fois que la valeur de recharge de l'arme atteint son maximum de 10 points, toucher à nouveau un ennemi avec Ascension de Dragon déclenchera une compétence finale  [Lang3]
-		legend_Text
 		[c/ff4500:"Il serait mieux avec une épée à chaîne"]
+		legend_Text
 		[Lang4]
-		[Text]
 		'''
 }
 
@@ -37,7 +35,6 @@ SHPCOverride: {
 		Maintenez la touche Maj pour ouvrir le panneau de contrôle du Noyau d'Âme
 		legend_Text
 		[Lang4]
-		[Text]
 		'''
 }
 

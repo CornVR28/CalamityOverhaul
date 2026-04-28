@@ -253,67 +253,91 @@ HalibutTrialQuestLine: {
 }
 
 MurasamaTrialQuestLine: {
-	// QuestCategory: 鬼妖村正·试炼
-	// TrackerWaiting: 目标不在场，等待召唤...
+	// QuestCategory: Murasama·Trial
+	// TrackerWaiting: Target not present, awaiting summon...
 	// TrackerFighting: "{0}: {1:0%}"
-	// Trial_0: 沙地幽影
-	// Trial_1: 入侵之者
-	// Trial_2: 腐化清除
-	// Trial_3: 寄生威胁
-	// Trial_4: 通向地狱
-	// Trial_5: 钢铁齿轮
-	// Trial_6: 灾影行动
-	// Trial_7: 石化阵线
-	// Trial_8: 月球坠落
-	// Trial_9: 幻影制裁
-	// Trial_10: 弑神之蛇
-	// Trial_11: 丛林之炎
-	// Trial_12: 核心终结
-	// Trial_13: 原初回归
-	/* TrialSummary_0:
+	// Trial_0: Sand Phantom
+	// Trial_1: Desert Hunt
+	// Trial_2: The Invader
+	// Trial_3: Corruption Purge
+	// Trial_4: Parasite Threat
+	// Trial_5: Gel Aberration
+	// Trial_6: Dungeon Breach
+	// Trial_7: Path to Hell
+	// Trial_8: Frozen Shackle
+	// Trial_9: Abyss Sweep
+	// Trial_10: Brimstone Purge
+	// Trial_11: Iron Gears
+	// Trial_12: Twin Annihilation
+	// Trial_13: Mechanical Skull
+	// Trial_14: Calamity Shadow Op
+	// Trial_15: Jungle Bloom
+	// Trial_16: Petrified Front
+	// Trial_17: Plague Suppression
+	// Trial_18: Golem Breach
+	// Trial_19: Stellar Domain End
+	// Trial_20: Moon Fall
+	// Trial_21: Phantom Sanction
+	// Trial_22: Soul Exorcism
+	// Trial_23: God-Slaying Serpent
+	// Trial_24: Jungle Flame
+	// Trial_25: Core End
+	// Trial_26: Chaos Verdict
+	// Trial_27: Primal Return
+	// TrialSummary_0: Recruit. Prove yourself to me.\nThat slimy blue brute is a fine starting point.\nDestroy it.
+	// TrialSummary_1: The siren-spawn beneath the sands still wanders.\nRun it down. End it.
+	// TrialSummary_2: The moon is high. Let's go poke out that giant, careening eyeball and blind that false god for good.
+	/* TrialSummary_3:
 		'''
-		Recruit. Prove yourself to me.
-		That slimy blue brute, and the siren-spawn beneath the sands...
-		Destroy them. That is your first step.
-		''' */
-	// TrialSummary_1: The moon is high. Let's go poke out that giant, careening eyeball and blind that false god for good.
-	/* TrialSummary_2:
-		'''
-		The false god's remains taint this land. Heresy breeds at the world's end, and abominations run rampant.
-		Go and liberate the corrupted lands. Hack apart that false god's putrid brain. Mince that purple worm!
+		The false god's remains taint this land. Go and liberate the corrupted lands.
+		Hack apart that false god's putrid brain. Mince that purple worm!
 		I want to see my blade dance in their alien flesh!
 		''' */
-	// TrialSummary_3: The corrupted lands still throb like a heart. The flesh-parasites still squirm. The corrupted tumors still *think*. Go and banish them all!
-	/* TrialSummary_4:
+	// TrialSummary_4: The corrupted lands still throb like a heart. The flesh-parasites still squirm. The corrupted tumors still *think*. Go and banish them all!
+	// TrialSummary_5: Can you feel it? That nauseating reek of corrupted gel.\nPurge this filth. Leave nothing behind.
+	/* TrialSummary_6:
 		'''
-		There is a legend in the Slime Kingdom... of a fallen, alien god.
-		It is weak. Now is the time to banish it back to the void.
 		The curse on the dungeon is failing. I feel a psychic power stirring in the deep... screams... wails... whispers...
+		Crush that great skull.
 		''' */
-	/* TrialSummary_5:
+	// TrialSummary_7: Step into Hell. That wall of flesh spanning the lava—it is the gate to the next age.\nTear it apart.
+	// TrialSummary_8: In the frozen north, a sealed construct of ice waits.\nShatter it before it breaks free on its own terms.
+	// TrialSummary_9: The outcast of the Sulphurous Sea bars our path to the abyss's treasures. End its endless consumption and wandering.
+	// TrialSummary_10: The brimstone herald deep in the lava harbors a heretical fire that offends me. Go extinguish it.
+	// TrialSummary_11: A great iron worm blocks our march. Mince it to pieces.
+	// TrialSummary_12: Those mechanical eyes stare down at us—drive this blade through them.
+	// TrialSummary_13: Skeletron put on iron armor thinking it could stop us. Smash that metal skull.
+	// TrialSummary_14: That witch who gave herself to the chaos... she has a warped clone-sister. Kill that aberration. Anoint this blade with its blood and fire.
+	// TrialSummary_15: That maddened plant deep in the Jungle has gone berserk. End this runaway growth.
+	// TrialSummary_16: The foolish Lihzahrds worship inert stone. Let us grind their idol to dust and shatter their faith.
+	// TrialSummary_17: Some kind of bee-machine hybrid lurks in steam and poison. Knock that filthy thing out of the sky.
+	// TrialSummary_18: That Ravager is rampaging across the land. Shatter its iron form completely.
+	// TrialSummary_19: The stellar worm is concentrating cosmic energy here. End it—only then will this stellar domain be ours.
+	/* TrialSummary_20:
 		'''
-		The outcast of the Sulphurous Sea bars our path to the abyss's treasures. End its endless consumption and wandering.
-		A great iron worm blocks our march. Mince it to pieces.
+		That false god hiding behind the moon is nothing but a flawed, patchwork thing.
+		Go. Sever its tentacles, carve out its heart, and let us drink deep of its blood.
 		''' */
-	// TrialSummary_6: That witch who gave herself to the chaos... she has a warped clone-sister. Kill that aberration. Anoint this blade with its blood and fire.
-	// TrialSummary_7: The foolish Lihzahrds worship inert stone. Let us grind their idol to dust and shatter their faith. WE are what they should be worshipping.
-	// TrialSummary_8: That false god hiding behind the moon is nothing but a flawed, patchwork thing. Go. Sever its tentacles, carve out its heart, and let us drink deep of its blood.
-	// TrialSummary_9: A pathetic god, merely prolonging its wretched life by siphoning stellar heat. Its heretical fire must be extinguished.
-	// TrialSummary_10: That arrogant cosmic serpent stirs behind the veil of this world. End its ambition.
-	/* TrialSummary_11:
+	// TrialSummary_21: A pathetic god, merely prolonging its wretched life by siphoning stellar heat. Its heretical fire must be extinguished.
+	// TrialSummary_22: That mass of restless souls deep in the Dungeon—put them to final rest.
+	// TrialSummary_23: That arrogant cosmic serpent stirs behind the veil of this world. End its ambition.
+	/* TrialSummary_24:
 		'''
 		The Jungle Dragon... the last of the Auric Dragons. Unlike these other abominations, it... deserves our respect.
 		And yet, we must make it die again. We must strip it of its Auric soul.
 		These materials will forge wargear of supreme quality.
 		''' */
-	/* TrialSummary_12:
+	/* TrialSummary_25:
 		'''
-		That heretic of the mechanical cult... he truly believes his 'Titans' surpass the power of gods.
+		That heretic of the mechanical cult truly believes his 'Titans' surpass the power of gods.
 		Such conviction is absurd. Let us return those Titans to their natural state—a pile of scrap.
-		And that witch... a gifted psyker who should have been a great asset, now lost to chaos.
+		''' */
+	/* TrialSummary_26:
+		'''
+		A gifted psyker who should have been a great asset, now lost to chaos.
 		We can only banish her. Plunge this blade into her heart and let the fire of loyalty burn her corrupted soul to ash.
 		''' */
-	/* TrialSummary_13:
+	/* TrialSummary_27:
 		'''
 		Our path to conquest is inevitable. Shatter the armor of that abyssal dragon.
 		Use the Terminus Stone. Begin the final battle against these alien things.

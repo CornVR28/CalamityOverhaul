@@ -1,11 +1,10 @@
-HalibutOverride: {
+﻿HalibutOverride: {
 	DisplayName: Cañón de Halibut
 	Tooltip:
 		'''
 		Convierte balas de mosquete en proyectiles oceánicos.
 		legend_Text
 		[Lang4]
-		[Text]
 		'''
 }
 
@@ -24,10 +23,9 @@ MurasamaOverride: {
 		Presiona [KEY2] para consumir 1 punto de carga de arma y realizar un ataque de golpe descendente [Lang2].
 		Cuando el valor de carga de la arma alcance el máximo de 10 puntos, 
 		un nuevo golpe ascendente que golpee a un enemigo activará un movimiento final [Lang3].
-		legend_Text
 		[c/ff4500:"Sería mejor si tuviera una espada de cadena."]
+		legend_Text
 		[Lang4]
-		[Text]
 		'''
 }
 
@@ -43,7 +41,6 @@ SHPCOverride: {
 		Mantén presionada la tecla Shift para abrir el panel de control del Núcleo de Alma
 		legend_Text
 		[Lang4]
-		[Text]
 		'''
 }
 
