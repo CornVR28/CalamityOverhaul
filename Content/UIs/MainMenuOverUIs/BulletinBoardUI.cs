@@ -1,5 +1,4 @@
 ﻿using CalamityOverhaul.Common;
-using CalamityOverhaul.Content.ADV.Extras;
 using CalamityOverhaul.Content.UIs.OverhaulSettings;
 using InnoVault.UIHandles;
 using Microsoft.Xna.Framework.Graphics;
@@ -28,7 +27,7 @@ namespace CalamityOverhaul.Content.UIs.MainMenuOverUIs
         public static int Time;
         public static float sengs;
         public static BulletinBoardUI Instance => UIHandleLoader.GetUIHandleOfType<BulletinBoardUI>();
-        internal static bool SafeStart => !FeedbackUI.Instance.OnActive() && !AcknowledgmentUI.OnActive() && !ExtraMain.Instance.Active;
+        internal static bool SafeStart => !FeedbackUI.Instance.OnActive() && !AcknowledgmentUI.OnActive();
         public static Asset<DynamicSpriteFont> Font { get; private set; }
         public static List<BulletinBoardElement> bulletinBoardElements = [];
         private static string HoverText => CWRLocText.Instance.IconUI_Text0.Value;
@@ -36,7 +35,7 @@ namespace CalamityOverhaul.Content.UIs.MainMenuOverUIs
         private string ModNameAndVersion => Mod.Name + " v" + Mod.Version;
         private Vector2 ModNameSize => Font.Value.MeasureString(ModNameAndVersion);
         internal Vector2 TrueDrawPos => new Vector2(Main.screenWidth - ModNameSize.X - 4, DrawPosition.Y);
-        public override bool Active => CWRLoad.OnLoadContentBool && !ExtraMain.Instance.Active;
+        public override bool Active => CWRLoad.OnLoadContentBool;
         public override LayersModeEnum LayersMode => LayersModeEnum.Mod_MenuLoad;
         #endregion
         public override void Load() {
@@ -72,9 +71,9 @@ namespace CalamityOverhaul.Content.UIs.MainMenuOverUIs
                 .Setproperty(OverhaulSettingsButton.OverhaulSettingsButtonText, OverhaulSettingsButton.OnOpen, disabledFunc: () => Main.menuMode == 888);
             bulletinBoardElements.Add(overhaulSettingsButtonBoard);
 
-            BulletinBoardElement extraBulletinBoard = new BulletinBoardElement()
-                .Setproperty(CWRLocText.Instance.IconUI_ExtraText, ExtraMain.OnOpen, disabledFunc: () => Main.menuMode == ExtraMain.ExtraMenuMode);
-            bulletinBoardElements.Add(extraBulletinBoard);
+            //BulletinBoardElement extraBulletinBoard = new BulletinBoardElement()
+            //    .Setproperty(CWRLocText.Instance.IconUI_ExtraText, ExtraMain.OnOpen, disabledFunc: () => Main.menuMode == ExtraMain.ExtraMenuMode);
+            //bulletinBoardElements.Add(extraBulletinBoard);
         }
         public override void UnLoad() {
             Font = null;
