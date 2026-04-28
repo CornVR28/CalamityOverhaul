@@ -1,5 +1,4 @@
-﻿using CalamityOverhaul.Common;
-using CalamityOverhaul.Content.ADV.EntrustManager;
+﻿using CalamityOverhaul.Content.ADV.EntrustManager;
 using Terraria;
 using Terraria.ID;
 using Terraria.Localization;
@@ -28,6 +27,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.MurasamaLegend.TrialQuests
 
         /// <summary>每条试炼的标题</summary>
         public static LocalizedText[] TrialTitles { get; private set; }
+        public static LocalizedText[] TrialSummaries { get; private set; }
 
         #endregion
 
@@ -61,6 +61,28 @@ namespace CalamityOverhaul.Content.LegendWeapon.MurasamaLegend.TrialQuests
             for (int i = 0; i < TRIAL_COUNT; i++) {
                 int idx = i;
                 TrialTitles[i] = this.GetLocalization($"Trial_{i}", () => defaultTitles[idx]);
+            }
+
+            TrialSummaries = new LocalizedText[TRIAL_COUNT];
+            string[] defaultSummaries = [
+                "新兵，向我证明你自己\n那个黏糊糊的蓝胖子，沙海之下的海妖余孽\n解决他们，这是你的第一步",
+                "夜月当空，让我们去戳爆那颗在空中乱飞的大眼球，让那个伪神彻底变成瞎子",
+                "伪神的残躯玷污着泰拉的大地，异端在世界尽头滋生，异形在大陆上横行\n去解放被腐化的大陆，砍碎那坨伪神的大脑，剁碎那条紫色蠕虫！",
+                "腐化的大地还在像心脏一样颤动，血肉的寄生者还在活动，腐化的肿瘤仍旧在思考，去将他们彻底放逐！",
+                "史莱姆王国流传着一个传说，它们有一个堕落的异神\n地牢门口的诅咒已经松动，我感觉到灵能在深牢中蠢动，夹杂着惨叫、哀嚎、低语...",
+                "硫磺之海的弃儿阻挡了我们探寻深渊的宝藏，去终结它的吞噬和游荡\n一个巨大的钢铁蠕虫挡住了我们的征途，将它剁成碎片",
+                "那个投入混沌的女巫，她有一个畸变的克隆姊妹，杀了那个异形，以血和火焰祭刀",
+                "愚蠢的蜥蜴族只会信奉这些冥顽不灵的石头，让我们把它斩为齑粉，摧毁他们的信仰",
+                "那个躲在月亮背面的伪神不过是个残缺的拼凑物。去斩断它的触须，挖出它的心脏，用它的血来痛饮",
+                "靠吸食恒星热能苟延残喘的可怜神明，它的异端之火需要彻底熄灭",
+                "那条傲慢的宇宙巨蟒在世界的帷幕后蠢蠢欲动，终结他的野望",
+                "丛林巨龙，泰拉大陆仅存的金源龙裔，值得我们的尊重\n然而，眼下我们却需让它再次赴死，剥夺其身上的金源魄",
+                "那个机械教会的异端笃信泰坦胜过神明，让我们将那几台泰坦归还自然的状态——一堆废铁\n曾拥有出色灵能天赋的女巫早已迷失于混沌之中，唯有将她放逐",
+                "我们的征服之路早已不可阻挡，破碎那黑渊之下妖龙的铠甲\n使用那终焉之石，与异形展开最终决战",
+            ];
+            for (int i = 0; i < TRIAL_COUNT; i++) {
+                int idx = i;
+                TrialSummaries[i] = this.GetLocalization($"TrialSummary_{i}", () => defaultSummaries[idx]);
             }
         }
 
@@ -159,9 +181,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.MurasamaLegend.TrialQuests
         }
 
         private MurasamaTrialQuestEntry CreateTrialEntry(int trialIndex) {
-            var summaryText = CWRLocText.GetText($"Murasama_TextDictionary_Content_{trialIndex}");
             return new MurasamaTrialQuestEntry(KEY_PREFIX + trialIndex,
-                TrialTitles[trialIndex], summaryText, QuestCategory) {
+                TrialTitles[trialIndex], TrialSummaries[trialIndex], QuestCategory) {
                 Priority = TRIAL_COUNT - trialIndex,
                 EntryStyle = new PhantomEntryStyle(),
                 TrackerStyle = new PhantomTrackerWidgetStyle(),

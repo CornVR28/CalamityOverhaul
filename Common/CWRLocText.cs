@@ -39,21 +39,6 @@ namespace CalamityOverhaul.Common
         public LocalizedText Drop_GlodDragonDrop_RuleText { get; private set; }
         public LocalizedText Murasama_Text_Lang_0 { get; private set; }
         public LocalizedText Murasama_Text_Lang_End { get; private set; }
-        public LocalizedText Murasama_TextDictionary_Content_0 { get; private set; }
-        public LocalizedText Murasama_TextDictionary_Content_1 { get; private set; }
-        public LocalizedText Murasama_TextDictionary_Content_2 { get; private set; }
-        public LocalizedText Murasama_TextDictionary_Content_3 { get; private set; }
-        public LocalizedText Murasama_TextDictionary_Content_4 { get; private set; }
-        public LocalizedText Murasama_TextDictionary_Content_5 { get; private set; }
-        public LocalizedText Murasama_TextDictionary_Content_6 { get; private set; }
-        public LocalizedText Murasama_TextDictionary_Content_7 { get; private set; }
-        public LocalizedText Murasama_TextDictionary_Content_8 { get; private set; }
-        public LocalizedText Murasama_TextDictionary_Content_9 { get; private set; }
-        public LocalizedText Murasama_TextDictionary_Content_10 { get; private set; }
-        public LocalizedText Murasama_TextDictionary_Content_11 { get; private set; }
-        public LocalizedText Murasama_TextDictionary_Content_12 { get; private set; }
-        public LocalizedText Murasama_TextDictionary_Content_13 { get; private set; }
-        public LocalizedText Murasama_TextDictionary_Content_14 { get; private set; }
         public LocalizedText Murasama_No_legend_Content_1 { get; private set; }
         public LocalizedText Murasama_No_legend_Content_2 { get; private set; }
         public LocalizedText Murasama_No_legend_Content_3 { get; private set; }
