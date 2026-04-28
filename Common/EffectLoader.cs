@@ -58,6 +58,7 @@ namespace CalamityOverhaul.Common
         public static Asset<Effect> VoidArrival { get; set; }
         public static Asset<Effect> CyberBossBar { get; set; }
         public static Asset<Effect> HackRamArc { get; set; }
+        public static Asset<Effect> SHPCCoreOrb { get; set; }
         public static Asset<Effect> ThermalPanel { get; set; }
         public static Asset<Effect> ThermalBar { get; set; }
         public static Asset<Effect> ThermalHeatHaze { get; set; }

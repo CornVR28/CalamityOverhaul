@@ -128,9 +128,62 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
         /// <summary>
         /// 绘制左下能量核心
         /// 状态包括：常驻轻微呼吸、悬停高亮、展开时外环旋转刻度、点击瞬时闪烁
+        /// 优先使用SHPCCoreOrb着色器渲染，降级时回退到纯CPU绘制
         /// </summary>
         public static void DrawCore(SpriteBatch sb, Texture2D px, Vector2 center,
             float expandProgress, float coreHover, float corePulse, float clickFlash, float time, float globalAlpha) {
+            Effect effect = EffectLoader.SHPCCoreOrb?.Value;
+            if (effect != null) {
+                DrawCore_Shader(sb, px, center, expandProgress, coreHover, corePulse,
+                    clickFlash, time, globalAlpha, effect);
+            }
+            else {
+                DrawCore_CPU(sb, px, center, expandProgress, coreHover, corePulse,
+                    clickFlash, time, globalAlpha);
+            }
+        }
+
+        private static void DrawCore_Shader(SpriteBatch sb, Texture2D px, Vector2 center,
+            float expandProgress, float coreHover, float corePulse, float clickFlash,
+            float time, float globalAlpha, Effect effect) {
+            //包围盒：覆盖外环、旋转刻度、点击冲击波最大半径与悬停辉光
+            const float pad = 18f;
+            float boxR = SHPCTheme.CoreRingR + 30f + pad;
+            float qLeft = MathF.Max(0f, center.X - boxR);
+            float qTop = MathF.Max(0f, center.Y - boxR);
+            float qRight = MathF.Min(Main.screenWidth, center.X + boxR);
+            float qBottom = MathF.Min(Main.screenHeight, center.Y + boxR);
+            int qW = (int)MathF.Ceiling(qRight - qLeft);
+            int qH = (int)MathF.Ceiling(qBottom - qTop);
+            if (qW <= 0 || qH <= 0) {
+                return;
+            }
+            Rectangle dest = new((int)qLeft, (int)qTop, qW, qH);
+            Vector2 relCenter = new(center.X - qLeft, center.Y - qTop);
+
+            effect.Parameters["uTime"]?.SetValue(time);
+            effect.Parameters["uAlpha"]?.SetValue(globalAlpha);
+            effect.Parameters["uResolution"]?.SetValue(new Vector2(qW, qH));
+            effect.Parameters["uCenter"]?.SetValue(relCenter);
+            effect.Parameters["uCoreRingR"]?.SetValue(SHPCTheme.CoreRingR);
+            effect.Parameters["uCoreRadius"]?.SetValue(SHPCTheme.CoreRadius);
+            effect.Parameters["uExpand"]?.SetValue(MathHelper.Clamp(expandProgress, 0f, 1f));
+            effect.Parameters["uHover"]?.SetValue(MathHelper.Clamp(coreHover, 0f, 1f));
+            effect.Parameters["uPulse"]?.SetValue(MathHelper.Clamp(corePulse, 0f, 1f));
+            effect.Parameters["uClickFlash"]?.SetValue(MathHelper.Clamp(clickFlash, 0f, 1f));
+
+            sb.End();
+            sb.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.LinearClamp,
+                DepthStencilState.None, RasterizerState.CullNone, effect, Main.UIScaleMatrix);
+            sb.Draw(px, dest, Color.White);
+            sb.End();
+            sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState,
+                DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.UIScaleMatrix);
+        }
+
+        private static void DrawCore_CPU(SpriteBatch sb, Texture2D px, Vector2 center,
+            float expandProgress, float coreHover, float corePulse, float clickFlash,
+            float time, float globalAlpha) {
             //外层投影，给整体一种漂浮感
             DrawDisc(sb, px, center + new Vector2(0f, 2.5f),
                 SHPCTheme.CoreRingR + 4f, 6f, SHPCTheme.ShadowDark * (0.45f * globalAlpha));
