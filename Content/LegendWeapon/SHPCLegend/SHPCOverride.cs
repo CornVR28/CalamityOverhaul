@@ -276,7 +276,6 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
 
         public static void SetTooltip(Item item, ref List<TooltipLine> tooltips) {
             int index = SHPC_Level();
-            string newContent = index >= 0 && index <= 16 ? CWRLocText.GetTextValue($"SHPC_TextDictionary_Content_{index}") : "ERROR";
             string num = (index + 1).ToString();
             if (index == 16) {
                 num = CWRLocText.GetTextValue("Murasama_Text_Lang_End");
@@ -286,8 +285,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
 
             tooltips.ReplacePlaceholder("[Lang4]", text, "");
             tooltips.ReplacePlaceholder("legend_Text", CWRLocText.GetTextValue("SHPC_No_legend_Content_3"), "");
-            Color newColor = Color.Lerp(Color.IndianRed, Color.White, 0.5f + (float)Math.Sin(Main.GlobalTimeWrappedHourly) * 0.5f);
-            tooltips.ReplacePlaceholder("[Text]", VaultUtils.FormatColorTextMultiLine(newContent, newColor), "");
+            tooltips.ReplacePlaceholder("[Text]", "", "");
         }
     }
 }

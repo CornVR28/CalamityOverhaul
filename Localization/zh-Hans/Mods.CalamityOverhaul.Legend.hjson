@@ -234,3 +234,25 @@ MurasamaTrialQuestLine: {
 	// Trial_12: 核心终结
 	// Trial_13: 原初回归
 }
+
+SHPCTrialQuestLine: {
+	// QuestCategory: SHPC·试炼
+	// TrackerWaiting: 目标不在场，等待召唤...
+	// TrackerFighting: "{0}: {1:0%}"
+	// Trial_0: 史莱姆清除
+	// Trial_1: 眼部解剖
+	// Trial_2: 生化样本
+	// Trial_3: 污秽提纯
+	// Trial_4: 封印突破
+	// Trial_5: 机械之夜
+	// Trial_6: 铁疙瘩清除
+	// Trial_7: 生态考察
+	// Trial_8: 远古科技
+	// Trial_9: 信息封锁
+	// Trial_10: 月背秘密
+	// Trial_11: 地核探险
+	// Trial_12: 神域入侵
+	// Trial_13: 获取龙羽
+	// Trial_14: 造物主访问
+	// Trial_15: 终焉大战
+}
