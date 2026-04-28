@@ -2,10 +2,8 @@
 using CalamityMod.Balancing;
 using CalamityMod.CalPlayer;
 using CalamityMod.CustomRecipes;
-using CalamityMod.DataStructures;
 using CalamityMod.Events;
 using CalamityMod.Graphics.Metaballs;
-using CalamityMod.Items.Weapons.Magic;
 using CalamityMod.NPCs;
 using CalamityMod.NPCs.ExoMechs;
 using CalamityMod.NPCs.SupremeCalamitas;
@@ -25,7 +23,6 @@ using Terraria.Audio;
 using Terraria.DataStructures;
 using Terraria.GameContent;
 using Terraria.GameContent.UI.BigProgressBar;
-using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
 using static CalamityOverhaul.Common.ModGanged;

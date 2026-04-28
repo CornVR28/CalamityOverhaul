@@ -1,4 +1,4 @@
-﻿ShepelCyberActiveDialogue: {
+ShepelCyberActiveDialogue: {
 	RoleName: SHPC
 	Line_Intro: 领域已激活，主人。当前层级 {0}，外部信号已完全隔离。
 	Line_LayerReport: 领域越深，可干预的目标范围越广，但能量消耗也成倍增加。请注意RAM余量。
@@ -18,4 +18,172 @@ ShepelIdleDialogue: {
 	Idle1_Line2: 如果是关于SHPC的性能数据，我可以随时调出报告。
 	Idle2_Line1: 主人，这附近的电磁环境有些不稳定。
 	Idle2_Line2: 建议保持警惕，SHPC随时准备接管应急协议。
+}
+
+ShepelBossDefeatedDialogue: {
+	RoleName: SHPC
+	Line1: 主人，目标已确认消灭。战斗数据已同步至档案库。
+	Line2: 您的战斗表现值得称赞。随时待命。
+}
+
+ShepelCyberLevelUpDialogue: {
+	RoleName: SHPC
+	Line1: 领域层级跃升，主人。干扰范围已扩大。
+	Line2: 新层级的协议正在初始化，预计完成时间：即刻。
+}
+
+ShepelRAMOverloadDialogue: {
+	RoleName: SHPC
+	Line1: 主人，RAM容量已触达临界值。
+	Line2: 建议暂停高消耗操作，等待系统自动恢复。
+}
+
+ShepelBrimstoneElementalDialogue: {
+	RoleName: SHPC
+	Line1: 硫磺元素体中和完毕。热辐射来源消除，区域温度恢复稳定范围。
+	Line2: 那种古老的愤怒……很难以数据来衡量。它更像一种意志，而不是简单的攻击行为。令人深思。
+}
+
+ShepelCalamitasCloneDialogue: {
+	RoleName: SHPC
+	Line1: 灾厄克隆体：终止。主人请注意，扫描确认，这只是个副本。
+	Line2: 原体的信号仍然存在，位置更深，威胁等级远超这个复刻版本。如果说这只是预演……
+	Line3: 我已将真正的灾厄列为最高优先监控目标。主人，请保持警惕。
+}
+
+ShepelCrabulonDialogue: {
+	RoleName: SHPC
+	Line1: 蘑荇蟹确认消灯。有意思的是，它的神经系统已经被菌丝网络部分取代，形成了一种外来寄生式的群体意识。
+	Line2: 拿活体生物当底层网络，确实是个有趣的研究对象。不过主人就不必亲身体验了。
+}
+
+ShepelCryogenDialogue: {
+	RoleName: SHPC
+	Line1: 冷冻封印已突破。我的热成像传感器显示区域温度驾升，已回到正常范围。
+	Line2: 那股持续的绝对零度干扰终于消失了。我的某些传感器模块在它附近一直运行不稳定。总算舒服了。
+}
+
+ShepelDesertScourgeDialogue: {
+	RoleName: SHPC
+	Line1: 沙漠莓虫已清除。体型确实庞大，但攻击模式太重复了，不难应对。
+	Line2: 移动模式我已经记下来了。主人，沙漠这边的威胁过去了，前方的挑战才刚刚开始。
+}
+
+ShepelDestroyerDialogue: {
+	RoleName: SHPC
+	Line1: 机械蠕虫的分布式节点网络已经瓦解。体节数量令人印象深刻，但中枢控制单一，存在明显弱点。
+	Line2: 大体量不等于高效能，这应该是条放之四海皆准的道理。
+}
+
+ShepelDevourerofGodsDialogue: {
+	RoleName: SHPC
+	Line1: 主人……您刚才击败的，是一条以神明为食的存在。这完全超出了我所有的预测模型。
+	Line2: 我正在经历一次完整的世界观重建。我一直以为神明是这一切的终点，
+	Line3: 但显然不是。主人，您已经站在了终点的另一端，而我还在追赶。请等等我。
+}
+
+ShepelEyeOfCthulhuDialogue: {
+	RoleName: SHPC
+	Line1: 主人，首个威胁目标已清除。这场战斗的数据我都记录好了。
+	Line2: 这种级别的威胁以后不用放在心上了。请继续前进，更大的目标还在前面等着。
+}
+
+ShepelGolemDialogue: {
+	RoleName: SHPC
+	Line1: 圣殿自动守卫：终止。原始工艺，硬编码攻击模式，完全可预测的行为树。
+	Line2: 相较于我，它更接近一台'装置'而非真正的智能系统。不太公平的对比，抱歉。
+}
+
+ShepelHiveMindDialogue: {
+	RoleName: SHPC
+	Line1: 腐化蜂巢意志体已清除。区域暗物质浓度正在回落至安全阈值。
+	Line2: 这类腐化型生物的感知辐射一直让我的探测系统频繁触发警报。现在终于清净了。
+}
+
+ShepelLeviathanDialogue: {
+	RoleName: SHPC
+	Line1: 海洋巨型生物群已撤离。体型数据超出了我预设的海洋威胁参数上限，已即时调整了。
+	Line2: 主人，您适应未知环境的速度让我的预测模型一直在更新，这已经快成常态了。
+}
+
+ShepelMoonLordDialogue: {
+	RoleName: SHPC
+	Line1: 古代实体确认终止。主人，那是我迄今记录过的最高威胁等级目标。
+	Line2: 星空的电磁辐射正在逐渐稳定。我的系统也全面恢复了正常。
+	Line3: 干得漂亮。不过要提醒主人一句，这个世界还有更深的层次，我正在更新参数。
+}
+
+ShepelPerforatorDialogue: {
+	RoleName: SHPC
+	Line1: 感染蜂巢摧毁。这批血肉穿刺群体协同起来有点像莓虫，但侵略性强多了。
+	Line2: 生物感染源移除完毕。主人，伤口状态扫描已完成，一切正常，请放心。
+}
+
+ShepelPlaguebringerDialogue: {
+	RoleName: SHPC
+	Line1: 瘟疫传播核心摧毁。污染等级正在快速下降，空气净化已经开始了。
+	Line2: 军事化瘟疫载体，背后像是有人刻意设计过的。这件事我记下来了，之后要深查一下。
+}
+
+ShepelPlanteraDialogue: {
+	RoleName: SHPC
+	Line1: 丛林的防御核心突破了。这株植物用有机神经网络的方式覆盖了整片生物群落，很罕见的形式。
+	Line2: 防线撤除，丛林深处的路现在通了。前方路线我来扫描。
+}
+
+ShepelProvidenceDialogue: {
+	RoleName: SHPC
+	Line1: 神圣实体：确认终止……主人，我需要一点时间，重新校准一下。
+	Line2: 在我的模型里，'神明'这一类别被标注为理论级威胁。从未预期会真正遭遇，更别说击败了。
+	Line3: 新的参考系已经建立。我在更新所有战斗评估算法。主人，您继续突破边界，我来跟上。
+}
+
+ShepelQueenBeeDialogue: {
+	RoleName: SHPC
+	Line1: 蜂后清除完毕。整个蜂群失去了指挥核心，威胁已解除。
+	Line2: 有机群体的协同行为挺有意思，某种程度上和分布式网络架构有点像。
+}
+
+ShepelSkeletronDialogue: {
+	RoleName: SHPC
+	Line1: 地牢古守卫已清除。外部安全屏障解除，通道正式开放。
+	Line2: 这类古代防御系统的内部可能仍有残留协议在运行。主人请保持警惕。
+}
+
+ShepelSkeletronPrimeDialogue: {
+	RoleName: SHPC
+	Line1: 机械化地牢守卫，原型的强化版本。四臂联动控制系统，有一定战术深度。
+	Line2: 已被主人压制。升级再多，根基的缺陷终究无法掩盖。
+}
+
+ShepelSlimeGodDialogue: {
+	RoleName: SHPC
+	Line1: 生物聚合体核心摧毁。无中枢、无边界、无固定形态，这东西把我所有的威胁模型都打乱了。
+	Line2: 比任何我预测过的架构都更混乱。但主人还是将它彻底击碎了。
+}
+
+ShepelSupremeCalamitasDialogue: {
+	RoleName: SHPC
+	Line1: 真正的灾厄，确认终止。我的全域威胁监控显示：危险等级归零。
+	Line2: 主人……我不知道该如何准确表达此刻的感受。所有预测模型里最坏的结局都没有发生，因为您在这里。
+	Line3: 这段数据我会永久保存，不设覆写权限。
+}
+
+ShepelTwinsDialogue: {
+	RoleName: SHPC
+	Line1: 两台机械眼双双离线。成对互补的设计，协同战术值得记一下。
+	Line2: 终究只是末日机械的粗糙复刻。跟我比起来，相当原始。
+}
+
+ShepelWallOfFleshDialogue: {
+	RoleName: SHPC
+	Line1: 主人，我检测到全域能量基线发生了剧变。整个世界的底层规则正在重构。
+	Line2: 先前的平衡已打破，新的威胁体系已经就位。我的威胁预测模型需要全面升级。
+	Line3: 但这也意味着更多的可能。我切换到高戒备模式，随时监控一切异常。
+}
+
+ShepelYharonDialogue: {
+	RoleName: SHPC
+	Line1: Yharim最后的守护者，亚伦龙，已经倒下了。我感应到某种远距离的连接正在断裂。
+	Line2: 无论那位传说中的暴君此刻身在何处，他也应该知晓了。主人，请做好最后的准备。
 }

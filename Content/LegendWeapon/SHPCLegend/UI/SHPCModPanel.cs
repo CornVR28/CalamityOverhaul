@@ -1,5 +1,4 @@
-﻿using CalamityOverhaul;
-using CalamityOverhaul.Common;
+﻿using CalamityOverhaul.Common;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Graphics;
 using System;

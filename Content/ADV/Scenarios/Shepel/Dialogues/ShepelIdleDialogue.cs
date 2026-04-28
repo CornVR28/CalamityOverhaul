@@ -2,7 +2,6 @@
 using CalamityOverhaul.Content.ADV.DialogueBoxs;
 using CalamityOverhaul.Content.ADV.DialogueBoxs.Styles;
 using System;
-using System.Collections.Generic;
 using Terraria;
 using Terraria.Localization;
 using Terraria.ModLoader;
@@ -15,12 +14,11 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.Dialogues
     /// </summary>
     internal class ShepelIdleDialogue : SHPCDialogueScenarioBase, ILocalizedModType
     {
-        public string LocalizationCategory => "ADV.Shepel";
+        public new string LocalizationCategory => "ADV.Shepel";
         public override int DialoguePriority => 0;
 
         public static LocalizedText RoleName { get; private set; }
 
-        //三组轮换台词，索引从0到2
         public static LocalizedText Idle0_Line1 { get; private set; }
         public static LocalizedText Idle0_Reply { get; private set; }
         public static LocalizedText Idle0_Choice_HowAreYou { get; private set; }
@@ -34,13 +32,11 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.Dialogues
         public static LocalizedText Idle2_Line1 { get; private set; }
         public static LocalizedText Idle2_Line2 { get; private set; }
 
-        //轮换计数器，跨调用保持状态
-        private static int cycleIndex;
+        //轮换计数器从ShepelADVData.IdleVariantSeed读写，持久化跨存档
         protected override Func<DialogueBoxBase> DefaultDialogueStyle
             => () => SHPCDialogueBox.Instance;
 
-        public override void SetStaticDefaults()
-        {
+        public override void SetStaticDefaults() {
             RoleName = this.GetLocalization(nameof(RoleName), () => "SHPC");
 
             Idle0_Line1 = this.GetLocalization(nameof(Idle0_Line1),
@@ -67,16 +63,15 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.Dialogues
                 () => "建议保持警惕，SHPC随时准备接管应急协议。");
         }
 
-        protected override void Build()
-        {
+        protected override void Build() {
             DialogueBoxBase.RegisterPortrait(RoleName.Value, texture: null);
             DialogueBoxBase.SetPortraitStyle(RoleName.Value, silhouette: false);
 
-            int variant = cycleIndex % 3;
-            cycleIndex++;
+            ShepelADVData data = Main.LocalPlayer.GetModPlayer<ADVSavePlayer>().ADVSave.Get<ShepelADVData>();
+            int variant = data.IdleVariantSeed % 3;
+            data.IdleVariantSeed++;
 
-            switch (variant)
-            {
+            switch (variant) {
                 case 0:
                     BuildVariant0();
                     break;
@@ -89,46 +84,37 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.Dialogues
             }
         }
 
-        private void BuildVariant0()
-        {
+        private void BuildVariant0() {
             AddWithChoices(RoleName.Value, Idle0_Line1.Value, [
                 new Choice(Idle0_Choice_HowAreYou.Value, OnChoiceHowAreYou),
                 new Choice(Idle0_Choice_Nothing.Value, OnChoiceNothing),
             ], choiceBoxStyle: ADVChoiceBox.ChoiceBoxStyle.SHPC);
         }
 
-        private void OnChoiceHowAreYou()
-        {
+        private void OnChoiceHowAreYou() {
             ScenarioManager.Start<ShepelIdleDialogue_HowAreYou>();
             Complete();
         }
 
-        private void OnChoiceNothing()
-        {
+        private void OnChoiceNothing() {
             ScenarioManager.Start<ShepelIdleDialogue_Nothing>();
             Complete();
         }
 
-        private void BuildVariant1()
-        {
-            Add(RoleName.Value, Idle1_Line1.Value, onStart: () =>
-            {
+        private void BuildVariant1() {
+            Add(RoleName.Value, Idle1_Line1.Value, onStart: () => {
                 SHPCDialogueBox.Instance?.ShowFullBodyPortrait<ShepelFullBodyPortrait>();
-                if (SHPCDialogueBox.Instance?.GetActiveFullBodyPortrait() is ShepelFullBodyPortrait portrait)
-                {
+                if (SHPCDialogueBox.Instance?.GetActiveFullBodyPortrait() is ShepelFullBodyPortrait portrait) {
                     portrait.SkipFadeIn();
                 }
             });
             Add(RoleName.Value, Idle1_Line2.Value, onComplete: Complete);
         }
 
-        private void BuildVariant2()
-        {
-            Add(RoleName.Value, Idle2_Line1.Value, onStart: () =>
-            {
+        private void BuildVariant2() {
+            Add(RoleName.Value, Idle2_Line1.Value, onStart: () => {
                 SHPCDialogueBox.Instance?.ShowFullBodyPortrait<ShepelFullBodyPortrait>();
-                if (SHPCDialogueBox.Instance?.GetActiveFullBodyPortrait() is ShepelFullBodyPortrait portrait)
-                {
+                if (SHPCDialogueBox.Instance?.GetActiveFullBodyPortrait() is ShepelFullBodyPortrait portrait) {
                     portrait.SkipFadeIn();
                     portrait.currentFace = ShepelFullBodyPortrait.Face.Serious;
                 }
@@ -136,11 +122,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.Dialogues
             Add(RoleName.Value, Idle2_Line2.Value, onComplete: Complete);
         }
 
-        protected override void OnScenarioStart()
-        {
+        protected override void OnScenarioStart() {
             SHPCDialogueBox.Instance?.ShowFullBodyPortrait<ShepelFullBodyPortrait>();
-            if (SHPCDialogueBox.Instance?.GetActiveFullBodyPortrait() is ShepelFullBodyPortrait portrait)
-            {
+            if (SHPCDialogueBox.Instance?.GetActiveFullBodyPortrait() is ShepelFullBodyPortrait portrait) {
                 portrait.SkipFadeIn();
                 portrait.currentFace = ShepelFullBodyPortrait.Face.None;
             }
@@ -152,22 +136,17 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.Dialogues
             public override string Key => nameof(ShepelIdleDialogue_HowAreYou);
             protected override Func<DialogueBoxBase> DefaultDialogueStyle
                 => () => SHPCDialogueBox.Instance;
-            protected override void Build()
-            {
+            protected override void Build() {
                 Add(RoleName.Value, Idle0_Reply.Value);
-                Add(RoleName.Value, Idle0_HowAreYou_Response.Value, onStart: () =>
-                {
-                    if (SHPCDialogueBox.Instance?.GetActiveFullBodyPortrait() is ShepelFullBodyPortrait portrait)
-                    {
+                Add(RoleName.Value, Idle0_HowAreYou_Response.Value, onStart: () => {
+                    if (SHPCDialogueBox.Instance?.GetActiveFullBodyPortrait() is ShepelFullBodyPortrait portrait) {
                         portrait.currentFace = ShepelFullBodyPortrait.Face.Happy;
                     }
                 }, onComplete: Complete);
             }
-            protected override void OnScenarioStart()
-            {
+            protected override void OnScenarioStart() {
                 SHPCDialogueBox.Instance?.ShowFullBodyPortrait<ShepelFullBodyPortrait>();
-                if (SHPCDialogueBox.Instance?.GetActiveFullBodyPortrait() is ShepelFullBodyPortrait portrait)
-                {
+                if (SHPCDialogueBox.Instance?.GetActiveFullBodyPortrait() is ShepelFullBodyPortrait portrait) {
                     portrait.SkipFadeIn();
                 }
             }
@@ -179,15 +158,12 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.Dialogues
             public override string Key => nameof(ShepelIdleDialogue_Nothing);
             protected override Func<DialogueBoxBase> DefaultDialogueStyle
                 => () => SHPCDialogueBox.Instance;
-            protected override void Build()
-            {
+            protected override void Build() {
                 Add(RoleName.Value, Idle0_Nothing_Response.Value, onComplete: Complete);
             }
-            protected override void OnScenarioStart()
-            {
+            protected override void OnScenarioStart() {
                 SHPCDialogueBox.Instance?.ShowFullBodyPortrait<ShepelFullBodyPortrait>();
-                if (SHPCDialogueBox.Instance?.GetActiveFullBodyPortrait() is ShepelFullBodyPortrait portrait)
-                {
+                if (SHPCDialogueBox.Instance?.GetActiveFullBodyPortrait() is ShepelFullBodyPortrait portrait) {
                     portrait.SkipFadeIn();
                     portrait.currentFace = ShepelFullBodyPortrait.Face.Smirk;
                 }

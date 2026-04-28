@@ -1,4 +1,4 @@
-using Terraria;
+﻿using Terraria;
 
 namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel
 {
@@ -14,9 +14,30 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel
         public virtual int DialoguePriority => 0;
 
         /// <summary>
-        /// 当前是否允许被路由器选中并触发
-        /// 默认始终可触发，子类按需重写
+        /// 触发此场景所需的最低故事阶段（StoryPhase）
+        /// 当前阶段低于该值时不参与路由，无需在子类重复判断
         /// </summary>
-        public virtual bool CanBeRoutedTo(Player player, ADVSave save) => true;
+        public virtual int RequiredPhase => 0;
+
+        /// <summary>
+        /// 子类实现的额外触发条件，通用检查（阶段门控）已由基类处理
+        /// 默认始终返回true
+        /// </summary>
+        protected virtual bool CheckConditions(Player player, ADVSave save) => true;
+
+        /// <summary>
+        /// 路由器调用的最终判断入口，封装了故事阶段门控
+        /// 非虚，防止子类绕过通用检查
+        /// </summary>
+        public bool CanBeRoutedTo(Player player, ADVSave save) {
+            ShepelADVData data = save.Get<ShepelADVData>();
+
+            //故事阶段门控
+            if (data.StoryPhase < RequiredPhase) {
+                return false;
+            }
+
+            return CheckConditions(player, save);
+        }
     }
 }

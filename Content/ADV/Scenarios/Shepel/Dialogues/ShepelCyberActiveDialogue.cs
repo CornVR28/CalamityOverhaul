@@ -13,7 +13,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.Dialogues
     /// </summary>
     internal class ShepelCyberActiveDialogue : SHPCDialogueScenarioBase, ILocalizedModType
     {
-        public string LocalizationCategory => "ADV.Shepel";
+        public new string LocalizationCategory => "ADV.Shepel";
         public override int DialoguePriority => 10;
 
         public static LocalizedText RoleName { get; private set; }
@@ -25,8 +25,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.Dialogues
         protected override Func<DialogueBoxBase> DefaultDialogueStyle
             => () => ADV.DialogueBoxs.Styles.SHPCDialogueBox.Instance;
 
-        public override void SetStaticDefaults()
-        {
+        public override void SetStaticDefaults() {
             RoleName = this.GetLocalization(nameof(RoleName), () => "SHPC");
             Line_Intro = this.GetLocalization(nameof(Line_Intro),
                 () => "领域已激活，主人。当前层级 {0}，外部信号已完全隔离。");
@@ -38,10 +37,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.Dialogues
                 () => "主人，当前已处于最深层级。此处的规则已与外界完全分离，请谨慎行动。");
         }
 
-        public override bool CanBeRoutedTo(Player player, ADVSave save) => Cyberspace.Active;
+        protected override bool CheckConditions(Player player, ADVSave save) => Cyberspace.Active;
 
-        protected override void Build()
-        {
+        protected override void Build() {
             ADV.DialogueBoxs.DialogueBoxBase.RegisterPortrait(RoleName.Value, texture: null);
             ADV.DialogueBoxs.DialogueBoxBase.SetPortraitStyle(RoleName.Value, silhouette: false);
 
@@ -49,38 +47,30 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.Dialogues
             bool isMaxLayer = layer >= Cyberspace.MaxLayerCount;
 
             string introText = string.Format(Line_Intro.Value, layer);
-            Add(RoleName.Value, introText, onStart: () =>
-            {
+            Add(RoleName.Value, introText, onStart: () => {
                 ADV.DialogueBoxs.Styles.SHPCDialogueBox.Instance?.ShowFullBodyPortrait<ShepelFullBodyPortrait>();
-                if (ADV.DialogueBoxs.Styles.SHPCDialogueBox.Instance?.GetActiveFullBodyPortrait() is ShepelFullBodyPortrait portrait)
-                {
+                if (ADV.DialogueBoxs.Styles.SHPCDialogueBox.Instance?.GetActiveFullBodyPortrait() is ShepelFullBodyPortrait portrait) {
                     portrait.SkipFadeIn();
                     portrait.currentFace = ShepelFullBodyPortrait.Face.Serious;
                 }
             });
 
-            if (isMaxLayer)
-            {
-                Add(RoleName.Value, Line_MaxLayer.Value, onStart: () =>
-                {
-                    if (ADV.DialogueBoxs.Styles.SHPCDialogueBox.Instance?.GetActiveFullBodyPortrait() is ShepelFullBodyPortrait portrait)
-                    {
+            if (isMaxLayer) {
+                Add(RoleName.Value, Line_MaxLayer.Value, onStart: () => {
+                    if (ADV.DialogueBoxs.Styles.SHPCDialogueBox.Instance?.GetActiveFullBodyPortrait() is ShepelFullBodyPortrait portrait) {
                         portrait.currentFace = ShepelFullBodyPortrait.Face.Shocked;
                     }
                 }, onComplete: Complete);
             }
-            else
-            {
+            else {
                 Add(RoleName.Value, Line_LayerReport.Value);
                 Add(RoleName.Value, Line_Warning.Value, onComplete: Complete);
             }
         }
 
-        protected override void OnScenarioStart()
-        {
+        protected override void OnScenarioStart() {
             ADV.DialogueBoxs.Styles.SHPCDialogueBox.Instance?.ShowFullBodyPortrait<ShepelFullBodyPortrait>();
-            if (ADV.DialogueBoxs.Styles.SHPCDialogueBox.Instance?.GetActiveFullBodyPortrait() is ShepelFullBodyPortrait portrait)
-            {
+            if (ADV.DialogueBoxs.Styles.SHPCDialogueBox.Instance?.GetActiveFullBodyPortrait() is ShepelFullBodyPortrait portrait) {
                 portrait.SkipFadeIn();
                 portrait.currentFace = ShepelFullBodyPortrait.Face.None;
             }
