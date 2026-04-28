@@ -1,4 +1,5 @@
 ﻿using CalamityOverhaul.Content.ADV.EntrustManager;
+using CalamityOverhaul.Content.ADV.UIEffect;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 
@@ -38,15 +39,20 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Quest
         private float waveTime;
         private float causticTime;
         private float bubbleTime;
+        //着色器专用单调递增时间
+        private float shaderTime;
+        private const int ShaderEdgePad = 5;
 
         public void Update() {
             waveTime += 0.025f;
             causticTime += 0.018f;
             bubbleTime += 0.04f;
+            shaderTime += 0.016f;
             const float wrap = MathHelper.TwoPi * 4f;
             if (waveTime > wrap) waveTime -= wrap;
             if (causticTime > wrap) causticTime -= wrap;
             if (bubbleTime > 100f) bubbleTime -= 100f;
+            if (shaderTime > 10000f) shaderTime -= 10000f;
         }
 
         public bool DrawEntryBackground(SpriteBatch sb, Rectangle entryRect, EntrustEntryData entry,
@@ -227,6 +233,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Quest
             waveTime = 0f;
             causticTime = 0f;
             bubbleTime = 0f;
+            shaderTime = 0f;
         }
     }
 }

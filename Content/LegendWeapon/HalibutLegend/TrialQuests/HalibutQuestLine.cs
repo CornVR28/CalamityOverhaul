@@ -109,7 +109,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend.TrialQuests
                 return;
             }
 
-            if (!Main.LocalPlayer.HasHalibut() && save.Get<HalibutADVData>().FirstMet) {
+            if (!Main.LocalPlayer.HasHalibut()) {
+                return;//未获得比目鱼前不显示任何试炼
+            }
+
+            if (!save.Get<HalibutADVData>().FirstMet) {
                 return;//未获得比目鱼前不显示任何试炼
             }
 
