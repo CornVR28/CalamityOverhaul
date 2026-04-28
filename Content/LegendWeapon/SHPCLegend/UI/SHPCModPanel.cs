@@ -1,3 +1,4 @@
+﻿using CalamityOverhaul;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Graphics;
 using System;
@@ -8,7 +9,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
 {
     /// <summary>
     /// SHPC枪体改造面板
-    /// 中央悬浮枪体程序化轮廓，数据分析线向外延伸连接六个改件插槽
+    /// 中央悬浮SHPC物品纹理，数据分析线从枪体关键部位延伸连接六个改件插槽
     /// 由 <see cref="SHPCUI"/> 在固定二级面板模式下调用（按钮索引2）
     /// </summary>
     internal static class SHPCModPanel
@@ -30,14 +31,21 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             new(-84f, -38f),  //FRAME   机匣  左上
         };
 
-        //数据线在枪体上的接出点（相对枪体中心，对应各槽方向）
+        //枪体纹理显示缩放，SHPC原始贴图约82×26px，2.0x时绘制尺寸约164×52
+        private static float GunScale => 1.2f;
+
+        //数据线在枪体纹理上的接出点，坐标单位为屏幕像素（相对枪体绘制中心）
+        //以枪口朝右为基准，对应SHPC贴图各功能区域的边缘位置
+        //如果实际贴图尺寸与预估不符可按照以下规律等比调整：
+        //  X轴：负值朝左（枪托侧），正值朝右（枪口侧），最大约±82*GunScale/2
+        //  Y轴：负值朝上（瞄具/枪管顶），正值朝下（握把/弹匣底），最大约±26*GunScale/2
         private static readonly Vector2[] ConnectPoints = {
-            new(4f, -9f),    //BARREL  向上引出
-            new(14f, -5f),   //OPTIC   右上引出
-            new(6f, 5f),     //POWER   右下引出
-            new(-2f, 9f),    //STOCK   向下引出
-            new(-17f, 5f),   //GRIP    左下引出
-            new(-17f, -5f),  //FRAME   左上引出
+            new(5f, -24f),   //BARREL  向上引出  枪管顶部
+            new(62f, -20f),  //OPTIC   右上引出  枪口侧上方
+            new(62f, 18f),   //POWER   右下引出  枪口侧下方
+            new(-55f, 26f),  //STOCK   向下引出  枪托底部
+            new(-15f, 26f),  //GRIP    左下引出  握把底部
+            new(-62f, -18f), //FRAME   左上引出  枪托侧上方
         };
 
         private static readonly string[] SlotLabels = {
@@ -132,18 +140,6 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                 new Vector2(rect.Right - 10f - idSz.X, rect.Y + 9f),
                 SHPCTheme.Cyan * (0.70f * a), 0.42f);
 
-            //中央旋转扫描环（枪体外围）
-            float scanAngle = time * 0.75f;
-            SHPCRenderer.DrawArcStroke(sb, px, gun, 26f,
-                scanAngle, scanAngle + 2.0f, 1.2f,
-                SHPCTheme.Cyan * (0.45f * a));
-            SHPCRenderer.DrawArcStroke(sb, px, gun, 26f,
-                scanAngle + MathHelper.Pi, scanAngle + MathHelper.Pi + 1.4f, 1.0f,
-                SHPCTheme.Cyan * (0.22f * a));
-
-            //枪体外轮廓参考环（静态底层装饰）
-            SHPCRenderer.DrawRing(sb, px, gun, 28f, 0.8f, SHPCTheme.Border * (0.3f * a));
-
             //数据分析线（绘于枪体下方）
             DrawDataLines(sb, px, gun, hover, time, a);
 
@@ -154,8 +150,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                 DrawSlot(sb, px, font, slotRect, SlotLabels[i], isHover, a);
             }
 
-            //SHPC枪体轮廓（绘于最上层）
-            DrawGunSilhouette(sb, px, gun, time, a);
+            //SHPC枪体纹理（绘于最上层，置于分析线和槽位之上）
+            DrawGunTexture(sb, px, gun, time, a);
         }
 
         private static void DrawScanLines(SpriteBatch sb, Texture2D px,
@@ -255,67 +251,44 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                 SHPCTheme.TextDim * (0.55f * a), emptyScale);
         }
 
-        private static void DrawGunSilhouette(SpriteBatch sb, Texture2D px,
+        private static void DrawGunTexture(SpriteBatch sb, Texture2D px,
             Vector2 gun, float time, float a) {
-            float pulse = 0.88f + MathF.Sin(time * 2.6f) * 0.12f;
-            Color body = SHPCTheme.Cyan * (pulse * a);
-            Color detail = SHPCTheme.CyanHi * (0.65f * pulse * a);
+            Texture2D gunTex = CWRID.Item_SHPC > 0
+                ? TextureAssets.Item[CWRID.Item_SHPC]?.Value
+                : null;
 
-            //枪体发光底衬
-            SHPCRenderer.DrawDisc(sb, px, gun, 5f, 10f, SHPCTheme.Cyan * (0.12f * a));
+            //悬浮呼吸脉冲强度
+            float pulse = 0.90f + MathF.Sin(time * 2.6f) * 0.10f;
 
-            //机匣主体（填充+描边）
-            Rectangle recv = new((int)(gun.X - 18f), (int)(gun.Y - 7f), 29, 14);
-            SHPCRenderer.DrawFilledRect(sb, px, recv, new Color(4, 20, 32) * (0.85f * a));
-            SHPCRenderer.DrawRectStroke(sb, px, recv, 1.4f, body);
+            if (gunTex == null) {
+                //纹理尚未加载时降级绘制一个占位圆
+                SHPCRenderer.DrawRing(sb, px, gun, 18f, 2f, SHPCTheme.Border * a);
+                return;
+            }
 
-            //枪管上轮廓线
-            SHPCRenderer.DrawLine(sb, px,
-                new Vector2(gun.X + 11f, gun.Y - 3f),
-                new Vector2(gun.X + 33f, gun.Y - 3f),
-                1.4f, body);
+            //枪体在面板中的轻微悬浮上下位移（呼吸感）
+            Vector2 floatOffset = new(0f, MathF.Sin(time * 1.8f) * 2.5f);
+            Vector2 drawPos = gun + floatOffset;
 
-            //枪管下轮廓线
-            SHPCRenderer.DrawLine(sb, px,
-                new Vector2(gun.X + 11f, gun.Y + 3f),
-                new Vector2(gun.X + 33f, gun.Y + 3f),
-                1.4f, body);
+            //背光晕染（椭圆形软边，贴合枪体横向轮廓）
+            float glowW = gunTex.Width * GunScale * 0.55f;
+            float glowH = gunTex.Height * GunScale * 0.80f;
+            for (int gi = 3; gi >= 1; gi--) {
+                float scaleAdd = gi * 0.12f;
+                sb.Draw(px,
+                    new Rectangle(
+                        (int)(drawPos.X - glowW * 0.5f - glowW * scaleAdd * 0.5f),
+                        (int)(drawPos.Y - glowH * 0.5f - glowH * scaleAdd * 0.5f),
+                        (int)(glowW * (1f + scaleAdd)),
+                        (int)(glowH * (1f + scaleAdd))),
+                    new Rectangle(0, 0, 1, 1),
+                    SHPCTheme.Cyan * (0.04f * (4 - gi) * pulse * a));
+            }
 
-            //枪口端盖（高亮色）
-            SHPCRenderer.DrawLine(sb, px,
-                new Vector2(gun.X + 33f, gun.Y - 5f),
-                new Vector2(gun.X + 33f, gun.Y + 5f),
-                2.0f, SHPCTheme.CyanHi * (pulse * a));
-
-            //枪管内腔能量光柱
-            SHPCRenderer.DrawLine(sb, px,
-                new Vector2(gun.X + 12f, gun.Y),
-                new Vector2(gun.X + 32f, gun.Y),
-                2.8f, SHPCTheme.CyanHi * (0.30f * pulse * a));
-
-            //瞄准镜座
-            Rectangle scope = new((int)(gun.X - 10f), (int)(gun.Y - 14f), 20, 7);
-            SHPCRenderer.DrawFilledRect(sb, px, scope, new Color(4, 20, 32) * (0.7f * a));
-            SHPCRenderer.DrawRectStroke(sb, px, scope, 1.2f, detail);
-
-            //弹匣
-            Rectangle mag = new((int)(gun.X - 5f), (int)(gun.Y + 7f), 8, 13);
-            SHPCRenderer.DrawFilledRect(sb, px, mag, new Color(4, 20, 32) * (0.65f * a));
-            SHPCRenderer.DrawRectStroke(sb, px, mag, 1.2f, detail);
-
-            //枪托后弧线
-            SHPCRenderer.DrawLine(sb, px,
-                new Vector2(gun.X - 18f, gun.Y - 4f),
-                new Vector2(gun.X - 30f, gun.Y - 2f),
-                1.4f, body);
-            SHPCRenderer.DrawLine(sb, px,
-                new Vector2(gun.X - 18f, gun.Y + 3f),
-                new Vector2(gun.X - 30f, gun.Y + 1f),
-                1.4f, body);
-            SHPCRenderer.DrawLine(sb, px,
-                new Vector2(gun.X - 30f, gun.Y - 2f),
-                new Vector2(gun.X - 30f, gun.Y + 1f),
-                1.4f, body);
+            //枪体纹理本体，以纹理中心为原点绘制，带半透明调色强化科技感
+            Color tint = Color.Lerp(Color.White, SHPCTheme.CyanHi, 0.15f * pulse) * a;
+            sb.Draw(gunTex, drawPos, null, tint,
+                0f, gunTex.Size() * 0.5f, GunScale, SpriteEffects.None, 0f);
         }
     }
 }
