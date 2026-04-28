@@ -1,6 +1,4 @@
-using CalamityOverhaul.Common;
 using CalamityOverhaul.Content.ADV.EntrustManager;
-using CalamityOverhaul.Content.LegendWeapon.MurasamaLegend.TrialQuests;
 using Terraria;
 using Terraria.ID;
 using Terraria.Localization;
@@ -21,6 +19,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.TrialQuests
         public static LocalizedText TrackerWaiting { get; private set; }
         public static LocalizedText TrackerFighting { get; private set; }
         public static LocalizedText[] TrialTitles { get; private set; }
+        public static LocalizedText[] TrialSummaries { get; private set; }
 
         #endregion
 
@@ -53,6 +52,30 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.TrialQuests
             for (int i = 0; i < TRIAL_COUNT; i++) {
                 int idx = i;
                 TrialTitles[i] = this.GetLocalization($"Trial_{i}", () => defaultTitles[idx]);
+            }
+
+            TrialSummaries = new LocalizedText[TRIAL_COUNT];
+            string[] defaultSummaries = [
+                "朋友，复兴文明的任务终于落在了我两手上...第一个目标是一坨蓝色的凝胶聚合物，把它从内部轰开",
+                "我们需要干掉那只大眼球，我需要解剖它，看看它是如何实现反重力的",
+                "无论那是盘踞腐土的巨虫，还是支配血肉的大脑，去切下它们的核心",
+                "凝胶居然衍生出了神？让我们对它来一次彻底的提纯分离，看看它还能剩下什么",
+                "一道横亘在地狱的血肉长墙，我们需要用足够的火力轰穿这道有机屏障",
+                "强大的机械入侵者在夜晚降临，用我们的力量终结这些机械的疯狂",
+                "已经开了个好头，坚持下去，把所有的机械Boss都消灭干净",
+                "丛林地下有几朵妖艳的大花苞已经盛开，那个女巫的克隆体也在游荡",
+                "神庙深处的远古机器人等待着一次充能启动，顺带逆向出远古科技",
+                "地牢门口那群狂热的信徒正在举行某种古老的仪式，打断他们",
+                "月亮背面的秘密将被我们知晓，世界将回到原来的样子",
+                "寄生在地核中的神明注意到了我们，地牢的怨灵也聚集了起来",
+                "可以确定它不是碳基生命，它吞噬神明，但我们不是神",
+                "世界上仅存的龙裔，哇这太酷了！带我去看看，我要得到它的羽毛",
+                "是时候拜访我的造物主了，或者那个女巫",
+                "大混战！曾经被我们击败过的敌人联合了起来，准备向我们发起总攻",
+            ];
+            for (int i = 0; i < TRIAL_COUNT; i++) {
+                int idx = i;
+                TrialSummaries[i] = this.GetLocalization($"TrialSummary_{i}", () => defaultSummaries[idx]);
             }
         }
 
@@ -143,12 +166,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.TrialQuests
         }
 
         private SHPCTrialQuestEntry CreateTrialEntry(int trialIndex) {
-            var summaryText = CWRLocText.GetText($"SHPC_TextDictionary_Content_{trialIndex}");
             return new SHPCTrialQuestEntry(KEY_PREFIX + trialIndex,
-                TrialTitles[trialIndex], summaryText, QuestCategory) {
+                TrialTitles[trialIndex], TrialSummaries[trialIndex], QuestCategory) {
                 Priority = TRIAL_COUNT - trialIndex,
-                EntryStyle = new PhantomEntryStyle(),
-                TrackerStyle = new PhantomTrackerWidgetStyle(),
+                EntryStyle = new SHPCEntryStyle(),
+                TrackerStyle = new SHPCTrackerWidgetStyle(),
                 TargetNpcTypes = trialTargetNpcs[trialIndex],
                 WaitingHint = TrackerWaiting,
                 FightingFormat = TrackerFighting,
