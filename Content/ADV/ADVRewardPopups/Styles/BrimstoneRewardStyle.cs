@@ -15,6 +15,9 @@ namespace CalamityOverhaul.Content.ADV.ADVRewardPopups.Styles
         private float emberGlowTimer = 0f;
         private float heatWavePhase = 0f;
         private float infernoPulse = 0f;
+        //着色器专用单调递增时间
+        private float shaderTime = 0f;
+        private const int ShaderEdgePad = 14;
         private readonly List<EmberPRT> embers = new();
         private int emberSpawnTimer = 0;
         private readonly List<AshPRT> ashes = new();
@@ -28,13 +31,33 @@ namespace CalamityOverhaul.Content.ADV.ADVRewardPopups.Styles
             emberGlowTimer += 0.038f;
             heatWavePhase += 0.025f;
             infernoPulse += 0.012f;
+            shaderTime += 0.016f;
             if (flameTimer > MathHelper.TwoPi) flameTimer -= MathHelper.TwoPi;
             if (emberGlowTimer > MathHelper.TwoPi) emberGlowTimer -= MathHelper.TwoPi;
             if (heatWavePhase > MathHelper.TwoPi) heatWavePhase -= MathHelper.TwoPi;
             if (infernoPulse > MathHelper.TwoPi) infernoPulse -= MathHelper.TwoPi;
+            if (shaderTime > 10000f) shaderTime -= 10000f;
         }
 
         public void DrawPanel(SpriteBatch spriteBatch, Rectangle rect, float alpha, float hoverGlow) {
+            if (BrimstoneShaderPanel.Available) {
+                //hoverGlow转为轻微热调变亮,避免过曝
+                float bright = MathHelper.Clamp(0.95f + hoverGlow * 0.30f, 0.0f, 1.4f);
+                Color tint = new Color(
+                    (byte)Math.Min(255, (int)(255 * bright)),
+                    (byte)Math.Min(255, (int)(238 * bright)),
+                    (byte)Math.Min(255, (int)(220 * bright)),
+                    (byte)255);
+                float pulse01 = (float)Math.Sin(infernoPulse * 1.8f) * 0.5f + 0.5f;
+                BrimstoneShaderPanel.Draw(spriteBatch, rect, alpha * 0.97f, pulse01, shaderTime, ShaderEdgePad, tint);
+                return;
+            }
+
+            DrawFallbackPanel(spriteBatch, rect, alpha, hoverGlow);
+        }
+
+        //降级面板:无shader环境使用原CPU堆叠绘制
+        private void DrawFallbackPanel(SpriteBatch spriteBatch, Rectangle rect, float alpha, float hoverGlow) {
             Texture2D px = VaultAsset.placeholder2.Value;
 
             //渐变背景 - 硫磺火深红色
@@ -116,6 +139,7 @@ namespace CalamityOverhaul.Content.ADV.ADVRewardPopups.Styles
             emberGlowTimer = 0f;
             heatWavePhase = 0f;
             infernoPulse = 0f;
+            shaderTime = 0f;
             embers.Clear();
             ashes.Clear();
             flameWisps.Clear();
