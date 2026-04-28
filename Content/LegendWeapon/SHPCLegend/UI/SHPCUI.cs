@@ -116,9 +116,6 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                 if (QuestManagerUI.Instance?.IsOpen == true) {
                     return false;
                 }
-                if (Main.playerInventory || Main.inFancyUI) {
-                    return false;
-                }
                 return true;
             }
         }

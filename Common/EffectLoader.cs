@@ -36,6 +36,7 @@ namespace CalamityOverhaul.Common
         public static Asset<Effect> CyberspaceField { get; set; }
         public static Asset<Effect> CyberPanel { get; set; }
         public static Asset<Effect> CyberDomainPanel { get; set; }
+        public static Asset<Effect> SHPCModPanel { get; set; }
         public static Asset<Effect> HotwindPanel { get; set; }
         public static Asset<Effect> DraedonPanel { get; set; }
         public static Asset<Effect> ForestPanel { get; set; }

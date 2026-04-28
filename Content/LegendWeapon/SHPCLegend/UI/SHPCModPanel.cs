@@ -1,4 +1,5 @@
 ﻿using CalamityOverhaul;
+using CalamityOverhaul.Common;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Graphics;
 using System;
@@ -16,6 +17,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
     {
         public const float PanelW = 300f;
         public const float PanelH = 260f;
+        private const float EdgePad = 12f;
 
         private const int SlotCount = 6;
         private const float SlotW = 56f;
@@ -110,11 +112,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                 new Rectangle(rect.X + 3, rect.Y + 4, rect.Width, rect.Height),
                 new Color(0, 0, 0) * (0.55f * a));
 
-            //背景
-            SHPCRenderer.DrawFilledRect(sb, px, rect, new Color(4, 14, 22) * (0.96f * a));
-
-            //横向滚动扫描线
-            DrawScanLines(sb, px, rect, time, a);
+            //着色器背景（肩负背景填充、扫描线、中央光场、内边柔光）
+            DrawShaderBackground(sb, px, rect, gun, panelAlpha, globalAlpha);
 
             //外框与四角L形装饰
             SHPCRenderer.DrawRectStroke(sb, px, rect, 1.2f, SHPCTheme.Border * (0.9f * a));
@@ -154,15 +153,40 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             DrawGunTexture(sb, px, gun, time, a);
         }
 
-        private static void DrawScanLines(SpriteBatch sb, Texture2D px,
-            Rectangle rect, float time, float a) {
-            const int spacing = 18;
-            float scroll = (time * 10f) % spacing;
-            for (float y = rect.Y + scroll; y < rect.Bottom; y += spacing) {
-                SHPCRenderer.DrawLine(sb, px,
-                    new Vector2(rect.X + 1, y), new Vector2(rect.Right - 1, y),
-                    0.7f, new Color(20, 60, 80) * (0.28f * a));
+        private static void DrawShaderBackground(SpriteBatch sb, Texture2D px,
+            Rectangle rect, Vector2 gunCenter, float panelAlpha, float globalAlpha) {
+            float a = panelAlpha * globalAlpha;
+            //着色器未加载时降级为纯色背景
+            if (EffectLoader.SHPCModPanel?.Value == null) {
+                SHPCRenderer.DrawFilledRect(sb, px, rect, new Color(4, 14, 22) * (0.96f * a));
+                return;
             }
+
+            Effect effect = EffectLoader.SHPCModPanel.Value;
+            float time = (float)Main.GameUpdateCount / 60f;
+
+            //枪体光场中心转换为面板局部坐标
+            Vector2 gunRel = new(gunCenter.X - rect.X, gunCenter.Y - rect.Y);
+            float gunRadius = 60f;
+
+            effect.Parameters["uTime"]?.SetValue(time);
+            effect.Parameters["uAlpha"]?.SetValue(a * 0.97f);
+            effect.Parameters["uResolution"]?.SetValue(new Vector2(rect.Width, rect.Height));
+            effect.Parameters["uEdgePad"]?.SetValue(EdgePad);
+            effect.Parameters["uGunCenter"]?.SetValue(gunRel);
+            effect.Parameters["uGunRadius"]?.SetValue(gunRadius);
+
+            sb.End();
+            sb.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend,
+                SamplerState.AnisotropicClamp, DepthStencilState.None,
+                RasterizerState.CullNone, effect, Main.UIScaleMatrix);
+
+            sb.Draw(px, rect, Color.White);
+
+            sb.End();
+            sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                SamplerState.AnisotropicClamp, DepthStencilState.None,
+                RasterizerState.CullNone, null, Main.UIScaleMatrix);
         }
 
         private static void DrawDataLines(SpriteBatch sb, Texture2D px,
