@@ -652,4 +652,8 @@ SHPCUI: {
 	// Cyber_StateOnline: ONLINE
 	// Cyber_StateOffline: OFFLINE
 	// Cyber_Hint: "[{0}] Toggle domain / Click ring segment to switch layer"
+	// Modify_Title: MODIFY
+	// Modify_Subtitle: Gun Augmentation
+	// Modify_Description: Install modification parts into SHPC chassis
+	// Modify_SlotEmpty: EMPTY
 }

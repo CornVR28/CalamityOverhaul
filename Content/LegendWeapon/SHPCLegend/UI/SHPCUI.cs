@@ -45,6 +45,10 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
         public static LocalizedText Config_Title { get; private set; }
         public static LocalizedText Config_Subtitle { get; private set; }
         public static LocalizedText Config_Description { get; private set; }
+        public static LocalizedText Modify_Title { get; private set; }
+        public static LocalizedText Modify_Subtitle { get; private set; }
+        public static LocalizedText Modify_Description { get; private set; }
+        public static LocalizedText Modify_SlotEmpty { get; private set; }
         public static LocalizedText State_On { get; private set; }
         public static LocalizedText State_Off { get; private set; }
         public static LocalizedText State_Layer { get; private set; }
@@ -73,6 +77,10 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             Config_Title = this.GetLocalization(nameof(Config_Title), () => "CONFIG");
             Config_Subtitle = this.GetLocalization(nameof(Config_Subtitle), () => "System Settings");
             Config_Description = this.GetLocalization(nameof(Config_Description), () => "Adjust assist options and display parameters");
+            Modify_Title = this.GetLocalization(nameof(Modify_Title), () => "MODIFY");
+            Modify_Subtitle = this.GetLocalization(nameof(Modify_Subtitle), () => "Gun Augmentation");
+            Modify_Description = this.GetLocalization(nameof(Modify_Description), () => "Install modification parts into SHPC chassis");
+            Modify_SlotEmpty = this.GetLocalization(nameof(Modify_SlotEmpty), () => "EMPTY");
             State_On = this.GetLocalization(nameof(State_On), () => "ON");
             State_Off = this.GetLocalization(nameof(State_Off), () => "OFF");
             State_Layer = this.GetLocalization(nameof(State_Layer), () => "L");
@@ -148,6 +156,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
         private float pinnedPanelProgress;
         //缓存上一帧赛博面板悬停的子控件
         private SHPCCyberPanel.HitKind cyberHover;
+        //缓存上一帧改造面板悬停的插槽
+        private SHPCModPanel.HitKind modHover;
 
         //全局时间，单位秒
         private float time;
@@ -199,14 +209,15 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                     OnClick = () => CyberwareUI.Instance?.Toggle(),
                 },
                 new SHPCButtonDef {
-                    Title = () => Status_Title.Value,
-                    Subtitle = () => Status_Subtitle.Value,
-                    Description = () => Status_Description.Value,
-                    Glyph = "I",
+                    Title = () => Modify_Title.Value,
+                    Subtitle = () => Modify_Subtitle.Value,
+                    Description = () => Modify_Description.Value,
+                    Glyph = "M",
                     Enabled = () => true,
-                    StatusValue = () => 0f,
-                    StatusText = () => Status_OK.Value,
+                    StatusValue = () => -1f,
+                    StatusText = () => "0/6",
                     OnClick = null,
+                    UsesFixedPanel = true,
                 },
                 new SHPCButtonDef {
                     Title = () => Config_Title.Value,
@@ -277,10 +288,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             //中线使用水平向右，面板只会沿水平方向滑入
             midA = 0f;
             Vector2 corePos = GetCorePosition();
-            //X：贴在扇形外环右侧，Y：让面板底部基本贴齐核心高度，整体落在扇形右上区域
+            //不同面板高度不同，用各自的高度计算纵向偏移保证底部对齐核心
+            float panelH = idx == 2 ? SHPCModPanel.PanelH : SHPCCyberPanel.PanelH;
             anchor = new Vector2(
                 corePos.X + SHPCTheme.ButtonOuterR + 2f,
-                corePos.Y - SHPCCyberPanel.PanelH * 0.5f + 6f);
+                corePos.Y - panelH * 0.5f + 6f);
         }
 
         #endregion
@@ -333,14 +345,23 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                 pinnedPanelProgress = 0f;
             }
             cyberHover = SHPCCyberPanel.HitKind.None;
+            modHover = SHPCModPanel.HitKind.None;
             SHPCCyberPanel.Layout cyberLayout = default;
+            SHPCModPanel.Layout modLayout = default;
             bool cyberPanelHit = false;
             if (pinnedSector >= 0 && pinnedSector < buttons.Count
                 && buttons[pinnedSector].UsesFixedPanel && pinnedPanelProgress > 0.4f) {
                 GetFixedPanelAnchor(pinnedSector, out Vector2 panelAnchor, out float panelMidA);
-                cyberLayout = SHPCCyberPanel.Compute(panelAnchor, panelMidA, pinnedPanelProgress);
-                cyberHover = SHPCCyberPanel.HitTest(cyberLayout, MousePosition);
-                cyberPanelHit = cyberLayout.Panel.Contains((int)MousePosition.X, (int)MousePosition.Y);
+                if (pinnedSector == 0) {
+                    cyberLayout = SHPCCyberPanel.Compute(panelAnchor, panelMidA, pinnedPanelProgress);
+                    cyberHover = SHPCCyberPanel.HitTest(cyberLayout, MousePosition);
+                    cyberPanelHit = cyberLayout.Panel.Contains((int)MousePosition.X, (int)MousePosition.Y);
+                }
+                else if (pinnedSector == 2) {
+                    modLayout = SHPCModPanel.Compute(panelAnchor, panelMidA, pinnedPanelProgress);
+                    modHover = SHPCModPanel.HitTest(modLayout, MousePosition);
+                    cyberPanelHit = modLayout.Panel.Contains((int)MousePosition.X, (int)MousePosition.Y);
+                }
             }
 
             //信息面板逻辑：仅在光标悬停按钮时显示（tooltip语义），锁定面板期间隐藏以免重叠
@@ -377,6 +398,10 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             if (keyLeftPressState == KeyPressState.Pressed) {
                 if (cyberHover != SHPCCyberPanel.HitKind.None) {
                     SHPCCyberPanel.HandleClick(cyberHover, player);
+                    SoundEngine.PlaySound(SoundID.MenuTick);
+                }
+                else if (modHover != SHPCModPanel.HitKind.None) {
+                    SHPCModPanel.HandleClick(modHover, player);
                     SoundEngine.PlaySound(SoundID.MenuTick);
                 }
                 else if (isCore) {
@@ -478,11 +503,17 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                     def.StatusText?.Invoke());
             }
 
-            //固定二级面板（赛博领域）
+            //固定二级面板
             if (pinnedSector >= 0 && pinnedSector < buttons.Count && pinnedPanelProgress > 0.02f) {
                 GetFixedPanelAnchor(pinnedSector, out Vector2 fAnchor, out float fMidA);
-                SHPCCyberPanel.Layout layout = SHPCCyberPanel.Compute(fAnchor, fMidA, pinnedPanelProgress);
-                SHPCCyberPanel.Draw(sb, px, layout, pinnedPanelProgress, globalAlpha, cyberHover);
+                if (pinnedSector == 0) {
+                    SHPCCyberPanel.Layout layout = SHPCCyberPanel.Compute(fAnchor, fMidA, pinnedPanelProgress);
+                    SHPCCyberPanel.Draw(sb, px, layout, pinnedPanelProgress, globalAlpha, cyberHover);
+                }
+                else if (pinnedSector == 2) {
+                    SHPCModPanel.Layout layout = SHPCModPanel.Compute(fAnchor, fMidA, pinnedPanelProgress);
+                    SHPCModPanel.Draw(sb, px, layout, pinnedPanelProgress, globalAlpha, modHover);
+                }
             }
         }
 

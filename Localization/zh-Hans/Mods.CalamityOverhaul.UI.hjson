@@ -652,4 +652,8 @@ SHPCUI: {
 	Cyber_StateOnline: 在线
 	Cyber_StateOffline: 离线
 	Cyber_Hint: "[{0}] 切换领域 / 点击环段切换层级"
+	// Modify_Title: MODIFY
+	// Modify_Subtitle: Gun Augmentation
+	// Modify_Description: Install modification parts into SHPC chassis
+	// Modify_SlotEmpty: EMPTY
 }
