@@ -45,7 +45,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel
             //对话 + 选择
             AddWithChoices(RolenameSHPC.Value, Line1.Value, [
                 new Choice(Choice1Text.Value, Choice1),
-                new Choice(Choice2Text.Value, Choice2),
+                new Choice(Choice2Text.Value, Choice2, enabled: false, disabledHint: string.Empty),
             ], choiceBoxStyle: ADVChoiceBox.ChoiceBoxStyle.SHPC);
         }
 
