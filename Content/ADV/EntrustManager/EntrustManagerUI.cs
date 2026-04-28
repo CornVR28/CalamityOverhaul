@@ -34,6 +34,11 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
             }
         }
 
+        public override void OnWorldUnload() {
+            //换存档时清空委托列表，防止玩家A的委托残留到玩家B
+            QuestManagerUI.Instance?.ClearAll();
+        }
+
         public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers) {
             var ui = QuestManagerUI.Instance;
             if (ui == null || !ui.IsOpen) return;
