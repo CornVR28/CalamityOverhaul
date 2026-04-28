@@ -118,6 +118,13 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen
                       | ScenarioBlockers.Cutscene,
         };
 
+        protected override void OnScenarioComplete() {
+            if (Main.LocalPlayer.TryGetADVSave(out var save)) {
+                save.Get<HalibutADVData>().FirstMet = true;
+                save.Get<HalibutADVData>().PostFirstMetIsComplete = true;
+            }
+        }
+
         public override void PreProcessSegment(DialoguePreProcessArgs args) {
             if (args.Index == 5) {
                 ADVRewardPopup.ShowReward(ItemID.Bass, 1, "", appearDuration: 24, holdDuration: -1, giveDuration: 16, requireClick: true,

@@ -117,6 +117,10 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend.TrialQuests
                 return;//未获得比目鱼前不显示任何试炼
             }
 
+            if (!save.Get<HalibutADVData>().PostFirstMetIsComplete) {
+                return;//未获得比目鱼前不显示任何试炼
+            }
+
             var manager = QuestManagerUI.Instance;
             if (manager == null) return;
 

@@ -7,6 +7,7 @@
     {
         public bool HasCaughtHalibut;
         public bool FirstMet;
+        public bool PostFirstMetIsComplete;
         public bool DyeProtest;
         public bool FishoilQuestDeclined;
         public bool FishoilQuestAccepted;

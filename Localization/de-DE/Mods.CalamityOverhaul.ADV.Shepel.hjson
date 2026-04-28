@@ -187,3 +187,11 @@ ShepelYharonDialogue: {
 	// Line1: Yharim最后的守护者，亚伦龙，已经倒下了。我感应到某种远距离的连接正在断裂。
 	// Line2: 无论那位传说中的暴君此刻身在何处，他也应该知晓了。主人，请做好最后的准备。
 }
+
+CybCourseIntroDialogue: {
+	// SpeakerName: SHPC
+	// Line1: 欢迎进入神经训练节点。
+	// Line2: 这里是超梦训练场景，为您准备的沉浸式教学空间。
+	// Line3: SHPC是一种高度定制化的神经直连武器，能与赛博空间产生共振。接下来你将学习如何操作它的HUD界面。
+	// Line4: 准备好了吗？跟我来。
+}
