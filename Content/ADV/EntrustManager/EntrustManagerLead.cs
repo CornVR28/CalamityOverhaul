@@ -2,6 +2,7 @@
 using InnoVault;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System;
 using System.Collections.Generic;
 using Terraria;
 using Terraria.GameContent;
@@ -22,15 +23,19 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
 
         private static LeadPhase currentPhase = LeadPhase.Inactive;
         private static float animProgress = 0f;
-
-        //阶段1卡片尺寸
-        private const int CardW1 = 310;
-        private const int CardH1 = 76;
-        //阶段2卡片尺寸
-        private const int CardW2 = 300;
-        private const int CardH2 = 100;
+        private static float shaderTimer = 0f;
 
         private const float AnimSpeed = 0.12f;
+        //着色器边框扩展量（与ForestPanel保持一致）
+        private const int EdgePad = 8;
+
+        //阶段1卡片固定宽度，高度根据是否绑定按键动态决定
+        private const int CardW1 = 320;
+        private const int CardH1_Bound   = 62;
+        private const int CardH1_Unbound = 104;
+        //阶段2卡片尺寸
+        private const int CardW2 = 318;
+        private const int CardH2 = 146;
 
         public override void OnWorldUnload() {
             currentPhase = LeadPhase.Inactive;
@@ -43,9 +48,11 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
             var ui = QuestManagerUI.Instance;
             if (ui == null) return;
 
+            shaderTimer += 0.004f;
+            if (shaderTimer > 100f) shaderTimer -= 100f;
+
             switch (currentPhase) {
                 case LeadPhase.Inactive:
-                    //检测是否有委托且玩家从未见过引导
                     if (ui.HasAnyEntry && Main.LocalPlayer.TryGetADVSave(out var save)
                         && !save.Get<EntrustGuideModule>().GuideSeen) {
                         currentPhase = LeadPhase.KeyPrompt;
@@ -55,7 +62,6 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
 
                 case LeadPhase.KeyPrompt:
                     animProgress = MathHelper.Lerp(animProgress, 1f, AnimSpeed);
-                    //检测玩家打开了委托面板则进入第二阶段
                     if (ui.IsOpen) {
                         currentPhase = LeadPhase.PanelIntro;
                         animProgress = 0f;
@@ -74,180 +80,234 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
         public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers) {
             if (currentPhase != LeadPhase.KeyPrompt && currentPhase != LeadPhase.PanelIntro) return;
 
-            int mouseTextIndex = layers.FindIndex(l => l.Name == "Vanilla: Mouse Text");
-            if (mouseTextIndex == -1) return;
+            int idx = layers.FindIndex(l => l.Name == "Vanilla: Mouse Text");
+            if (idx == -1) return;
 
-            layers.Insert(mouseTextIndex, new LegacyGameInterfaceLayer(
+            layers.Insert(idx, new LegacyGameInterfaceLayer(
                 "CWRMod: Entrust Guide Lead",
                 delegate {
                     var sb = Main.spriteBatch;
-                    if (currentPhase == LeadPhase.KeyPrompt) {
+                    if (currentPhase == LeadPhase.KeyPrompt)
                         DrawKeyPromptCard(sb);
-                    }
-                    else if (currentPhase == LeadPhase.PanelIntro) {
+                    else if (currentPhase == LeadPhase.PanelIntro)
                         DrawPanelIntroCard(sb);
-                    }
                     return true;
                 },
                 InterfaceScaleType.UI
             ));
         }
 
-        /// <summary>标记引导完成并保存</summary>
         private static void MarkGuideSeen() {
-            if (Main.LocalPlayer.TryGetADVSave(out var save)) {
+            if (Main.LocalPlayer.TryGetADVSave(out var save))
                 save.Get<EntrustGuideModule>().GuideSeen = true;
-            }
             currentPhase = LeadPhase.Complete;
         }
 
-        /// <summary>获取 QuestManager_Key 当前绑定的键名，未绑定时返回 null</summary>
         private static string GetBoundKeyName() {
             if (CWRKeySystem.QuestManager_Key == null) return null;
             var keys = CWRKeySystem.QuestManager_Key.GetAssignedKeys();
             return keys.Count > 0 ? keys[0] : null;
         }
 
-        //阶段1：左下角按键提示卡
+        // ─── 阶段1：左下角按键提示卡 ───────────────────────────────────────────
+
         private static void DrawKeyPromptCard(SpriteBatch sb) {
-            int screenW = Main.screenWidth;
-            int screenH = Main.screenHeight;
-            var font = FontAssets.MouseText.Value;
-
-            float slideOffset = (1f - animProgress) * 60f;
-            float x = 20f;
-            float y = screenH - CardH1 - 20f + slideOffset;
-            float alpha = animProgress;
-
-            var bg = new Rectangle((int)x, (int)y, CardW1, CardH1);
-            FillRect(sb, bg, new Color(0, 0, 0, (int)(200 * alpha)));
-            //细边框
-            StrokeRect(sb, bg, 1, new Color(180, 180, 180, (int)(120 * alpha)));
-
             string boundKey = GetBoundKeyName();
-            bool hasBinding = boundKey != null;
-            string displayKey = hasBinding ? boundKey : "K";
+            bool hasBind = boundKey != null;
+            string displayKey = hasBind ? boundKey : "K";
+            int cardH = hasBind ? CardH1_Bound : CardH1_Unbound;
 
-            string mainLine = $"按 [{displayKey}] 打开委托面板";
-            string subLine = hasBinding ? null : "（未绑定，当前使用默认键，可在 设置→控制 中绑定自定义键）";
+            float slideY = (1f - animProgress) * 65f;
+            float x = 20f;
+            float y = Main.screenHeight - cardH - 20f + slideY;
+            float alpha = animProgress;
+            var card = new Rectangle((int)x, (int)y, CardW1, cardH);
 
-            float mainScale = 0.85f;
-            float subScale = 0.63f;
-            var mainColor = new Color(255, 255, 255, (int)(255 * alpha));
-            var subColor = new Color(200, 200, 200, (int)(200 * alpha));
+            DrawCardBackground(sb, card, 0f, alpha);
 
-            float paddingX = 12f;
-            float paddingY = 12f;
-            Utils.DrawBorderString(sb, mainLine, new Vector2(x + paddingX, y + paddingY), mainColor, mainScale);
-            if (subLine != null) {
-                float mainH = font.MeasureString(mainLine).Y * mainScale;
-                Utils.DrawBorderString(sb, subLine,
-                    new Vector2(x + paddingX, y + paddingY + mainH + 2f), subColor, subScale);
+            var font = FontAssets.MouseText.Value;
+            float px = x + 14f, py = y + 11f;
+
+            if (hasBind) {
+                //单行：已绑定
+                string line = $"按 [{displayKey}] 打开委托面板";
+                Utils.DrawBorderString(sb, line, new Vector2(px, py),
+                    new Color(255, 255, 230, (int)(255 * alpha)), 0.85f);
+            }
+            else {
+                float warnScale = 0.82f;
+                float subScale1 = 0.73f;
+                float subScale2 = 0.63f;
+                float lineH_w = font.MeasureString("A").Y * warnScale + 2f;
+                float lineH_1 = font.MeasureString("A").Y * subScale1 + 2f;
+
+                //警告标题（琥珀色脉动，提升醒目度）
+                float blink = 0.84f + MathF.Sin(shaderTimer * 52f) * 0.16f;
+                var warnColor = new Color(
+                    (int)(255 * blink),
+                    (int)(175 * blink),
+                    (int)(25 * blink),
+                    (int)(255 * alpha));
+                Utils.DrawBorderString(sb, "⚠  委托快捷键尚未绑定！",
+                    new Vector2(px, py), warnColor, warnScale);
+
+                py += lineH_w + 2f;
+
+                //可用按键提示（白色主行）
+                string keyLine = $"当前按 [{displayKey}]（默认键）可打开委托面板";
+                Utils.DrawBorderString(sb, keyLine, new Vector2(px, py),
+                    new Color(235, 225, 200, (int)(245 * alpha)), subScale1);
+
+                py += lineH_1 + 1f;
+
+                //设置引导（暗淡提示色）
+                Utils.DrawBorderString(sb, "建议前往  设置 → 控制  中绑定自定义按键",
+                    new Vector2(px, py),
+                    new Color(165, 155, 115, (int)(195 * alpha)), subScale2);
             }
 
-            //关闭按钮
-            if (DrawCloseButton(sb, bg, alpha)) {
+            if (DrawCloseButton(sb, card, alpha))
                 MarkGuideSeen();
-            }
         }
 
-        //阶段2：委托面板右侧说明卡
+        // ─── 阶段2：面板右侧说明卡 ─────────────────────────────────────────────
+
         private static void DrawPanelIntroCard(SpriteBatch sb) {
             var ui = QuestManagerUI.Instance;
             if (ui == null) return;
 
-            int screenH = Main.screenHeight;
+            float slideX = (1f - animProgress) * 80f;
+            float x = ui.PanelRightEdge + 15f - slideX;
+            float y = (Main.screenHeight - CardH2) * 0.5f;
             float alpha = animProgress;
+            var card = new Rectangle((int)x, (int)y, CardW2, CardH2);
 
-            float slideOffset = (1f - animProgress) * 80f;
-            float x = ui.PanelRightEdge + 15f - slideOffset;
-            float y = (screenH - CardH2) / 2f;
+            DrawCardBackground(sb, card, 1f, alpha);
 
-            var bg = new Rectangle((int)x, (int)y, CardW2, CardH2);
-            FillRect(sb, bg, new Color(0, 0, 0, (int)(200 * alpha)));
-            StrokeRect(sb, bg, 1, new Color(180, 180, 180, (int)(120 * alpha)));
-
-            //左侧三角箭头指向面板
-            DrawLeftArrow(sb, new Vector2(x - 6f, y + CardH2 / 2f), alpha);
+            //左侧三角箭头
+            DrawLeftArrow(sb, new Vector2(x - 8f, y + CardH2 * 0.5f), alpha);
 
             var font = FontAssets.MouseText.Value;
-            float scale = 0.73f;
-            float subScale = 0.63f;
-            float px = x + 12f;
-            float py = y + 10f;
-            float lineH = font.MeasureString("A").Y * scale + 4f;
+            float titleScale = 0.80f;
+            float bodyScale  = 0.68f;
+            float subScale   = 0.62f;
+            float px = x + 14f, py = y + 11f;
+            float lineH_t = font.MeasureString("A").Y * titleScale + 2f;
+            float lineH_b = font.MeasureString("A").Y * bodyScale  + 2f;
+            float lineH_s = font.MeasureString("A").Y * subScale   + 2f;
 
-            var titleColor = new Color(230, 230, 100, (int)(255 * alpha));
-            var bodyColor = new Color(220, 220, 220, (int)(230 * alpha));
-            var subColor = new Color(170, 200, 170, (int)(200 * alpha));
+            //标题
+            Utils.DrawBorderString(sb, "委托操作说明",
+                new Vector2(px, py),
+                new Color(230, 225, 100, (int)(255 * alpha)), titleScale);
+            py += lineH_t + 2f;
 
-            Utils.DrawBorderString(sb, "委托操作提示", new Vector2(px, py), titleColor, scale);
-            py += lineH + 2f;
-            Utils.DrawBorderString(sb, "右键单击条目 → 关注委托（在屏幕左侧追踪进度）", new Vector2(px, py), bodyColor, subScale);
-            py += font.MeasureString("A").Y * subScale + 2f;
-            Utils.DrawBorderString(sb, "中键单击条目 → 挂起委托（暂时隐藏该委托）", new Vector2(px, py), subColor, subScale);
+            //分割线
+            BaseManagerStyle.FillRect(sb,
+                new Rectangle((int)px, (int)py, CardW2 - 28, 1),
+                new Color(130, 125, 70, (int)(130 * alpha)));
+            py += 6f;
 
-            //明白了按钮
-            if (DrawConfirmButton(sb, bg, alpha)) {
+            //关注说明
+            float rightKeyW = font.MeasureString("右键单击委托条目").X * bodyScale;
+            Utils.DrawBorderString(sb, "右键单击委托条目",
+                new Vector2(px, py),
+                new Color(95, 210, 255, (int)(240 * alpha)), bodyScale);
+            Utils.DrawBorderString(sb, " →  关注委托",
+                new Vector2(px + rightKeyW, py),
+                new Color(200, 240, 255, (int)(240 * alpha)), bodyScale);
+            py += lineH_b;
+            Utils.DrawBorderString(sb, "     左侧追踪窗口将持续显示任务进度",
+                new Vector2(px, py),
+                new Color(130, 165, 175, (int)(200 * alpha)), subScale);
+            py += lineH_s + 6f;
+
+            //挂起说明
+            float midKeyW = font.MeasureString("中键单击委托条目").X * bodyScale;
+            Utils.DrawBorderString(sb, "中键单击委托条目",
+                new Vector2(px, py),
+                new Color(130, 220, 145, (int)(240 * alpha)), bodyScale);
+            Utils.DrawBorderString(sb, " →  挂起委托",
+                new Vector2(px + midKeyW, py),
+                new Color(195, 240, 195, (int)(240 * alpha)), bodyScale);
+            py += lineH_b;
+            Utils.DrawBorderString(sb, "     暂时隐藏该委托，不在追踪窗口中显示",
+                new Vector2(px, py),
+                new Color(120, 155, 120, (int)(200 * alpha)), subScale);
+
+            if (DrawConfirmButton(sb, card, alpha))
                 MarkGuideSeen();
+        }
+
+        // ─── 着色器背景（含降级回退） ────────────────────────────────────────────
+
+        private static void DrawCardBackground(SpriteBatch sb, Rectangle card, float variant, float alpha) {
+            Effect effect = EffectLoader.EntrustGuideCard?.Value;
+            if (effect != null) {
+                Rectangle ext = card;
+                ext.Inflate(EdgePad, EdgePad);
+
+                effect.Parameters["uTime"]?.SetValue(shaderTimer);
+                effect.Parameters["uAlpha"]?.SetValue(alpha * 0.96f);
+                effect.Parameters["uResolution"]?.SetValue(new Vector2(ext.Width, ext.Height));
+                effect.Parameters["uEdgePad"]?.SetValue((float)EdgePad);
+                effect.Parameters["uVariant"]?.SetValue(variant);
+
+                sb.End();
+                sb.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend,
+                    SamplerState.AnisotropicClamp, DepthStencilState.None,
+                    RasterizerState.CullNone, effect, Main.UIScaleMatrix);
+                sb.Draw(VaultAsset.placeholder2.Value, ext, Color.White);
+                sb.End();
+                sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                    SamplerState.AnisotropicClamp, DepthStencilState.None,
+                    RasterizerState.CullNone, null, Main.UIScaleMatrix);
+            }
+            else {
+                //降级：纯色背景 + 边框
+                BaseManagerStyle.FillRect(sb, card, new Color(0, 0, 0, (int)(200 * alpha)));
+                BaseManagerStyle.StrokeRect(sb, card, 1, new Color(160, 160, 160, (int)(120 * alpha)));
             }
         }
 
-        /// <summary>绘制右上角关闭按钮，返回 true 时表示本帧被点击</summary>
+        // ─── 辅助 UI 元素 ────────────────────────────────────────────────────────
+
         private static bool DrawCloseButton(SpriteBatch sb, Rectangle card, float alpha) {
-            const int size = 16;
-            const int margin = 6;
+            const int size = 16, margin = 6;
             var rect = new Rectangle(card.Right - size - margin, card.Top + margin, size, size);
             bool hovered = rect.Contains(Main.mouseX, Main.mouseY);
             var color = hovered
                 ? new Color(255, 100, 100, (int)(255 * alpha))
-                : new Color(200, 200, 200, (int)(180 * alpha));
-            Utils.DrawBorderString(sb, "×",
-                new Vector2(rect.X, rect.Y), color, 0.8f);
-            if (hovered) {
-                Main.LocalPlayer.mouseInterface = true;
-            }
+                : new Color(190, 190, 190, (int)(170 * alpha));
+            Utils.DrawBorderString(sb, "×", new Vector2(rect.X, rect.Y), color, 0.82f);
+            if (hovered) Main.LocalPlayer.mouseInterface = true;
             return hovered && Main.mouseLeft && !Main.mouseLeftRelease;
         }
 
-        /// <summary>绘制底部"明白了"确认按钮，返回 true 时表示本帧被点击</summary>
         private static bool DrawConfirmButton(SpriteBatch sb, Rectangle card, float alpha) {
-            const int btnW = 72;
-            const int btnH = 18;
-            const int margin = 8;
+            const int btnW = 78, btnH = 20, margin = 8;
             var rect = new Rectangle(card.Right - btnW - margin, card.Bottom - btnH - margin, btnW, btnH);
             bool hovered = rect.Contains(Main.mouseX, Main.mouseY);
-            FillRect(sb, rect, new Color(40, 80, 40, (int)((hovered ? 220 : 150) * alpha)));
-            StrokeRect(sb, rect, 1, new Color(130, 200, 130, (int)(160 * alpha)));
-            var textColor = new Color(200, 255, 200, (int)(255 * alpha));
-            Vector2 textSize = FontAssets.MouseText.Value.MeasureString("明白了") * 0.62f;
+            BaseManagerStyle.FillRect(sb, rect, new Color(22, 58, 22, (int)((hovered ? 215 : 140) * alpha)));
+            BaseManagerStyle.StrokeRect(sb, rect, 1, new Color(90, 185, 90, (int)(145 * alpha)));
+            var textColor = new Color(175, 240, 175, (int)(255 * alpha));
+            Vector2 ts = FontAssets.MouseText.Value.MeasureString("明白了") * 0.62f;
             Utils.DrawBorderString(sb, "明白了",
-                new Vector2(rect.X + (rect.Width - textSize.X) * 0.5f, rect.Y + (rect.Height - textSize.Y) * 0.5f),
+                new Vector2(rect.X + (rect.Width - ts.X) * 0.5f, rect.Y + (rect.Height - ts.Y) * 0.5f),
                 textColor, 0.62f);
-            if (hovered) {
-                Main.LocalPlayer.mouseInterface = true;
-            }
+            if (hovered) Main.LocalPlayer.mouseInterface = true;
             return hovered && Main.mouseLeft && !Main.mouseLeftRelease;
         }
 
-        /// <summary>绘制指向左边的三角箭头</summary>
         private static void DrawLeftArrow(SpriteBatch sb, Vector2 tip, float alpha) {
             var px = VaultAsset.placeholder2.Value;
-            var color = new Color(180, 180, 180, (int)(140 * alpha));
-            //用三个细矩形近似三角形
-            for (int i = 0; i < 5; i++) {
-                int halfH = 5 - i;
+            var color = new Color(100, 200, 225, (int)(160 * alpha));
+            for (int i = 0; i < 7; i++) {
+                int halfH = 7 - i;
                 sb.Draw(px, new Rectangle((int)tip.X + i, (int)tip.Y - halfH, 1, halfH * 2), color);
             }
         }
-
-        private static void FillRect(SpriteBatch sb, Rectangle rect, Color color) {
-            BaseManagerStyle.FillRect(sb, rect, color);
-        }
-
-        private static void StrokeRect(SpriteBatch sb, Rectangle rect, int bw, Color color) {
-            BaseManagerStyle.StrokeRect(sb, rect, bw, color);
-        }
     }
 }
+
 
