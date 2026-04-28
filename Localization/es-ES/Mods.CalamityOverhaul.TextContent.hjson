@@ -178,6 +178,17 @@ CWRLocText: {
 		'''
 	SHPC_TextDictionary_Content_5:
 		'''
+		Poderosos invasores mecánicos descienden en la noche—reliquias de una civilización olvidada.
+		El Destructor, los Gemelos, el Esqueletron Prime—debemos demostrar nuestra valía contra estos gigantes de acero.
+		Las criaturas de Calamity también se agitan; Criógeno y el Tormento Acuático se interponen entre nosotros y el siguiente capítulo.
+		'''
+	SHPC_TextDictionary_Content_6:
+		'''
+		Buen progreso—algunas de estas máquinas de hierro ya son chatarra.
+		Sigue adelante, elimina a todos los jefes mecánicos restantes.
+		'''
+	SHPC_TextDictionary_Content_7:
+		'''
 		En las profundidades de la Selva, han florecido unos extraños bulbos.
 		Necesitamos investigar y recolectar datos experimentales.
 		El clon de esa bruja también deambula por ahí.
@@ -185,55 +196,55 @@ CWRLocText: {
 		es suficiente para probar el rendimiento de nuestras armas.
 		Destruye esa falsificación.
 		'''
-	SHPC_TextDictionary_Content_6:
+	SHPC_TextDictionary_Content_8:
 		'''
 		El antiguo robot en lo profundo del Templo espera una recarga para activarse.
 		Hagámosle una visita y, de paso,
 		hagamos ingeniería inversa a esa tecnología antigua.
 		'''
-	SHPC_TextDictionary_Content_7:
+	SHPC_TextDictionary_Content_9:
 		'''
 		Esos fanáticos en la entrada de la Mazmorra celebran un antiguo ritual,
 		intentando bloquear información del exterior.
 		Interrúmpelos. Sus hechizos supersticiosos no detendrán nuestra tecnología.
 		Necesito esas coordenadas estelares ocultas.
 		'''
-	SHPC_TextDictionary_Content_8:
+	SHPC_TextDictionary_Content_10:
 		'''
 		Los secretos del lado oscuro de la luna nos serán revelados.
 		El mundo volverá a su estado original.
 		'''
-	SHPC_TextDictionary_Content_9:
+	SHPC_TextDictionary_Content_11:
 		'''
 		El dios parásito en el núcleo del planeta nos ha notado.
 		Ve al Inframundo; necesito conocimientos sobre el uso de energía térmica.
 		Los espíritus de la Mazmorra se han reunido en un simbionte masivo.
 		Esto es demasiado interesante, debemos ir a verlo ahora mismo.
 		'''
-	SHPC_TextDictionary_Content_10:
+	SHPC_TextDictionary_Content_12:
 		'''
 		Se confirma que no es vida basada en carbono.
 		Puede rasgar la membrana espacial solo con su cuerpo.
 		Devora dioses, pero no somos dioses;
 		imagino que tal vez nos invite a tomar el té.
 		'''
-	SHPC_TextDictionary_Content_11:
+	SHPC_TextDictionary_Content_13:
 		'''
 		El último Sangre de Dragón del mundo. ¡Guau, esto es genial!
 		Llévame a verlo, quiero obtener sus plumas.
 		'''
-	SHPC_TextDictionary_Content_12:
+	SHPC_TextDictionary_Content_14:
 		'''
 		Es hora de visitar a mi creador.
 		O a esa bruja; su existencia me perturba.
 		'''
-	SHPC_TextDictionary_Content_13:
+	SHPC_TextDictionary_Content_15:
 		'''
 		¡Una gran contienda! Enemigos que una vez derrotamos se han unido,
 		preparándose para lanzar un asalto total contra nosotros.
 		Prepárate, necesitamos una victoria perfecta.
 		'''
-	SHPC_TextDictionary_Content_14: Protocolo HMOI-0001 Desbloqueado
+	SHPC_TextDictionary_Content_16: Protocolo HMOI-0001 Desbloqueado
 	Halibut_No_legend_Content_1: Desbloquear después de la caída del dragón
 	Halibut_No_legend_Content_2: Hermano, he estado aquí todo el tiempo
 	Halibut_No_legend_Content_3: "[c/fff08c:Me vuelvo más fuerte a medida que avanza el viaje]"

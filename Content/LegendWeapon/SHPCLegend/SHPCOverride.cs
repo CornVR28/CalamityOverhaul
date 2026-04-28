@@ -151,15 +151,17 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
                 {3, 28 },
                 {4, 35 },
                 {5, 117 },
-                {6, 150 },
-                {7, 200 },
-                {8, 280 },
-                {9, 540 },
-                {10, 700 },
-                {11, 1400 },
-                {12, 2000 },
-                {13, 3001 },
-                {14, 8888 }
+                {6, 130 },
+                {7, 150 },
+                {8, 175 },
+                {9, 200 },
+                {10, 280 },
+                {11, 540 },
+                {12, 700 },
+                {13, 1400 },
+                {14, 2000 },
+                {15, 3001 },
+                {16, 8888 }
             };
         }
 
@@ -274,9 +276,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
 
         public static void SetTooltip(Item item, ref List<TooltipLine> tooltips) {
             int index = SHPC_Level();
-            string newContent = index >= 0 && index <= 14 ? CWRLocText.GetTextValue($"SHPC_TextDictionary_Content_{index}") : "ERROR";
+            string newContent = index >= 0 && index <= 16 ? CWRLocText.GetTextValue($"SHPC_TextDictionary_Content_{index}") : "ERROR";
             string num = (index + 1).ToString();
-            if (index == 14) {
+            if (index == 16) {
                 num = CWRLocText.GetTextValue("Murasama_Text_Lang_End");
             }
 

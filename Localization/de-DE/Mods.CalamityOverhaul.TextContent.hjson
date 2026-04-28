@@ -157,61 +157,72 @@ CWRLocText: {
 		'''
 	SHPC_TextDictionary_Content_5:
 		'''
+		Mächtige mechanische Eindringlinge fallen in der Nacht ein—Relikte einer vergessenen Zivilisation.
+		Der Zerstörer, die Zwillinge, Skelettron Prime—wir müssen unsere Stärke gegen diese eisernen Giganten beweisen.
+		Kalamitys Kreaturen regen sich ebenfalls; Kryogen und die Meeresplage stehen zwischen uns und dem nächsten Kapitel.
+		'''
+	SHPC_TextDictionary_Content_6:
+		'''
+		Gute Fortschritte—einige dieser Eisenmaschinen sind bereits Schrott.
+		Weiter so, beseitige alle verbleibenden mechanischen Bosse.
+		'''
+	SHPC_TextDictionary_Content_7:
+		'''
 		Tief im Dschungel sind einige seltsame Knospen aufgeblüht.
 		Wir müssen nachsehen und experimentelle Daten sammeln.
 		Der Klon dieser Hexe treibt sich auch dort herum.
 		Auch wenn es nur eine plumpe Nachahmung von Nekromantie ist,
 		reicht es völlig aus, um unsere Waffenleistung zu testen. Zerstöre diese Fälschung.
 		'''
-	SHPC_TextDictionary_Content_6:
+	SHPC_TextDictionary_Content_8:
 		'''
 		Der antike Roboter tief im Tempel wartet auf eine Aufladung zur Aktivierung.
 		Statten wir ihm einen Besuch ab und betreiben dabei
 		gleich etwas Reverse-Engineering an dieser uralten Technologie.
 		'''
-	SHPC_TextDictionary_Content_7:
+	SHPC_TextDictionary_Content_9:
 		'''
 		Diese Fanatiker am Dungeoneingang halten ein uraltes Ritual ab
 		und versuchen, Informationen aus dem All zu blockieren.
 		Unterbrich sie. Ihre abergläubischen Zaubersprüche können unsere Technologie nicht aufhalten.
 		Ich brauche diese verborgenen Sternenkoordinaten.
 		'''
-	SHPC_TextDictionary_Content_8:
+	SHPC_TextDictionary_Content_10:
 		'''
 		Die Geheimnisse der dunklen Seite des Mondes werden uns offenbart.
 		Die Welt wird in ihren ursprünglichen Zustand zurückkehren.
 		'''
-	SHPC_TextDictionary_Content_9:
+	SHPC_TextDictionary_Content_11:
 		'''
 		Der Gott, der im Planetenkern parasitiert, hat uns bemerkt.
 		Geh in die Unterwelt; ich brauche Wissen über die Nutzung thermischer Energie.
 		Die Geister des Dungeons haben sich zu einem massiven Symbionten vereint.
 		Das ist zu interessant, das müssen wir uns sofort ansehen.
 		'''
-	SHPC_TextDictionary_Content_10:
+	SHPC_TextDictionary_Content_12:
 		'''
 		Es ist bestätigt, dass es sich nicht um kohlenstoffbasiertes Leben handelt.
 		Es kann die Raummembran allein mit seinem Körper zerreißen.
 		Es verschlingt Götter, aber wir sind keine Götter;
 		ich nehme an, es wird uns zum Tee einladen.
 		'''
-	SHPC_TextDictionary_Content_11:
+	SHPC_TextDictionary_Content_13:
 		'''
 		Das letzte Drachenblut der Welt. Wow, das ist zu cool!
 		Bring mich zu ihm, ich will seine Federn haben.
 		'''
-	SHPC_TextDictionary_Content_12:
+	SHPC_TextDictionary_Content_14:
 		'''
 		Es ist an der Zeit, meinen Schöpfer zu besuchen.
 		Oder diese Hexe; ihre Existenz stört mich.
 		'''
-	SHPC_TextDictionary_Content_13:
+	SHPC_TextDictionary_Content_15:
 		'''
 		Ein großes Gemetzel! Feinde, die wir einst besiegt haben, haben sich vereint
 		und bereiten einen totalen Angriff auf uns vor.
 		Mach dich bereit, wir brauchen einen perfekten Sieg.
 		'''
-	SHPC_TextDictionary_Content_14: Protokoll HMOI-0001 freigeschaltet
+	SHPC_TextDictionary_Content_16: Protokoll HMOI-0001 freigeschaltet
 	Halibut_No_legend_Content_1: Freigeschaltet nach dem Fall des großen Drachen
 	Halibut_No_legend_Content_2: Kumpel, ich war die ganze Zeit hier
 	Halibut_No_legend_Content_3: "[c/fff08c:Stärker geworden mit jeder Reise]"

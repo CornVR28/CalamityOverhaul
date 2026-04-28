@@ -294,64 +294,78 @@ namespace CalamityOverhaul.Content
                 return level;
             }
 
-            if (VDownedV7.Invoke() || Downed10.Invoke()) {
+            if (DownedV5.Invoke()) {
                 level = 6;
             }
             else {
                 return level;
             }
 
-            if (DownedV7.Invoke()) {
+            if (DownedAnyMechBoss) {
                 level = 7;
             }
             else {
                 return level;
             }
 
-            if (DownedV8.Invoke()) {
+            if (VDownedV7.Invoke() || Downed10.Invoke()) {
                 level = 8;
             }
             else {
                 return level;
             }
 
-            if (VDownedV16.Invoke()) {
+            if (DownedV7.Invoke()) {
                 level = 9;
             }
             else {
                 return level;
             }
 
-            if (Downed23.Invoke() || Downed19.Invoke()) {
+            if (DownedV8.Invoke()) {
                 level = 10;
             }
             else {
                 return level;
             }
 
-            if (Downed27.Invoke()) {
+            if (VDownedV16.Invoke()) {
                 level = 11;
             }
             else {
                 return level;
             }
 
-            if (Downed28.Invoke()) {
+            if (Downed23.Invoke() || Downed19.Invoke()) {
                 level = 12;
             }
             else {
                 return level;
             }
 
-            if (Downed29.Invoke() || Downed30.Invoke()) {
+            if (Downed27.Invoke()) {
                 level = 13;
             }
             else {
                 return level;
             }
 
-            if (Downed32.Invoke()) {
+            if (Downed28.Invoke()) {
                 level = 14;
+            }
+            else {
+                return level;
+            }
+
+            if (Downed29.Invoke() || Downed30.Invoke()) {
+                level = 15;
+            }
+            else {
+                return level;
+            }
+
+            if (Downed32.Invoke()) {
+                level = 16;
             }
             else {
                 return level;

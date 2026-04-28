@@ -171,61 +171,72 @@ CWRLocText: {
 		'''
 	SHPC_TextDictionary_Content_5:
 		'''
+		De puissants envahisseurs mécaniques descendent dans la nuit—reliques d'une civilisation oubliée.
+		Le Destructeur, les Jumeaux, Skeletron Prime—nous devons prouver notre valeur contre ces géants de fer.
+		La propre progéniture de Calamity s'agite aussi ; Cryogène et le Fléau Aquatique se dressent entre nous et le prochain chapitre.
+		'''
+	SHPC_TextDictionary_Content_6:
+		'''
+		Bonne progression—certaines de ces machines de fer sont déjà de la ferraille.
+		Continuez, éliminez tous les boss mécaniques restants.
+		'''
+	SHPC_TextDictionary_Content_7:
+		'''
 		Dans les profondeurs de la Jungle, d'étranges bulbes ont éclos.
 		Nous devons aller voir et collecter des données expérimentales.
 		Le clone de cette sorcière rôde aussi par là.
 		Bien que ce ne soit qu'une imitation maladroite de nécromancie,
 		cela suffira amplement pour tester nos armes. Allez détruire cette contrefaçon.
 		'''
-	SHPC_TextDictionary_Content_6:
+	SHPC_TextDictionary_Content_8:
 		'''
 		L'ancien robot au fond du Temple attend une recharge pour s'activer.
 		Rendons-lui visite et profitons-en pour faire
 		de la rétro-ingénierie sur cette technologie antique.
 		'''
-	SHPC_TextDictionary_Content_7:
+	SHPC_TextDictionary_Content_9:
 		'''
 		Ces fanatiques à l'entrée du Donjon tiennent un ancien rituel,
 		tentant de bloquer les informations venant du ciel.
 		Interrompez-les. Leurs sorts superstitieux ne peuvent arrêter notre technologie.
 		J'ai besoin de ces coordonnées stellaires cachées.
 		'''
-	SHPC_TextDictionary_Content_8:
+	SHPC_TextDictionary_Content_10:
 		'''
 		Les secrets de la face cachée de la lune nous seront révélés.
 		Le monde retrouvera son état originel.
 		'''
-	SHPC_TextDictionary_Content_9:
+	SHPC_TextDictionary_Content_11:
 		'''
 		Le dieu parasitant le noyau de la planète nous a remarqués.
 		Allez en Enfer ; j'ai besoin de connaissances sur l'utilisation de l'énergie thermique.
 		Les esprits du Donjon se sont rassemblés en un symbiote massif.
 		C'est trop intéressant, nous devons aller voir ça tout de suite.
 		'''
-	SHPC_TextDictionary_Content_10:
+	SHPC_TextDictionary_Content_12:
 		'''
 		Il est confirmé qu'il ne s'agit pas d'une forme de vie carbonée.
 		Il peut déchirer la membrane spatiale avec son seul corps.
 		Il dévore les dieux, mais nous ne sommes pas des dieux ;
 		j'imagine qu'il nous invitera peut-être à prendre le thé.
 		'''
-	SHPC_TextDictionary_Content_11:
+	SHPC_TextDictionary_Content_13:
 		'''
 		Le dernier Enfant de Dragon au monde. Wow, c'est trop cool !
 		Emmenez-moi le voir, je veux obtenir ses plumes.
 		'''
-	SHPC_TextDictionary_Content_12:
+	SHPC_TextDictionary_Content_14:
 		'''
 		Il est temps de rendre visite à mon créateur.
 		Ou à cette sorcière ; son existence me dérange.
 		'''
-	SHPC_TextDictionary_Content_13:
+	SHPC_TextDictionary_Content_15:
 		'''
 		Une grande mêlée ! Les ennemis que nous avons vaincus se sont unis
 		et préparent un assaut total contre nous.
 		Préparez-vous, nous avons besoin d'une victoire parfaite.
 		'''
-	SHPC_TextDictionary_Content_14: Protocole HMOI-0001 déverrouillé
+	SHPC_TextDictionary_Content_16: Protocole HMOI-0001 déverrouillé
 	Halibut_No_legend_Content_1: Déverrouillé après la chute du grand dragon
 	Halibut_No_legend_Content_2: Mec, j'ai été là tout le temps
 	Halibut_No_legend_Content_3: "[c/fff08c:Devenu plus fort au fil des voyages]"
