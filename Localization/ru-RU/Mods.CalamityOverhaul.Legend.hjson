@@ -271,3 +271,122 @@ MurasamaTrialQuestLine: {
 	// Trial_12: 核心终结
 	// Trial_13: 原初回归
 }
+
+SHPCTrialQuestLine: {
+	// QuestCategory: SHPC·Trial
+	// TrackerWaiting: Target not present, awaiting summon...
+	// TrackerFighting: "{0}: {1:0%}"
+	// Trial_0: Slime Elimination
+	// Trial_1: Eye Dissection
+	// Trial_2: Biochemical Sample
+	// Trial_3: Impurity Purification
+	// Trial_4: Seal Breach
+	// Trial_5: Night of Machines
+	// Trial_6: Iron Scrap Clearance
+	// Trial_7: Ecological Survey
+	// Trial_8: Ancient Technology
+	// Trial_9: Information Blockade
+	// Trial_10: Dark Side of the Moon
+	// Trial_11: Core Expedition
+	// Trial_12: Divine Domain Invasion
+	// Trial_13: Obtain Dragon Feathers
+	// Trial_14: Visit the Creator
+	// Trial_15: The Final Battle
+	/* TrialSummary_0:
+		'''
+		Friend, the task of restoring civilization has finally fallen into our hands.
+		This is a glorious undertaking...
+		Our first target is a massive blue gel polymer.
+		Blast it open from the inside.
+		''' */
+	/* TrialSummary_1:
+		'''
+		We need to eliminate that giant eye; it comes from a powerful organism.
+		I need to dissect it to see how it achieves anti-gravity.
+		''' */
+	/* TrialSummary_2:
+		'''
+		Whether it is the giant worm coiling in the corruption,
+		or the brain dominating the crimson flesh, they are excellent biochemical samples.
+		Cut out their cores; I want to study this terrifying ecological invasiveness.
+		''' */
+	/* TrialSummary_3:
+		'''
+		Gel has actually derived a god?
+		I feel it is just a filthy aggregation that swallowed too many impurities.
+		Let us help it undergo a thorough purification separation
+		to see what remains of this so-called god.
+		''' */
+	/* TrialSummary_4:
+		'''
+		A wall of flesh spanning the Underworld; it is a seal of the old era.
+		We need enough firepower to blast through this organic barrier.
+		This will be our opening act for the new era.
+		''' */
+	/* TrialSummary_5:
+		'''
+		Powerful mechanical invaders descend in the night—relics of a long-forgotten civilization.
+		The Destroyer, the Twins, Skeletron Prime—we must prove our worth against these iron giants.
+		Calamity's own spawn also stir; Cryogen and the Aquatic Scourge stand between us and the next chapter.
+		''' */
+	/* TrialSummary_6:
+		'''
+		Good progress—some of these iron machines are already scrap.
+		Keep going, eliminate all remaining mechanical bosses.
+		''' */
+	/* TrialSummary_7:
+		'''
+		Deep in the Jungle, several flamboyant buds have bloomed.
+		We need to investigate and collect experimental data.
+		That witch's clone is also wandering about.
+		Though just a clumsy imitation of necromancy,
+		it is more than enough to test our weapon performance.
+		Go destroy that counterfeit.
+		''' */
+	/* TrialSummary_8:
+		'''
+		The ancient robot deep in the Temple awaits a recharge activation.
+		Let us pay a visit and reverse-engineer that ancient technology while we're at it.
+		''' */
+	/* TrialSummary_9:
+		'''
+		Those fanatics at the Dungeon entrance are holding some ancient ritual,
+		attempting to block information from beyond the sky.
+		Interrupt them. Their superstitious spells cannot stop our technology.
+		I need those hidden star coordinates.
+		''' */
+	/* TrialSummary_10:
+		'''
+		The secrets of the dark side of the moon shall be known to us.
+		The world will return to its original state.
+		''' */
+	/* TrialSummary_11:
+		'''
+		The god parasitic in the planet's core has noticed us.
+		Go to the Underworld; I need knowledge on thermal energy utilization.
+		The spirits of the Dungeon have gathered into a massive symbiote.
+		This is too interesting; we must go see it now.
+		''' */
+	/* TrialSummary_12:
+		'''
+		It is confirmed to be non-carbon-based life,
+		capable of tearing the spatial membrane with just its body.
+		It devours gods, but we are not gods; I imagine it might invite us for tea.
+		''' */
+	/* TrialSummary_13:
+		'''
+		The world's last Dragonborn. Wow, this is too cool!
+		Take me to see it; I want to obtain its feathers.
+		''' */
+	/* TrialSummary_14:
+		'''
+		It is time to visit my creator.
+		Or that witch; her existence troubles me.
+		''' */
+	/* TrialSummary_15:
+		'''
+		A grand melee! Enemies we once defeated have united,
+		preparing to launch a total assault on us.
+		Get ready; we need a flawless victory.
+		''' */
+}
