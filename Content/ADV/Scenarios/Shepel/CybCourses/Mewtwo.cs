@@ -15,7 +15,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
             Item.useStyle = ItemUseStyleID.HoldUp;
             Item.useTime = 30;
             Item.useAnimation = 30;
-            Item.consumable = true;
             Item.rare = ItemRarityID.Cyan;
             Item.value = 0;
         }
