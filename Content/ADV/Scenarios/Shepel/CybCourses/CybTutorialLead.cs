@@ -80,6 +80,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
         private static bool _introAttempted = false;
         private static bool _prevMouseLeft = false;
         private static Rectangle _nextBtnRect = Rectangle.Empty;
+        private static Rectangle _cardRect = Rectangle.Empty;
 
         public override void OnWorldUnload() {
             _phase = Phase.Inactive;
@@ -89,6 +90,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
             _introAttempted = false;
             _prevMouseLeft = false;
             _nextBtnRect = Rectangle.Empty;
+            _cardRect = Rectangle.Empty;
         }
 
         //由CybCourseIntroDialogue.OnScenarioComplete()在对话结束后调用
@@ -113,6 +115,11 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
             bool mouseDown = Main.mouseLeft;
             bool mouseClicked = mouseDown && !_prevMouseLeft;
             _prevMouseLeft = mouseDown;
+
+            //卡片可见时屏蔽世界点击，防止玩家在操作引导界面时误触武器
+            if (_cardRect != Rectangle.Empty && _cardRect.Contains(Main.mouseX, Main.mouseY)) {
+                Main.LocalPlayer.mouseInterface = true;
+            }
 
             switch (_phase) {
                 case Phase.Running:
@@ -225,6 +232,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
             float slideX = (1f - alpha) * 30f;
             var card = new Rectangle(cx + (int)slideX, cy, CardW, CardH);
 
+            _cardRect = card;
             DrawCardBg(sb, card, alpha);
             DrawCardContent(sb, px, card, alpha);
             DrawHighlightForStep(sb, px, targetKey, alpha);
