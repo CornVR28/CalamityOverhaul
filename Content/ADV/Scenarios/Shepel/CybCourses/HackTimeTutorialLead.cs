@@ -299,7 +299,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
                 return;
             }
             //避免在打字/编辑界面中误触发
-            if (Main.chatMode || Main.editSign || Main.editChest || Main.drawingPlayerChat) {
+            if (Main.editSign || Main.editChest || Main.drawingPlayerChat) {
                 _prevFallbackKeyDown = false;
                 return;
             }
