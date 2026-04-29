@@ -1,5 +1,5 @@
 ﻿using CalamityOverhaul.Common;
-using CalamityOverhaul.Content.RAMSystem;
+using CalamityOverhaul.Content.RAMSystems;
 using System;
 using System.Collections.Generic;
 using Terraria;

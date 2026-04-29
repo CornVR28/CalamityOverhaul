@@ -1,6 +1,6 @@
 ﻿using CalamityOverhaul.Common;
 using CalamityOverhaul.Content.HackTimes;
-using CalamityOverhaul.Content.RAMSystem;
+using CalamityOverhaul.Content.RAMSystems;
 using System;
 using Terraria;
 using Terraria.Audio;
@@ -308,8 +308,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             //领域处于激活态时按当前层消耗 RAM；耗尽即触发系统崩溃强制关闭
             if (Active && CurrentLayer >= 1 && !HackTime.InfiniteHack) {
                 float drain = LayerRamDrainPerSecond[CurrentLayer - 1];
-                CWRRamSystem.ConsumeOverTime(drain);
-                if (CWRRamSystem.CurrentRam <= 0f) {
+                RamSystem.ConsumeOverTime(drain);
+                if (RamSystem.CurrentRam <= 0f) {
                     TriggerSystemCrash();
                 }
             }

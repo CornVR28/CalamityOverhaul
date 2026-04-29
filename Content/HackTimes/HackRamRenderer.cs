@@ -1,5 +1,5 @@
 ﻿using CalamityOverhaul.Common;
-using CalamityOverhaul.Content.RAMSystem;
+using CalamityOverhaul.Content.RAMSystems;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;
@@ -82,7 +82,7 @@ namespace CalamityOverhaul.Content.HackTimes
             if (flyInProgress > 0.995f) flyInProgress = 1f;
             if (flyInProgress < 0.005f) flyInProgress = 0f;
 
-            displayRam = MathHelper.Lerp(displayRam, CWRRamSystem.CurrentRam, 0.12f);
+            displayRam = MathHelper.Lerp(displayRam, RamSystem.CurrentRam, 0.12f);
         }
 
         public void Draw(SpriteBatch sb) {
@@ -94,7 +94,7 @@ namespace CalamityOverhaul.Content.HackTimes
             float alpha = HackTime.Intensity * flyInProgress;
             if (alpha < 0.01f) return;
 
-            int maxRam = CWRRamSystem.MaxRam;
+            int maxRam = RamSystem.MaxRam;
             if (maxRam <= 0) return;
 
             //弧线参数计算（随 maxRam 动态拉伸/收紧）
@@ -166,9 +166,9 @@ namespace CalamityOverhaul.Content.HackTimes
             //低RAM警告强度(平滑)
             float lowRam = 0f;
             if (!HackTime.InfiniteHack) {
-                if (CWRRamSystem.CurrentRam < 0.5f) lowRam = 1f;
-                else if (CWRRamSystem.CurrentRam <= 2f)
-                    lowRam = MathHelper.Clamp(1f - (CWRRamSystem.CurrentRam - 0.5f) / 1.5f, 0f, 1f);
+                if (RamSystem.CurrentRam < 0.5f) lowRam = 1f;
+                else if (RamSystem.CurrentRam <= 2f)
+                    lowRam = MathHelper.Clamp(1f - (RamSystem.CurrentRam - 0.5f) / 1.5f, 0f, 1f);
             }
 
             effect.Parameters["uTime"]?.SetValue(timer);
@@ -437,9 +437,9 @@ namespace CalamityOverhaul.Content.HackTimes
                 HackTheme.Accent * (alpha * 0.55f), FTitle);
 
             //数值读数（大号）
-            string val = $"{CWRRamSystem.DisplayCurrent}/{maxRam}";
+            string val = $"{RamSystem.DisplayCurrent}/{maxRam}";
             Vector2 valSize = FontAssets.MouseText.Value.MeasureString(val) * FValue;
-            Color valColor = CWRRamSystem.CurrentRam <= 2f && !HackTime.InfiniteHack
+            Color valColor = RamSystem.CurrentRam <= 2f && !HackTime.InfiniteHack
                 ? Color.Lerp(HackTheme.TextBright, HackTheme.Danger,
                     MathF.Sin(timer * 5f) * 0.4f + 0.6f)
                 : HackTheme.TextBright;
@@ -455,9 +455,9 @@ namespace CalamityOverhaul.Content.HackTimes
                 HackTheme.TextDim * (alpha * 0.22f), FHex);
 
             //低RAM警告
-            if (CWRRamSystem.CurrentRam <= 2f && !HackTime.InfiniteHack) {
+            if (RamSystem.CurrentRam <= 2f && !HackTime.InfiniteHack) {
                 float wPulse = MathF.Sin(timer * 5f) * 0.4f + 0.6f;
-                string warn = CWRRamSystem.CurrentRam < 0.5f
+                string warn = RamSystem.CurrentRam < 0.5f
                     ? HackTime.RamDepleted.Value
                     : HackTime.LowRam.Value;
                 Vector2 wSize = FontAssets.MouseText.Value.MeasureString(warn) * FWarn;

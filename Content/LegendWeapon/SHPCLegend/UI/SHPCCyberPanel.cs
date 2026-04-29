@@ -1,7 +1,7 @@
 ﻿using CalamityOverhaul.Common;
 using CalamityOverhaul.Content.HackTimes;
 using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
-using CalamityOverhaul.Content.RAMSystem;
+using CalamityOverhaul.Content.RAMSystems;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Graphics;
 using System;
@@ -530,7 +530,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                 else {
                     float drainNow = Cyberspace.GetCurrentDrainRate();
                     if (drainNow > 0f) {
-                        float sustain = CWRRamSystem.CurrentRam / drainNow;
+                        float sustain = RamSystem.CurrentRam / drainNow;
                         string sustainTxt = string.Format(SHPCUI.Cyber_SustainTime.Value,
                             sustain.ToString("F1"));
                         //剩余时间紧张时颜色转红并轻微脉冲

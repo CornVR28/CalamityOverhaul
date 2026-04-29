@@ -1,10 +1,10 @@
-using CalamityOverhaul.Content.HackTimes;
+﻿using CalamityOverhaul.Content.HackTimes;
 using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
 using System;
 using System.Collections.Generic;
 using Terraria.ModLoader.IO;
 
-namespace CalamityOverhaul.Content.RAMSystem
+namespace CalamityOverhaul.Content.RAMSystems
 {
     /// <summary>
     /// 提供运行时挂入 RAM 系统的修饰器接口

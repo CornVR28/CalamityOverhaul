@@ -1,4 +1,4 @@
-﻿using CalamityOverhaul.Content.RAMSystem;
+﻿using CalamityOverhaul.Content.RAMSystems;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;

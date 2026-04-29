@@ -6,7 +6,7 @@ using CalamityOverhaul.Content.Items.Rogue;
 using CalamityOverhaul.Content.LegendWeapon;
 using CalamityOverhaul.Content.NPCs.Modifys.Crabulons;
 using CalamityOverhaul.Content.Projectiles.Others;
-using CalamityOverhaul.Content.RAMSystem;
+using CalamityOverhaul.Content.RAMSystems;
 using CalamityOverhaul.Content.RangedModify;
 using CalamityOverhaul.Content.RangedModify.Core;
 using CalamityOverhaul.OtherMods.HighFPSSupport;
@@ -293,7 +293,7 @@ namespace CalamityOverhaul.Content
                 tag["UnderstandWindGrivenMK2"] = UnderstandWindGrivenMK2;
                 //仅本地玩家持久化 RAM 进度，多人下避免远端玩家覆盖本地状态
                 if (Player.whoAmI == Main.myPlayer) {
-                    CWRRamSystem.WriteSave(tag);
+                    RamSystem.WriteSave(tag);
                 }
             } catch (Exception ex) { CWRMod.Instance.Logger.Error($"CWRPlayer.SaveData An Error Has Cccurred: {ex.Message}"); }
         }
@@ -308,7 +308,7 @@ namespace CalamityOverhaul.Content
                 }
                 //仅本地玩家读取 RAM 进度，避免被其他客户端的存档覆盖
                 if (Player.whoAmI == Main.myPlayer) {
-                    CWRRamSystem.ReadSave(tag);
+                    RamSystem.ReadSave(tag);
                 }
             } catch (Exception ex) { CWRMod.Instance.Logger.Error($"CWRPlayer.LoadData An Error Has Cccurred: {ex.Message}"); }
         }
@@ -354,7 +354,7 @@ namespace CalamityOverhaul.Content
             Information();
 
             //进入世界时把 RAM 重置为满（基础值已在 LoadData 中读取）
-            CWRRamSystem.Refill();
+            RamSystem.Refill();
 
             SpearOfLonginus.ZenithWorldAsset();
 

@@ -1,6 +1,6 @@
 ﻿using CalamityOverhaul.Content.ADV.Scenarios;
 using CalamityOverhaul.Content.HackTimes;
-using CalamityOverhaul.Content.RAMSystem;
+using CalamityOverhaul.Content.RAMSystems;
 using Microsoft.Xna.Framework;
 using Terraria;
 
@@ -45,7 +45,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
 
             //4. 重置玩家位置 / RAM / 骇客时间
             HackTime.Reset();
-            CWRRamSystem.Refill();
+            RamSystem.Refill();
             HackTime.InfiniteHack = true;
             Player p = Main.LocalPlayer;
             if (p != null && p.active) {

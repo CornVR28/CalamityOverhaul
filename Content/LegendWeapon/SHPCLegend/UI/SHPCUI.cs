@@ -6,7 +6,7 @@ using CalamityOverhaul.Content.Cyberwares.UIs;
 using CalamityOverhaul.Content.HackTimes;
 using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
 using CalamityOverhaul.Content.QuestLogs;
-using CalamityOverhaul.Content.RAMSystem;
+using CalamityOverhaul.Content.RAMSystems;
 using InnoVault.UIHandles;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -356,7 +356,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             time += 1f / 60f;
 
             //平滑跟随RAM当前值
-            ramDisplayValue = MathHelper.Lerp(ramDisplayValue, CWRRamSystem.CurrentRam, 0.12f);
+            ramDisplayValue = MathHelper.Lerp(ramDisplayValue, RamSystem.CurrentRam, 0.12f);
 
             //展开进度推进
             float targetExpand = expanded ? 1f : 0f;
@@ -558,7 +558,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
 
             //RAM弧形条（始终显示，不受展开状态影响）
             SHPCRenderer.DrawRAMBar(sb, px, corePos,
-                ramDisplayValue, CWRRamSystem.MaxRam, time, globalAlpha);
+                ramDisplayValue, RamSystem.MaxRam, time, globalAlpha);
 
             //核心
             SHPCRenderer.DrawCore(sb, px, corePos, expandProgress,
