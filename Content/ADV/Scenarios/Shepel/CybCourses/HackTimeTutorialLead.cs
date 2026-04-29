@@ -53,18 +53,25 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
                 this.GetLocalization("HT_Step2_Body", () => "右侧面板展示目标的可用骇入协议。\n不同协议消耗不同RAM并产生不同效果。"),
                 this.GetLocalization("HT_Step3_Body", () => "点击协议将其加入左侧上传队列，\n队列将依次执行骇入操作。"),
                 this.GetLocalization("HT_Step4_Body", () => "NPC骇入序列完成。下一阶段：物块扫描接口训练。"),
-                this.GetLocalization("HT_Step5_Body", () => "前方有一台热能发电机MK2。\n重新激活骇客时间，将光标移至发电机并点击选中。"),
+                this.GetLocalization("HT_Step5_Body", () => "前方有一台热能发电机MK2。\n再次按下 [N] 重新激活骇客时间。"),
                 this.GetLocalization("HT_Step6_Body", () => "将光标悬停在发电机上，\n点击左键将其锁定为扫描目标。"),
                 this.GetLocalization("HT_Step7_Body", () => "物块扫描接口已解析。右侧面板展示当前物块的可用骇入协议。"),
             };
             _textWaiting    = this.GetLocalization("HT_Waiting",    () => "AWAITING INPUT...");
             _textCalibrating = this.GetLocalization("HT_Calibrating", () => "DISCONNECTING...");
             _textNextBtn    = this.GetLocalization("HT_NextBtn",    () => "NEXT  >");
+            _textHintStuck  = this.GetLocalization("HT_HintStuck",  () => "// HINT: 点击 NEXT 按钮可强制跳过");
         }
 
         private const int CardW = 310;
         private const int CardH = 118;
         private const int EdgePad = 8;
+        //自动步骤统一倒计时（缩短至1.6s）
+        private const float AutoStepDuration = 1.6f;
+        //手动步骤无操作多少秒后给红色提示
+        private const float StuckHintAfter = 12f;
+        //SHPC教学结束 → 骇客对话之间的衔接缓冲
+        private const float HackIntroLeadDelay = 0.15f;
 
         private static Phase _phase = Phase.Inactive;
         private static int _currentStep = 0;
@@ -72,23 +79,35 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
         private static float _shaderTimer = 0f;
         private static float _highlightPulse = 0f;
         private static float _stepTimer = 0f;
+        private static float _stuckTimer = 0f;
+        //SHPC教学进入FadeOut/Done后的衔接计时
+        private static float _hackIntroLeadTimer = 0f;
         private static bool _hackIntroAttempted = false;
+        private static bool _outroStarted = false;
         private static bool _prevMouseLeft = false;
         private static Rectangle _nextBtnRect = Rectangle.Empty;
         private static Rectangle _cardRect = Rectangle.Empty;
+        private static LocalizedText _textHintStuck;
 
         //被固定在原地的SantaNK1的NPC索引和世界坐标
         private static int _npcIndex = -1;
         private static Vector2 _npcSpawnPos;
 
-        public override void OnWorldUnload() {
+        public override void OnWorldUnload() => ResetForRetry();
+
+        //完整重置教程状态，可被OnWorldUnload与RETRY软重启复用
+        public static void ResetForRetry() {
+            CleanupTank();
             _phase = Phase.Inactive;
             _currentStep = 0;
             _cardAnim = 0f;
             _shaderTimer = 0f;
             _highlightPulse = 0f;
             _stepTimer = 0f;
+            _stuckTimer = 0f;
+            _hackIntroLeadTimer = 0f;
             _hackIntroAttempted = false;
+            _outroStarted = false;
             _prevMouseLeft = false;
             _nextBtnRect = Rectangle.Empty;
             _cardRect = Rectangle.Empty;
@@ -101,10 +120,12 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
             _currentStep = 0;
             _cardAnim = 0f;
             _stepTimer = 0f;
+            _stuckTimer = 0f;
             SpawnOrFindTank();
         }
 
         //生成或复用已存在的SantaNK1，并记录其固定位置
+        //支持失败重试（向左退一步），避免因右侧实体阻挡导致索引溢出
         private static void SpawnOrFindTank() {
             if (Main.dedServ) return;
             for (int i = 0; i < Main.maxNPCs; i++) {
@@ -115,15 +136,19 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
                 }
             }
             //在走廊前段生成，Y取通道中间位置确保不落在实体块内，生成后再修正至地板上方
-            int spawnX = (int)Main.LocalPlayer.Center.X + 350;
+            int baseX = (int)Main.LocalPlayer.Center.X + 350;
             int spawnY = (CybCourseGen.FloorY - 8) * 16;
-            int idx = NPC.NewNPC(new EntitySource_WorldEvent(), spawnX, spawnY, NPCID.SantaNK1);
-            if (idx < Main.maxNPCs) {
-                float correctY = CybCourseGen.SurfaceY * 16f - Main.npc[idx].height;
-                _npcIndex = idx;
-                _npcSpawnPos = new Vector2(Main.npc[idx].position.X, correctY);
-                Main.npc[idx].position = _npcSpawnPos;
-                Main.npc[idx].dontTakeDamage = true;
+            for (int retry = 0; retry < 3; retry++) {
+                int spawnX = baseX - retry * 50;
+                int idx = NPC.NewNPC(new EntitySource_WorldEvent(), spawnX, spawnY, NPCID.SantaNK1);
+                if (idx >= 0 && idx < Main.maxNPCs) {
+                    float correctY = CybCourseGen.SurfaceY * 16f - Main.npc[idx].height;
+                    _npcIndex = idx;
+                    _npcSpawnPos = new Vector2(Main.npc[idx].position.X, correctY);
+                    Main.npc[idx].position = _npcSpawnPos;
+                    Main.npc[idx].dontTakeDamage = true;
+                    return;
+                }
             }
         }
 
@@ -151,7 +176,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
             _shaderTimer += dt * 0.8f;
             if (_shaderTimer > 100f) _shaderTimer -= 100f;
 
-            AutoTriggerHackIntro();
+            AutoTriggerHackIntro(dt);
 
             bool mouseDown = Main.mouseLeft;
             bool mouseClicked = mouseDown && !_prevMouseLeft;
@@ -166,14 +191,30 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
                     _cardAnim = MathHelper.Lerp(_cardAnim, 1f, 0.16f);
                     _stepTimer += dt;
 
+                    //step≥1时若NPC意外丢失，自动重生避免卡阶段
+                    if (_currentStep >= 1 && _currentStep <= 4) {
+                        EnsureTankAlive();
+                    }
+
                     bool isAuto = StepIsAuto[_currentStep];
                     if (isAuto) {
-                        if (CheckAutoAdvance()) AdvanceStep();
+                        //自动步骤同样允许左键跳过等待
+                        if (CheckAutoAdvance() || mouseClicked) {
+                            AdvanceStep();
+                        }
+                        _stuckTimer = 0f;
                     } else {
                         //step 0特殊处理：玩家自行激活骇客模式时自动推进
                         if (_currentStep == 0 && HackTime.Active) {
                             AdvanceStep();
-                        } else if (mouseClicked && _nextBtnRect != Rectangle.Empty
+                            break;
+                        }
+                        //step 5特殊处理：玩家自行重激活骇客模式时自动推进
+                        if (_currentStep == 5 && HackTime.Active) {
+                            AdvanceStep();
+                            break;
+                        }
+                        if (mouseClicked && _nextBtnRect != Rectangle.Empty
                                 && _nextBtnRect.Contains(Main.mouseX, Main.mouseY)) {
                             Main.mouseLeft = false;
                             //玩家点NEXT跳过，强制激活骇客模式
@@ -183,7 +224,10 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
                             if (_currentStep == 5 && !HackTime.Active)
                                 HackTime.Activate();
                             AdvanceStep();
+                            break;
                         }
+                        //无操作时累计卡死计时
+                        _stuckTimer += dt;
                     }
                     break;
 
@@ -193,19 +237,38 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
                         _cardAnim = 0f;
                         _phase = Phase.Done;
                         CleanupTank();
+                        TryStartOutro();
                     }
+                    break;
+
+                case Phase.Done:
+                    //Done阶段持续尝试拉起Outro，确保即便FadeOut完成时被其他场景占用也能续上
+                    TryStartOutro();
                     break;
             }
         }
 
-        //SHPC教学已完成且当前期間尚未触发过对话时自动启动
-        private static void AutoTriggerHackIntro() {
+        //SHPC教学进入FadeOut或Done阶段后即可启动骇客对话，无需等待FadeOut走完
+        //保留小段缓冲避免对话与卡片淡出重叠
+        private static void AutoTriggerHackIntro(float dt) {
             if (_hackIntroAttempted) return;
             if (_phase != Phase.Inactive) return;
-            if (!CybTutorialLead.IsDone) return;
+            if (!CybTutorialLead.IsTailing) return;
+            //允许的衔接缓冲，避免对话与SHPC卡片淡出动画抢镜
+            _hackIntroLeadTimer += dt;
+            if (_hackIntroLeadTimer < HackIntroLeadDelay) return;
             if (ScenarioManager.IsActive()) return;
             ScenarioManager.Start<CybCourseHackIntroDialogue>();
             _hackIntroAttempted = true;
+        }
+
+        //Phase.Done时尝试启动通关祝贺对话（只触发一次，对话完成由其OnScenarioComplete拉起完成面板）
+        private static void TryStartOutro() {
+            if (_outroStarted) return;
+            if (ScenarioManager.IsActive()) return;
+            if (CybCourseCompletePanel.Visible) return;
+            _outroStarted = true;
+            ScenarioManager.Start<CybCourseOutroDialogue>();
         }
 
         //各自动推进步骤的完成判定
@@ -220,12 +283,22 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
             if (step == 3)
                 return (HackTimeUI.Instance?.Queue?.Entries.Count ?? 0) > 0;
             if (step == 4)
-                return _stepTimer >= 3.5f;
+                return _stepTimer >= AutoStepDuration;
             if (step == 6)
                 return HackTime.Active && HackTime.CurrentScanTarget is TileScannable;
             if (step == StepIsAuto.Length - 1)
-                return _stepTimer >= 3.5f;
+                return _stepTimer >= AutoStepDuration;
             return false;
+        }
+
+        //当前NPC失效时，若仍处于需要它的步骤，则尝试重新生成
+        private static void EnsureTankAlive() {
+            if (_npcIndex >= 0 && _npcIndex < Main.maxNPCs) {
+                NPC npc = Main.npc[_npcIndex];
+                if (npc.active && npc.type == NPCID.SantaNK1) return;
+            }
+            _npcIndex = -1;
+            SpawnOrFindTank();
         }
 
         //将测试目标NPC从世界中移除
@@ -241,6 +314,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
         private static void AdvanceStep() {
             _currentStep++;
             _stepTimer = 0f;
+            _stuckTimer = 0f;
             _cardAnim = 0f;
             if (_currentStep == 5)
                 CleanupTank();
@@ -269,11 +343,27 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
             if (px == null) return;
 
             float alpha = MathHelper.Clamp(_cardAnim, 0f, 1f);
-            //卡片固定在屏幕左上角，从上方滑入
-            int cx = 20;
-            int cy = 20;
-            float slideY = (1f - alpha) * 20f;
-            var card = new Rectangle(cx, cy + (int)slideY, CardW, CardH);
+
+            //卡片位置依骇客状态自适应，避开快捷栏与协议面板
+            int cx, cy;
+            float slideX = 0f, slideY = 0f;
+            if (HackTime.Active && HackTime.SelectedTargetIndex < 0
+                && !(HackTime.CurrentScanTarget is TileScannable)) {
+                //骇客模式下未锁定目标：卡片放屏幕右上，避免压住底部 N 键提示与协议预览
+                cx = Main.screenWidth - CardW - 24;
+                cy = 96;
+                slideX = (1f - alpha) * 24f;
+            }
+            else {
+                //正常情况：卡片放快捷栏下方左侧（位于第一行 buff 与第二行物品栏之间的空区）
+                cx = 24;
+                cy = 92;
+                slideY = (1f - alpha) * 20f;
+            }
+            //屏幕边界 clamp，防止低分辨率被推出屏幕
+            int finalX = (int)MathHelper.Clamp(cx + (int)slideX, 8, Math.Max(8, Main.screenWidth - CardW - 8));
+            int finalY = (int)MathHelper.Clamp(cy + (int)slideY, 8, Math.Max(8, Main.screenHeight - CardH - 8));
+            var card = new Rectangle(finalX, finalY, CardW, CardH);
 
             _cardRect = card;
             DrawCardBg(sb, card, alpha);
@@ -314,14 +404,16 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
             float lineT = font.MeasureString("A").Y * titleSc + 2f;
             float lineB = font.MeasureString("A").Y * bodySc + 1f;
 
-            string title = _stepTitles[_currentStep].Value;
-            string body  = _stepBodies[_currentStep].Value;
-            bool isAuto  = StepIsAuto[_currentStep];
+            int stepIdx = (int)MathHelper.Clamp(_currentStep, 0, StepIsAuto.Length - 1);
+            string title = _stepTitles[stepIdx].Value;
+            string body  = _stepBodies[stepIdx].Value;
+            bool isAuto  = StepIsAuto[stepIdx];
+            bool stuck   = !isAuto && _stuckTimer >= StuckHintAfter;
             float px2 = card.X + 14f;
             float py  = card.Y + 12f;
 
             //步骤计数
-            string counter = $"{_currentStep + 1:D2} / {StepIsAuto.Length:D2}";
+            string counter = $"{stepIdx + 1:D2} / {StepIsAuto.Length:D2}";
             float counterW = font.MeasureString(counter).X * subSc;
             Utils.DrawBorderString(sb, counter,
                 new Vector2(card.Right - 14f - counterW, py),
@@ -350,10 +442,18 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
                 }
             }
 
+            //卡死提示：玩家长时间未操作时附加红色提示
+            if (stuck && _textHintStuck != null) {
+                float pulseHint = 0.7f + 0.3f * MathF.Sin(_shaderTimer * 14f);
+                Utils.DrawBorderString(sb, _textHintStuck.Value,
+                    new Vector2(px2, card.Bottom - 36f),
+                    new Color(255, 110, 90, (int)(220 * alpha * pulseHint)), subSc);
+            }
+
             //底部：自动步骤显示状态文字，手动步骤显示NEXT按钮
             if (isAuto) {
                 float blink = 0.72f + 0.28f * MathF.Sin(_shaderTimer * 22f);
-                bool isCompletionStep = _currentStep == 4 || _currentStep == StepIsAuto.Length - 1;
+                bool isCompletionStep = stepIdx == 4 || stepIdx == StepIsAuto.Length - 1;
                 string standby = isCompletionStep
                     ? _textCalibrating.Value
                     : _textWaiting.Value;
@@ -362,25 +462,26 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
                     new Vector2(card.Right - 14f - sbW, card.Bottom - 16f),
                     new Color(60, 190, 200, (int)(200 * alpha * blink)), subSc);
             } else {
-                DrawNextButton(sb, card, alpha);
+                DrawNextButton(sb, card, alpha, stuck);
             }
         }
 
-        private static void DrawNextButton(SpriteBatch sb, Rectangle card, float alpha) {
+        private static void DrawNextButton(SpriteBatch sb, Rectangle card, float alpha, bool stuck) {
             const int btnW = 72, btnH = 20, margin = 10;
             var btn = new Rectangle(card.Right - btnW - margin, card.Bottom - btnH - margin, btnW, btnH);
             _nextBtnRect = btn;
 
             bool hovered = btn.Contains(Main.mouseX, Main.mouseY);
+            float emphasize = stuck ? (0.85f + 0.15f * MathF.Sin(_shaderTimer * 14f)) : 0f;
             Color bgColor = hovered
                 ? new Color(40, 155, 180, (int)(210 * alpha))
-                : new Color(18, 72, 92, (int)(150 * alpha));
+                : new Color(18 + (int)(40 * emphasize), 72, 92, (int)((150 + 50 * emphasize) * alpha));
             Color borderColor = hovered
                 ? new Color(100, 220, 245, (int)(200 * alpha))
-                : new Color(50, 150, 180, (int)(120 * alpha));
+                : new Color(50 + (int)(80 * emphasize), 150, 180, (int)((120 + 80 * emphasize) * alpha));
             Color textColor = hovered
                 ? new Color(200, 250, 255, (int)(255 * alpha))
-                : new Color(110, 205, 225, (int)(195 * alpha));
+                : new Color(110 + (int)(80 * emphasize), 205, 225, (int)((195 + 60 * emphasize) * alpha));
 
             BaseManagerStyle.FillRect(sb, btn, bgColor);
             BaseManagerStyle.StrokeRect(sb, btn, 1, borderColor);
@@ -388,11 +489,12 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
         }
 
         private static void DrawHighlightForStep(SpriteBatch sb, Texture2D px, float alpha) {
-            if (_currentStep == 6) {
+            int stepIdx = (int)MathHelper.Clamp(_currentStep, 0, StepIsAuto.Length - 1);
+            if (stepIdx == 6) {
                 DrawGeneratorHighlight(sb, px, alpha);
                 return;
             }
-            if (_currentStep != 1) return;
+            if (stepIdx != 1) return;
             if (_npcIndex < 0 || _npcIndex >= Main.maxNPCs) return;
 
             NPC npc = Main.npc[_npcIndex];

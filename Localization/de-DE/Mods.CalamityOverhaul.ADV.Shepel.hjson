@@ -232,6 +232,7 @@ CybTutorialLead: {
 	AwaitingEquip: AWAITING EQUIP...
 	Calibrating: CALIBRATING...
 	NextBtn: NEXT  >
+	// HintStuck: "// HINT: 试着点击高亮的目标区域"
 }
 
 CybCourseHackIntroDialogue: {
@@ -281,7 +282,7 @@ HackTimeTutorialLead: {
 	/* HT_Step5_Body:
 		'''
 		前方有一台热能发电机MK2。
-		重新激活骇客时间，将光标移至发电机并点击选中。
+		再次按下 [N] 重新激活骇客时间。
 		''' */
 	/* HT_Step6_Body:
 		'''
@@ -289,6 +290,25 @@ HackTimeTutorialLead: {
 		点击左键将其锁定为扫描目标。
 		''' */
 	// HT_Step7_Body: 物块扫描接口已解析。右侧面板展示当前物块的可用骇入协议。
+	// HT_HintStuck: "// HINT: 点击 NEXT 按钮可强制跳过"
+}
+
+CybCourseOutroDialogue: {
+	// SpeakerName: SHPC
+	// Line1: 训练完成。所有接口均已完成校准。
+	// Line2: 你已掌握神经直连协议，超梦节点正在脱钩。
+	// Line3: 随时可重置训练，或退出超梦。
+}
+
+CybCourseCompletePanel: {
+	// Title: TRAINING COMPLETE
+	// Subtitle: SUPERDREAM PROTOCOL
+	// Stat1: "[#] SHPC HUD 校准完毕"
+	// Stat2: "[#] 骇客时间校准完毕"
+	// Stat3: "[#] 物块扫描接口校准完毕"
+	// BtnRetry: RETRY
+	// BtnExit: EXIT
+	// Footer: "// 选择以继续 — RETRY 重启训练，EXIT 离开超梦"
 }
 
 ShepelBloodMoonDialogue: {

@@ -21,6 +21,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
         private const int WallThick = 6;
         //玩家所在地表tile Y（走廊顶板上方，= FloorY - RoomHeight - 2）
         internal const int SurfaceY = FloorY - RoomHeight - 2;
+        //玩家初始 spawn tile 坐标（与 ApplyPass 末尾设置保持一致，便于 RETRY 重置位置时复用）
+        internal const int SpawnTileX = 120;
+        internal const int SpawnTileY = SurfaceY;
         //热能发电机MK2放置参数（PlaceObject origin坐标和tile范围）
         internal const int GenMK2OriginX = 140;
         internal const int GenMK2OriginY = SurfaceY - 1;
@@ -51,8 +54,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
             //放置热能发电机MK2作为物块骇入教学目标
             PlaceGeneratorMK2();
             //设置出生点到走廊顶板上方，玩家站在通道顶部地面上
-            Main.spawnTileX = 120;
-            Main.spawnTileY = FloorY - RoomHeight - 2;
+            Main.spawnTileX = SpawnTileX;
+            Main.spawnTileY = SpawnTileY;
         }
 
         //清空全图：移除所有默认方块和背景墙，背景墙清为0（无墙）让天空可见

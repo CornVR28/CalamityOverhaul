@@ -161,6 +161,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             SoundEngine.PlaySound(SoundID.MenuTick);
         }
 
+        //供外部代码（如教程系统）只读查询当前固定二级面板锁定的扇区索引，-1表示未锁定
+        public int PinnedSector => pinnedSector;
+        //当前操作面板是否已展开（用于教程系统判定玩家是否已点击核心）
+        public bool IsExpanded => expanded || expandProgress > 0.6f;
+
         #region 状态
 
         //展开进度，0为收起仅显示核心，1为完全展开

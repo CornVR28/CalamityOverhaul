@@ -1,4 +1,5 @@
 ﻿using CalamityOverhaul.Common;
+using CalamityOverhaul.Content.HackTimes;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Graphics;
 using SubworldLibrary;
@@ -32,7 +33,10 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
             _loadTime = 0f;
         }
 
-        public override void OnExit() { }
+        public override void OnExit() {
+            //离开教程世界时清理兜底状态，避免被带回主世界造成异常
+            HackTime.InfiniteHack = false;
+        }
 
         public override void OnLoad() {
             //固定为永夜，强化赛博朋克氛围
