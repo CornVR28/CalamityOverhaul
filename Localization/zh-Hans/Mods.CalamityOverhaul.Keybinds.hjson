@@ -1,4 +1,4 @@
-ADS_Key.DisplayName: 打开瞄准镜
+﻿ADS_Key.DisplayName: 打开瞄准镜
 QuestLog_Key.DisplayName: 任务书:开关主界面
 QuestManager_Key.DisplayName: 委托任务:开关管理面板
 HeavenfallLongbowSkillKey.DisplayName: 天堂陨落长弓:万象审判
@@ -6,11 +6,11 @@ InfinitePickSkillKey.DisplayName: 无尽之镐:形态切换
 Murasama_TriggerKey.DisplayName: 鬼妖村正:扳机键
 Murasama_DownKey.DisplayName: 鬼妖村正:下砸
 Legend_Domain.DisplayName: 领域展开
+Legend_UIControl.DisplayName: 开关传奇武器HUD
 Halibut_Clone.DisplayName: 大比目鱼:过去身入侵
 Halibut_Restart.DisplayName: 大比目鱼:重启
 Halibut_Superposition.DisplayName: 大比目鱼:叠加
 Halibut_Teleport.DisplayName: 大比目鱼:领域传送
-Halibut_UIControl.DisplayName: 大比目鱼:面板开关
 Halibut_Skill_L.DisplayName: 大比目鱼:向左切换技能
 Halibut_Skill_R.DisplayName: 大比目鱼:向右切换技能
 WeponSkill_Q.DisplayName: 武器:左技能键
@@ -24,5 +24,4 @@ HackTime_Toggle.DisplayName: 骇客时间
 CyberBanish_Key.DisplayName: 赛博空间:放逐
 CyberFreeze_Key.DisplayName: 赛博空间:冻结
 CyberwareSkill_Key.DisplayName: 赛博义体技能
-// VoidTimeShift_Key.DisplayName: Void Time Shift_ Key
-// Legend_UIControl.DisplayName: Legend_ U I Control
+VoidTimeShift_Key.DisplayName: 虚空时间入侵
