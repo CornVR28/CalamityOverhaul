@@ -1,4 +1,4 @@
-ShepelCyberActiveDialogue: {
+﻿ShepelCyberActiveDialogue: {
 	RoleName: SHPC
 	Line_Intro: 领域已激活，主人。当前层级 {0}，外部信号已完全隔离。
 	Line_LayerReport: 领域越深，可干预的目标范围越广，但能量消耗也成倍增加。请注意RAM余量。
@@ -211,23 +211,23 @@ CybCourseIntroDialogue: {
 }
 
 CybTutorialLead: {
-	Step0_Title: Connect SHPC
-	Step0_Body: Equip SHPC to your weapon slot and hold it. The HUD core node will appear in the lower-left corner.
-	Step1_Title: Core Node
-	Step1_Body: Click the core node in the lower-left to expand or collapse the control panel.
+	Step0_Title: 连接 SHPC
+	Step0_Body: 将SHPC装备至武器栏并持握，HUD核心节点即会出现在屏幕左下角。
+	Step1_Title: 核心节点
+	Step1_Body: 点击左下角的核心节点可展开或收起操作面板。
 	Step2_Title: CYBER DOMAIN
-	Step2_Body: Deploy and manage multi-layer cyberspace structures.
+	Step2_Body: 网域 — 部署并管理多层赛博空间层叠结构。
 	Step3_Title: CYBERWARE
-	Step3_Body: View and manage your body augmentation modules.
+	Step3_Body: 赛博改装 — 查看并管理你的机体增强模块。
 	Step4_Title: MODIFY
-	Step4_Body: Install or remove modification parts for your SHPC.
+	Step4_Body: 改造 — 为SHPC安装或拆卸改造零件。
 	Step5_Title: TALK
-	Step5_Body: Establish a direct neural link with SHPC to start a conversation.
+	Step5_Body: 神经链路 — 与SHPC建立直连通讯，开启对话。
 	Step6_Title: ENGRAM CALIBRATED
 	Step6_Body:
 		'''
-		All interfaces parsed.
-		Neural link stable. SHPC is ready.
+		所有接口已解析完毕。
+		神经链路稳定，SHPC已就绪。
 		'''
 	AwaitingEquip: AWAITING EQUIP...
 	Calibrating: CALIBRATING...
