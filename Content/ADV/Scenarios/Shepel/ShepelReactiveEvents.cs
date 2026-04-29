@@ -14,6 +14,11 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel
         BossDefeated = 1 << 0,
         CyberLevelUp = 1 << 1,
         RAMOverload = 1 << 2,
+        BloodMoon = 1 << 3,
+        SolarEclipse = 1 << 4,
+        PlayerRespawned = 1 << 5,
+        LowHealth = 1 << 6,
+        RainStarted = 1 << 7,
         //后续新增事件在此追加，保持2的幂次
     }
 

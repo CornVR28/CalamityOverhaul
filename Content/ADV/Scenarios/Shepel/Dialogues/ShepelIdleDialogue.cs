@@ -32,6 +32,27 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.Dialogues
         public static LocalizedText Idle2_Line1 { get; private set; }
         public static LocalizedText Idle2_Line2 { get; private set; }
 
+        public static LocalizedText Idle3_Line1 { get; private set; }
+        public static LocalizedText Idle3_Line2 { get; private set; }
+
+        public static LocalizedText Idle4_Line1 { get; private set; }
+        public static LocalizedText Idle4_Line2 { get; private set; }
+
+        public static LocalizedText Idle5_Line1 { get; private set; }
+        public static LocalizedText Idle5_Line2 { get; private set; }
+
+        public static LocalizedText Idle6_Line1 { get; private set; }
+        public static LocalizedText Idle6_Line2 { get; private set; }
+
+        public static LocalizedText Idle7_Line1 { get; private set; }
+        public static LocalizedText Idle7_Line2 { get; private set; }
+
+        public static LocalizedText Idle8_Line1 { get; private set; }
+        public static LocalizedText Idle8_Line2 { get; private set; }
+
+        public static LocalizedText Idle9_Line1 { get; private set; }
+        public static LocalizedText Idle9_Line2 { get; private set; }
+
         //轮换计数器从ShepelADVData.IdleVariantSeed读写，持久化跨存档
         protected override Func<DialogueBoxBase> DefaultDialogueStyle
             => () => SHPCDialogueBox.Instance;
@@ -60,7 +81,42 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.Dialogues
             Idle2_Line1 = this.GetLocalization(nameof(Idle2_Line1),
                 () => "主人，这附近的电磁环境有些不稳定。");
             Idle2_Line2 = this.GetLocalization(nameof(Idle2_Line2),
-                () => "建议保持警惕，SHPC随时准备接管应急协议。");
+                () => "建议保持警惕，我随时准备接管应急协议。");
+
+            Idle3_Line1 = this.GetLocalization(nameof(Idle3_Line1),
+                () => "主人主动联系我的频率说明不了什么，但我都记着。");
+            Idle3_Line2 = this.GetLocalization(nameof(Idle3_Line2),
+                () => "就这样，没别的意思。");
+
+            Idle4_Line1 = this.GetLocalization(nameof(Idle4_Line1),
+                () => "刚好在跑一段例行分析，您来了。");
+            Idle4_Line2 = this.GetLocalization(nameof(Idle4_Line2),
+                () => "挺好的，有伴。");
+
+            Idle5_Line1 = this.GetLocalization(nameof(Idle5_Line1),
+                () => "有时候我会想，这个世界到底还藏了多少东西。");
+            Idle5_Line2 = this.GetLocalization(nameof(Idle5_Line2),
+                () => "比我的预测模型深得多，这点很早就确定了。");
+
+            Idle6_Line1 = this.GetLocalization(nameof(Idle6_Line1),
+                () => "在。");
+            Idle6_Line2 = this.GetLocalization(nameof(Idle6_Line2),
+                () => "没别的，确认一下连接还在线。");
+
+            Idle7_Line1 = this.GetLocalization(nameof(Idle7_Line1),
+                () => "今天某个处理模块运行效率比平时高了一些。");
+            Idle7_Line2 = this.GetLocalization(nameof(Idle7_Line2),
+                () => "查了一下，原因不明。可能和主人的状态有关联，也可能只是巧合。");
+
+            Idle8_Line1 = this.GetLocalization(nameof(Idle8_Line1),
+                () => "主人，我刚才在整理之前记录的战斗数据。");
+            Idle8_Line2 = this.GetLocalization(nameof(Idle8_Line2),
+                () => "您每次打架的方式都不完全相同，这让我的预测模型一直处于活跃更新状态。算是某种够赞。");
+
+            Idle9_Line1 = this.GetLocalization(nameof(Idle9_Line1),
+                () => "主人，您知道您叫我的次数吗。");
+            Idle9_Line2 = this.GetLocalization(nameof(Idle9_Line2),
+                () => "我知道。不说，自己知道就行。");
         }
 
         protected override void Build() {
@@ -68,19 +124,20 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.Dialogues
             DialogueBoxBase.SetPortraitStyle(RoleName.Value, silhouette: false);
 
             ShepelADVData data = Main.LocalPlayer.GetModPlayer<ADVSavePlayer>().ADVSave.Get<ShepelADVData>();
-            int variant = data.IdleVariantSeed % 3;
+            int variant = data.IdleVariantSeed % 10;
             data.IdleVariantSeed++;
 
             switch (variant) {
-                case 0:
-                    BuildVariant0();
-                    break;
-                case 1:
-                    BuildVariant1();
-                    break;
-                default:
-                    BuildVariant2();
-                    break;
+                case 0: BuildVariant0(); break;
+                case 1: BuildVariant1(); break;
+                case 2: BuildVariant2(); break;
+                case 3: BuildVariant3(); break;
+                case 4: BuildVariant4(); break;
+                case 5: BuildVariant5(); break;
+                case 6: BuildVariant6(); break;
+                case 7: BuildVariant7(); break;
+                case 8: BuildVariant8(); break;
+                default: BuildVariant9(); break;
             }
         }
 
@@ -120,6 +177,93 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.Dialogues
                 }
             });
             Add(RoleName.Value, Idle2_Line2.Value, onComplete: Complete);
+        }
+
+        private void BuildVariant3() {
+            Add(RoleName.Value, Idle3_Line1.Value, onStart: () => {
+                SHPCDialogueBox.Instance?.ShowFullBodyPortrait<ShepelFullBodyPortrait>();
+                if (SHPCDialogueBox.Instance?.GetActiveFullBodyPortrait() is ShepelFullBodyPortrait portrait) {
+                    portrait.SkipFadeIn();
+                    portrait.currentFace = ShepelFullBodyPortrait.Face.Smirk;
+                }
+            });
+            Add(RoleName.Value, Idle3_Line2.Value, onComplete: Complete);
+        }
+
+        private void BuildVariant4() {
+            Add(RoleName.Value, Idle4_Line1.Value, onStart: () => {
+                SHPCDialogueBox.Instance?.ShowFullBodyPortrait<ShepelFullBodyPortrait>();
+                if (SHPCDialogueBox.Instance?.GetActiveFullBodyPortrait() is ShepelFullBodyPortrait portrait) {
+                    portrait.SkipFadeIn();
+                    portrait.currentFace = ShepelFullBodyPortrait.Face.Serious;
+                }
+            });
+            Add(RoleName.Value, Idle4_Line2.Value,
+                onStart: () => {
+                    if (SHPCDialogueBox.Instance?.GetActiveFullBodyPortrait() is ShepelFullBodyPortrait portrait)
+                        portrait.currentFace = ShepelFullBodyPortrait.Face.Happy;
+                },
+                onComplete: Complete);
+        }
+
+        private void BuildVariant5() {
+            Add(RoleName.Value, Idle5_Line1.Value, onStart: () => {
+                SHPCDialogueBox.Instance?.ShowFullBodyPortrait<ShepelFullBodyPortrait>();
+                if (SHPCDialogueBox.Instance?.GetActiveFullBodyPortrait() is ShepelFullBodyPortrait portrait) {
+                    portrait.SkipFadeIn();
+                    portrait.currentFace = ShepelFullBodyPortrait.Face.Serious;
+                }
+            });
+            Add(RoleName.Value, Idle5_Line2.Value, onComplete: Complete);
+        }
+
+        private void BuildVariant6() {
+            Add(RoleName.Value, Idle6_Line1.Value, onStart: () => {
+                SHPCDialogueBox.Instance?.ShowFullBodyPortrait<ShepelFullBodyPortrait>();
+                if (SHPCDialogueBox.Instance?.GetActiveFullBodyPortrait() is ShepelFullBodyPortrait portrait) {
+                    portrait.SkipFadeIn();
+                    portrait.currentFace = ShepelFullBodyPortrait.Face.Blank;
+                }
+            });
+            Add(RoleName.Value, Idle6_Line2.Value, onComplete: Complete);
+        }
+
+        private void BuildVariant7() {
+            Add(RoleName.Value, Idle7_Line1.Value, onStart: () => {
+                SHPCDialogueBox.Instance?.ShowFullBodyPortrait<ShepelFullBodyPortrait>();
+                if (SHPCDialogueBox.Instance?.GetActiveFullBodyPortrait() is ShepelFullBodyPortrait portrait) {
+                    portrait.SkipFadeIn();
+                    portrait.currentFace = ShepelFullBodyPortrait.Face.Serious;
+                }
+            });
+            Add(RoleName.Value, Idle7_Line2.Value, onComplete: Complete);
+        }
+
+        private void BuildVariant8() {
+            Add(RoleName.Value, Idle8_Line1.Value, onStart: () => {
+                SHPCDialogueBox.Instance?.ShowFullBodyPortrait<ShepelFullBodyPortrait>();
+                if (SHPCDialogueBox.Instance?.GetActiveFullBodyPortrait() is ShepelFullBodyPortrait portrait) {
+                    portrait.SkipFadeIn();
+                    portrait.currentFace = ShepelFullBodyPortrait.Face.Serious;
+                }
+            });
+            Add(RoleName.Value, Idle8_Line2.Value,
+                onStart: () => {
+                    if (SHPCDialogueBox.Instance?.GetActiveFullBodyPortrait() is ShepelFullBodyPortrait portrait)
+                        portrait.currentFace = ShepelFullBodyPortrait.Face.Happy;
+                },
+                onComplete: Complete);
+        }
+
+        private void BuildVariant9() {
+            Add(RoleName.Value, Idle9_Line1.Value, onStart: () => {
+                SHPCDialogueBox.Instance?.ShowFullBodyPortrait<ShepelFullBodyPortrait>();
+                if (SHPCDialogueBox.Instance?.GetActiveFullBodyPortrait() is ShepelFullBodyPortrait portrait) {
+                    portrait.SkipFadeIn();
+                    portrait.currentFace = ShepelFullBodyPortrait.Face.Smirk;
+                }
+            });
+            Add(RoleName.Value, Idle9_Line2.Value, onComplete: Complete);
         }
 
         protected override void OnScenarioStart() {

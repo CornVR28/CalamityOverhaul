@@ -15,5 +15,12 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel
         public int LastDefeatedBossNpcType = -1;
         //是否已触发首次获得SHPC场景
         public bool FirstSHPCObtained;
+        //各地区情境对话的变体轮换种子，满足特殊条件时池子扩大一格
+        public int UnderworldVariantSeed;
+        public int DungeonVariantSeed;
+        public int OceanVariantSeed;
+        public int SnowVariantSeed;
+        public int JungleVariantSeed;
+        public int NightVariantSeed;
     }
 }
