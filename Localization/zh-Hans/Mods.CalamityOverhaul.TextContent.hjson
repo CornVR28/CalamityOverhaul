@@ -194,7 +194,6 @@
 		'''
 	Config_1: 用户
 	Config_2: 修改了服务端配置
-	CWRGun_Scope_Text: 按下[Scope]开镜
 	SkeletronPrime_Text: 别妄图用这愚蠢的东西杀死我!去死吧有机体!
 	Notbound: "[未绑定按键]"
 	DisableMotionInterpolationMessage:

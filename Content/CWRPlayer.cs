@@ -412,15 +412,7 @@ namespace CalamityOverhaul.Content
             }
         }
 
-        public void SetScope() {
-            Item heldItem = Player.GetItem();
-            if (heldItem.type != ItemID.None && heldItem.CWR().Scope) {
-                Player.scope = false;
-            }
-        }
-
         public override void PostUpdate() {
-            SetScope();
 
             if (DontUseItemTime > 0) {
                 DontUseItemTime--;

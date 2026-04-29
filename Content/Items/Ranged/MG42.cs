@@ -24,7 +24,6 @@ namespace CalamityOverhaul.Content.Items.Ranged
             Item.DamageType = DamageClass.Ranged;
             Item.value = Terraria.Item.buyPrice(3, 53, 5, 0);
             Item.crit = 2;
-            Item.CWR().Scope = true;
             Item.SetHeldProj<MG42Held>();
         }
     }

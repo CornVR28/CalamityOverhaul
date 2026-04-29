@@ -51,10 +51,7 @@ namespace CalamityOverhaul.Content
         /// </summary>
         public bool hasHeldNoCanUseBool;
         /// <summary>
-        /// 该物品是否可以开启侦察
-        /// </summary>
-        public bool Scope;
-        /// <summary>
+
         /// 如果该物品被一个收集者视作为目标，那么该值会被设置为对应手臂的的弹幕索引
         /// </summary>
         internal int TargetByCollector = -1;
@@ -137,7 +134,6 @@ namespace CalamityOverhaul.Content
             cwr.IsHeldSwing = IsHeldSwing;
             cwr.heldProjType = heldProjType;
             cwr.hasHeldNoCanUseBool = hasHeldNoCanUseBool;
-            cwr.Scope = Scope;
             cwr.StorageUE = StorageUE;
             cwr.UEValue = UEValue;
             cwr.ConsumeUseUE = ConsumeUseUE;
@@ -353,11 +349,6 @@ namespace CalamityOverhaul.Content
             bool inRItemIndsDict = ItemOverride.ByID.ContainsKey(item.type);
 
             if (CWRLoad.ItemIsGun[item.type]) {
-                if (item.CWR().Scope) {
-                    string newText = CWRLocText.GetTextValue("CWRGun_Scope_Text").Replace("[Scope]", CWRKeySystem.ADS_Key.ToTooltipString());
-                    tooltips.Add(new TooltipLine(CWRMod.Instance, "CWRGun_Scope", newText));
-                }
-
                 if (!inRItemIndsDict) {
                     List<TooltipLine> newTooltips = new(tooltips);
                     List<TooltipLine> prefixTooltips = [];

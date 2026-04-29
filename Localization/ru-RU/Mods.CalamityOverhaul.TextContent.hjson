@@ -193,7 +193,6 @@ CWRLocText: {
 		'''
 	Config_1: Пользователь
 	Config_2: Конфигурация сервера была изменена
-	CWRGun_Scope_Text: Нажмите [Scope], чтобы прицелиться.
 	SkeletronPrime_Text: Не пытайся убить меня этой дурацкой штукой! Умри, организм!
 	Notbound: "[Не назначено]"
 	DisableMotionInterpolationMessage:

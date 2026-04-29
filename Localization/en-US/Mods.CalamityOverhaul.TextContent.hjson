@@ -202,7 +202,6 @@
 		'''
 	Config_1: User
 	Config_2: The server configuration is modified
-	CWRGun_Scope_Text: Press [Scope] to open the lens
 	SkeletronPrime_Text: Don't try to kill me with this stupid thing! Die, organism!
 	Notbound: "[Unbound keys]"
 	DisableMotionInterpolationMessage:

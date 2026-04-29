@@ -1,12 +1,11 @@
-﻿ADS_Key.DisplayName: 打开瞄准镜
-QuestLog_Key.DisplayName: 任务书:开关主界面
+﻿QuestLog_Key.DisplayName: 任务书:开关主界面
 QuestManager_Key.DisplayName: 委托任务:开关管理面板
 HeavenfallLongbowSkillKey.DisplayName: 天堂陨落长弓:万象审判
 InfinitePickSkillKey.DisplayName: 无尽之镐:形态切换
 Murasama_TriggerKey.DisplayName: 鬼妖村正:扳机键
 Murasama_DownKey.DisplayName: 鬼妖村正:下砸
-Legend_Domain.DisplayName: 领域展开
 Legend_UIControl.DisplayName: 开关传奇武器HUD
+Legend_Domain.DisplayName: 领域展开
 Halibut_Clone.DisplayName: 大比目鱼:过去身入侵
 Halibut_Restart.DisplayName: 大比目鱼:重启
 Halibut_Superposition.DisplayName: 大比目鱼:叠加

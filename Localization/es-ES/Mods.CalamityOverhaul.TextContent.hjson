@@ -197,7 +197,6 @@ CWRLocText: {
 		'''
 	Config_1: Usuario
 	Config_2: Se ha modificado la configuración del servidor
-	CWRGun_Scope_Text: Presiona [Scope] para mirar a través del visor
 	// SkeletronPrime_Text: Don't try to kill me with this stupid thing! Die, organism!
 	// Notbound: "[Unbound keys]"
 	/* DisableMotionInterpolationMessage:

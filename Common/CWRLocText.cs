@@ -94,7 +94,6 @@ namespace CalamityOverhaul.Common
         public LocalizedText OverhaulTheBibleUI_Text5 { get; private set; }
         public LocalizedText ArrowHolderUI_Text0 { get; private set; }
         public LocalizedText ArrowHolderUI_Text1 { get; private set; }
-        public LocalizedText CWRGun_Scope_Text { get; private set; }
         public LocalizedText AmmoBox_Text { get; private set; }
         public LocalizedText AmmoBox_Text2 { get; private set; }
         public LocalizedText AmmoBox_Text3 { get; private set; }

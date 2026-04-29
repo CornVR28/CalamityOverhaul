@@ -153,10 +153,6 @@ namespace CalamityOverhaul.Content.RangedModify.Core
         /// </summary>
         protected bool onFireR;
         /// <summary>
-        /// 屏幕位移模长
-        /// </summary>
-        protected float ScopeLeng;
-        /// <summary>
         /// 弹药转化目标
         /// </summary>
         protected int ToTargetAmmo;
@@ -328,20 +324,6 @@ namespace CalamityOverhaul.Content.RangedModify.Core
 
         public override bool? CanDamage() => CanMelee;
 
-        protected void ScopeSrecen() {
-            if (CWRKeySystem.ADS_Key.Old) {
-                ScopeLeng += 4f;
-                if (ScopeLeng > 40f) {
-                    ScopeLeng = 40f;
-                }
-                Main.SetCameraLerp(0.15f, 60);
-                Owner.CWR().OffsetScreenPos = ToMouse.UnitVector() * ScopeLeng;
-            }
-            else {
-                ScopeLeng = 0;
-            }
-        }
-
         private void UpdateSafeMouseInterfaceValue() {
             if (!CanFire) {//只有在玩家不进行开火尝试时才能更改空闲状态
                 if (Projectile.IsOwnedByLocalPlayer()) {
@@ -369,12 +351,6 @@ namespace CalamityOverhaul.Content.RangedModify.Core
             if (CanFire && _safeMouseInterfaceValue) {
                 SetWeaponOccupancyStatus();
                 CWRRef.UpdateRogueStealth(Owner);
-            }
-            if (Projectile.IsOwnedByLocalPlayer() && Item.CWR().Scope) {
-                ScopeSrecen();
-            }
-            else {
-                ScopeLeng = 0;
             }
             UpdateShootState();
             return true;
