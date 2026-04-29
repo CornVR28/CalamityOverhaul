@@ -4,24 +4,23 @@ HeavenfallLongbowSkillKey.DisplayName: Длинный лук Небесного 
 InfinitePickSkillKey.DisplayName: Бесконечная кирка: Смена режима
 Murasama_TriggerKey.DisplayName: Мурасама: Спусковой крючок
 Murasama_DownKey.DisplayName: Мурасама: Удар в падении
-// Legend_Domain.DisplayName: Domain Trigger
+// Legend_UIControl.DisplayName: Toggle Legendary Weapon HUD
+// Legend_Domain.DisplayName: Domain Expansion
 Halibut_Clone.DisplayName: Палтус: Вторжение прошлого
 Halibut_Restart.DisplayName: Палтус: Перезагрузка
 Halibut_Superposition.DisplayName: Палтус: Суперпозиция
 Halibut_Teleport.DisplayName: Палтус: Телепортация в домен
-Halibut_UIControl.DisplayName: Палтус: Панель управления
 Halibut_Skill_L.DisplayName: Палтус: Предыдущий навык
 Halibut_Skill_R.DisplayName: Палтус: Следующий навык
-// WeponSkill_Q.DisplayName: WeponSkill: Q
-// WeponSkill_R.DisplayName: WeponSkill: R
+// WeponSkill_Q.DisplayName: Weapon: Left Skill
+// WeponSkill_R.DisplayName: Weapon: Right Skill
 AriaofTheCosmos_Q.DisplayName: Ария Космоса: Страж звездного кольца
 AriaofTheCosmos_R.DisplayName: Ария Космоса: Гамма-всплеск
 JusticeUnveiled.DisplayName: Явление правосудия: Свершить правосудие
 EmblemOfDread_Dash.DisplayName: Знак Ужаса: Гравитационный Рывок
 EyeOfSingularity_QuantumLeap.DisplayName: Око Сингулярности: Квантовый Скачок
-// HackTime_Toggle.DisplayName: Hack Time_ Toggle
-// CyberBanish_Key.DisplayName: Cyber Banish_ Key
-// CyberFreeze_Key.DisplayName: Cyber Freeze_ Key
-// CyberwareSkill_Key.DisplayName: Cyberware Skill_ Key
-// VoidTimeShift_Key.DisplayName: Void Time Shift_ Key
-// Legend_UIControl.DisplayName: Legend_ U I Control
+// HackTime_Toggle.DisplayName: Toggle Hack Time
+// CyberBanish_Key.DisplayName: Cyberspace: Banish
+// CyberFreeze_Key.DisplayName: Cyberspace: Freeze
+// CyberwareSkill_Key.DisplayName: Cyberware Skill
+// VoidTimeShift_Key.DisplayName: Void Time Shift

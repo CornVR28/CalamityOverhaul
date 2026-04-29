@@ -1,27 +1,26 @@
-// QuestLog_Key.DisplayName: Quest Book: Toggle Main Interface
+// QuestLog_Key.DisplayName: Quest Log: Toggle Main Interface
 // QuestManager_Key.DisplayName: Quest Manager: Toggle Panel
 HeavenfallLongbowSkillKey.DisplayName: Arc long de la chute céleste : Jugement universel
 InfinitePickSkillKey.DisplayName: Pioche infinie : Changement de forme
 Murasama_TriggerKey.DisplayName: Murasama : Touche de déclenchement
 Murasama_DownKey.DisplayName: Murasama : Frappe vers le bas
-// Legend_Domain.DisplayName: Domain Trigger
-// Halibut_Clone.DisplayName: Halibut: Invasion of the Former Self
-// Halibut_Restart.DisplayName: Halibut: Reboot
+// Legend_UIControl.DisplayName: Toggle Legendary Weapon HUD
+// Legend_Domain.DisplayName: Domain Expansion
+// Halibut_Clone.DisplayName: Halibut: Past Self Invasion
+// Halibut_Restart.DisplayName: Halibut: Restart
 // Halibut_Superposition.DisplayName: Halibut: Superposition
 // Halibut_Teleport.DisplayName: Halibut: Domain Teleport
-// Halibut_UIControl.DisplayName: Halibut: UI Control
-// Halibut_Skill_L.DisplayName: Halibut: Switch to the left skill
-// Halibut_Skill_R.DisplayName: Halibut: Switch to the right skill
-// WeponSkill_Q.DisplayName: WeponSkill: Q
-// WeponSkill_R.DisplayName: WeponSkill: R
-// AriaofTheCosmos_Q.DisplayName: Aria of the Cosmos: Star Ring Guardian
-// AriaofTheCosmos_R.DisplayName: Aria of the Cosmos: Gamma Ray Burst
-// JusticeUnveiled.DisplayName: Justice Unveiled: Trigger Judgment
+// Halibut_Skill_L.DisplayName: Halibut: Switch Skill Left
+// Halibut_Skill_R.DisplayName: Halibut: Switch Skill Right
+// WeponSkill_Q.DisplayName: Weapon: Left Skill
+// WeponSkill_R.DisplayName: Weapon: Right Skill
+// AriaofTheCosmos_Q.DisplayName: Aria of The Cosmos: Stellar Ring Guard
+// AriaofTheCosmos_R.DisplayName: Aria of The Cosmos: Gamma Ray Burst
+// JusticeUnveiled.DisplayName: Justice Unveiled: Judgment Trigger
 // EmblemOfDread_Dash.DisplayName: Emblem of Dread: Gravity Dash
 // EyeOfSingularity_QuantumLeap.DisplayName: Eye of Singularity: Quantum Leap
-// HackTime_Toggle.DisplayName: Hack Time_ Toggle
-// CyberBanish_Key.DisplayName: Cyber Banish_ Key
-// CyberFreeze_Key.DisplayName: Cyber Freeze_ Key
-// CyberwareSkill_Key.DisplayName: Cyberware Skill_ Key
-// VoidTimeShift_Key.DisplayName: Void Time Shift_ Key
-// Legend_UIControl.DisplayName: Legend_ U I Control
+// HackTime_Toggle.DisplayName: Toggle Hack Time
+// CyberBanish_Key.DisplayName: Cyberspace: Banish
+// CyberFreeze_Key.DisplayName: Cyberspace: Freeze
+// CyberwareSkill_Key.DisplayName: Cyberware Skill
+// VoidTimeShift_Key.DisplayName: Void Time Shift

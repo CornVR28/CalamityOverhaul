@@ -238,8 +238,8 @@ CybTutorialLead: {
 CybCourseHackIntroDialogue: {
 	// SpeakerName: SHPC
 	// Line1: 接口解析完毕。下一项训练：骇客时间。
-	// Line2: 骇客时间是SHPC专属的神经干预协议。激活后，外部时间流将冻结，你可以从容选择目标并上传定制骇入程序。默认按键是 [N]。
-	// Line3: 前方的测试单元已固定就位。按下 [N] 进入骇客时间，然后点击锁定它。
+	// Line2: 骇客时间是SHPC专属的神经干预协议。激活后，外部时间流将冻结，你可以从容选择目标并上传定制骇入程序。默认按键是 {0}。
+	// Line3: 前方的测试单元已固定就位。按下 {0} 进入骇客时间，然后点击锁定它。
 }
 
 HackTimeTutorialLead: {
@@ -250,7 +250,7 @@ HackTimeTutorialLead: {
 	// HT_Step4_Title: HACK SEQUENCE COMPLETE
 	/* HT_Step0_Body:
 		'''
-		按下 [N] 键进入骇客时间模式。
+		按下 {0} 键进入骇客时间模式。
 		时间将冻结，赛博滤镜叠加于画面。
 		''' */
 	/* HT_Step1_Body:
@@ -282,7 +282,7 @@ HackTimeTutorialLead: {
 	/* HT_Step5_Body:
 		'''
 		前方有一台热能发电机MK2。
-		再次按下 [N] 重新激活骇客时间。
+		再次按下 {0} 重新激活骇客时间。
 		''' */
 	/* HT_Step6_Body:
 		'''
@@ -291,6 +291,8 @@ HackTimeTutorialLead: {
 		''' */
 	// HT_Step7_Body: 物块扫描接口已解析。右侧面板展示当前物块的可用骇入协议。
 	// HT_HintStuck: "// HINT: 点击 NEXT 按钮可强制跳过"
+	// HT_KeyUnbound: 未绑定·按 [N] 临时启用
+	// HT_KeyHintUnbound: "// 提示：未绑定骇客时间快捷键，可在 设置 中绑定。"
 }
 
 CybCourseOutroDialogue: {
