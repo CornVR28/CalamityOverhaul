@@ -27,7 +27,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
         //各步骤的固定元数据（目标键和推进方式）
         private static readonly (string TargetKey, bool IsAuto)[] StepMeta =
         {
-            (null,              true),
+            (null,              false),
             ("SHPC.Core",       false),
             ("SHPC.Sector.0",   false),
             ("SHPC.Sector.1",   false),
@@ -132,9 +132,15 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
                         if (CheckAutoAdvance())
                             AdvanceStep();
                     } else {
-                        if (mouseClicked && _nextBtnRect != Rectangle.Empty
+                        //step 0：玩家自行持握SHPC时自动推进，无需点击NEXT
+                        if (_currentStep == 0 && SHPCUI.Instance?.Active == true) {
+                            AdvanceStep();
+                        } else if (mouseClicked && _nextBtnRect != Rectangle.Empty
                             && _nextBtnRect.Contains(Main.mouseX, Main.mouseY)) {
                             Main.mouseLeft = false;
+                            //玩家直接点NEXT跳过装备步骤，强制将SHPC移至持握槽
+                            if (_currentStep == 0 && SHPCUI.Instance?.Active != true)
+                                ForceEquipSHPC();
                             AdvanceStep();
                         }
                     }
@@ -180,14 +186,31 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
             }
         }
 
-        //各自动推进步骤的完成条件
+        //各自动推进步骤的完成条件（仅IsAuto=true的步骤会调用此方法）
         private static bool CheckAutoAdvance() {
-            int step = _currentStep;
-            if (step == 0)
-                return SHPCUI.Instance?.Active == true;
-            if (step == StepMeta.Length - 1)
+            if (_currentStep == StepMeta.Length - 1)
                 return _stepTimer >= 3.5f;
             return false;
+        }
+
+        //在热键栏或背包中找SHPC并装备到当前持握槽
+        private static void ForceEquipSHPC() {
+            Player p = Main.LocalPlayer;
+            if (p == null || p.dead) return;
+            for (int i = 0; i < 10; i++) {
+                if (p.inventory[i].type == CWRID.Item_SHPC) {
+                    p.selectedItem = i;
+                    return;
+                }
+            }
+            for (int i = 10; i < 58; i++) {
+                if (p.inventory[i].type == CWRID.Item_SHPC) {
+                    var tmp = p.inventory[p.selectedItem];
+                    p.inventory[p.selectedItem] = p.inventory[i];
+                    p.inventory[i] = tmp;
+                    return;
+                }
+            }
         }
 
         private static void AdvanceStep() {
