@@ -46,16 +46,6 @@ namespace CalamityOverhaul.Content.Cyberwares.UIs
         }
 
         /// <summary>
-        ///绘制全屏暗色遮罩
-        /// </summary>
-        public void DrawFullScreenDim(SpriteBatch sb, float alpha) {
-            Texture2D px = CWRAsset.Placeholder_White?.Value;
-            if (px == null) return;
-            sb.Draw(px, new Rectangle(0, 0, Main.screenWidth, Main.screenHeight),
-                new Rectangle(0, 0, 1, 1), Color.Black * (alpha * 0.65f));
-        }
-
-        /// <summary>
         ///绘制面板背景、边框和四角装饰
         /// </summary>
         public void DrawBackground(SpriteBatch sb, float alpha, Rectangle panelRect, Vector2 panelCenter, float globalTimer) {

@@ -292,7 +292,6 @@ namespace CalamityOverhaul.Content.Cyberwares.UIs
             RefreshSlotLabelCache();
 
             //面板底层（背景、网格、扫描线）
-            panelRenderer.DrawFullScreenDim(spriteBatch, currentAlpha);
             panelRenderer.DrawBackground(spriteBatch, currentAlpha, panelRect, panelCenter, globalTimer);
             panelRenderer.DrawGrid(spriteBatch, currentAlpha, panelRect);
             panelRenderer.DrawScanLines(spriteBatch, currentAlpha, panelRect);
