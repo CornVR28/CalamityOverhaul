@@ -652,6 +652,18 @@ SHPCUI: {
 	Cyber_StateOnline: 在线
 	Cyber_StateOffline: 离线
 	Cyber_Hint: "[{0}] 切换领域 / 点击环段切换层级"
+	Cyber_Layer1_Title: 基础接入
+	Cyber_Layer2_Title: 深层下潜
+	Cyber_Layer3_Title: 黑墙穿透
+	Cyber_NoSkill: "// 无特有技能"
+	Cyber_LayerBaseFooter: 基础层 — 仅用于建立领域场域
+	Cyber_SkillUnlocked: "[#] 已解锁"
+	Cyber_SkillLocked: "[X] 需要 {0} 层领域"
+	Cyber_KeyUnbound: 未绑定
+	Cyber_Skill_Banish_Name: 赛博放逐
+	Cyber_Skill_Banish_Desc: 将光标下的敌人送入深层赛博空间
+	Cyber_Skill_Freeze_Name: 领域冻结
+	Cyber_Skill_Freeze_Desc: 锁定领域内所有敌对实体的运动
 	// Modify_Title: MODIFY
 	// Modify_Subtitle: Gun Augmentation
 	// Modify_Description: Install modification parts into SHPC chassis

@@ -5,6 +5,7 @@ using ReLogic.Graphics;
 using System;
 using Terraria;
 using Terraria.GameContent;
+using Terraria.ModLoader;
 
 namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
 {
@@ -28,8 +29,16 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
         //12点方向起始
         private const float StartAngle = -MathHelper.PiOver2;
 
+        //三级技能面板尺寸与定位
+        private const float SkillPanelW = 218f;
+        private const float SkillPanelH = 96f;
+        private const float SkillPanelGapX = 14f;
+        //段悬停时外径最大延展量
+        private const float SegmentExpandMax = 14f;
+
         /// <summary>
         /// 面板内可点击控件枚举
+        /// Skill1/Skill2/Skill3 表示对应层的三级面板悬停区域，仅用于阻止面板收起
         /// </summary>
         public enum HitKind
         {
@@ -38,6 +47,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             Layer1,
             Layer2,
             Layer3,
+            Skill1,
+            Skill2,
+            Skill3,
         }
 
         public ref struct Layout
@@ -45,6 +57,55 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             public Rectangle Panel;
             public Vector2 RingCenter;
             public Rectangle Toggle;
+        }
+
+        //三段环各自的悬停延展进度，0=未悬停 1=完全延展，由 <see cref="UpdateHover"/> 平滑跟随
+        private static readonly float[] segmentExpandAmt = new float[3];
+
+        /// <summary>
+        /// 三级技能面板单条技能定义
+        /// </summary>
+        private readonly struct SkillEntry
+        {
+            public readonly Func<string> Name;
+            public readonly Func<string> Desc;
+            public readonly Func<ModKeybind> Hotkey;
+            public readonly int RequiredLayer;
+
+            public SkillEntry(Func<string> name, Func<string> desc,
+                Func<ModKeybind> hotkey, int requiredLayer) {
+                Name = name;
+                Desc = desc;
+                Hotkey = hotkey;
+                RequiredLayer = requiredLayer;
+            }
+        }
+
+        /// <summary>
+        /// 取出某段对应的技能列表，目前每段最多一个技能
+        /// 数组为延迟初始化，确保本地化文本已就绪
+        /// </summary>
+        private static SkillEntry[] GetLayerSkills(int layer) {
+            switch (layer) {
+                case 2:
+                    return [
+                        new SkillEntry(
+                            () => SHPCUI.Cyber_Skill_Banish_Name.Value,
+                            () => SHPCUI.Cyber_Skill_Banish_Desc.Value,
+                            () => CWRKeySystem.CyberBanish_Key,
+                            requiredLayer: 2)
+                    ];
+                case 3:
+                    return [
+                        new SkillEntry(
+                            () => SHPCUI.Cyber_Skill_Freeze_Name.Value,
+                            () => SHPCUI.Cyber_Skill_Freeze_Desc.Value,
+                            () => CWRKeySystem.CyberFreeze_Key,
+                            requiredLayer: 3)
+                    ];
+                default:
+                    return [];
+            }
         }
 
         /// <summary>
@@ -79,15 +140,54 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
         }
 
         /// <summary>
+        /// 取得指定层(1..3)三级技能面板的屏幕矩形
+        /// 面板锁定于二级面板右侧，按层数纵向分布（上/中/下）
+        /// </summary>
+        private static Rectangle GetSkillPanelRect(in Layout layout, int layer) {
+            int x = layout.Panel.Right + (int)SkillPanelGapX;
+            float ringY = layout.RingCenter.Y;
+            float yOffset = (layer - 2) * 56f;
+            int y = (int)(ringY + yOffset - SkillPanelH * 0.5f);
+            return new Rectangle(x, y, (int)SkillPanelW, (int)SkillPanelH);
+        }
+
+        /// <summary>
+        /// 取得指定段编号(0..2) 对应的悬停延展进度
+        /// </summary>
+        public static float GetSegmentExpand(int segIdx) {
+            if (segIdx < 0 || segIdx > 2) {
+                return 0f;
+            }
+            return segmentExpandAmt[segIdx];
+        }
+
+        /// <summary>
         /// 命中测试
+        /// 优先级：开关按钮 → 三级面板（已展开）→ 三段环 → 无
         /// </summary>
         public static HitKind HitTest(in Layout layout, Vector2 mouse) {
             if (layout.Toggle.Contains((int)mouse.X, (int)mouse.Y)) {
                 return HitKind.Toggle;
             }
+
+            //三级面板命中：仅当对应段已展开时才参与命中，避免无悬停时出现幽灵区
+            for (int i = 0; i < 3; i++) {
+                if (segmentExpandAmt[i] <= 0.05f) {
+                    continue;
+                }
+                Rectangle skillRect = GetSkillPanelRect(layout, i + 1);
+                if (skillRect.Contains((int)mouse.X, (int)mouse.Y)) {
+                    return i == 0 ? HitKind.Skill1
+                        : i == 1 ? HitKind.Skill2
+                        : HitKind.Skill3;
+                }
+            }
+
             Vector2 d = mouse - layout.RingCenter;
             float dist = d.Length();
-            if (dist >= RingInnerR - 4f && dist <= RingOuterR + 6f) {
+            //命中检测半径需考虑当前最大延展量，否则延展时鼠标会落出"环段"
+            float maxOuter = RingOuterR + SegmentExpandMax + 6f;
+            if (dist >= RingInnerR - 4f && dist <= maxOuter) {
                 float ang = MathF.Atan2(d.Y, d.X);
                 float rel = MathHelper.WrapAngle(ang - StartAngle);
                 if (rel < 0f) rel += MathHelper.TwoPi;
@@ -96,6 +196,26 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                 return seg == 0 ? HitKind.Layer1 : seg == 1 ? HitKind.Layer2 : HitKind.Layer3;
             }
             return HitKind.None;
+        }
+
+        /// <summary>
+        /// 平滑更新各段悬停延展进度
+        /// 面板可见时调用，面板收起后会被传入 <see cref="HitKind.None"/>
+        /// 面板整体不可见时强制衰减为 0
+        /// </summary>
+        public static void UpdateHover(HitKind hover, bool panelVisible) {
+            for (int i = 0; i < 3; i++) {
+                bool isHover = panelVisible && (
+                    (i == 0 && (hover == HitKind.Layer1 || hover == HitKind.Skill1))
+                    || (i == 1 && (hover == HitKind.Layer2 || hover == HitKind.Skill2))
+                    || (i == 2 && (hover == HitKind.Layer3 || hover == HitKind.Skill3)));
+                float target = isHover ? 1f : 0f;
+                float speed = isHover ? 0.22f : 0.16f;
+                segmentExpandAmt[i] = MathHelper.Lerp(segmentExpandAmt[i], target, speed);
+                if (MathF.Abs(segmentExpandAmt[i] - target) < 0.003f) {
+                    segmentExpandAmt[i] = target;
+                }
+            }
         }
 
         /// <summary>
@@ -157,6 +277,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             Utils.DrawBorderString(sb, hint,
                 new Vector2(rect.X + (rect.Width - hintSize.X) * 0.5f, rect.Bottom - 12),
                 new Color(220, 130, 120) * (0.85f * a), 0.36f);
+
+            //三级技能面板，最后绘制保证置顶
+            DrawSkillPanels(sb, px, font, layout, panelAlpha, globalAlpha, time);
         }
 
         /// <summary>
@@ -223,12 +346,14 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                 int layer = i + 1;
                 bool lit = Cyberspace.Active && Cyberspace.CurrentLayer >= layer;
                 float litAmt = Cyberspace.GetLayerExpand(i);
-                bool isHover = (i == 0 && hover == HitKind.Layer1)
-                    || (i == 1 && hover == HitKind.Layer2)
-                    || (i == 2 && hover == HitKind.Layer3);
+                bool isHover = (i == 0 && (hover == HitKind.Layer1 || hover == HitKind.Skill1))
+                    || (i == 1 && (hover == HitKind.Layer2 || hover == HitKind.Skill2))
+                    || (i == 2 && (hover == HitKind.Layer3 || hover == HitKind.Skill3));
+                float expand = segmentExpandAmt[i];
 
                 GetSegmentAngles(layer, out float a0, out float a1);
-                DrawRingSegment(sb, px, center, a0, a1, layer, litAmt, lit, isHover, time, a);
+                DrawRingSegment(sb, px, center, a0, a1, layer,
+                    litAmt, lit, isHover, expand, time, a);
             }
 
             //中央层数文本
@@ -249,12 +374,17 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
 
         /// <summary>
         /// 绘制单段环
+        /// expandAmt 表示段位悬停延展进度，影响外径与额外辉光
         /// </summary>
         private static void DrawRingSegment(SpriteBatch sb, Texture2D px,
             Vector2 center, float a0, float a1, int layer,
-            float litAmt, bool litFlag, bool hover, float time, float a) {
+            float litAmt, bool litFlag, bool hover, float expandAmt,
+            float time, float a) {
+            //延展后的实际外径
+            float outerR = RingOuterR + expandAmt * SegmentExpandMax;
+
             //底环
-            SHPCRenderer.DrawArc(sb, px, center, RingInnerR, RingOuterR, a0, a1,
+            SHPCRenderer.DrawArc(sb, px, center, RingInnerR, outerR, a0, a1,
                 new Color(60, 14, 18) * (0.95f * a));
 
             //点亮填充，按litAmt插值半径
@@ -262,7 +392,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                 Color hot = layer == 1 ? new Color(255, 70, 50)
                     : layer == 2 ? new Color(255, 130, 60)
                     : new Color(255, 200, 80);
-                float fillR = MathHelper.Lerp(RingInnerR, RingOuterR, MathHelper.Clamp(litAmt, 0f, 1f));
+                float fillR = MathHelper.Lerp(RingInnerR, outerR, MathHelper.Clamp(litAmt, 0f, 1f));
                 SHPCRenderer.DrawArc(sb, px, center, RingInnerR, fillR, a0, a1, hot * (0.55f * a));
                 SHPCRenderer.DrawArcStroke(sb, px, center, fillR - 1f, a0, a1, 1.6f,
                     hot * (0.95f * a));
@@ -273,13 +403,13 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                 float scanW = (a1 - a0) * 0.18f;
                 float sa0 = MathF.Max(a0, scanA - scanW * 0.5f);
                 float sa1 = MathF.Min(a1, scanA + scanW * 0.5f);
-                SHPCRenderer.DrawArc(sb, px, center, RingInnerR + 2f, RingOuterR - 2f, sa0, sa1,
+                SHPCRenderer.DrawArc(sb, px, center, RingInnerR + 2f, outerR - 2f, sa0, sa1,
                     new Color(255, 240, 220) * (0.45f * litAmt * a));
             }
 
             //悬停柔光
             if (hover) {
-                SHPCRenderer.DrawArc(sb, px, center, RingInnerR, RingOuterR, a0, a1,
+                SHPCRenderer.DrawArc(sb, px, center, RingInnerR, outerR, a0, a1,
                     new Color(255, 200, 180) * (0.18f * a));
             }
 
@@ -287,18 +417,44 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             Color border = litFlag
                 ? new Color(255, 220, 200)
                 : hover ? new Color(255, 150, 130) : new Color(160, 50, 50);
-            SHPCRenderer.DrawArcStroke(sb, px, center, RingOuterR - 0.5f, a0, a1, 1.4f, border * a);
+            SHPCRenderer.DrawArcStroke(sb, px, center, outerR - 0.5f, a0, a1, 1.4f, border * a);
             SHPCRenderer.DrawArcStroke(sb, px, center, RingInnerR + 0.5f, a0, a1, 1.1f, border * (0.6f * a));
 
             //径向封口
             Vector2 dirS = SHPCRenderer.AngleDir(a0);
             Vector2 dirE = SHPCRenderer.AngleDir(a1);
             SHPCRenderer.DrawLine(sb, px,
-                center + dirS * RingInnerR, center + dirS * RingOuterR,
+                center + dirS * RingInnerR, center + dirS * outerR,
                 1.4f, border * (0.7f * a));
             SHPCRenderer.DrawLine(sb, px,
-                center + dirE * RingInnerR, center + dirE * RingOuterR,
+                center + dirE * RingInnerR, center + dirE * outerR,
                 1.4f, border * (0.7f * a));
+
+            //延展时的外缘辉光与小刻度，提供"打开三级面板"的视觉反馈
+            if (expandAmt > 0.02f) {
+                Color glow = layer == 1 ? new Color(255, 90, 70)
+                    : layer == 2 ? new Color(255, 150, 80)
+                    : new Color(255, 210, 100);
+
+                //外缘高光环带
+                SHPCRenderer.DrawArc(sb, px, center, outerR - 1f, outerR + 2.5f, a0, a1,
+                    glow * (0.45f * expandAmt * a));
+                SHPCRenderer.DrawArcStroke(sb, px, center, outerR + 1.2f, a0, a1, 1.4f,
+                    glow * (0.85f * expandAmt * a));
+
+                //三个小指示刻度，沿外缘均匀分布
+                int tickCount = 3;
+                for (int t = 0; t < tickCount; t++) {
+                    float tt = (t + 1f) / (tickCount + 1f);
+                    float tickA = MathHelper.Lerp(a0, a1, tt);
+                    Vector2 td = SHPCRenderer.AngleDir(tickA);
+                    float tickIn = outerR + 2.5f;
+                    float tickOut = outerR + 2.5f + 4f * expandAmt;
+                    SHPCRenderer.DrawLine(sb, px,
+                        center + td * tickIn, center + td * tickOut,
+                        1.5f, glow * (0.95f * expandAmt * a));
+                }
+            }
 
             //段内层数文字
             float midA = (a0 + a1) * 0.5f;
@@ -369,7 +525,245 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
         }
 
         /// <summary>
+        /// 三级技能面板：遍历每段，按延展进度淡入淡出绘制
+        /// </summary>
+        private static void DrawSkillPanels(SpriteBatch sb, Texture2D px,
+            DynamicSpriteFont font, in Layout layout,
+            float panelAlpha, float globalAlpha, float time) {
+            for (int i = 0; i < 3; i++) {
+                float exp = segmentExpandAmt[i];
+                if (exp < 0.02f) {
+                    continue;
+                }
+                int layer = i + 1;
+                Rectangle skillRect = GetSkillPanelRect(layout, layer);
+                DrawSkillPanel(sb, px, font, layout, skillRect, layer,
+                    exp, panelAlpha, globalAlpha, time);
+            }
+        }
+
+        /// <summary>
+        /// 单个三级技能面板绘制
+        /// 由二级面板右侧滑出，附带连接弧线，背景使用半透明深色色板
+        /// </summary>
+        private static void DrawSkillPanel(SpriteBatch sb, Texture2D px,
+            DynamicSpriteFont font, in Layout layout, Rectangle skillRect,
+            int layer, float expandAmt, float panelAlpha, float globalAlpha, float time) {
+            float a = panelAlpha * globalAlpha * MathHelper.Clamp(expandAmt * 1.15f, 0f, 1f);
+            if (a < 0.02f) {
+                return;
+            }
+
+            //入场偏移：从二级面板右侧向外滑出
+            float slide = (1f - expandAmt) * 22f;
+            Rectangle drawRect = new(
+                skillRect.X - (int)slide, skillRect.Y,
+                skillRect.Width, skillRect.Height);
+
+            Color hot = layer == 1 ? new Color(255, 90, 70)
+                : layer == 2 ? new Color(255, 140, 80)
+                : new Color(255, 200, 90);
+
+            //连接弧线：从环段外缘指向面板左边缘中点
+            DrawSkillConnector(sb, px, layout, layer, drawRect, expandAmt, panelAlpha * globalAlpha, hot);
+
+            //投影
+            SHPCRenderer.DrawFilledRect(sb, px,
+                new Rectangle(drawRect.X + 2, drawRect.Y + 3, drawRect.Width, drawRect.Height),
+                new Color(0, 0, 0) * (0.55f * a));
+
+            //背景深色板
+            SHPCRenderer.DrawFilledRect(sb, px, drawRect,
+                new Color(22, 6, 9) * (0.95f * a));
+
+            //左侧色带，颜色随层级
+            SHPCRenderer.DrawFilledRect(sb, px,
+                new Rectangle(drawRect.X, drawRect.Y, 3, drawRect.Height),
+                hot * (0.85f * a));
+
+            //顶部色带
+            SHPCRenderer.DrawFilledRect(sb, px,
+                new Rectangle(drawRect.X, drawRect.Y, drawRect.Width, 2),
+                hot * (0.55f * a));
+
+            //外框 + 四角L形装饰
+            SHPCRenderer.DrawRectStroke(sb, px, drawRect, 1.2f,
+                new Color(140, 30, 30) * (0.9f * a));
+            SHPCRenderer.DrawCornerBrackets(sb, px, drawRect, 7f, 1.4f,
+                hot * (0.95f * a));
+
+            //顶部扫光带，随时间在面板宽度上推进
+            float scanT = (time * 0.45f + layer * 0.33f) % 1f;
+            int scanX = drawRect.X + (int)(scanT * drawRect.Width);
+            int scanW = (int)(drawRect.Width * 0.18f);
+            int scanX0 = Math.Max(drawRect.X, scanX - scanW / 2);
+            int scanX1 = Math.Min(drawRect.Right, scanX + scanW / 2);
+            if (scanX1 > scanX0) {
+                SHPCRenderer.DrawFilledRect(sb, px,
+                    new Rectangle(scanX0, drawRect.Y, scanX1 - scanX0, 2),
+                    new Color(255, 240, 220) * (0.45f * a));
+            }
+
+            //标题：L{layer} · 层名
+            string title = layer == 1 ? SHPCUI.Cyber_Layer1_Title.Value
+                : layer == 2 ? SHPCUI.Cyber_Layer2_Title.Value
+                : SHPCUI.Cyber_Layer3_Title.Value;
+            string layerTag = $"L{layer}";
+            Utils.DrawBorderString(sb, layerTag,
+                new Vector2(drawRect.X + 8, drawRect.Y + 6),
+                hot * a, 0.55f);
+            Vector2 tagSize = font.MeasureString(layerTag) * 0.55f;
+            Utils.DrawBorderString(sb, title,
+                new Vector2(drawRect.X + 8 + tagSize.X + 6, drawRect.Y + 7),
+                new Color(255, 230, 220) * a, 0.48f);
+
+            //右上 ID 码
+            string idCode = $"S{layer}{((int)(time * 7f) % 99):D2}";
+            Vector2 idSize = font.MeasureString(idCode) * 0.36f;
+            Utils.DrawBorderString(sb, idCode,
+                new Vector2(drawRect.Right - 6 - idSize.X, drawRect.Y + 8),
+                hot * (0.75f * a), 0.36f);
+
+            //横向分割线
+            int divY = drawRect.Y + 24;
+            SHPCRenderer.DrawFilledRect(sb, px,
+                new Rectangle(drawRect.X + 6, divY, drawRect.Width - 12, 1),
+                new Color(120, 30, 30) * (0.65f * a));
+
+            //技能列表
+            SkillEntry[] skills = GetLayerSkills(layer);
+            if (skills.Length == 0) {
+                //无特有技能时给出占位提示
+                string none = SHPCUI.Cyber_NoSkill.Value;
+                Vector2 sz = font.MeasureString(none) * 0.42f;
+                Utils.DrawBorderString(sb, none,
+                    new Vector2(drawRect.X + (drawRect.Width - sz.X) * 0.5f,
+                        drawRect.Y + 38),
+                    new Color(170, 110, 100) * a, 0.42f);
+
+                string footer = SHPCUI.Cyber_LayerBaseFooter.Value;
+                Vector2 fsz = font.MeasureString(footer) * 0.36f;
+                Utils.DrawBorderString(sb, footer,
+                    new Vector2(drawRect.X + (drawRect.Width - fsz.X) * 0.5f,
+                        drawRect.Y + 60),
+                    new Color(180, 130, 120) * (0.85f * a), 0.36f);
+            }
+            else {
+                int entryY = divY + 6;
+                for (int i = 0; i < skills.Length; i++) {
+                    DrawSkillEntry(sb, px, font, drawRect, entryY,
+                        skills[i], hot, a);
+                    entryY += 50;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 单条技能条目：左侧名称 + 描述，右侧快捷键徽标，下方解锁状态
+        /// </summary>
+        private static void DrawSkillEntry(SpriteBatch sb, Texture2D px,
+            DynamicSpriteFont font, Rectangle panel, int entryY,
+            SkillEntry entry, Color hot, float a) {
+            bool unlocked = Cyberspace.Active && Cyberspace.CurrentLayer >= entry.RequiredLayer;
+            Color nameCol = unlocked ? new Color(255, 240, 230) : new Color(170, 120, 110);
+            Color descCol = unlocked ? new Color(220, 180, 170) : new Color(140, 90, 85);
+
+            //快捷键徽标，绘制于条目右上
+            ModKeybind keybind = entry.Hotkey?.Invoke();
+            string keyName = keybind != null && keybind.GetAssignedKeys().Count > 0
+                ? keybind.GetAssignedKeys()[0]
+                : SHPCUI.Cyber_KeyUnbound.Value;
+            string keyTxt = $"[{keyName}]";
+            Vector2 keySize = font.MeasureString(keyTxt) * 0.42f;
+            Rectangle keyRect = new(
+                panel.Right - 8 - (int)keySize.X - 8,
+                entryY,
+                (int)keySize.X + 12, 18);
+            Color keyBg = unlocked ? hot * 0.35f : new Color(60, 40, 40) * 0.6f;
+            SHPCRenderer.DrawFilledRect(sb, px, keyRect, keyBg * a);
+            SHPCRenderer.DrawRectStroke(sb, px, keyRect, 1f,
+                (unlocked ? hot : new Color(120, 80, 80)) * (0.9f * a));
+            Color keyTextCol = unlocked ? new Color(255, 245, 230) : new Color(170, 130, 120);
+            Utils.DrawBorderString(sb, keyTxt,
+                new Vector2(keyRect.X + 6, keyRect.Y + 1),
+                keyTextCol * a, 0.42f);
+
+            //技能名（左对齐，避开右上徽标）
+            string name = entry.Name?.Invoke() ?? string.Empty;
+            float nameMaxX = keyRect.X - 4;
+            string trimmedName = TrimToWidth(font, name, 0.46f, nameMaxX - (panel.X + 8));
+            Utils.DrawBorderString(sb, trimmedName,
+                new Vector2(panel.X + 8, entryY + 1),
+                nameCol * a, 0.46f);
+
+            //描述（截断到面板宽度内）
+            string desc = entry.Desc?.Invoke() ?? string.Empty;
+            float descMaxW = panel.Width - 16;
+            string trimmedDesc = TrimToWidth(font, desc, 0.36f, descMaxW);
+            Utils.DrawBorderString(sb, trimmedDesc,
+                new Vector2(panel.X + 8, entryY + 22),
+                descCol * a, 0.36f);
+
+            //解锁状态行
+            string status = unlocked
+                ? SHPCUI.Cyber_SkillUnlocked.Value
+                : string.Format(SHPCUI.Cyber_SkillLocked.Value, entry.RequiredLayer);
+            Color statusCol = unlocked ? new Color(120, 220, 130) : new Color(220, 110, 100);
+            Utils.DrawBorderString(sb, status,
+                new Vector2(panel.X + 8, entryY + 36),
+                statusCol * a, 0.34f);
+        }
+
+        /// <summary>
+        /// 简易文本宽度截断，超出 maxWidth 时尾部加省略号
+        /// </summary>
+        private static string TrimToWidth(DynamicSpriteFont font, string text,
+            float scale, float maxWidth) {
+            if (string.IsNullOrEmpty(text) || maxWidth <= 0f) {
+                return text ?? string.Empty;
+            }
+            if (font.MeasureString(text).X * scale <= maxWidth) {
+                return text;
+            }
+            const string ellipsis = "...";
+            float ellipsisW = font.MeasureString(ellipsis).X * scale;
+            int n = text.Length;
+            while (n > 0 && font.MeasureString(text[..n]).X * scale + ellipsisW > maxWidth) {
+                n--;
+            }
+            return n <= 0 ? ellipsis : text[..n] + ellipsis;
+        }
+
+        /// <summary>
+        /// 段位与三级面板之间的连接弧线，沿径向延伸到面板左边缘中点
+        /// </summary>
+        private static void DrawSkillConnector(SpriteBatch sb, Texture2D px,
+            in Layout layout, int layer, Rectangle drawRect,
+            float expandAmt, float baseAlpha, Color glow) {
+            if (expandAmt < 0.05f) {
+                return;
+            }
+            float a = baseAlpha * MathHelper.Clamp(expandAmt * 1.2f, 0f, 1f);
+            GetSegmentAngles(layer, out float a0, out float a1);
+            float midA = (a0 + a1) * 0.5f;
+            float outerR = RingOuterR + expandAmt * SegmentExpandMax + 5f;
+            Vector2 segPoint = layout.RingCenter + SHPCRenderer.AngleDir(midA) * outerR;
+            Vector2 panelAttach = new(drawRect.X, drawRect.Y + drawRect.Height * 0.5f);
+
+            //中转点：水平在面板左侧附近，给一段内凹折角
+            Vector2 mid = new(panelAttach.X - 12f, panelAttach.Y);
+
+            SHPCRenderer.DrawLine(sb, px, segPoint, mid, 1.2f, glow * (0.45f * a));
+            SHPCRenderer.DrawLine(sb, px, mid, panelAttach, 1.6f, glow * (0.95f * a));
+
+            //端点小亮点
+            SHPCRenderer.DrawDisc(sb, px, panelAttach, 2.2f, 1.6f, glow * (0.9f * a));
+            SHPCRenderer.DrawDisc(sb, px, segPoint, 1.8f, 1.4f, glow * (0.7f * a));
+        }
+
+        /// <summary>
         /// 处理面板控件点击效果
+        /// Skill1/2/3 仅作为悬停穿透判定，不响应点击
         /// </summary>
         public static void HandleClick(HitKind hit, Player owner) {
             switch (hit) {

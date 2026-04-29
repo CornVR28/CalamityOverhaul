@@ -90,46 +90,139 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
         }
 
         //绘制加载界面文字层（由DrawSetup在已开启的SpriteBatch内调用）
+        //设计原则：仅五块内容，从上到下形成清晰焦点动线
+        //  ① 顶部识别码（极淡）   ② 标题+副标题+下划线     ③ 雷达盘心百分比（焦点）
+        //  ④ 状态行                ⑤ 底部进度条标签
         public override void DrawMenu(GameTime gameTime) {
             int sw = Main.screenWidth;
             int sh = Main.screenHeight;
             float progress = MathHelper.SmoothStep(0f, 1f, MathHelper.Clamp(_loadTime / _estDuration, 0f, 0.95f));
 
-            Color yellow = new Color(245, 197, 24);
-            Color dimWhite = new Color(190, 205, 215);
+            Color gold = new Color(245, 197, 24);
+            Color warm = new Color(255, 218, 130);
+            Color dim  = new Color(170, 185, 200);
 
-            var titleFont = FontAssets.DeathText.Value;
-            var bodyFont = FontAssets.MouseText.Value;
+            DynamicSpriteFont titleFont = FontAssets.DeathText.Value;
+            DynamicSpriteFont bodyFont  = FontAssets.MouseText.Value;
+            Texture2D px = VaultAsset.placeholder2.Value;
 
-            //顶部左侧节点标识（对应着色器顶部水平线下方）
-            DynamicSpriteFontExtensionMethods.DrawString(Main.spriteBatch, bodyFont, "CYBERSPACE NODE // 4082-E",
-                new Vector2(sw * 0.032f, sh * 0.095f), dimWhite * 0.52f);
+            DrawTopIdentifier(sw, sh, bodyFont, dim);
+            DrawTitleBlock(sw, sh, titleFont, bodyFont, gold, dim, px);
+            DrawDialPercentage(sw, sh, titleFont, bodyFont, gold, warm, progress);
+            DrawStatus(sw, sh, bodyFont, dim);
+            DrawBarLabel(sw, sh, bodyFont, dim);
+        }
 
-            //中央大标题（两端各加空格形成间距感）
+        //顶部识别码（极淡，纯文字，不闪烁不动）
+        private static void DrawTopIdentifier(int sw, int sh, DynamicSpriteFont font, Color dim) {
+            string tag = "// CYBERSPACE  NODE-4082E";
+            DynamicSpriteFontExtensionMethods.DrawString(Main.spriteBatch, font, tag,
+                new Vector2(sw * 0.034f, sh * 0.090f), dim * 0.50f);
+        }
+
+        //中央标题：主标题（DeathText）+ 副标题 + 下划线锚点
+        private static void DrawTitleBlock(int sw, int sh, DynamicSpriteFont titleFont,
+            DynamicSpriteFont bodyFont, Color gold, Color dim, Texture2D px) {
             string title = "ENGRAM  LINK";
             Vector2 titleSz = titleFont.MeasureString(title);
-            Vector2 titlePos = new Vector2(sw * 0.5f - titleSz.X * 0.5f, sh * 0.296f);
-            //阴影
-            DynamicSpriteFontExtensionMethods.DrawString(Main.spriteBatch, titleFont, title, titlePos + new Vector2(2f, 2f), Color.Black * 0.65f);
-            DynamicSpriteFontExtensionMethods.DrawString(Main.spriteBatch, titleFont, title, titlePos, yellow);
+            Vector2 titlePos = new Vector2(sw * 0.5f - titleSz.X * 0.5f, sh * 0.180f);
 
-            //加载状态文本（显示WorldGen的当前步骤信息）
-            string status = (Main.statusText ?? "").ToUpperInvariant();
-            Vector2 statusSz = bodyFont.MeasureString(status);
-            DynamicSpriteFontExtensionMethods.DrawString(Main.spriteBatch, bodyFont, status,
-                new Vector2(sw * 0.5f - statusSz.X * 0.5f, sh * 0.578f), dimWhite * 0.70f);
+            //仅一层投影（避免色差/抖动等故障特效，保持高质感）
+            DynamicSpriteFontExtensionMethods.DrawString(Main.spriteBatch, titleFont, title,
+                titlePos + new Vector2(2f, 3f), Color.Black * 0.55f);
+            DynamicSpriteFontExtensionMethods.DrawString(Main.spriteBatch, titleFont, title,
+                titlePos, gold);
 
-            //进度百分比（对齐进度条右侧）
-            string progStr = $"{(int)(progress * 100):D2}%";
-            Vector2 progSz = bodyFont.MeasureString(progStr);
-            DynamicSpriteFontExtensionMethods.DrawString(Main.spriteBatch, bodyFont, progStr,
-                new Vector2(sw * 0.970f - progSz.X, sh * 0.908f - progSz.Y * 0.5f), yellow);
+            string sub = "SUPERDREAM   PROTOCOL";
+            Vector2 subSz = bodyFont.MeasureString(sub);
+            Vector2 subPos = new Vector2(sw * 0.5f - subSz.X * 0.5f,
+                                         titlePos.Y + titleSz.Y + 8f);
+            DynamicSpriteFontExtensionMethods.DrawString(Main.spriteBatch, bodyFont, sub,
+                subPos, dim * 0.65f);
 
-            //进度条左侧标签
-            DynamicSpriteFontExtensionMethods.DrawString(Main.spriteBatch, bodyFont, "INITIALIZING NEURAL BRIDGE",
-                new Vector2(sw * 0.030f, sh * 0.908f - bodyFont.MeasureString("A").Y * 0.5f),
-                dimWhite * 0.36f);
+            //下划线锚点：一条克制的金色细线 + 中央菱形（衔接副标题与下方雷达盘）
+            int ulY = (int)(subPos.Y + subSz.Y + 14f);
+            int ulW = (int)(titleSz.X * 0.55f);
+            int ulX = (int)(sw * 0.5f - ulW / 2f);
+            //左右两段，中央留出菱形位置
+            int gap = 6;
+            Main.spriteBatch.Draw(px, new Rectangle(ulX, ulY, ulW / 2 - gap, 1),
+                new Rectangle(0, 0, 1, 1), gold * 0.55f);
+            Main.spriteBatch.Draw(px, new Rectangle(ulX + ulW / 2 + gap, ulY, ulW / 2 - gap, 1),
+                new Rectangle(0, 0, 1, 1), gold * 0.55f);
+
+            //中心菱形（用三段水平像素拼接近似）
+            int cx = ulX + ulW / 2;
+            Main.spriteBatch.Draw(px, new Rectangle(cx - 1, ulY - 2, 2, 1),
+                new Rectangle(0, 0, 1, 1), gold * 0.95f);
+            Main.spriteBatch.Draw(px, new Rectangle(cx - 2, ulY - 1, 4, 1),
+                new Rectangle(0, 0, 1, 1), gold);
+            Main.spriteBatch.Draw(px, new Rectangle(cx - 3, ulY,     6, 1),
+                new Rectangle(0, 0, 1, 1), gold);
+            Main.spriteBatch.Draw(px, new Rectangle(cx - 2, ulY + 1, 4, 1),
+                new Rectangle(0, 0, 1, 1), gold);
+            Main.spriteBatch.Draw(px, new Rectangle(cx - 1, ulY + 2, 2, 1),
+                new Rectangle(0, 0, 1, 1), gold * 0.95f);
+        }
+
+        //雷达盘心：放大百分比数字（焦点）+ 小号"%"符号
+        //数字使用DeathText（与标题同源）以保证排版一致；scale<1降至适合内环框尺寸
+        private static void DrawDialPercentage(int sw, int sh, DynamicSpriteFont titleFont,
+            DynamicSpriteFont bodyFont, Color gold, Color warm, float progress) {
+            int pct = (int)(progress * 100);
+            string num = pct.ToString("D2");
+            Vector2 numSz = titleFont.MeasureString(num);
+            Vector2 scale = new Vector2(0.92f);
+            Vector2 numActSz = new Vector2(numSz.X * scale.X, numSz.Y * scale.Y);
+
+            Vector2 dialCenter = new Vector2(sw * 0.5f, sh * 0.510f);
+            //数字基点：相对中心居中，整体略向左偏移以为右上方"%"符号留位
+            float signOffset = 6f;
+            Vector2 numPos = new Vector2(
+                dialCenter.X - (numActSz.X + signOffset + 14f) * 0.5f,
+                dialCenter.Y - numActSz.Y * 0.5f);
+
+            //投影
+            DynamicSpriteFontExtensionMethods.DrawString(Main.spriteBatch, titleFont, num,
+                numPos + new Vector2(2f, 3f), Color.Black * 0.55f,
+                0f, Vector2.Zero, scale, SpriteEffects.None, 0f);
+            //主体
+            DynamicSpriteFontExtensionMethods.DrawString(Main.spriteBatch, titleFont, num,
+                numPos, gold,
+                0f, Vector2.Zero, scale, SpriteEffects.None, 0f);
+
+            //"%"符号：小号，置于数字右上角，颜色稍暖
+            string sign = "%";
+            Vector2 signSz = bodyFont.MeasureString(sign);
+            Vector2 signPos = new Vector2(
+                numPos.X + numActSz.X + signOffset,
+                numPos.Y + numActSz.Y - signSz.Y - 4f);
+            DynamicSpriteFontExtensionMethods.DrawString(Main.spriteBatch, bodyFont, sign,
+                signPos, warm * 0.92f);
+        }
+
+        //状态行：当前WorldGen进度文本 + 动画省略号；克制的描边阴影
+        private static void DrawStatus(int sw, int sh, DynamicSpriteFont font, Color dim) {
+            string status = (Main.statusText ?? string.Empty).ToUpperInvariant();
+            if (string.IsNullOrEmpty(status)) {
+                status = "ESTABLISHING NEURAL HANDSHAKE";
+            }
+            int dotN = (int)(_loadTime * 1.7f) % 4;
+            string full = status + new string('.', dotN);
+
+            Vector2 sz = font.MeasureString(full);
+            Vector2 pos = new Vector2(sw * 0.5f - sz.X * 0.5f, sh * 0.785f);
+            DynamicSpriteFontExtensionMethods.DrawString(Main.spriteBatch, font, full,
+                pos + new Vector2(1f, 1f), Color.Black * 0.55f);
+            DynamicSpriteFontExtensionMethods.DrawString(Main.spriteBatch, font, full,
+                pos, dim * 0.85f);
+        }
+
+        //底部进度条左侧标签：极简，对应着色器进度条y≈0.928
+        private static void DrawBarLabel(int sw, int sh, DynamicSpriteFont font, Color dim) {
+            string label = "NEURAL  BRIDGE";
+            DynamicSpriteFontExtensionMethods.DrawString(Main.spriteBatch, font, label,
+                new Vector2(sw * 0.034f, sh * 0.892f), dim * 0.55f);
         }
     }
 }
-

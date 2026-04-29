@@ -1,4 +1,4 @@
-﻿ShepelCyberActiveDialogue: {
+ShepelCyberActiveDialogue: {
 	RoleName: SHPC
 	Line_Intro: 领域已激活，主人。当前层级 {0}，外部信号已完全隔离。
 	Line_LayerReport: 领域越深，可干预的目标范围越广，但能量消耗也成倍增加。请注意RAM余量。

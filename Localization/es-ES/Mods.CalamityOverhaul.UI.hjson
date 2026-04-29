@@ -652,6 +652,18 @@ SHPCUI: {
 	// Cyber_StateOnline: ONLINE
 	// Cyber_StateOffline: OFFLINE
 	// Cyber_Hint: "[{0}] Toggle domain / Click ring segment to switch layer"
+	// Cyber_Layer1_Title: BASE ACCESS
+	// Cyber_Layer2_Title: DEEP DIVE
+	// Cyber_Layer3_Title: BLACKWALL BREACH
+	// Cyber_NoSkill: "// No exclusive skills."
+	// Cyber_LayerBaseFooter: Foundation layer — establishes the domain field.
+	// Cyber_SkillUnlocked: "[#] UNLOCKED"
+	// Cyber_SkillLocked: "[X] Requires Layer {0}"
+	// Cyber_KeyUnbound: ?
+	// Cyber_Skill_Banish_Name: CYBER BANISH
+	// Cyber_Skill_Banish_Desc: Send the foe under the cursor into deep cyberspace.
+	// Cyber_Skill_Freeze_Name: DOMAIN FREEZE
+	// Cyber_Skill_Freeze_Desc: Lock every hostile entity inside the domain in place.
 	// Modify_Title: MODIFY
 	// Modify_Subtitle: Gun Augmentation
 	// Modify_Description: Install modification parts into SHPC chassis

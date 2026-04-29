@@ -64,6 +64,18 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
         public static LocalizedText Cyber_StateOnline { get; private set; }
         public static LocalizedText Cyber_StateOffline { get; private set; }
         public static LocalizedText Cyber_Hint { get; private set; }
+        public static LocalizedText Cyber_Layer1_Title { get; private set; }
+        public static LocalizedText Cyber_Layer2_Title { get; private set; }
+        public static LocalizedText Cyber_Layer3_Title { get; private set; }
+        public static LocalizedText Cyber_NoSkill { get; private set; }
+        public static LocalizedText Cyber_LayerBaseFooter { get; private set; }
+        public static LocalizedText Cyber_SkillUnlocked { get; private set; }
+        public static LocalizedText Cyber_SkillLocked { get; private set; }
+        public static LocalizedText Cyber_KeyUnbound { get; private set; }
+        public static LocalizedText Cyber_Skill_Banish_Name { get; private set; }
+        public static LocalizedText Cyber_Skill_Banish_Desc { get; private set; }
+        public static LocalizedText Cyber_Skill_Freeze_Name { get; private set; }
+        public static LocalizedText Cyber_Skill_Freeze_Desc { get; private set; }
 
         public override void SetStaticDefaults() {
             CyberDomain_Title = this.GetLocalization(nameof(CyberDomain_Title), () => "CYBER DOMAIN");
@@ -98,6 +110,18 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             Cyber_StateOnline = this.GetLocalization(nameof(Cyber_StateOnline), () => "ONLINE");
             Cyber_StateOffline = this.GetLocalization(nameof(Cyber_StateOffline), () => "OFFLINE");
             Cyber_Hint = this.GetLocalization(nameof(Cyber_Hint), () => "[{0}] Toggle domain / Click ring segment to switch layer");
+            Cyber_Layer1_Title = this.GetLocalization(nameof(Cyber_Layer1_Title), () => "BASE ACCESS");
+            Cyber_Layer2_Title = this.GetLocalization(nameof(Cyber_Layer2_Title), () => "DEEP DIVE");
+            Cyber_Layer3_Title = this.GetLocalization(nameof(Cyber_Layer3_Title), () => "BLACKWALL BREACH");
+            Cyber_NoSkill = this.GetLocalization(nameof(Cyber_NoSkill), () => "// No exclusive skills.");
+            Cyber_LayerBaseFooter = this.GetLocalization(nameof(Cyber_LayerBaseFooter), () => "Foundation layer — establishes the domain field.");
+            Cyber_SkillUnlocked = this.GetLocalization(nameof(Cyber_SkillUnlocked), () => "[#] UNLOCKED");
+            Cyber_SkillLocked = this.GetLocalization(nameof(Cyber_SkillLocked), () => "[X] Requires Layer {0}");
+            Cyber_KeyUnbound = this.GetLocalization(nameof(Cyber_KeyUnbound), () => "?");
+            Cyber_Skill_Banish_Name = this.GetLocalization(nameof(Cyber_Skill_Banish_Name), () => "CYBER BANISH");
+            Cyber_Skill_Banish_Desc = this.GetLocalization(nameof(Cyber_Skill_Banish_Desc), () => "Send the foe under the cursor into deep cyberspace.");
+            Cyber_Skill_Freeze_Name = this.GetLocalization(nameof(Cyber_Skill_Freeze_Name), () => "DOMAIN FREEZE");
+            Cyber_Skill_Freeze_Desc = this.GetLocalization(nameof(Cyber_Skill_Freeze_Desc), () => "Lock every hostile entity inside the domain in place.");
         }
 
         #endregion
@@ -363,13 +387,18 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             SHPCCyberPanel.Layout cyberLayout = default;
             SHPCModPanel.Layout modLayout = default;
             bool cyberPanelHit = false;
+            bool cyberPanelVisible = false;
             if (pinnedSector >= 0 && pinnedSector < buttons.Count
                 && buttons[pinnedSector].UsesFixedPanel && pinnedPanelProgress > 0.4f) {
                 GetFixedPanelAnchor(pinnedSector, out Vector2 panelAnchor, out float panelMidA);
                 if (pinnedSector == 0) {
                     cyberLayout = SHPCCyberPanel.Compute(panelAnchor, panelMidA, pinnedPanelProgress);
                     cyberHover = SHPCCyberPanel.HitTest(cyberLayout, MousePosition);
-                    cyberPanelHit = cyberLayout.Panel.Contains((int)MousePosition.X, (int)MousePosition.Y);
+                    cyberPanelHit = cyberLayout.Panel.Contains((int)MousePosition.X, (int)MousePosition.Y)
+                        || cyberHover == SHPCCyberPanel.HitKind.Skill1
+                        || cyberHover == SHPCCyberPanel.HitKind.Skill2
+                        || cyberHover == SHPCCyberPanel.HitKind.Skill3;
+                    cyberPanelVisible = true;
                 }
                 else if (pinnedSector == 2) {
                     modLayout = SHPCModPanel.Compute(panelAnchor, panelMidA, pinnedPanelProgress);
@@ -377,6 +406,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                     cyberPanelHit = modLayout.Panel.Contains((int)MousePosition.X, (int)MousePosition.Y);
                 }
             }
+            //每帧推进赛博面板段位悬停延展进度，面板不可见时强制衰减
+            SHPCCyberPanel.UpdateHover(cyberHover, cyberPanelVisible);
 
             //信息面板逻辑：仅在光标悬停按钮时显示（tooltip语义），锁定面板期间隐藏以免重叠
             float targetInfoAlpha = 0f;
@@ -411,8 +442,14 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             //左键处理
             if (keyLeftPressState == KeyPressState.Pressed) {
                 if (cyberHover != SHPCCyberPanel.HitKind.None) {
-                    SHPCCyberPanel.HandleClick(cyberHover, player);
-                    SoundEngine.PlaySound(SoundID.MenuTick);
+                    //三级面板悬停区仅用于阻止收起，不响应点击
+                    bool isSkillHover = cyberHover == SHPCCyberPanel.HitKind.Skill1
+                        || cyberHover == SHPCCyberPanel.HitKind.Skill2
+                        || cyberHover == SHPCCyberPanel.HitKind.Skill3;
+                    if (!isSkillHover) {
+                        SHPCCyberPanel.HandleClick(cyberHover, player);
+                        SoundEngine.PlaySound(SoundID.MenuTick);
+                    }
                 }
                 else if (modHover != SHPCModPanel.HitKind.None) {
                     SHPCModPanel.HandleClick(modHover, player);

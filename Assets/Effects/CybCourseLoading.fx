@@ -1,126 +1,241 @@
 // ============================================================================
-// CybCourseLoading.fx — 超梦接入加载界面背景着色器
-// 赛博朋克2077风格：黑底 + 霓虹黄几何框架 + 双环旋转指示器
-// 全程序化，不含扫描线，低视觉疲劳，高辨识度
+// CybCourseLoading.fx — 超梦接入加载界面背景着色器（精炼版）
+// 设计原则：
+//   ① 单一焦点（中央雷达盘）  ② 极克制配色（金黄主色 + 暖橙高光）
+//   ③ 大量留白与暗场             ④ 微纹理（FBM雾 + 胶片颗粒）建立屏幕质感
+// 全程序化，无外部纹理依赖
 // ============================================================================
 
 float uTime;
 float uProgress;     //0..1 加载进度
-float uAspectRatio;  //屏幕宽高比
+float uAspectRatio;
 
-#define YELLOW float3(0.965, 0.773, 0.094)
-#define CYAN   float3(0.000, 0.898, 1.000)
-#define BASE   float3(0.007, 0.010, 0.022)
+#define TAU 6.28318530
+#define PI  3.14159265
 
-//水平细线SDF（UV空间）
-float hLine(float y, float yCurr, float halfThick)
+#define GOLD float3(0.965, 0.773, 0.094)   //主色（HUD与文字强调）
+#define WARM float3(1.000, 0.860, 0.420)   //暖橙高光（用于前沿/扫描臂）
+
+// ==================== Hash / Noise ====================
+
+float hash21(float2 p)
 {
-    return smoothstep(halfThick, 0.0, abs(yCurr - y));
+    float3 p3 = frac(float3(p.xyx) * float3(0.1031, 0.1030, 0.0973));
+    p3 += dot(p3, p3.yzx + 33.33);
+    return frac((p3.x + p3.y) * p3.z);
 }
 
-//垂直细线SDF（UV空间）
-float vLine(float x, float xCurr, float halfThick)
+float vnoise(float2 p)
 {
-    return smoothstep(halfThick, 0.0, abs(xCurr - x));
+    float2 i = floor(p);
+    float2 f = frac(p);
+    f = f * f * (3.0 - 2.0 * f);
+    float a = hash21(i);
+    float b = hash21(i + float2(1, 0));
+    float c = hash21(i + float2(0, 1));
+    float d = hash21(i + float2(1, 1));
+    return lerp(lerp(a, b, f.x), lerp(c, d, f.x), f.y);
 }
+
+//SDF helpers
+float hLine(float y, float yCurr, float ht) { return smoothstep(ht, 0.0, abs(yCurr - y)); }
+float vLine(float x, float xCurr, float ht) { return smoothstep(ht, 0.0, abs(xCurr - x)); }
+
+// ==================== Main ====================
 
 float4 PSCybCourseLoading(float2 uv : TEXCOORD0) : COLOR0
 {
-    float3 col = BASE;
+    float t = uTime;
+    float aspect = uAspectRatio;
 
     // ====================================================================
-    // Layer 1 — 左侧双竖线：主线+副线，赛博朋克标志性边栏
+    // Layer 0 — 深邃径向渐变底色
+    // 中央略亮的午夜蓝→四角更深；制造"屏幕中心微微发光"的错觉
     // ====================================================================
-    col += YELLOW * vLine(0.013, uv.x, 0.0012);
-    col += YELLOW * vLine(0.023, uv.x, 0.0007) * 0.32;
+    float2 vc = uv - 0.5;
+    float vr = length(vc * float2(1.35, 1.0));
+    float3 deep = float3(0.004, 0.007, 0.018);
+    float3 mid  = float3(0.014, 0.022, 0.046);
+    float3 col  = lerp(mid, deep, smoothstep(0.0, 0.85, vr));
 
     // ====================================================================
-    // Layer 2 — 标题区水平横线（顶部+底部，从左栏延伸到页面中间偏右）
+    // Layer 1 — 极淡架构网格（屏幕空间，非透视）
+    // 仅在交叉处微亮一些，营造"工程图纸"基底感
     // ====================================================================
-    float hl_top = hLine(0.082, uv.y, 0.0013) * step(0.025, uv.x) * step(uv.x, 0.460);
-    col += YELLOW * hl_top * 0.82;
-
-    float hl_bot = hLine(0.858, uv.y, 0.0010) * step(0.025, uv.x) * step(uv.x, 0.560);
-    col += YELLOW * hl_bot * 0.52;
-
-    // ====================================================================
-    // Layer 3 — 进度条（y≈0.908）：深色轨道 + 黄色填充 + 前沿辉光
-    // ====================================================================
-    float barY    = 0.908;
-    float barHalf = 0.009;
-    float barDist = abs(uv.y - barY);
-
-    //深色轨道
-    col += YELLOW * smoothstep(barHalf + 0.004, barHalf, barDist) * 0.09;
-
-    //填充
-    if (uv.x <= uProgress)
     {
-        float fill = smoothstep(barHalf, 0.0, barDist);
-        fill = fill * fill;
-        col = lerp(col, YELLOW, fill * 0.93);
-        //前沿辉光
-        col += YELLOW * exp(-(uProgress - uv.x) * 58.0) * fill * 0.68;
+        float gx = abs(frac(uv.x * 14.0) - 0.5) * 2.0;
+        float gy = abs(frac(uv.y * 9.0) - 0.5) * 2.0;
+        float lineX = smoothstep(0.987, 1.0, gx);
+        float lineY = smoothstep(0.987, 1.0, gy);
+        col += GOLD * (lineX + lineY) * 0.018;
     }
 
-    //轨道边框线（上下各一条）
-    col += YELLOW * smoothstep(0.0014, 0.0, abs(barDist - barHalf)) * 0.40;
+    // ====================================================================
+    // Layer 2 — 微弱数据雾（两八度FBM，营造体积感与缓慢流动）
+    // ====================================================================
+    {
+        float2 nuv = uv * float2(2.5 * aspect, 2.5) + float2(t * 0.04, t * 0.018);
+        float n = vnoise(nuv) * 0.6 + vnoise(nuv * 2.3 - t * 0.02) * 0.4;
+        col += GOLD * (n - 0.5) * 0.022;
+    }
 
     // ====================================================================
-    // Layer 4 — 四角L形标注框（赛博朋克最典型的UI元素）
+    // Layer 3 — 顶部/底部水平基线 + 左侧主栅线（HUD骨架）
+    // 单条主线 + 单点交点装饰，避免双线/多线堆叠
     // ====================================================================
-    float cS = 0.048; //L臂长度
-    float cT = 0.0028;//线宽（UV空间，Y方向）
-    float cM = 0.022; //距屏幕边缘距离
-    float corner = 0.0;
+    col += GOLD * vLine(0.020, uv.x, 0.0011);                    //左主栅线
+    col += GOLD * hLine(0.115, uv.y, 0.0011)
+                * step(0.020, uv.x) * step(uv.x, 0.980) * 0.55;  //顶横线
+    col += GOLD * hLine(0.880, uv.y, 0.0010)
+                * step(0.020, uv.x) * step(uv.x, 0.980) * 0.45;  //底横线
 
-    //左上
-    corner += hLine(cM,     uv.y, cT) * step(cM,       uv.x) * step(uv.x, cM + cS);
-    corner += vLine(cM,     uv.x, cT) * step(cM,       uv.y) * step(uv.y, cM + cS);
-    //右上
-    corner += hLine(cM,     uv.y, cT) * step(1.0-cM-cS, uv.x) * step(uv.x, 1.0-cM);
-    corner += vLine(1.0-cM, uv.x, cT) * step(cM,        uv.y) * step(uv.y, cM + cS);
-    //左下
-    corner += hLine(1.0-cM, uv.y, cT) * step(cM,        uv.x) * step(uv.x, cM + cS);
-    corner += vLine(cM,     uv.x, cT) * step(1.0-cM-cS, uv.y) * step(uv.y, 1.0-cM);
-    //右下
-    corner += hLine(1.0-cM, uv.y, cT) * step(1.0-cM-cS, uv.x) * step(uv.x, 1.0-cM);
-    corner += vLine(1.0-cM, uv.x, cT) * step(1.0-cM-cS, uv.y) * step(uv.y, 1.0-cM);
-
-    col += YELLOW * saturate(corner) * 0.90;
+    //顶横线左端节点点
+    {
+        float dx = (uv.x - 0.020) * aspect;
+        float dy = (uv.y - 0.115);
+        float d = length(float2(dx, dy));
+        col += GOLD * smoothstep(0.0040, 0.0, d) * 1.10;
+    }
 
     // ====================================================================
-    // Layer 5 — 中心旋转指示器（极坐标，宽高比修正使其显示为正圆）
-    //   外圆：4段黄色弧（顺时针）
-    //   内圆：3段青色弧（逆时针）
-    //   中心：黄色脉冲点
+    // Layer 4 — 四角L形角标（单层，精炼）
     // ====================================================================
-    float2 spinCenter = float2(0.500, 0.462);
-    float2 rel = uv - spinCenter;
-    rel.x *= uAspectRatio;
-    float spinR = length(rel);
-    float spinA = atan2(rel.y, rel.x);
-
-    //外层4弧
-    float outerArc = smoothstep(0.0030, 0.0, abs(spinR - 0.063));
-    outerArc *= smoothstep(-0.30, 0.20, sin(spinA * 4.0 - uTime * 2.8));
-    col += YELLOW * outerArc * 0.88;
-
-    //内层3弧（青色，逆转）
-    float innerArc = smoothstep(0.0022, 0.0, abs(spinR - 0.040));
-    innerArc *= smoothstep(-0.30, 0.20, sin(spinA * 3.0 + uTime * 3.6));
-    col += CYAN * innerArc * 0.62;
-
-    //中心点（心跳脉冲）
-    float pulse = 0.58 + 0.42 * abs(sin(uTime * 2.3));
-    col += YELLOW * smoothstep(0.008, 0.0, spinR) * pulse;
+    {
+        float cS = 0.038, cT = 0.0022, cM = 0.026;
+        float corner = 0.0;
+        corner += hLine(cM,         uv.y, cT) * step(cM,        uv.x) * step(uv.x, cM + cS);
+        corner += vLine(cM,         uv.x, cT) * step(cM,        uv.y) * step(uv.y, cM + cS);
+        corner += hLine(cM,         uv.y, cT) * step(1.0-cM-cS, uv.x) * step(uv.x, 1.0-cM);
+        corner += vLine(1.0-cM,     uv.x, cT) * step(cM,        uv.y) * step(uv.y, cM + cS);
+        corner += hLine(1.0-cM,     uv.y, cT) * step(cM,        uv.x) * step(uv.x, cM + cS);
+        corner += vLine(cM,         uv.x, cT) * step(1.0-cM-cS, uv.y) * step(uv.y, 1.0-cM);
+        corner += hLine(1.0-cM,     uv.y, cT) * step(1.0-cM-cS, uv.x) * step(uv.x, 1.0-cM);
+        corner += vLine(1.0-cM,     uv.x, cT) * step(1.0-cM-cS, uv.y) * step(uv.y, 1.0-cM);
+        col += GOLD * saturate(corner) * 0.85;
+    }
 
     // ====================================================================
-    // Post — 轻微暗角（强化屏幕中心聚焦感）
+    // Layer 5 — 中央全息雷达盘（焦点元素，放大）
+    // 自外向内：外环+刻度 → 进度弧 → 内环  
+    // 配合：缓慢扫描臂 + 中心淡晕
     // ====================================================================
-    float2 vigUV = uv - 0.5;
-    float vig = 1.0 - dot(vigUV, vigUV) * 2.0;
-    col *= saturate(vig * 0.5 + 0.58);
+    float2 cc = float2(0.500, 0.510);
+    float2 rel = uv - cc;
+    rel.x *= aspect;
+    float R  = length(rel);
+    float A  = atan2(rel.y, rel.x);
+    float a01 = (A + PI) / TAU;             //0..1
+
+    //中心暖晕（建立焦点的"体积感"）
+    {
+        float halo = exp(-R * 7.0);
+        col += WARM * halo * 0.045;
+    }
+
+    //外引导环
+    float outerR = 0.155;
+    col += GOLD * smoothstep(0.0009, 0.0, abs(R - outerR)) * 0.65;
+
+    //外环刻度：60小 / 12大
+    {
+        float tk    = abs(frac(a01 * 60.0) - 0.5) * 2.0;
+        float bigTk = abs(frac(a01 * 12.0) - 0.5) * 2.0;
+        float tickArea    = smoothstep(0.0048, 0.0, abs(R - (outerR - 0.006)));
+        float bigTickArea = smoothstep(0.0090, 0.0, abs(R - (outerR - 0.010)));
+        col += GOLD * smoothstep(0.94, 1.0, tk)    * tickArea    * 0.55;
+        col += GOLD * smoothstep(0.96, 1.0, bigTk) * bigTickArea * 0.95;
+    }
+
+    //进度弧（顶部起点顺时针填充）
+    float progR = 0.122;
+    {
+        float ang = frac(a01 + 0.25);
+        float arcDist = abs(R - progR);
+        float onRing  = smoothstep(0.0040, 0.0, arcDist);
+        float fill    = step(ang, uProgress);
+        //主弧
+        col += GOLD * onRing * fill * 1.05;
+        //柔肩（向外晕染，营造发光质感）
+        col += GOLD * smoothstep(0.012, 0.004, arcDist) * fill * 0.18;
+        //前沿暖光
+        float lead = smoothstep(0.018, 0.0, abs(ang - uProgress)) * step(ang, uProgress);
+        col += WARM * onRing * lead * 1.20;
+    }
+
+    //内引导环（包住中央百分比文字）
+    float innerR = 0.078;
+    col += GOLD * smoothstep(0.0008, 0.0, abs(R - innerR)) * 0.55;
+
+    //缓慢旋转的扫描臂（柔和扇形，唯一的运动元素）
+    //角速度配合 _loadTime 步进（约1.2/sec real-time），约3秒一圈
+    {
+        float sweepAng = -t * 1.30;
+        float relAng = A - sweepAng;
+        relAng = relAng - TAU * floor((relAng + PI) / TAU);
+        float wedge = smoothstep(0.55, 0.0, abs(relAng));
+        wedge = pow(wedge, 2.6);
+        //仅在外环以内、内环以外的环带显示
+        float radial = smoothstep(outerR, innerR + 0.005, R)
+                     * smoothstep(innerR - 0.005, innerR + 0.020, R);
+        col += WARM * wedge * radial * 0.32;
+        //扫描臂前沿在外环上点亮一颗游标
+        float onOuter = smoothstep(0.0040, 0.0, abs(R - outerR));
+        col += WARM * onOuter * smoothstep(0.40, 0.0, abs(relAng)) * 0.65;
+    }
+
+    // ====================================================================
+    // Layer 6 — 底部进度条（克制、单段平滑填充）
+    // ====================================================================
+    {
+        float barY = 0.928;
+        float barHalf = 0.0070;
+        float barX0 = 0.026;
+        float barX1 = 0.974;
+        float bx = (uv.x - barX0) / (barX1 - barX0);
+        float barDist = abs(uv.y - barY);
+        float onBar = step(0.0, bx) * step(bx, 1.0);
+
+        //深色轨道
+        col += GOLD * smoothstep(barHalf + 0.0030, barHalf, barDist) * 0.06 * onBar;
+
+        //填充
+        if (bx <= uProgress && bx >= 0.0)
+        {
+            float fill = smoothstep(barHalf, 0.0, barDist);
+            //垂直渐变（顶部更亮，模拟发光面板）
+            float vy = (uv.y - (barY - barHalf)) / (2.0 * barHalf);
+            float topHi = smoothstep(0.40, 0.0, vy);
+            col = lerp(col, GOLD, fill * 0.94);
+            col += WARM * fill * topHi * 0.22;
+            //前沿柔光
+            col += WARM * exp(-(uProgress - bx) * 30.0) * fill * 0.55;
+        }
+
+        //上下边缘细线
+        col += GOLD * smoothstep(0.0010, 0.0, abs(barDist - barHalf)) * onBar * 0.50;
+        //左右端帽
+        col += GOLD * vLine(barX0, uv.x, 0.0008)
+                    * smoothstep(0.012, 0.0, barDist) * 0.75;
+        col += GOLD * vLine(barX1, uv.x, 0.0008)
+                    * smoothstep(0.012, 0.0, barDist) * 0.75;
+    }
+
+    // ====================================================================
+    // Layer 7 — 胶片颗粒（极弱，建立屏幕质感）
+    // ====================================================================
+    {
+        float grain = hash21(uv * 1234.5 + frac(t * 7.3));
+        col += (grain - 0.5) * 0.014;
+    }
+
+    // ====================================================================
+    // Post — 暗角（柔和，强化中央焦点）
+    // ====================================================================
+    {
+        float2 v = uv - 0.5;
+        float vig = 1.0 - dot(v, v) * 1.30;
+        col *= saturate(vig * 0.55 + 0.62);
+    }
 
     return float4(saturate(col), 1.0);
 }
