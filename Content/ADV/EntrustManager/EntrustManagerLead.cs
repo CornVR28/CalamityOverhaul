@@ -131,8 +131,14 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
             if (hasBind) {
                 //单行：已绑定
                 string line = $"按 [{displayKey}] 打开委托面板";
-                Utils.DrawBorderString(sb, line, new Vector2(px, py),
-                    new Color(255, 255, 230, (int)(255 * alpha)), 0.85f);
+                int wrapW = (int)((CardW1 - 28) / 0.85f);
+                string[] wrapped = Utils.WordwrapString(line, font, wrapW, 99, out _);
+                foreach (string wl in wrapped) {
+                    if (string.IsNullOrEmpty(wl)) continue;
+                    Utils.DrawBorderString(sb, wl.TrimEnd('-', ' '), new Vector2(px, py),
+                        new Color(255, 255, 230, (int)(255 * alpha)), 0.85f);
+                    py += font.MeasureString("A").Y * 0.85f + 2f;
+                }
             }
             else {
                 float warnScale = 0.82f;
@@ -155,15 +161,25 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
 
                 //可用按键提示（白色主行）
                 string keyLine = $"当前按 [{displayKey}]（默认键）可打开委托面板";
-                Utils.DrawBorderString(sb, keyLine, new Vector2(px, py),
-                    new Color(235, 225, 200, (int)(245 * alpha)), subScale1);
-
-                py += lineH_1 + 1f;
+                int keyWrapW = (int)((CardW1 - 28) / subScale1);
+                string[] keyWrapped = Utils.WordwrapString(keyLine, font, keyWrapW, 99, out _);
+                foreach (string wl in keyWrapped) {
+                    if (string.IsNullOrEmpty(wl)) continue;
+                    Utils.DrawBorderString(sb, wl.TrimEnd('-', ' '), new Vector2(px, py),
+                        new Color(235, 225, 200, (int)(245 * alpha)), subScale1);
+                    py += lineH_1;
+                }
+                py += 1f;
 
                 //设置引导（暗淡提示色）
-                Utils.DrawBorderString(sb, "建议前往  设置 → 控制  中绑定自定义按键",
-                    new Vector2(px, py),
-                    new Color(165, 155, 115, (int)(195 * alpha)), subScale2);
+                int hintWrapW = (int)((CardW1 - 28) / subScale2);
+                string[] hintWrapped = Utils.WordwrapString("建议前往  设置 → 控制  中绑定自定义按键", font, hintWrapW, 99, out _);
+                foreach (string wl in hintWrapped) {
+                    if (string.IsNullOrEmpty(wl)) continue;
+                    Utils.DrawBorderString(sb, wl.TrimEnd('-', ' '), new Vector2(px, py),
+                        new Color(165, 155, 115, (int)(195 * alpha)), subScale2);
+                    py += font.MeasureString("A").Y * subScale2 + 2f;
+                }
             }
 
             if (DrawCloseButton(sb, card, alpha))
@@ -217,10 +233,15 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
                 new Vector2(px + rightKeyW, py),
                 new Color(200, 240, 255, (int)(240 * alpha)), bodyScale);
             py += lineH_b;
-            Utils.DrawBorderString(sb, "     左侧追踪窗口将持续显示任务进度",
-                new Vector2(px, py),
-                new Color(130, 165, 175, (int)(200 * alpha)), subScale);
-            py += lineH_s + 6f;
+            int descWrapW = (int)((CardW2 - 28) / subScale);
+            string[] followWrapped = Utils.WordwrapString("     左侧追踪窗口将持续显示任务进度", font, descWrapW, 99, out _);
+            foreach (string wl in followWrapped) {
+                if (string.IsNullOrEmpty(wl)) continue;
+                Utils.DrawBorderString(sb, wl.TrimEnd('-', ' '), new Vector2(px, py),
+                    new Color(130, 165, 175, (int)(200 * alpha)), subScale);
+                py += lineH_s;
+            }
+            py += 6f;
 
             //挂起说明
             float midKeyW = font.MeasureString("中键单击委托条目").X * bodyScale;
@@ -231,9 +252,13 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
                 new Vector2(px + midKeyW, py),
                 new Color(195, 240, 195, (int)(240 * alpha)), bodyScale);
             py += lineH_b;
-            Utils.DrawBorderString(sb, "     暂时隐藏该委托，不在追踪窗口中显示",
-                new Vector2(px, py),
-                new Color(120, 155, 120, (int)(200 * alpha)), subScale);
+            string[] suspendWrapped = Utils.WordwrapString("     暂时隐藏该委托，不在追踪窗口中显示", font, descWrapW, 99, out _);
+            foreach (string wl in suspendWrapped) {
+                if (string.IsNullOrEmpty(wl)) continue;
+                Utils.DrawBorderString(sb, wl.TrimEnd('-', ' '), new Vector2(px, py),
+                    new Color(120, 155, 120, (int)(200 * alpha)), subScale);
+                py += lineH_s;
+            }
 
             if (DrawConfirmButton(sb, card, alpha))
                 MarkGuideSeen();

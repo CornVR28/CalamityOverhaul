@@ -251,10 +251,15 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
             py += 6f;
 
             //正文（支持换行）
+            int bodyWrapW = (int)((CardW - 28) / bodySc);
             foreach (string line in body.Split('\n')) {
-                Utils.DrawBorderString(sb, line, new Vector2(px2, py),
-                    new Color(175, 215, 225, (int)(215 * alpha)), bodySc);
-                py += lineB;
+                string[] bodyWrapped = Utils.WordwrapString(line, font, bodyWrapW, 99, out _);
+                foreach (string wl in bodyWrapped) {
+                    if (string.IsNullOrEmpty(wl)) continue;
+                    Utils.DrawBorderString(sb, wl.TrimEnd('-', ' '), new Vector2(px2, py),
+                        new Color(175, 215, 225, (int)(215 * alpha)), bodySc);
+                    py += lineB;
+                }
             }
 
             //底部按钮区
