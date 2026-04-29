@@ -22,7 +22,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
         //玩家所在地表tile Y（走廊顶板上方，= FloorY - RoomHeight - 2）
         internal const int SurfaceY = FloorY - RoomHeight - 2;
         //热能发电机MK2放置参数（PlaceObject origin坐标和tile范围）
-        internal const int GenMK2OriginX = 282;
+        internal const int GenMK2OriginX = 40;
         internal const int GenMK2OriginY = SurfaceY - 1;
         internal const int GenMK2TileLeft = GenMK2OriginX - 2;
         internal const int GenMK2TileTop = GenMK2OriginY - 2;
@@ -131,9 +131,21 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
         }
 
         //在走廊右侧放置热能发电机MK2，作为物块扫描教学目标
+        //直接写入帧数据，绕过WorldGen.PlaceObject的放置检查，确保可靠生成
         private static void PlaceGeneratorMK2() {
-            WorldGen.PlaceObject(GenMK2OriginX, GenMK2OriginY,
-                ModContent.TileType<ThermalGeneratorMK2Tile>());
+            int tileType = ModContent.TileType<ThermalGeneratorMK2Tile>();
+            for (int dx = 0; dx < GenMK2TileW; dx++) {
+                for (int dy = 0; dy < GenMK2TileH; dy++) {
+                    int tx = GenMK2TileLeft + dx;
+                    int ty = GenMK2TileTop + dy;
+                    if (!WorldGen.InWorld(tx, ty)) continue;
+                    Tile t = Main.tile[tx, ty];
+                    t.HasTile = true;
+                    t.TileType = (ushort)tileType;
+                    t.TileFrameX = (short)(dx * 18);
+                    t.TileFrameY = (short)(dy * 18);
+                }
+            }
         }
 
         private static void PlaceSolid(int x, int y, ushort tileType) {

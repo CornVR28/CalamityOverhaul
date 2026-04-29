@@ -246,7 +246,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
             if (step == 4)
                 return _stepTimer >= 3.5f;
             if (step == 6)
-                return HackTime.CurrentScanTarget is TileScannable;
+                return HackTime.Active && HackTime.CurrentScanTarget is TileScannable;
             if (step == StepIsAuto.Length - 1)
                 return _stepTimer >= 3.5f;
             return false;
@@ -266,6 +266,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
             _currentStep++;
             _stepTimer = 0f;
             _cardAnim = 0f;
+            //NPC教学阶段结束，清除坦克避免占用后续物块扫描的收标
+            if (_currentStep == 5)
+                CleanupTank();
             if (_currentStep >= StepIsAuto.Length) {
                 _phase = Phase.FadeOut;
                 if (Main.LocalPlayer.TryGetADVSave(out var save))
@@ -430,15 +433,23 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
                 (int)(70 * pulse), (int)(215 * pulse), (int)(245 * pulse),
                 (int)(120 * pulse * alpha));
 
-            //NPC世界坐标转屏幕坐标
-            Vector2 screenPos = npc.position - Main.screenPosition;
-            var npcRect = new Rectangle((int)screenPos.X - 8, (int)screenPos.Y - 8,
-                npc.width + 16, npc.height + 16);
+            //切换到游戏视图矩阵，使世界坐标直接可用
+            sb.End();
+            sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                SamplerState.AnisotropicClamp, DepthStencilState.None,
+                RasterizerState.CullNone, null, Main.GameViewMatrix.TransformationMatrix);
 
-            //外轮廓半透明填充
+            var npcRect = new Rectangle(
+                (int)npc.position.X - 8, (int)npc.position.Y - 8,
+                npc.width + 16, npc.height + 16);
             sb.Draw(px, npcRect, outlineColor);
-            //四角L形括号
             DrawLBrackets(sb, px, npcRect, bracketColor);
+
+            //切回UI矩阵
+            sb.End();
+            sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                SamplerState.AnisotropicClamp, DepthStencilState.None,
+                RasterizerState.CullNone, null, Main.UIScaleMatrix);
         }
 
         //绘制走廊内热能发电机MK2的高亮标注框（step 6等待玩家选中时）
@@ -448,15 +459,26 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
             Color outlineColor = new Color(
                 (int)(70 * pulse), (int)(215 * pulse), (int)(245 * pulse),
                 (int)(120 * pulse * alpha));
-            Vector2 worldPos = new Vector2(
-                CybCourseGen.GenMK2TileLeft * 16f,
-                CybCourseGen.GenMK2TileTop  * 16f) - Main.screenPosition;
+
+            //切换到游戏视图矩阵，直接使用世界坐标
+            sb.End();
+            sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                SamplerState.AnisotropicClamp, DepthStencilState.None,
+                RasterizerState.CullNone, null, Main.GameViewMatrix.TransformationMatrix);
+
             var rect = new Rectangle(
-                (int)worldPos.X - 4, (int)worldPos.Y - 4,
+                CybCourseGen.GenMK2TileLeft * 16 - 4,
+                CybCourseGen.GenMK2TileTop  * 16 - 4,
                 CybCourseGen.GenMK2TileW * 16 + 8,
                 CybCourseGen.GenMK2TileH * 16 + 8);
             sb.Draw(px, rect, outlineColor);
             DrawLBrackets(sb, px, rect, bracketColor);
+
+            //切回UI矩阵
+            sb.End();
+            sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                SamplerState.AnisotropicClamp, DepthStencilState.None,
+                RasterizerState.CullNone, null, Main.UIScaleMatrix);
         }
 
         private static void DrawLBrackets(SpriteBatch sb, Texture2D px, Rectangle r, Color c) {
