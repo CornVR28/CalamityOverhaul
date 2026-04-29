@@ -152,7 +152,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
             if (_shaderTimer > 100f) _shaderTimer -= 100f;
 
             AutoTriggerHackIntro();
-            ResumeFromSave();
 
             bool mouseDown = Main.mouseLeft;
             bool mouseClicked = mouseDown && !_prevMouseLeft;
@@ -199,37 +198,14 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
             }
         }
 
-        //SHPC教学完成且骇客时间介绍未播放时自动触发对话
+        //SHPC教学已完成且当前期間尚未触发过对话时自动启动
         private static void AutoTriggerHackIntro() {
             if (_hackIntroAttempted) return;
             if (_phase != Phase.Inactive) return;
-            if (!Main.LocalPlayer.TryGetADVSave(out var save)) return;
-            var data = save.Get<CybCourseTutorialData>();
-            if (data.SHPCTutorialStep != -1) return;
-            if (data.HackIntroPlayed) return;
+            if (!CybTutorialLead.IsDone) return;
             if (ScenarioManager.IsActive()) return;
             ScenarioManager.Start<CybCourseHackIntroDialogue>();
             _hackIntroAttempted = true;
-        }
-
-        //重新进入世界时从存档恢复骇客时间教程进度
-        private static void ResumeFromSave() {
-            if (_phase != Phase.Inactive) return;
-            if (!Main.LocalPlayer.TryGetADVSave(out var save)) return;
-            var data = save.Get<CybCourseTutorialData>();
-            if (!data.HackIntroPlayed) return;
-            int step = data.HackTutorialStep;
-            if (step < 0) {
-                _phase = Phase.Done;
-                return;
-            }
-            if (step < StepIsAuto.Length) {
-                _phase = Phase.Running;
-                _currentStep = step;
-                _cardAnim = 0f;
-                _stepTimer = 0f;
-                SpawnOrFindTank();
-            }
         }
 
         //各自动推进步骤的完成判定
@@ -266,17 +242,12 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
             _currentStep++;
             _stepTimer = 0f;
             _cardAnim = 0f;
-            //NPC教学阶段结束，清除坦克避免占用后续物块扫描的收标
             if (_currentStep == 5)
                 CleanupTank();
             if (_currentStep >= StepIsAuto.Length) {
                 _phase = Phase.FadeOut;
-                if (Main.LocalPlayer.TryGetADVSave(out var save))
-                    save.Get<CybCourseTutorialData>().HackTutorialStep = -1;
                 return;
             }
-            if (Main.LocalPlayer.TryGetADVSave(out var sv))
-                sv.Get<CybCourseTutorialData>().HackTutorialStep = _currentStep;
         }
 
         public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers) {

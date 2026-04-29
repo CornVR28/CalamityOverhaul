@@ -54,8 +54,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
         }
 
         protected override void OnScenarioComplete() {
-            if (Main.LocalPlayer.TryGetADVSave(out var save))
-                save.Get<CybCourseTutorialData>().IntroPlayed = true;
             CybTutorialLead.BeginSHPCTutorial();
         }
     }

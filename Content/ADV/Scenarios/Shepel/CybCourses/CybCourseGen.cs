@@ -22,7 +22,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
         //玩家所在地表tile Y（走廊顶板上方，= FloorY - RoomHeight - 2）
         internal const int SurfaceY = FloorY - RoomHeight - 2;
         //热能发电机MK2放置参数（PlaceObject origin坐标和tile范围）
-        internal const int GenMK2OriginX = 40;
+        internal const int GenMK2OriginX = 80;
         internal const int GenMK2OriginY = SurfaceY - 1;
         internal const int GenMK2TileLeft = GenMK2OriginX - 2;
         internal const int GenMK2TileTop = GenMK2OriginY - 2;
@@ -51,7 +51,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
             //放置热能发电机MK2作为物块骇入教学目标
             PlaceGeneratorMK2();
             //设置出生点到走廊顶板上方，玩家站在通道顶部地面上
-            Main.spawnTileX = 30;
+            Main.spawnTileX = 60;
             Main.spawnTileY = FloorY - RoomHeight - 2;
         }
 

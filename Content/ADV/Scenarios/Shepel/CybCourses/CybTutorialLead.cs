@@ -65,6 +65,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
         private const int CardH = 118;
         private const int EdgePad = 8;
 
+        public static bool IsDone => _phase == Phase.Done;
+
         private static Phase _phase = Phase.Inactive;
         private static int _currentStep = 0;
         private static float _cardAnim = 0f;
@@ -106,7 +108,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
             if (_shaderTimer > 100f) _shaderTimer -= 100f;
 
             AutoTriggerIntro();
-            ResumeFromSave();
 
             bool mouseDown = Main.mouseLeft;
             bool mouseClicked = mouseDown && !_prevMouseLeft;
@@ -157,34 +158,12 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
             }
         }
 
-        //在开场对话未播放时自动触发
+        //开场对话尚未触发时自动启动，_introAttempted 在 OnWorldUnload 中重置，天然防重入
         private static void AutoTriggerIntro() {
             if (_introAttempted) return;
-            if (!Main.LocalPlayer.TryGetADVSave(out var save)) return;
-            var data = save.Get<CybCourseTutorialData>();
-            if (data.IntroPlayed) return;
             if (ScenarioManager.IsActive()) return;
             ScenarioManager.Start<CybCourseIntroDialogue>();
             _introAttempted = true;
-        }
-
-        //重新进入世界时从存档恢复教程进度
-        private static void ResumeFromSave() {
-            if (_phase != Phase.Inactive) return;
-            if (!Main.LocalPlayer.TryGetADVSave(out var save)) return;
-            var data = save.Get<CybCourseTutorialData>();
-            if (!data.IntroPlayed) return;
-            int step = data.SHPCTutorialStep;
-            if (step < 0) {
-                _phase = Phase.Done;
-                return;
-            }
-            if (step < StepMeta.Length) {
-                _phase = Phase.Running;
-                _currentStep = step;
-                _cardAnim = 0f;
-                _stepTimer = 0f;
-            }
         }
 
         //各自动推进步骤的完成条件（仅IsAuto=true的步骤会调用此方法）
@@ -220,12 +199,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
             _cardAnim = 0f;
             if (_currentStep >= StepMeta.Length) {
                 _phase = Phase.FadeOut;
-                if (Main.LocalPlayer.TryGetADVSave(out var save))
-                    save.Get<CybCourseTutorialData>().SHPCTutorialStep = -1;
-                return;
             }
-            if (Main.LocalPlayer.TryGetADVSave(out var sv))
-                sv.Get<CybCourseTutorialData>().SHPCTutorialStep = _currentStep;
         }
 
         public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers) {
