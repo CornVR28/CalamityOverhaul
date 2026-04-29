@@ -37,7 +37,7 @@ namespace CalamityOverhaul.Content.RAMSystems
     /// </list>
     /// 每帧得出生效值 <see cref="MaxRam"/>/<see cref="RecoveryRate"/> 供外部读取
     /// </summary>
-    internal class CWRRamSystem : ICWRLoader
+    internal class RamSystem : ICWRLoader
     {
         void ICWRLoader.UnLoadData() => UnloadReset();
 

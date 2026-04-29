@@ -665,9 +665,9 @@ SHPCUI: {
 	Cyber_Skill_Freeze_Name: 领域冻结
 	Cyber_Skill_Freeze_Desc: 锁定领域内所有敌对实体的运动
 	Cyber_DrainHeader: RAM 消耗
-	Cyber_DrainPerSec: "-{0}/秒"
-	Cyber_SustainTime: "可维持 ~{0} 秒"
-	Cyber_SustainInfinite: "可维持 ∞"
+	Cyber_DrainPerSec: -{0}/秒
+	Cyber_SustainTime: 可维持 ~{0} 秒
+	Cyber_SustainInfinite: 可维持 ∞
 	// Modify_Title: MODIFY
 	// Modify_Subtitle: Gun Augmentation
 	// Modify_Description: Install modification parts into SHPC chassis
