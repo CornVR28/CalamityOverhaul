@@ -1,12 +1,30 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Terraria;
+using Terraria.ID;
+using Terraria.ModLoader;
 
 namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
 {
-    internal class Mewtwo
+    //超梦接入凭证，消耗后进入CybCourse子世界
+    internal class Mewtwo : ModItem
     {
+        public override void SetDefaults() {
+            Item.width = 28;
+            Item.height = 28;
+            Item.maxStack = 1;
+            Item.useStyle = ItemUseStyleID.HoldUp;
+            Item.useTime = 30;
+            Item.useAnimation = 30;
+            Item.consumable = true;
+            Item.rare = ItemRarityID.Cyan;
+            Item.value = 0;
+        }
+
+        public override bool? UseItem(Player player) {
+            if (player.whoAmI == Main.myPlayer) {
+                CybCourse.Enter();
+            }
+            return true;
+        }
     }
 }
+

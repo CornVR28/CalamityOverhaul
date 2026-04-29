@@ -1047,6 +1047,11 @@ FirstMetShepel: {
 	Choice2Text: ...好久不见
 	Choice1Response: ...是的，只要是您，我每次都愿意认错
 	Choice1Silence: ......
+	CybCourseOfferLine: 超梦程序已成功录入。主人，是否现在接入超梦空间，学习骇客模式及SHPC武器操作规范？
+	CybCourseAcceptText: 现在就去
+	CybCourseDeclineText: 暂时不去
+	CybCourseAcceptResponse: 收到，正在建立神经链路……请保持稳定。
+	CybCourseDeclineResponse: 了解。超梦接入凭证已写入您的存档，主人随时可以自行激活。
 }
 
 TheHerInThePast: {

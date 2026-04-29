@@ -13,5 +13,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel
         public int ReactiveEventFlags;
         //上一次触发BossDefeated事件的NPC类型ID，-1表示尚未记录
         public int LastDefeatedBossNpcType = -1;
+        //是否已触发首次获得SHPC场景
+        public bool FirstSHPCObtained;
     }
 }

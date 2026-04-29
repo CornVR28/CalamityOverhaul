@@ -1,8 +1,12 @@
 ﻿using CalamityOverhaul.Common;
 using CalamityOverhaul.Content.ADV.ADVChoices;
+using CalamityOverhaul.Content.ADV.ADVRewardPopups;
 using CalamityOverhaul.Content.ADV.DialogueBoxs;
 using CalamityOverhaul.Content.ADV.DialogueBoxs.Styles;
+using CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses;
+using Microsoft.Xna.Framework;
 using System;
+using Terraria;
 using Terraria.Audio;
 using Terraria.Localization;
 using Terraria.ModLoader;
@@ -10,7 +14,7 @@ using Terraria.ModLoader;
 namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel
 {
     /// <summary>
-    /// 初遇SHPC场景
+    /// 初遇SHPC场景，首次获得SHPC时触发
     /// </summary>
     internal class FirstMetShepel : ADVScenarioBase, ILocalizedModType
     {
@@ -25,6 +29,13 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel
         public static LocalizedText Choice1Silence { get; private set; }
         public static LocalizedText Choice1Response { get; private set; }
 
+        //Choice1后的超梦接入询问文本
+        public static LocalizedText CybCourseOfferLine { get; private set; }
+        public static LocalizedText CybCourseAcceptText { get; private set; }
+        public static LocalizedText CybCourseDeclineText { get; private set; }
+        public static LocalizedText CybCourseAcceptResponse { get; private set; }
+        public static LocalizedText CybCourseDeclineResponse { get; private set; }
+
         //使用SHPC专属赛博女仆风格
         protected override Func<DialogueBoxBase> DefaultDialogueStyle
             => () => SHPCDialogueBox.Instance;
@@ -36,7 +47,19 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel
             Choice2Text = this.GetLocalization(nameof(Choice2Text), () => "...好久不见");
             Choice1Silence = this.GetLocalization(nameof(Choice1Silence), () => "......");
             Choice1Response = this.GetLocalization(nameof(Choice1Response), () => "...是的，只要是您，我每次都愿意认错");
+            CybCourseOfferLine = this.GetLocalization(nameof(CybCourseOfferLine), () => "超梦程序已成功录入。主人，是否现在接入超梦空间，学习骇客模式及SHPC武器操作规范？");
+            CybCourseAcceptText = this.GetLocalization(nameof(CybCourseAcceptText), () => "现在就去");
+            CybCourseDeclineText = this.GetLocalization(nameof(CybCourseDeclineText), () => "暂时不去");
+            CybCourseAcceptResponse = this.GetLocalization(nameof(CybCourseAcceptResponse), () => "收到，正在建立神经链路……请保持稳定。");
+            CybCourseDeclineResponse = this.GetLocalization(nameof(CybCourseDeclineResponse), () => "了解。超梦接入凭证已写入您的存档，主人随时可以自行激活。");
         }
+
+        protected override ScenarioPolicy ConfigurePolicy() => new() {
+            IsCompleted = save => save.Get<ShepelADVData>().FirstSHPCObtained,
+            MarkCompleted = save => save.Get<ShepelADVData>().FirstSHPCObtained = true,
+            CanTrigger = (save, player) => player.HasItem(CWRID.Item_SHPC),
+            BlockedBy = ScenarioBlockers.Boss | ScenarioBlockers.BossRush | ScenarioBlockers.ActiveScenario,
+        };
 
         protected override void Build() {
             DialogueBoxBase.RegisterPortrait(RolenameSHPC.Value, texture: null);
@@ -59,6 +82,11 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel
 
         public void Choice1() {
             ScenarioManager.Start<FirstMetShepel_Choice1>();
+            Complete();
+        }
+
+        public void Choice2() {
+            //TODO
             Complete();
         }
 
@@ -89,11 +117,105 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel
                     portrait.currentFace = ShepelFullBodyPortrait.Face.None;
                 }
             }
+            protected override void OnScenarioComplete() {
+                ScenarioManager.Start<FirstMetShepel_CybCourseOffer>();
+            }
         }
 
-        public void Choice2() {
-            //TODO: 选择2的后续场景
-            Complete();
+        //Choice1结束后的超梦接入询问场景
+        private class FirstMetShepel_CybCourseOffer : ADVScenarioBase
+        {
+            public override string Key => nameof(FirstMetShepel_CybCourseOffer);
+            protected override Func<DialogueBoxBase> DefaultDialogueStyle
+                => () => SHPCDialogueBox.Instance;
+            protected override void Build() {
+                AddWithChoices(RolenameSHPC.Value, CybCourseOfferLine.Value, [
+                    new Choice(CybCourseAcceptText.Value, AcceptCybCourse),
+                    new Choice(CybCourseDeclineText.Value, DeclineCybCourse),
+                ], choiceBoxStyle: ADVChoiceBox.ChoiceBoxStyle.SHPC);
+            }
+            protected override void OnScenarioStart() {
+                SHPCDialogueBox.Instance?.ShowFullBodyPortrait<ShepelFullBodyPortrait>();
+                if (SHPCDialogueBox.Instance?.GetActiveFullBodyPortrait() is ShepelFullBodyPortrait portrait) {
+                    portrait.SkipFadeIn();
+                    portrait.currentFace = ShepelFullBodyPortrait.Face.None;
+                }
+            }
+            public void AcceptCybCourse() {
+                ScenarioManager.Start<FirstMetShepel_CybCourseAccept>();
+                Complete();
+            }
+            public void DeclineCybCourse() {
+                ScenarioManager.Start<FirstMetShepel_CybCourseDecline>();
+                Complete();
+            }
+        }
+
+        //接受超梦，进入CybCourse
+        private class FirstMetShepel_CybCourseAccept : ADVScenarioBase
+        {
+            public override string Key => nameof(FirstMetShepel_CybCourseAccept);
+            protected override Func<DialogueBoxBase> DefaultDialogueStyle
+                => () => SHPCDialogueBox.Instance;
+            protected override void Build() {
+                Add(RolenameSHPC.Value, CybCourseAcceptResponse.Value, onStart: () => {
+                    if (SHPCDialogueBox.Instance?.GetActiveFullBodyPortrait() is ShepelFullBodyPortrait portrait) {
+                        portrait.currentFace = ShepelFullBodyPortrait.Face.Serious;
+                    }
+                });
+            }
+            protected override void OnScenarioStart() {
+                SHPCDialogueBox.Instance?.ShowFullBodyPortrait<ShepelFullBodyPortrait>();
+                if (SHPCDialogueBox.Instance?.GetActiveFullBodyPortrait() is ShepelFullBodyPortrait portrait) {
+                    portrait.SkipFadeIn();
+                    portrait.currentFace = ShepelFullBodyPortrait.Face.None;
+                }
+            }
+            protected override void OnScenarioComplete() {
+                if (Main.myPlayer == Main.LocalPlayer.whoAmI) {
+                    CybCourse.Enter();
+                }
+            }
+        }
+
+        //拒绝超梦，给予Mewtwo道具
+        private class FirstMetShepel_CybCourseDecline : ADVScenarioBase
+        {
+            public override string Key => nameof(FirstMetShepel_CybCourseDecline);
+            protected override Func<DialogueBoxBase> DefaultDialogueStyle
+                => () => SHPCDialogueBox.Instance;
+            protected override void Build() {
+                Add(RolenameSHPC.Value, CybCourseDeclineResponse.Value, onStart: () => {
+                    if (SHPCDialogueBox.Instance?.GetActiveFullBodyPortrait() is ShepelFullBodyPortrait portrait) {
+                        portrait.currentFace = ShepelFullBodyPortrait.Face.Blank;
+                    }
+                    ADVRewardPopup.ShowReward(
+                        ModContent.ItemType<Mewtwo>(),
+                        1,
+                        "",
+                        appearDuration: 24,
+                        holdDuration: -1,
+                        giveDuration: 16,
+                        requireClick: true,
+                        anchorProvider: () => {
+                            var rect = DialogueUIRegistry.Current?.GetPanelRect() ?? Rectangle.Empty;
+                            if (rect == Rectangle.Empty) {
+                                return new Vector2(Main.screenWidth / 2f, Main.screenHeight * 0.45f);
+                            }
+                            return new Vector2(rect.Center.X, rect.Y - 70f);
+                        },
+                        offset: Vector2.Zero,
+                        styleProvider: () => ADVRewardPopup.RewardStyle.Draedon
+                    );
+                });
+            }
+            protected override void OnScenarioStart() {
+                SHPCDialogueBox.Instance?.ShowFullBodyPortrait<ShepelFullBodyPortrait>();
+                if (SHPCDialogueBox.Instance?.GetActiveFullBodyPortrait() is ShepelFullBodyPortrait portrait) {
+                    portrait.SkipFadeIn();
+                    portrait.currentFace = ShepelFullBodyPortrait.Face.None;
+                }
+            }
         }
     }
 }
