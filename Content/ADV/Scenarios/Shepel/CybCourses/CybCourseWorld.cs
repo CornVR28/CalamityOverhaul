@@ -29,13 +29,30 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
         //预估加载时长（秒），进度条基于此动画，超出后钉在95%
         private const float _estDuration = 5.5f;
 
+        //入场揭示动画累计时间。-1 = 等待真实进入（OnEnter 后、首帧 Update 前）
+        //0..EntryRevealDuration = 进行中；>= EntryRevealDuration = 演出结束
+        private static float _entryRevealTime = -1f;
+        //入场演出阶段时长（秒）
+        private const float EntryHoldDuration = 0.18f;     //开场短暂停留（暗场，蓄势）
+        private const float EntryExpandDuration = 1.95f;   //波前从中心扩散到屏幕外
+        private const float EntryFadeDuration = 0.55f;     //尾声整体淡出
+        private const float EntryRevealDuration =
+            EntryHoldDuration + EntryExpandDuration + EntryFadeDuration;
+
+        public static bool EntryRevealActive =>
+            _entryRevealTime >= 0f && _entryRevealTime < EntryRevealDuration;
+
         public override void OnEnter() {
             _loadTime = 0f;
+            //置为哨兵值，等首帧 Update 真正进入游戏时再启动
+            _entryRevealTime = -1f;
         }
 
         public override void OnExit() {
             //离开教程世界时清理兜底状态，避免被带回主世界造成异常
             HackTime.InfiniteHack = false;
+            //避免下次进入时误用旧值
+            _entryRevealTime = -1f;
         }
 
         public override void OnLoad() {
@@ -48,7 +65,16 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
             Main.rockLayer = Height - 4;
         }
 
-        public override void Update() { }
+        public override void Update() {
+            //子世界 Update 仅在真正游戏帧调用（加载阶段不调用），适合作为入场演出的起点
+            if (_entryRevealTime < 0f) {
+                _entryRevealTime = 0f;
+            }
+            else if (_entryRevealTime < EntryRevealDuration) {
+                //Terraria 子世界帧率固定 60Hz
+                _entryRevealTime += 1f / 60f;
+            }
+        }
 
         //完全接管加载界面的绘制逻辑
         public override void DrawSetup(GameTime gameTime) {
@@ -68,6 +94,59 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
             DrawMenu(gameTime);
             Main.DrawCursor(Main.DrawThickCursor());
             Main.spriteBatch.End();
+        }
+
+        //入场演出：进入子世界后第一秒到第二秒之间，从屏幕中心扩散一圈六角能量网格揭示真实场景
+        //由 CybCourseEntryRevealLayer 在最高层级调用，盖住一切常规UI；演出结束后自动停止
+        internal static void DrawEntryRevealOverlay(SpriteBatch sb) {
+            if (!EntryRevealActive) {
+                return;
+            }
+            var shader = EffectLoader.CybCourseEntryReveal?.Value;
+            if (shader == null || VaultAsset.placeholder2 == null || VaultAsset.placeholder2.IsDisposed) {
+                return;
+            }
+
+            float t = _entryRevealTime;
+            //三段式时间到 reveal 的映射：
+            //  [0, Hold]                       → reveal = 0（屏幕被蜂窝完全覆盖，蓄势）
+            //  [Hold, Hold+Expand]             → reveal 从 0 平滑到 1.0（波前扩散）
+            //  [Hold+Expand, total]            → reveal 从 1.0 推进到 1.18（整体淡出）
+            float reveal;
+            if (t < EntryHoldDuration) {
+                reveal = 0f;
+            }
+            else if (t < EntryHoldDuration + EntryExpandDuration) {
+                float u = (t - EntryHoldDuration) / EntryExpandDuration;
+                //先慢起步，过中段后稍快推进，再略微减速；让能量波前充满"展开"的仪式感
+                reveal = MathHelper.SmoothStep(0f, 1f, u);
+            }
+            else {
+                float u = (t - EntryHoldDuration - EntryExpandDuration) / EntryFadeDuration;
+                reveal = 1f + MathHelper.Clamp(u, 0f, 1f) * 0.18f;
+            }
+
+            int w = Main.screenWidth;
+            int h = Main.screenHeight;
+
+            //接管 SpriteBatch，使用 Immediate 模式以应用 shader
+            sb.End();
+            sb.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend,
+                SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
+                null, Main.UIScaleMatrix);
+
+            shader.Parameters["uTime"]?.SetValue(t);
+            shader.Parameters["uReveal"]?.SetValue(reveal);
+            shader.Parameters["uAspectRatio"]?.SetValue((float)w / h);
+            shader.CurrentTechnique.Passes[0].Apply();
+
+            sb.Draw(VaultAsset.placeholder2.Value, new Rectangle(0, 0, w, h), Color.White);
+
+            sb.End();
+            //还原至默认 Deferred 状态，匹配 Terraria 界面层调用约定
+            sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
+                null, Main.UIScaleMatrix);
         }
 
         //绘制全屏着色器背景（在DrawSetup内、文字层之前调用）
