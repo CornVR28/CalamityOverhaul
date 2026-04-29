@@ -1,4 +1,5 @@
 ﻿using CalamityOverhaul.Common;
+using CalamityOverhaul.Content.RAMSystem;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;
@@ -29,10 +30,14 @@ namespace CalamityOverhaul.Content.HackTimes
         private const float OuterR = InnerR + ArcThick;
         //弧顶距屏幕顶部
         private const float TopY = 76f;
-        //弧线水平像素跨度
-        private const float ArcSpanPx = 400f;
         //格间间隙弧度
         private const float CellGap = 0.007f;
+        //单格基准角度：让 8 格视觉上对应旧的 400px 跨度
+        //BaseCellAngle ≈ (asin(200/572)*2 - 7*CellGap)/8 ≈ 0.0826 rad
+        private const float BaseCellAngle = 0.0826f;
+        //最大允许的总扫掠角（防止 HUD 在屏幕顶端横向溢出）
+        //≈ π/2，对应 ArcSpanPx ≈ 808px，足以容纳 16 格视觉拉伸
+        private const float MaxTotalSweep = MathHelper.PiOver2;
 
         //外围装饰环（刻度轨道）
         private const float DecoGap = 6f;
@@ -47,8 +52,27 @@ namespace CalamityOverhaul.Content.HackTimes
         private const float FWarn = 0.50f;
         private const float FHex = 0.42f;
 
-        //弧线半扫掠角（由跨度和中径计算）
-        private float HalfSweep() => MathF.Asin(ArcSpanPx * 0.5f / (InnerR + ArcThick * 0.5f));
+        /// <summary>
+        /// 根据 maxRam 推导当前帧的弧线几何参数
+        /// <br/>常规情况下保持单格视觉宽度恒定，整体跨度随 maxRam 线性增长
+        /// <br/>超过软上限后反向收紧每格使整体跨度饱和
+        /// </summary>
+        private static void ComputeArcGeom(int maxRam,
+            out float halfSweep, out float cellAngle, out float arcSpanPx) {
+            float targetSweep = BaseCellAngle * maxRam + (maxRam - 1) * CellGap;
+            float totalSweep;
+            if (targetSweep <= MaxTotalSweep) {
+                cellAngle = BaseCellAngle;
+                totalSweep = targetSweep;
+            }
+            else {
+                totalSweep = MaxTotalSweep;
+                cellAngle = (MaxTotalSweep - (maxRam - 1) * CellGap) / maxRam;
+            }
+            halfSweep = totalSweep * 0.5f;
+            //ArcSpanPx 由当前半扫掠角与中径反算，用于水平居中布局与 quad 大小
+            arcSpanPx = 2f * (InnerR + ArcThick * 0.5f) * MathF.Sin(halfSweep);
+        }
 
         public void Update() {
             timer += 0.016f;
@@ -58,7 +82,7 @@ namespace CalamityOverhaul.Content.HackTimes
             if (flyInProgress > 0.995f) flyInProgress = 1f;
             if (flyInProgress < 0.005f) flyInProgress = 0f;
 
-            displayRam = MathHelper.Lerp(displayRam, HackTimeRAM.CurrentRam, 0.12f);
+            displayRam = MathHelper.Lerp(displayRam, CWRRamSystem.CurrentRam, 0.12f);
         }
 
         public void Draw(SpriteBatch sb) {
@@ -70,16 +94,14 @@ namespace CalamityOverhaul.Content.HackTimes
             float alpha = HackTime.Intensity * flyInProgress;
             if (alpha < 0.01f) return;
 
-            int maxRam = HackTimeRAM.MaxRam;
+            int maxRam = CWRRamSystem.MaxRam;
             if (maxRam <= 0) return;
 
-            //弧线参数计算
-            float halfSweep = HalfSweep();
+            //弧线参数计算（随 maxRam 动态拉伸/收紧）
+            ComputeArcGeom(maxRam, out float halfSweep, out float cellAngle, out float arcSpanPx);
             float midAngle = -MathHelper.PiOver2; //正上方
             float aStart = midAngle - halfSweep;
             float totalSweep = halfSweep * 2f;
-            float totalGapAngle = (maxRam - 1) * CellGap;
-            float cellAngle = (totalSweep - totalGapAngle) / maxRam;
 
             //弧线中心（在弧线正下方,使弧线呈穹顶拱形）
             //水平居中于屏幕顶部中间偏上位置，作为整个骇客HUD的主焦点
@@ -93,7 +115,7 @@ namespace CalamityOverhaul.Content.HackTimes
 
             //优先使用着色器渲染主弧带+装饰环
             bool shaderOK = TryDrawShaderArc(sb, px, center, aStart, cellAngle,
-                totalSweep, maxRam, alpha);
+                totalSweep, arcSpanPx, maxRam, alpha);
 
             if (!shaderOK) {
                 //CPU回退路径
@@ -113,7 +135,7 @@ namespace CalamityOverhaul.Content.HackTimes
         //使用HackRamArc.fx绘制主弧带+内外装饰环
         //通过单个quad把弧形几何、格子、扫描、故障等全部用GPU完成
         private bool TryDrawShaderArc(SpriteBatch sb, Texture2D px, Vector2 center,
-            float aStart, float cellAngle, float totalSweep, int maxRam, float alpha) {
+            float aStart, float cellAngle, float totalSweep, float arcSpanPx, int maxRam, float alpha) {
             Effect effect = EffectLoader.HackRamArc?.Value;
             if (effect == null) return false;
 
@@ -129,9 +151,9 @@ namespace CalamityOverhaul.Content.HackTimes
             //简化:quad顶 = cy - (decoOuterR + PadTop)
             //quad底 = cy - (decoInnerR * MathF.Cos(halfSweep)) + PadBottom
             //但直接用简单估算即可,因为弧顶在正上方最靠上
-            float qLeft = center.X - ArcSpanPx * 0.5f - PadSide;
+            float qLeft = center.X - arcSpanPx * 0.5f - PadSide;
             float qTop = center.Y - decoOuterR - PadTop;
-            float qRight = center.X + ArcSpanPx * 0.5f + PadSide;
+            float qRight = center.X + arcSpanPx * 0.5f + PadSide;
             float qBottom = center.Y - decoInnerR * MathF.Cos(totalSweep * 0.5f) + PadBottom;
 
             int qW = (int)MathF.Ceiling(qRight - qLeft);
@@ -144,9 +166,9 @@ namespace CalamityOverhaul.Content.HackTimes
             //低RAM警告强度(平滑)
             float lowRam = 0f;
             if (!HackTime.InfiniteHack) {
-                if (HackTimeRAM.CurrentRam < 0.5f) lowRam = 1f;
-                else if (HackTimeRAM.CurrentRam <= 2f)
-                    lowRam = MathHelper.Clamp(1f - (HackTimeRAM.CurrentRam - 0.5f) / 1.5f, 0f, 1f);
+                if (CWRRamSystem.CurrentRam < 0.5f) lowRam = 1f;
+                else if (CWRRamSystem.CurrentRam <= 2f)
+                    lowRam = MathHelper.Clamp(1f - (CWRRamSystem.CurrentRam - 0.5f) / 1.5f, 0f, 1f);
             }
 
             effect.Parameters["uTime"]?.SetValue(timer);
@@ -415,9 +437,9 @@ namespace CalamityOverhaul.Content.HackTimes
                 HackTheme.Accent * (alpha * 0.55f), FTitle);
 
             //数值读数（大号）
-            string val = $"{HackTimeRAM.DisplayCurrent}/{maxRam}";
+            string val = $"{CWRRamSystem.DisplayCurrent}/{maxRam}";
             Vector2 valSize = FontAssets.MouseText.Value.MeasureString(val) * FValue;
-            Color valColor = HackTimeRAM.CurrentRam <= 2f && !HackTime.InfiniteHack
+            Color valColor = CWRRamSystem.CurrentRam <= 2f && !HackTime.InfiniteHack
                 ? Color.Lerp(HackTheme.TextBright, HackTheme.Danger,
                     MathF.Sin(timer * 5f) * 0.4f + 0.6f)
                 : HackTheme.TextBright;
@@ -433,9 +455,9 @@ namespace CalamityOverhaul.Content.HackTimes
                 HackTheme.TextDim * (alpha * 0.22f), FHex);
 
             //低RAM警告
-            if (HackTimeRAM.CurrentRam <= 2f && !HackTime.InfiniteHack) {
+            if (CWRRamSystem.CurrentRam <= 2f && !HackTime.InfiniteHack) {
                 float wPulse = MathF.Sin(timer * 5f) * 0.4f + 0.6f;
-                string warn = HackTimeRAM.CurrentRam < 0.5f
+                string warn = CWRRamSystem.CurrentRam < 0.5f
                     ? HackTime.RamDepleted.Value
                     : HackTime.LowRam.Value;
                 Vector2 wSize = FontAssets.MouseText.Value.MeasureString(warn) * FWarn;

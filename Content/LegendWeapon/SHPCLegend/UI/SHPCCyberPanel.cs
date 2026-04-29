@@ -1,5 +1,7 @@
 ﻿using CalamityOverhaul.Common;
+using CalamityOverhaul.Content.HackTimes;
 using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
+using CalamityOverhaul.Content.RAMSystem;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Graphics;
 using System;
@@ -483,7 +485,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
         }
 
         /// <summary>
-        /// 右侧状态文字栏，列出每层激活状态
+        /// 右侧状态文字栏，列出每层激活状态、RAM 消耗速度及当前可维持时长
         /// </summary>
         private static void DrawStatusColumn(SpriteBatch sb, DynamicSpriteFont font,
             Rectangle panel, in Layout layout, float a) {
@@ -498,13 +500,56 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             Utils.DrawBorderString(sb, state, new Vector2(colX, colY), stateCol * a, 0.56f);
             colY += lineH;
 
+            //每层激活标记 + 该层的 RAM 消耗速度
             for (int i = 0; i < 3; i++) {
                 int layer = i + 1;
                 bool lit = Cyberspace.Active && Cyberspace.CurrentLayer >= layer;
                 string mark = lit ? "[#]" : "[ ]";
                 Color tc = lit ? new Color(255, 200, 170) : new Color(120, 60, 60);
-                Utils.DrawBorderString(sb, $"{mark} L{layer}", new Vector2(colX, colY), tc * a, 0.52f);
+                Utils.DrawBorderString(sb, $"{mark} L{layer}", new Vector2(colX, colY), tc * a, 0.50f);
+
+                //每层消耗速度："-X.X/s"，当前激活层用更亮的红色
+                float drainRate = Cyberspace.GetLayerDrainRate(layer);
+                if (drainRate > 0f) {
+                    string drainTxt = string.Format(SHPCUI.Cyber_DrainPerSec.Value, drainRate.ToString("F1"));
+                    Color drainCol = lit ? new Color(255, 200, 170) : new Color(140, 80, 80);
+                    Utils.DrawBorderString(sb, drainTxt,
+                        new Vector2(colX + 36f, colY + 1f), drainCol * a, 0.44f);
+                }
                 colY += lineH;
+            }
+
+            //当前层的 SUSTAIN 估算："SUSTAIN ~Xs"
+            //仅在激活态显示，剩余时间过短(<2s)用闪烁红警示，无限模式下显示 ∞
+            if (Cyberspace.Active && Cyberspace.CurrentLayer >= 1) {
+                colY += 2f;
+                if (HackTime.InfiniteHack) {
+                    Utils.DrawBorderString(sb, SHPCUI.Cyber_SustainInfinite.Value,
+                        new Vector2(colX, colY), new Color(255, 230, 200) * a, 0.46f);
+                }
+                else {
+                    float drainNow = Cyberspace.GetCurrentDrainRate();
+                    if (drainNow > 0f) {
+                        float sustain = CWRRamSystem.CurrentRam / drainNow;
+                        string sustainTxt = string.Format(SHPCUI.Cyber_SustainTime.Value,
+                            sustain.ToString("F1"));
+                        //剩余时间紧张时颜色转红并轻微脉冲
+                        float t = (float)Main.GameUpdateCount / 60f;
+                        Color sustainCol;
+                        if (sustain < 2f) {
+                            float pulse = MathF.Sin(t * 8f) * 0.4f + 0.6f;
+                            sustainCol = Color.Lerp(new Color(255, 200, 170), new Color(255, 80, 80), pulse);
+                        }
+                        else if (sustain < 5f) {
+                            sustainCol = new Color(255, 170, 130);
+                        }
+                        else {
+                            sustainCol = new Color(220, 200, 180);
+                        }
+                        Utils.DrawBorderString(sb, sustainTxt,
+                            new Vector2(colX, colY), sustainCol * a, 0.46f);
+                    }
+                }
             }
         }
 

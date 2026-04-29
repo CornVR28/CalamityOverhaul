@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using CalamityOverhaul.Content.RAMSystem;
+using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using Terraria;
@@ -149,7 +150,7 @@ namespace CalamityOverhaul.Content.HackTimes
                     int globalIdx = GetGlobalIndex(i);
                     var hack = QuickHackDef.GetByIndex(globalIdx);
                     var qs = Queue?.GetSlotState(globalIdx) ?? QueueSlotState.None;
-                    bool disabled = hack != null && !HackTimeRAM.CanAfford(hack.RamCost)
+                    bool disabled = hack != null && !CWRRamSystem.CanAfford(hack.RamCost)
                         || qs != QueueSlotState.None;
                     if (!disabled) hoveredSlot = i;
                     break;
@@ -179,7 +180,7 @@ namespace CalamityOverhaul.Content.HackTimes
                 var hack = QuickHackDef.GetByIndex(globalIdx);
                 if (hack == null) return;
                 //RAM不足时拒绝入队
-                if (!HackTimeRAM.CanAfford(hack.RamCost)) return;
+                if (!CWRRamSystem.CanAfford(hack.RamCost)) return;
 
                 bool enqueued;
                 if (currentTargetKind == HackTargetKind.Tile
@@ -207,7 +208,7 @@ namespace CalamityOverhaul.Content.HackTimes
                 }
 
                 if (enqueued) {
-                    HackTimeRAM.TryConsume(hack.RamCost);
+                    CWRRamSystem.TryConsume(hack.RamCost);
                 }
             }
         }
@@ -420,7 +421,7 @@ namespace CalamityOverhaul.Content.HackTimes
 
                 //禁用状态：RAM不足或该协议已在队列中，抑制悬停展开
                 QueueSlotState queueState = Queue?.GetSlotState(globalIdx) ?? QueueSlotState.None;
-                bool slotDisabled = !HackTimeRAM.CanAfford(hack.RamCost)
+                bool slotDisabled = !CWRRamSystem.CanAfford(hack.RamCost)
                     || queueState != QueueSlotState.None;
                 if (slotDisabled) hover = 0f;
 
@@ -453,7 +454,7 @@ namespace CalamityOverhaul.Content.HackTimes
             bool isQueued = queueState == QueueSlotState.Queued;
             bool isCompleted = queueState == QueueSlotState.Completed;
             //禁用状态：RAM不足 或 已在上传队列中
-            bool isDisabled = !HackTimeRAM.CanAfford(hack.RamCost)
+            bool isDisabled = !CWRRamSystem.CanAfford(hack.RamCost)
                 || isUploading || isQueued;
 
             //=== 背景（双层渐变） ===
@@ -685,7 +686,7 @@ namespace CalamityOverhaul.Content.HackTimes
                 Utils.DrawBorderString(sb, timeStr, tp, HackTheme.TextNormal * (alpha * 0.55f), FontTime);
 
                 //RAM消耗（右侧，上传耗时左边）
-                bool canAfford = HackTimeRAM.CanAfford(hack.RamCost);
+                bool canAfford = CWRRamSystem.CanAfford(hack.RamCost);
                 string ramStr = $"{hack.RamCost} RAM";
                 Color ramColor = canAfford ? HackTheme.Accent : HackTheme.Danger;
                 //RAM不足时红色闪烁

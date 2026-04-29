@@ -667,6 +667,10 @@ SHPCUI: {
 	Cyber_Skill_Banish_Desc: Send the foe under the cursor into deep cyberspace.
 	Cyber_Skill_Freeze_Name: DOMAIN FREEZE
 	Cyber_Skill_Freeze_Desc: Lock every hostile entity inside the domain in place.
+	Cyber_DrainHeader: RAM DRAIN
+	Cyber_DrainPerSec: "-{0}/s"
+	Cyber_SustainTime: "SUSTAIN ~{0}s"
+	Cyber_SustainInfinite: "SUSTAIN ∞"
 	Modify_Title: MODIFY
 	Modify_Subtitle: Gun Augmentation
 	Modify_Description: Install modification parts into SHPC chassis

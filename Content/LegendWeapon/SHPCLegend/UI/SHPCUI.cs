@@ -6,6 +6,7 @@ using CalamityOverhaul.Content.Cyberwares.UIs;
 using CalamityOverhaul.Content.HackTimes;
 using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
 using CalamityOverhaul.Content.QuestLogs;
+using CalamityOverhaul.Content.RAMSystem;
 using InnoVault.UIHandles;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -76,6 +77,10 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
         public static LocalizedText Cyber_Skill_Banish_Desc { get; private set; }
         public static LocalizedText Cyber_Skill_Freeze_Name { get; private set; }
         public static LocalizedText Cyber_Skill_Freeze_Desc { get; private set; }
+        public static LocalizedText Cyber_DrainHeader { get; private set; }
+        public static LocalizedText Cyber_DrainPerSec { get; private set; }
+        public static LocalizedText Cyber_SustainTime { get; private set; }
+        public static LocalizedText Cyber_SustainInfinite { get; private set; }
 
         public override void SetStaticDefaults() {
             CyberDomain_Title = this.GetLocalization(nameof(CyberDomain_Title), () => "CYBER DOMAIN");
@@ -122,6 +127,10 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             Cyber_Skill_Banish_Desc = this.GetLocalization(nameof(Cyber_Skill_Banish_Desc), () => "Send the foe under the cursor into deep cyberspace.");
             Cyber_Skill_Freeze_Name = this.GetLocalization(nameof(Cyber_Skill_Freeze_Name), () => "DOMAIN FREEZE");
             Cyber_Skill_Freeze_Desc = this.GetLocalization(nameof(Cyber_Skill_Freeze_Desc), () => "Lock every hostile entity inside the domain in place.");
+            Cyber_DrainHeader = this.GetLocalization(nameof(Cyber_DrainHeader), () => "RAM DRAIN");
+            Cyber_DrainPerSec = this.GetLocalization(nameof(Cyber_DrainPerSec), () => "-{0}/s");
+            Cyber_SustainTime = this.GetLocalization(nameof(Cyber_SustainTime), () => "SUSTAIN ~{0}s");
+            Cyber_SustainInfinite = this.GetLocalization(nameof(Cyber_SustainInfinite), () => "SUSTAIN \u221E");
         }
 
         #endregion
@@ -203,7 +212,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
         //全局时间，单位秒
         private float time;
 
-        //RAM值平滑显示量，跟随HackTimeRAM.CurrentRam
+        //RAM值平滑显示量，跟随 CWRRamSystem.CurrentRam
         private float ramDisplayValue;
 
         //按钮配置列表
@@ -347,7 +356,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             time += 1f / 60f;
 
             //平滑跟随RAM当前值
-            ramDisplayValue = MathHelper.Lerp(ramDisplayValue, HackTimeRAM.CurrentRam, 0.12f);
+            ramDisplayValue = MathHelper.Lerp(ramDisplayValue, CWRRamSystem.CurrentRam, 0.12f);
 
             //展开进度推进
             float targetExpand = expanded ? 1f : 0f;
@@ -549,7 +558,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
 
             //RAM弧形条（始终显示，不受展开状态影响）
             SHPCRenderer.DrawRAMBar(sb, px, corePos,
-                ramDisplayValue, HackTimeRAM.MaxRam, time, globalAlpha);
+                ramDisplayValue, CWRRamSystem.MaxRam, time, globalAlpha);
 
             //核心
             SHPCRenderer.DrawCore(sb, px, corePos, expandProgress,

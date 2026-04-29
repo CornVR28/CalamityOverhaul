@@ -1,4 +1,6 @@
 ﻿using CalamityOverhaul.Common;
+using CalamityOverhaul.Content.HackTimes;
+using CalamityOverhaul.Content.RAMSystem;
 using System;
 using Terraria;
 using Terraria.Audio;
@@ -39,6 +41,43 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         /// 每层半径相对于基础半径的倍率
         /// </summary>
         private static readonly float[] LayerRadiusScale = { 1.0f, 1.7f, 2.6f };
+
+        /// <summary>
+        /// 各层维持领域时每秒消耗的 RAM 量
+        /// <br/>L1 温和(0.6/s)、L2 紧张(1.5/s)、L3 爆发(3.5/s)
+        /// <br/>默认 8 RAM 上限下 L1 ~13s、L2 ~5s、L3 ~2s 即耗尽
+        /// </summary>
+        public static readonly float[] LayerRamDrainPerSecond = { 0.6f, 1.5f, 3.5f };
+
+        /// <summary>
+        /// 取当前层的 RAM 每秒消耗量；未激活或层数为 0 时返回 0
+        /// <br/>UI 与外部系统可调用此方法读取实时消耗速度
+        /// </summary>
+        public static float GetCurrentDrainRate() {
+            if (!Active || CurrentLayer < 1 || CurrentLayer > MaxLayerCount) {
+                return 0f;
+            }
+            return LayerRamDrainPerSecond[CurrentLayer - 1];
+        }
+
+        /// <summary>
+        /// 取指定层(1..MaxLayerCount)的 RAM 每秒消耗量
+        /// </summary>
+        public static float GetLayerDrainRate(int layer) {
+            if (layer < 1 || layer > MaxLayerCount) {
+                return 0f;
+            }
+            return LayerRamDrainPerSecond[layer - 1];
+        }
+
+        //RAM 崩溃后强制锁定的剩余帧数，期间禁止重启领域
+        private const int CrashLockoutFrames = 90;
+        private static int crashLockoutTimer;
+
+        /// <summary>
+        /// 当前是否处于"系统崩溃"锁定中(刚被 RAM 耗尽强制关闭)
+        /// </summary>
+        public static bool IsCrashLockedOut => crashLockoutTimer > 0;
 
         /// <summary>
         /// 每层独立展开进度 (0~1)
@@ -154,8 +193,16 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         /// <summary>
         /// 激活赛博空间领域第一层（带爆发式展开+视觉特效）
         /// <br/>支持在前一次收缩动画尚未完成时立即重新展开，避免吞操作
+        /// <br/>"系统崩溃"锁定期间(<see cref="IsCrashLockedOut"/>)会拒绝激活并播放"拒绝"音效
         /// </summary>
         public static void Activate(Player owner) {
+            //RAM 耗尽后的强制锁定期间不允许立刻重启领域
+            if (crashLockoutTimer > 0) {
+                if (!VaultUtils.isServer && owner != null) {
+                    SoundEngine.PlaySound(CWRSound.FailureCurrent with { Volume = 0.45f, Pitch = -0.4f }, owner.Center);
+                }
+                return;
+            }
             //平滑接管：保留当前 layerExpand/Intensity，让动画从当前进度连续过渡
             //仅对超出层（>=1）清掉残留 burst，确保第一层独享爆发动画
             int resumeLayer = Math.Clamp(lastLayer, 1, MaxLayerCount);
@@ -225,9 +272,48 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         }
 
         /// <summary>
+        /// RAM 耗尽触发的"系统崩溃"：强制关闭领域、播放警示音效、设置短暂锁定期
+        /// <br/>锁定期内 <see cref="Activate"/> 会被拒绝，避免出现"瞬间重启又瞬间崩溃"的抖动
+        /// </summary>
+        public static void TriggerSystemCrash() {
+            if (!Active && CurrentLayer == 0 && crashLockoutTimer > 0) {
+                return;
+            }
+
+            //先关闭领域，再设置锁定计时（Deactivate 会重置不少状态，所以锁定要在它之后）
+            Deactivate();
+            crashLockoutTimer = CrashLockoutFrames;
+
+            if (!VaultUtils.isServer) {
+                Player p = Main.LocalPlayer;
+                if (p != null && p.active) {
+                    //系统崩溃文字反馈，使用 RAM HUD 的危险色系
+                    Color crashColor = new(255, 70, 70);
+                    CombatText.NewText(p.Hitbox, crashColor, "// SYSTEM CRASH", true);
+                    SoundEngine.PlaySound(CWRSound.FailureCurrent with { Volume = 0.85f, Pitch = -0.3f }, p.Center);
+                    SoundEngine.PlaySound(CWRSound.Faultrelease with { Volume = 0.7f, Pitch = -0.5f }, p.Center);
+                }
+            }
+        }
+
+        /// <summary>
         /// 每帧逻辑更新，驱动多层展开/收缩过渡
         /// </summary>
         public static void Update() {
+            //崩溃锁定计时
+            if (crashLockoutTimer > 0) {
+                crashLockoutTimer--;
+            }
+
+            //领域处于激活态时按当前层消耗 RAM；耗尽即触发系统崩溃强制关闭
+            if (Active && CurrentLayer >= 1 && !HackTime.InfiniteHack) {
+                float drain = LayerRamDrainPerSecond[CurrentLayer - 1];
+                CWRRamSystem.ConsumeOverTime(drain);
+                if (CWRRamSystem.CurrentRam <= 0f) {
+                    TriggerSystemCrash();
+                }
+            }
+
             //累计效果时间：根据变速齿轮缩放，最低保持0.1倍速让着色器动画不完全停止
             float dt = 1f / 60f;
             float timeSpeed = TimeGear.IsTimeSlowed ? MathHelper.Max(TimeGear.TimeScale, 0.1f) : 1f;
@@ -308,6 +394,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             lastLayer = 1;
             targetIntensity = 0f;
             ambientBoltTimer = 0;
+            crashLockoutTimer = 0;
             for (int i = 0; i < MaxLayerCount; i++) {
                 layerExpand[i] = 0f;
                 layerBurstTimer[i] = 0;

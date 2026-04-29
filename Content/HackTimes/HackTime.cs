@@ -1,6 +1,7 @@
 ﻿using CalamityOverhaul.Common;
 using CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.GlitchWraith;
 using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
+using CalamityOverhaul.Content.RAMSystem;
 using Terraria;
 using Terraria.Audio;
 using Terraria.Localization;
@@ -498,7 +499,7 @@ namespace CalamityOverhaul.Content.HackTimes
         /// </summary>
         public override void PostUpdateEverything() {
             //RAM自动恢复
-            HackTimeRAM.Update();
+            CWRRamSystem.Update();
             //骇入效果全局驱动，退出骇客时间后仍持续生效
             HackEffectTracker.Update();
             //物块骇入效果驱动
@@ -624,7 +625,7 @@ namespace CalamityOverhaul.Content.HackTimes
             cameraTo = Vector2.Zero;
             InfiniteHack = false;
             HackTimeFreeze.Deactivate();
-            HackTimeRAM.Reset();
+            CWRRamSystem.Reset();
         }
     }
 }

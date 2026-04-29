@@ -1,4 +1,5 @@
 ﻿using CalamityOverhaul.Common;
+using CalamityOverhaul.Content.RAMSystem;
 using System;
 using System.Collections.Generic;
 using Terraria;
@@ -247,9 +248,9 @@ namespace CalamityOverhaul.Content.HackTimes
             float refund = totalCost * KillRefundRatio;
             //至少返还1点
             if (refund < 1f) refund = 1f;
-            float before = HackTimeRAM.CurrentRam;
-            HackTimeRAM.Restore(refund);
-            float actual = HackTimeRAM.CurrentRam - before;
+            float before = CWRRamSystem.CurrentRam;
+            CWRRamSystem.Restore(refund);
+            float actual = CWRRamSystem.CurrentRam - before;
 
             //视觉反馈：在NPC位置弹出青色浮动文字
             if (actual > 0.01f && !VaultUtils.isServer) {

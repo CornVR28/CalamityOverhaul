@@ -1,5 +1,6 @@
 ﻿using CalamityOverhaul.Common;
 using CalamityOverhaul.Content.HackTimes;
+using CalamityOverhaul.Content.RAMSystem;
 using Terraria;
 using Terraria.ModLoader;
 
@@ -43,7 +44,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
             if (!CybCourseWorld.Active) return;
             //血量与 RAM 双保险，确保任何异常都不会让玩家陷入劣势
             Player.statLife = Player.statLifeMax2;
-            HackTimeRAM.Refill();
+            CWRRamSystem.Refill();
         }
 
         /// <summary>
