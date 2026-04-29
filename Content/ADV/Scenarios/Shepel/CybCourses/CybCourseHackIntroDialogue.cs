@@ -26,19 +26,21 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
             SpeakerName = this.GetLocalization(nameof(SpeakerName), () => "SHPC");
             Line1 = this.GetLocalization(nameof(Line1),
                 () => "接口解析完毕。下一项训练：骇客时间。");
+            //{0}处会在Build时替换为玩家当前绑定的骇客时间快捷键
             Line2 = this.GetLocalization(nameof(Line2),
-                () => "骇客时间是SHPC专属的神经干预协议。激活后，外部时间流将冻结，你可以从容选择目标并上传定制骇入程序。默认按键是 [N]。");
+                () => "骇客时间是SHPC专属的神经干预协议。激活后，外部时间流将冻结，你可以从容选择目标并上传定制骇入程序。默认按键是 {0}。");
             Line3 = this.GetLocalization(nameof(Line3),
-                () => "前方的测试单元已固定就位。按下 [N] 进入骇客时间，然后点击锁定它。");
+                () => "前方的测试单元已固定就位。按下 {0} 进入骇客时间，然后点击锁定它。");
         }
 
         protected override void Build() {
             DialogueBoxBase.RegisterPortrait(SpeakerName.Value, texture: null);
             DialogueBoxBase.SetPortraitStyle(SpeakerName.Value, silhouette: false);
 
+            //对话内容里的快捷键占位符在此实时解析为当前键位（未绑定时给出提示）
             AddTimed(SpeakerName.Value, Line1.Value, 4.5f, onStart: OnStart);
-            AddTimed(SpeakerName.Value, Line2.Value, 6.5f);
-            Add(SpeakerName.Value, Line3.Value);
+            AddTimed(SpeakerName.Value, HackTimeTutorialLead.ResolveKeyTokens(Line2.Value), 6.5f);
+            Add(SpeakerName.Value, HackTimeTutorialLead.ResolveKeyTokens(Line3.Value));
         }
 
         private void OnStart() {

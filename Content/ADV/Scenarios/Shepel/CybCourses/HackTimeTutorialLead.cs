@@ -5,6 +5,7 @@ using CalamityOverhaul.Content.HackTimes;
 using InnoVault;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using ReLogic.Graphics;
 using System;
 using System.Collections.Generic;
@@ -35,6 +36,10 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
         private static LocalizedText _textWaiting;
         private static LocalizedText _textCalibrating;
         private static LocalizedText _textNextBtn;
+        private static LocalizedText _textKeyUnbound;
+        private static LocalizedText _textKeyHintUnbound;
+        //文本中的快捷键占位符，渲染时实时替换为当前绑定的按键名
+        private const string HackKeyToken = "{0}";
 
         public override void SetStaticDefaults() {
             _stepTitles = new[] {
@@ -48,12 +53,12 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
                 this.GetLocalization("HT_Step7_Title", () => "TILE SCAN COMPLETE"),
             };
             _stepBodies = new[] {
-                this.GetLocalization("HT_Step0_Body", () => "按下 [N] 键进入骇客时间模式。\n时间将冻结，赛博滤镜叠加于画面。"),
+                this.GetLocalization("HT_Step0_Body", () => "按下 {0} 键进入骇客时间模式。\n时间将冻结，赛博滤镜叠加于画面。"),
                 this.GetLocalization("HT_Step1_Body", () => "将光标悬停到高亮的圣诞坦克上，\n点击左键将其锁定为骇入目标。"),
                 this.GetLocalization("HT_Step2_Body", () => "右侧面板展示目标的可用骇入协议。\n不同协议消耗不同RAM并产生不同效果。"),
                 this.GetLocalization("HT_Step3_Body", () => "点击协议将其加入左侧上传队列，\n队列将依次执行骇入操作。"),
                 this.GetLocalization("HT_Step4_Body", () => "NPC骇入序列完成。下一阶段：物块扫描接口训练。"),
-                this.GetLocalization("HT_Step5_Body", () => "前方有一台热能发电机MK2。\n再次按下 [N] 重新激活骇客时间。"),
+                this.GetLocalization("HT_Step5_Body", () => "前方有一台热能发电机MK2。\n再次按下 {0} 重新激活骇客时间。"),
                 this.GetLocalization("HT_Step6_Body", () => "将光标悬停在发电机上，\n点击左键将其锁定为扫描目标。"),
                 this.GetLocalization("HT_Step7_Body", () => "物块扫描接口已解析。右侧面板展示当前物块的可用骇入协议。"),
             };
@@ -61,7 +66,33 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
             _textCalibrating = this.GetLocalization("HT_Calibrating", () => "DISCONNECTING...");
             _textNextBtn    = this.GetLocalization("HT_NextBtn",    () => "NEXT  >");
             _textHintStuck  = this.GetLocalization("HT_HintStuck",  () => "// HINT: 点击 NEXT 按钮可强制跳过");
+            _textKeyUnbound = this.GetLocalization("HT_KeyUnbound", () => "未绑定·按 [N] 临时启用");
+            _textKeyHintUnbound = this.GetLocalization("HT_KeyHintUnbound",
+                () => "// 提示：未绑定骇客时间快捷键，可在 设置 中绑定。");
         }
+
+        //返回当前骇客时间快捷键的显示字符串，未绑定时返回带括号的提示文本
+        public static string GetHackToggleKeyDisplay() {
+            ModKeybind kb = CWRKeySystem.HackTime_Toggle;
+            if (kb != null) {
+                var keys = kb.GetAssignedKeys();
+                if (keys != null && keys.Count > 0)
+                    return $"[{keys[0]}]";
+            }
+            return $"[{(_textKeyUnbound != null ? _textKeyUnbound.Value : "未绑定·N")}]";
+        }
+
+        //快捷键是否已经绑定到至少一个按键
+        public static bool IsHackToggleBound() {
+            ModKeybind kb = CWRKeySystem.HackTime_Toggle;
+            if (kb == null) return false;
+            var keys = kb.GetAssignedKeys();
+            return keys != null && keys.Count > 0;
+        }
+
+        //将含有 {HackKeyToken} 的本地化文本替换为当前快捷键名
+        public static string ResolveKeyTokens(string raw)
+            => string.IsNullOrEmpty(raw) ? raw : raw.Replace(HackKeyToken, GetHackToggleKeyDisplay());
 
         private const int CardW = 310;
         private const int CardH = 118;
@@ -85,6 +116,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
         private static bool _hackIntroAttempted = false;
         private static bool _outroStarted = false;
         private static bool _prevMouseLeft = false;
+        //快捷键未绑定时的兜底N键边沿检测
+        private static bool _prevFallbackKeyDown = false;
         private static Rectangle _nextBtnRect = Rectangle.Empty;
         private static Rectangle _cardRect = Rectangle.Empty;
         private static LocalizedText _textHintStuck;
@@ -112,6 +145,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
             _nextBtnRect = Rectangle.Empty;
             _cardRect = Rectangle.Empty;
             _npcIndex = -1;
+            _prevFallbackKeyDown = false;
         }
 
         //由CybCourseHackIntroDialogue.OnScenarioComplete在对话结束后调用
@@ -196,6 +230,10 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
                         EnsureTankAlive();
                     }
 
+                    //教学的0/5步要求按下骇客时间快捷键。当玩家未绑定该快捷键时，
+                    //允许使用默认的 N 键作为兜底，避免引导彻底卡死
+                    HandleHackToggleKeyFallback();
+
                     bool isAuto = StepIsAuto[_currentStep];
                     if (isAuto) {
                         //自动步骤同样允许左键跳过等待
@@ -246,6 +284,32 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
                     TryStartOutro();
                     break;
             }
+        }
+
+        //在玩家未绑定HackTime_Toggle快捷键时，使用默认的 N 键作为兜底交互
+        //仅在step 0/5（要求按键开启骇客时间）时启用，避免与其他流程冲突
+        //当玩家已绑定该快捷键时不接管，防止与HackTimeTargeting.ProcessTriggers的JustPressed重复触发
+        private static void HandleHackToggleKeyFallback() {
+            if (_currentStep != 0 && _currentStep != 5) {
+                _prevFallbackKeyDown = false;
+                return;
+            }
+            if (IsHackToggleBound()) {
+                _prevFallbackKeyDown = false;
+                return;
+            }
+            //避免在打字/编辑界面中误触发
+            if (Main.chatMode || Main.editSign || Main.editChest || Main.drawingPlayerChat) {
+                _prevFallbackKeyDown = false;
+                return;
+            }
+
+            bool nowDown = Main.keyState.IsKeyDown(Keys.N);
+            if (nowDown && !_prevFallbackKeyDown) {
+                if (HackTime.Active) HackTime.Deactivate();
+                else HackTime.Activate();
+            }
+            _prevFallbackKeyDown = nowDown;
         }
 
         //SHPC教学进入FadeOut或Done阶段后即可启动骇客对话，无需等待FadeOut走完
@@ -406,9 +470,12 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
 
             int stepIdx = (int)MathHelper.Clamp(_currentStep, 0, StepIsAuto.Length - 1);
             string title = _stepTitles[stepIdx].Value;
-            string body  = _stepBodies[stepIdx].Value;
+            //把正文中的快捷键占位符替换成当前绑定的按键名（含未绑定提示）
+            string body  = ResolveKeyTokens(_stepBodies[stepIdx].Value);
             bool isAuto  = StepIsAuto[stepIdx];
             bool stuck   = !isAuto && _stuckTimer >= StuckHintAfter;
+            //仅在需要按键的步骤（0/5）且玩家未绑定快捷键时，提示去控制设置中绑定
+            bool keyHint = (stepIdx == 0 || stepIdx == 5) && !IsHackToggleBound();
             float px2 = card.X + 14f;
             float py  = card.Y + 12f;
 
@@ -439,6 +506,20 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
                     Utils.DrawBorderString(sb, wl.TrimEnd('-', ' '), new Vector2(px2, py),
                         new Color(175, 215, 225, (int)(215 * alpha)), bodySc);
                     py += lineB;
+                }
+            }
+
+            //快捷键未绑定提示：仅在按键交互步骤(0/5)且玩家未绑定时显示
+            //闪烁的琥珀色文本，引导玩家去控制设置绑定，并告知N键临时可用
+            if (keyHint && _textKeyHintUnbound != null) {
+                float pulseKey = 0.75f + 0.25f * MathF.Sin(_shaderTimer * 10f);
+                int wrapW = (int)((CardW - 28) / subSc);
+                string[] wrapped = Utils.WordwrapString(_textKeyHintUnbound.Value, font, wrapW, 99, out _);
+                foreach (string wl in wrapped) {
+                    if (string.IsNullOrEmpty(wl)) continue;
+                    Utils.DrawBorderString(sb, wl.TrimEnd('-', ' '), new Vector2(px2, py),
+                        new Color(255, 195, 90, (int)(220 * alpha * pulseKey)), subSc);
+                    py += lineB - 1f;
                 }
             }
 
