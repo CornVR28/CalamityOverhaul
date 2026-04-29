@@ -51,7 +51,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Banish
         /// 对光标下的NPC发起放逐
         /// </summary>
         public static void BanishAtCursor() {
-            if (!Cyberspace.Active || Cyberspace.Intensity < 0.5f) return;
+            if (!Cyberspace.Active || Cyberspace.Intensity < 0.5f || Cyberspace.CurrentLayer < 2) return;
 
             Vector2 mouse = Main.MouseWorld;
             Vector2 domainCenter = Main.LocalPlayer.Center;

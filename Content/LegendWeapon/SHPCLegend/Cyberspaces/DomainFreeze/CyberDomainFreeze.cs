@@ -92,7 +92,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.DomainFre
         /// 触发领域冻结：冻结领域内所有敌对实体 + 生成能量波
         /// </summary>
         public static void TriggerFreeze(Player owner) {
-            if (!Cyberspace.Active || Cyberspace.Intensity < 0.5f) return;
+            if (!Cyberspace.Active || Cyberspace.Intensity < 0.5f || Cyberspace.CurrentLayer < Cyberspace.MaxLayerCount) return;
 
             Vector2 domainCenter = owner.Center;
             float effectiveRadius = Cyberspace.Radius * Cyberspace.ExpandProgress;
