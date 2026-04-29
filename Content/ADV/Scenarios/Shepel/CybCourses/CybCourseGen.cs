@@ -1,4 +1,4 @@
-using CalamityOverhaul.Content.Industrials.Generator.Thermal;
+﻿using CalamityOverhaul.Content.Industrials.Generator.Thermal;
 using Terraria;
 using Terraria.ID;
 using Terraria.IO;
@@ -13,19 +13,21 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
     {
         //主通道地板Y坐标（从顶部算）
         internal const int FloorY = 170;
-        //热能发电机MK2放置参数（PlaceObject origin坐标和tile范围）
-        internal const int GenMK2OriginX = 282;
-        internal const int GenMK2OriginY = FloorY - 1;
-        internal const int GenMK2TileLeft = GenMK2OriginX - 2;
-        internal const int GenMK2TileTop = GenMK2OriginY - 2;
-        internal const int GenMK2TileW = 4;
-        internal const int GenMK2TileH = 3;
         //通道净高（空气格数）
         private const int RoomHeight = 20;
         //地面厚度
         private const int FloorThick = 8;
         //墙面厚度（左右边界）
         private const int WallThick = 6;
+        //玩家所在地表tile Y（走廊顶板上方，= FloorY - RoomHeight - 2）
+        internal const int SurfaceY = FloorY - RoomHeight - 2;
+        //热能发电机MK2放置参数（PlaceObject origin坐标和tile范围）
+        internal const int GenMK2OriginX = 282;
+        internal const int GenMK2OriginY = SurfaceY - 1;
+        internal const int GenMK2TileLeft = GenMK2OriginX - 2;
+        internal const int GenMK2TileTop = GenMK2OriginY - 2;
+        internal const int GenMK2TileW = 4;
+        internal const int GenMK2TileH = 3;
 
         public CybCourseGen() : base("Cyb Course Generation", 1f) { }
 
@@ -48,6 +50,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
             PlacePlatforms(width);
             //放置热能发电机MK2作为物块骇入教学目标
             PlaceGeneratorMK2();
+            //设置出生点到走廊顶板上方，玩家站在通道顶部地面上
+            Main.spawnTileX = 30;
+            Main.spawnTileY = FloorY - RoomHeight - 2;
         }
 
         //清空全图：移除所有默认方块和背景墙，背景墙清为0（无墙）让天空可见

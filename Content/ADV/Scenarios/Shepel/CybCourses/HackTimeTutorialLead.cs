@@ -119,7 +119,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
             int spawnY = (CybCourseGen.FloorY - 8) * 16;
             int idx = NPC.NewNPC(new EntitySource_WorldEvent(), spawnX, spawnY, NPCID.SantaNK1);
             if (idx < Main.maxNPCs) {
-                float correctY = CybCourseGen.FloorY * 16f - Main.npc[idx].height;
+                float correctY = CybCourseGen.SurfaceY * 16f - Main.npc[idx].height;
                 _npcIndex = idx;
                 _npcSpawnPos = new Vector2(Main.npc[idx].position.X, correctY);
                 Main.npc[idx].position = _npcSpawnPos;

@@ -264,4 +264,15 @@ HackTimeTutorialLead: {
 	// HT_Step5_Title: 物块扫描
 	// HT_Step6_Title: 锁定物块目标
 	// HT_Step7_Title: TILE SCAN COMPLETE
+	/* HT_Step5_Body:
+		'''
+		前方有一台热能发电机MK2。
+		重新激活骇客时间，将光标移至发电机并点击选中。
+		''' */
+	/* HT_Step6_Body:
+		'''
+		将光标悬停在发电机上，
+		点击左键将其锁定为扫描目标。
+		''' */
+	// HT_Step7_Body: 物块扫描接口已解析。右侧面板展示当前物块的可用骇入协议。
 }
