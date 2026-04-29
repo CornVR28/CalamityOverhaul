@@ -219,3 +219,49 @@ CybTutorialLead: {
 	Calibrating: CALIBRATING...
 	NextBtn: NEXT  >
 }
+
+CybCourseHackIntroDialogue: {
+	SpeakerName: SHPC
+	Line1: 接口解析完毕。下一项训练：骇客时间。
+	Line2: 骇客时间是SHPC专属的神经干预协议。激活后，外部时间流将冻结，你可以从容选择目标并上传定制骇入程序。默认按键是 [N]。
+	Line3: 前方的测试单元已固定就位。按下 [N] 进入骇客时间，然后点击锁定它。
+}
+
+HackTimeTutorialLead: {
+	HT_Step0_Title: 激活骇客模式
+	HT_Step1_Title: 锁定目标
+	HT_Step2_Title: 骇入协议面板
+	HT_Step3_Title: 上传协议
+	HT_Step4_Title: HACK SEQUENCE COMPLETE
+	HT_Step0_Body:
+		'''
+		按下 [N] 键进入骇客时间模式。
+		时间将冻结，赛博滤镜叠加于画面。
+		'''
+	HT_Step1_Body:
+		'''
+		将光标悬停到高亮的圣诞坦克上，
+		点击左键将其锁定为骇入目标。
+		'''
+	HT_Step2_Body:
+		'''
+		右侧面板展示目标的可用骇入协议。
+		不同协议消耗不同RAM并产生不同效果。
+		'''
+	HT_Step3_Body:
+		'''
+		点击协议将其加入左侧上传队列，
+		队列将依次执行骇入操作。
+		'''
+	HT_Step4_Body:
+		'''
+		神经链路已断开。
+		骇客时间协议训练完成，系统就绪。
+		'''
+	HT_Waiting: AWAITING INPUT...
+	HT_Calibrating: DISCONNECTING...
+	HT_NextBtn: NEXT  >
+	HT_Step5_Title: 物块扫描
+	HT_Step6_Title: 锁定物块目标
+	HT_Step7_Title: TILE SCAN COMPLETE
+}

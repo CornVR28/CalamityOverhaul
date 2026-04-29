@@ -128,6 +128,15 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
 
         #endregion
 
+        //供外部代码（如教程系统）强制展开操作面板
+        public void ForceExpand() {
+            if (expanded) return;
+            expanded = true;
+            clickFlash = 1f;
+            corePulse = 1f;
+            SoundEngine.PlaySound(SoundID.MenuTick);
+        }
+
         #region 状态
 
         //展开进度，0为收起仅显示核心，1为完全展开

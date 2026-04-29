@@ -7,5 +7,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
         public bool IntroPlayed;
         //SHPC HUD教学当前步骤索引，-1表示已完成全部步骤
         public int SHPCTutorialStep;
+        //骇客时间介绍是否已播放
+        public bool HackIntroPlayed;
+        //骇客时间教学当前步骤索引，-1表示已完成全部步骤
+        public int HackTutorialStep;
     }
 }

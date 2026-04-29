@@ -1,6 +1,8 @@
+using CalamityOverhaul.Content.Industrials.Generator.Thermal;
 using Terraria;
 using Terraria.ID;
 using Terraria.IO;
+using Terraria.ModLoader;
 using Terraria.WorldBuilding;
 
 namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
@@ -10,7 +12,14 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
     internal class CybCourseGen : GenPass
     {
         //主通道地板Y坐标（从顶部算）
-        private const int FloorY = 170;
+        internal const int FloorY = 170;
+        //热能发电机MK2放置参数（PlaceObject origin坐标和tile范围）
+        internal const int GenMK2OriginX = 282;
+        internal const int GenMK2OriginY = FloorY - 1;
+        internal const int GenMK2TileLeft = GenMK2OriginX - 2;
+        internal const int GenMK2TileTop = GenMK2OriginY - 2;
+        internal const int GenMK2TileW = 4;
+        internal const int GenMK2TileH = 3;
         //通道净高（空气格数）
         private const int RoomHeight = 20;
         //地面厚度
@@ -37,6 +46,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
 
             //在主通道内放置若干高低平台
             PlacePlatforms(width);
+            //放置热能发电机MK2作为物块骇入教学目标
+            PlaceGeneratorMK2();
         }
 
         //清空全图：移除所有默认方块和背景墙，背景墙清为0（无墙）让天空可见
@@ -112,6 +123,12 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
                     PlaceSolid(x, platY + 1, TileID.IronBrick);
                 }
             }
+        }
+
+        //在走廊右侧放置热能发电机MK2，作为物块扫描教学目标
+        private static void PlaceGeneratorMK2() {
+            WorldGen.PlaceObject(GenMK2OriginX, GenMK2OriginY,
+                ModContent.TileType<ThermalGeneratorMK2Tile>());
         }
 
         private static void PlaceSolid(int x, int y, ushort tileType) {

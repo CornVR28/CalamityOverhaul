@@ -1,11 +1,7 @@
-using CalamityOverhaul.Common;
+﻿using CalamityOverhaul.Common;
 using CalamityOverhaul.Content.ADV.EntrustManager;
-using CalamityOverhaul.Content.ADV.Scenarios;
 using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI;
-using InnoVault;
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using ReLogic.Graphics;
 using System;
 using System.Collections.Generic;
 using Terraria;
@@ -39,7 +35,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
         //各步骤的本地化标题与正文
         private static LocalizedText[] _stepTitles;
         private static LocalizedText[] _stepBodies;
-        private static LocalizedText _textAwaitingEquip;
         private static LocalizedText _textCalibrating;
         private static LocalizedText _textNextBtn;
 
@@ -62,9 +57,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
                 this.GetLocalization("Step5_Body", () => "神经链路 — 与SHPC建立直连通讯，开启对话。"),
                 this.GetLocalization("Step6_Body", () => "所有接口已解析完毕。\n神经链路稳定，SHPC已就绪。"),
             };
-            _textAwaitingEquip = this.GetLocalization("AwaitingEquip", () => "AWAITING EQUIP...");
-            _textCalibrating   = this.GetLocalization("Calibrating",   () => "CALIBRATING...");
-            _textNextBtn       = this.GetLocalization("NextBtn",       () => "NEXT  >");
+            _textCalibrating = this.GetLocalization("Calibrating", () => "CALIBRATING...");
+            _textNextBtn = this.GetLocalization("NextBtn", () => "NEXT  >");
         }
 
         private const int CardW = 310;
@@ -86,6 +80,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
             _phase = Phase.Inactive;
             _currentStep = 0;
             _cardAnim = 0f;
+            _shaderTimer = 0f;
+            _highlightPulse = 0f;
             _stepTimer = 0f;
             _introAttempted = false;
             _prevMouseLeft = false;
@@ -131,16 +127,21 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
                     if (isAuto) {
                         if (CheckAutoAdvance())
                             AdvanceStep();
-                    } else {
+                    }
+                    else {
                         //step 0：玩家自行持握SHPC时自动推进，无需点击NEXT
                         if (_currentStep == 0 && SHPCUI.Instance?.Active == true) {
                             AdvanceStep();
-                        } else if (mouseClicked && _nextBtnRect != Rectangle.Empty
+                        }
+                        else if (mouseClicked && _nextBtnRect != Rectangle.Empty
                             && _nextBtnRect.Contains(Main.mouseX, Main.mouseY)) {
                             Main.mouseLeft = false;
                             //玩家直接点NEXT跳过装备步骤，强制将SHPC移至持握槽
                             if (_currentStep == 0 && SHPCUI.Instance?.Active != true)
                                 ForceEquipSHPC();
+                            //玩家直接点NEXT跳过核心点击步骤，强制展开操作面板
+                            if (_currentStep == 1)
+                                SHPCUI.Instance?.ForceExpand();
                             AdvanceStep();
                         }
                     }
@@ -280,7 +281,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
                 sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
                     SamplerState.AnisotropicClamp, DepthStencilState.None,
                     RasterizerState.CullNone, null, Main.UIScaleMatrix);
-            } else {
+            }
+            else {
                 sb.Draw(VaultAsset.placeholder2.Value, card, new Color(0, 8, 18, (int)(200 * alpha)));
                 BaseManagerStyle.StrokeRect(sb, card, 1, new Color(50, 160, 200, (int)(120 * alpha)));
             }
@@ -294,9 +296,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
             float lineT = font.MeasureString("A").Y * titleSc + 2f;
             float lineB = font.MeasureString("A").Y * bodySc + 1f;
 
-            string title  = _stepTitles[_currentStep].Value;
-            string body   = _stepBodies[_currentStep].Value;
-            bool isAuto   = StepMeta[_currentStep].IsAuto;
+            string title = _stepTitles[_currentStep].Value;
+            string body = _stepBodies[_currentStep].Value;
+            bool isAuto = StepMeta[_currentStep].IsAuto;
             float px2 = card.X + 14f;
             float py = card.Y + 12f;
 
@@ -333,12 +335,11 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
             //底部按钮区
             if (!isAuto) {
                 DrawNextButton(sb, card, alpha);
-            } else {
-                //自动推进步骤显示等待提示
+            }
+            else {
                 float blink = 0.72f + 0.28f * MathF.Sin(_shaderTimer * 22f);
-                string standby = _currentStep == 0 ? _textAwaitingEquip.Value : _textCalibrating.Value;
-                float sbW = font.MeasureString(standby).X * subSc;
-                Utils.DrawBorderString(sb, standby,
+                float sbW = font.MeasureString(_textCalibrating.Value).X * subSc;
+                Utils.DrawBorderString(sb, _textCalibrating.Value,
                     new Vector2(card.Right - 14f - sbW, card.Bottom - 16f),
                     new Color(60, 190, 200, (int)(200 * alpha * blink)), subSc);
             }
@@ -381,7 +382,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
                 SHPCRenderer.DrawArc(sb, px, corePos,
                     SHPCTheme.CoreRingR + 4f, SHPCTheme.CoreRingR + 14f,
                     0f, MathHelper.TwoPi, hColor);
-            } else if (targetKey.StartsWith("SHPC.Sector.")
+            }
+            else if (targetKey.StartsWith("SHPC.Sector.")
                 && int.TryParse(targetKey[12..], out int idx)) {
                 SHPCHUDTargets.GetSectorAngles(idx, out float a0, out float a1);
                 float expand = 3f + 4f * MathF.Sin(_highlightPulse * 3.2f);
@@ -400,14 +402,14 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
         private static void DrawLBrackets(SpriteBatch sb, Texture2D px, Rectangle r, Color c) {
             const int len = 12;
             const int thick = 2;
-            sb.Draw(px, new Rectangle(r.Left,          r.Top,          len,   thick), c);
-            sb.Draw(px, new Rectangle(r.Left,          r.Top,          thick, len),   c);
-            sb.Draw(px, new Rectangle(r.Right - len,   r.Top,          len,   thick), c);
-            sb.Draw(px, new Rectangle(r.Right - thick, r.Top,          thick, len),   c);
-            sb.Draw(px, new Rectangle(r.Left,          r.Bottom - thick, len,   thick), c);
-            sb.Draw(px, new Rectangle(r.Left,          r.Bottom - len,   thick, len),   c);
-            sb.Draw(px, new Rectangle(r.Right - len,   r.Bottom - thick, len,   thick), c);
-            sb.Draw(px, new Rectangle(r.Right - thick, r.Bottom - len,   thick, len),   c);
+            sb.Draw(px, new Rectangle(r.Left, r.Top, len, thick), c);
+            sb.Draw(px, new Rectangle(r.Left, r.Top, thick, len), c);
+            sb.Draw(px, new Rectangle(r.Right - len, r.Top, len, thick), c);
+            sb.Draw(px, new Rectangle(r.Right - thick, r.Top, thick, len), c);
+            sb.Draw(px, new Rectangle(r.Left, r.Bottom - thick, len, thick), c);
+            sb.Draw(px, new Rectangle(r.Left, r.Bottom - len, thick, len), c);
+            sb.Draw(px, new Rectangle(r.Right - len, r.Bottom - thick, len, thick), c);
+            sb.Draw(px, new Rectangle(r.Right - thick, r.Bottom - len, thick, len), c);
         }
     }
 }
