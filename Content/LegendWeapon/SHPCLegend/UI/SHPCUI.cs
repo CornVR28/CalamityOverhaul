@@ -476,7 +476,12 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                         selectedSector = hit;
                         if (def.UsesFixedPanel) {
                             //切换锁定状态：同一按钮再点击则收起
-                            pinnedSector = pinnedSector == hit ? -1 : hit;
+                            bool wasOpen = pinnedSector == hit;
+                            pinnedSector = wasOpen ? -1 : hit;
+                            //开启固定面板时联动关闭义体UI
+                            if (!wasOpen && CyberwareUI.Instance?.Active == true) {
+                                CyberwareUI.Instance.Toggle();//考虑到这个义体界面可能在其他地方也有所使用，这里的关联关闭可能不妥，后续如果有需要再调整为更合理的交互方式
+                            }
                         }
                         else if (pinnedSector >= 0 && pinnedSector != hit) {
                             pinnedSector = -1;
