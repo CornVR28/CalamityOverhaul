@@ -195,3 +195,27 @@ CybCourseIntroDialogue: {
 	Line3: SHPC是一种高度定制化的神经直连武器，能与赛博空间产生共振。接下来你将学习如何操作它的HUD界面。
 	Line4: 准备好了吗？跟我来。
 }
+
+CybTutorialLead: {
+	Step0_Title: Connect SHPC
+	Step0_Body: Equip SHPC to your weapon slot and hold it. The HUD core node will appear in the lower-left corner.
+	Step1_Title: Core Node
+	Step1_Body: Click the core node in the lower-left to expand or collapse the control panel.
+	Step2_Title: CYBER DOMAIN
+	Step2_Body: Deploy and manage multi-layer cyberspace structures.
+	Step3_Title: CYBERWARE
+	Step3_Body: View and manage your body augmentation modules.
+	Step4_Title: MODIFY
+	Step4_Body: Install or remove modification parts for your SHPC.
+	Step5_Title: TALK
+	Step5_Body: Establish a direct neural link with SHPC to start a conversation.
+	Step6_Title: ENGRAM CALIBRATED
+	Step6_Body:
+		'''
+		All interfaces parsed.
+		Neural link stable. SHPC is ready.
+		'''
+	AwaitingEquip: AWAITING EQUIP...
+	Calibrating: CALIBRATING...
+	NextBtn: NEXT  >
+}

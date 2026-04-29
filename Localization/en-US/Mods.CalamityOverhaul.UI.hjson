@@ -665,3 +665,18 @@ SHPCUI: {
 	Talk_Status_Busy: BUSY
 	Talk_Status_Ready: READY
 }
+
+EntrustManagerLead: {
+	TextKeyPromptBound: Press [{0}] to open Entrust Panel
+	TextKeyPromptWarnTitle: ⚠  Entrust Key Not Bound!
+	TextKeyPromptDefaultKey: Press [{0}] (default) to open Entrust Panel
+	TextKeyPromptBindHint: Go to  Settings → Controls  to bind a custom key
+	TextPanelIntroTitle: Entrust Panel Guide
+	TextRightClickLabel: Right-click an entry
+	TextRightClickAction: " →  Focus"
+	TextRightClickDesc: "     The tracker window will show task progress"
+	TextMiddleClickLabel: Middle-click an entry
+	TextMiddleClickAction: " →  Suspend"
+	TextMiddleClickDesc: "     Temporarily hides the task from the tracker"
+	TextConfirmBtn: Got it
+}

@@ -6,12 +6,13 @@ using System;
 using System.Collections.Generic;
 using Terraria;
 using Terraria.GameContent;
+using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.UI;
 
 namespace CalamityOverhaul.Content.ADV.EntrustManager
 {
-    internal class EntrustManagerLead : ModSystem
+    internal class EntrustManagerLead : ModSystem, ILocalizedModType
     {
         private enum LeadPhase
         {
@@ -20,6 +21,40 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
             PanelIntro,
             Complete
         }
+
+        public string LocalizationCategory => "UI";
+
+        #region 本地化
+
+        public static LocalizedText TextKeyPromptBound     { get; private set; }
+        public static LocalizedText TextKeyPromptWarnTitle { get; private set; }
+        public static LocalizedText TextKeyPromptDefaultKey{ get; private set; }
+        public static LocalizedText TextKeyPromptBindHint  { get; private set; }
+        public static LocalizedText TextPanelIntroTitle    { get; private set; }
+        public static LocalizedText TextRightClickLabel    { get; private set; }
+        public static LocalizedText TextRightClickAction   { get; private set; }
+        public static LocalizedText TextRightClickDesc     { get; private set; }
+        public static LocalizedText TextMiddleClickLabel   { get; private set; }
+        public static LocalizedText TextMiddleClickAction  { get; private set; }
+        public static LocalizedText TextMiddleClickDesc    { get; private set; }
+        public static LocalizedText TextConfirmBtn         { get; private set; }
+
+        public override void SetStaticDefaults() {
+            TextKeyPromptBound      = this.GetLocalization(nameof(TextKeyPromptBound),      () => "按 [{0}] 打开委托面板");
+            TextKeyPromptWarnTitle  = this.GetLocalization(nameof(TextKeyPromptWarnTitle),  () => "⚠  委托快捷键尚未绑定！");
+            TextKeyPromptDefaultKey = this.GetLocalization(nameof(TextKeyPromptDefaultKey), () => "当前按 [{0}]（默认键）可打开委托面板");
+            TextKeyPromptBindHint   = this.GetLocalization(nameof(TextKeyPromptBindHint),   () => "建议前往  设置 → 控制  中绑定自定义按键");
+            TextPanelIntroTitle     = this.GetLocalization(nameof(TextPanelIntroTitle),     () => "委托操作说明");
+            TextRightClickLabel     = this.GetLocalization(nameof(TextRightClickLabel),     () => "右键单击委托条目");
+            TextRightClickAction    = this.GetLocalization(nameof(TextRightClickAction),    () => " →  关注委托");
+            TextRightClickDesc      = this.GetLocalization(nameof(TextRightClickDesc),      () => "     左侧追踪窗口将持续显示任务进度");
+            TextMiddleClickLabel    = this.GetLocalization(nameof(TextMiddleClickLabel),    () => "中键单击委托条目");
+            TextMiddleClickAction   = this.GetLocalization(nameof(TextMiddleClickAction),   () => " →  挂起委托");
+            TextMiddleClickDesc     = this.GetLocalization(nameof(TextMiddleClickDesc),     () => "     暂时隐藏该委托，不在追踪窗口中显示");
+            TextConfirmBtn          = this.GetLocalization(nameof(TextConfirmBtn),          () => "明白了");
+        }
+
+        #endregion
 
         private static LeadPhase currentPhase = LeadPhase.Inactive;
         private static float animProgress = 0f;
@@ -130,7 +165,7 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
 
             if (hasBind) {
                 //单行：已绑定
-                string line = $"按 [{displayKey}] 打开委托面板";
+                string line = TextKeyPromptBound.Format(displayKey);
                 int wrapW = (int)((CardW1 - 28) / 0.85f);
                 string[] wrapped = Utils.WordwrapString(line, font, wrapW, 99, out _);
                 foreach (string wl in wrapped) {
@@ -154,13 +189,13 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
                     (int)(175 * blink),
                     (int)(25 * blink),
                     (int)(255 * alpha));
-                Utils.DrawBorderString(sb, "⚠  委托快捷键尚未绑定！",
+                Utils.DrawBorderString(sb, TextKeyPromptWarnTitle.Value,
                     new Vector2(px, py), warnColor, warnScale);
 
                 py += lineH_w + 2f;
 
                 //可用按键提示（白色主行）
-                string keyLine = $"当前按 [{displayKey}]（默认键）可打开委托面板";
+                string keyLine = TextKeyPromptDefaultKey.Format(displayKey);
                 int keyWrapW = (int)((CardW1 - 28) / subScale1);
                 string[] keyWrapped = Utils.WordwrapString(keyLine, font, keyWrapW, 99, out _);
                 foreach (string wl in keyWrapped) {
@@ -213,7 +248,7 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
             float lineH_s = font.MeasureString("A").Y * subScale   + 2f;
 
             //标题
-            Utils.DrawBorderString(sb, "委托操作说明",
+            Utils.DrawBorderString(sb, TextPanelIntroTitle.Value,
                 new Vector2(px, py),
                 new Color(230, 225, 100, (int)(255 * alpha)), titleScale);
             py += lineH_t + 2f;
@@ -225,16 +260,16 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
             py += 6f;
 
             //关注说明
-            float rightKeyW = font.MeasureString("右键单击委托条目").X * bodyScale;
-            Utils.DrawBorderString(sb, "右键单击委托条目",
+            float rightKeyW = font.MeasureString(TextRightClickLabel.Value).X * bodyScale;
+            Utils.DrawBorderString(sb, TextRightClickLabel.Value,
                 new Vector2(px, py),
                 new Color(95, 210, 255, (int)(240 * alpha)), bodyScale);
-            Utils.DrawBorderString(sb, " →  关注委托",
+            Utils.DrawBorderString(sb, TextRightClickAction.Value,
                 new Vector2(px + rightKeyW, py),
                 new Color(200, 240, 255, (int)(240 * alpha)), bodyScale);
             py += lineH_b;
             int descWrapW = (int)((CardW2 - 28) / subScale);
-            string[] followWrapped = Utils.WordwrapString("     左侧追踪窗口将持续显示任务进度", font, descWrapW, 99, out _);
+            string[] followWrapped = Utils.WordwrapString(TextRightClickDesc.Value, font, descWrapW, 99, out _);
             foreach (string wl in followWrapped) {
                 if (string.IsNullOrEmpty(wl)) continue;
                 Utils.DrawBorderString(sb, wl.TrimEnd('-', ' '), new Vector2(px, py),
@@ -244,15 +279,15 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
             py += 6f;
 
             //挂起说明
-            float midKeyW = font.MeasureString("中键单击委托条目").X * bodyScale;
-            Utils.DrawBorderString(sb, "中键单击委托条目",
+            float midKeyW = font.MeasureString(TextMiddleClickLabel.Value).X * bodyScale;
+            Utils.DrawBorderString(sb, TextMiddleClickLabel.Value,
                 new Vector2(px, py),
                 new Color(130, 220, 145, (int)(240 * alpha)), bodyScale);
-            Utils.DrawBorderString(sb, " →  挂起委托",
+            Utils.DrawBorderString(sb, TextMiddleClickAction.Value,
                 new Vector2(px + midKeyW, py),
                 new Color(195, 240, 195, (int)(240 * alpha)), bodyScale);
             py += lineH_b;
-            string[] suspendWrapped = Utils.WordwrapString("     暂时隐藏该委托，不在追踪窗口中显示", font, descWrapW, 99, out _);
+            string[] suspendWrapped = Utils.WordwrapString(TextMiddleClickDesc.Value, font, descWrapW, 99, out _);
             foreach (string wl in suspendWrapped) {
                 if (string.IsNullOrEmpty(wl)) continue;
                 Utils.DrawBorderString(sb, wl.TrimEnd('-', ' '), new Vector2(px, py),
@@ -316,8 +351,8 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
             BaseManagerStyle.FillRect(sb, rect, new Color(22, 58, 22, (int)((hovered ? 215 : 140) * alpha)));
             BaseManagerStyle.StrokeRect(sb, rect, 1, new Color(90, 185, 90, (int)(145 * alpha)));
             var textColor = new Color(175, 240, 175, (int)(255 * alpha));
-            Vector2 ts = FontAssets.MouseText.Value.MeasureString("明白了") * 0.62f;
-            Utils.DrawBorderString(sb, "明白了",
+            Vector2 ts = FontAssets.MouseText.Value.MeasureString(TextConfirmBtn.Value) * 0.62f;
+            Utils.DrawBorderString(sb, TextConfirmBtn.Value,
                 new Vector2(rect.X + (rect.Width - ts.X) * 0.5f, rect.Y + (rect.Height - ts.Y) * 0.5f),
                 textColor, 0.62f);
             if (hovered) Main.LocalPlayer.mouseInterface = true;

@@ -195,3 +195,27 @@ CybCourseIntroDialogue: {
 	// Line3: SHPC是一种高度定制化的神经直连武器，能与赛博空间产生共振。接下来你将学习如何操作它的HUD界面。
 	// Line4: 准备好了吗？跟我来。
 }
+
+CybTutorialLead: {
+	Step0_Title: 连接 SHPC
+	Step0_Body: 将SHPC装备至武器栏并持握，HUD核心节点即会出现在屏幕左下角。
+	Step1_Title: 核心节点
+	Step1_Body: 点击左下角的核心节点可展开或收起操作面板。
+	Step2_Title: CYBER DOMAIN
+	Step2_Body: 网域 — 部署并管理多层赛博空间层叠结构。
+	Step3_Title: CYBERWARE
+	Step3_Body: 赛博改装 — 查看并管理你的机体增强模块。
+	Step4_Title: MODIFY
+	Step4_Body: 改造 — 为SHPC安装或拆卸改造零件。
+	Step5_Title: TALK
+	Step5_Body: 神经链路 — 与SHPC建立直连通讯，开启对话。
+	Step6_Title: ENGRAM CALIBRATED
+	Step6_Body:
+		'''
+		所有接口已解析完毕。
+		神经链路稳定，SHPC已就绪。
+		'''
+	AwaitingEquip: AWAITING EQUIP...
+	Calibrating: CALIBRATING...
+	NextBtn: NEXT  >
+}

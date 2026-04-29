@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using Terraria;
 using Terraria.GameContent;
+using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.UI;
 
@@ -17,20 +18,54 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
 {
     //超梦教程引导层，负责自动触发开场对话、管理教学步骤状态，并绘制教学卡片和高亮标注
     //复用EntrustGuideCard着色器（variant=1青色版），不修改任何被教学的目标UI代码
-    internal class CybTutorialLead : ModSystem
+    internal class CybTutorialLead : ModSystem, ILocalizedModType
     {
         private enum Phase { Inactive, Running, FadeOut, Done }
 
-        private static readonly (string TargetKey, string Title, string Body, bool IsAuto)[] StepDefs =
+        public string LocalizationCategory => "ADV.Shepel";
+
+        //各步骤的固定元数据（目标键和推进方式）
+        private static readonly (string TargetKey, bool IsAuto)[] StepMeta =
         {
-            (null,              "连接 SHPC",       "将SHPC装备至武器栏并持握，HUD核心节点即会出现在屏幕左下角。",  true),
-            ("SHPC.Core",       "核心节点",         "点击左下角的核心节点可展开或收起操作面板。",                    false),
-            ("SHPC.Sector.0",   "CYBER DOMAIN",    "网域 — 部署并管理多层赛博空间层叠结构。",                      false),
-            ("SHPC.Sector.1",   "CYBERWARE",       "赛博改装 — 查看并管理你的机体增强模块。",                      false),
-            ("SHPC.Sector.2",   "MODIFY",          "改造 — 为SHPC安装或拆卸改造零件。",                           false),
-            ("SHPC.Sector.3",   "TALK",            "神经链路 — 与SHPC建立直连通讯，开启对话。",                    false),
-            (null,              "ENGRAM CALIBRATED","所有接口已解析完毕。\n神经链路稳定，SHPC已就绪。",              true),
+            (null,              true),
+            ("SHPC.Core",       false),
+            ("SHPC.Sector.0",   false),
+            ("SHPC.Sector.1",   false),
+            ("SHPC.Sector.2",   false),
+            ("SHPC.Sector.3",   false),
+            (null,              true),
         };
+
+        //各步骤的本地化标题与正文
+        private static LocalizedText[] _stepTitles;
+        private static LocalizedText[] _stepBodies;
+        private static LocalizedText _textAwaitingEquip;
+        private static LocalizedText _textCalibrating;
+        private static LocalizedText _textNextBtn;
+
+        public override void SetStaticDefaults() {
+            _stepTitles = new[] {
+                this.GetLocalization("Step0_Title", () => "连接 SHPC"),
+                this.GetLocalization("Step1_Title", () => "核心节点"),
+                this.GetLocalization("Step2_Title", () => "CYBER DOMAIN"),
+                this.GetLocalization("Step3_Title", () => "CYBERWARE"),
+                this.GetLocalization("Step4_Title", () => "MODIFY"),
+                this.GetLocalization("Step5_Title", () => "TALK"),
+                this.GetLocalization("Step6_Title", () => "ENGRAM CALIBRATED"),
+            };
+            _stepBodies = new[] {
+                this.GetLocalization("Step0_Body", () => "将SHPC装备至武器栏并持握，HUD核心节点即会出现在屏幕左下角。"),
+                this.GetLocalization("Step1_Body", () => "点击左下角的核心节点可展开或收起操作面板。"),
+                this.GetLocalization("Step2_Body", () => "网域 — 部署并管理多层赛博空间层叠结构。"),
+                this.GetLocalization("Step3_Body", () => "赛博改装 — 查看并管理你的机体增强模块。"),
+                this.GetLocalization("Step4_Body", () => "改造 — 为SHPC安装或拆卸改造零件。"),
+                this.GetLocalization("Step5_Body", () => "神经链路 — 与SHPC建立直连通讯，开启对话。"),
+                this.GetLocalization("Step6_Body", () => "所有接口已解析完毕。\n神经链路稳定，SHPC已就绪。"),
+            };
+            _textAwaitingEquip = this.GetLocalization("AwaitingEquip", () => "AWAITING EQUIP...");
+            _textCalibrating   = this.GetLocalization("Calibrating",   () => "CALIBRATING...");
+            _textNextBtn       = this.GetLocalization("NextBtn",       () => "NEXT  >");
+        }
 
         private const int CardW = 310;
         private const int CardH = 118;
@@ -85,7 +120,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
                     _cardAnim = MathHelper.Lerp(_cardAnim, 1f, 0.16f);
 
                     _stepTimer += dt;
-                    var (_, _, _, isAuto) = StepDefs[_currentStep];
+                    bool isAuto = StepMeta[_currentStep].IsAuto;
                     if (isAuto) {
                         if (CheckAutoAdvance())
                             AdvanceStep();
@@ -130,7 +165,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
                 _phase = Phase.Done;
                 return;
             }
-            if (step < StepDefs.Length) {
+            if (step < StepMeta.Length) {
                 _phase = Phase.Running;
                 _currentStep = step;
                 _cardAnim = 0f;
@@ -143,7 +178,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
             int step = _currentStep;
             if (step == 0)
                 return SHPCUI.Instance?.Active == true;
-            if (step == StepDefs.Length - 1)
+            if (step == StepMeta.Length - 1)
                 return _stepTimer >= 3.5f;
             return false;
         }
@@ -152,7 +187,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
             _currentStep++;
             _stepTimer = 0f;
             _cardAnim = 0f;
-            if (_currentStep >= StepDefs.Length) {
+            if (_currentStep >= StepMeta.Length) {
                 _phase = Phase.FadeOut;
                 if (Main.LocalPlayer.TryGetADVSave(out var save))
                     save.Get<CybCourseTutorialData>().SHPCTutorialStep = -1;
@@ -181,7 +216,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
             if (px == null) return;
 
             float alpha = MathHelper.Clamp(_cardAnim, 0f, 1f);
-            var (targetKey, _, _, _) = StepDefs[_currentStep];
+            string targetKey = StepMeta[_currentStep].TargetKey;
 
             //卡片位置固定在SHPC HUD右侧，从下往上偏移
             Vector2 corePos = SHPCHUDTargets.CorePos;
@@ -228,12 +263,14 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
             float lineT = font.MeasureString("A").Y * titleSc + 2f;
             float lineB = font.MeasureString("A").Y * bodySc + 1f;
 
-            var (_, title, body, isAuto) = StepDefs[_currentStep];
+            string title  = _stepTitles[_currentStep].Value;
+            string body   = _stepBodies[_currentStep].Value;
+            bool isAuto   = StepMeta[_currentStep].IsAuto;
             float px2 = card.X + 14f;
             float py = card.Y + 12f;
 
             //步骤计数
-            string counter = $"{_currentStep + 1:D2} / {StepDefs.Length:D2}";
+            string counter = $"{_currentStep + 1:D2} / {StepMeta.Length:D2}";
             float counterW = font.MeasureString(counter).X * subSc;
             Utils.DrawBorderString(sb, counter,
                 new Vector2(card.Right - 14f - counterW, py),
@@ -268,7 +305,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
             } else {
                 //自动推进步骤显示等待提示
                 float blink = 0.72f + 0.28f * MathF.Sin(_shaderTimer * 22f);
-                string standby = _currentStep == 0 ? "AWAITING EQUIP..." : "CALIBRATING...";
+                string standby = _currentStep == 0 ? _textAwaitingEquip.Value : _textCalibrating.Value;
                 float sbW = font.MeasureString(standby).X * subSc;
                 Utils.DrawBorderString(sb, standby,
                     new Vector2(card.Right - 14f - sbW, card.Bottom - 16f),
@@ -294,7 +331,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
 
             BaseManagerStyle.FillRect(sb, btn, bgColor);
             BaseManagerStyle.StrokeRect(sb, btn, 1, borderColor);
-            BaseManagerStyle.DrawCenteredText(sb, "NEXT  >", btn.Center.ToVector2(), textColor, 0.60f);
+            BaseManagerStyle.DrawCenteredText(sb, _textNextBtn.Value, btn.Center.ToVector2(), textColor, 0.60f);
         }
 
         private static void DrawHighlightForStep(SpriteBatch sb, Texture2D px, string targetKey, float alpha) {
