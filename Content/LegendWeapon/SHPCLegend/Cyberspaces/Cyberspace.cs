@@ -44,10 +44,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
 
         /// <summary>
         /// 各层维持领域时每秒消耗的 RAM 量
-        /// <br/>L1 温和(0.6/s)、L2 紧张(1.5/s)、L3 爆发(3.5/s)
-        /// <br/>默认 8 RAM 上限下 L1 ~13s、L2 ~5s、L3 ~2s 即耗尽
         /// </summary>
-        public static readonly float[] LayerRamDrainPerSecond = { 0.6f, 1.5f, 3.5f };
+        public static readonly float[] LayerRamDrainPerSecond = { 0.2f, 1.6f, 6f };
 
         /// <summary>
         /// 取当前层的 RAM 每秒消耗量；未激活或层数为 0 时返回 0
@@ -78,6 +76,26 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         /// 当前是否处于"系统崩溃"锁定中(刚被 RAM 耗尽强制关闭)
         /// </summary>
         public static bool IsCrashLockedOut => crashLockoutTimer > 0;
+
+        /// <summary>
+        /// 激活/升层最低应能维持的秒数：低于这个阈值就直接拒绝，避免"开一帧立刻崩溃"的劣质反馈
+        /// </summary>
+        public const float MinSustainSeconds = 1f;
+
+        /// <summary>
+        /// 检查目标层(1..MaxLayerCount)是否有足够 RAM 维持最低秒数
+        /// <br/><see cref="HackTime.InfiniteHack"/> 模式下永远视为足够
+        /// </summary>
+        public static bool CanAffordLayer(int layer) {
+            if (HackTime.InfiniteHack) {
+                return true;
+            }
+            if (layer < 1 || layer > MaxLayerCount) {
+                return false;
+            }
+            float required = LayerRamDrainPerSecond[layer - 1] * MinSustainSeconds;
+            return RamSystem.CurrentRam >= required;
+        }
 
         /// <summary>
         /// 每层独立展开进度 (0~1)
@@ -194,6 +212,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         /// 激活赛博空间领域第一层（带爆发式展开+视觉特效）
         /// <br/>支持在前一次收缩动画尚未完成时立即重新展开，避免吞操作
         /// <br/>"系统崩溃"锁定期间(<see cref="IsCrashLockedOut"/>)会拒绝激活并播放"拒绝"音效
+        /// <br/>RAM 不足以维持目标层 <see cref="MinSustainSeconds"/> 秒时也会拒绝，避免"开一帧立刻崩溃"
         /// </summary>
         public static void Activate(Player owner) {
             //RAM 耗尽后的强制锁定期间不允许立刻重启领域
@@ -206,6 +225,22 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             //平滑接管：保留当前 layerExpand/Intensity，让动画从当前进度连续过渡
             //仅对超出层（>=1）清掉残留 burst，确保第一层独享爆发动画
             int resumeLayer = Math.Clamp(lastLayer, 1, MaxLayerCount);
+
+            //RAM 余量门槛：拒绝在不可维持的余量下激活（且不静默——给玩家一个失败反馈）
+            //从 resumeLayer 向下递减找到一个能维持的层；若连 L1 都不够，直接拒绝
+            if (!HackTime.InfiniteHack) {
+                while (resumeLayer >= 1 && !CanAffordLayer(resumeLayer)) {
+                    resumeLayer--;
+                }
+                if (resumeLayer < 1) {
+                    if (!VaultUtils.isServer && owner != null) {
+                        SoundEngine.PlaySound(CWRSound.FailureCurrent with { Volume = 0.45f, Pitch = -0.4f }, owner.Center);
+                        Color denyColor = new(255, 90, 80);
+                        CombatText.NewText(owner.Hitbox, denyColor, "// LOW RAM", true);
+                    }
+                    return;
+                }
+            }
             for (int i = resumeLayer; i < MaxLayerCount; i++) {
                 layerBurstTimer[i] = 0;
             }
@@ -226,11 +261,22 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
 
         /// <summary>
         /// 自由设置领域层数（可升可降，带展开/收缩过渡）
+        /// <br/>升层时会先做 RAM 余量检查：维持不到 <see cref="MinSustainSeconds"/> 秒就拒绝并播放失败反馈
         /// </summary>
         public static void SetLayer(int layer, Player owner = null) {
             layer = Math.Clamp(layer, 1, MaxLayerCount);
             if (!Active) return;
             if (layer == CurrentLayer) return;
+
+            //升层时校验 RAM 是否能维持新层最低秒数；拒绝时给一个失败反馈，避免"升一帧就崩"
+            if (layer > CurrentLayer && !CanAffordLayer(layer)) {
+                if (!VaultUtils.isServer && owner != null) {
+                    SoundEngine.PlaySound(CWRSound.FailureCurrent with { Volume = 0.4f, Pitch = -0.3f }, owner.Center);
+                    Color denyColor = new(255, 90, 80);
+                    CombatText.NewText(owner.Hitbox, denyColor, $"// L{layer} - LOW RAM", true);
+                }
+                return;
+            }
 
             int oldLayer = CurrentLayer;
             CurrentLayer = layer;
