@@ -105,6 +105,23 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
             Utils.DrawBorderString(sb, text, center - size / 2f, color, scale);
         }
 
+        /// <summary>条目状态的明文标签，避免只靠符号区分关注、挂起等状态。</summary>
+        protected static string GetEntryStatusText(QuestEntryStatus status) {
+            return status switch {
+                QuestEntryStatus.Active => QuestManagerUI.EntryStatusActive?.Value ?? "进行中",
+                QuestEntryStatus.Tracked => QuestManagerUI.EntryStatusTracked?.Value ?? "已关注",
+                QuestEntryStatus.Suspended => QuestManagerUI.EntryStatusSuspended?.Value ?? "已挂起",
+                QuestEntryStatus.Completed => QuestManagerUI.EntryStatusCompleted?.Value ?? "已完成",
+                QuestEntryStatus.Failed => QuestManagerUI.EntryStatusFailed?.Value ?? "已失败",
+                _ => ""
+            };
+        }
+
+        protected static int GetStatusBadgeWidth(string statusText, float scale = 0.55f) {
+            if (string.IsNullOrEmpty(statusText)) return 0;
+            return (int)(FontAssets.MouseText.Value.MeasureString(statusText).X * scale) + 14;
+        }
+
         /// <summary>渐变水平线段</summary>
         protected static void DrawGradientHLine(SpriteBatch sb, int x, int y, int w,
             Color startColor, Color endColor, int segments = 16) {

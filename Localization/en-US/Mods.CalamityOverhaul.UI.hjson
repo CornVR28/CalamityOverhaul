@@ -421,6 +421,11 @@ QuestManagerUI: {
 	HeaderStatusTag: ◈ ACTIVE
 	FooterStatsFormat: TOTAL: {0}  |  ACTIVE: {1}
 	ExpandHintText: "[左键] 展开/收起详情"
+	EntryStatusActive: 进行中
+	EntryStatusTracked: 已关注
+	EntryStatusSuspended: 已挂起
+	EntryStatusCompleted: 已完成
+	EntryStatusFailed: 已失败
 }
 
 CyberwareUI: {

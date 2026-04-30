@@ -73,6 +73,11 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
         public static LocalizedText ExpandHintText { get; private set; }
         public static LocalizedText HeaderStatusTag { get; private set; }
         public static LocalizedText FooterStatsFormat { get; private set; }
+        public static LocalizedText EntryStatusActive { get; private set; }
+        public static LocalizedText EntryStatusTracked { get; private set; }
+        public static LocalizedText EntryStatusSuspended { get; private set; }
+        public static LocalizedText EntryStatusCompleted { get; private set; }
+        public static LocalizedText EntryStatusFailed { get; private set; }
 
         public override void SetStaticDefaults() {
             TitleText = this.GetLocalization(nameof(TitleText), () => "任务管理");
@@ -87,6 +92,11 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
             ExpandHintText = this.GetLocalization(nameof(ExpandHintText), () => "[左键] 展开/收起详情");
             HeaderStatusTag = this.GetLocalization(nameof(HeaderStatusTag), () => "◈ ACTIVE");
             FooterStatsFormat = this.GetLocalization(nameof(FooterStatsFormat), () => "TOTAL: {0}  |  ACTIVE: {1}");
+            EntryStatusActive = this.GetLocalization(nameof(EntryStatusActive), () => "进行中");
+            EntryStatusTracked = this.GetLocalization(nameof(EntryStatusTracked), () => "已关注");
+            EntryStatusSuspended = this.GetLocalization(nameof(EntryStatusSuspended), () => "已挂起");
+            EntryStatusCompleted = this.GetLocalization(nameof(EntryStatusCompleted), () => "已完成");
+            EntryStatusFailed = this.GetLocalization(nameof(EntryStatusFailed), () => "已失败");
         }
 
         #endregion

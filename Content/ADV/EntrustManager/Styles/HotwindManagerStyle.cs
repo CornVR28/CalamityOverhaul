@@ -1,4 +1,4 @@
-using CalamityOverhaul.Common;
+﻿using CalamityOverhaul.Common;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
@@ -488,15 +488,22 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager.Styles
                 titleColor = Color.Lerp(titleColor, AccentGold, newBlink * 0.4f);
             }
 
-            //截断标题
+            //截断标题，并给右侧状态标签预留空间
+            string statusText = GetEntryStatusText(entry.Status);
+            float statusBadgeScale = 0.55f;
+            int statusBadgeW = GetStatusBadgeWidth(statusText, statusBadgeScale);
+            float statusBadgeX = entryRect.Right - statusBadgeW - 28f;
             string displayTitle = entry.Title ?? "";
-            float maxEntryTitleW = entryRect.Width - 50f - iconOffset;
+            float maxEntryTitleW = Math.Max(40f, statusBadgeX - titleX - 8f);
             if (font.MeasureString(displayTitle).X * 0.78f > maxEntryTitleW) {
                 while (displayTitle.Length > 3 && font.MeasureString(displayTitle + "...").X * 0.78f > maxEntryTitleW)
                     displayTitle = displayTitle[..^1];
                 displayTitle += "...";
             }
             Utils.DrawBorderString(sb, displayTitle, new Vector2(titleX, titleY), titleColor, 0.78f);
+            Rectangle statusBadgeRect = new((int)statusBadgeX, entryRect.Y + 8, statusBadgeW, 15);
+            DrawHotwindStatusBadge(sb, statusBadgeRect, statusText, entry.Status,
+                alpha, statusBadgeScale, entryIndex);
 
             //Tracked态火焰指示器
             if (entry.Status == QuestEntryStatus.Tracked) {
@@ -504,9 +511,11 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager.Styles
                 float titleW = font.MeasureString(displayTitle).X * 0.78f;
                 Color flameColor = customStyle?.GetAccentColor(QuestEntryStatus.Tracked, alpha * flameBlink)
                     ?? AccentGold * (alpha * flameBlink);
-                Utils.DrawBorderString(sb, "◆",
-                    new Vector2(titleX + titleW + 6f, titleY + 1f),
-                    flameColor, 0.65f);
+                if (titleX + titleW + 18f < statusBadgeX) {
+                    Utils.DrawBorderString(sb, "◆",
+                        new Vector2(titleX + titleW + 6f, titleY + 1f),
+                        flameColor, 0.65f);
+                }
             }
 
             //摘要文本
@@ -611,6 +620,42 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager.Styles
 
             // === 前景特效 ===
             customStyle?.DrawEntryOverlay(sb, entryRect, entry, alpha);
+        }
+
+        //锻铁风状态铭牌：金属渐变、凹槽线和两侧铆钉，避免像外贴的普通按钮
+        private void DrawHotwindStatusBadge(SpriteBatch sb, Rectangle badgeRect, string statusText,
+            QuestEntryStatus status, float alpha, float scale, int entryIndex) {
+            if (badgeRect.Width <= 0 || string.IsNullOrEmpty(statusText)) return;
+
+            Color statusColor = GetStatusColor(status, 1f);
+            float heat = MathF.Sin(pulseTimer * 2f + entryIndex * 0.35f) * 0.12f + 0.88f;
+            Color top = Color.Lerp(new Color(34, 18, 8), statusColor, 0.22f);
+            Color bottom = Color.Lerp(new Color(12, 7, 4), statusColor, 0.10f);
+            for (int y = badgeRect.Y; y < badgeRect.Bottom; y++) {
+                float t = (y - badgeRect.Y) / (float)Math.Max(1, badgeRect.Height - 1);
+                HLine(sb, badgeRect.X, y, badgeRect.Width,
+                    Color.Lerp(top, bottom, t) * (alpha * 0.78f));
+            }
+
+            HLine(sb, badgeRect.X + 2, badgeRect.Y, badgeRect.Width - 4,
+                PrimaryBright * (alpha * 0.16f));
+            HLine(sb, badgeRect.X + 1, badgeRect.Bottom - 1, badgeRect.Width - 2,
+                Color.Black * (alpha * 0.35f));
+            VLine(sb, badgeRect.X, badgeRect.Y + 2, badgeRect.Height - 4,
+                statusColor * (alpha * 0.42f));
+            VLine(sb, badgeRect.Right - 1, badgeRect.Y + 2, badgeRect.Height - 4,
+                Color.Black * (alpha * 0.22f));
+
+            Vector2 leftRivet = new(badgeRect.X + 4f, badgeRect.Y + badgeRect.Height / 2f);
+            Vector2 rightRivet = new(badgeRect.Right - 4f, leftRivet.Y);
+            sb.Draw(Px, leftRivet, null, AccentGold * (alpha * 0.50f * heat),
+                0f, new Vector2(0.5f), 2.2f, SpriteEffects.None, 0f);
+            sb.Draw(Px, rightRivet, null, AccentGold * (alpha * 0.35f * heat),
+                0f, new Vector2(0.5f), 2.2f, SpriteEffects.None, 0f);
+
+            Utils.DrawBorderString(sb, statusText,
+                new Vector2(badgeRect.X + 9f, badgeRect.Y + 1f),
+                statusColor * (alpha * (status == QuestEntryStatus.Active ? 0.74f : 0.95f)), scale);
         }
 
         //状态铆钉节点（金属圆钉风格）
@@ -747,7 +792,7 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager.Styles
         #region 样式切换按钮
 
         public override Rectangle GetStyleSwitchButtonRect(Rectangle panelRect) =>
-            new(panelRect.Right - 58, panelRect.Y + 6, 26, 26);
+            new(panelRect.Right - 180, panelRect.Y + 6, 26, 26);
 
         public override void DrawStyleSwitchButton(SpriteBatch sb, Rectangle panelRect, bool isHovered, float alpha) {
             Rectangle btnRect = GetStyleSwitchButtonRect(panelRect);

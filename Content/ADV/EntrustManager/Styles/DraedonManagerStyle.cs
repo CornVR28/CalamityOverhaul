@@ -495,15 +495,22 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager.Styles
                 titleColor = Color.Lerp(titleColor, AccentWarm, newBlink * 0.4f);
             }
 
-            //截断标题
+            //截断标题，并给右侧状态标签预留空间
+            string statusText = GetEntryStatusText(entry.Status);
+            float statusBadgeScale = 0.55f;
+            int statusBadgeW = GetStatusBadgeWidth(statusText, statusBadgeScale);
+            float statusBadgeX = entryRect.Right - statusBadgeW - 28f;
             string displayTitle = entry.Title ?? "";
-            float maxEntryTitleW = entryRect.Width - 50f - iconOffset;
+            float maxEntryTitleW = Math.Max(40f, statusBadgeX - titleX - 8f);
             if (font.MeasureString(displayTitle).X * 0.78f > maxEntryTitleW) {
                 while (displayTitle.Length > 3 && font.MeasureString(displayTitle + "...").X * 0.78f > maxEntryTitleW)
                     displayTitle = displayTitle[..^1];
                 displayTitle += "...";
             }
             Utils.DrawBorderString(sb, displayTitle, new Vector2(titleX, titleY), titleColor, 0.78f);
+            Rectangle statusBadgeRect = new((int)statusBadgeX, entryRect.Y + 8, statusBadgeW, 15);
+            DrawDraedonStatusBadge(sb, statusBadgeRect, statusText, entry.Status,
+                alpha, statusBadgeScale, entryIndex);
 
             //Tracked态雪佛龙指示器
             if (entry.Status == QuestEntryStatus.Tracked) {
@@ -511,9 +518,11 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager.Styles
                 float titleW = font.MeasureString(displayTitle).X * 0.78f;
                 Color chevColor = customStyle?.GetAccentColor(QuestEntryStatus.Tracked, alpha * chevBlink)
                     ?? AccentCyan * (alpha * chevBlink);
-                Utils.DrawBorderString(sb, "››",
-                    new Vector2(titleX + titleW + 6f, titleY + 1f),
-                    chevColor, 0.7f);
+                if (titleX + titleW + 18f < statusBadgeX) {
+                    Utils.DrawBorderString(sb, "››",
+                        new Vector2(titleX + titleW + 6f, titleY + 1f),
+                        chevColor, 0.7f);
+                }
             }
 
             //摘要文本
@@ -618,6 +627,33 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager.Styles
 
             // === 前景特效 ===
             customStyle?.DrawEntryOverlay(sb, entryRect, entry, alpha);
+        }
+
+        //科技风状态铭牌：微弱全息底、角标和数据节点，贴合嘉登面板语言
+        private void DrawDraedonStatusBadge(SpriteBatch sb, Rectangle badgeRect, string statusText,
+            QuestEntryStatus status, float alpha, float scale, int entryIndex) {
+            if (badgeRect.Width <= 0 || string.IsNullOrEmpty(statusText)) return;
+
+            Color statusColor = GetStatusColor(status, 1f);
+            float pulse = MathF.Sin(chevronPulse + entryIndex * 0.45f) * 0.18f + 0.82f;
+            FillRect(sb, badgeRect, BgDeep * (alpha * 0.55f));
+            DrawGradientHLine(sb, badgeRect.X + 1, badgeRect.Y + 1, badgeRect.Width - 2,
+                statusColor * (alpha * 0.30f), Color.Transparent, 10);
+            HLine(sb, badgeRect.X + 1, badgeRect.Bottom - 2, badgeRect.Width - 2,
+                PrimaryDim * (alpha * 0.35f));
+
+            Color cornerColor = statusColor * (alpha * 0.75f * pulse);
+            HLine(sb, badgeRect.X, badgeRect.Y, 5, cornerColor);
+            VLine(sb, badgeRect.X, badgeRect.Y, 5, cornerColor);
+            HLine(sb, badgeRect.Right - 5, badgeRect.Bottom - 1, 5, cornerColor);
+            VLine(sb, badgeRect.Right - 1, badgeRect.Bottom - 5, 5, cornerColor);
+
+            Vector2 node = new(badgeRect.X + 4f, badgeRect.Y + badgeRect.Height / 2f);
+            sb.Draw(Px, node, null, statusColor * (alpha * 0.75f * pulse),
+                MathHelper.PiOver4, new Vector2(0.5f), 2.4f, SpriteEffects.None, 0f);
+            Utils.DrawBorderString(sb, statusText,
+                new Vector2(badgeRect.X + 10f, badgeRect.Y + 1f),
+                statusColor * (alpha * (status == QuestEntryStatus.Active ? 0.72f : 0.95f)), scale);
         }
 
         //菱形状态节点（多层全息风格，与QuestLogStyle的节点统一）
@@ -757,7 +793,7 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager.Styles
         #region 样式切换按钮
 
         public override Rectangle GetStyleSwitchButtonRect(Rectangle panelRect) =>
-            new(panelRect.Right - 58, panelRect.Y + 6, 26, 26);
+            new(panelRect.Right - 180, panelRect.Y + 6, 26, 26);
 
         public override void DrawStyleSwitchButton(SpriteBatch sb, Rectangle panelRect, bool isHovered, float alpha) {
             Rectangle btnRect = GetStyleSwitchButtonRect(panelRect);
