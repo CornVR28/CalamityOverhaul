@@ -99,6 +99,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
         private const float StuckHintAfter = 12f;
         //SHPC教学结束 → 骇客对话之间的衔接缓冲
         private const float HackIntroLeadDelay = 0.15f;
+        //结束对话启动前，等待骇客时间视觉层淡出到不会与对话重叠
+        private const float OutroHackTimeFadeThreshold = 0.02f;
 
         private static Phase _phase = Phase.Inactive;
         private static int _currentStep = 0;
@@ -325,6 +327,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
         //Phase.Done时尝试启动通关祝贺对话（只触发一次，对话完成由其OnScenarioComplete拉起完成面板）
         private static void TryStartOutro() {
             if (_outroStarted) return;
+            if (HackTime.Active || HackTime.Intensity > OutroHackTimeFadeThreshold) return;
             if (ScenarioManager.IsActive()) return;
             if (CybCourseCompletePanel.Visible) return;
             _outroStarted = true;
@@ -379,6 +382,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
             if (_currentStep == 5)
                 CleanupTank();
             if (_currentStep >= StepIsAuto.Length) {
+                if (HackTime.Active)
+                    HackTime.Deactivate();
                 _phase = Phase.FadeOut;
                 return;
             }
