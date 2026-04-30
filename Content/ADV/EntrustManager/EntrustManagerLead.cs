@@ -18,6 +18,7 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
             Inactive,
             KeyPrompt,
             PanelIntro,
+            StyleButtonPrompt,
             Complete
         }
 
@@ -36,6 +37,10 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
         public static LocalizedText TextMiddleClickLabel { get; private set; }
         public static LocalizedText TextMiddleClickAction { get; private set; }
         public static LocalizedText TextMiddleClickDesc { get; private set; }
+        public static LocalizedText TextStyleButtonTitle { get; private set; }
+        public static LocalizedText TextStyleButtonLabel { get; private set; }
+        public static LocalizedText TextStyleButtonAction { get; private set; }
+        public static LocalizedText TextStyleButtonDesc { get; private set; }
         public static LocalizedText TextConfirmBtn { get; private set; }
 
         public override void SetStaticDefaults() {
@@ -50,6 +55,10 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
             TextMiddleClickLabel = this.GetLocalization(nameof(TextMiddleClickLabel), () => "中键单击委托条目");
             TextMiddleClickAction = this.GetLocalization(nameof(TextMiddleClickAction), () => " →  挂起委托");
             TextMiddleClickDesc = this.GetLocalization(nameof(TextMiddleClickDesc), () => "     暂时隐藏该委托，不在追踪窗口中显示");
+            TextStyleButtonTitle = this.GetLocalization(nameof(TextStyleButtonTitle), () => "样式按钮提示");
+            TextStyleButtonLabel = this.GetLocalization(nameof(TextStyleButtonLabel), () => "左键单击顶部小按钮");
+            TextStyleButtonAction = this.GetLocalization(nameof(TextStyleButtonAction), () => " →  切换界面样式");
+            TextStyleButtonDesc = this.GetLocalization(nameof(TextStyleButtonDesc), () => "     可以在荒漠、嘉登与森林风格之间循环切换");
             TextConfirmBtn = this.GetLocalization(nameof(TextConfirmBtn), () => "明白了");
         }
 
@@ -70,6 +79,13 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
         //阶段2卡片尺寸
         private const int CardW2 = 318;
         private const int CardH2 = 146;
+        //阶段3卡片尺寸
+        private const int CardW3 = 286;
+        private const int CardH3 = 112;
+        //与三套管理器样式中的样式切换按钮位置保持一致
+        private const int StyleButtonOffsetFromPanelRight = 180;
+        private const int StyleButtonTop = 36;
+        private const int StyleButtonSize = 26;
 
         public override void OnWorldUnload() {
             currentPhase = LeadPhase.Inactive;
@@ -105,6 +121,18 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
 
                 case LeadPhase.PanelIntro:
                     animProgress = MathHelper.Lerp(animProgress, 1f, AnimSpeed);
+                    if (!ui.IsOpen) {
+                        currentPhase = LeadPhase.KeyPrompt;
+                        animProgress = 0f;
+                    }
+                    break;
+
+                case LeadPhase.StyleButtonPrompt:
+                    animProgress = MathHelper.Lerp(animProgress, 1f, AnimSpeed);
+                    if (!ui.IsOpen) {
+                        currentPhase = LeadPhase.KeyPrompt;
+                        animProgress = 0f;
+                    }
                     break;
 
                 case LeadPhase.Complete:
@@ -113,7 +141,8 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
         }
 
         public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers) {
-            if (currentPhase != LeadPhase.KeyPrompt && currentPhase != LeadPhase.PanelIntro) return;
+            if (currentPhase != LeadPhase.KeyPrompt && currentPhase != LeadPhase.PanelIntro
+                && currentPhase != LeadPhase.StyleButtonPrompt) return;
             if (CybCourse.IsActive) return;
 
             int idx = layers.FindIndex(l => l.Name == "Vanilla: Mouse Text");
@@ -127,6 +156,8 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
                         DrawKeyPromptCard(sb);
                     else if (currentPhase == LeadPhase.PanelIntro)
                         DrawPanelIntroCard(sb);
+                    else if (currentPhase == LeadPhase.StyleButtonPrompt)
+                        DrawStyleButtonPromptCard(sb);
                     return true;
                 },
                 InterfaceScaleType.UI
@@ -209,7 +240,7 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
 
                 //设置引导（暗淡提示色）
                 int hintWrapW = (int)((CardW1 - 28) / subScale2);
-                string[] hintWrapped = Utils.WordwrapString("建议前往  设置 → 控制  中绑定自定义按键", font, hintWrapW, 99, out _);
+                string[] hintWrapped = Utils.WordwrapString(TextKeyPromptBindHint.Value, font, hintWrapW, 99, out _);
                 foreach (string wl in hintWrapped) {
                     if (string.IsNullOrEmpty(wl)) continue;
                     Utils.DrawBorderString(sb, wl.TrimEnd('-', ' '), new Vector2(px, py),
@@ -297,7 +328,92 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
             }
 
             if (DrawConfirmButton(sb, card, alpha))
+                StartStyleButtonPrompt();
+        }
+
+        // ─── 阶段3：样式切换按钮提示卡 ───────────────────────────────────────────
+
+        private static void StartStyleButtonPrompt() {
+            currentPhase = LeadPhase.StyleButtonPrompt;
+            animProgress = 0f;
+        }
+
+        private static Rectangle GetStyleSwitchGuideRect(QuestManagerUI ui) {
+            return new Rectangle(
+                ui.PanelRightEdge - StyleButtonOffsetFromPanelRight,
+                StyleButtonTop,
+                StyleButtonSize,
+                StyleButtonSize);
+        }
+
+        private static void DrawStyleButtonPromptCard(SpriteBatch sb) {
+            var ui = QuestManagerUI.Instance;
+            if (ui == null) return;
+
+            Rectangle styleRect = GetStyleSwitchGuideRect(ui);
+            float alpha = animProgress;
+            DrawStyleButtonHighlight(sb, styleRect, alpha);
+
+            float slideX = (1f - animProgress) * 70f;
+            float x = MathHelper.Clamp(styleRect.Right + 16f + slideX, 20f, Main.screenWidth - CardW3 - 20f);
+            float y = MathHelper.Clamp(styleRect.Y - 8f, 20f, Main.screenHeight - CardH3 - 20f);
+            var card = new Rectangle((int)x, (int)y, CardW3, CardH3);
+
+            DrawCardBackground(sb, card, 0.5f, alpha);
+            DrawLeftArrow(sb, new Vector2(x - 8f, y + 28f), alpha);
+
+            var font = FontAssets.MouseText.Value;
+            float titleScale = 0.78f;
+            float bodyScale = 0.66f;
+            float subScale = 0.60f;
+            float px = x + 14f, py = y + 10f;
+            float lineH_t = font.MeasureString("A").Y * titleScale + 2f;
+            float lineH_b = font.MeasureString("A").Y * bodyScale + 2f;
+            float lineH_s = font.MeasureString("A").Y * subScale + 2f;
+
+            Utils.DrawBorderString(sb, TextStyleButtonTitle.Value,
+                new Vector2(px, py),
+                new Color(230, 225, 100, (int)(255 * alpha)), titleScale);
+            py += lineH_t + 2f;
+
+            BaseManagerStyle.FillRect(sb,
+                new Rectangle((int)px, (int)py, CardW3 - 28, 1),
+                new Color(130, 125, 70, (int)(130 * alpha)));
+            py += 6f;
+
+            float keyW = font.MeasureString(TextStyleButtonLabel.Value).X * bodyScale;
+            Utils.DrawBorderString(sb, TextStyleButtonLabel.Value,
+                new Vector2(px, py),
+                new Color(245, 190, 95, (int)(240 * alpha)), bodyScale);
+            Utils.DrawBorderString(sb, TextStyleButtonAction.Value,
+                new Vector2(px + keyW, py),
+                new Color(255, 230, 170, (int)(240 * alpha)), bodyScale);
+            py += lineH_b;
+
+            int descWrapW = (int)((CardW3 - 28) / subScale);
+            string[] wrapped = Utils.WordwrapString(TextStyleButtonDesc.Value, font, descWrapW, 99, out _);
+            foreach (string wl in wrapped) {
+                if (string.IsNullOrEmpty(wl)) continue;
+                Utils.DrawBorderString(sb, wl.TrimEnd('-', ' '), new Vector2(px, py),
+                    new Color(175, 150, 105, (int)(205 * alpha)), subScale);
+                py += lineH_s;
+            }
+
+            bool clickedStyleButton = styleRect.Contains(Main.mouseX, Main.mouseY)
+                && Main.mouseLeft && !Main.mouseLeftRelease;
+            if (clickedStyleButton || DrawConfirmButton(sb, card, alpha))
                 MarkGuideSeen();
+        }
+
+        private static void DrawStyleButtonHighlight(SpriteBatch sb, Rectangle styleRect, float alpha) {
+            float pulse = 0.65f + MathF.Sin(shaderTimer * 44f) * 0.35f;
+            Rectangle glowRect = styleRect;
+            glowRect.Inflate(5, 5);
+            BaseManagerStyle.StrokeRect(sb, glowRect, 2,
+                new Color(255, 205, 90, (int)(210 * alpha * pulse)));
+            glowRect.Inflate(3, 3);
+            BaseManagerStyle.StrokeRect(sb, glowRect, 1,
+                new Color(255, 230, 140, (int)(120 * alpha * pulse)));
         }
 
         // ─── 着色器背景（含降级回退） ────────────────────────────────────────────

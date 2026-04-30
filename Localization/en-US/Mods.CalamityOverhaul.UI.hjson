@@ -699,6 +699,10 @@ EntrustManagerLead: {
 	TextMiddleClickLabel: Middle-click an entry
 	TextMiddleClickAction: " →  Suspend"
 	TextMiddleClickDesc: "     Temporarily hides the task from the tracker"
+	TextStyleButtonTitle: Style Button Tip
+	TextStyleButtonLabel: Left-click the top small button
+	TextStyleButtonAction: " →  Switch UI style"
+	TextStyleButtonDesc: "     Cycle between Hotwind, Draedon, and Forest styles"
 	TextConfirmBtn: Got it
 }
 

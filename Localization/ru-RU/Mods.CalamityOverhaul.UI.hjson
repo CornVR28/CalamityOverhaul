@@ -696,6 +696,10 @@ EntrustManagerLead: {
 	TextMiddleClickLabel: 中键单击委托条目
 	TextMiddleClickAction: " →  挂起委托"
 	TextMiddleClickDesc: "     暂时隐藏该委托，不在追踪窗口中显示"
+	TextStyleButtonTitle: 样式按钮提示
+	TextStyleButtonLabel: 左键单击顶部小按钮
+	TextStyleButtonAction: " →  切换界面样式"
+	TextStyleButtonDesc: "     可以在荒漠、嘉登与森林风格之间循环切换"
 	TextConfirmBtn: 明白了
 }
 
