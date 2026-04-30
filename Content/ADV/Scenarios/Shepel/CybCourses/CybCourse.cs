@@ -45,7 +45,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
             //4. 重置玩家位置 / RAM / 骇客时间
             HackTime.Reset();
             RamSystem.Refill();
-            HackTime.InfiniteHack = true;
             Player p = Main.LocalPlayer;
             if (p != null && p.active) {
                 p.Center = new Vector2(

@@ -1,4 +1,4 @@
-﻿ShepelCyberActiveDialogue: {
+ShepelCyberActiveDialogue: {
 	// RoleName: SHPC
 	// Line_Intro: 领域已激活，主人。当前层级 {0}，外部信号已完全隔离。
 	// Line_LayerReport: 领域越深，可干预的目标范围越广，但能量消耗也成倍增加。请注意RAM余量。
@@ -291,8 +291,8 @@ HackTimeTutorialLead: {
 		''' */
 	// HT_Step7_Body: 物块扫描接口已解析。右侧面板展示当前物块的可用骇入协议。
 	// HT_HintStuck: "// HINT: 点击 NEXT 按钮可强制跳过"
-	// HT_KeyUnbound: 未绑定·按 [N] 临时启用
-	// HT_KeyHintUnbound: "// 提示：未绑定骇客时间快捷键，可在 设置 中绑定。"
+	// HT_KeyUnbound: N（临时开关）
+	// HT_KeyHintUnbound: "// 提示：未绑定骇客时间快捷键时，本教程内可用 [N] 临时开关；建议在 设置 > 控制 中绑定。"
 }
 
 CybCourseOutroDialogue: {
