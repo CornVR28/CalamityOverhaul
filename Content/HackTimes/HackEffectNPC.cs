@@ -64,7 +64,7 @@ namespace CalamityOverhaul.Content.HackTimes
             if (HackEffectTracker.HasEffect<MemoryWipe>(npc.whoAmI)) {
                 var eff = HackEffectTracker.GetEffect<MemoryWipe>(npc.whoAmI);
                 if (eff != null) {
-                    eff.Hack.OnRemove((IHackTarget)npc);
+                    eff.Hack.OnRemove(eff.Target);
                     eff.Active = false;
                 }
             }
@@ -74,7 +74,7 @@ namespace CalamityOverhaul.Content.HackTimes
             if (HackEffectTracker.HasEffect<MemoryWipe>(npc.whoAmI)) {
                 var eff = HackEffectTracker.GetEffect<MemoryWipe>(npc.whoAmI);
                 if (eff != null) {
-                    eff.Hack.OnRemove((IHackTarget)npc);
+                    eff.Hack.OnRemove(eff.Target);
                     eff.Active = false;
                 }
             }

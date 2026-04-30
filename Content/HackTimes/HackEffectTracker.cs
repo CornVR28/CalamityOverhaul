@@ -51,6 +51,9 @@ namespace CalamityOverhaul.Content.HackTimes
         private static readonly List<ActiveHackEffect> activeEffects = [];
         //帧内移除缓冲
         private static readonly List<ActiveHackEffect> removeBuffer = [];
+        //OnRemove 可能施加传播类效果，延迟加入可避免当前帧遍历期间处理新效果
+        private static readonly List<ActiveHackEffect> pendingEffects = [];
+        private static bool updatingNpcEffects;
 
         //所有 Tile 维度的活跃效果
         private static readonly List<ActiveHackEffect> activeTileEffects = [];
@@ -87,7 +90,10 @@ namespace CalamityOverhaul.Content.HackTimes
                 EffectMult = npc.boss ? 0.5f : 1f,
             };
 
-            activeEffects.Add(effect);
+            if (updatingNpcEffects)
+                pendingEffects.Add(effect);
+            else
+                activeEffects.Add(effect);
             return effect;
         }
 
@@ -100,6 +106,7 @@ namespace CalamityOverhaul.Content.HackTimes
             removeBuffer.Clear();
             killRefundedThisFrame.Clear();
 
+            updatingNpcEffects = true;
             for (int i = 0; i < activeEffects.Count; i++) {
                 var eff = activeEffects[i];
                 if (!eff.Active) {
@@ -155,9 +162,15 @@ namespace CalamityOverhaul.Content.HackTimes
 
                 eff.Elapsed++;
             }
+            updatingNpcEffects = false;
 
             for (int i = 0; i < removeBuffer.Count; i++) {
                 activeEffects.Remove(removeBuffer[i]);
+            }
+
+            if (pendingEffects.Count > 0) {
+                activeEffects.AddRange(pendingEffects);
+                pendingEffects.Clear();
             }
         }
 
@@ -165,6 +178,11 @@ namespace CalamityOverhaul.Content.HackTimes
         public static bool HasEffect<T>(int npcIndex) where T : QuickHackDef {
             for (int i = 0; i < activeEffects.Count; i++) {
                 var e = activeEffects[i];
+                if (e.Active && e.Hack is T && e.Target is NpcScannable n && n.NpcIndex == npcIndex)
+                    return true;
+            }
+            for (int i = 0; i < pendingEffects.Count; i++) {
+                var e = pendingEffects[i];
                 if (e.Active && e.Hack is T && e.Target is NpcScannable n && n.NpcIndex == npcIndex)
                     return true;
             }
@@ -347,9 +365,18 @@ namespace CalamityOverhaul.Content.HackTimes
         #endregion
 
         public static void Reset() {
+            updatingNpcEffects = false;
             activeEffects.Clear();
             removeBuffer.Clear();
+            pendingEffects.Clear();
             killRefundedThisFrame.Clear();
+
+            for (int i = 0; i < activeTileEffects.Count; i++) {
+                var eff = activeTileEffects[i];
+                if (!eff.Active || !eff.Applied || eff.Target == null || !eff.Target.IsValid) continue;
+                eff.Hack.OnRemove(eff.Target);
+            }
+
             activeTileEffects.Clear();
             tileRemoveBuffer.Clear();
         }

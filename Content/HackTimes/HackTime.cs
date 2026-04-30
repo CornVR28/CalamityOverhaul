@@ -19,6 +19,8 @@ namespace CalamityOverhaul.Content.HackTimes
 
         public override void Unload() => Reset();
 
+        public override void OnWorldUnload() => Reset();
+
         #region 本地化字段
 
         public static LocalizedText Locked { get; private set; }
@@ -510,6 +512,9 @@ namespace CalamityOverhaul.Content.HackTimes
             cameraTo = Vector2.Zero;
             InfiniteHack = false;
             HackTimeFreeze.Deactivate();
+            HackTimeUI.Instance?.Queue?.Clear();
+            HackEffectTracker.Reset();
+            HackTimeTileCyberPass.ReleaseRT();
             RamSystem.Reset();
         }
     }

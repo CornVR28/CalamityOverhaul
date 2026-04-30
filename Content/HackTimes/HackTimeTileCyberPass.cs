@@ -259,5 +259,10 @@ namespace CalamityOverhaul.Content.HackTimes
             _rt = new RenderTarget2D(gd, w, h, false, SurfaceFormat.Color,
                 DepthFormat.None, 0, RenderTargetUsage.DiscardContents);
         }
+
+        public static void ReleaseRT() {
+            _rt?.Dispose();
+            _rt = null;
+        }
     }
 }
