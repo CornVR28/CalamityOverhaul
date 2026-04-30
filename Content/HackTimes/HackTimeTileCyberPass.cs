@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using InnoVault.RenderHandles;
+using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;
 using Terraria.GameContent;
@@ -32,7 +33,7 @@ namespace CalamityOverhaul.Content.HackTimes
             Effect shader = HackTimeAssets.HackTimeNPCHighlight;
             if (shader == null) return;
 
-            //优先绘制悬停（冷青），再绘制选中（红色），选中覆盖悬停
+            ////优先绘制悬停（冷青），再绘制选中（红色），选中覆盖悬停
             DrawPassForHovered(sb, gd, shader, effectStr);
             DrawPassForSelected(sb, gd, shader, effectStr);
         }
@@ -71,6 +72,11 @@ namespace CalamityOverhaul.Content.HackTimes
 
         /// <summary>
         /// 将包围盒范围内所有 HasTile 的物块重绘到 RT，套用着色器合成回屏幕
+        /// <br/>采用「备份-切RT-还原」swap 模式：
+        /// 在某些驱动/MonoGame 版本下，<see cref="EndEntityDraw"/> 阶段中途切换 RT 会导致
+        /// <see cref="Main.screenTarget"/> 内容丢失（即使声明 PreserveContents）；
+        /// 因此先把当前屏幕画面复制到 InnoVault 提供的全屏 ScreenSwap，做完小 RT 重绘后
+        /// 再把备份内容画回 screenTarget，以彻底规避 RT 切换丢内容问题
         /// </summary>
         private static void RenderAndComposite(SpriteBatch sb, GraphicsDevice gd, Effect shader,
             Rectangle worldBounds, float effectStr, bool isSelected) {
@@ -80,45 +86,63 @@ namespace CalamityOverhaul.Content.HackTimes
             int rtH = Math.Min(worldBounds.Height + EdgePadding * 2, MaxRtSize);
             if (rtW <= 0 || rtH <= 0) return;
 
+            //此处由 EndEntityDraw 调用，主屏幕 RT 必为 Main.screenTarget
+            if (Main.screenTarget == null || Main.screenTarget.IsDisposed) return;
+
+            //InnoVault 维护的全屏 swap RT，作为屏幕画面的备份载体
+            RenderTarget2D screenSwap = RenderHandleLoader.ScreenSwap;
+            if (screenSwap == null || screenSwap.IsDisposed) return;
+
             EnsureRT(gd, rtW, rtH);
-            if (_rt == null) return;
+            if (_rt == null || _rt.IsDisposed) return;
 
-            //保存当前渲染目标用于后续还原
-            RenderTargetBinding[] prevTargets = gd.GetRenderTargets();
+            try {
+                //阶段1：把当前 screenTarget 内容备份到 screenSwap
+                //（必须先于 _rt 切换，因为切到 _rt 之后再切回 screenTarget 内容就丢了）
+                gd.SetRenderTarget(screenSwap);
+                gd.Clear(Color.Transparent);
+                sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
+                sb.Draw(Main.screenTarget, Vector2.Zero, Color.White);
+                sb.End();
 
-            gd.SetRenderTarget(_rt);
-            gd.Clear(Color.Transparent);
+                //阶段2：按原始帧把物块重绘到小 RT，透明像素自然形成轮廓掩码
+                gd.SetRenderTarget(_rt);
+                gd.Clear(Color.Transparent);
+                sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                    SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone);
+                RedrawTileRegion(sb, worldBounds);
+                sb.End();
 
-            //阶段1：按原始帧把物块重绘到 RT，透明像素自然形成轮廓掩码
-            sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone);
-            RedrawTileRegion(sb, worldBounds);
-            sb.End();
+                //阶段3：切回 screenTarget，先清空再用备份还原原始画面
+                //这一步是修复黑屏的关键：切换 RT 后必须显式还原，不能依赖 PreserveContents
+                gd.SetRenderTarget(Main.screenTarget);
+                gd.Clear(Color.Transparent);
+                sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
+                sb.Draw(screenSwap, Vector2.Zero, Color.White);
+                sb.End();
 
-            //还原渲染目标
-            if (prevTargets.Length > 0) {
-                gd.SetRenderTarget((RenderTarget2D)prevTargets[0].RenderTarget);
+                //阶段4：套着色器把小 RT 加法叠加到屏幕上，呈现赛博高亮效果
+                shader.Parameters["texelSize"]?.SetValue(new Vector2(1f / rtW, 1f / rtH));
+                shader.Parameters["intensity"]?.SetValue(effectStr);
+                shader.Parameters["isSelected"]?.SetValue(isSelected ? 1f : 0f);
+                shader.Parameters["uTime"]?.SetValue(Main.GlobalTimeWrappedHourly);
+
+                Vector2 screenPos = new(
+                    worldBounds.X - EdgePadding - Main.screenPosition.X,
+                    worldBounds.Y - EdgePadding - Main.screenPosition.Y);
+
+                sb.Begin(SpriteSortMode.Immediate, BlendState.Additive,
+                    SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone,
+                    null, Main.GameViewMatrix.TransformationMatrix);
+                shader.CurrentTechnique.Passes[0].Apply();
+                sb.Draw(_rt, screenPos, Color.White);
+                sb.End();
             }
-            else {
-                gd.SetRenderTarget(null);
+            catch {
+                //出错时确保切回主屏 RT，避免后续绘制写到错误目标
+                gd.SetRenderTarget(Main.screenTarget);
+                throw;
             }
-
-            //阶段2：套着色器把 RT 绘回屏幕（加法混合，叠加在已绘制的原始物块之上）
-            shader.Parameters["texelSize"]?.SetValue(new Vector2(1f / rtW, 1f / rtH));
-            shader.Parameters["intensity"]?.SetValue(effectStr);
-            shader.Parameters["isSelected"]?.SetValue(isSelected ? 1f : 0f);
-            shader.Parameters["uTime"]?.SetValue(Main.GlobalTimeWrappedHourly);
-
-            Vector2 screenPos = new(
-                worldBounds.X - EdgePadding - Main.screenPosition.X,
-                worldBounds.Y - EdgePadding - Main.screenPosition.Y);
-
-            sb.Begin(SpriteSortMode.Immediate, BlendState.Additive,
-                SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone,
-                null, Main.GameViewMatrix.TransformationMatrix);
-            shader.CurrentTechnique.Passes[0].Apply();
-            sb.Draw(_rt, screenPos, Color.White);
-            sb.End();
         }
 
         /// <summary>
@@ -256,8 +280,10 @@ namespace CalamityOverhaul.Content.HackTimes
         private static void EnsureRT(GraphicsDevice gd, int w, int h) {
             if (_rt != null && !_rt.IsDisposed && _rt.Width == w && _rt.Height == h) return;
             _rt?.Dispose();
+            //使用 PreserveContents（与 SandevistanGhostActor 等已稳定运行的 RT 通道保持一致），
+            //避免某些驱动下 DiscardContents 在切换回主 RT 时引起的画面被清空问题
             _rt = new RenderTarget2D(gd, w, h, false, SurfaceFormat.Color,
-                DepthFormat.None, 0, RenderTargetUsage.DiscardContents);
+                DepthFormat.None, 0, RenderTargetUsage.PreserveContents);
         }
     }
 }
