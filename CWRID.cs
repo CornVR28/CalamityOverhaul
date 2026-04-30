@@ -303,6 +303,8 @@ namespace CalamityOverhaul
         public static int Tile_HostileOnyxTurret => Get();
         public static int Tile_HostilePlagueTurret => Get();
         public static int Tile_HostileWaterTurret => Get();
+        public static int Tile_SecurityChestTile => Get();
+        public static int Tile_AgedSecurityChestTile => Get();
         #endregion
         #region 增益效果ID引用
         public static int Buff_Dragonfire => Get();
