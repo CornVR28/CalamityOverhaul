@@ -1,4 +1,6 @@
-﻿using Terraria;
+﻿using CalamityOverhaul.Content.HackTimes.Targets;
+using System;
+using Terraria;
 using Terraria.ID;
 using Terraria.Map;
 using Terraria.ModLoader;
@@ -9,8 +11,9 @@ namespace CalamityOverhaul.Content.HackTimes
     /// <summary>
     /// 物块扫描数据实现
     /// <br/>扫描家具、工作站、容器等可交互物块的属性信息
+    /// <br/>同时承担 <see cref="IHackTarget"/> 抽象，把物块的"被骇入"行为下沉到本类
     /// </summary>
-    internal class TileScannable : IScannable
+    internal class TileScannable : IHackTarget
     {
         //物块的格子坐标
         private readonly int tileX;
@@ -77,6 +80,50 @@ namespace CalamityOverhaul.Content.HackTimes
             values[4] = GetStatusText(tile, type);
             colors[4] = GetStatusColor(tile, type);
         }
+
+        #region IHackTarget
+
+        public HackTargetType TargetType => HackTargetType.Get<TileTargetType>();
+
+        public Vector2 LockFrameHalfSize {
+            get {
+                Rectangle bounds = GetTileWorldBounds(tileX, tileY);
+                return new Vector2(
+                    Math.Max(bounds.Width, 32) * 0.6f + 28f,
+                    Math.Max(bounds.Height, 32) * 0.6f + 28f);
+            }
+        }
+
+        public string LockFrameTitle {
+            get {
+                if (!IsValid) return string.Empty;
+                Tile tile = Main.tile[tileX, tileY];
+                return GetTileName(tileX, tileY, tile.TileType);
+            }
+        }
+
+        public bool TryGetLockFrameStatus(out string text, out Color color) {
+            text = null;
+            color = default;
+            if (!IsValid) return false;
+            Tile tile = Main.tile[tileX, tileY];
+            int type = tile.TileType;
+            text = GetTileClass(type);
+            color = GetTileClassColor(type);
+            return true;
+        }
+
+        public bool ApplyHack(QuickHackDef hack, Player caster) {
+            //物块协议走效果追踪器，由其管理 OnApply→OnTick→OnRemove 生命周期
+            int casterIndex = caster?.whoAmI ?? Main.myPlayer;
+            return HackEffectTracker.ApplyTileEffect(hack, tileX, tileY, casterIndex) != null;
+        }
+
+        public bool TargetEquals(IHackTarget other) {
+            return other is TileScannable t && t.tileX == tileX && t.tileY == tileY;
+        }
+
+        #endregion
 
         /// <summary>
         /// 获取物块的显示名称

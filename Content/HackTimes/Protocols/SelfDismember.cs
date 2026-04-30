@@ -19,8 +19,8 @@ namespace CalamityOverhaul.Content.HackTimes.Protocols
             SupportedTargets = HackTargetKind.Wraith;
         }
 
-        public override bool OnApplyToWraith(GlitchWraithActor wraith, Player caster) {
-            if (wraith == null) return false;
+        public override bool OnApply(IHackTarget target, Player caster) {
+            if (target is not GlitchWraithActor wraith) return false;
             wraith.ApplySelfDismember();
             SoundEngine.PlaySound(SoundID.NPCDeath10 with { Volume = 1f, Pitch = -0.9f }, wraith.Center);
             SoundEngine.PlaySound(SoundID.Item122 with { Volume = 1f, Pitch = -1f }, wraith.Center);

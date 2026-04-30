@@ -278,6 +278,25 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Signa
 
         int IScannable.ScanRowCount => 4;
 
+        HackTargetType IHackTarget.TargetType
+            => HackTargetType.Get<HackTimes.Targets.SignalTowerTargetType>();
+
+        Vector2 IHackTarget.LockFrameHalfSize => new(
+            Math.Max(Width, 32) * 0.40f + 22f,
+            Math.Max(Height, 32) * 0.32f + 22f);
+
+        string IHackTarget.LockFrameTitle => HackTime.SignalTowerScanName.Value;
+
+        bool IHackTarget.TryGetLockFrameStatus(out string text, out Color color) {
+            text = HackTime.SignalTowerScanStatusOnline.Value;
+            color = HackTheme.AccentAlt;
+            return true;
+        }
+
+        bool IHackTarget.ApplyHack(QuickHackDef hack, Player caster) => hack.OnApply(this, caster);
+
+        bool IHackTarget.TargetEquals(IHackTarget other) => ReferenceEquals(this, other);
+
         void IScannable.BuildScanData(string[] labels, string[] values, Color[] colors) {
             labels[0] = HackTime.TurretScanName.Value;
             values[0] = HackTime.SignalTowerScanName.Value;

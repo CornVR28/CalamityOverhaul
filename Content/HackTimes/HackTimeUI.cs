@@ -77,50 +77,21 @@ namespace CalamityOverhaul.Content.HackTimes
                 return;
             }
 
-            int hovered = HackTime.HoveredTargetIndex;
+            //世界中点击：所有目标种类通过 IHackTarget 统一进入选择流程
+            IHackTarget hovered = HackTimeTargeting.HoveredTarget;
 
-            if (hovered >= 0) {
-                //点击NPC目标
-                if (hovered != HackTime.SelectedTargetIndex) {
-                    HackTime.SelectTarget(hovered);
-                    Panel.Show(HackTargetKind.Npc);
+            if (hovered != null) {
+                if (HackTime.CurrentScanTarget == null
+                    || !hovered.TargetEquals(HackTime.CurrentScanTarget)) {
+                    HackTime.Select(hovered);
+                    //协议面板按目标种类过滤可用协议
+                    Panel.Show(hovered.TargetType.Kind);
                 }
             }
-            else if (HackTimeTargeting.HoveredWraith != null) {
-                //点击灵异Actor目标
-                var wraith = HackTimeTargeting.HoveredWraith;
-                if (HackTime.CurrentScanTarget != wraith) {
-                    HackTime.SelectWraithScan(wraith);
-                    Panel.Show(HackTargetKind.Wraith);
-                }
-            }
-            else if (HackTimeTargeting.HoveredSignalTower != null) {
-                //点击可骇入信号塔Actor目标
-                var tower = HackTimeTargeting.HoveredSignalTower;
-                if (HackTime.CurrentScanTarget != tower) {
-                    HackTime.SelectSignalTowerScan(tower);
-                    Panel.Show(HackTargetKind.SignalTower);
-                }
-            }
-            else if (HackTimeTargeting.HoveredTurret != null) {
-                //点击可骇入炮台Actor目标
-                var turret = HackTimeTargeting.HoveredTurret;
-                if (HackTime.CurrentScanTarget != turret) {
-                    HackTime.SelectTurretScan(turret);
-                    Panel.Show(HackTargetKind.Turret);
-                }
-            }
-            else if (HackTimeTargeting.HoveredTileX >= 0) {
-                //点击可扫描物块，同时显示物块协议面板
-                HackTime.SelectTileScan(HackTimeTargeting.HoveredTileX, HackTimeTargeting.HoveredTileY);
-                Panel.Show(HackTargetKind.Tile);
-            }
-            else {
+            else if (HackTime.CurrentScanTarget != null) {
                 //点击空白处取消选中
-                if (HackTime.SelectedTargetIndex >= 0 || HackTime.CurrentScanTarget != null) {
-                    HackTime.DeselectTarget();
-                    Panel.Hide();
-                }
+                HackTime.DeselectTarget();
+                Panel.Hide();
             }
         }
 

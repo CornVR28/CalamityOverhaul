@@ -4,19 +4,20 @@ using Terraria;
 namespace CalamityOverhaul.Content.HackTimes
 {
     /// <summary>
-    /// 可被骇客时间骇入的Actor机械目标
+    /// 可被骇客时间骇入的 Actor 机械目标
     /// 典型实现：虚空聚落炮台（加特林/激光炮台）
-    /// 通过IScannable实现扫描数据，通过本接口暴露电路层面的骇入反应
+    /// 通过 <see cref="IHackTarget"/> 暴露统一的目标抽象，
+    /// 通过本接口暴露电路层面的骇入反应
     /// </summary>
-    internal interface IHackableTurret : IScannable
+    internal interface IHackableTurret : IHackTarget
     {
-        /// <summary>返回Actor本体，用于统一的光标悬停判定与生命周期校验</summary>
+        /// <summary>返回 Actor 本体，用于统一的光标悬停判定与生命周期校验</summary>
         Actor AsActor { get; }
 
         /// <summary>当前是否正处于电路过载导致的失效状态，用于面板状态显示</summary>
         bool IsCircuitDisabled { get; }
 
-        /// <summary>剩余失效帧数，用于扫描面板展示和UI倒计时</summary>
+        /// <summary>剩余失效帧数，用于扫描面板展示和 UI 倒计时</summary>
         int CircuitDisabledFrames { get; }
 
         /// <summary>

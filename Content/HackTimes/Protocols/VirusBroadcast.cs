@@ -27,8 +27,8 @@ namespace CalamityOverhaul.Content.HackTimes.Protocols
             SupportedTargets = HackTargetKind.SignalTower;
         }
 
-        public override bool OnApplyToSignalTower(IHackableSignalTower tower, Player caster) {
-            if (tower == null) return false;
+        public override bool OnApply(IHackTarget target, Player caster) {
+            if (target is not IHackableSignalTower tower) return false;
             tower.BeginVirusBroadcast(BroadcastRadiusPx, TurretDisableFrames, caster);
             Vector2 center = tower.WorldCenter;
 

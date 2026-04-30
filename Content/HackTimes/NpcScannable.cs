@@ -1,31 +1,34 @@
-﻿using System;
+﻿using CalamityOverhaul.Content.HackTimes.Targets;
+using System;
 using Terraria;
 
 namespace CalamityOverhaul.Content.HackTimes
 {
     /// <summary>
-    /// NPC扫描数据实现
-    /// <br/>从ScanInfoRenderer中提取的NPC扫描逻辑
+    /// NPC 扫描数据实现
+    /// <br/>同时承担 <see cref="IHackTarget"/> 抽象，把 NPC 的"被骇入"行为下沉到本类
     /// </summary>
-    internal class NpcScannable : IScannable
+    internal class NpcScannable : IHackTarget
     {
-        private readonly int npcIndex;
+        public int NpcIndex { get; }
 
         public NpcScannable(int npcIndex) {
-            this.npcIndex = npcIndex;
+            NpcIndex = npcIndex;
         }
+
+        #region IScannable
 
         public Vector2 WorldCenter {
             get {
-                if (npcIndex < 0 || npcIndex >= Main.maxNPCs) return Vector2.Zero;
-                return Main.npc[npcIndex].Center;
+                if (NpcIndex < 0 || NpcIndex >= Main.maxNPCs) return Vector2.Zero;
+                return Main.npc[NpcIndex].Center;
             }
         }
 
         public bool IsValid {
             get {
-                if (npcIndex < 0 || npcIndex >= Main.maxNPCs) return false;
-                return Main.npc[npcIndex].active;
+                if (NpcIndex < 0 || NpcIndex >= Main.maxNPCs) return false;
+                return Main.npc[NpcIndex].active;
             }
         }
 
@@ -34,8 +37,8 @@ namespace CalamityOverhaul.Content.HackTimes
         public int ScanRowCount => 6;
 
         public void BuildScanData(string[] labels, string[] values, Color[] colors) {
-            if (npcIndex < 0 || npcIndex >= Main.maxNPCs) return;
-            NPC npc = Main.npc[npcIndex];
+            if (NpcIndex < 0 || NpcIndex >= Main.maxNPCs) return;
+            NPC npc = Main.npc[NpcIndex];
             if (!npc.active) return;
 
             //TYPE
@@ -96,5 +99,49 @@ namespace CalamityOverhaul.Content.HackTimes
             colors[5] = npc.knockBackResist >= 0.9f ? HackTheme.Danger
                 : npc.knockBackResist >= 0.5f ? HackTheme.Uploading : HackTheme.TextBright;
         }
+
+        #endregion
+
+        #region IHackTarget
+
+        public HackTargetType TargetType => HackTargetType.Get<NpcTargetType>();
+
+        public Vector2 LockFrameHalfSize {
+            get {
+                if (!IsValid) return Vector2.Zero;
+                NPC npc = Main.npc[NpcIndex];
+                return new Vector2(
+                    Math.Max(npc.width, 32) * 0.6f + 28f,
+                    Math.Max(npc.height, 32) * 0.6f + 28f);
+            }
+        }
+
+        public string LockFrameTitle => IsValid ? Main.npc[NpcIndex].FullName : string.Empty;
+
+        public bool TryGetLockFrameStatus(out string text, out Color color) {
+            text = null;
+            color = default;
+            if (!IsValid) return false;
+            NPC npc = Main.npc[NpcIndex];
+            if (npc.lifeMax <= 0) return false;
+
+            float hpPct = (float)npc.life / npc.lifeMax;
+            text = HackTime.HpFormat.Format((int)(hpPct * 100));
+            color = hpPct > 0.5f ? HackTheme.AccentAlt
+                : hpPct > 0.25f ? HackTheme.Uploading : HackTheme.Danger;
+            return true;
+        }
+
+        public bool ApplyHack(QuickHackDef hack, Player caster) {
+            //NPC 协议走效果追踪器，由其管理 OnApply→OnTick→OnRemove 生命周期
+            int casterIndex = caster?.whoAmI ?? Main.myPlayer;
+            return HackEffectTracker.ApplyNpcEffect(hack, NpcIndex, casterIndex) != null;
+        }
+
+        public bool TargetEquals(IHackTarget other) {
+            return other is NpcScannable n && n.NpcIndex == NpcIndex;
+        }
+
+        #endregion
     }
 }

@@ -17,25 +17,29 @@ namespace CalamityOverhaul.Content.HackTimes.Protocols
 
         public override int GetDuration() => 60 * 5; //5秒持续
 
-        public override bool OnApply(NPC target, Player caster) {
+        public override bool OnApply(IHackTarget target, Player caster) {
+            if (target is not NpcScannable s) return false;
+            NPC npc = Main.npc[s.NpcIndex];
             //初始神经脉冲爆发
             for (int i = 0; i < 8; i++) {
                 Vector2 vel = Main.rand.NextVector2CircularEdge(4f, 4f);
-                PRTLoader.AddParticle(new PRT_Spark(target.Center, vel, false, 25, 1.2f,
+                PRTLoader.AddParticle(new PRT_Spark(npc.Center, vel, false, 25, 1.2f,
                     new Color(255, 120, 20)));
             }
             return true;
         }
 
-        public override bool OnTick(NPC target, int elapsed) {
+        public override bool OnTick(IHackTarget target, int elapsed) {
+            if (target is not NpcScannable s) return true;
+            NPC npc = Main.npc[s.NpcIndex];
             //每15帧造成一次伤害（4次/秒，每次25，5秒共500）
             if (elapsed % 15 == 0) {
-                target.SimpleStrikeNPC(25, 0, false, 0f, null, false, 0f, true);
+                npc.SimpleStrikeNPC(25, 0, false, 0f, null, false, 0f, true);
             }
             //持续焚烧粒子
             if (elapsed % 3 == 0) {
-                Vector2 pos = target.Center + Main.rand.NextVector2Circular(
-                    target.width * 0.3f, target.height * 0.3f);
+                Vector2 pos = npc.Center + Main.rand.NextVector2Circular(
+                    npc.width * 0.3f, npc.height * 0.3f);
                 Vector2 vel = new(Main.rand.NextFloat(-1f, 1f), Main.rand.NextFloat(-2f, -0.5f));
                 Color c = Color.Lerp(new Color(255, 80, 0), new Color(255, 200, 50), Main.rand.NextFloat());
                 PRTLoader.AddParticle(new PRT_Spark(pos, vel, false, 20, 0.8f, c));

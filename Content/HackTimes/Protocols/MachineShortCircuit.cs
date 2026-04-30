@@ -25,13 +25,15 @@ namespace CalamityOverhaul.Content.HackTimes.Protocols
             SupportedTargets = HackTargetKind.Tile;
         }
 
-        public override bool CanApplyToTile(int tileX, int tileY) {
-            if (!base.CanApplyToTile(tileX, tileY)) return false;
-            return TryGetMachine(tileX, tileY, out _);
+        public override bool CanApplyTo(IHackTarget target) {
+            if (!base.CanApplyTo(target)) return false;
+            if (target is not TileScannable s) return false;
+            return TryGetMachine(s.TileCoordX, s.TileCoordY, out _);
         }
 
-        public override bool OnApplyToTile(int tileX, int tileY, Player caster) {
-            if (!TryGetMachine(tileX, tileY, out MachineTP machine)) return false;
+        public override bool OnApply(IHackTarget target, Player caster) {
+            if (target is not TileScannable s) return false;
+            if (!TryGetMachine(s.TileCoordX, s.TileCoordY, out MachineTP machine)) return false;
 
             //清空电能
             float drainedUE = machine.MachineData.UEvalue;

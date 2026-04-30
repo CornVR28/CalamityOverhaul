@@ -27,7 +27,10 @@ namespace CalamityOverhaul.Content.HackTimes.Protocols
 
         public override int GetDuration() => PullDuration;
 
-        public override bool OnApplyToTile(int tileX, int tileY, Player caster) {
+        public override bool OnApply(IHackTarget target, Player caster) {
+            if (target is not TileScannable s) return false;
+            int tileX = s.TileCoordX;
+            int tileY = s.TileCoordY;
             Vector2 center = new(tileX * 16f + 8f, tileY * 16f + 8f);
 
             //启动粒子
@@ -44,7 +47,10 @@ namespace CalamityOverhaul.Content.HackTimes.Protocols
             return true;
         }
 
-        public override bool OnTickTile(int tileX, int tileY, int elapsed) {
+        public override bool OnTick(IHackTarget target, int elapsed) {
+            if (target is not TileScannable s) return true;
+            int tileX = s.TileCoordX;
+            int tileY = s.TileCoordY;
             Vector2 tileCenter = new(tileX * 16f + 8f, tileY * 16f + 8f);
             Player player = Main.LocalPlayer;
             Vector2 pullTarget = player.Center;

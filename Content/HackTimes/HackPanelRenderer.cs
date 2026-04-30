@@ -175,41 +175,23 @@ namespace CalamityOverhaul.Content.HackTimes
 
         public void HandleClick() {
             if (!visible) return;
-            if (hoveredSlot >= 0 && Queue != null) {
-                int globalIdx = GetGlobalIndex(hoveredSlot);
-                var hack = QuickHackDef.GetByIndex(globalIdx);
-                if (hack == null) return;
-                //RAM不足时拒绝入队
-                if (!RamSystem.CanAfford(hack.RamCost)) return;
+            if (hoveredSlot < 0 || Queue == null) return;
 
-                bool enqueued;
-                if (currentTargetKind == HackTargetKind.Tile
-                    && HackTime.CurrentScanTarget is TileScannable tileScan) {
-                    //物块目标入队
-                    enqueued = Queue.EnqueueTile(hack, globalIdx, tileScan.TileCoordX, tileScan.TileCoordY);
-                }
-                else if (currentTargetKind == HackTargetKind.Wraith
-                    && HackTime.CurrentScanTarget is ADV.Scenarios.VoidColonys.GlitchWraith.GlitchWraithActor wraith) {
-                    //灵异目标入队
-                    enqueued = Queue.EnqueueWraith(hack, globalIdx, wraith);
-                }
-                else if (currentTargetKind == HackTargetKind.Turret
-                    && HackTime.CurrentScanTarget is IHackableTurret turret) {
-                    //炮台目标入队
-                    enqueued = Queue.EnqueueTurret(hack, globalIdx, turret);
-                }
-                else if (currentTargetKind == HackTargetKind.SignalTower
-                    && HackTime.CurrentScanTarget is IHackableSignalTower tower) {
-                    //信号塔目标入队
-                    enqueued = Queue.EnqueueSignalTower(hack, globalIdx, tower);
-                }
-                else {
-                    enqueued = Queue.Enqueue(hack, globalIdx, HackTime.SelectedTargetIndex);
-                }
+            int globalIdx = GetGlobalIndex(hoveredSlot);
+            var hack = QuickHackDef.GetByIndex(globalIdx);
+            if (hack == null) return;
+            //RAM不足时拒绝入队
+            if (!RamSystem.CanAfford(hack.RamCost)) return;
 
-                if (enqueued) {
-                    RamSystem.TryConsume(hack.RamCost);
-                }
+            //当前选中的目标统一通过 IHackTarget 暴露给队列，无需按种类分支
+            IHackTarget target = HackTime.CurrentScanTarget;
+            if (target == null) return;
+            //协议必须支持当前目标种类
+            if ((hack.SupportedTargets & target.TargetType.Kind) == 0) return;
+
+            bool enqueued = Queue.Enqueue(hack, globalIdx, target);
+            if (enqueued) {
+                RamSystem.TryConsume(hack.RamCost);
             }
         }
 
@@ -297,7 +279,7 @@ namespace CalamityOverhaul.Content.HackTimes
         #region 电路连接树
 
         private void DrawConnectorTree(SpriteBatch sb, Texture2D px, float alpha) {
-            if (HackTime.SelectedTargetIndex < 0 && HackTime.CurrentScanTarget == null) return;
+            if (HackTime.CurrentScanTarget == null) return;
 
             float totalH = displayCount * (ItemHeight + ItemGap) - ItemGap;
             float listStartY = (Main.screenHeight - totalH) * 0.5f + TopPadding;

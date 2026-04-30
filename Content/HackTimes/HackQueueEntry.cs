@@ -1,7 +1,8 @@
-﻿namespace CalamityOverhaul.Content.HackTimes
-{
-    using CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.GlitchWraith;
+﻿using CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.GlitchWraith;
+using Terraria;
 
+namespace CalamityOverhaul.Content.HackTimes
+{
     //队列条目状态
     internal enum HackQueueState
     {
@@ -13,7 +14,7 @@
         Completed,
     }
 
-    //用于在右侧面板查询某个hack在队列中的状态
+    //用于在右侧面板查询某个 hack 在队列中的状态
     internal enum QueueSlotState
     {
         None,
@@ -22,140 +23,59 @@
         Completed,
     }
 
-    //左侧待执行队列的单条记录
+    /// <summary>
+    /// 左侧待执行队列的单条记录
+    /// <br/>统一通过 <see cref="IHackTarget"/> 引用承载所有目标种类，无需为每种目标维护独立字段
+    /// </summary>
     internal class HackQueueEntry
     {
         //对应的协议定义
         public QuickHackDef Hack;
-        //在QuickHackDef.Instances中的索引
+        //在 QuickHackDef.Instances 中的索引
         public int SlotIndex;
-        //目标类型
-        public HackTargetKind TargetKind;
-        //骇入目标NPC索引（TargetKind为Npc时有效），入队时锁定
-        public int TargetIndex;
-        //骇入目标物块坐标（TargetKind为Tile时有效）
-        public int TileX;
-        public int TileY;
-        //骇入目标灵异Actor引用（TargetKind为Wraith时有效）
-        public GlitchWraithActor WraithTarget;
-        //骇入目标炮台Actor引用（TargetKind为Turret时有效）
-        public IHackableTurret TurretTarget;
-        //骇入目标信号塔Actor引用（TargetKind为SignalTower时有效）
-        public IHackableSignalTower SignalTowerTarget;
+        //目标引用（NPC、物块、灵异、炮台、信号塔等任意 IHackTarget 实现）
+        public IHackTarget Target;
         //当前队列状态
         public HackQueueState State;
-        //上传进度0~1
+        //上传进度 0~1
         public float UploadProgress;
-        //飞入动画进度0~1
+        //飞入动画进度 0~1
         public float FlyIn;
         //完成后闪烁计时
         public float CompletedTimer;
         //故障种子
         public float GlitchSeed;
 
-        //NPC目标构造
-        public HackQueueEntry(QuickHackDef hack, int slotIndex, int targetIndex) {
+        public HackQueueEntry(QuickHackDef hack, int slotIndex, IHackTarget target) {
             Hack = hack;
             SlotIndex = slotIndex;
-            TargetKind = HackTargetKind.Npc;
-            TargetIndex = targetIndex;
-            TileX = -1;
-            TileY = -1;
+            Target = target;
             State = HackQueueState.Waiting;
             UploadProgress = 0f;
             FlyIn = 0f;
             CompletedTimer = 0f;
-            GlitchSeed = Terraria.Main.rand?.Next(10000) / 100f ?? 0f;
-        }
-
-        //物块目标构造
-        public HackQueueEntry(QuickHackDef hack, int slotIndex, int tileX, int tileY) {
-            Hack = hack;
-            SlotIndex = slotIndex;
-            TargetKind = HackTargetKind.Tile;
-            TargetIndex = -1;
-            TileX = tileX;
-            TileY = tileY;
-            State = HackQueueState.Waiting;
-            UploadProgress = 0f;
-            FlyIn = 0f;
-            CompletedTimer = 0f;
-            GlitchSeed = Terraria.Main.rand?.Next(10000) / 100f ?? 0f;
-        }
-
-        //灵异目标构造
-        public HackQueueEntry(QuickHackDef hack, int slotIndex, GlitchWraithActor wraith) {
-            Hack = hack;
-            SlotIndex = slotIndex;
-            TargetKind = HackTargetKind.Wraith;
-            TargetIndex = -1;
-            TileX = -1;
-            TileY = -1;
-            WraithTarget = wraith;
-            State = HackQueueState.Waiting;
-            UploadProgress = 0f;
-            FlyIn = 0f;
-            CompletedTimer = 0f;
-            GlitchSeed = Terraria.Main.rand?.Next(10000) / 100f ?? 0f;
-        }
-
-        //炮台目标构造
-        public HackQueueEntry(QuickHackDef hack, int slotIndex, IHackableTurret turret) {
-            Hack = hack;
-            SlotIndex = slotIndex;
-            TargetKind = HackTargetKind.Turret;
-            TargetIndex = -1;
-            TileX = -1;
-            TileY = -1;
-            TurretTarget = turret;
-            State = HackQueueState.Waiting;
-            UploadProgress = 0f;
-            FlyIn = 0f;
-            CompletedTimer = 0f;
-            GlitchSeed = Terraria.Main.rand?.Next(10000) / 100f ?? 0f;
-        }
-
-        //信号塔目标构造
-        public HackQueueEntry(QuickHackDef hack, int slotIndex, IHackableSignalTower tower) {
-            Hack = hack;
-            SlotIndex = slotIndex;
-            TargetKind = HackTargetKind.SignalTower;
-            TargetIndex = -1;
-            TileX = -1;
-            TileY = -1;
-            SignalTowerTarget = tower;
-            State = HackQueueState.Waiting;
-            UploadProgress = 0f;
-            FlyIn = 0f;
-            CompletedTimer = 0f;
-            GlitchSeed = Terraria.Main.rand?.Next(10000) / 100f ?? 0f;
+            GlitchSeed = Main.rand?.Next(10000) / 100f ?? 0f;
         }
 
         //目标是否仍然有效
-        public bool IsTargetValid {
-            get {
-                if (TargetKind == HackTargetKind.Npc) {
-                    return TargetIndex >= 0 && TargetIndex < Terraria.Main.maxNPCs
-                        && Terraria.Main.npc[TargetIndex].active;
-                }
-                if (TargetKind == HackTargetKind.Tile) {
-                    return TileX >= 0 && TileX < Terraria.Main.maxTilesX
-                        && TileY >= 0 && TileY < Terraria.Main.maxTilesY
-                        && Terraria.Main.tile[TileX, TileY].HasTile;
-                }
-                if (TargetKind == HackTargetKind.Wraith) {
-                    return WraithTarget != null && WraithTarget.Active;
-                }
-                if (TargetKind == HackTargetKind.Turret) {
-                    return TurretTarget != null && TurretTarget.AsActor != null
-                        && TurretTarget.AsActor.Active && TurretTarget.IsValid;
-                }
-                if (TargetKind == HackTargetKind.SignalTower) {
-                    return SignalTowerTarget != null && SignalTowerTarget.AsActor != null
-                        && SignalTowerTarget.AsActor.Active && SignalTowerTarget.IsValid;
-                }
-                return false;
-            }
-        }
+        public bool IsTargetValid => Target != null && Target.IsValid;
+
+        //目标种类（旁路便捷查询）
+        public HackTargetKind TargetKind => Target?.TargetType?.Kind ?? HackTargetKind.None;
+
+        //----- 兼容旧 API：暴露具体目标维度的便捷查询 -----
+
+        /// <summary>当 Target 为 NpcScannable 时返回 NPC 索引，否则返回 -1</summary>
+        public int TargetIndex => Target is NpcScannable n ? n.NpcIndex : -1;
+        /// <summary>当 Target 为 TileScannable 时返回物块 X，否则返回 -1</summary>
+        public int TileX => Target is TileScannable t ? t.TileCoordX : -1;
+        /// <summary>当 Target 为 TileScannable 时返回物块 Y，否则返回 -1</summary>
+        public int TileY => Target is TileScannable t ? t.TileCoordY : -1;
+        /// <summary>当 Target 为灵异 Actor 时返回引用</summary>
+        public GlitchWraithActor WraithTarget => Target as GlitchWraithActor;
+        /// <summary>当 Target 为炮台时返回引用</summary>
+        public IHackableTurret TurretTarget => Target as IHackableTurret;
+        /// <summary>当 Target 为信号塔时返回引用</summary>
+        public IHackableSignalTower SignalTowerTarget => Target as IHackableSignalTower;
     }
 }

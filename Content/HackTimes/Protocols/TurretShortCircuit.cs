@@ -20,8 +20,8 @@ namespace CalamityOverhaul.Content.HackTimes.Protocols
             SupportedTargets = HackTargetKind.Turret;
         }
 
-        public override bool OnApplyToTurret(IHackableTurret turret, Player caster) {
-            if (turret == null) return false;
+        public override bool OnApply(IHackTarget target, Player caster) {
+            if (target is not IHackableTurret turret) return false;
             turret.ApplyShortCircuit(DisableFrames, caster);
             Vector2 center = turret.WorldCenter;
 

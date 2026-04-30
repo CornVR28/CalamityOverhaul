@@ -1,7 +1,5 @@
 ﻿using CalamityOverhaul.Common;
 using CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.GlitchWraith;
-using InnoVault.Actors;
-using System.Collections.Generic;
 using Terraria;
 using Terraria.ModLoader;
 
@@ -10,7 +8,8 @@ namespace CalamityOverhaul.Content.HackTimes
     /// <summary>
     /// 骇客时间目标选择系统
     /// <br/>处理按键切换、光标悬停检测和运镜缩放
-    /// <br/>点击选择逻辑由HackTimeUI(UIHandle)负责
+    /// <br/>点击选择逻辑由 HackTimeUI(UIHandle) 负责
+    /// <br/>悬停检测通过 <see cref="HackTargetType.DetectTopmostHover"/> 自动遍历所有注册的目标种类，无需在此维护按种类分支
     /// </summary>
     internal class HackTimeTargeting : ModPlayer
     {
@@ -20,25 +19,23 @@ namespace CalamityOverhaul.Content.HackTimes
         private float savedZoomTarget;
 
         /// <summary>
-        /// 当前悬停的可扫描物块坐标，负数表示无悬停
+        /// 当前光标下的可骇入目标，null 表示无悬停
+        /// <br/>所有种类（NPC、物块、灵异、炮台、信号塔等）通过<see cref="IHackTarget"/>统一暴露
         /// </summary>
-        public static int HoveredTileX { get; set; } = -1;
-        public static int HoveredTileY { get; set; } = -1;
+        public static IHackTarget HoveredTarget { get; private set; }
 
-        /// <summary>
-        /// 当前悬停的灵异Actor引用，null表示无悬停
-        /// </summary>
-        public static GlitchWraithActor HoveredWraith { get; set; }
+        //----- 兼容旧 API：从统一的 HoveredTarget 派生具体维度 -----
 
-        /// <summary>
-        /// 当前悬停的可骇入炮台Actor引用，null表示无悬停
-        /// </summary>
-        public static IHackableTurret HoveredTurret { get; set; }
-
-        /// <summary>
-        /// 当前悬停的可骇入信号塔Actor引用，null表示无悬停
-        /// </summary>
-        public static IHackableSignalTower HoveredSignalTower { get; set; }
+        /// <summary>当前悬停的可扫描物块 X，无悬停物块时返回 -1</summary>
+        public static int HoveredTileX => HoveredTarget is TileScannable t ? t.TileCoordX : -1;
+        /// <summary>当前悬停的可扫描物块 Y，无悬停物块时返回 -1</summary>
+        public static int HoveredTileY => HoveredTarget is TileScannable t ? t.TileCoordY : -1;
+        /// <summary>当前悬停的灵异 Actor，无悬停灵异时返回 null</summary>
+        public static GlitchWraithActor HoveredWraith => HoveredTarget as GlitchWraithActor;
+        /// <summary>当前悬停的可骇入炮台，无悬停炮台时返回 null</summary>
+        public static IHackableTurret HoveredTurret => HoveredTarget as IHackableTurret;
+        /// <summary>当前悬停的可骇入信号塔，无悬停信号塔时返回 null</summary>
+        public static IHackableSignalTower HoveredSignalTower => HoveredTarget as IHackableSignalTower;
 
         public override void ProcessTriggers(Terraria.GameInput.TriggersSet triggersSet) {
             if (Player.whoAmI != Main.myPlayer) return;
@@ -49,183 +46,18 @@ namespace CalamityOverhaul.Content.HackTimes
 
         public override void PostUpdate() {
             if (Player.whoAmI != Main.myPlayer) return;
-            if (!HackTime.Active) return;
-
+            if (!HackTime.Active) {
+                HoveredTarget = null;
+                return;
+            }
             UpdateHoverDetection();
         }
 
         /// <summary>
-        /// 检测光标下方的可骇入目标或可扫描物块
+        /// 检测光标下方的可骇入目标，按目标种类工厂的<see cref="HackTargetType.HoverPriority"/>取最高优先级命中
         /// </summary>
         private void UpdateHoverDetection() {
-            //获取鼠标在世界中的位置
-            Vector2 mouseWorld = Main.MouseWorld;
-            int bestIndex = -1;
-            float bestDistSq = float.MaxValue;
-
-            //遍历所有活跃NPC，找到离鼠标最近的可骇入目标
-            for (int i = 0; i < Main.maxNPCs; i++) {
-                NPC npc = Main.npc[i];
-                if (!HackTime.IsHackableTarget(npc)) continue;
-
-                //检查鼠标是否在NPC的碰撞箱范围内（略微放大判定区域）
-                float expandMargin = 16f;
-                float left = npc.position.X - expandMargin;
-                float top = npc.position.Y - expandMargin;
-                float right = npc.position.X + npc.width + expandMargin;
-                float bottom = npc.position.Y + npc.height + expandMargin;
-
-                if (mouseWorld.X >= left && mouseWorld.X <= right &&
-                    mouseWorld.Y >= top && mouseWorld.Y <= bottom) {
-                    float dx = mouseWorld.X - npc.Center.X;
-                    float dy = mouseWorld.Y - npc.Center.Y;
-                    float distSq = dx * dx + dy * dy;
-
-                    if (distSq < bestDistSq) {
-                        bestDistSq = distSq;
-                        bestIndex = i;
-                    }
-                }
-            }
-
-            HackTime.HoveredTargetIndex = bestIndex;
-
-            //NPC优先，没有悬停NPC时再检测灵异Actor和物块
-            if (bestIndex >= 0) {
-                HoveredTileX = -1;
-                HoveredTileY = -1;
-                HoveredWraith = null;
-                HoveredTurret = null;
-                HoveredSignalTower = null;
-            }
-            else {
-                GlitchWraithActor wraith = TryGetHoveredWraith(mouseWorld);
-                if (wraith != null) {
-                    HoveredWraith = wraith;
-                    HoveredTurret = null;
-                    HoveredSignalTower = null;
-                    HoveredTileX = -1;
-                    HoveredTileY = -1;
-                }
-                else {
-                    HoveredWraith = null;
-                    //信号塔优先于炮台：信号塔贴图包围区较大而有时与炮台重叠，应允许玩家优先选中塔
-                    IHackableSignalTower tower = TryGetHoveredSignalTower(mouseWorld);
-                    if (tower != null) {
-                        HoveredSignalTower = tower;
-                        HoveredTurret = null;
-                        HoveredTileX = -1;
-                        HoveredTileY = -1;
-                    }
-                    else {
-                        HoveredSignalTower = null;
-                        IHackableTurret turret = TryGetHoveredTurret(mouseWorld);
-                        if (turret != null) {
-                            HoveredTurret = turret;
-                            HoveredTileX = -1;
-                            HoveredTileY = -1;
-                        }
-                        else {
-                            HoveredTurret = null;
-                            if (TileScannable.TryGetScannableTile(mouseWorld, out int tx, out int ty)) {
-                                HoveredTileX = tx;
-                                HoveredTileY = ty;
-                            }
-                            else {
-                                HoveredTileX = -1;
-                                HoveredTileY = -1;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// 判定鼠标下方是否有足够可见的灵异Actor可供骇入
-        /// </summary>
-        private static GlitchWraithActor TryGetHoveredWraith(Vector2 mouseWorld) {
-            List<GlitchWraithActor> list = ActorLoader.GetActiveActors<GlitchWraithActor>();
-            if (list == null || list.Count == 0) return null;
-            GlitchWraithActor best = null;
-            float bestDistSq = float.MaxValue;
-            foreach (GlitchWraithActor w in list) {
-                //可见度过低的灵异体无法被扫描锁定，避免玩家隔空选中隐形目标
-                if (w.Visibility < 0.3f) continue;
-                float expandMargin = 16f;
-                float left = w.Position.X - expandMargin;
-                float top = w.Position.Y - expandMargin;
-                float right = w.Position.X + w.Width + expandMargin;
-                float bottom = w.Position.Y + w.Height + expandMargin;
-                if (mouseWorld.X < left || mouseWorld.X > right) continue;
-                if (mouseWorld.Y < top || mouseWorld.Y > bottom) continue;
-                float dx = mouseWorld.X - w.Center.X;
-                float dy = mouseWorld.Y - w.Center.Y;
-                float distSq = dx * dx + dy * dy;
-                if (distSq < bestDistSq) {
-                    bestDistSq = distSq;
-                    best = w;
-                }
-            }
-            return best;
-        }
-
-        /// <summary>
-        /// 扫描所有Actor并挑选出鼠标下方最近的可骇入炮台
-        /// </summary>
-        private static IHackableTurret TryGetHoveredTurret(Vector2 mouseWorld) {
-            List<Actor> list = ActorLoader.GetActiveActors<Actor>();
-            if (list == null || list.Count == 0) return null;
-            IHackableTurret best = null;
-            float bestDistSq = float.MaxValue;
-            foreach (Actor actor in list) {
-                if (actor is not IHackableTurret turret) continue;
-                if (!turret.IsValid) continue;
-                float expandMargin = 24f;
-                float left = actor.Position.X - expandMargin;
-                float top = actor.Position.Y - expandMargin;
-                float right = actor.Position.X + actor.Width + expandMargin;
-                float bottom = actor.Position.Y + actor.Height + expandMargin;
-                if (mouseWorld.X < left || mouseWorld.X > right) continue;
-                if (mouseWorld.Y < top || mouseWorld.Y > bottom) continue;
-                float dx = mouseWorld.X - turret.WorldCenter.X;
-                float dy = mouseWorld.Y - turret.WorldCenter.Y;
-                float distSq = dx * dx + dy * dy;
-                if (distSq < bestDistSq) {
-                    bestDistSq = distSq;
-                    best = turret;
-                }
-            }
-            return best;
-        }
-
-        /// <summary>
-        /// 扫描所有Actor并挑选出鼠标下方最近的可骇入信号塔
-        /// </summary>
-        private static IHackableSignalTower TryGetHoveredSignalTower(Vector2 mouseWorld) {
-            List<Actor> list = ActorLoader.GetActiveActors<Actor>();
-            if (list == null || list.Count == 0) return null;
-            IHackableSignalTower best = null;
-            float bestDistSq = float.MaxValue;
-            foreach (Actor actor in list) {
-                if (actor is not IHackableSignalTower tower) continue;
-                if (!tower.IsValid) continue;
-                float expandMargin = 24f;
-                float left = actor.Position.X - expandMargin;
-                float top = actor.Position.Y - expandMargin;
-                float right = actor.Position.X + actor.Width + expandMargin;
-                float bottom = actor.Position.Y + actor.Height + expandMargin;
-                if (mouseWorld.X < left || mouseWorld.X > right) continue;
-                if (mouseWorld.Y < top || mouseWorld.Y > bottom) continue;
-                float dx = mouseWorld.X - tower.WorldCenter.X;
-                float dy = mouseWorld.Y - tower.WorldCenter.Y;
-                float distSq = dx * dx + dy * dy;
-                if (distSq < bestDistSq) {
-                    bestDistSq = distSq;
-                    best = tower;
-                }
-            }
-            return best;
+            HoveredTarget = HackTargetType.DetectTopmostHover(Main.MouseWorld);
         }
 
         /// <summary>

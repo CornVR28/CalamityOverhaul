@@ -1,5 +1,4 @@
 ﻿using CalamityOverhaul.Common;
-using CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.GlitchWraith;
 using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
 using CalamityOverhaul.Content.RAMSystems;
 using Terraria;
@@ -253,14 +252,6 @@ namespace CalamityOverhaul.Content.HackTimes
         /// </summary>
         public static float Intensity { get; set; }
         /// <summary>
-        /// 当前选中的骇入目标NPC索引，负数表示未选中
-        /// </summary>
-        public static int SelectedTargetIndex { get; set; } = -1;
-        /// <summary>
-        /// 当前光标悬停的可骇入目标NPC索引，负数表示无悬停
-        /// </summary>
-        public static int HoveredTargetIndex { get; set; } = -1;
-        /// <summary>
         /// 运镜进度(0到1)，选中目标后平滑过渡到目标中心
         /// </summary>
         public static float CameraProgress { get; set; }
@@ -278,10 +269,22 @@ namespace CalamityOverhaul.Content.HackTimes
         public static Vector2 CameraOffset { get; set; }
 
         /// <summary>
-        /// 当前扫描目标（NPC或物块），null表示无扫描目标
-        /// <br/>通过IScannable接口解耦，扫描面板不需要关心具体目标类型
+        /// 当前扫描目标，null 表示无扫描目标
+        /// <br/>所有目标种类（NPC、物块、灵异、炮台、信号塔等）统一通过<see cref="IHackTarget"/>暴露
         /// </summary>
-        public static IScannable CurrentScanTarget { get; private set; }
+        public static IHackTarget CurrentScanTarget { get; private set; }
+
+        /// <summary>
+        /// 当前选中的 NPC 索引（兼容旧 API；从<see cref="CurrentScanTarget"/>派生），负数表示未选中或选中的不是 NPC
+        /// </summary>
+        public static int SelectedTargetIndex
+            => CurrentScanTarget is NpcScannable n ? n.NpcIndex : -1;
+
+        /// <summary>
+        /// 当前悬停的 NPC 索引（兼容旧 API；从<see cref="HackTimeTargeting.HoveredTarget"/>派生），负数表示无悬停或悬停的不是 NPC
+        /// </summary>
+        public static int HoveredTargetIndex
+            => HackTimeTargeting.HoveredTarget is NpcScannable n ? n.NpcIndex : -1;
 
         //无限骇入模式（无限袭击终态演出用）
         public static bool InfiniteHack { get; set; }
@@ -324,8 +327,6 @@ namespace CalamityOverhaul.Content.HackTimes
             if (Main.gameMenu) return;
             Active = true;
             targetIntensity = 1f;
-            SelectedTargetIndex = -1;
-            HoveredTargetIndex = -1;
             CurrentScanTarget = null;
             CameraProgress = 0f;
             ZoomProgress = 0f;
@@ -345,29 +346,28 @@ namespace CalamityOverhaul.Content.HackTimes
         public static void Deactivate() {
             Active = false;
             targetIntensity = 0f;
-            SelectedTargetIndex = -1;
-            HoveredTargetIndex = -1;
             CurrentScanTarget = null;
             HackTimeFreeze.Deactivate();
             HackTimeUI.Instance?.Panel.Hide();
         }
 
         /// <summary>
-        /// 选中一个骇入目标，触发运镜
+        /// 选中一个骇入目标
+        /// <br/>所有目标种类（NPC、物块、灵异、炮台、信号塔等）通过<see cref="IHackTarget"/>统一进入
+        /// <br/>触发运镜并取消正在进行的上传
         /// </summary>
-        public static void SelectTarget(int npcIndex) {
-            if (!Active || npcIndex < 0 || npcIndex >= Main.maxNPCs) return;
+        public static void Select(IHackTarget target) {
+            if (!Active || target == null || !target.IsValid) return;
 
-            NPC npc = Main.npc[npcIndex];
-            if (!npc.active) return;
+            //目标无变化时不做处理（点击同一目标不要重复重置上传）
+            if (CurrentScanTarget != null && target.TargetEquals(CurrentScanTarget)) return;
 
             //切换目标时取消正在进行的上传
             HackTimeUI.Instance?.Panel.CancelUpload();
 
-            bool freshSelect = SelectedTargetIndex < 0 && CurrentScanTarget == null;
-            SelectedTargetIndex = npcIndex;
-            CurrentScanTarget = new NpcScannable(npcIndex);
-            cameraTo = npc.Center;
+            bool freshSelect = CurrentScanTarget == null;
+            CurrentScanTarget = target;
+            cameraTo = target.WorldCenter;
 
             //首次选中时从零开始推进；切换目标时保持当前进度，让偏移量平滑重定向
             if (freshSelect) {
@@ -375,120 +375,23 @@ namespace CalamityOverhaul.Content.HackTimes
                 ZoomProgress = 0f;
             }
 
-            if (!VaultUtils.isServer) {
-                SoundEngine.PlaySound(CWRSound.Hacker, Main.LocalPlayer.Center);
-            }
+            //目标种类工厂可定制选中反馈（默认播放扫描音效）
+            target.TargetType?.OnSelectFeedback(target);
         }
 
         /// <summary>
-        /// 选中一个物块进行扫描和骇入
+        /// 兼容旧 API：选中指定 NPC
         /// </summary>
-        public static void SelectTileScan(int tileX, int tileY) {
-            if (!Active) return;
-
-            Tile tile = Main.tile[tileX, tileY];
-            if (!tile.HasTile) return;
-
-            //切换到物块扫描时清除NPC选中状态和旧队列
-            if (SelectedTargetIndex >= 0) {
-                HackTimeUI.Instance?.Panel.CancelUpload();
-            }
-            SelectedTargetIndex = -1;
-
-            bool freshSelect = CurrentScanTarget == null;
-            CurrentScanTarget = new TileScannable(tileX, tileY);
-            cameraTo = CurrentScanTarget.WorldCenter;
-
-            if (freshSelect) {
-                CameraProgress = 0f;
-                ZoomProgress = 0f;
-            }
-
-            if (!VaultUtils.isServer) {
-                SoundEngine.PlaySound(CWRSound.Hacker, Main.LocalPlayer.Center);
-            }
-        }
-
-        /// <summary>
-        /// 选中一个乱码鬼等灵异Actor进行扫描和骇入
-        /// </summary>
-        public static void SelectWraithScan(GlitchWraithActor wraith) {
-            if (!Active || wraith == null || !wraith.Active) return;
-
-            if (SelectedTargetIndex >= 0) {
-                HackTimeUI.Instance?.Panel.CancelUpload();
-            }
-            SelectedTargetIndex = -1;
-
-            bool freshSelect = CurrentScanTarget == null;
-            CurrentScanTarget = wraith;
-            cameraTo = wraith.Center;
-
-            if (freshSelect) {
-                CameraProgress = 0f;
-                ZoomProgress = 0f;
-            }
-
-            if (!VaultUtils.isServer) {
-                SoundEngine.PlaySound(CWRSound.Hacker, Main.LocalPlayer.Center);
-            }
-        }
-
-        /// <summary>
-        /// 选中一个可骇入炮台Actor进行扫描和骇入
-        /// </summary>
-        public static void SelectTurretScan(IHackableTurret turret) {
-            if (!Active || turret == null || turret.AsActor == null || !turret.AsActor.Active) return;
-
-            if (SelectedTargetIndex >= 0) {
-                HackTimeUI.Instance?.Panel.CancelUpload();
-            }
-            SelectedTargetIndex = -1;
-
-            bool freshSelect = CurrentScanTarget == null;
-            CurrentScanTarget = turret;
-            cameraTo = turret.WorldCenter;
-
-            if (freshSelect) {
-                CameraProgress = 0f;
-                ZoomProgress = 0f;
-            }
-
-            if (!VaultUtils.isServer) {
-                SoundEngine.PlaySound(CWRSound.Hacker, Main.LocalPlayer.Center);
-            }
-        }
-
-        /// <summary>
-        /// 选中一个可骇入信号塔Actor进行扫描和骇入
-        /// </summary>
-        public static void SelectSignalTowerScan(IHackableSignalTower tower) {
-            if (!Active || tower == null || tower.AsActor == null || !tower.AsActor.Active) return;
-
-            if (SelectedTargetIndex >= 0) {
-                HackTimeUI.Instance?.Panel.CancelUpload();
-            }
-            SelectedTargetIndex = -1;
-
-            bool freshSelect = CurrentScanTarget == null;
-            CurrentScanTarget = tower;
-            cameraTo = tower.WorldCenter;
-
-            if (freshSelect) {
-                CameraProgress = 0f;
-                ZoomProgress = 0f;
-            }
-
-            if (!VaultUtils.isServer) {
-                SoundEngine.PlaySound(CWRSound.Hacker, Main.LocalPlayer.Center);
-            }
+        public static void SelectTarget(int npcIndex) {
+            if (npcIndex < 0 || npcIndex >= Main.maxNPCs) return;
+            if (!Main.npc[npcIndex].active) return;
+            Select(new NpcScannable(npcIndex));
         }
 
         /// <summary>
         /// 取消选中目标，运镜平滑回归
         /// </summary>
         public static void DeselectTarget() {
-            SelectedTargetIndex = -1;
             CurrentScanTarget = null;
             //不立即归零CameraProgress/CameraOffset，由UpdateCamera平滑回归
             HackTimeUI.Instance?.Panel.Hide();
@@ -540,51 +443,35 @@ namespace CalamityOverhaul.Content.HackTimes
         }
 
         private static void UpdateCamera() {
-            if (SelectedTargetIndex >= 0) {
-                NPC target = Main.npc[SelectedTargetIndex];
-                //目标失效时自动取消
-                if (!target.active) {
-                    DeselectTarget();
-                    return;
-                }
+            //有目标且仍然有效：平滑推进运镜与缩放
+            if (CurrentScanTarget != null && CurrentScanTarget.IsValid) {
+                cameraTo = CurrentScanTarget.WorldCenter;
 
-                //更新运镜目标位置
-                cameraTo = target.Center;
-
-                //平滑推进运镜进度和缩放
                 CameraProgress = MathHelper.Lerp(CameraProgress, 1f, CameraLerpSpeed);
                 ZoomProgress = MathHelper.Lerp(ZoomProgress, 1f, CameraLerpSpeed * 0.8f);
 
                 //偏移量独立平滑插值到目标位置（切换目标时从当前偏移重定向，而非瞬跳）
                 Vector2 desiredOffset = cameraTo - Main.LocalPlayer.Center;
                 CameraOffset = Vector2.Lerp(CameraOffset, desiredOffset, CameraLerpSpeed);
+                return;
             }
-            else if (CurrentScanTarget != null && CurrentScanTarget.IsValid) {
-                //物块扫描目标的运镜处理
-                cameraTo = CurrentScanTarget.WorldCenter;
 
-                CameraProgress = MathHelper.Lerp(CameraProgress, 1f, CameraLerpSpeed);
-                ZoomProgress = MathHelper.Lerp(ZoomProgress, 1f, CameraLerpSpeed * 0.8f);
-
-                Vector2 desiredOffset = cameraTo - Main.LocalPlayer.Center;
-                CameraOffset = Vector2.Lerp(CameraOffset, desiredOffset, CameraLerpSpeed);
-            }
-            else if (CurrentScanTarget != null && !CurrentScanTarget.IsValid) {
-                //物块扫描目标失效时自动取消
+            //目标失效时自动取消
+            if (CurrentScanTarget != null && !CurrentScanTarget.IsValid) {
                 DeselectTarget();
+                return;
             }
-            else {
-                //无目标时平滑回归
-                float returnSpeed = CameraLerpSpeed * 1.5f;
-                CameraProgress = MathHelper.Lerp(CameraProgress, 0f, returnSpeed);
-                ZoomProgress = MathHelper.Lerp(ZoomProgress, 0f, returnSpeed);
-                CameraOffset = Vector2.Lerp(CameraOffset, Vector2.Zero, returnSpeed);
 
-                if (CameraProgress < 0.005f && CameraOffset.LengthSquared() < 0.5f) {
-                    CameraProgress = 0f;
-                    ZoomProgress = 0f;
-                    CameraOffset = Vector2.Zero;
-                }
+            //无目标时平滑回归
+            float returnSpeed = CameraLerpSpeed * 1.5f;
+            CameraProgress = MathHelper.Lerp(CameraProgress, 0f, returnSpeed);
+            ZoomProgress = MathHelper.Lerp(ZoomProgress, 0f, returnSpeed);
+            CameraOffset = Vector2.Lerp(CameraOffset, Vector2.Zero, returnSpeed);
+
+            if (CameraProgress < 0.005f && CameraOffset.LengthSquared() < 0.5f) {
+                CameraProgress = 0f;
+                ZoomProgress = 0f;
+                CameraOffset = Vector2.Zero;
             }
         }
 
@@ -615,8 +502,6 @@ namespace CalamityOverhaul.Content.HackTimes
             Active = false;
             Intensity = 0f;
             targetIntensity = 0f;
-            SelectedTargetIndex = -1;
-            HoveredTargetIndex = -1;
             CurrentScanTarget = null;
             CameraProgress = 0f;
             ZoomProgress = 0f;

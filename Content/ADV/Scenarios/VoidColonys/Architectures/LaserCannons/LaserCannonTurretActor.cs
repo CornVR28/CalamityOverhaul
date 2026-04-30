@@ -915,6 +915,32 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.Architectures.Laser
 
         public int CircuitDisabledFrames => circuitDisabledFrames;
 
+        HackTargetType IHackTarget.TargetType
+            => HackTargetType.Get<HackTimes.Targets.TurretTargetType>();
+
+        Vector2 IHackTarget.LockFrameHalfSize => new(
+            System.Math.Max(Width, 32) * 0.45f + 24f,
+            System.Math.Max(Height, 32) * 0.45f + 24f);
+
+        string IHackTarget.LockFrameTitle => HackTime.TurretScanLaserName.Value;
+
+        bool IHackTarget.TryGetLockFrameStatus(out string text, out Color color) {
+            if (IsCircuitDisabled) {
+                int seconds = circuitDisabledFrames / 60 + 1;
+                text = HackTime.TurretScanCircuit.Value + ": " + seconds + "s";
+                color = HackTheme.Uploading;
+            }
+            else {
+                text = HackTime.TurretScanCircuitOnline.Value;
+                color = HackTheme.AccentAlt;
+            }
+            return true;
+        }
+
+        bool IHackTarget.ApplyHack(QuickHackDef hack, Player caster) => hack.OnApply(this, caster);
+
+        bool IHackTarget.TargetEquals(IHackTarget other) => ReferenceEquals(this, other);
+
         void IScannable.BuildScanData(string[] labels, string[] values, Color[] colors) {
             labels[0] = HackTime.TurretScanName.Value;
             values[0] = HackTime.TurretScanLaserName.Value;

@@ -21,15 +21,19 @@ namespace CalamityOverhaul.Content.HackTimes.Protocols
             SupportedTargets = HackTargetKind.Tile;
         }
 
-        public override bool CanApplyToTile(int tileX, int tileY) {
-            if (!base.CanApplyToTile(tileX, tileY)) return false;
+        public override bool CanApplyTo(IHackTarget target) {
+            if (!base.CanApplyTo(target)) return false;
+            if (target is not TileScannable s) return false;
             //不允许对神庙砖等极高硬度物块使用
-            Tile tile = Main.tile[tileX, tileY];
+            Tile tile = Main.tile[s.TileCoordX, s.TileCoordY];
             return tile.TileType != TileID.LihzahrdBrick
                 && tile.TileType != TileID.LihzahrdAltar;
         }
 
-        public override bool OnApplyToTile(int tileX, int tileY, Player caster) {
+        public override bool OnApply(IHackTarget target, Player caster) {
+            if (target is not TileScannable s) return false;
+            int tileX = s.TileCoordX;
+            int tileY = s.TileCoordY;
             Vector2 center = new(tileX * 16f + 8f, tileY * 16f + 8f);
 
             //范围破坏

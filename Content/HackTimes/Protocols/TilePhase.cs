@@ -25,16 +25,20 @@ namespace CalamityOverhaul.Content.HackTimes.Protocols
 
         public override int GetDuration() => PhaseDuration;
 
-        public override bool CanApplyToTile(int tileX, int tileY) {
-            if (!base.CanApplyToTile(tileX, tileY)) return false;
-            Tile tile = Main.tile[tileX, tileY];
+        public override bool CanApplyTo(IHackTarget target) {
+            if (!base.CanApplyTo(target)) return false;
+            if (target is not TileScannable s) return false;
+            Tile tile = Main.tile[s.TileCoordX, s.TileCoordY];
             //已经被致动（actuated）的不再重复施加
             if (tile.IsActuated) return false;
             //不允许对神庙砖使用
             return tile.TileType != TileID.LihzahrdBrick;
         }
 
-        public override bool OnApplyToTile(int tileX, int tileY, Player caster) {
+        public override bool OnApply(IHackTarget target, Player caster) {
+            if (target is not TileScannable s) return false;
+            int tileX = s.TileCoordX;
+            int tileY = s.TileCoordY;
             //计算多物块对象的尺寸，对整个物块进行虚化
             TileObjectData data = TileObjectData.GetTileData(Main.tile[tileX, tileY].TileType, 0);
             int w = data?.Width ?? 1;
@@ -87,7 +91,10 @@ namespace CalamityOverhaul.Content.HackTimes.Protocols
             return true;
         }
 
-        public override bool OnTickTile(int tileX, int tileY, int elapsed) {
+        public override bool OnTick(IHackTarget target, int elapsed) {
+            if (target is not TileScannable s) return true;
+            int tileX = s.TileCoordX;
+            int tileY = s.TileCoordY;
             //周期性虚化粒子提示效果仍在
             if (elapsed % 30 == 0) {
                 Vector2 center = new(tileX * 16f + 8f, tileY * 16f + 8f);
@@ -98,7 +105,10 @@ namespace CalamityOverhaul.Content.HackTimes.Protocols
             return true;
         }
 
-        public override void OnRemoveTile(int tileX, int tileY) {
+        public override void OnRemove(IHackTarget target) {
+            if (target is not TileScannable s) return;
+            int tileX = s.TileCoordX;
+            int tileY = s.TileCoordY;
             //恢复实体状态
             TileObjectData data = TileObjectData.GetTileData(Main.tile[tileX, tileY].TileType, 0);
             int w = data?.Width ?? 1;

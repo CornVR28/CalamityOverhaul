@@ -1,5 +1,4 @@
-﻿using CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.GlitchWraith;
-using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using Terraria;
@@ -35,49 +34,16 @@ namespace CalamityOverhaul.Content.HackTimes
 
         #region 公共接口
 
-        //向队列添加一个骇入协议（不允许重复），targetIndex是骇入目标NPC索引
-        public bool Enqueue(QuickHackDef hack, int slotIndex, int targetIndex) {
-            //不允许重复入队
+        /// <summary>
+        /// 向队列添加一个骇入协议
+        /// <br/>不允许同 slot 重复入队；具体目标种类由<see cref="IHackTarget"/>统一承载
+        /// </summary>
+        public bool Enqueue(QuickHackDef hack, int slotIndex, IHackTarget target) {
+            if (target == null) return false;
             for (int i = 0; i < queue.Count; i++) {
                 if (queue[i].SlotIndex == slotIndex) return false;
             }
-            queue.Add(new HackQueueEntry(hack, slotIndex, targetIndex));
-            return true;
-        }
-
-        //物块目标入队
-        public bool EnqueueTile(QuickHackDef hack, int slotIndex, int tileX, int tileY) {
-            for (int i = 0; i < queue.Count; i++) {
-                if (queue[i].SlotIndex == slotIndex) return false;
-            }
-            queue.Add(new HackQueueEntry(hack, slotIndex, tileX, tileY));
-            return true;
-        }
-
-        //灵异目标入队
-        public bool EnqueueWraith(QuickHackDef hack, int slotIndex, GlitchWraithActor wraith) {
-            for (int i = 0; i < queue.Count; i++) {
-                if (queue[i].SlotIndex == slotIndex) return false;
-            }
-            queue.Add(new HackQueueEntry(hack, slotIndex, wraith));
-            return true;
-        }
-
-        //炮台目标入队
-        public bool EnqueueTurret(QuickHackDef hack, int slotIndex, IHackableTurret turret) {
-            for (int i = 0; i < queue.Count; i++) {
-                if (queue[i].SlotIndex == slotIndex) return false;
-            }
-            queue.Add(new HackQueueEntry(hack, slotIndex, turret));
-            return true;
-        }
-
-        //信号塔目标入队
-        public bool EnqueueSignalTower(QuickHackDef hack, int slotIndex, IHackableSignalTower tower) {
-            for (int i = 0; i < queue.Count; i++) {
-                if (queue[i].SlotIndex == slotIndex) return false;
-            }
-            queue.Add(new HackQueueEntry(hack, slotIndex, tower));
+            queue.Add(new HackQueueEntry(hack, slotIndex, target));
             return true;
         }
 
@@ -106,23 +72,9 @@ namespace CalamityOverhaul.Content.HackTimes
                     queue.RemoveAt(i);
                     continue;
                 }
-                //上传完成且闪烁结束，施加效果
+                //上传完成且闪烁结束，由目标自身分派协议生效
                 if (entry.State == HackQueueState.Completed && entry.CompletedTimer <= 0f) {
-                    if (entry.TargetKind == HackTargetKind.Tile) {
-                        HackEffectTracker.ApplyToTile(entry.Hack, entry.TileX, entry.TileY, Main.myPlayer);
-                    }
-                    else if (entry.TargetKind == HackTargetKind.Wraith) {
-                        entry.Hack.OnApplyToWraith(entry.WraithTarget, Main.LocalPlayer);
-                    }
-                    else if (entry.TargetKind == HackTargetKind.Turret) {
-                        entry.Hack.OnApplyToTurret(entry.TurretTarget, Main.LocalPlayer);
-                    }
-                    else if (entry.TargetKind == HackTargetKind.SignalTower) {
-                        entry.Hack.OnApplyToSignalTower(entry.SignalTowerTarget, Main.LocalPlayer);
-                    }
-                    else {
-                        HackEffectTracker.Apply(entry.Hack, entry.TargetIndex, Main.myPlayer);
-                    }
+                    entry.Target.ApplyHack(entry.Hack, Main.LocalPlayer);
                     queue.RemoveAt(i);
                 }
             }

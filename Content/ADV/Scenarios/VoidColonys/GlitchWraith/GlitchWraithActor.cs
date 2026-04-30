@@ -15,7 +15,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.GlitchWraith
     /// 无视地形碰撞，持续向最近玩家缓慢蠕动并偶发乱码瞬移
     /// 骇客时间激活期间会被暂停，可被玩家作为灵异目标骇入
     /// </summary>
-    internal class GlitchWraithActor : Actor, IScannable
+    internal class GlitchWraithActor : Actor, IHackTarget
     {
         //缓慢的基础爬行速度，像素每帧
         private const float CreepSpeed = 1.4f;
@@ -413,7 +413,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.GlitchWraith
             return MathHelper.Clamp(t * eraBoost, 0f, 1f);
         }
 
-        #region IScannable 实现
+        #region IHackTarget 实现
 
         Vector2 IScannable.WorldCenter => Center;
 
@@ -422,6 +422,25 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.GlitchWraith
         bool IScannable.IsHackable => true;
 
         int IScannable.ScanRowCount => 6;
+
+        HackTargetType IHackTarget.TargetType
+            => HackTargetType.Get<HackTimes.Targets.WraithTargetType>();
+
+        Vector2 IHackTarget.LockFrameHalfSize => new(
+            Math.Max(Width, 32) * 0.6f + 30f,
+            Math.Max(Height, 32) * 0.6f + 30f);
+
+        string IHackTarget.LockFrameTitle => HackTime.WraithScanNameValue.Value;
+
+        bool IHackTarget.TryGetLockFrameStatus(out string text, out Color color) {
+            text = HackTime.WraithScanIntegrityValue.Value;
+            color = HackTheme.Contagion;
+            return true;
+        }
+
+        bool IHackTarget.ApplyHack(QuickHackDef hack, Player caster) => hack.OnApply(this, caster);
+
+        bool IHackTarget.TargetEquals(IHackTarget other) => ReferenceEquals(this, other);
 
         void IScannable.BuildScanData(string[] labels, string[] values, Color[] colors) {
             //NAME

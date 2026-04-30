@@ -1,5 +1,4 @@
-﻿using CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.GlitchWraith;
-using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;
 using Terraria.GameContent;
@@ -19,83 +18,22 @@ namespace CalamityOverhaul.Content.HackTimes
             Texture2D px = CWRAsset.Placeholder_White?.Value;
             if (px == null) return;
 
+            //从统一的目标抽象上读取所有锁定框元数据，无需再做按种类分支
+            IHackTarget target = HackTime.CurrentScanTarget;
+            if (target == null || !target.IsValid) return;
+
             float alpha = HackTime.Intensity * camProg;
             Vector2 center = new(Main.screenWidth * 0.5f, Main.screenHeight * 0.5f);
 
-            float baseHalfW;
-            float baseHalfH;
-            string targetName = "";
+            Vector2 half = target.LockFrameHalfSize;
+            float baseHalfW = half.X;
+            float baseHalfH = half.Y;
+            string targetName = target.LockFrameTitle ?? string.Empty;
             string hpStr = null;
             Color hpColor = default;
-
-            int selIdx = HackTime.SelectedTargetIndex;
-            if (selIdx >= 0 && selIdx < Main.maxNPCs) {
-                NPC npc = Main.npc[selIdx];
-                if (!npc.active) return;
-
-                baseHalfW = Math.Max(npc.width, 32) * 0.6f + 28f;
-                baseHalfH = Math.Max(npc.height, 32) * 0.6f + 28f;
-                targetName = npc.FullName;
-                if (npc.lifeMax > 0) {
-                    float hpPct = (float)npc.life / npc.lifeMax;
-                    hpStr = HackTime.HpFormat.Format((int)(hpPct * 100));
-                    hpColor = hpPct > 0.5f ? HackTheme.AccentAlt
-                        : hpPct > 0.25f ? HackTheme.Uploading : HackTheme.Danger;
-                }
-            }
-            else if (HackTime.CurrentScanTarget is TileScannable tileScan && tileScan.IsValid) {
-                //物块扫描目标的锁定框
-                Vector2 wc = tileScan.WorldCenter;
-                int tx = (int)(wc.X / 16f);
-                int ty = (int)(wc.Y / 16f);
-                Rectangle bounds = TileScannable.GetTileWorldBounds(tx, ty);
-                baseHalfW = Math.Max(bounds.Width, 32) * 0.6f + 28f;
-                baseHalfH = Math.Max(bounds.Height, 32) * 0.6f + 28f;
-
-                //物块名称和分类
-                Tile tile = Main.tile[tx, ty];
-                if (tile.HasTile) {
-                    int tileType = tile.TileType;
-                    targetName = TileScannable.GetTileName(tx, ty, tileType);
-                    hpStr = TileScannable.GetTileClass(tileType);
-                    hpColor = TileScannable.GetTileClassColor(tileType);
-                }
-            }
-            else if (HackTime.CurrentScanTarget is IHackableTurret turret && turret.IsValid) {
-                //炮台锁定框：尺寸取底座贴图实际宽高
-                var actor = turret.AsActor;
-                baseHalfW = Math.Max(actor.Width, 32) * 0.45f + 24f;
-                baseHalfH = Math.Max(actor.Height, 32) * 0.45f + 24f;
-                targetName = GetTurretDisplayName(turret);
-                if (turret.IsCircuitDisabled) {
-                    int seconds = turret.CircuitDisabledFrames / 60 + 1;
-                    hpStr = HackTime.TurretScanCircuit.Value + ": " + seconds + "s";
-                    hpColor = HackTheme.Uploading;
-                }
-                else {
-                    hpStr = HackTime.TurretScanCircuitOnline.Value;
-                    hpColor = HackTheme.AccentAlt;
-                }
-            }
-            else if (HackTime.CurrentScanTarget is IHackableSignalTower signalTower && signalTower.IsValid) {
-                //信号塔锁定框：以Actor贴图宽高收缩，避免庞大矩形框吃屏
-                var actor = signalTower.AsActor;
-                baseHalfW = Math.Max(actor.Width, 32) * 0.40f + 22f;
-                baseHalfH = Math.Max(actor.Height, 32) * 0.32f + 22f;
-                targetName = HackTime.SignalTowerScanName.Value;
-                hpStr = HackTime.SignalTowerScanStatusOnline.Value;
-                hpColor = HackTheme.AccentAlt;
-            }
-            else if (HackTime.CurrentScanTarget is GlitchWraithActor wraith && wraith.Active) {
-                //灵异目标锁定框：尺寸取Actor贴图宽高，外放一点以贴合身形
-                baseHalfW = Math.Max(wraith.Width, 32) * 0.6f + 30f;
-                baseHalfH = Math.Max(wraith.Height, 32) * 0.6f + 30f;
-                targetName = HackTime.WraithScanNameValue.Value;
-                hpStr = HackTime.WraithScanIntegrityValue.Value;
-                hpColor = HackTheme.Contagion;
-            }
-            else {
-                return;
+            if (target.TryGetLockFrameStatus(out string status, out Color statusColor)) {
+                hpStr = status;
+                hpColor = statusColor;
             }
 
             float ease = EaseOutCubic(camProg);
@@ -234,17 +172,6 @@ namespace CalamityOverhaul.Content.HackTimes
         private static float EaseOutCubic(float t) {
             float inv = 1f - t;
             return 1f - inv * inv * inv;
-        }
-
-        /// <summary>返回炮台锁定框上的目标名，按具体炮台类型选用对应本地化</summary>
-        private static string GetTurretDisplayName(IHackableTurret turret) {
-            return turret switch {
-                ADV.Scenarios.VoidColonys.Architectures.LaserCannons.LaserCannonTurretActor
-                    => HackTime.TurretScanLaserName.Value,
-                ADV.Scenarios.VoidColonys.Architectures.GatlinTurrets.GatlinTurretActor
-                    => HackTime.TurretScanGatlinName.Value,
-                _ => HackTime.TurretScanName.Value,
-            };
         }
     }
 }
