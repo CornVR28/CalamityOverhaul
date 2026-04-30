@@ -693,3 +693,17 @@ EntrustManagerLead: {
 	TextMiddleClickDesc: "     暂时隐藏该委托，不在追踪窗口中显示"
 	TextConfirmBtn: 明白了
 }
+
+AbandonedPortalStrings: {
+	// Title: 废墟传送门控制台
+	// BrokenSubtitle: 结构断裂 · 核心离线
+	// RepairingSubtitle: 自修复程序运行中
+	// RepairedSubtitle: 通道稳定 · 虚无坐标可用
+	// BrokenBody: 残破门框中仍残留着微弱的亚空间回声。启动自修复后，门体会在数分钟内重建定位环。
+	// RepairingBody: 纳米焊缝正在重构裂隙约束器。请保持附近区域稳定，等待校准完成。
+	// RepairedBody: 门体已经完成自修复。传送序列会先展开裂隙演出，再将你送入虚无世界。
+	// StartRepair: ▷ 启动自修复程序
+	// Teleport: ▷ 启动传送
+	// Close: ✕ 关闭
+	// ProgressFormat: 修复进度 {0}%
+}
