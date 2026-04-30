@@ -56,6 +56,8 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
 
         /// <summary>当前状态</summary>
         public QuestEntryStatus Status;
+        /// <summary>从关注状态挂起时记录，用于恢复时回到关注而不是普通激活</summary>
+        public bool RestoreTrackedOnUnsuspend;
         /// <summary>进度 0~1</summary>
         public float Progress;
         /// <summary>是否为新任务</summary>

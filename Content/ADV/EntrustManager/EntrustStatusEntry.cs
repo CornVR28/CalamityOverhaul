@@ -73,7 +73,7 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
         #endregion
 
         public override void DrawContent(SpriteBatch sb, Rectangle r, float alpha) {
-            Texture2D px = TextureAssets.MagicPixel.Value;
+            Texture2D px = VaultAsset.placeholder2.Value;
             Color primary = GetPrimaryColor();
             Color accent = GetAccentColor();
             float animTime = LifeTimer / 60f;

@@ -1,4 +1,6 @@
 ﻿using InnoVault.UIHandles;
+using CalamityOverhaul.Content.HackTimes;
+using CalamityOverhaul.Content.UIs.StorageUIs;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
@@ -68,6 +70,7 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
                 if (Main.gameMenu) return false;
                 //动画尚未结束时保持激活
                 if (slideProgress > 0.005f) return true;
+                if (ShouldTemporarilyHide()) return false;
                 //直接查询管理器源数据，避免缓存列表导致的首帧不活跃问题
                 var manager = QuestManagerUI.Instance;
                 return manager != null && manager.HasTrackedEntries();
@@ -97,7 +100,8 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
             //目标状态：有被关注的条目且管理器未打开
             var manager = QuestManagerUI.Instance;
             bool shouldShow = trackedEntries.Count > 0
-                && (manager == null || !manager.IsOpen);
+                && (manager == null || !manager.IsOpen)
+                && !ShouldTemporarilyHide();
 
             float targetSlide = shouldShow ? 1f : 0f;
             slideProgress = MathHelper.Lerp(slideProgress, targetSlide, 0.15f);
@@ -168,6 +172,25 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
             if (manager == null) return;
 
             manager.GetTrackedEntries(trackedEntries);
+        }
+
+        private static bool ShouldTemporarilyHide() {
+            Player player = Main.LocalPlayer;
+            if (player == null) return true;
+
+            if (HackTime.Active || HackTime.Intensity > 0.01f)
+                return true;
+
+            if (player.chest != -1 || player.talkNPC != -1
+                || Main.npcShop > 0 || Main.InGuideCraftMenu)
+                return true;
+
+            foreach (var ui in UIHandleLoader.UIHandles) {
+                if (ui is BaseChestUI && ui.Active)
+                    return true;
+            }
+
+            return false;
         }
 
         #endregion

@@ -54,7 +54,7 @@ namespace CalamityOverhaul.Common
             effect.CurrentTechnique.Passes[0].Apply();
 
             Vector2 screenPos = worldCenter - Main.screenPosition;
-            Texture2D pixel = TextureAssets.MagicPixel.Value;
+            Texture2D pixel = VaultAsset.placeholder2.Value;
             Rectangle destRect = new Rectangle(
                 (int)(screenPos.X - screenWidth * 0.5f),
                 (int)(screenPos.Y - screenHeight * 0.5f),

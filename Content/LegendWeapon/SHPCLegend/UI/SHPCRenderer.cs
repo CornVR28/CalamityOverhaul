@@ -1,4 +1,4 @@
-using CalamityOverhaul.Common;
+﻿using CalamityOverhaul.Common;
 using CalamityOverhaul.Content.HackTimes;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Graphics;
@@ -547,7 +547,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             string ramStr = $"{(int)currentRam}/{maxRam}";
             DynamicSpriteFont font = FontAssets.MouseText.Value;
             Vector2 sz = font.MeasureString(ramStr) * 0.38f;
-            Utils.DrawBorderString(sb, ramStr, labelPos - sz * 0.5f, SHPCTheme.TextDim * globalAlpha, 0.38f);
+            Utils.DrawBorderString(sb, ramStr, labelPos - sz * 0.5f, SHPCTheme.TextDim * globalAlpha, 0.58f);
         }
 
         private static void DrawRAMBar_Shader(SpriteBatch sb, Texture2D px, Vector2 center,

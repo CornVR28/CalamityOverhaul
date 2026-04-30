@@ -53,17 +53,17 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
 
         #region 颜色
 
-        // 蓄力颜色（黄金色系）
+        //蓄力颜色（黄金色系）
         private static readonly Color ChargeCore = new(255, 220, 80);
         private static readonly Color ChargeGlow = new(230, 170, 30);
         private static readonly Color ChargeAura = new(150, 100, 15);
 
-        // 满蓄/飞行颜色（白青色系）
+        //满蓄/飞行颜色（白青色系）
         private static readonly Color FullCore = new(220, 255, 255);
         private static readonly Color FullGlow = new(80, 230, 220);
         private static readonly Color FullAura = new(20, 140, 130);
 
-        // 超驱颜色（高温红炽 + 白热）
+        //超驱颜色（高温红炽 + 白热）
         private static readonly Color ODCore = new(255, 245, 200);
         private static readonly Color ODGlow = new(255, 25, 40);
         private static readonly Color ODAura = new(180, 0, 15);
@@ -75,7 +75,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         #region 实例字段
 
         private int chargeTime;
-        private float chargeRatio; // 0~1
+        private float chargeRatio; //0~1
         private float fadeAlpha;
         private int particleTimer;
         private float flyAngle;
@@ -135,19 +135,19 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
                 return;
             }
 
-            // 超驱检测与过渡
+            //超驱检测与过渡
             bool insideDomain = Cyberspace.IsInsideDomain(Projectile.Center);
             float targetOD = insideDomain ? 1f : 0f;
             float prevOD = overdriveAmount;
             overdriveAmount = MathHelper.Lerp(overdriveAmount, targetOD, 0.055f);
             if (overdriveAmount < 0.005f) overdriveAmount = 0f;
 
-            // 首次进入超驱阈值时，给 burstTimer 一个随机初始值，避免立即触发
+            //首次进入超驱阈值时，给 burstTimer 一个随机初始值，避免立即触发
             if (prevOD <= 0.3f && overdriveAmount > 0.3f) {
                 glitchBurstTimer = Main.rand.Next(8, 20);
             }
 
-            // 间歇性故障爆发（高频黑墙撕裂）
+            //间歇性故障爆发（高频黑墙撕裂）
             if (overdriveAmount > 0.3f) {
                 glitchBurstTimer--;
                 if (glitchBurstTimer <= 0) {
@@ -171,7 +171,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         #region 蓄力阶段
 
         private void AI_Charging(Player owner) {
-            // 尝试从手持弹幕获取枪口位置
+            //尝试从手持弹幕获取枪口位置
             Vector2 targetPos;
             int heldIdx = HeldProjIndex;
             if (heldIdx >= 0 && heldIdx < Main.maxProjectiles
@@ -180,7 +180,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
                 targetPos = heldProj.TipPosition;
             }
             else {
-                // 后备：直接用玩家前方偏移
+                //后备：直接用玩家前方偏移
                 Vector2 fallbackDir = (Main.MouseWorld - owner.Center).SafeNormalize(Vector2.UnitX);
                 targetPos = owner.Center + fallbackDir * ChargeOffsetDist;
             }
@@ -189,14 +189,14 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             Vector2 aimDir = (Main.MouseWorld - owner.Center).SafeNormalize(Vector2.UnitX);
             Projectile.rotation = aimDir.ToRotation();
 
-            // 玩家面向光球方向
+            //玩家面向光球方向
             owner.ChangeDir(aimDir.X > 0f ? 1 : -1);
 
-            // 持续蓄力
+            //持续蓄力
             chargeTime++;
             chargeRatio = MathHelper.Clamp((float)chargeTime / MaxChargeFrames, 0f, 1f);
 
-            // 蓄力音效：从开始蓄力即播放，pitch 随蓄力比例递增，超驱时额外升调+抖动
+            //蓄力音效：从开始蓄力即播放，pitch 随蓄力比例递增，超驱时额外升调+抖动
             if (chargeTime == 1 && Main.netMode != NetmodeID.Server) {
                 SoundStyle chargeSound = "CalamityMod/Sounds/Item/NorfleetRecharge".GetSound();
                 chargeSoundSlot = SoundEngine.PlaySound(chargeSound with { Volume = 0.8f, Pitch = -0.6f }, Projectile.Center);
@@ -211,20 +211,20 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
                 activeChargeSound.Pitch = basePitch + odPitch + odFlutter;
             }
 
-            // 蓄力阶段不移动
+            //蓄力阶段不移动
             Projectile.velocity = Vector2.Zero;
-            Projectile.timeLeft = 600; // 重置timeLeft防止蓄力超时消失
+            Projectile.timeLeft = 600; //重置timeLeft防止蓄力超时消失
 
-            // 淡入
+            //淡入
             fadeAlpha = MathHelper.Clamp(chargeTime / 15f, 0f, 1f);
 
-            // 光照（超驱时更亮）
+            //光照（超驱时更亮）
             Color currentCore = Color.Lerp(
                 Color.Lerp(ChargeCore, FullCore, chargeRatio),
                 ODCore, overdriveAmount);
             Lighting.AddLight(Projectile.Center, currentCore.ToVector3() * (0.5f + overdriveAmount * 1.0f) * fadeAlpha * (0.3f + chargeRatio * 0.7f));
 
-            // 汇聚粒子（超驱时极密集）
+            //汇聚粒子（超驱时极密集）
             int interval = overdriveAmount > 0.3f ? 1 : ConvergeParticleInterval;
             particleTimer++;
             if (particleTimer >= interval && Main.netMode != NetmodeID.Server) {
@@ -232,7 +232,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
                 SpawnConvergeParticles();
             }
 
-            // 满蓄脉冲提示
+            //满蓄脉冲提示
             if (chargeRatio >= 1f && chargeTime % 20 == 0) {
                 if (Main.netMode != NetmodeID.Server) {
                     Color pulseMain = overdriveAmount > 0.3f ? ODCore : FullCore;
@@ -249,13 +249,13 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
                 }
             }
 
-            // 检测右键释放 → 发射
+            //检测右键释放 → 发射
             if (!owner.PressKey(false)) {
                 if (chargeTime >= MinChargeFrames) {
                     LaunchOrb(owner);
                 }
                 else {
-                    // 蓄力不足，取消
+                    //蓄力不足，取消
                     Projectile.Kill();
                 }
             }
@@ -289,7 +289,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         }
 
         private void LaunchOrb(Player owner) {
-            // 停止蓄力音效
+            //停止蓄力音效
             StopChargeSound();
             State = OrbState.Flying;
             Vector2 aimDir = (Main.MouseWorld - owner.Center).SafeNormalize(Vector2.UnitX);
@@ -297,9 +297,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             float timeScale = TimeGear.TimeScale;
             Projectile.velocity = aimDir * FlySpeed * timeScale;
             Projectile.tileCollide = true;
-            Projectile.timeLeft = 300; // 飞行最多5秒
+            Projectile.timeLeft = 300; //飞行最多5秒
 
-            // 发射时粒子爆发
+            //发射时粒子爆发
             if (Main.netMode != NetmodeID.Server) {
                 float od = overdriveAmount;
                 Color launchMain = od > 0.3f ? Color.Lerp(FullCore, ODCore, od) : FullCore;
@@ -332,7 +332,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             Projectile.rotation = flyAngle;
             fadeAlpha = 1f;
 
-            // 飞行发光（超驱时更亮）
+            //飞行发光（超驱时更亮）
             Color flyCore = Color.Lerp(
                 Color.Lerp(ChargeCore, FullCore, chargeRatio),
                 ODCore, overdriveAmount);
@@ -410,8 +410,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
 
         private void SpawnDetonation() {
             if (Projectile.owner != Main.myPlayer) return;
-            // 生成爆破弹幕，传递蓄力比例和伤害
-            int damage = (int)(Projectile.damage * (0.5f + chargeRatio * 0.5f)); // 蓄力越满伤害越高
+            //生成爆破弹幕，传递蓄力比例和伤害
+            int damage = (int)(Projectile.damage * (0.5f + chargeRatio * 2.5f)); //蓄力越满伤害越高
             int projIndex = Projectile.NewProjectile(
                 Projectile.GetSource_FromThis(),
                 Projectile.Center,
@@ -419,8 +419,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
                 ModContent.ProjectileType<CyberDetonationProj>(),
                 damage, Projectile.knockBack,
                 Projectile.owner,
-                ai0: chargeRatio, // ai[0] = 蓄力比例，影响爆炸规模
-                ai1: overdriveAmount // ai[1] = 超驱量，影响爆炸故障效果
+                ai0: chargeRatio, //ai[0] = 蓄力比例，影响爆炸规模
+                ai1: overdriveAmount //ai[1] = 超驱量，影响爆炸故障效果
             );
             if (projIndex >= 0 && projIndex < Main.maxProjectiles) {
                 Main.projectile[projIndex].originalDamage = Projectile.originalDamage;
@@ -441,13 +441,13 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
 
             Vector2 drawPos = Projectile.Center - Main.screenPosition;
 
-            // 根据蓄力比例计算球体大小
+            //根据蓄力比例计算球体大小
             float sizeRatio = State == OrbState.Charging
                 ? 0.2f + chargeRatio * 0.8f
                 : 1f;
             float orbDiameterPx = MaxOrbDiameter * sizeRatio;
 
-            // 当前颜色（黄金→白青过渡，超驱时混合品红）
+            //当前颜色（黄金→白青过渡，超驱时混合品红）
             float od = overdriveAmount;
             Color currentCore = Color.Lerp(
                 Color.Lerp(ChargeCore, FullCore, chargeRatio), ODCore, od);
@@ -457,19 +457,19 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
                 Color.Lerp(ChargeAura, FullAura, chargeRatio), ODAura, od);
 
             float pulse = 0.92f + 0.08f * MathF.Sin((float)Main.timeForVisualEffects * 0.12f + chargeRatio * 5f);
-            // 超驱时脉冲剧烈抽搐
+            //超驱时脉冲剧烈抽搐
             pulse += od * 0.25f * MathF.Sin((float)Main.timeForVisualEffects * 0.45f);
             pulse += od * glitchBurstIntensity * 0.2f * MathF.Sin((float)Main.timeForVisualEffects * 1.2f);
             float alpha = fadeAlpha * pulse;
             Vector2 glowOrigin = glow.Size() * 0.5f;
 
-            // 外层柔和bloom（超驱时巨大炽热光晕）
+            //外层柔和bloom（超驱时巨大炽热光晕）
             float outerScale = (orbDiameterPx / glow.Width) * (2.5f + od * 2.5f);
             Color outerColor = currentAura * alpha * (0.2f + od * 0.4f);
             spriteBatch.Draw(glow, drawPos, null, outerColor, 0f,
                 glowOrigin, outerScale, SpriteEffects.None, 0f);
 
-            // CyberEnergyOrb 着色器绘制
+            //CyberEnergyOrb 着色器绘制
             spriteBatch.End();
 
             Effect orbShader = EffectLoader.CyberEnergyOrb?.Value;
@@ -486,7 +486,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
                 orbShader.Parameters["auraColor"]?.SetValue(currentAura.ToVector3());
                 orbShader.Parameters["orbScale"]?.SetValue(pulse);
                 orbShader.Parameters["uNoiseTex"]?.SetValue(noise);
-                // 超驱参数
+                //超驱参数
                 orbShader.Parameters["overdriveAmount"]?.SetValue(od);
                 orbShader.Parameters["glitchBurst"]?.SetValue(glitchBurstIntensity);
                 orbShader.Parameters["odCoreColor"]?.SetValue(ODCore.ToVector3());
@@ -505,7 +505,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
                 spriteBatch.End();
             }
 
-            // 恢复 Additive + Deferred
+            //恢复 Additive + Deferred
             spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive, SamplerState.PointWrap,
                 DepthStencilState.None, RasterizerState.CullNone, null, Main.GameViewMatrix.TransformationMatrix);
         }

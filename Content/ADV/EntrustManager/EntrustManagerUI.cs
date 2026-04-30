@@ -213,15 +213,8 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
             var entry = GetEntry(key);
             if (entry == null || entry.Status == newStatus) return false;
 
-            var oldStatus = entry.Status;
-            entry.Status = newStatus;
             if (progress.HasValue) entry.Progress = progress.Value;
-            if (oldStatus == QuestEntryStatus.Suspended && newStatus != QuestEntryStatus.Suspended)
-                entry.OnUnsuspended?.Invoke();
-            entry.OnStatusChanged(oldStatus, newStatus);
-            EmitStatusNotification(entry, oldStatus, newStatus);
-            filterDirty = true;
-            return true;
+            return ChangeEntryStatus(entry, newStatus);
         }
 
         /// <summary>获取所有被关注状态的条目，供 <see cref="EntrustTrackerWidget"/> 查询</summary>
@@ -505,21 +498,8 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
                     //右键关注/取消关注
                     if (keyRightPressState == KeyPressState.Pressed) {
                         var entry = filteredEntries[idx];
-                        var oldStatus = entry.Status;
-                        if (entry.Status == QuestEntryStatus.Tracked)
-                            entry.Status = QuestEntryStatus.Active;
-                        else if (entry.Status == QuestEntryStatus.Active)
-                            entry.Status = QuestEntryStatus.Tracked;
-                        else if (entry.Status == QuestEntryStatus.Suspended) {
-                            entry.Status = QuestEntryStatus.Tracked;
-                            entry.OnUnsuspended?.Invoke();
-                        }
-                        if (entry.Status != oldStatus) {
-                            entry.OnStatusChanged(oldStatus, entry.Status);
-                            EmitStatusNotification(entry, oldStatus, entry.Status);
-                        }
-                        filterDirty = true;
-                        SoundEngine.PlaySound(SoundID.MenuTick with { Volume = 0.4f });
+                        if (ToggleEntryTracked(entry))
+                            SoundEngine.PlaySound(SoundID.MenuTick with { Volume = 0.4f });
                     }
 
                     //中键挂起/恢复
@@ -527,23 +507,53 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
                     bool middleJustPressed = middleDown && !prevMiddleDown;
                     if (middleJustPressed) {
                         var entry = filteredEntries[idx];
-                        var oldStatus = entry.Status;
-                        if (entry.Status == QuestEntryStatus.Suspended) {
-                            entry.Status = QuestEntryStatus.Active;
-                            entry.OnUnsuspended?.Invoke();
-                        }
-                        else if (entry.Status == QuestEntryStatus.Active || entry.Status == QuestEntryStatus.Tracked) {
-                            entry.Status = QuestEntryStatus.Suspended;
-                        }
-                        if (entry.Status != oldStatus) {
-                            entry.OnStatusChanged(oldStatus, entry.Status);
-                            EmitStatusNotification(entry, oldStatus, entry.Status);
-                        }
-                        filterDirty = true;
-                        SoundEngine.PlaySound(SoundID.MenuTick with { Volume = 0.4f });
+                        if (ToggleEntrySuspended(entry))
+                            SoundEngine.PlaySound(SoundID.MenuTick with { Volume = 0.4f });
                     }
                 }
             }
+        }
+
+        private bool ToggleEntryTracked(EntrustEntryData entry) {
+            if (entry == null) return false;
+
+            return entry.Status switch {
+                QuestEntryStatus.Tracked => ChangeEntryStatus(entry, QuestEntryStatus.Active),
+                QuestEntryStatus.Active => ChangeEntryStatus(entry, QuestEntryStatus.Tracked),
+                QuestEntryStatus.Suspended => ChangeEntryStatus(entry, QuestEntryStatus.Tracked),
+                _ => false,
+            };
+        }
+
+        private bool ToggleEntrySuspended(EntrustEntryData entry) {
+            if (entry == null) return false;
+
+            return entry.Status switch {
+                QuestEntryStatus.Suspended => ChangeEntryStatus(entry,
+                    entry.RestoreTrackedOnUnsuspend ? QuestEntryStatus.Tracked : QuestEntryStatus.Active),
+                QuestEntryStatus.Active or QuestEntryStatus.Tracked
+                    => ChangeEntryStatus(entry, QuestEntryStatus.Suspended),
+                _ => false,
+            };
+        }
+
+        private bool ChangeEntryStatus(EntrustEntryData entry, QuestEntryStatus newStatus) {
+            if (entry == null || entry.Status == newStatus) return false;
+
+            QuestEntryStatus oldStatus = entry.Status;
+            entry.RestoreTrackedOnUnsuspend = oldStatus == QuestEntryStatus.Tracked
+                && newStatus == QuestEntryStatus.Suspended;
+            entry.Status = newStatus;
+
+            if (oldStatus == QuestEntryStatus.Suspended && newStatus != QuestEntryStatus.Suspended) {
+                entry.RestoreTrackedOnUnsuspend = false;
+                entry.OnUnsuspended?.Invoke();
+            }
+
+            entry.OnStatusChanged(oldStatus, newStatus);
+            EmitStatusNotification(entry, oldStatus, newStatus);
+            filterDirty = true;
+            return true;
         }
 
         /// <summary>根据状态变化发射对应的通知弹窗</summary>

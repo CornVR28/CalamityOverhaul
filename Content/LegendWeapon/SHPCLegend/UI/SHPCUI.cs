@@ -526,7 +526,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             if (buttons == null) {
                 return;
             }
-            Texture2D px = CWRAsset.Placeholder_White?.Value ?? TextureAssets.MagicPixel.Value;
+            Texture2D px = VaultAsset.placeholder2.Value;
             if (px == null) {
                 return;
             }

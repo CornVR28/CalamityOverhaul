@@ -46,7 +46,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.AcheronProtocols.Machines.DropP
         public override void PostDrawInterface(SpriteBatch spriteBatch) {
             // 坠入环节——屏幕渐黑遮罩
             if (landingFade <= 0f) return;
-            Texture2D pixel = Terraria.GameContent.TextureAssets.MagicPixel.Value;
+            Texture2D pixel = VaultAsset.placeholder2.Value;
             spriteBatch.Draw(pixel,
                 new Rectangle(0, 0, Main.screenWidth, Main.screenHeight),
                 Color.Black * landingFade);
