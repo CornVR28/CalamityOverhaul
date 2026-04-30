@@ -1,4 +1,4 @@
-using Terraria;
+﻿using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -25,6 +25,7 @@ namespace CalamityOverhaul.Content.RAMSystems
             Item.rare = ItemRarityID.Cyan;
             Item.value = Item.sellPrice(gold: 1);
             Item.UseSound = SoundID.Item4;
+            Item.autoReuse = true;
         }
 
         public override bool CanUseItem(Player player) => CanApplyUpgrade;
