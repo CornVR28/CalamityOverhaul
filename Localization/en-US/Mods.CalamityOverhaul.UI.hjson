@@ -692,6 +692,7 @@ EntrustManagerLead: {
 	TextKeyPromptWarnTitle: ⚠  Entrust Key Not Bound!
 	TextKeyPromptDefaultKey: Press [{0}] (default) to open Entrust Panel
 	TextKeyPromptBindHint: Go to  Settings → Controls  to bind a custom key
+	TextKeyPromptConfirmBtn: I know
 	TextPanelIntroTitle: Entrust Panel Guide
 	TextRightClickLabel: Right-click an entry
 	TextRightClickAction: " →  Focus"

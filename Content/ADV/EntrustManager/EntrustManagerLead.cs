@@ -30,6 +30,7 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
         public static LocalizedText TextKeyPromptWarnTitle { get; private set; }
         public static LocalizedText TextKeyPromptDefaultKey { get; private set; }
         public static LocalizedText TextKeyPromptBindHint { get; private set; }
+        public static LocalizedText TextKeyPromptConfirmBtn { get; private set; }
         public static LocalizedText TextPanelIntroTitle { get; private set; }
         public static LocalizedText TextRightClickLabel { get; private set; }
         public static LocalizedText TextRightClickAction { get; private set; }
@@ -48,6 +49,7 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
             TextKeyPromptWarnTitle = this.GetLocalization(nameof(TextKeyPromptWarnTitle), () => "⚠  委托快捷键尚未绑定！");
             TextKeyPromptDefaultKey = this.GetLocalization(nameof(TextKeyPromptDefaultKey), () => "当前按 [{0}]（默认键）可打开委托面板");
             TextKeyPromptBindHint = this.GetLocalization(nameof(TextKeyPromptBindHint), () => "建议前往  设置 → 控制  中绑定自定义按键");
+            TextKeyPromptConfirmBtn = this.GetLocalization(nameof(TextKeyPromptConfirmBtn), () => "我知道了");
             TextPanelIntroTitle = this.GetLocalization(nameof(TextPanelIntroTitle), () => "委托操作说明");
             TextRightClickLabel = this.GetLocalization(nameof(TextRightClickLabel), () => "右键单击委托条目");
             TextRightClickAction = this.GetLocalization(nameof(TextRightClickAction), () => " →  关注委托");
@@ -74,8 +76,8 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
 
         //阶段1卡片固定宽度，高度根据是否绑定按键动态决定
         private const int CardW1 = 320;
-        private const int CardH1_Bound = 62;
-        private const int CardH1_Unbound = 104;
+        private const int CardH1_Bound = 86;
+        private const int CardH1_Unbound = 128;
         //阶段2卡片尺寸
         private const int CardW2 = 318;
         private const int CardH2 = 146;
@@ -249,7 +251,7 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
                 }
             }
 
-            if (DrawCloseButton(sb, card, alpha))
+            if (DrawConfirmButton(sb, card, alpha, TextKeyPromptConfirmBtn.Value))
                 MarkGuideSeen();
         }
 
@@ -449,27 +451,16 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
 
         // ─── 辅助 UI 元素 ────────────────────────────────────────────────────────
 
-        private static bool DrawCloseButton(SpriteBatch sb, Rectangle card, float alpha) {
-            const int size = 16, margin = 6;
-            var rect = new Rectangle(card.Right - size - margin, card.Top + margin, size, size);
-            bool hovered = rect.Contains(Main.mouseX, Main.mouseY);
-            var color = hovered
-                ? new Color(255, 100, 100, (int)(255 * alpha))
-                : new Color(190, 190, 190, (int)(170 * alpha));
-            Utils.DrawBorderString(sb, "×", new Vector2(rect.X, rect.Y), color, 0.82f);
-            if (hovered) Main.LocalPlayer.mouseInterface = true;
-            return hovered && Main.mouseLeft && !Main.mouseLeftRelease;
-        }
-
-        private static bool DrawConfirmButton(SpriteBatch sb, Rectangle card, float alpha) {
+        private static bool DrawConfirmButton(SpriteBatch sb, Rectangle card, float alpha, string text = null) {
             const int btnW = 78, btnH = 20, margin = 8;
             var rect = new Rectangle(card.Right - btnW - margin, card.Bottom - btnH - margin, btnW, btnH);
             bool hovered = rect.Contains(Main.mouseX, Main.mouseY);
             BaseManagerStyle.FillRect(sb, rect, new Color(22, 58, 22, (int)((hovered ? 215 : 140) * alpha)));
             BaseManagerStyle.StrokeRect(sb, rect, 1, new Color(90, 185, 90, (int)(145 * alpha)));
+            string buttonText = text ?? TextConfirmBtn.Value;
             var textColor = new Color(175, 240, 175, (int)(255 * alpha));
-            Vector2 ts = FontAssets.MouseText.Value.MeasureString(TextConfirmBtn.Value) * 0.62f;
-            Utils.DrawBorderString(sb, TextConfirmBtn.Value,
+            Vector2 ts = FontAssets.MouseText.Value.MeasureString(buttonText) * 0.62f;
+            Utils.DrawBorderString(sb, buttonText,
                 new Vector2(rect.X + (rect.Width - ts.X) * 0.5f, rect.Y + (rect.Height - ts.Y) * 0.5f),
                 textColor, 0.62f);
             if (hovered) Main.LocalPlayer.mouseInterface = true;

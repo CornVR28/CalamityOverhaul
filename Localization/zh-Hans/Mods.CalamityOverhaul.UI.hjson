@@ -689,6 +689,7 @@ EntrustManagerLead: {
 	TextKeyPromptWarnTitle: ⚠  委托快捷键尚未绑定！
 	TextKeyPromptDefaultKey: 当前按 [{0}]（默认键）可打开委托面板
 	TextKeyPromptBindHint: 建议前往  设置 → 控制  中绑定自定义按键
+	TextKeyPromptConfirmBtn: 我知道了
 	TextPanelIntroTitle: 委托操作说明
 	TextRightClickLabel: 右键单击委托条目
 	TextRightClickAction: " →  关注委托"
