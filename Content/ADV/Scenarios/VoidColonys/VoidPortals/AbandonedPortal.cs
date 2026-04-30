@@ -1,4 +1,5 @@
 ﻿using CalamityOverhaul.Common;
+using CalamityOverhaul.OtherMods.SubWorld;
 using InnoVault.Actors;
 using InnoVault.UIHandles;
 using Microsoft.Xna.Framework.Graphics;
@@ -377,7 +378,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.VoidPortals
         public override void PostUpdateWorld() {
             AbandonedPortalSession.Update();
 
-            if (Main.gameMenu || VoidColony.Active || Main.netMode == NetmodeID.MultiplayerClient) {
+            if (Main.gameMenu || VoidColony.Active || VaultUtils.isClient || SubWorldRef.AnyActiveSubWorld()) {
                 return;
             }
 
