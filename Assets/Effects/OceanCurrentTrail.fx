@@ -148,25 +148,69 @@ float4 PixelShaderFunction(PSInput input) : COLOR0
     float tailFade = 1.0 - smoothstep(0.72, 1.0, along);
 
     // ============================================================
-    // 颜色合成
+    // 颜色合成（强约束："海洋蓝必须是主色"）
+    //
+    // 设计原则：
+    //   1) 不使用任何 float3(1,1,1) 直叠 —— 纯白叠加在 Additive 下会让 R/G 通道
+    //      与 B 一起冲到 1.0，从而把蓝色"煮"成白色。
+    //   2) 主体（body）权重提高，保证视觉重心仍是深海蓝。
+    //   3) 中高频高光全部走 bioColor / foamColor（蓝绿调），
+    //      只在 core² 这一极小热斑上允许少量近白（OceanHotSpark 形态）的"反光"。
+    //   4) 头部端帽用 bio 主导 + 一点 foam 提亮，不再做大块白光。
+    //
+    // 期望视觉：深海蓝身体 + 青色焦散/流条 + 头部蓝白冲尖（点状），不再"白成一坨"
     // ============================================================
     float depth = 1.0 - crossDist;
-    float3 bodyColor = lerp(shallowColor, deepColor, saturate(depth * 0.85 + waterField * 0.10));
+    float3 bodyColor = lerp(shallowColor, deepColor, saturate(depth * 0.78 + waterField * 0.12));
 
-    float3 col = bodyColor * thickness * (0.62 + waterField * 0.40);
-    col += bioColor    * core * 0.95;
-    col += float3(1.0, 1.0, 1.0) * core * 0.40;
-    col += foamColor   * caustic * 0.55;
-    col += foamColor   * streamStripes * 0.60;
-    col += foamColor   * foamMask * 1.15;
-    col += float3(1.0, 1.0, 1.0) * headCap * 0.75;
-    col += bioColor    * headRim;
+    // 极小的"水面反光"热斑色：偏冷的近白，仅用于 core 中心一个像素级别的小亮斑
+    // 不要直接用 (1,1,1)，否则在 Additive 下与 bio/foam 叠加后红通道也满，整片白
+    float3 hotSpark = float3(0.74, 0.88, 1.0);
+
+    // ----- 1. 身体主色：海洋蓝主导，权重显著提升 -----
+    float3 col = bodyColor * thickness * (0.95 + waterField * 0.55);
+
+    // ----- 2. 内核：以生物荧光为主，叠加一道收得很紧的反光斑 -----
+    col += bioColor  * core * 0.78;
+    col += hotSpark  * (core * core * core) * 0.22;     // core³ 把白光压缩到最中心
+
+    // ----- 3. 焦散：青色为主，foam 仅做轻微"反光晶光" -----
+    col += bioColor  * caustic * 0.40;
+    col += foamColor * caustic * 0.22;
+
+    // ----- 4. 流条：用 bio + 浅蓝混合，避免 foamColor 主导导致一道道白纹 -----
+    col += bioColor      * streamStripes * 0.55;
+    col += shallowColor  * streamStripes * 0.30;
+
+    // ----- 5. 边缘泡沫带：foamColor 已经被改为青调，权重降下来防止累计白化 -----
+    col += foamColor * foamMask * 0.75;
+
+    // ----- 6. 头部端帽 / 光环：以 bio 为主，禁止纯白 -----
+    col += bioColor  * headCap * 0.80;
+    col += foamColor * headCap * 0.35;
+    col += hotSpark  * (headCap * headCap) * 0.18;      // headCap² 收紧，仅最中心一点有"反光"
+    col += bioColor  * headRim * 1.05;
+
+    // ============================================================
+    // "蓝色保权"约束 —— 关键防白化手段
+    //   Additive 混合下，R/G 一旦先于 B 抵达 1.0，整体就会被显示为
+    //   带白调（甚至纯白）。即便中性色（如 hotSpark）单层下没问题，
+    //   多层叠加（trail+水头+泡沫粒子）也会迅速失衡。
+    //
+    //   本步骤在像素层面"硬性"压住 R 和 G，使其永远不会超过 B 的某个比例。
+    //   - R 上限 = B * 0.45（保证蓝远高于红）
+    //   - G 上限 = B * 0.92（青色仍然保留，但仍小于蓝）
+    //   这样一来，即便 col 经 Additive 与亮背景累加，也会沿"海洋蓝→青蓝"
+    //   方向饱和，而不是沿"白"方向饱和。
+    // ============================================================
+    col.r = min(col.r, col.b * 0.45);
+    col.g = min(col.g, col.b * 0.92);
 
     float alpha = thickness * 0.85;
-    alpha += core * 0.80;
-    alpha += foamMask * 0.55;
-    alpha += caustic * 0.18;
-    alpha += headCap * 0.50;
+    alpha += core * 0.78;
+    alpha += foamMask * 0.50;
+    alpha += caustic * 0.16;
+    alpha += headCap * 0.48;
     alpha = saturate(alpha) * tailFade * fadeAlpha;
 
     return float4(col * alpha, alpha) * input.Color;

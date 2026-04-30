@@ -72,11 +72,14 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend
         private int dispersalStartLife = -1; //进入消散阶段时记录生命周期计数
         private const int MaxGraceTicks = 90; //最大宽限时间（保证粒子能自然淡出）
 
-        //海洋颜色主题
-        private static readonly Color DeepOcean = new(15, 50, 90);
-        private static readonly Color ShallowOcean = new(40, 120, 180);
-        private static readonly Color OceanFoam = new(200, 230, 255);
-        private static readonly Color BioluminescentBlue = new(80, 180, 255);
+        //海洋颜色主题（以"真海水"为基调：深海蓝 → 中层蓝 → 青蓝泡沫 → 生物荧光青）
+        //OceanFoam 不再使用接近纯白的 (200,230,255)，避免 Additive 多层叠加后蓝/绿/红一并饱和成白
+        //同时拆出一个仅用于极小热斑的 OceanHotSpark，绝不做大面积白叠加
+        private static readonly Color DeepOcean = new(8, 32, 78);
+        private static readonly Color ShallowOcean = new(24, 96, 188);
+        private static readonly Color OceanFoam = new(120, 195, 235);
+        private static readonly Color BioluminescentBlue = new(70, 175, 255);
+        private static readonly Color OceanHotSpark = new(190, 225, 255);
 
         private int trueDmg;
 
@@ -762,7 +765,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend
             shader.Parameters["coreShimmerSpeed"]?.SetValue(shimmerSpeed);
             shader.Parameters["foamColor"]?.SetValue(OceanFoam.ToVector3());
             shader.Parameters["bioColor"]?.SetValue(BioluminescentBlue.ToVector3());
-            shader.Parameters["highlightColor"]?.SetValue(Vector3.One);
+            //顶点高光改为偏冷青调（OceanHotSpark = 190,225,255），避免使用 Vector3.One
+            //在 Additive 混合下纯白高光 + 浅水青底色会把整块粒子"洗"成白噪
+            shader.Parameters["highlightColor"]?.SetValue(OceanHotSpark.ToVector3());
             shader.Parameters["uNoiseTex"]?.SetValue(noise);
         }
 
@@ -895,8 +900,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend
                     0
                 );
 
-                //发光核心
-                Color coreColor = Color.White * life.Opacity * flicker * 0.6f;
+                //发光核心：避免叠加 Color.White 带来的"洗白"，改用偏冷热斑色
+                Color coreColor = OceanHotSpark * life.Opacity * flicker * 0.45f;
                 sb.Draw(
                     glowTex,
                     drawPos,
@@ -941,16 +946,17 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend
             float headPulse = 0.85f + 0.15f * MathF.Sin((float)Main.timeForVisualEffects * 0.18f);
             float baseScale = headPulse * streamFade;
 
-            //外层柔光（生物荧光蓝晕）
-            Color outerTint = Color.Lerp(BioluminescentBlue, OceanFoam, glowPulse * 0.45f);
+            //外层柔光（深海→生物荧光的过渡环）：以蓝绿为主，避免被白色弥散稀释
+            Color outerTint = Color.Lerp(ShallowOcean, BioluminescentBlue, 0.65f + 0.20f * glowPulse);
             outerTint.A = 0;
-            sb.Draw(glow, headPos, null, outerTint * (streamFade * 0.85f), 0f, origin,
+            sb.Draw(glow, headPos, null, outerTint * (streamFade * 0.70f), 0f, origin,
                 1.55f * baseScale, SpriteEffects.None, 0f);
 
-            //内核高亮（白炽水流冲尖）
-            Color coreTint = Color.Lerp(OceanFoam, Color.White, 0.55f);
+            //内核高亮（青蓝水头）：用 BioluminescentBlue → OceanHotSpark 过渡，绝不再混 Color.White
+            //Additive 下任何接近 (1,1,1) 的色都会把背景"煮"成白；保持 R 通道偏低让蓝色统治
+            Color coreTint = Color.Lerp(BioluminescentBlue, OceanHotSpark, 0.55f);
             coreTint.A = 0;
-            sb.Draw(glow, headPos, null, coreTint * (streamFade * glowPulse), 0f, origin,
+            sb.Draw(glow, headPos, null, coreTint * (streamFade * glowPulse * 0.80f), 0f, origin,
                 0.65f * baseScale, SpriteEffects.None, 0f);
         }
 

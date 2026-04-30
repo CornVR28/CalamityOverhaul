@@ -80,13 +80,24 @@ float4 PixelShaderFunction(PSInput input) : COLOR0
     float topHighlight = pow(lightDot, 3.0) * coreT * 0.5;
 
     // ========= 颜色合成 =========
+    //   baseTint 已经携带海洋蓝色 (深海/浅海/Bio) 信息（来自 C# 端 SpriteBatch 顶点色），
+    //   因此本段只追加"高频细节"，且权重被刻意压低：
+    //     - foamMask 由 1.25 降为 0.85，防止 Additive 多层叠加后 R/G 也涨满
+    //     - highlightColor 在 C# 已替换为偏冷的 OceanHotSpark（不再是 Vector3.One）
+    //     - caustic 焦散权重保持 0.40，足够"水波闪光"但不会成片白化
     float3 baseTint = input.Color.rgb;
 
     float3 col = baseTint * baseAlpha;
-    col += bioColor       * core * 0.7;
-    col += highlightColor * topHighlight;
-    col += foamColor      * foamMask * 1.25;
-    col += foamColor      * caustic * coreT * 0.40;
+    col += bioColor       * core * 0.65;
+    col += highlightColor * topHighlight * 0.85;
+    col += foamColor      * foamMask * 0.85;
+    col += foamColor      * caustic * coreT * 0.32;
+
+    // "蓝色保权"约束：与 OceanCurrentTrail.fx 保持同一审美 ——
+    //   水滴/泡沫/水头在 Additive 模式下大量叠加时，强制 R/G 不超过 B 的固定比例，
+    //   保证整批粒子向"海洋蓝/青蓝"方向饱和，而不是沿"白"方向。
+    col.r = min(col.r, col.b * 0.55);
+    col.g = min(col.g, col.b * 0.96);
 
     // 输出 alpha：在 baseAlpha 基础上叠加泡沫贡献
     float outA = baseAlpha * input.Color.a;
