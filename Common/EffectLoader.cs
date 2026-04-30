@@ -54,6 +54,7 @@ namespace CalamityOverhaul.Common
         public static Asset<Effect> ProverbsGhostDomain { get; set; }
         public static Asset<Effect> RevelationPlague { get; set; }
         public static Asset<Effect> VoidPortal { get; set; }
+        public static Asset<Effect> AbandonedPortalPanel { get; set; }
         public static Asset<Effect> VoidSuction { get; set; }
         public static Asset<Effect> VoidArrival { get; set; }
         public static Asset<Effect> CyberBossBar { get; set; }

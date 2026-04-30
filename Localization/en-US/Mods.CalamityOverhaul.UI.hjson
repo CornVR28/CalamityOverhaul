@@ -709,4 +709,11 @@ AbandonedPortalStrings: {
 	Teleport: ▷ 启动传送
 	Close: ✕ 关闭
 	ProgressFormat: 修复进度 {0}%
+	StatusBroken: STATUS  ▌ OFFLINE
+	StatusRepairing: STATUS  ▌ CALIBRATING
+	StatusRepaired: STATUS  ▌ ONLINE
+	DiagnosticHeader: "[DIAG]"
+	DiagnosticBroken: ERR-0xC4: 定位环裂隙 / 主能源回路断开
+	DiagnosticRepairing: INFO: 纳米焊缝阵列同步中…请勿移动门基座
+	DiagnosticRepaired: OK: 全部子系统在线 / 坐标解析就绪
 }

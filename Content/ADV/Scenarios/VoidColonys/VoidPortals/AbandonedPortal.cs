@@ -2,6 +2,7 @@
 using InnoVault.Actors;
 using InnoVault.UIHandles;
 using Microsoft.Xna.Framework.Graphics;
+using ReLogic.Content;
 using ReLogic.Graphics;
 using System;
 using Terraria;
@@ -15,8 +16,9 @@ using Terraria.ModLoader.IO;
 namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.VoidPortals
 {
     /// <summary>
-    /// 主世界出生点下方的废墟传送门，用 Actor 承载贴图、悬停反馈与右键交互。
-    /// 修复完成后会启动 <see cref="VoidTransportPlayer"/> 的传送演出并进入虚空聚落。
+    /// 主世界出生点下方洞穴层中的废墟传送门。<br/>
+    /// 用 Actor 承载贴图、悬停反馈与右键交互。修复完成后会启动
+    /// <see cref="VoidTransportPlayer"/> 的传送演出并进入虚空聚落。
     /// </summary>
     internal class AbandonedPortal : Actor
     {
@@ -61,11 +63,11 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.VoidPortals
         internal Vector2 PortalMouthCenter => Position + new Vector2(Width * 0.55f, Height * 0.46f);
 
         public override void OnSpawn(params object[] args) {
-            Width = 416;
-            Height = 300;
             DrawLayer = ActorDrawLayer.AfterTiles;
             hoverSeed = Main.rand.NextFloat() * 100f;
-            ApplyTextureSize();
+            Width = 416;
+            Height = 300;
+            DrawExtendMode = Math.Max(Width, Height) + 80;
             RepairStateByte = AbandonedPortalSystem.SavedStateByte;
             RepairTimer = Math.Clamp(AbandonedPortalSystem.SavedRepairTimer, 0, AbandonedPortalSession.RepairDurationFrames);
             if (RepairTimer >= AbandonedPortalSession.RepairDurationFrames) {
@@ -75,8 +77,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.VoidPortals
         }
 
         public override void AI() {
-            if (!initialized) ApplyTextureSize();
-
             if (VoidColony.Active) {
                 AbandonedPortalSession.Close();
                 ActorLoader.KillActor(WhoAmI);
@@ -90,6 +90,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.VoidPortals
             Velocity = Vector2.Zero;
             UpdateRepair();
             UpdateLocalHoverAndInteract();
+            initialized = true;
         }
 
         internal void StartRepair() {
@@ -151,6 +152,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.VoidPortals
 
             if (!mouseOver) return;
 
+            local.CWR().DontUseItemTime = 2;
             local.mouseInterface = true;
             local.cursorItemIconEnabled = false;
             local.cursorItemIconID = ItemID.None;
@@ -160,14 +162,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.VoidPortals
                 Main.mouseRightRelease = false;
                 SoundEngine.PlaySound(SoundID.MenuOpen);
             }
-        }
-
-        private void ApplyTextureSize() {
-            Texture2D tex = GetTexture();
-            Width = tex?.Width ?? FallbackWidth;
-            Height = tex?.Height ?? FallbackHeight;
-            DrawExtendMode = Math.Max(Width, Height) + 80;
-            initialized = true;
         }
 
         private static Texture2D GetTexture() {
@@ -289,7 +283,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.VoidPortals
             }
 
             float target = Phase == PanelPhase.Closing ? 0f : 1f;
-            OpenProgress = MathHelper.Lerp(OpenProgress, target, 0.16f);
+            OpenProgress = MathHelper.Lerp(OpenProgress, target, 0.26f);
             if (Math.Abs(OpenProgress - target) < 0.005f) OpenProgress = target;
 
             if (Phase == PanelPhase.Closing && OpenProgress <= 0.01f) {
@@ -313,6 +307,13 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.VoidPortals
         public static LocalizedText Teleport { get; private set; }
         public static LocalizedText Close { get; private set; }
         public static LocalizedText ProgressFormat { get; private set; }
+        public static LocalizedText StatusBroken { get; private set; }
+        public static LocalizedText StatusRepairing { get; private set; }
+        public static LocalizedText StatusRepaired { get; private set; }
+        public static LocalizedText DiagnosticHeader { get; private set; }
+        public static LocalizedText DiagnosticBroken { get; private set; }
+        public static LocalizedText DiagnosticRepairing { get; private set; }
+        public static LocalizedText DiagnosticRepaired { get; private set; }
 
         public override void SetStaticDefaults() {
             Title = this.GetLocalization(nameof(Title), () => "废墟传送门控制台");
@@ -322,28 +323,56 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.VoidPortals
             BrokenBody = this.GetLocalization(nameof(BrokenBody), () => "残破门框中仍残留着微弱的亚空间回声。启动自修复后，门体会在数分钟内重建定位环。");
             RepairingBody = this.GetLocalization(nameof(RepairingBody), () => "纳米焊缝正在重构裂隙约束器。请保持附近区域稳定，等待校准完成。");
             RepairedBody = this.GetLocalization(nameof(RepairedBody), () => "门体已经完成自修复。传送序列会先展开裂隙演出，再将你送入虚无世界。");
-            StartRepair = this.GetLocalization(nameof(StartRepair), () => "▷ 启动自修复程序");
-            Teleport = this.GetLocalization(nameof(Teleport), () => "▷ 启动传送");
-            Close = this.GetLocalization(nameof(Close), () => "✕ 关闭");
-            ProgressFormat = this.GetLocalization(nameof(ProgressFormat), () => "修复进度 {0}%");
+            StartRepair = this.GetLocalization(nameof(StartRepair), () => "启 动 自 修 复");
+            Teleport = this.GetLocalization(nameof(Teleport), () => "进 入 通 道");
+            Close = this.GetLocalization(nameof(Close), () => "关 闭");
+            ProgressFormat = this.GetLocalization(nameof(ProgressFormat), () => "校准进度  {0}%");
+            StatusBroken = this.GetLocalization(nameof(StatusBroken), () => "STATUS  ▌ OFFLINE");
+            StatusRepairing = this.GetLocalization(nameof(StatusRepairing), () => "STATUS  ▌ CALIBRATING");
+            StatusRepaired = this.GetLocalization(nameof(StatusRepaired), () => "STATUS  ▌ ONLINE");
+            DiagnosticHeader = this.GetLocalization(nameof(DiagnosticHeader), () => "[DIAG]");
+            DiagnosticBroken = this.GetLocalization(nameof(DiagnosticBroken), () => "ERR-0xC4: 定位环裂隙 / 主能源回路断开");
+            DiagnosticRepairing = this.GetLocalization(nameof(DiagnosticRepairing), () => "INFO: 纳米焊缝阵列同步中…请勿移动门基座");
+            DiagnosticRepaired = this.GetLocalization(nameof(DiagnosticRepaired), () => "OK: 全部子系统在线 / 坐标解析就绪");
         }
     }
 
     internal class AbandonedPortalSystem : ModSystem
     {
-        private const int SpawnCheckDelay = 90;
         private const string SaveStateKey = "AbandonedPortalState";
         private const string SaveRepairTimerKey = "AbandonedPortalRepairTimer";
-        private const int ClearMarginTiles = 2;
-        private int spawnTimer;
+        private const string SavePosXKey = "AbandonedPortalPosX";
+        private const string SavePosYKey = "AbandonedPortalPosY";
+        private const string SaveResolvedKey = "AbandonedPortalResolved";
+
+        //OnWorldLoad 设置为 true，表示已请求一次 spawn；首帧 PostUpdateWorld 时执行
+        private bool spawnPending;
 
         internal static byte SavedStateByte { get; private set; }
         internal static int SavedRepairTimer { get; private set; }
+        //缓存的传送门左上角 tile 坐标（一次世界 = 一次决策）
+        internal static int SavedTileX { get; private set; }
+        internal static int SavedTileY { get; private set; }
+        internal static bool PositionResolved { get; private set; }
 
         internal static void StorePortalState(AbandonedPortal portal) {
             if (portal == null) return;
             SavedStateByte = portal.RepairStateByte;
             SavedRepairTimer = Math.Clamp(portal.RepairTimer, 0, AbandonedPortalSession.RepairDurationFrames);
+        }
+
+        public override void OnWorldLoad() {
+            spawnPending = true;
+        }
+
+        public override void OnWorldUnload() {
+            spawnPending = false;
+            SavedStateByte = 0;
+            SavedRepairTimer = 0;
+            SavedTileX = 0;
+            SavedTileY = 0;
+            PositionResolved = false;
+            AbandonedPortalSession.Close();
         }
 
         public override void PostUpdateWorld() {
@@ -353,25 +382,31 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.VoidPortals
                 return;
             }
 
-            if (++spawnTimer < SpawnCheckDelay) {
-                return;
-            }
-            spawnTimer = 0;
+            if (!spawnPending) return;
 
+            //世界已经开放绘制后才执行：避免在 worldgen 早期 / 数据未稳定时介入
             if (ActorLoader.GetActiveActors<AbandonedPortal>().Count > 0) {
+                spawnPending = false;
                 return;
             }
 
-            Vector2 position = ResolveSpawnPosition();
-            PreparePortalSite(position);
-            ActorLoader.NewActor<AbandonedPortal>(position, Vector2.Zero);
-        }
+            //尚未持久化的世界，先决策位置并准备生成位（仅首次）
+            bool firstTimeResolved = false;
+            if (!PositionResolved) {
+                Point spawnTile = AbandonedPortalSiteFinder.Resolve();
+                SavedTileX = spawnTile.X;
+                SavedTileY = spawnTile.Y;
+                PositionResolved = true;
+                firstTimeResolved = true;
+            }
 
-        public override void OnWorldUnload() {
-            spawnTimer = 0;
-            SavedStateByte = 0;
-            SavedRepairTimer = 0;
-            AbandonedPortalSession.Close();
+            Vector2 worldPos = new(SavedTileX * 16f, SavedTileY * 16f);
+            //只在首次决策位置时执行地形整理，保留玩家后续对周边的改动
+            if (firstTimeResolved) {
+                AbandonedPortalSiteFinder.PreparePortalSite(SavedTileX, SavedTileY);
+            }
+            ActorLoader.NewActor<AbandonedPortal>(worldPos, Vector2.Zero);
+            spawnPending = false;
         }
 
         public override void SaveWorldData(TagCompound tag) {
@@ -382,6 +417,12 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.VoidPortals
 
             tag[SaveStateKey] = SavedStateByte;
             tag[SaveRepairTimerKey] = SavedRepairTimer;
+
+            if (PositionResolved) {
+                tag[SavePosXKey] = SavedTileX;
+                tag[SavePosYKey] = SavedTileY;
+                tag[SaveResolvedKey] = true;
+            }
         }
 
         public override void LoadWorldData(TagCompound tag) {
@@ -390,39 +431,221 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.VoidPortals
             if (SavedRepairTimer >= AbandonedPortalSession.RepairDurationFrames) {
                 SavedStateByte = (byte)AbandonedPortal.RepairState.Repaired;
             }
+
+            if (tag.ContainsKey(SaveResolvedKey) && tag.GetBool(SaveResolvedKey)) {
+                SavedTileX = tag.GetInt(SavePosXKey);
+                SavedTileY = tag.GetInt(SavePosYKey);
+                PositionResolved = SavedTileX > 0 && SavedTileY > 0;
+            }
         }
+    }
 
-        private static Vector2 ResolveSpawnPosition() {
-            int x = Math.Clamp(Main.spawnTileX, 20, Main.maxTilesX - 20);
-            int startY = Math.Clamp(Main.spawnTileY + 12, 20, Main.maxTilesY - 20);
-            int groundY = Math.Clamp(Main.spawnTileY + 42, 20, Main.maxTilesY - 20);
+    /// <summary>
+    /// 废墟传送门选址：在出生点正下方的洞穴层中，优先寻找天然的开阔空间，
+    /// 找到后只填补缺失的地基；当无法找到合适空间时，最后才挖掘一个生成位。
+    /// </summary>
+    internal static class AbandonedPortalSiteFinder
+    {
+        //搜索水平半径（tile）
+        private const int SearchRadiusX = 220;
+        //搜索深度（tile）
+        private const int SearchMaxDepth = 1100;
+        //每列尝试步长，避免计算过密
+        private const int ColumnStep = 3;
+        //每列内 Y 扫描步长
+        private const int RowStep = 2;
+        //允许的最低开阔度门槛（找到完美空间时）
+        private const int RequiredOpenWidth = AbandonedPortal.TileWidth + 4;
+        private const int RequiredOpenHeight = AbandonedPortal.TileHeight + 3;
+        //地基缺口允许的最大百分比，找到大致平整的地面就视为合格
+        private const float MaxFloorGapRatio = 0.35f;
+        //安全边距
+        private const int WorldEdgeMargin = 40;
+        //准备生成位时，门体外缘留出的清理缓冲（tile）
+        private const int ClearMarginTiles = 1;
 
-            for (int y = startY; y < Math.Min(Main.maxTilesY - 20, startY + 260); y++) {
-                Tile tile = Framing.GetTileSafely(x, y);
-                if (tile.HasTile && Main.tileSolid[tile.TileType]) {
-                    groundY = y;
-                    break;
-                }
+        /// <summary>
+        /// 公开入口：返回门体左上角的 tile 坐标。<br/>
+        /// 三阶段：①找完美天然腔体 → ②在合理腔体中填补地基 → ③如全失败则挖掘
+        /// </summary>
+        internal static Point Resolve() {
+            int spawnX = Math.Clamp(Main.spawnTileX, WorldEdgeMargin, Main.maxTilesX - WorldEdgeMargin);
+            int rockTop = (int)Main.rockLayer + 30; //至少进入洞穴层 30 tile
+            int searchTop = Math.Max(rockTop, Main.spawnTileY + 80);
+            int searchBottom = Math.Min(Main.maxTilesY - 220, searchTop + SearchMaxDepth);
+
+            //阶段 1：寻找完美天然腔体（开阔且地基平整）
+            if (TryFindNaturalCavity(spawnX, searchTop, searchBottom, allowFloorPatch: false, out Point perfectSpot)) {
+                return perfectSpot;
             }
 
-            int leftTile = x - AbandonedPortal.TileWidth / 2;
-            int topTile = groundY - AbandonedPortal.TileHeight;
+            //阶段 2：放宽——允许底部存在一定缺口，进行少量地基填补
+            if (TryFindNaturalCavity(spawnX, searchTop, searchBottom, allowFloorPatch: true, out Point patchSpot)) {
+                return patchSpot;
+            }
 
-            leftTile = Math.Clamp(leftTile, 10, Main.maxTilesX - AbandonedPortal.TileWidth - 10);
-            topTile = Math.Clamp(topTile, 10, Main.maxTilesY - AbandonedPortal.TileHeight - 10);
-
-            return new Vector2(leftTile * 16f, topTile * 16f);
+            //阶段 3：实在找不到，就在期望的位置直接挖一个洞
+            int forcedY = Math.Min(searchBottom, searchTop + 200);
+            int forcedX = Math.Clamp(spawnX - AbandonedPortal.TileWidth / 2, WorldEdgeMargin,
+                Main.maxTilesX - AbandonedPortal.TileWidth - WorldEdgeMargin);
+            int forcedTopY = Math.Clamp(forcedY - AbandonedPortal.TileHeight, WorldEdgeMargin,
+                Main.maxTilesY - AbandonedPortal.TileHeight - WorldEdgeMargin);
+            return new Point(forcedX, forcedTopY);
         }
 
-        private static void PreparePortalSite(Vector2 topLeftWorld) {
-            int left = (int)MathF.Floor(topLeftWorld.X / 16f);
-            int top = (int)MathF.Floor(topLeftWorld.Y / 16f);
-            int right = left + AbandonedPortal.TileWidth - 1;
-            int bottom = top + AbandonedPortal.TileHeight - 1;
+        /// <summary>
+        /// 在 spawnX 周围以螺旋顺序搜索符合条件的洞穴空间。
+        /// </summary>
+        private static bool TryFindNaturalCavity(int spawnX, int searchTop, int searchBottom, bool allowFloorPatch, out Point result) {
+            //螺旋扫描：自中心向两侧逐步外扩，深度自上而下
+            for (int dx = 0; dx <= SearchRadiusX; dx += ColumnStep) {
+                for (int sign = -1; sign <= 1; sign += 2) {
+                    if (dx == 0 && sign == 1) continue; //中心列只评估一次
 
-            // 清理门体足迹与边缘缓冲，但保留其下方地面，避免 Actor 基座看起来悬空。
-            ClearTiles(left - ClearMarginTiles, top - ClearMarginTiles,
+                    int x = spawnX + dx * sign;
+                    int leftTile = x - AbandonedPortal.TileWidth / 2;
+                    if (leftTile < WorldEdgeMargin || leftTile + AbandonedPortal.TileWidth >= Main.maxTilesX - WorldEdgeMargin) {
+                        continue;
+                    }
+
+                    for (int y = searchTop; y < searchBottom; y += RowStep) {
+                        if (EvaluateBox(leftTile, y, allowFloorPatch)) {
+                            //y 是地基行，门体顶部在其上方 TileHeight 行
+                            result = new Point(leftTile, y - AbandonedPortal.TileHeight);
+                            return true;
+                        }
+                    }
+                }
+            }
+            result = default;
+            return false;
+        }
+
+        /// <summary>
+        /// 评估候选位置：(leftTile, floorY) 表示候选地基行；<br/>
+        /// 门体占据 floorY 上方 TileHeight 行，floorY 自身是要求的实心地基。
+        /// </summary>
+        private static bool EvaluateBox(int leftTile, int floorY, bool allowFloorPatch) {
+            //门体顶部
+            int topY = floorY - AbandonedPortal.TileHeight;
+            if (topY <= WorldEdgeMargin) return false;
+            if (floorY + 4 >= Main.maxTilesY - WorldEdgeMargin) return false;
+
+            //1) 上方开阔：评估比 Portal 略大的范围（开阔度更友好）
+            int openLeft = leftTile - 2;
+            int openRight = leftTile + AbandonedPortal.TileWidth + 1;
+            int openTop = topY - 1;
+            int openBottom = floorY - 1;
+            int openSampleCount = 0;
+            int openClearCount = 0;
+            for (int x = openLeft; x <= openRight; x++) {
+                for (int y = openTop; y <= openBottom; y++) {
+                    openSampleCount++;
+                    Tile t = Framing.GetTileSafely(x, y);
+                    if (!IsSolidObstruction(t) && t.LiquidAmount == 0) {
+                        openClearCount++;
+                    }
+                }
+            }
+            float openRatio = openClearCount / (float)openSampleCount;
+            //完美：>= 95% 空气；放宽：>= 80% 空气
+            float openThreshold = allowFloorPatch ? 0.80f : 0.95f;
+            if (openRatio < openThreshold) return false;
+
+            //2) 地基：floorY 那一行至少要有大部分固体；下方再加一行做缓冲
+            int floorSamples = 0;
+            int floorSolids = 0;
+            int floorLeft = leftTile - 1;
+            int floorRight = leftTile + AbandonedPortal.TileWidth;
+            for (int x = floorLeft; x <= floorRight; x++) {
+                Tile t1 = Framing.GetTileSafely(x, floorY);
+                Tile t2 = Framing.GetTileSafely(x, floorY + 1);
+                floorSamples += 2;
+                if (IsSolidGround(t1)) floorSolids++;
+                if (IsSolidGround(t2)) floorSolids++;
+            }
+            float floorRatio = floorSolids / (float)floorSamples;
+            //完美：>= 90% 地基；放宽：>= (1 - MaxFloorGapRatio*2) 也即 30%（最多挖一半再补）
+            float floorThreshold = allowFloorPatch ? (1f - MaxFloorGapRatio) : 0.90f;
+            if (floorRatio < floorThreshold) return false;
+
+            //3) 不能有大液体堆积
+            if (HasSignificantLiquid(leftTile, topY, AbandonedPortal.TileWidth, AbandonedPortal.TileHeight)) {
+                return false;
+            }
+
+            //4) 必须达到最小开阔尺寸（防止位置卡在低矮缝里）
+            if (!HasMinimumChamber(leftTile + AbandonedPortal.TileWidth / 2, topY + AbandonedPortal.TileHeight / 2,
+                    RequiredOpenWidth, RequiredOpenHeight)) {
+                if (!allowFloorPatch) return false;
+            }
+
+            return true;
+        }
+
+        private static bool IsSolidObstruction(Tile tile) {
+            //只把"完整方块"视为阻挡，让平台、家具等可被忽略
+            return tile.HasTile && Main.tileSolid[tile.TileType] && !Main.tileSolidTop[tile.TileType];
+        }
+
+        private static bool IsSolidGround(Tile tile) {
+            //作为地基只接受完整石/泥/沙类方块，避免把灌木/草识别为支撑
+            return tile.HasTile && Main.tileSolid[tile.TileType] && !TileID.Sets.Platforms[tile.TileType];
+        }
+
+        private static bool HasSignificantLiquid(int left, int top, int w, int h) {
+            int liquid = 0;
+            int total = 0;
+            for (int x = left; x < left + w; x += 2) {
+                for (int y = top; y < top + h; y += 2) {
+                    total++;
+                    if (Framing.GetTileSafely(x, y).LiquidAmount > 80) liquid++;
+                }
+            }
+            return total > 0 && liquid * 5 > total; // > 20% 体积是液体则拒绝
+        }
+
+        /// <summary>
+        /// 在中心点附近查找一个最少 reqW × reqH 的近似空腔。
+        /// </summary>
+        private static bool HasMinimumChamber(int cx, int cy, int reqW, int reqH) {
+            int halfW = reqW / 2;
+            int halfH = reqH / 2;
+            int clearCount = 0;
+            int total = 0;
+            for (int x = cx - halfW; x <= cx + halfW; x++) {
+                for (int y = cy - halfH; y <= cy + halfH; y++) {
+                    total++;
+                    if (!IsSolidObstruction(Framing.GetTileSafely(x, y))) clearCount++;
+                }
+            }
+            return total > 0 && clearCount / (float)total >= 0.85f;
+        }
+
+        /// <summary>
+        /// 准备生成位：①清空门体足迹 ②补齐地基 ③向外消除少量遮挡
+        /// </summary>
+        internal static void PreparePortalSite(int leftTile, int topTile) {
+            int right = leftTile + AbandonedPortal.TileWidth - 1;
+            int bottom = topTile + AbandonedPortal.TileHeight - 1;
+
+            //1) 清空门体内部 + 一格缓冲，让 Actor 能完整可见
+            ClearTiles(leftTile - ClearMarginTiles, topTile - ClearMarginTiles,
                 right + ClearMarginTiles, bottom);
+
+            //2) 补齐底部地基：把门下方两行内缺失的固体填上（仅限正下方与左右一格）
+            FillFloor(leftTile - 1, right + 1, bottom + 1, bottom + 2);
+
+            //3) 在底部边缘做轻量"风化清理"——把门两侧贴近门体的悬空块也敲掉，避免外观突兀
+            CleanupLowerEdges(leftTile - ClearMarginTiles, right + ClearMarginTiles, bottom + 1);
+
+            //广播一次大范围 TileSquare（多人同步用）
+            if (Main.netMode == NetmodeID.Server) {
+                int cx = (leftTile + right) / 2;
+                int cy = (topTile + bottom) / 2;
+                int size = Math.Max(right - leftTile + 4, bottom - topTile + 6);
+                NetMessage.SendTileSquare(-1, cx, cy, size);
+            }
         }
 
         private static void ClearTiles(int left, int top, int right, int bottom) {
@@ -438,28 +661,110 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.VoidPortals
                     WorldGen.KillTile(x, y, fail: false, effectOnly: false, noItem: true);
                 }
             }
+        }
 
-            if (Main.netMode == NetmodeID.Server) {
-                NetMessage.SendTileSquare(-1, (left + right) / 2, (top + bottom) / 2,
-                    Math.Max(right - left + 1, bottom - top + 1));
+        private static void FillFloor(int left, int right, int top, int bottom) {
+            left = Math.Clamp(left, 1, Main.maxTilesX - 2);
+            right = Math.Clamp(right, 1, Main.maxTilesX - 2);
+            top = Math.Clamp(top, 1, Main.maxTilesY - 2);
+            bottom = Math.Clamp(bottom, 1, Main.maxTilesY - 2);
+
+            //优先沿用周边主体物块作为填充类型，让填补尽量自然
+            ushort fillType = ResolveSurroundingTileType(left, right, top);
+
+            for (int x = left; x <= right; x++) {
+                for (int y = top; y <= bottom; y++) {
+                    Tile tile = Framing.GetTileSafely(x, y);
+                    if (tile.HasTile && Main.tileSolid[tile.TileType]) continue;
+                    if (tile.LiquidAmount > 0) tile.LiquidAmount = 0;
+                    WorldGen.PlaceTile(x, y, fillType, mute: true, forced: true);
+                }
             }
+        }
+
+        private static void CleanupLowerEdges(int left, int right, int floorY) {
+            //把门体足下两块外侧的"悬挂物"（草、藤蔓等）清掉，避免视觉穿模
+            for (int x = left; x <= right; x++) {
+                for (int dy = 0; dy <= 1; dy++) {
+                    int y = floorY - dy;
+                    Tile tile = Framing.GetTileSafely(x, y);
+                    if (!tile.HasTile) continue;
+                    //只在不是稳定地基（非纯固体）的情况下处理，避免破坏地形
+                    if (!Main.tileSolid[tile.TileType] || Main.tileSolidTop[tile.TileType]) {
+                        WorldGen.KillTile(x, y, fail: false, effectOnly: false, noItem: true);
+                    }
+                }
+            }
+        }
+
+        private static ushort ResolveSurroundingTileType(int left, int right, int floorY) {
+            //在门体左右各扫几列，统计最常见的固体类型
+            int[] counts = new int[TileLoader.TileCount];
+            int sampleSpan = 6;
+            int sampleX1 = Math.Max(1, left - sampleSpan);
+            int sampleX2 = Math.Min(Main.maxTilesX - 2, right + sampleSpan);
+            int sampleY1 = Math.Max(1, floorY);
+            int sampleY2 = Math.Min(Main.maxTilesY - 2, floorY + 5);
+            for (int x = sampleX1; x <= sampleX2; x++) {
+                for (int y = sampleY1; y <= sampleY2; y++) {
+                    Tile tile = Framing.GetTileSafely(x, y);
+                    if (!tile.HasTile) continue;
+                    if (!Main.tileSolid[tile.TileType] || Main.tileSolidTop[tile.TileType]) continue;
+                    if (tile.TileType >= counts.Length) continue;
+                    counts[tile.TileType]++;
+                }
+            }
+
+            int bestType = TileID.Stone;
+            int bestCount = 0;
+            for (int i = 0; i < counts.Length; i++) {
+                if (counts[i] > bestCount) {
+                    bestCount = counts[i];
+                    bestType = i;
+                }
+            }
+            return (ushort)bestType;
         }
     }
 
     internal class AbandonedPortalPanelUI : UIHandle
     {
+        private const int EdgePad = 14;
         private static Rectangle panelRect;
+
+        //轻量动画状态
+        private float shaderTime;
+        private float glitchTimer;
+        private float lastRepairProgress;
+        private float repairAccel;
 
         public override bool Active => !Main.gameMenu
             && (AbandonedPortalSession.IsOpen || AbandonedPortalSession.OpenProgress > 0.005f);
 
         public override void Update() {
-            if (AbandonedPortalSession.OpenProgress > 0.05f) {
-                UIHitBox = panelRect;
+            shaderTime += 1f / 60f;
+            if (shaderTime > 100f) shaderTime -= 100f;
+
+            //根据状态衰减/驱动故障强度
+            AbandonedPortal portal = AbandonedPortalSession.CurrentPortal;
+            float targetGlitch;
+            if (portal == null) {
+                targetGlitch = 0.4f;
             }
             else {
-                UIHitBox = Rectangle.Empty;
+                targetGlitch = portal.State switch {
+                    AbandonedPortal.RepairState.Broken => 0.85f,
+                    AbandonedPortal.RepairState.Repairing => 0.45f - portal.RepairProgress * 0.30f,
+                    _ => 0.10f,
+                };
             }
+            glitchTimer = MathHelper.Lerp(glitchTimer, targetGlitch, 0.08f);
+
+            float curr = portal?.RepairProgress ?? 0f;
+            repairAccel = MathHelper.Lerp(repairAccel, MathHelper.Clamp((curr - lastRepairProgress) * 60f, 0f, 1f), 0.15f);
+            lastRepairProgress = curr;
+
+            UIHitBox = AbandonedPortalSession.OpenProgress > 0.05f ? panelRect : Rectangle.Empty;
         }
 
         public override void Draw(SpriteBatch sb) {
@@ -468,18 +773,23 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.VoidPortals
 
             float open = AbandonedPortalSession.OpenProgress;
             float eased = 1f - (float)Math.Pow(1f - MathHelper.Clamp(open, 0f, 1f), 3);
-            int width = 700;
-            int height = 360;
-            float scale = 0.9f + eased * 0.1f;
+            int width = 760;
+            int height = 410;
+            float scale = 0.92f + eased * 0.08f;
             int drawW = (int)(width * scale);
             int drawH = (int)(height * scale);
             Rectangle rect = new(Main.screenWidth / 2 - drawW / 2, Main.screenHeight / 2 - drawH / 2, drawW, drawH);
             panelRect = rect;
             Texture2D px = TextureAssets.MagicPixel.Value;
 
-            sb.Draw(px, new Rectangle(0, 0, Main.screenWidth, Main.screenHeight), Color.Black * (0.48f * eased));
-            DrawPanelBox(sb, rect, eased);
-            DrawPanelText(sb, rect, portal, eased);
+            //背景压暗
+            sb.Draw(px, new Rectangle(0, 0, Main.screenWidth, Main.screenHeight), Color.Black * (0.55f * eased));
+
+            //着色器面板（含外发光范围）
+            DrawShaderPanel(sb, rect, eased, portal);
+
+            //内容
+            DrawPanelContent(sb, rect, portal, eased);
 
             if (rect.Contains(Main.mouseX, Main.mouseY) && eased > 0.2f) {
                 Main.LocalPlayer.mouseInterface = true;
@@ -487,91 +797,266 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.VoidPortals
             }
         }
 
-        private static void DrawPanelBox(SpriteBatch sb, Rectangle rect, float alpha) {
+        //═══ 1. 使用 AbandonedPortalPanel 着色器渲染面板背景 ═══
+        private void DrawShaderPanel(SpriteBatch sb, Rectangle rect, float alpha, AbandonedPortal portal) {
             Texture2D px = TextureAssets.MagicPixel.Value;
-            Color bg = new Color(10, 13, 16) * (0.94f * alpha);
-            Color edge = new Color(86, 184, 210) * alpha;
-            Color rust = new Color(210, 92, 48) * (0.75f * alpha);
+            Asset<Effect> effectAsset = EffectLoader.AbandonedPortalPanel;
 
-            sb.Draw(px, rect, bg);
-            sb.Draw(px, new Rectangle(rect.X, rect.Y, rect.Width, 2), edge);
-            sb.Draw(px, new Rectangle(rect.X, rect.Bottom - 2, rect.Width, 2), rust);
-            sb.Draw(px, new Rectangle(rect.X, rect.Y, 2, rect.Height), edge * 0.75f);
-            sb.Draw(px, new Rectangle(rect.Right - 2, rect.Y, 2, rect.Height), rust * 0.75f);
-
-            for (int i = 0; i < 8; i++) {
-                float t = (AbandonedPortalSession.SessionTime * 40f + i * 59f) % rect.Width;
-                sb.Draw(px, new Rectangle(rect.X + (int)t, rect.Y + 18 + i * 31, 54, 1), edge * 0.12f);
+            if (effectAsset?.Value == null) {
+                DrawFallbackPanel(sb, rect, alpha, portal);
+                return;
             }
+
+            Rectangle ext = rect;
+            ext.Inflate(EdgePad, EdgePad);
+
+            float repair = portal.RepairProgress;
+            float state = portal.State switch {
+                AbandonedPortal.RepairState.Repaired => 2f,
+                AbandonedPortal.RepairState.Repairing => 1f,
+                _ => 0f,
+            };
+
+            Effect effect = effectAsset.Value;
+            effect.Parameters["uTime"]?.SetValue(shaderTime);
+            effect.Parameters["uAlpha"]?.SetValue(alpha * 0.97f);
+            effect.Parameters["uResolution"]?.SetValue(new Vector2(ext.Width, ext.Height));
+            effect.Parameters["uEdgePad"]?.SetValue((float)EdgePad);
+            effect.Parameters["uRepair"]?.SetValue(repair);
+            effect.Parameters["uState"]?.SetValue(state);
+            effect.Parameters["uGlitch"]?.SetValue(MathHelper.Clamp(glitchTimer, 0f, 1f));
+
+            sb.End();
+            sb.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.AnisotropicClamp,
+                DepthStencilState.None, RasterizerState.CullNone, effect, Main.UIScaleMatrix);
+
+            sb.Draw(px, ext, Color.White);
+
+            sb.End();
+            sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.AnisotropicClamp,
+                DepthStencilState.None, RasterizerState.CullNone, null, Main.UIScaleMatrix);
         }
 
-        private static void DrawPanelText(SpriteBatch sb, Rectangle rect, AbandonedPortal portal, float alpha) {
+        //降级面板：着色器未加载时仍能显示
+        private static void DrawFallbackPanel(SpriteBatch sb, Rectangle rect, float alpha, AbandonedPortal portal) {
+            Texture2D px = TextureAssets.MagicPixel.Value;
+            Color bg = new Color(14, 12, 9) * (0.95f * alpha);
+            Color edge = new Color(190, 110, 50) * alpha;
+            Color rust = new Color(140, 70, 38) * (0.7f * alpha);
+
+            sb.Draw(px, rect, bg);
+            sb.Draw(px, new Rectangle(rect.X, rect.Y, rect.Width, 3), edge);
+            sb.Draw(px, new Rectangle(rect.X, rect.Bottom - 3, rect.Width, 3), rust);
+            sb.Draw(px, new Rectangle(rect.X, rect.Y, 2, rect.Height), edge * 0.85f);
+            sb.Draw(px, new Rectangle(rect.Right - 2, rect.Y, 2, rect.Height), rust * 0.85f);
+        }
+
+        //═══ 2. 面板内容：标题、状态、诊断、进度条、按钮 ═══
+        private void DrawPanelContent(SpriteBatch sb, Rectangle rect, AbandonedPortal portal, float alpha) {
             DynamicSpriteFont font = FontAssets.MouseText.Value;
-            Color title = new Color(220, 245, 255) * alpha;
-            Color accent = new Color(86, 220, 238) * alpha;
-            Color bodyColor = new Color(190, 206, 210) * alpha;
-            Color warn = new Color(245, 118, 72) * alpha;
 
-            Vector2 pos = new(rect.X + 34, rect.Y + 26);
-            Utils.DrawBorderString(sb, AbandonedPortalStrings.Title.Value, pos, title, 0.92f);
+            //── 状态色调：损毁=橙红，修复中=蓝橙，已修复=青蓝 ──
+            Color accent = portal.State switch {
+                AbandonedPortal.RepairState.Repaired => new Color(140, 230, 250),
+                AbandonedPortal.RepairState.Repairing => Color.Lerp(new Color(245, 130, 60), new Color(150, 220, 245), portal.RepairProgress),
+                _ => new Color(245, 110, 50),
+            };
+            Color title = new Color(240, 235, 220) * alpha;
+            Color body = new Color(196, 200, 196) * alpha;
+            Color dim = new Color(120, 110, 96) * alpha;
+            Color warn = new Color(255, 170, 90) * alpha;
 
-            string subtitle = AbandonedPortalSession.Phase switch {
-                AbandonedPortalSession.PanelPhase.Repairing => AbandonedPortalStrings.RepairingSubtitle.Value,
-                AbandonedPortalSession.PanelPhase.Repaired => AbandonedPortalStrings.RepairedSubtitle.Value,
+            // ── 标题 + 状态徽章 ──
+            int padX = 36;
+            int padY = 30;
+            Vector2 titlePos = new(rect.X + padX, rect.Y + padY);
+            Utils.DrawBorderString(sb, AbandonedPortalStrings.Title.Value, titlePos, title, 0.95f);
+
+            //右上角状态徽章
+            string status = portal.State switch {
+                AbandonedPortal.RepairState.Repaired => AbandonedPortalStrings.StatusRepaired.Value,
+                AbandonedPortal.RepairState.Repairing => AbandonedPortalStrings.StatusRepairing.Value,
+                _ => AbandonedPortalStrings.StatusBroken.Value,
+            };
+            float blink = (MathF.Sin(shaderTime * (portal.State == AbandonedPortal.RepairState.Broken ? 4.5f : 1.6f)) * 0.3f + 0.7f);
+            DrawStatusBadge(sb, new Rectangle(rect.Right - 232, rect.Y + 26, 200, 26), status, accent * (alpha * blink));
+
+            //── 副标题 ──
+            string subtitle = portal.State switch {
+                AbandonedPortal.RepairState.Repairing => AbandonedPortalStrings.RepairingSubtitle.Value,
+                AbandonedPortal.RepairState.Repaired => AbandonedPortalStrings.RepairedSubtitle.Value,
                 _ => AbandonedPortalStrings.BrokenSubtitle.Value,
             };
-            Utils.DrawBorderString(sb, subtitle, pos + new Vector2(0f, 38f), accent, 0.7f);
+            Utils.DrawBorderString(sb, subtitle, new Vector2(rect.X + padX, rect.Y + padY + 36f), accent * alpha, 0.74f);
 
-            string body = AbandonedPortalSession.Phase switch {
-                AbandonedPortalSession.PanelPhase.Repairing => AbandonedPortalStrings.RepairingBody.Value,
-                AbandonedPortalSession.PanelPhase.Repaired => AbandonedPortalStrings.RepairedBody.Value,
+            //装饰：分隔线
+            DrawDecoLine(sb, new Rectangle(rect.X + padX, rect.Y + padY + 64, rect.Width - padX * 2, 2), accent * (alpha * 0.6f), alpha);
+
+            //── 正文（带终端字头） ──
+            string body1 = portal.State switch {
+                AbandonedPortal.RepairState.Repairing => AbandonedPortalStrings.RepairingBody.Value,
+                AbandonedPortal.RepairState.Repaired => AbandonedPortalStrings.RepairedBody.Value,
                 _ => AbandonedPortalStrings.BrokenBody.Value,
             };
-            string[] wrapped = Utils.WordwrapString(body, font, rect.Width - 90, 8, out _);
+            string[] wrapped = Utils.WordwrapString(body1, font, rect.Width - 90, 6, out _);
+            float bodyY = rect.Y + padY + 78f;
             for (int i = 0; i < wrapped.Length; i++) {
                 if (string.IsNullOrEmpty(wrapped[i])) continue;
-                Utils.DrawBorderString(sb, wrapped[i], pos + new Vector2(0f, 98f + i * 24f), bodyColor, 0.65f);
+                Utils.DrawBorderString(sb, wrapped[i], new Vector2(rect.X + padX, bodyY + i * 22f), body, 0.66f);
             }
 
-            DrawRepairBar(sb, new Rectangle(rect.X + 34, rect.Y + 226, rect.Width - 68, 18), portal.RepairProgress, alpha);
+            //── 诊断行（终端式 [DIAG] 标签） ──
+            string diag = portal.State switch {
+                AbandonedPortal.RepairState.Repairing => AbandonedPortalStrings.DiagnosticRepairing.Value,
+                AbandonedPortal.RepairState.Repaired => AbandonedPortalStrings.DiagnosticRepaired.Value,
+                _ => AbandonedPortalStrings.DiagnosticBroken.Value,
+            };
+            string diagFull = AbandonedPortalStrings.DiagnosticHeader.Value + " " + diag;
+            Utils.DrawBorderString(sb, diagFull, new Vector2(rect.X + padX, rect.Bottom - 156f), dim, 0.62f);
+
+            //── 校准进度条 ──
+            Rectangle progressRect = new(rect.X + padX, rect.Bottom - 124, rect.Width - padX * 2, 24);
+            DrawRepairBar(sb, progressRect, portal.RepairProgress, accent, alpha);
 
             int percent = (int)(portal.RepairProgress * 100f);
-            Utils.DrawBorderString(sb, string.Format(AbandonedPortalStrings.ProgressFormat.Value, percent),
-                new Vector2(rect.X + 34, rect.Y + 250), portal.CanTeleport ? accent : warn, 0.64f);
+            string progressText = string.Format(AbandonedPortalStrings.ProgressFormat.Value, percent);
+            Utils.DrawBorderString(sb, progressText,
+                new Vector2(rect.X + padX, progressRect.Bottom + 4f),
+                portal.CanTeleport ? accent * alpha : warn, 0.62f);
 
-            Rectangle primary = new(rect.Right - 244, rect.Bottom - 66, 190, 34);
-            Rectangle close = new(rect.X + 34, rect.Bottom - 66, 120, 34);
+            //── 按钮区 ──
+            int btnH = 38;
+            int btnPadY = rect.Bottom - 60;
+            Rectangle close = new(rect.X + padX, btnPadY, 130, btnH);
+            Rectangle primary = new(rect.Right - 274, btnPadY, 240, btnH);
+
+            DrawTechButton(sb, close, AbandonedPortalStrings.Close.Value, dim * 1.6f, alpha,
+                AbandonedPortalSession.RequestClose, false);
+
             if (portal.State == AbandonedPortal.RepairState.Broken) {
-                DrawButton(sb, primary, AbandonedPortalStrings.StartRepair.Value, accent, alpha, () => portal.StartRepair());
+                DrawTechButton(sb, primary, AbandonedPortalStrings.StartRepair.Value, accent, alpha,
+                    () => portal.StartRepair(), true);
             }
             else if (portal.State == AbandonedPortal.RepairState.Repaired) {
-                DrawButton(sb, primary, AbandonedPortalStrings.Teleport.Value, warn, alpha, () => portal.StartTransport(Main.LocalPlayer));
+                DrawTechButton(sb, primary, AbandonedPortalStrings.Teleport.Value, accent, alpha,
+                    () => portal.StartTransport(Main.LocalPlayer), true);
             }
-            DrawButton(sb, close, AbandonedPortalStrings.Close.Value, bodyColor, alpha, AbandonedPortalSession.RequestClose);
+            else {
+                //修复中：进度按钮（不可点击，呼吸动效）
+                DrawProgressButton(sb, primary, accent, portal.RepairProgress, alpha);
+            }
         }
 
-        private static void DrawRepairBar(SpriteBatch sb, Rectangle rect, float progress, float alpha) {
+        //═══ 装饰：分隔线，左端有起始符号 ═══
+        private static void DrawDecoLine(SpriteBatch sb, Rectangle rect, Color c, float alpha) {
             Texture2D px = TextureAssets.MagicPixel.Value;
-            sb.Draw(px, rect, Color.Black * (0.55f * alpha));
-            Rectangle fill = rect;
-            fill.Width = (int)(rect.Width * MathHelper.Clamp(progress, 0f, 1f));
-            Color c = Color.Lerp(new Color(230, 75, 45), new Color(80, 230, 245), progress) * alpha;
-            sb.Draw(px, fill, c * 0.75f);
-            sb.Draw(px, new Rectangle(rect.X, rect.Y, rect.Width, 1), c);
-            sb.Draw(px, new Rectangle(rect.X, rect.Bottom - 1, rect.Width, 1), c * 0.8f);
+            //起始三角符号 ▌
+            sb.Draw(px, new Rectangle(rect.X, rect.Y - 3, 4, 8), c);
+            sb.Draw(px, new Rectangle(rect.X + 6, rect.Y, rect.Width - 6, rect.Height), c * 0.85f);
+            //短装饰
+            sb.Draw(px, new Rectangle(rect.Right - 26, rect.Y - 3, 26, 1), c * 0.7f);
+            sb.Draw(px, new Rectangle(rect.Right - 12, rect.Y - 5, 12, 1), c * 0.5f);
         }
 
-        private static void DrawButton(SpriteBatch sb, Rectangle rect, string text, Color color, float alpha, Action onClick) {
+        //═══ 状态徽章 ═══
+        private static void DrawStatusBadge(SpriteBatch sb, Rectangle rect, string text, Color color) {
+            Texture2D px = TextureAssets.MagicPixel.Value;
+            sb.Draw(px, rect, Color.Black * (color.A / 255f * 0.45f));
+            //左端 6px 浓色条
+            sb.Draw(px, new Rectangle(rect.X, rect.Y, 4, rect.Height), color);
+            sb.Draw(px, new Rectangle(rect.X + 4, rect.Y, rect.Width - 4, 1), color * 0.85f);
+            sb.Draw(px, new Rectangle(rect.X + 4, rect.Bottom - 1, rect.Width - 4, 1), color * 0.6f);
+
+            DynamicSpriteFont font = FontAssets.MouseText.Value;
+            Vector2 size = font.MeasureString(text) * 0.55f;
+            Utils.DrawBorderString(sb, text,
+                new Vector2(rect.X + 12, rect.Center.Y - size.Y * 0.5f),
+                color, 0.55f);
+        }
+
+        //═══ 修复进度条（带流光） ═══
+        private void DrawRepairBar(SpriteBatch sb, Rectangle rect, float progress, Color accent, float alpha) {
+            Texture2D px = TextureAssets.MagicPixel.Value;
+            //凹槽
+            sb.Draw(px, rect, Color.Black * (0.65f * alpha));
+            //内边框
+            sb.Draw(px, new Rectangle(rect.X, rect.Y, rect.Width, 1), accent * (alpha * 0.55f));
+            sb.Draw(px, new Rectangle(rect.X, rect.Bottom - 1, rect.Width, 1), accent * (alpha * 0.4f));
+
+            //填充
+            int fillW = (int)(rect.Width * MathHelper.Clamp(progress, 0f, 1f));
+            if (fillW > 0) {
+                Rectangle fill = new(rect.X, rect.Y, fillW, rect.Height);
+                Color fillColor = accent * (alpha * 0.85f);
+                sb.Draw(px, fill, fillColor * 0.25f);
+                sb.Draw(px, new Rectangle(fill.X, fill.Y, fill.Width, 2), fillColor);
+                sb.Draw(px, new Rectangle(fill.X, fill.Bottom - 2, fill.Width, 2), fillColor * 0.7f);
+
+                //流光
+                float flow = (shaderTime * 0.55f) % 1f;
+                int flowX = fill.X + (int)(flow * fill.Width);
+                int beam = 28;
+                for (int dx = -beam; dx <= beam; dx++) {
+                    int x = flowX + dx;
+                    if (x < fill.X || x >= fill.Right) continue;
+                    float f = 1f - Math.Abs(dx) / (float)beam;
+                    sb.Draw(px, new Rectangle(x, fill.Y, 1, fill.Height), Color.White * (alpha * 0.35f * f * f));
+                }
+            }
+
+            //刻度（每 10%）
+            for (int i = 1; i < 10; i++) {
+                int x = rect.X + rect.Width * i / 10;
+                int h = (i % 5 == 0) ? rect.Height : (rect.Height / 2);
+                sb.Draw(px, new Rectangle(x, rect.Bottom - h, 1, h), accent * (alpha * 0.25f));
+            }
+        }
+
+        //═══ 主按钮：带边框、悬停发光 ═══
+        private void DrawTechButton(SpriteBatch sb, Rectangle rect, string text, Color color, float alpha,
+            Action onClick, bool isPrimary) {
             Texture2D px = TextureAssets.MagicPixel.Value;
             bool hover = rect.Contains(Main.mouseX, Main.mouseY);
-            Color bg = (hover ? color * 0.28f : Color.Black * 0.35f) * alpha;
-            sb.Draw(px, rect, bg);
-            sb.Draw(px, new Rectangle(rect.X, rect.Y, rect.Width, 1), color * alpha);
-            sb.Draw(px, new Rectangle(rect.X, rect.Bottom - 1, rect.Width, 1), color * (0.75f * alpha));
 
-            Vector2 size = FontAssets.MouseText.Value.MeasureString(text) * 0.62f;
-            Utils.DrawBorderString(sb, text, new Vector2(rect.Center.X - size.X * 0.5f, rect.Center.Y - size.Y * 0.5f),
-                Color.White * alpha, 0.62f);
+            //背景
+            Color bg = (hover ? color * 0.32f : Color.Black * 0.40f) * alpha;
+            sb.Draw(px, rect, bg);
+
+            //双层边框
+            Color edge = color * (alpha * (hover ? 1f : 0.7f));
+            sb.Draw(px, new Rectangle(rect.X, rect.Y, rect.Width, 2), edge);
+            sb.Draw(px, new Rectangle(rect.X, rect.Bottom - 2, rect.Width, 2), edge * 0.7f);
+            sb.Draw(px, new Rectangle(rect.X, rect.Y, 1, rect.Height), edge * 0.85f);
+            sb.Draw(px, new Rectangle(rect.Right - 1, rect.Y, 1, rect.Height), edge * 0.55f);
+
+            //四角小切角
+            int cs = 5;
+            sb.Draw(px, new Rectangle(rect.X, rect.Y, cs, 2), color * alpha);
+            sb.Draw(px, new Rectangle(rect.X, rect.Y, 2, cs), color * alpha);
+            sb.Draw(px, new Rectangle(rect.Right - cs, rect.Bottom - 2, cs, 2), color * (alpha * 0.7f));
+            sb.Draw(px, new Rectangle(rect.Right - 2, rect.Bottom - cs, 2, cs), color * (alpha * 0.7f));
+
+            //主按钮悬停时左端添加流动条
+            if (isPrimary && hover) {
+                float w = ((shaderTime * 1.4f) % 1f) * rect.Width;
+                int beam = 64;
+                for (int dx = -beam; dx <= beam; dx++) {
+                    int x = rect.X + (int)w + dx;
+                    if (x < rect.X || x >= rect.Right) continue;
+                    float f = 1f - Math.Abs(dx) / (float)beam;
+                    sb.Draw(px, new Rectangle(x, rect.Y + 2, 1, rect.Height - 4), color * (alpha * 0.28f * f * f));
+                }
+            }
+
+            //按钮标识（左端 ▌）
+            sb.Draw(px, new Rectangle(rect.X + 10, rect.Center.Y - 7, 3, 14), color * alpha);
+
+            //文本
+            DynamicSpriteFont font = FontAssets.MouseText.Value;
+            Vector2 size = font.MeasureString(text) * 0.66f;
+            Utils.DrawBorderString(sb, text,
+                new Vector2(rect.X + 22 + (rect.Width - 22 - size.X) * 0.5f, rect.Center.Y - size.Y * 0.5f),
+                Color.White * alpha, 0.66f);
 
             if (hover) {
                 Main.LocalPlayer.mouseInterface = true;
@@ -582,5 +1067,34 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.VoidPortals
                 }
             }
         }
+
+        //═══ 进度按钮：修复进行中显示，无法点击 ═══
+        private void DrawProgressButton(SpriteBatch sb, Rectangle rect, Color color, float progress, float alpha) {
+            Texture2D px = TextureAssets.MagicPixel.Value;
+            //底色
+            sb.Draw(px, rect, Color.Black * (alpha * 0.55f));
+            int fillW = (int)(rect.Width * MathHelper.Clamp(progress, 0f, 1f));
+            if (fillW > 0) {
+                sb.Draw(px, new Rectangle(rect.X, rect.Y, fillW, rect.Height), color * (alpha * 0.30f));
+                //顶/底高光
+                sb.Draw(px, new Rectangle(rect.X, rect.Y, fillW, 2), color * (alpha * 0.85f));
+                sb.Draw(px, new Rectangle(rect.X, rect.Bottom - 2, fillW, 2), color * (alpha * 0.55f));
+            }
+            //外边框
+            sb.Draw(px, new Rectangle(rect.X, rect.Y, rect.Width, 1), color * (alpha * 0.55f));
+            sb.Draw(px, new Rectangle(rect.X, rect.Bottom - 1, rect.Width, 1), color * (alpha * 0.4f));
+            sb.Draw(px, new Rectangle(rect.X, rect.Y, 1, rect.Height), color * (alpha * 0.55f));
+            sb.Draw(px, new Rectangle(rect.Right - 1, rect.Y, 1, rect.Height), color * (alpha * 0.4f));
+
+            //文本：CALIBRATING xx%
+            DynamicSpriteFont font = FontAssets.MouseText.Value;
+            string txt = string.Format(AbandonedPortalStrings.ProgressFormat.Value, (int)(progress * 100f));
+            Vector2 size = font.MeasureString(txt) * 0.66f;
+            float pulse = MathF.Sin(shaderTime * 3.4f) * 0.18f + 0.82f;
+            Utils.DrawBorderString(sb, txt,
+                new Vector2(rect.Center.X - size.X * 0.5f, rect.Center.Y - size.Y * 0.5f),
+                color * (alpha * pulse), 0.66f);
+        }
     }
+
 }
