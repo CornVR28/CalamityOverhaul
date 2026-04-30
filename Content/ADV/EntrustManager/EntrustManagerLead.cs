@@ -1,6 +1,4 @@
 ﻿using CalamityOverhaul.Common;
-using InnoVault;
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
@@ -26,32 +24,32 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
 
         #region 本地化
 
-        public static LocalizedText TextKeyPromptBound     { get; private set; }
+        public static LocalizedText TextKeyPromptBound { get; private set; }
         public static LocalizedText TextKeyPromptWarnTitle { get; private set; }
-        public static LocalizedText TextKeyPromptDefaultKey{ get; private set; }
-        public static LocalizedText TextKeyPromptBindHint  { get; private set; }
-        public static LocalizedText TextPanelIntroTitle    { get; private set; }
-        public static LocalizedText TextRightClickLabel    { get; private set; }
-        public static LocalizedText TextRightClickAction   { get; private set; }
-        public static LocalizedText TextRightClickDesc     { get; private set; }
-        public static LocalizedText TextMiddleClickLabel   { get; private set; }
-        public static LocalizedText TextMiddleClickAction  { get; private set; }
-        public static LocalizedText TextMiddleClickDesc    { get; private set; }
-        public static LocalizedText TextConfirmBtn         { get; private set; }
+        public static LocalizedText TextKeyPromptDefaultKey { get; private set; }
+        public static LocalizedText TextKeyPromptBindHint { get; private set; }
+        public static LocalizedText TextPanelIntroTitle { get; private set; }
+        public static LocalizedText TextRightClickLabel { get; private set; }
+        public static LocalizedText TextRightClickAction { get; private set; }
+        public static LocalizedText TextRightClickDesc { get; private set; }
+        public static LocalizedText TextMiddleClickLabel { get; private set; }
+        public static LocalizedText TextMiddleClickAction { get; private set; }
+        public static LocalizedText TextMiddleClickDesc { get; private set; }
+        public static LocalizedText TextConfirmBtn { get; private set; }
 
         public override void SetStaticDefaults() {
-            TextKeyPromptBound      = this.GetLocalization(nameof(TextKeyPromptBound),      () => "按 [{0}] 打开委托面板");
-            TextKeyPromptWarnTitle  = this.GetLocalization(nameof(TextKeyPromptWarnTitle),  () => "⚠  委托快捷键尚未绑定！");
+            TextKeyPromptBound = this.GetLocalization(nameof(TextKeyPromptBound), () => "按 [{0}] 打开委托面板");
+            TextKeyPromptWarnTitle = this.GetLocalization(nameof(TextKeyPromptWarnTitle), () => "⚠  委托快捷键尚未绑定！");
             TextKeyPromptDefaultKey = this.GetLocalization(nameof(TextKeyPromptDefaultKey), () => "当前按 [{0}]（默认键）可打开委托面板");
-            TextKeyPromptBindHint   = this.GetLocalization(nameof(TextKeyPromptBindHint),   () => "建议前往  设置 → 控制  中绑定自定义按键");
-            TextPanelIntroTitle     = this.GetLocalization(nameof(TextPanelIntroTitle),     () => "委托操作说明");
-            TextRightClickLabel     = this.GetLocalization(nameof(TextRightClickLabel),     () => "右键单击委托条目");
-            TextRightClickAction    = this.GetLocalization(nameof(TextRightClickAction),    () => " →  关注委托");
-            TextRightClickDesc      = this.GetLocalization(nameof(TextRightClickDesc),      () => "     左侧追踪窗口将持续显示任务进度");
-            TextMiddleClickLabel    = this.GetLocalization(nameof(TextMiddleClickLabel),    () => "中键单击委托条目");
-            TextMiddleClickAction   = this.GetLocalization(nameof(TextMiddleClickAction),   () => " →  挂起委托");
-            TextMiddleClickDesc     = this.GetLocalization(nameof(TextMiddleClickDesc),     () => "     暂时隐藏该委托，不在追踪窗口中显示");
-            TextConfirmBtn          = this.GetLocalization(nameof(TextConfirmBtn),          () => "明白了");
+            TextKeyPromptBindHint = this.GetLocalization(nameof(TextKeyPromptBindHint), () => "建议前往  设置 → 控制  中绑定自定义按键");
+            TextPanelIntroTitle = this.GetLocalization(nameof(TextPanelIntroTitle), () => "委托操作说明");
+            TextRightClickLabel = this.GetLocalization(nameof(TextRightClickLabel), () => "右键单击委托条目");
+            TextRightClickAction = this.GetLocalization(nameof(TextRightClickAction), () => " →  关注委托");
+            TextRightClickDesc = this.GetLocalization(nameof(TextRightClickDesc), () => "     左侧追踪窗口将持续显示任务进度");
+            TextMiddleClickLabel = this.GetLocalization(nameof(TextMiddleClickLabel), () => "中键单击委托条目");
+            TextMiddleClickAction = this.GetLocalization(nameof(TextMiddleClickAction), () => " →  挂起委托");
+            TextMiddleClickDesc = this.GetLocalization(nameof(TextMiddleClickDesc), () => "     暂时隐藏该委托，不在追踪窗口中显示");
+            TextConfirmBtn = this.GetLocalization(nameof(TextConfirmBtn), () => "明白了");
         }
 
         #endregion
@@ -66,7 +64,7 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
 
         //阶段1卡片固定宽度，高度根据是否绑定按键动态决定
         private const int CardW1 = 320;
-        private const int CardH1_Bound   = 62;
+        private const int CardH1_Bound = 62;
         private const int CardH1_Unbound = 104;
         //阶段2卡片尺寸
         private const int CardW2 = 318;
@@ -240,12 +238,12 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
 
             var font = FontAssets.MouseText.Value;
             float titleScale = 0.80f;
-            float bodyScale  = 0.68f;
-            float subScale   = 0.62f;
+            float bodyScale = 0.68f;
+            float subScale = 0.62f;
             float px = x + 14f, py = y + 11f;
             float lineH_t = font.MeasureString("A").Y * titleScale + 2f;
-            float lineH_b = font.MeasureString("A").Y * bodyScale  + 2f;
-            float lineH_s = font.MeasureString("A").Y * subScale   + 2f;
+            float lineH_b = font.MeasureString("A").Y * bodyScale + 2f;
+            float lineH_s = font.MeasureString("A").Y * subScale + 2f;
 
             //标题
             Utils.DrawBorderString(sb, TextPanelIntroTitle.Value,

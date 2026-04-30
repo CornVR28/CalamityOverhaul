@@ -4,7 +4,6 @@ using CalamityOverhaul.Content.ADV.ADVRewardPopups;
 using CalamityOverhaul.Content.ADV.DialogueBoxs;
 using CalamityOverhaul.Content.ADV.DialogueBoxs.Styles;
 using CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses;
-using Microsoft.Xna.Framework;
 using System;
 using Terraria;
 using Terraria.Audio;

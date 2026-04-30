@@ -183,10 +183,10 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
 
             Color gold = new Color(245, 197, 24);
             Color warm = new Color(255, 218, 130);
-            Color dim  = new Color(170, 185, 200);
+            Color dim = new Color(170, 185, 200);
 
             DynamicSpriteFont titleFont = FontAssets.DeathText.Value;
-            DynamicSpriteFont bodyFont  = FontAssets.MouseText.Value;
+            DynamicSpriteFont bodyFont = FontAssets.MouseText.Value;
             Texture2D px = VaultAsset.placeholder2.Value;
 
             DrawTopIdentifier(sw, sh, bodyFont, dim);
@@ -240,7 +240,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
                 new Rectangle(0, 0, 1, 1), gold * 0.95f);
             Main.spriteBatch.Draw(px, new Rectangle(cx - 2, ulY - 1, 4, 1),
                 new Rectangle(0, 0, 1, 1), gold);
-            Main.spriteBatch.Draw(px, new Rectangle(cx - 3, ulY,     6, 1),
+            Main.spriteBatch.Draw(px, new Rectangle(cx - 3, ulY, 6, 1),
                 new Rectangle(0, 0, 1, 1), gold);
             Main.spriteBatch.Draw(px, new Rectangle(cx - 2, ulY + 1, 4, 1),
                 new Rectangle(0, 0, 1, 1), gold);

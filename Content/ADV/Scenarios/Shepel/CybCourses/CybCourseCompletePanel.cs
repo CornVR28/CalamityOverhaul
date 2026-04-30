@@ -32,14 +32,14 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
         public static LocalizedText Footer { get; private set; }
 
         public override void SetStaticDefaults() {
-            Title    = this.GetLocalization(nameof(Title),    () => "TRAINING COMPLETE");
+            Title = this.GetLocalization(nameof(Title), () => "TRAINING COMPLETE");
             Subtitle = this.GetLocalization(nameof(Subtitle), () => "SUPERDREAM PROTOCOL");
-            Stat1    = this.GetLocalization(nameof(Stat1),    () => "[#] SHPC HUD 校准完毕");
-            Stat2    = this.GetLocalization(nameof(Stat2),    () => "[#] 骇客时间校准完毕");
-            Stat3    = this.GetLocalization(nameof(Stat3),    () => "[#] 物块扫描接口校准完毕");
+            Stat1 = this.GetLocalization(nameof(Stat1), () => "[#] SHPC HUD 校准完毕");
+            Stat2 = this.GetLocalization(nameof(Stat2), () => "[#] 骇客时间校准完毕");
+            Stat3 = this.GetLocalization(nameof(Stat3), () => "[#] 物块扫描接口校准完毕");
             BtnRetry = this.GetLocalization(nameof(BtnRetry), () => "RETRY");
-            BtnExit  = this.GetLocalization(nameof(BtnExit),  () => "EXIT");
-            Footer   = this.GetLocalization(nameof(Footer),   () => "// 选择以继续 — RETRY 重启训练，EXIT 离开超梦");
+            BtnExit = this.GetLocalization(nameof(BtnExit), () => "EXIT");
+            Footer = this.GetLocalization(nameof(Footer), () => "// 选择以继续 — RETRY 重启训练，EXIT 离开超梦");
         }
 
         //面板尺寸：比教程卡片更大、居中显示
@@ -242,9 +242,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
             float lineH = font.MeasureString("A").Y * bodySc + 6f;
             float statY = divY + 14f;
             float statX = panel.X + 36f;
-            DrawStatLine(sb, font, statX, statY,                Stat1.Value, bodySc);
-            DrawStatLine(sb, font, statX, statY + lineH,        Stat2.Value, bodySc);
-            DrawStatLine(sb, font, statX, statY + lineH * 2f,   Stat3.Value, bodySc);
+            DrawStatLine(sb, font, statX, statY, Stat1.Value, bodySc);
+            DrawStatLine(sb, font, statX, statY + lineH, Stat2.Value, bodySc);
+            DrawStatLine(sb, font, statX, statY + lineH * 2f, Stat3.Value, bodySc);
 
             //按钮区
             const int btnW = 130;
@@ -255,9 +255,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
             int btnX = panel.Center.X - btnTotalW / 2;
 
             _retryRect = new Rectangle(btnX, btnY, btnW, btnH);
-            _exitRect  = new Rectangle(btnX + btnW + gap, btnY, btnW, btnH);
+            _exitRect = new Rectangle(btnX + btnW + gap, btnY, btnW, btnH);
             DrawPanelButton(sb, font, _retryRect, BtnRetry.Value, hot: true);
-            DrawPanelButton(sb, font, _exitRect,  BtnExit.Value,  hot: false);
+            DrawPanelButton(sb, font, _exitRect, BtnExit.Value, hot: false);
 
             //底部提示行
             BaseManagerStyle.DrawCenteredText(sb, Footer.Value,

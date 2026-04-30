@@ -1,5 +1,4 @@
 ﻿using CalamityOverhaul.Content.ADV.EntrustManager;
-using CalamityOverhaul.Content.ADV.UIEffect;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 

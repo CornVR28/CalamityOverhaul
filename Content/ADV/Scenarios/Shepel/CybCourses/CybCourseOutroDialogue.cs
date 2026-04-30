@@ -1,6 +1,5 @@
-using CalamityOverhaul.Content.ADV.DialogueBoxs;
+﻿using CalamityOverhaul.Content.ADV.DialogueBoxs;
 using CalamityOverhaul.Content.ADV.DialogueBoxs.Styles;
-using CalamityOverhaul.Content.ADV.Scenarios;
 using System;
 using Terraria.Localization;
 using Terraria.ModLoader;

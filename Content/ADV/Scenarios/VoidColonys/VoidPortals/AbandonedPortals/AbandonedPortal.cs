@@ -1,18 +1,10 @@
 ﻿using CalamityOverhaul.Common;
-using CalamityOverhaul.OtherMods.SubWorld;
 using InnoVault.Actors;
-using InnoVault.UIHandles;
 using Microsoft.Xna.Framework.Graphics;
-using ReLogic.Content;
-using ReLogic.Graphics;
 using System;
 using Terraria;
 using Terraria.Audio;
-using Terraria.GameContent;
 using Terraria.ID;
-using Terraria.Localization;
-using Terraria.ModLoader;
-using Terraria.ModLoader.IO;
 
 namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.VoidPortals.AbandonedPortals
 {

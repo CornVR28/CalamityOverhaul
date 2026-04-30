@@ -1,12 +1,8 @@
 ﻿using CalamityOverhaul.Common;
 using CalamityOverhaul.Content.ADV.EntrustManager;
-using CalamityOverhaul.Content.ADV.Scenarios;
 using CalamityOverhaul.Content.HackTimes;
-using InnoVault;
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using ReLogic.Graphics;
 using System;
 using System.Collections.Generic;
 using Terraria;
@@ -62,10 +58,10 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
                 this.GetLocalization("HT_Step6_Body", () => "将光标悬停在发电机上，\n点击左键将其锁定为扫描目标。"),
                 this.GetLocalization("HT_Step7_Body", () => "物块扫描接口已解析。右侧面板展示当前物块的可用骇入协议。"),
             };
-            _textWaiting    = this.GetLocalization("HT_Waiting",    () => "AWAITING INPUT...");
+            _textWaiting = this.GetLocalization("HT_Waiting", () => "AWAITING INPUT...");
             _textCalibrating = this.GetLocalization("HT_Calibrating", () => "DISCONNECTING...");
-            _textNextBtn    = this.GetLocalization("HT_NextBtn",    () => "NEXT  >");
-            _textHintStuck  = this.GetLocalization("HT_HintStuck",  () => "// HINT: 点击 NEXT 按钮可强制跳过");
+            _textNextBtn = this.GetLocalization("HT_NextBtn", () => "NEXT  >");
+            _textHintStuck = this.GetLocalization("HT_HintStuck", () => "// HINT: 点击 NEXT 按钮可强制跳过");
             _textKeyUnbound = this.GetLocalization("HT_KeyUnbound", () => "未绑定·按 [N] 临时启用");
             _textKeyHintUnbound = this.GetLocalization("HT_KeyHintUnbound",
                 () => "// 提示：未绑定骇客时间快捷键，可在 设置 中绑定。");
@@ -241,7 +237,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
                             AdvanceStep();
                         }
                         _stuckTimer = 0f;
-                    } else {
+                    }
+                    else {
                         //step 0特殊处理：玩家自行激活骇客模式时自动推进
                         if (_currentStep == 0 && HackTime.Active) {
                             AdvanceStep();
@@ -454,7 +451,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
                 sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
                     SamplerState.AnisotropicClamp, DepthStencilState.None,
                     RasterizerState.CullNone, null, Main.UIScaleMatrix);
-            } else {
+            }
+            else {
                 sb.Draw(VaultAsset.placeholder2.Value, card, new Color(0, 8, 18, (int)(200 * alpha)));
                 BaseManagerStyle.StrokeRect(sb, card, 1, new Color(50, 160, 200, (int)(120 * alpha)));
             }
@@ -463,21 +461,21 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
         private static void DrawCardContent(SpriteBatch sb, Texture2D px, Rectangle card, float alpha) {
             var font = FontAssets.MouseText.Value;
             float titleSc = 0.84f;
-            float bodySc  = 0.70f;
-            float subSc   = 0.58f;
+            float bodySc = 0.70f;
+            float subSc = 0.58f;
             float lineT = font.MeasureString("A").Y * titleSc + 2f;
             float lineB = font.MeasureString("A").Y * bodySc + 1f;
 
             int stepIdx = (int)MathHelper.Clamp(_currentStep, 0, StepIsAuto.Length - 1);
             string title = _stepTitles[stepIdx].Value;
             //把正文中的快捷键占位符替换成当前绑定的按键名（含未绑定提示）
-            string body  = ResolveKeyTokens(_stepBodies[stepIdx].Value);
-            bool isAuto  = StepIsAuto[stepIdx];
-            bool stuck   = !isAuto && _stuckTimer >= StuckHintAfter;
+            string body = ResolveKeyTokens(_stepBodies[stepIdx].Value);
+            bool isAuto = StepIsAuto[stepIdx];
+            bool stuck = !isAuto && _stuckTimer >= StuckHintAfter;
             //仅在需要按键的步骤（0/5）且玩家未绑定快捷键时，提示去控制设置中绑定
             bool keyHint = (stepIdx == 0 || stepIdx == 5) && !IsHackToggleBound();
             float px2 = card.X + 14f;
-            float py  = card.Y + 12f;
+            float py = card.Y + 12f;
 
             //步骤计数
             string counter = $"{stepIdx + 1:D2} / {StepIsAuto.Length:D2}";
@@ -542,7 +540,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
                 Utils.DrawBorderString(sb, standby,
                     new Vector2(card.Right - 14f - sbW, card.Bottom - 16f),
                     new Color(60, 190, 200, (int)(200 * alpha * blink)), subSc);
-            } else {
+            }
+            else {
                 DrawNextButton(sb, card, alpha, stuck);
             }
         }
@@ -622,7 +621,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
 
             var rect = new Rectangle(
                 CybCourseGen.GenMK2TileLeft * 16 - 4,
-                CybCourseGen.GenMK2TileTop  * 16 - 4,
+                CybCourseGen.GenMK2TileTop * 16 - 4,
                 CybCourseGen.GenMK2TileW * 16 + 8,
                 CybCourseGen.GenMK2TileH * 16 + 8);
             sb.Draw(px, rect, outlineColor);
@@ -638,14 +637,14 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
         private static void DrawLBrackets(SpriteBatch sb, Texture2D px, Rectangle r, Color c) {
             const int len = 14;
             const int thick = 2;
-            sb.Draw(px, new Rectangle(r.Left,          r.Top,            len,   thick), c);
-            sb.Draw(px, new Rectangle(r.Left,          r.Top,            thick, len),   c);
-            sb.Draw(px, new Rectangle(r.Right - len,   r.Top,            len,   thick), c);
-            sb.Draw(px, new Rectangle(r.Right - thick, r.Top,            thick, len),   c);
-            sb.Draw(px, new Rectangle(r.Left,          r.Bottom - thick, len,   thick), c);
-            sb.Draw(px, new Rectangle(r.Left,          r.Bottom - len,   thick, len),   c);
-            sb.Draw(px, new Rectangle(r.Right - len,   r.Bottom - thick, len,   thick), c);
-            sb.Draw(px, new Rectangle(r.Right - thick, r.Bottom - len,   thick, len),   c);
+            sb.Draw(px, new Rectangle(r.Left, r.Top, len, thick), c);
+            sb.Draw(px, new Rectangle(r.Left, r.Top, thick, len), c);
+            sb.Draw(px, new Rectangle(r.Right - len, r.Top, len, thick), c);
+            sb.Draw(px, new Rectangle(r.Right - thick, r.Top, thick, len), c);
+            sb.Draw(px, new Rectangle(r.Left, r.Bottom - thick, len, thick), c);
+            sb.Draw(px, new Rectangle(r.Left, r.Bottom - len, thick, len), c);
+            sb.Draw(px, new Rectangle(r.Right - len, r.Bottom - thick, len, thick), c);
+            sb.Draw(px, new Rectangle(r.Right - thick, r.Bottom - len, thick, len), c);
         }
     }
 }

@@ -1,7 +1,5 @@
-﻿using CalamityOverhaul.Content.ADV.Scenarios;
-using CalamityOverhaul.Content.HackTimes;
+﻿using CalamityOverhaul.Content.HackTimes;
 using CalamityOverhaul.Content.RAMSystems;
-using Microsoft.Xna.Framework;
 using Terraria;
 
 namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses

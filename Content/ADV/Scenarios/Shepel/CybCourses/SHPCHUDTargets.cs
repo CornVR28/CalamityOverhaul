@@ -1,5 +1,4 @@
-using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI;
-using Microsoft.Xna.Framework;
+﻿using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI;
 using System;
 using Terraria;
 using Terraria.ModLoader;
