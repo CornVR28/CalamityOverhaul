@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
+using System.IO;
 using Terraria.ModLoader;
 
 namespace CalamityOverhaul.Content.ADV.Scenarios.AcheronProtocols.Machines
@@ -10,29 +11,29 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.AcheronProtocols.Machines
     /// </summary>
     internal static class ExoGoreAssets
     {
-        /// <summary>
-        /// ExoGore纹理资源所在目录
-        /// </summary>
-        public const string Path = "CalamityOverhaul/Content/ADV/Scenarios/AcheronProtocols/Machines/ExoGores/";
+        ///// <summary>
+        ///// ExoGore纹理资源所在目录
+        ///// </summary>
+        //public const string Path = "CalamityOverhaul/Content/ADV/Scenarios/AcheronProtocols/Machines/ExoGores/";
 
-        /// <summary>
-        /// 所有残骸纹理的文件名，不含扩展名
-        /// </summary>
-        public static readonly string[] Names = [
-            "Apollo1", "Apollo2", "Apollo3", "Apollo4", "Apollo5",
-            "AresArm_Gore1", "AresArm_Gore2", "AresArm_Gore3",
-            "AresBody1", "AresBody2", "AresBody3", "AresBody4", "AresBody5", "AresBody6", "AresBody7",
-            "AresGaussNuke1", "AresGaussNuke2", "AresGaussNuke3",
-            "AresHandBase1", "AresHandBase2", "AresHandBase3",
-            "AresLaserCannon1", "AresLaserCannon2",
-            "AresPlasmaFlamethrower1", "AresPlasmaFlamethrower2",
-            "AresTeslaCannon1", "AresTeslaCannon2",
-            "Artemis1", "Artemis2", "Artemis3", "Artemis4", "Artemis5",
-            "ThanatosBody1", "ThanatosBody1_2", "ThanatosBody1_3",
-            "ThanatosBody2", "ThanatosBody2_2", "ThanatosBody2_3",
-            "ThanatosHead", "ThanatosHead2", "ThanatosHead3",
-            "ThanatosTail", "ThanatosTail2", "ThanatosTail3", "ThanatosTail4"
-        ];
+        ///// <summary>
+        ///// 所有残骸纹理的文件名，不含扩展名
+        ///// </summary>
+        //public static readonly string[] Names = [
+        //    "Apollo1", "Apollo2", "Apollo3", "Apollo4", "Apollo5",
+        //    "AresArm_Gore1", "AresArm_Gore2", "AresArm_Gore3",
+        //    "AresBody1", "AresBody2", "AresBody3", "AresBody4", "AresBody5", "AresBody6", "AresBody7",
+        //    "AresGaussNuke1", "AresGaussNuke2", "AresGaussNuke3",
+        //    "AresHandBase1", "AresHandBase2", "AresHandBase3",
+        //    "AresLaserCannon1", "AresLaserCannon2",
+        //    "AresPlasmaFlamethrower1", "AresPlasmaFlamethrower2",
+        //    "AresTeslaCannon1", "AresTeslaCannon2",
+        //    "Artemis1", "Artemis2", "Artemis3", "Artemis4", "Artemis5",
+        //    "ThanatosBody1", "ThanatosBody1_2", "ThanatosBody1_3",
+        //    "ThanatosBody2", "ThanatosBody2_2", "ThanatosBody2_3",
+        //    "ThanatosHead", "ThanatosHead2", "ThanatosHead3",
+        //    "ThanatosTail", "ThanatosTail2", "ThanatosTail3", "ThanatosTail4"
+        //];
 
         private static Asset<Texture2D>[] assets;
 
@@ -70,9 +71,13 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.AcheronProtocols.Machines
                 if (VaultUtils.isServer) {
                     return;
                 }
-                var buffer = new Asset<Texture2D>[Names.Length];
-                for (int i = 0; i < Names.Length; i++) {
-                    buffer[i] = ModContent.Request<Texture2D>(Path + Names[i], AssetRequestMode.AsyncLoad);
+                //var buffer = new Asset<Texture2D>[Names.Length];
+                //for (int i = 0; i < Names.Length; i++) {
+                //    buffer[i] = ModContent.Request<Texture2D>(Path + Names[i], AssetRequestMode.AsyncLoad);
+                //}
+                var buffer = new Asset<Texture2D>[3];
+                for (int i = 0; i < 3; i++) {
+                    buffer[i] = VaultAsset.placeholder3;
                 }
                 assets = buffer;
             }
