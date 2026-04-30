@@ -1,7 +1,8 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Terraria;
 using Terraria.ID;
+using Terraria.Localization;
 using Terraria.ObjectData;
 
 namespace CalamityOverhaul.Content.HackTimes
@@ -12,34 +13,53 @@ namespace CalamityOverhaul.Content.HackTimes
     /// </summary>
     internal static class TileNameFallbackRegistry
     {
-        private static readonly Dictionary<int, string> namesByType = [];
-        private static readonly Dictionary<TileStyleKey, string> namesByStyle = [];
+        private const string LocalizationPrefix = "Mods.CalamityOverhaul.TileNameFallback.";
+
+        private static readonly Dictionary<int, string> localizationKeysByType = [];
+        private static readonly Dictionary<TileStyleKey, string> localizationKeysByStyle = [];
 
         static TileNameFallbackRegistry() {
             RegisterInitialData();
         }
 
-        public static void Register(int tileType, string name) {
-            if (tileType < 0 || string.IsNullOrWhiteSpace(name)) return;
-            namesByType[tileType] = name.Trim();
+        public static void Register(int tileType, string localizationKey) {
+            if (tileType < 0 || string.IsNullOrWhiteSpace(localizationKey)) return;
+            localizationKeysByType[tileType] = localizationKey.Trim();
         }
 
-        public static void RegisterStyle(int tileType, int style, string name) {
-            if (tileType < 0 || style < 0 || string.IsNullOrWhiteSpace(name)) return;
-            namesByStyle[new TileStyleKey(tileType, style)] = name.Trim();
+        public static void RegisterStyle(int tileType, int style, string localizationKey) {
+            if (tileType < 0 || style < 0 || string.IsNullOrWhiteSpace(localizationKey)) return;
+            localizationKeysByStyle[new TileStyleKey(tileType, style)] = localizationKey.Trim();
         }
 
         public static bool TryGetName(Tile tile, int tileType, out string name) {
             int style = GetBestEffortStyle(tile, tileType);
-            if (style >= 0 && namesByStyle.TryGetValue(new TileStyleKey(tileType, style), out name)) {
+            if (style >= 0 && localizationKeysByStyle.TryGetValue(new TileStyleKey(tileType, style), out string localizationKey)) {
+                name = GetLocalizedName(localizationKey);
                 return true;
             }
 
-            return namesByType.TryGetValue(tileType, out name);
+            if (localizationKeysByType.TryGetValue(tileType, out localizationKey)) {
+                name = GetLocalizedName(localizationKey);
+                return true;
+            }
+
+            name = null;
+            return false;
         }
 
         public static bool TryGetName(int tileType, out string name) {
-            return namesByType.TryGetValue(tileType, out name);
+            if (localizationKeysByType.TryGetValue(tileType, out string localizationKey)) {
+                name = GetLocalizedName(localizationKey);
+                return true;
+            }
+
+            name = null;
+            return false;
+        }
+
+        private static string GetLocalizedName(string localizationKey) {
+            return Language.GetTextValue(LocalizationPrefix + localizationKey);
         }
 
         private static int GetBestEffortStyle(Tile tile, int tileType) {
@@ -60,136 +80,140 @@ namespace CalamityOverhaul.Content.HackTimes
         }
 
         private static void RegisterInitialData() {
-            // 基础数据来自 terraria.wiki.gg/zh/wiki/图格_ID，后续测试员可按异常样本继续追加。
-            Register(TileID.Dirt, "土块");
-            Register(TileID.Stone, "石块");
-            Register(TileID.Grass, "草");
-            Register(TileID.Plants, "野生植物");
-            Register(TileID.Torches, "火把");
-            Register(TileID.Trees, "树");
-            Register(TileID.Iron, "铁矿");
-            Register(TileID.Copper, "铜矿");
-            Register(TileID.Gold, "金矿");
-            Register(TileID.Silver, "银矿");
-            Register(TileID.ClosedDoor, "门");
-            Register(TileID.OpenDoor, "门");
-            Register(TileID.Heart, "生命水晶");
-            Register(TileID.Bottles, "玻璃瓶");
-            Register(TileID.Tables, "桌");
-            Register(TileID.Chairs, "椅");
-            Register(TileID.Anvils, "砧");
-            Register(TileID.Furnaces, "熔炉");
-            Register(TileID.WorkBenches, "工作台");
-            Register(TileID.Platforms, "平台");
-            Register(TileID.Saplings, "树苗");
-            Register(TileID.Containers, "宝箱");
-            Register(TileID.Demonite, "魔矿");
-            Register(TileID.CorruptGrass, "腐化草");
-            Register(TileID.CorruptPlants, "野生腐化植物");
-            Register(TileID.Ebonstone, "黑檀石块");
-            Register(TileID.DemonAltar, "祭坛");
-            Register(TileID.Sunflower, "向日葵");
-            Register(TileID.Pots, "罐子");
-            Register(TileID.PiggyBank, "猪猪存钱罐");
-            Register(TileID.WoodBlock, "木材");
-            Register(TileID.ShadowOrbs, "暗影珠");
-            Register(TileID.CorruptThorns, "腐化荆棘");
-            Register(TileID.Candles, "蜡烛");
-            Register(TileID.Chandeliers, "吊灯");
-            Register(TileID.Jackolanterns, "杰克南瓜灯");
-            Register(TileID.Presents, "礼物");
-            Register(TileID.Meteorite, "陨石");
-            Register(TileID.GrayBrick, "灰砖");
-            Register(TileID.RedBrick, "红砖");
-            Register(TileID.ClayBlock, "黏土块");
-            Register(TileID.BlueDungeonBrick, "蓝砖");
-            Register(TileID.HangingLanterns, "吊灯笼");
-            Register(TileID.GreenDungeonBrick, "绿砖");
-            Register(TileID.PinkDungeonBrick, "粉砖");
-            Register(TileID.GoldBrick, "金砖");
-            Register(TileID.SilverBrick, "银砖");
-            Register(TileID.CopperBrick, "铜砖");
-            Register(TileID.Spikes, "尖刺");
-            Register(TileID.WaterCandle, "水蜡烛");
-            Register(TileID.Books, "书");
-            Register(TileID.Cobweb, "蛛网");
-            Register(TileID.Vines, "藤蔓");
-            Register(TileID.Sand, "沙块");
-            Register(TileID.Glass, "玻璃");
-            Register(TileID.Signs, "标牌");
-            Register(TileID.Obsidian, "黑曜石");
-            Register(TileID.Ash, "灰烬块");
-            Register(TileID.Hellstone, "狱石");
-            Register(TileID.Mud, "泥块");
-            Register(TileID.JungleGrass, "丛林草");
-            Register(TileID.JunglePlants, "野生丛林植物");
-            Register(TileID.JungleVines, "丛林藤蔓");
-            Register(TileID.Sapphire, "蓝玉石块");
-            Register(TileID.Ruby, "红玉石块");
-            Register(TileID.Emerald, "翡翠石块");
-            Register(TileID.Topaz, "黄玉石块");
-            Register(TileID.Amethyst, "紫晶石块");
-            Register(TileID.Diamond, "钻石石块");
-            Register(TileID.JungleThorns, "丛林荆棘");
-            Register(TileID.MushroomGrass, "蘑菇草");
-            Register(TileID.MushroomPlants, "发光蘑菇");
-            Register(TileID.MushroomTrees, "巨型发光蘑菇");
-            Register(TileID.Plants2, "高茎草");
-            Register(TileID.JunglePlants2, "高野生丛林植物");
-            Register(TileID.ObsidianBrick, "黑曜石砖");
-            Register(TileID.HellstoneBrick, "狱石砖");
-            Register(TileID.Hellforge, "地狱熔炉");
-            Register(TileID.ClayPot, "陶盆");
-            Register(TileID.Beds, "床");
-            Register(TileID.Cactus, "仙人掌");
-            Register(TileID.Coral, "珊瑚");
-            Register(TileID.ImmatureHerbs, "草药幼苗");
-            Register(TileID.MatureHerbs, "成熟草药");
-            Register(TileID.BloomingHerbs, "开花草药");
-            Register(TileID.Tombstones, "墓碑");
-            Register(TileID.Loom, "织布机");
-            Register(TileID.Pianos, "钢琴");
-            Register(TileID.Dressers, "梳妆台");
-            Register(TileID.Benches, "长椅");
-            Register(TileID.Bathtubs, "浴缸");
+            //基础数据来自 terraria.wiki.gg/zh/wiki/图格_ID，后续测试员可按异常样本继续追加
+            Register(TileID.Dirt, "Dirt");
+            Register(TileID.Stone, "Stone");
+            Register(TileID.Grass, "Grass");
+            Register(TileID.Plants, "Plants");
+            Register(TileID.Torches, "Torch");
+            Register(TileID.Trees, "Tree");
+            Register(TileID.Iron, "Iron");
+            Register(TileID.Copper, "Copper");
+            Register(TileID.Gold, "Gold");
+            Register(TileID.Silver, "Silver");
+            Register(TileID.ClosedDoor, "ClosedDoor");
+            Register(TileID.OpenDoor, "OpenDoor");
+            Register(TileID.Heart, "Heart");
+            Register(TileID.Bottles, "Bottle");
+            Register(TileID.Tables, "Table");
+            Register(TileID.Chairs, "Chair");
+            Register(TileID.Anvils, "Anvil");
+            Register(TileID.Furnaces, "Furnace");
+            Register(TileID.WorkBenches, "WorkBench");
+            Register(TileID.Platforms, "Platform");
+            Register(TileID.Saplings, "Sapling");
+            Register(TileID.Containers, "Container");
+            Register(TileID.Demonite, "Demonite");
+            Register(TileID.CorruptGrass, "CorruptGrass");
+            Register(TileID.CorruptPlants, "CorruptPlants");
+            Register(TileID.Ebonstone, "Ebonstone");
+            Register(TileID.DemonAltar, "DemonAltar");
+            Register(TileID.Sunflower, "Sunflower");
+            Register(TileID.Pots, "Pot");
+            Register(TileID.PiggyBank, "PiggyBank");
+            Register(TileID.WoodBlock, "WoodBlock");
+            Register(TileID.ShadowOrbs, "ShadowOrb");
+            Register(TileID.CorruptThorns, "CorruptThorns");
+            Register(TileID.Candles, "Candle");
+            Register(TileID.Chandeliers, "Chandelier");
+            Register(TileID.Jackolanterns, "JackOLantern");
+            Register(TileID.Presents, "Present");
+            Register(TileID.Meteorite, "Meteorite");
+            Register(TileID.GrayBrick, "GrayBrick");
+            Register(TileID.RedBrick, "RedBrick");
+            Register(TileID.ClayBlock, "ClayBlock");
+            Register(TileID.BlueDungeonBrick, "BlueDungeonBrick");
+            Register(TileID.HangingLanterns, "HangingLantern");
+            Register(TileID.GreenDungeonBrick, "GreenDungeonBrick");
+            Register(TileID.PinkDungeonBrick, "PinkDungeonBrick");
+            Register(TileID.GoldBrick, "GoldBrick");
+            Register(TileID.SilverBrick, "SilverBrick");
+            Register(TileID.CopperBrick, "CopperBrick");
+            Register(TileID.Spikes, "Spikes");
+            Register(TileID.WaterCandle, "WaterCandle");
+            Register(TileID.Books, "Book");
+            Register(TileID.Cobweb, "Cobweb");
+            Register(TileID.Vines, "Vine");
+            Register(TileID.Sand, "Sand");
+            Register(TileID.Glass, "Glass");
+            Register(TileID.Signs, "Sign");
+            Register(TileID.Obsidian, "Obsidian");
+            Register(TileID.Ash, "Ash");
+            Register(TileID.Hellstone, "Hellstone");
+            Register(TileID.Mud, "Mud");
+            Register(TileID.JungleGrass, "JungleGrass");
+            Register(TileID.JunglePlants, "JunglePlants");
+            Register(TileID.JungleVines, "JungleVine");
+            Register(TileID.Sapphire, "Sapphire");
+            Register(TileID.Ruby, "Ruby");
+            Register(TileID.Emerald, "Emerald");
+            Register(TileID.Topaz, "Topaz");
+            Register(TileID.Amethyst, "Amethyst");
+            Register(TileID.Diamond, "Diamond");
+            Register(TileID.JungleThorns, "JungleThorns");
+            Register(TileID.MushroomGrass, "MushroomGrass");
+            Register(TileID.MushroomPlants, "MushroomPlants");
+            Register(TileID.MushroomTrees, "MushroomTree");
+            Register(TileID.Plants2, "Plants2");
+            Register(TileID.JunglePlants2, "JunglePlants2");
+            Register(TileID.ObsidianBrick, "ObsidianBrick");
+            Register(TileID.HellstoneBrick, "HellstoneBrick");
+            Register(TileID.Hellforge, "Hellforge");
+            Register(TileID.ClayPot, "ClayPot");
+            Register(TileID.Beds, "Bed");
+            Register(TileID.Cactus, "Cactus");
+            Register(TileID.Coral, "Coral");
+            Register(TileID.ImmatureHerbs, "ImmatureHerb");
+            Register(TileID.MatureHerbs, "MatureHerb");
+            Register(TileID.BloomingHerbs, "BloomingHerb");
+            Register(TileID.Tombstones, "Tombstone");
+            Register(TileID.Loom, "Loom");
+            Register(TileID.Pianos, "Piano");
+            Register(TileID.Dressers, "Dresser");
+            Register(TileID.Benches, "Bench");
+            Register(TileID.Bathtubs, "Bathtub");
 
-            RegisterStyle(TileID.Torches, 0, "火把");
-            RegisterStyle(TileID.Torches, 1, "蓝火把");
-            RegisterStyle(TileID.Torches, 2, "红火把");
-            RegisterStyle(TileID.Torches, 3, "绿火把");
-            RegisterStyle(TileID.Torches, 4, "紫火把");
-            RegisterStyle(TileID.Torches, 5, "白火把");
-            RegisterStyle(TileID.Torches, 6, "黄火把");
-            RegisterStyle(TileID.Torches, 7, "恶魔火把");
-            RegisterStyle(TileID.Torches, 8, "诅咒火把");
-            RegisterStyle(TileID.Torches, 9, "冰雪火把");
-            RegisterStyle(TileID.Torches, 10, "橙火把");
-            RegisterStyle(TileID.Torches, 11, "灵液火把");
-            RegisterStyle(TileID.Torches, 12, "超亮火把");
-            RegisterStyle(TileID.Torches, 13, "骨头火把");
-            RegisterStyle(TileID.Torches, 14, "彩虹火把");
-            RegisterStyle(TileID.Torches, 15, "粉火把");
-            RegisterStyle(TileID.Torches, 16, "沙漠火把");
-            RegisterStyle(TileID.Torches, 17, "珊瑚火把");
-            RegisterStyle(TileID.Torches, 18, "腐化火把");
-            RegisterStyle(TileID.Torches, 19, "猩红火把");
-            RegisterStyle(TileID.Torches, 20, "神圣火把");
-            RegisterStyle(TileID.Torches, 21, "丛林火把");
-            RegisterStyle(TileID.Torches, 22, "蘑菇火把");
-            RegisterStyle(TileID.Torches, 23, "以太火把");
+            RegisterStyle(TileID.Torches, 0, "Torch");
+            RegisterStyle(TileID.Torches, 1, "BlueTorch");
+            RegisterStyle(TileID.Torches, 2, "RedTorch");
+            RegisterStyle(TileID.Torches, 3, "GreenTorch");
+            RegisterStyle(TileID.Torches, 4, "PurpleTorch");
+            RegisterStyle(TileID.Torches, 5, "WhiteTorch");
+            RegisterStyle(TileID.Torches, 6, "YellowTorch");
+            RegisterStyle(TileID.Torches, 7, "DemonTorch");
+            RegisterStyle(TileID.Torches, 8, "CursedTorch");
+            RegisterStyle(TileID.Torches, 9, "IceTorch");
+            RegisterStyle(TileID.Torches, 10, "OrangeTorch");
+            RegisterStyle(TileID.Torches, 11, "IchorTorch");
+            RegisterStyle(TileID.Torches, 12, "UltrabrightTorch");
+            RegisterStyle(TileID.Torches, 13, "BoneTorch");
+            RegisterStyle(TileID.Torches, 14, "RainbowTorch");
+            RegisterStyle(TileID.Torches, 15, "PinkTorch");
+            RegisterStyle(TileID.Torches, 16, "DesertTorch");
+            RegisterStyle(TileID.Torches, 17, "CoralTorch");
+            RegisterStyle(TileID.Torches, 18, "CorruptTorch");
+            RegisterStyle(TileID.Torches, 19, "CrimsonTorch");
+            RegisterStyle(TileID.Torches, 20, "HallowedTorch");
+            RegisterStyle(TileID.Torches, 21, "JungleTorch");
+            RegisterStyle(TileID.Torches, 22, "MushroomTorch");
+            RegisterStyle(TileID.Torches, 23, "AetherTorch");
 
-            RegisterStyle(TileID.Trees, 0, "森林树");
-            RegisterStyle(TileID.Trees, 1, "乌木树");
-            RegisterStyle(TileID.Trees, 2, "红木树");
-            RegisterStyle(TileID.Trees, 3, "珍珠木树");
-            RegisterStyle(TileID.Trees, 4, "针叶树");
-            RegisterStyle(TileID.Trees, 5, "暗影木树");
-            RegisterStyle(TileID.Trees, 7, "巨型发光蘑菇");
+            RegisterStyle(TileID.Trees, 0, "ForestTree");
+            RegisterStyle(TileID.Trees, 1, "EbonwoodTree");
+            RegisterStyle(TileID.Trees, 2, "RichMahoganyTree");
+            RegisterStyle(TileID.Trees, 3, "PearlwoodTree");
+            RegisterStyle(TileID.Trees, 4, "BorealTree");
+            RegisterStyle(TileID.Trees, 5, "ShadewoodTree");
+            RegisterStyle(TileID.Trees, 7, "MushroomTree");
 
-            RegisterStyle(TileID.Anvils, 0, "铁砧");
-            RegisterStyle(TileID.Anvils, 1, "铅砧");
-            RegisterStyle(TileID.DemonAltar, 0, "恶魔祭坛");
-            RegisterStyle(TileID.DemonAltar, 1, "猩红祭坛");
+            RegisterStyle(TileID.Anvils, 0, "IronAnvil");
+            RegisterStyle(TileID.Anvils, 1, "LeadAnvil");
+            RegisterStyle(TileID.DemonAltar, 0, "DemonAltar");
+            RegisterStyle(TileID.DemonAltar, 1, "CrimsonAltar");
+
+            Register(192, "Tile192");//生命树树叶
+            Register(187, "Tile187");//杂草
+            Register(352, "Tile352");//荆棘
         }
 
         private readonly record struct TileStyleKey(int TileType, int Style);

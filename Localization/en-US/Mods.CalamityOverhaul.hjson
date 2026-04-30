@@ -1,4 +1,4 @@
-EndlessDamageClassTextContent.EndlessDamageClass.DisplayName: Endless Damage
+﻿EndlessDamageClassTextContent.EndlessDamageClass.DisplayName: Endless Damage
 Tools.RecipesLoseText: You can't just make this thing
 
 Biomes: {
@@ -146,4 +146,133 @@ HackTargetType: {
 	TileTargetType.DisplayName: Tile Target Type
 	TurretTargetType.DisplayName: Turret Target Type
 	WraithTargetType.DisplayName: Wraith Target Type
+}
+
+TileNameFallback: {
+	Dirt: Dirt Block
+	Stone: Stone Block
+	Grass: Grass
+	Plants: Wild Plant
+	Torch: Torch
+	Tree: Tree
+	Iron: Iron Ore
+	Copper: Copper Ore
+	Gold: Gold Ore
+	Silver: Silver Ore
+	ClosedDoor: Door
+	OpenDoor: Door
+	Heart: Life Crystal
+	Bottle: Bottle
+	Table: Table
+	Chair: Chair
+	Anvil: Anvil
+	Furnace: Furnace
+	WorkBench: Work Bench
+	Platform: Platform
+	Sapling: Sapling
+	Container: Chest
+	Demonite: Demonite Ore
+	CorruptGrass: Corrupt Grass
+	CorruptPlants: Wild Corrupt Plant
+	Ebonstone: Ebonstone Block
+	DemonAltar: Demon Altar
+	Sunflower: Sunflower
+	Pot: Pot
+	PiggyBank: Piggy Bank
+	WoodBlock: Wood
+	ShadowOrb: Shadow Orb
+	CorruptThorns: Corrupt Thorn
+	Candle: Candle
+	Chandelier: Chandelier
+	JackOLantern: Jack-o'-Lantern
+	Present: Present
+	Meteorite: Meteorite
+	GrayBrick: Gray Brick
+	RedBrick: Red Brick
+	ClayBlock: Clay Block
+	BlueDungeonBrick: Blue Brick
+	HangingLantern: Hanging Lantern
+	GreenDungeonBrick: Green Brick
+	PinkDungeonBrick: Pink Brick
+	GoldBrick: Gold Brick
+	SilverBrick: Silver Brick
+	CopperBrick: Copper Brick
+	Spikes: Spikes
+	WaterCandle: Water Candle
+	Book: Book
+	Cobweb: Cobweb
+	Vine: Vine
+	Sand: Sand Block
+	Glass: Glass
+	Sign: Sign
+	Obsidian: Obsidian
+	Ash: Ash Block
+	Hellstone: Hellstone
+	Mud: Mud Block
+	JungleGrass: Jungle Grass
+	JunglePlants: Wild Jungle Plant
+	JungleVine: Jungle Vine
+	Sapphire: Sapphire Stone Block
+	Ruby: Ruby Stone Block
+	Emerald: Emerald Stone Block
+	Topaz: Topaz Stone Block
+	Amethyst: Amethyst Stone Block
+	Diamond: Diamond Stone Block
+	JungleThorns: Jungle Thorn
+	MushroomGrass: Mushroom Grass
+	MushroomPlants: Glowing Mushroom
+	MushroomTree: Giant Glowing Mushroom
+	Plants2: Tall Grass
+	JunglePlants2: Tall Wild Jungle Plant
+	ObsidianBrick: Obsidian Brick
+	HellstoneBrick: Hellstone Brick
+	Hellforge: Hellforge
+	ClayPot: Clay Pot
+	Bed: Bed
+	Cactus: Cactus
+	Coral: Coral
+	ImmatureHerb: Herb Seedling
+	MatureHerb: Mature Herb
+	BloomingHerb: Blooming Herb
+	Tombstone: Tombstone
+	Loom: Loom
+	Piano: Piano
+	Dresser: Dresser
+	Bench: Bench
+	Bathtub: Bathtub
+	BlueTorch: Blue Torch
+	RedTorch: Red Torch
+	GreenTorch: Green Torch
+	PurpleTorch: Purple Torch
+	WhiteTorch: White Torch
+	YellowTorch: Yellow Torch
+	DemonTorch: Demon Torch
+	CursedTorch: Cursed Torch
+	IceTorch: Ice Torch
+	OrangeTorch: Orange Torch
+	IchorTorch: Ichor Torch
+	UltrabrightTorch: Ultrabright Torch
+	BoneTorch: Bone Torch
+	RainbowTorch: Rainbow Torch
+	PinkTorch: Pink Torch
+	DesertTorch: Desert Torch
+	CoralTorch: Coral Torch
+	CorruptTorch: Corrupt Torch
+	CrimsonTorch: Crimson Torch
+	HallowedTorch: Hallowed Torch
+	JungleTorch: Jungle Torch
+	MushroomTorch: Mushroom Torch
+	AetherTorch: Aether Torch
+	ForestTree: Forest Tree
+	EbonwoodTree: Ebonwood Tree
+	RichMahoganyTree: Rich Mahogany Tree
+	PearlwoodTree: Pearlwood Tree
+	BorealTree: Boreal Tree
+	ShadewoodTree: Shadewood Tree
+	IronAnvil: Iron Anvil
+	LeadAnvil: Lead Anvil
+	CrimsonAltar: Crimson Altar
+	Tile192: Leaves of the Tree of Life
+	Tile187: Weed
+	Tile352: Thorns
 }

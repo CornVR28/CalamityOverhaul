@@ -1,4 +1,4 @@
-EndlessDamageClassTextContent.EndlessDamageClass.DisplayName: 无尽伤害
+﻿EndlessDamageClassTextContent.EndlessDamageClass.DisplayName: 无尽伤害
 Tools.RecipesLoseText: 你无法直接制作该物品!
 
 Biomes: {
@@ -146,4 +146,133 @@ HackTargetType: {
 	// TileTargetType.DisplayName: Tile Target Type
 	// TurretTargetType.DisplayName: Turret Target Type
 	// WraithTargetType.DisplayName: Wraith Target Type
+}
+
+TileNameFallback: {
+	Dirt: 土块
+	Stone: 石块
+	Grass: 草
+	Plants: 野生植物
+	Torch: 火把
+	Tree: 树
+	Iron: 铁矿
+	Copper: 铜矿
+	Gold: 金矿
+	Silver: 银矿
+	ClosedDoor: 门
+	OpenDoor: 门
+	Heart: 生命水晶
+	Bottle: 玻璃瓶
+	Table: 桌
+	Chair: 椅
+	Anvil: 砧
+	Furnace: 熔炉
+	WorkBench: 工作台
+	Platform: 平台
+	Sapling: 树苗
+	Container: 宝箱
+	Demonite: 魔矿
+	CorruptGrass: 腐化草
+	CorruptPlants: 野生腐化植物
+	Ebonstone: 黑檀石块
+	DemonAltar: 恶魔祭坛
+	Sunflower: 向日葵
+	Pot: 罐子
+	PiggyBank: 猪猪存钱罐
+	WoodBlock: 木材
+	ShadowOrb: 暗影珠
+	CorruptThorns: 腐化荆棘
+	Candle: 蜡烛
+	Chandelier: 吊灯
+	JackOLantern: 杰克南瓜灯
+	Present: 礼物
+	Meteorite: 陨石
+	GrayBrick: 灰砖
+	RedBrick: 红砖
+	ClayBlock: 黏土块
+	BlueDungeonBrick: 蓝砖
+	HangingLantern: 吊灯笼
+	GreenDungeonBrick: 绿砖
+	PinkDungeonBrick: 粉砖
+	GoldBrick: 金砖
+	SilverBrick: 银砖
+	CopperBrick: 铜砖
+	Spikes: 尖刺
+	WaterCandle: 水蜡烛
+	Book: 书
+	Cobweb: 蛛网
+	Vine: 藤蔓
+	Sand: 沙块
+	Glass: 玻璃
+	Sign: 标牌
+	Obsidian: 黑曜石
+	Ash: 灰烬块
+	Hellstone: 狱石
+	Mud: 泥块
+	JungleGrass: 丛林草
+	JunglePlants: 野生丛林植物
+	JungleVine: 丛林藤蔓
+	Sapphire: 蓝玉石块
+	Ruby: 红玉石块
+	Emerald: 翡翠石块
+	Topaz: 黄玉石块
+	Amethyst: 紫晶石块
+	Diamond: 钻石石块
+	JungleThorns: 丛林荆棘
+	MushroomGrass: 蘑菇草
+	MushroomPlants: 发光蘑菇
+	MushroomTree: 巨型发光蘑菇
+	Plants2: 高茎草
+	JunglePlants2: 高野生丛林植物
+	ObsidianBrick: 黑曜石砖
+	HellstoneBrick: 狱石砖
+	Hellforge: 地狱熔炉
+	ClayPot: 陶盆
+	Bed: 床
+	Cactus: 仙人掌
+	Coral: 珊瑚
+	ImmatureHerb: 草药幼苗
+	MatureHerb: 成熟草药
+	BloomingHerb: 开花草药
+	Tombstone: 墓碑
+	Loom: 织布机
+	Piano: 钢琴
+	Dresser: 梳妆台
+	Bench: 长椅
+	Bathtub: 浴缸
+	BlueTorch: 蓝火把
+	RedTorch: 红火把
+	GreenTorch: 绿火把
+	PurpleTorch: 紫火把
+	WhiteTorch: 白火把
+	YellowTorch: 黄火把
+	DemonTorch: 恶魔火把
+	CursedTorch: 诅咒火把
+	IceTorch: 冰雪火把
+	OrangeTorch: 橙火把
+	IchorTorch: 灵液火把
+	UltrabrightTorch: 超亮火把
+	BoneTorch: 骨头火把
+	RainbowTorch: 彩虹火把
+	PinkTorch: 粉火把
+	DesertTorch: 沙漠火把
+	CoralTorch: 珊瑚火把
+	CorruptTorch: 腐化火把
+	CrimsonTorch: 猩红火把
+	HallowedTorch: 神圣火把
+	JungleTorch: 丛林火把
+	MushroomTorch: 蘑菇火把
+	AetherTorch: 以太火把
+	ForestTree: 森林树
+	EbonwoodTree: 乌木树
+	RichMahoganyTree: 红木树
+	PearlwoodTree: 珍珠木树
+	BorealTree: 针叶树
+	ShadewoodTree: 暗影木树
+	IronAnvil: 铁砧
+	LeadAnvil: 铅砧
+	CrimsonAltar: 猩红祭坛
+	Tile192: 生命树树叶
+	Tile187: 杂草
+	Tile352: 荆棘
 }
