@@ -25,7 +25,7 @@ namespace CalamityOverhaul.Content.HackTimes
         //复用缓冲
         private static readonly List<ActiveHackEffect> effectBuf = [];
         private static readonly List<HackQueueEntry> queueBuf = [];
-        private static readonly List<ActiveTileHackEffect> tileEffectBuf = [];
+        private static readonly List<ActiveHackEffect> tileEffectBuf = [];
         private static readonly List<HackQueueEntry> tileQueueBuf = [];
         private static readonly List<HackQueueEntry> turretQueueBuf = [];
         private static readonly List<HackQueueEntry> signalTowerQueueBuf = [];
@@ -334,7 +334,7 @@ namespace CalamityOverhaul.Content.HackTimes
         }
 
         //绘制物块上已生效的协议卡片（无EffectMult，物块不区分Boss）
-        private static void DrawActiveTileCard(SpriteBatch sb, Texture2D px, float x, float y, ActiveTileHackEffect eff) {
+        private static void DrawActiveTileCard(SpriteBatch sb, Texture2D px, float x, float y, ActiveHackEffect eff) {
             Color bgColor = HackTheme.BgSection * 0.85f;
             sb.Draw(px, new Rectangle((int)x, (int)y, (int)CardWidth, (int)CardHeight), bgColor);
 

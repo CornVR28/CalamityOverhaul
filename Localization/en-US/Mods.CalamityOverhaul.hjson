@@ -139,3 +139,11 @@ QuickHack: {
 		Description: ""
 	}
 }
+
+HackTargetType: {
+	NpcTargetType.DisplayName: Npc Target Type
+	SignalTowerTargetType.DisplayName: Signal Tower Target Type
+	TileTargetType.DisplayName: Tile Target Type
+	TurretTargetType.DisplayName: Turret Target Type
+	WraithTargetType.DisplayName: Wraith Target Type
+}

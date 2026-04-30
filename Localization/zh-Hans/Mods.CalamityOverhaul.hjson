@@ -139,3 +139,11 @@ QuickHack: {
 		Description: 向信号塔注入蠕虫代码，令其向四周发射赛博电磁冲击波，长时间短路广播范围内的所有炮台
 	}
 }
+
+HackTargetType: {
+	// NpcTargetType.DisplayName: Npc Target Type
+	// SignalTowerTargetType.DisplayName: Signal Tower Target Type
+	// TileTargetType.DisplayName: Tile Target Type
+	// TurretTargetType.DisplayName: Turret Target Type
+	// WraithTargetType.DisplayName: Wraith Target Type
+}

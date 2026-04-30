@@ -41,14 +41,6 @@ namespace CalamityOverhaul.Content.HackTimes
     }
 
     /// <summary>
-    /// 物块骇入效果的别名（保留名称给老旧消费者使用）
-    /// <br/>其本质是 <see cref="ActiveHackEffect"/>，通过 Target 类型（TileScannable）区分
-    /// </summary>
-    internal class ActiveTileHackEffect : ActiveHackEffect
-    {
-    }
-
-    /// <summary>
     /// 骇入效果全局追踪器
     /// <br/>管理所有目标身上正在生效的骇入协议，驱动效果生命周期（Apply→Tick→Remove）
     /// <br/>无叠加限制，同一目标可承受任意数量的不同协议
