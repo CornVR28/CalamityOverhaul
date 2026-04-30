@@ -145,8 +145,11 @@ namespace CalamityOverhaul.Content.HackTimes
                 if (modTile != null) return modTile.Name;
             }
 
-            //无法解析出正常名称时，通过掉落物获取物品名作为兜底
             Tile tile = Main.tile[x, y];
+            //地图名失效后先走人工打表，避免掉落物名污染物块名
+            if (TileNameFallbackRegistry.TryGetName(tile, type, out string fallbackName)) return fallbackName;
+
+            //无法解析出正常名称时，通过掉落物获取物品名作为兜底
             int dropId = tile.GetTileDrop(x, y);
             if (dropId > 0) {
                 string itemName = VaultUtils.GetLocalizedItemName(dropId).Value;

@@ -14,7 +14,15 @@ namespace CalamityOverhaul.Content.HackTimes
         void ICWRLoader.UnLoadData() {
             IsActive = false;
             NPCFrozenPositions = null;
+            NPCFrozenVelocities = null;
+            NPCSnapshotCaptured = null;
+            NPCSnapshotTypes = null;
             ProjFrozenPositions = null;
+            ProjFrozenVelocities = null;
+            ProjSnapshotCaptured = null;
+            ProjSnapshotTypes = null;
+            ProjSnapshotOwners = null;
+            ProjSnapshotIdentities = null;
         }
 
         /// <summary>
@@ -24,12 +32,34 @@ namespace CalamityOverhaul.Content.HackTimes
 
         //NPC冻结位置快照
         internal static Vector2[] NPCFrozenPositions;
+        //NPC冻结速度快照
+        internal static Vector2[] NPCFrozenVelocities;
+        //NPC快照是否有效
+        internal static bool[] NPCSnapshotCaptured;
+        //NPC快照对应的类型，用于避免复用槽位时套用旧快照
+        internal static int[] NPCSnapshotTypes;
         //弹幕冻结位置快照
         internal static Vector2[] ProjFrozenPositions;
+        //弹幕冻结速度快照
+        internal static Vector2[] ProjFrozenVelocities;
+        //弹幕快照是否有效
+        internal static bool[] ProjSnapshotCaptured;
+        //弹幕快照对应的类型/归属/身份，用于避免复用槽位时套用旧快照
+        internal static int[] ProjSnapshotTypes;
+        internal static int[] ProjSnapshotOwners;
+        internal static int[] ProjSnapshotIdentities;
 
         void ICWRLoader.LoadData() {
             NPCFrozenPositions = new Vector2[Main.maxNPCs];
+            NPCFrozenVelocities = new Vector2[Main.maxNPCs];
+            NPCSnapshotCaptured = new bool[Main.maxNPCs];
+            NPCSnapshotTypes = new int[Main.maxNPCs];
             ProjFrozenPositions = new Vector2[Main.maxProjectiles];
+            ProjFrozenVelocities = new Vector2[Main.maxProjectiles];
+            ProjSnapshotCaptured = new bool[Main.maxProjectiles];
+            ProjSnapshotTypes = new int[Main.maxProjectiles];
+            ProjSnapshotOwners = new int[Main.maxProjectiles];
+            ProjSnapshotIdentities = new int[Main.maxProjectiles];
         }
 
         /// <summary>
@@ -46,22 +76,89 @@ namespace CalamityOverhaul.Content.HackTimes
         /// 解除时间冻结
         /// </summary>
         public static void Deactivate() {
+            if (!IsActive) return;
+            RestoreSnapshots();
+            ClearSnapshots();
             IsActive = false;
             TimeGear.Unregister("HackTimeFreeze");
         }
 
         private static void SnapshotPositions() {
+            ClearSnapshots();
             for (int i = 0; i < Main.maxNPCs; i++) {
                 NPC npc = Main.npc[i];
                 if (npc.active) {
-                    NPCFrozenPositions[i] = npc.position;
+                    CaptureNPC(npc);
                 }
             }
             for (int i = 0; i < Main.maxProjectiles; i++) {
                 Projectile proj = Main.projectile[i];
                 if (proj.active) {
-                    ProjFrozenPositions[i] = proj.position;
+                    CaptureProjectile(proj);
                 }
+            }
+        }
+
+        internal static void EnsureNPCSnapshot(NPC npc) {
+            int id = npc.whoAmI;
+            if (!NPCSnapshotCaptured[id] || NPCSnapshotTypes[id] != npc.type) {
+                CaptureNPC(npc);
+            }
+        }
+
+        internal static void EnsureProjectileSnapshot(Projectile proj) {
+            int id = proj.whoAmI;
+            if (!ProjSnapshotCaptured[id]
+                || ProjSnapshotTypes[id] != proj.type
+                || ProjSnapshotOwners[id] != proj.owner
+                || ProjSnapshotIdentities[id] != proj.identity) {
+                CaptureProjectile(proj);
+            }
+        }
+
+        private static void CaptureNPC(NPC npc) {
+            int id = npc.whoAmI;
+            NPCFrozenPositions[id] = npc.position;
+            NPCFrozenVelocities[id] = npc.velocity;
+            NPCSnapshotCaptured[id] = true;
+            NPCSnapshotTypes[id] = npc.type;
+        }
+
+        private static void CaptureProjectile(Projectile proj) {
+            int id = proj.whoAmI;
+            ProjFrozenPositions[id] = proj.position;
+            ProjFrozenVelocities[id] = proj.velocity;
+            ProjSnapshotCaptured[id] = true;
+            ProjSnapshotTypes[id] = proj.type;
+            ProjSnapshotOwners[id] = proj.owner;
+            ProjSnapshotIdentities[id] = proj.identity;
+        }
+
+        private static void RestoreSnapshots() {
+            for (int i = 0; i < Main.maxNPCs; i++) {
+                NPC npc = Main.npc[i];
+                if (!npc.active || !NPCSnapshotCaptured[i] || NPCSnapshotTypes[i] != npc.type) continue;
+                npc.velocity = NPCFrozenVelocities[i];
+            }
+
+            for (int i = 0; i < Main.maxProjectiles; i++) {
+                Projectile proj = Main.projectile[i];
+                if (!proj.active || !ProjSnapshotCaptured[i]) continue;
+                if (ProjSnapshotTypes[i] != proj.type
+                    || ProjSnapshotOwners[i] != proj.owner
+                    || ProjSnapshotIdentities[i] != proj.identity) {
+                    continue;
+                }
+                proj.velocity = ProjFrozenVelocities[i];
+            }
+        }
+
+        private static void ClearSnapshots() {
+            for (int i = 0; i < Main.maxNPCs; i++) {
+                NPCSnapshotCaptured[i] = false;
+            }
+            for (int i = 0; i < Main.maxProjectiles; i++) {
+                ProjSnapshotCaptured[i] = false;
             }
         }
 
@@ -92,6 +189,7 @@ namespace CalamityOverhaul.Content.HackTimes
             if (!HackTimeFreeze.ShouldFreezeNPC(npc)) return true;
 
             int id = npc.whoAmI;
+            HackTimeFreeze.EnsureNPCSnapshot(npc);
 
             //将NPC钉在快照位置上，完全冻结
             npc.position = HackTimeFreeze.NPCFrozenPositions[id];
@@ -114,6 +212,7 @@ namespace CalamityOverhaul.Content.HackTimes
             if (!HackTimeFreeze.ShouldFreezeProjectile(proj)) return true;
 
             int id = proj.whoAmI;
+            HackTimeFreeze.EnsureProjectileSnapshot(proj);
 
             //将弹幕钉在快照位置上
             proj.position = HackTimeFreeze.ProjFrozenPositions[id];

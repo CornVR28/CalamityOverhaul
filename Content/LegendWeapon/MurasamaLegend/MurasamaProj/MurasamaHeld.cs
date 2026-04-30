@@ -17,7 +17,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.MurasamaLegend.MurasamaProj
         public override string Texture => CWRConstant.Projectile_Melee + "MurasamaHeld";
         private ref float Time => ref Projectile.ai[0];
         private ref int RisingDragon => ref Owner.CWR().RisingDragonCharged;
-        private bool OnFireR => DownRight && !DownLeft;
+        private bool CanStartRightAction => !Projectile.IsOwnedByLocalPlayer()
+            || (!Owner.CWR().UIMouseInterface && !Owner.cursorItemIconEnabled && Owner.cursorItemIconID == ItemID.None);
+        private bool OnFireR => DownRight && !DownLeft && CanStartRightAction;
         private int Level => MurasamaOverride.GetLevel(Item);
         private bool initialize;
         private bool oldRisingDragonFullSet;
@@ -119,7 +121,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.MurasamaLegend.MurasamaProj
                 }
             }
 
-            if (hasBoss && !DownRight && RisingDragon < MurasamaOverride.GetOnRDCD(Item)) {
+            if (hasBoss && !OnFireR && RisingDragon < MurasamaOverride.GetOnRDCD(Item)) {
                 noAttenuationTime = 4;
                 RisingDragon++;
             }
@@ -288,7 +290,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.MurasamaLegend.MurasamaProj
                 armRotSengsBack = 110;
             }
 
-            if (CWRServerConfig.Instance.WeaponHandheldDisplay || DownLeft || DownRight) {
+            if (CWRServerConfig.Instance.WeaponHandheldDisplay || DownLeft || OnFireR) {
                 Owner.SetCompositeArmFront(true, Player.CompositeArmStretchAmount.Full, MathHelper.ToRadians(armRotSengsFront) * -DirSign * safeGravDir);
                 Owner.SetCompositeArmBack(true, Player.CompositeArmStretchAmount.Full, MathHelper.ToRadians(armRotSengsBack) * -DirSign * safeGravDir);
             }
@@ -329,7 +331,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.MurasamaLegend.MurasamaProj
         public override void PostDraw(Color lightColor) => MuraChargeUI.Instance.DrawOverheadSorwdBar(Owner, RisingDragon, uiFrame, maxFrame);
 
         public override bool PreDraw(ref Color lightColor) {
-            if (!CWRServerConfig.Instance.WeaponHandheldDisplay && !(DownLeft || DownRight)) {
+            if (!CWRServerConfig.Instance.WeaponHandheldDisplay && !(DownLeft || OnFireR)) {
                 return false;
             }
             if (!noHasDownSkillProj) {

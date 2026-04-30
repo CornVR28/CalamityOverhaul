@@ -1,5 +1,6 @@
 ﻿using CalamityOverhaul.Common;
 using CalamityOverhaul.Content.PRTTypes;
+using InnoVault.GameContent.BaseEntity;
 using InnoVault.PRT;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Utilities;
@@ -18,7 +19,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
     /// <br/>飞行阶段：直线高速飞行，拖尾方形粒子
     /// <br/>命中阶段：生成 CyberDetonationProj 爆破特效
     /// </summary>
-    internal class CyberChargeOrbProj : ModProjectile, IAdditiveDrawable
+    internal class CyberChargeOrbProj : BaseHeldProj, IAdditiveDrawable
     {
         public override string Texture => CWRConstant.Placeholder;
 
@@ -129,8 +130,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         }
 
         public override void AI() {
-            Player owner = Main.player[Projectile.owner];
-            if (!owner.active || owner.dead) {
+            if (!Owner.active || Owner.dead) {
                 Projectile.Kill();
                 return;
             }
@@ -160,7 +160,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
 
             switch (State) {
                 case OrbState.Charging:
-                    AI_Charging(owner);
+                    AI_Charging(Owner);
                     break;
                 case OrbState.Flying:
                     AI_Flying();
@@ -181,12 +181,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             }
             else {
                 //后备：直接用玩家前方偏移
-                Vector2 fallbackDir = (Main.MouseWorld - owner.Center).SafeNormalize(Vector2.UnitX);
-                targetPos = owner.Center + fallbackDir * ChargeOffsetDist;
+                targetPos = owner.Center + UnitToMouseV * ChargeOffsetDist;
             }
 
             Projectile.Center = targetPos;
-            Vector2 aimDir = (Main.MouseWorld - owner.Center).SafeNormalize(Vector2.UnitX);
+            Vector2 aimDir = UnitToMouseV;
             Projectile.rotation = aimDir.ToRotation();
 
             //玩家面向光球方向
@@ -292,7 +291,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             //停止蓄力音效
             StopChargeSound();
             State = OrbState.Flying;
-            Vector2 aimDir = (Main.MouseWorld - owner.Center).SafeNormalize(Vector2.UnitX);
+            Vector2 aimDir = UnitToMouseV;
             flyAngle = aimDir.ToRotation();
             float timeScale = TimeGear.TimeScale;
             Projectile.velocity = aimDir * FlySpeed * timeScale;
@@ -300,7 +299,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             Projectile.timeLeft = 300; //飞行最多5秒
 
             //发射时粒子爆发
-            if (Main.netMode != NetmodeID.Server) {
+            if (!VaultUtils.isServer) {
                 float od = overdriveAmount;
                 Color launchMain = od > 0.3f ? Color.Lerp(FullCore, ODCore, od) : FullCore;
                 Color launchEdge = od > 0.3f ? Color.Lerp(FullGlow, ODGlow, od) : FullGlow;
@@ -313,9 +312,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
                         Main.rand.NextFloat(0.8f, 1.5f + od * 0.5f), Main.rand.Next(20, 35)
                     ));
                 }
+                SoundEngine.PlaySound("CalamityMod/Sounds/Item/NorfleetFire".GetSound() with { Pitch = -0.62f, Volume = 0.85f }, Projectile.Center);
             }
 
-            SoundEngine.PlaySound("CalamityMod/Sounds/Item/NorfleetFire".GetSound() with { Pitch = -0.62f, Volume = 0.85f }, Projectile.Center);
             Projectile.netUpdate = true;
         }
 
