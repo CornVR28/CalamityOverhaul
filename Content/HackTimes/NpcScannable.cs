@@ -43,7 +43,19 @@ namespace CalamityOverhaul.Content.HackTimes
 
             //TYPE
             labels[0] = HackTime.TypeLabel.Value;
-            if (npc.boss) {
+            if (npc.townNPC) {
+                values[0] = HackTime.TownNpc.Value;
+                colors[0] = HackTheme.Accent;
+            }
+            else if (npc.CountsAsACritter) {
+                values[0] = HackTime.PassiveCritter.Value;
+                colors[0] = HackTheme.Accent;
+            }
+            else if (npc.friendly) {
+                values[0] = HackTime.FriendlyUnit.Value;
+                colors[0] = HackTheme.AccentAlt;
+            }
+            else if (npc.boss) {
                 values[0] = HackTime.BossClass.Value;
                 colors[0] = HackTheme.Danger;
             }
@@ -51,13 +63,19 @@ namespace CalamityOverhaul.Content.HackTimes
                 values[0] = HackTime.EliteUnit.Value;
                 colors[0] = HackTheme.Uploading;
             }
+            else if (npc.damage <= 0) {
+                values[0] = HackTime.NeutralEntity.Value;
+                colors[0] = HackTheme.TextDim;
+            }
             else {
                 values[0] = HackTime.HostileEntity.Value;
                 colors[0] = HackTheme.TextBright;
             }
 
             //THREAT
-            int threatScore = (int)(npc.damage * 0.5f + npc.lifeMax * 0.01f + npc.defense);
+            int threatScore = IsNonCombatNpc(npc)
+                ? 0
+                : (int)(npc.damage * 0.5f + npc.lifeMax * 0.01f + npc.defense);
             labels[1] = HackTime.ThreatLabel.Value;
             if (threatScore > 500) {
                 values[1] = HackTime.ThreatExtreme.Value;
@@ -98,6 +116,10 @@ namespace CalamityOverhaul.Content.HackTimes
             values[5] = $"{npc.knockBackResist:F2}";
             colors[5] = npc.knockBackResist >= 0.9f ? HackTheme.Danger
                 : npc.knockBackResist >= 0.5f ? HackTheme.Uploading : HackTheme.TextBright;
+        }
+
+        private static bool IsNonCombatNpc(NPC npc) {
+            return npc.townNPC || npc.friendly || npc.CountsAsACritter || npc.damage <= 0;
         }
 
         #endregion

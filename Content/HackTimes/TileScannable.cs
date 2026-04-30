@@ -156,7 +156,7 @@ namespace CalamityOverhaul.Content.HackTimes
                 if (!string.IsNullOrEmpty(itemName)) return itemName;
             }
 
-            return $"TILE#{type:X3}";
+            return GetGenericFallbackName(type);
         }
 
         private static bool IsNumericOnly(string s) {
@@ -164,6 +164,17 @@ namespace CalamityOverhaul.Content.HackTimes
                 if (c < '0' || c > '9') return false;
             }
             return s.Length > 0;
+        }
+
+        private static string GetGenericFallbackName(int type) {
+            return IsMultiTileObject(type)
+                ? HackTime.TileScanMiscPile.Value
+                : HackTime.TileScanMisc.Value;
+        }
+
+        private static bool IsMultiTileObject(int type) {
+            TileObjectData data = TileObjectData.GetTileData(type, 0);
+            return data != null && (data.Width > 1 || data.Height > 1);
         }
 
         /// <summary>

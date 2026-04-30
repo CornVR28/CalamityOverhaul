@@ -41,6 +41,10 @@ namespace CalamityOverhaul.Content.HackTimes
         public static LocalizedText BossClass { get; private set; }
         public static LocalizedText EliteUnit { get; private set; }
         public static LocalizedText HostileEntity { get; private set; }
+        public static LocalizedText TownNpc { get; private set; }
+        public static LocalizedText FriendlyUnit { get; private set; }
+        public static LocalizedText PassiveCritter { get; private set; }
+        public static LocalizedText NeutralEntity { get; private set; }
         public static LocalizedText ThreatLabel { get; private set; }
         public static LocalizedText ThreatExtreme { get; private set; }
         public static LocalizedText ThreatHigh { get; private set; }
@@ -107,6 +111,8 @@ namespace CalamityOverhaul.Content.HackTimes
         public static LocalizedText TileScanSealed { get; private set; }
         public static LocalizedText TileScanOnline { get; private set; }
         public static LocalizedText TileScanIntact { get; private set; }
+        public static LocalizedText TileScanMisc { get; private set; }
+        public static LocalizedText TileScanMiscPile { get; private set; }
 
         //炮台扫描本地化字段
         public static LocalizedText TurretScanName { get; private set; }
@@ -153,6 +159,10 @@ namespace CalamityOverhaul.Content.HackTimes
             BossClass = this.GetLocalization(nameof(BossClass));
             EliteUnit = this.GetLocalization(nameof(EliteUnit));
             HostileEntity = this.GetLocalization(nameof(HostileEntity));
+            TownNpc = this.GetLocalization(nameof(TownNpc));
+            FriendlyUnit = this.GetLocalization(nameof(FriendlyUnit));
+            PassiveCritter = this.GetLocalization(nameof(PassiveCritter));
+            NeutralEntity = this.GetLocalization(nameof(NeutralEntity));
             ThreatLabel = this.GetLocalization(nameof(ThreatLabel));
             ThreatExtreme = this.GetLocalization(nameof(ThreatExtreme));
             ThreatHigh = this.GetLocalization(nameof(ThreatHigh));
@@ -217,6 +227,8 @@ namespace CalamityOverhaul.Content.HackTimes
             TileScanSealed = this.GetLocalization(nameof(TileScanSealed));
             TileScanOnline = this.GetLocalization(nameof(TileScanOnline));
             TileScanIntact = this.GetLocalization(nameof(TileScanIntact));
+            TileScanMisc = this.GetLocalization(nameof(TileScanMisc));
+            TileScanMiscPile = this.GetLocalization(nameof(TileScanMiscPile));
 
             TurretScanName = this.GetLocalization(nameof(TurretScanName));
             TurretScanLaserName = this.GetLocalization(nameof(TurretScanLaserName));

@@ -480,6 +480,10 @@ HackTime: {
 	BossClass: BOSS CLASS
 	EliteUnit: ELITE UNIT
 	HostileEntity: HOSTILE ENTITY
+	TownNpc: TOWN NPC
+	FriendlyUnit: FRIENDLY UNIT
+	PassiveCritter: PASSIVE CRITTER
+	NeutralEntity: NEUTRAL ENTITY
 	ThreatLabel: THREAT
 	ThreatExtreme: EXTREME
 	ThreatHigh: HIGH
@@ -527,6 +531,8 @@ HackTime: {
 	TileScanSealed: SEALED
 	TileScanOnline: ONLINE
 	TileScanIntact: INTACT
+	TileScanMisc: MISC
+	TileScanMiscPile: MISC PILE
 	CatParanormal: Mods.CalamityOverhaul.UI.HackTime.CatParanormal
 	WraithScanName: Mods.CalamityOverhaul.UI.HackTime.WraithScanName
 	WraithScanNameValue: Mods.CalamityOverhaul.UI.HackTime.WraithScanNameValue
