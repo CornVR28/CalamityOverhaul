@@ -70,7 +70,6 @@ namespace CalamityOverhaul.Content.HackTimes
         /// </summary>
         internal static bool ShouldFreezeNPC(NPC npc) {
             if (!npc.active) return false;
-            if (npc.friendly || npc.townNPC) return false;
             return true;
         }
 
@@ -79,9 +78,6 @@ namespace CalamityOverhaul.Content.HackTimes
         /// </summary>
         internal static bool ShouldFreezeProjectile(Projectile proj) {
             if (!proj.active) return false;
-            //玩家自己的弹幕不冻结
-            if (proj.friendly) return false;
-            if (Main.projPet[proj.type] || proj.minion || Main.projHook[proj.type]) return false;
             return true;
         }
     }
