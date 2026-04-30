@@ -1,4 +1,5 @@
 ﻿using CalamityOverhaul.Content.ADV.EntrustManager;
+using CalamityOverhaul.Content.ADV.UIEffect;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;
@@ -33,17 +34,21 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Quest
         private float pulse;
         private float wave;
         private float causticPhase;
+        private float shaderTime;
+        private const int ShaderEdgePad = 8;
 
         public void Update(Rectangle widgetRect, float slideProgress) {
             pulse += 0.028f;
             wave += 0.022f;
             causticPhase += 0.015f;
+            shaderTime += 0.016f;
             if (pulse > MathHelper.TwoPi) pulse -= MathHelper.TwoPi;
             if (wave > MathHelper.TwoPi) wave -= MathHelper.TwoPi;
             if (causticPhase > MathHelper.TwoPi * 3f) causticPhase -= MathHelper.TwoPi * 3f;
+            if (shaderTime > 10000f) shaderTime -= 10000f;
         }
 
-        public void Reset() { pulse = wave = causticPhase = 0f; }
+        public void Reset() { pulse = wave = causticPhase = shaderTime = 0f; }
 
         public void DrawWidgetBackground(SpriteBatch sb, Rectangle rect, float alpha) {
             var px = VaultAsset.placeholder2.Value;
@@ -52,6 +57,15 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Quest
             //软投影（偏右下，模拟水下漫射）
             sb.Draw(px, new Rectangle(rect.X + 2, rect.Y + 3, rect.Width, rect.Height),
                 uv, Color.Black * (alpha * 0.4f));
+
+            if (SeaShaderPanel.Available) {
+                float pulse01 = MathF.Sin(pulse * 1.5f) * 0.5f + 0.5f;
+                float shimmer = MathF.Sin(wave * 1.2f) * 0.5f + 0.5f;
+                Color tint = Color.Lerp(new Color(210, 235, 255), Color.White, shimmer * 0.25f);
+                SeaShaderPanel.Draw(sb, rect, alpha * 0.97f, pulse01, shaderTime, ShaderEdgePad, tint);
+                sb.Draw(px, rect, uv, BioGlow * (alpha * 0.018f * pulse01));
+                return;
+            }
 
             //纵向深海渐变（由深到浅微曲线）
             int segs = 14;

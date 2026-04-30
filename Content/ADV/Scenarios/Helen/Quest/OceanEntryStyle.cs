@@ -1,4 +1,5 @@
 ﻿using CalamityOverhaul.Content.ADV.EntrustManager;
+using CalamityOverhaul.Content.ADV.UIEffect;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 
@@ -59,6 +60,70 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Quest
             var px = VaultAsset.placeholder2.Value;
             var uv = new Rectangle(0, 0, 1, 1);
 
+            if (SeaShaderPanel.Available) {
+                DrawShaderBackground(sb, entryRect, entry, isSelected, isHovered, alpha);
+            }
+            else {
+                DrawFallbackBackground(sb, entryRect, isSelected, isHovered, alpha);
+            }
+
+            //水面波光碎片（顶部边缘间断的白色亮点）
+            int step = 3;
+            for (int x = 0; x < entryRect.Width; x += step) {
+                float shimmer = MathF.Sin(waveTime * 3f + x * 0.08f)
+                              * MathF.Sin(waveTime * 1.7f + x * 0.05f);
+                if (shimmer > 0.35f) {
+                    float si = (shimmer - 0.35f) / 0.65f * 0.18f;
+                    sb.Draw(px, new Rectangle(entryRect.X + x, entryRect.Y + 1, step, 1),
+                        uv, FoamWhite * (alpha * si));
+                }
+            }
+
+            //左侧生物发光带（4px宽主色带 + 光晕 + 高亮芯线）
+            Color statusC = GetAccentColor(entry.Status, 1f);
+            float glowPulse = MathF.Sin(waveTime * 2f) * 0.3f + 0.7f;
+            sb.Draw(px, new Rectangle(entryRect.X, entryRect.Y + 1, 4, entryRect.Height - 2),
+                uv, statusC * (alpha * glowPulse));
+            sb.Draw(px, new Rectangle(entryRect.X + 4, entryRect.Y + 3, 8, entryRect.Height - 6),
+                uv, statusC * (alpha * glowPulse * 0.1f));
+            sb.Draw(px, new Rectangle(entryRect.X + 1, entryRect.Y + 2, 1, entryRect.Height - 4),
+                uv, FoamWhite * (alpha * glowPulse * 0.3f));
+
+            //波浪形上下边框（每3px一段，亮度随正弦变化）
+            for (int x = 0; x < entryRect.Width; x += step) {
+                float topB = MathF.Sin(waveTime * 1.5f + x * 0.06f) * 0.5f + 0.5f;
+                float botB = MathF.Sin(waveTime * 1.2f + x * 0.05f + 2f) * 0.5f + 0.5f;
+                int w = Math.Min(step, entryRect.Width - x);
+                sb.Draw(px, new Rectangle(entryRect.X + x, entryRect.Y, w, 1),
+                    uv, Color.Lerp(CausticDim, WaveCrest, topB) * (alpha * 0.5f));
+                sb.Draw(px, new Rectangle(entryRect.X + x, entryRect.Bottom - 1, w, 1),
+                    uv, Color.Lerp(CausticDim, CoralAccent, botB) * (alpha * 0.3f));
+            }
+
+            return true;
+        }
+
+        private void DrawShaderBackground(SpriteBatch sb, Rectangle entryRect, EntrustEntryData entry,
+            bool isSelected, bool isHovered, float alpha) {
+            float pulse01 = MathF.Sin(causticTime * 1.7f) * 0.5f + 0.5f;
+            Color statusTint = GetAccentColor(entry.Status, 1f);
+            Color stateTint = isSelected ? SelectedTint
+                : isHovered ? HoverTint
+                : Color.White;
+
+            Color tint = Color.Lerp(new Color(220, 238, 255), statusTint, 0.08f);
+            if (isSelected || isHovered) {
+                tint = Color.Lerp(tint, stateTint, isSelected ? 0.22f : 0.14f);
+            }
+
+            SeaShaderPanel.Draw(sb, entryRect, alpha * (isSelected ? 1.0f : 0.93f), pulse01, shaderTime, ShaderEdgePad, tint);
+        }
+
+        private void DrawFallbackBackground(SpriteBatch sb, Rectangle entryRect,
+            bool isSelected, bool isHovered, float alpha) {
+            var px = VaultAsset.placeholder2.Value;
+            var uv = new Rectangle(0, 0, 1, 1);
+
             //多段海水渐变，叠加双层波浪色相偏移
             int segs = 16;
             for (int i = 0; i < segs; i++) {
@@ -111,41 +176,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Quest
                         sb.Draw(px, gr, uv, CausticBright * (alpha * bright * (0.3f + lt * 0.7f)));
                 }
             }
-
-            //水面波光碎片（顶部边缘间断的白色亮点）
-            int step = 3;
-            for (int x = 0; x < entryRect.Width; x += step) {
-                float shimmer = MathF.Sin(waveTime * 3f + x * 0.08f)
-                              * MathF.Sin(waveTime * 1.7f + x * 0.05f);
-                if (shimmer > 0.35f) {
-                    float si = (shimmer - 0.35f) / 0.65f * 0.18f;
-                    sb.Draw(px, new Rectangle(entryRect.X + x, entryRect.Y + 1, step, 1),
-                        uv, FoamWhite * (alpha * si));
-                }
-            }
-
-            //左侧生物发光带（4px宽主色带 + 光晕 + 高亮芯线）
-            Color statusC = GetAccentColor(entry.Status, 1f);
-            float glowPulse = MathF.Sin(waveTime * 2f) * 0.3f + 0.7f;
-            sb.Draw(px, new Rectangle(entryRect.X, entryRect.Y + 1, 4, entryRect.Height - 2),
-                uv, statusC * (alpha * glowPulse));
-            sb.Draw(px, new Rectangle(entryRect.X + 4, entryRect.Y + 3, 8, entryRect.Height - 6),
-                uv, statusC * (alpha * glowPulse * 0.1f));
-            sb.Draw(px, new Rectangle(entryRect.X + 1, entryRect.Y + 2, 1, entryRect.Height - 4),
-                uv, FoamWhite * (alpha * glowPulse * 0.3f));
-
-            //波浪形上下边框（每3px一段，亮度随正弦变化）
-            for (int x = 0; x < entryRect.Width; x += step) {
-                float topB = MathF.Sin(waveTime * 1.5f + x * 0.06f) * 0.5f + 0.5f;
-                float botB = MathF.Sin(waveTime * 1.2f + x * 0.05f + 2f) * 0.5f + 0.5f;
-                int w = Math.Min(step, entryRect.Width - x);
-                sb.Draw(px, new Rectangle(entryRect.X + x, entryRect.Y, w, 1),
-                    uv, Color.Lerp(CausticDim, WaveCrest, topB) * (alpha * 0.5f));
-                sb.Draw(px, new Rectangle(entryRect.X + x, entryRect.Bottom - 1, w, 1),
-                    uv, Color.Lerp(CausticDim, CoralAccent, botB) * (alpha * 0.3f));
-            }
-
-            return true;
         }
 
         public float DrawEntryIcon(SpriteBatch sb, Vector2 titlePos, EntrustEntryData entry, float alpha) {
