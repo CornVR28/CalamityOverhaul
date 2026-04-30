@@ -529,6 +529,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.VoidPortals
             };
             string[] wrapped = Utils.WordwrapString(body, font, rect.Width - 90, 8, out _);
             for (int i = 0; i < wrapped.Length; i++) {
+                if (string.IsNullOrEmpty(wrapped[i])) continue;
                 Utils.DrawBorderString(sb, wrapped[i], pos + new Vector2(0f, 98f + i * 24f), bodyColor, 0.65f);
             }
 
