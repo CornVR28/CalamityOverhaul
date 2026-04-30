@@ -1611,6 +1611,16 @@ SandevistansItem: {
 	CyberDescription: 减缓感知时间流速70%，持续5秒。冷却15秒。
 }
 
+RamCapacityUpgradeChip: {
+	DisplayName: RAM容量提升芯片
+	Tooltip: 使用后永久增加1点基础RAM上限
+}
+
+RamRecoveryUpgradeChip: {
+	DisplayName: RAM恢复提升芯片
+	Tooltip: 使用后永久增加0.05点每秒基础RAM恢复速度
+}
+
 Mewtwo: {
 	// DisplayName: Mewtwo
 	// Tooltip: ""

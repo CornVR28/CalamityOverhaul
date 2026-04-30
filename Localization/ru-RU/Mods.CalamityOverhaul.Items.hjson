@@ -1635,6 +1635,16 @@ SandevistansItem: {
 	// CyberDescription: Militech Sandevistan Mk.5 — Slows perceived time by 70% for 3.5 seconds. Cooldown 15s.
 }
 
+RamCapacityUpgradeChip: {
+	// DisplayName: RAM Capacity Upgrade Chip
+	// Tooltip: Permanently increases base maximum RAM by 1
+}
+
+RamRecoveryUpgradeChip: {
+	// DisplayName: RAM Recovery Upgrade Chip
+	// Tooltip: Permanently increases base RAM recovery speed by 0.05 per second
+}
+
 Mewtwo: {
 	// DisplayName: Mewtwo
 	// Tooltip: ""
