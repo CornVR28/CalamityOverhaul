@@ -1,4 +1,5 @@
 ﻿using CalamityOverhaul.Common;
+using CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
@@ -77,6 +78,7 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
 
         public override void UpdateUI(GameTime gameTime) {
             if (Main.gameMenu) return;
+            if (CybCourse.IsActive) return;
 
             var ui = QuestManagerUI.Instance;
             if (ui == null) return;
@@ -112,6 +114,7 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
 
         public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers) {
             if (currentPhase != LeadPhase.KeyPrompt && currentPhase != LeadPhase.PanelIntro) return;
+            if (CybCourse.IsActive) return;
 
             int idx = layers.FindIndex(l => l.Name == "Vanilla: Mouse Text");
             if (idx == -1) return;

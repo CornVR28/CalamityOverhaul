@@ -60,6 +60,57 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel
             BlockedBy = ScenarioBlockers.Boss | ScenarioBlockers.BossRush | ScenarioBlockers.ActiveScenario,
         };
 
+        internal static bool CanStartSHPCTrialQuests(Player player) {
+            if (player == null || !player.active || !player.HasItem(CWRID.Item_SHPC)) {
+                return false;
+            }
+
+            if (!player.TryGetADVSave(out var save)) {
+                return false;
+            }
+
+            var data = save.Get<ShepelADVData>();
+            if (data.FirstSHPCIntroCompleted) {
+                return true;
+            }
+
+            if (data.FirstSHPCObtained && !ScenarioManager.IsActive()) {
+                data.FirstSHPCIntroCompleted = true;
+                return true;
+            }
+
+            return false;
+        }
+
+        private static void MarkFirstSHPCIntroCompleted() {
+            if (Main.LocalPlayer.TryGetADVSave(out var save)) {
+                save.Get<ShepelADVData>().FirstSHPCIntroCompleted = true;
+            }
+        }
+
+        private static void MarkCybCourseMewtwoCompensationPending() {
+            if (Main.LocalPlayer.TryGetADVSave(out var save)) {
+                save.Get<ShepelADVData>().PendingCybCourseMewtwoCompensation = true;
+            }
+        }
+
+        internal static void TryGrantCybCourseMewtwoCompensation(Player player) {
+            if (player == null || !player.active || !player.TryGetADVSave(out var save)) {
+                return;
+            }
+
+            var data = save.Get<ShepelADVData>();
+            if (!data.PendingCybCourseMewtwoCompensation) {
+                return;
+            }
+
+            int mewtwoType = ModContent.ItemType<Mewtwo>();
+            if (!player.HasItem(mewtwoType)) {
+                player.QuickSpawnItem(player.GetSource_GiftOrReward(), mewtwoType, 1);
+            }
+            data.PendingCybCourseMewtwoCompensation = false;
+        }
+
         protected override void Build() {
             DialogueBoxBase.RegisterPortrait(RolenameSHPC.Value, texture: null);
             DialogueBoxBase.SetPortraitStyle(RolenameSHPC.Value, silhouette: false);
@@ -86,6 +137,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel
 
         public void Choice2() {
             //TODO
+            MarkFirstSHPCIntroCompleted();
             Complete();
         }
 
@@ -171,6 +223,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel
                 }
             }
             protected override void OnScenarioComplete() {
+                MarkFirstSHPCIntroCompleted();
+                MarkCybCourseMewtwoCompensationPending();
                 if (Main.myPlayer == Main.LocalPlayer.whoAmI) {
                     CybCourse.Enter();
                 }
@@ -214,6 +268,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel
                     portrait.SkipFadeIn();
                     portrait.currentFace = ShepelFullBodyPortrait.Face.None;
                 }
+            }
+            protected override void OnScenarioComplete() {
+                MarkFirstSHPCIntroCompleted();
             }
         }
     }

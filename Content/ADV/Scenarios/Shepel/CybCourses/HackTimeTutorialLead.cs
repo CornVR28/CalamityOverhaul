@@ -62,9 +62,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
             _textCalibrating = this.GetLocalization("HT_Calibrating", () => "DISCONNECTING...");
             _textNextBtn = this.GetLocalization("HT_NextBtn", () => "NEXT  >");
             _textHintStuck = this.GetLocalization("HT_HintStuck", () => "// HINT: 点击 NEXT 按钮可强制跳过");
-            _textKeyUnbound = this.GetLocalization("HT_KeyUnbound", () => "未绑定·按 [N] 临时启用");
+            _textKeyUnbound = this.GetLocalization("HT_KeyUnbound", () => "N（临时开关）");
             _textKeyHintUnbound = this.GetLocalization("HT_KeyHintUnbound",
-                () => "// 提示：未绑定骇客时间快捷键，可在 设置 中绑定。");
+                () => "// 提示：未绑定骇客时间快捷键时，本教程内可用 [N] 临时开关；建议在 设置 > 控制 中绑定。");
         }
 
         //返回当前骇客时间快捷键的显示字符串，未绑定时返回带括号的提示文本
@@ -226,8 +226,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
                         EnsureTankAlive();
                     }
 
-                    //教学的0/5步要求按下骇客时间快捷键。当玩家未绑定该快捷键时，
-                    //允许使用默认的 N 键作为兜底，避免引导彻底卡死
+                    //玩家未绑定骇客时间快捷键时，教程内持续提供 N 键临时开关，
+                    //避免按 N 进入后因教程推进而失去关闭入口
                     HandleHackToggleKeyFallback();
 
                     bool isAuto = StepIsAuto[_currentStep];
@@ -283,11 +283,11 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
             }
         }
 
-        //在玩家未绑定HackTime_Toggle快捷键时，使用默认的 N 键作为兜底交互
-        //仅在step 0/5（要求按键开启骇客时间）时启用，避免与其他流程冲突
+        //在玩家未绑定HackTime_Toggle快捷键时，使用默认的 N 键作为教程内兜底交互
+        //整个教程运行期间保持可用，保证未绑定玩家既能进入也能退出骇客时间
         //当玩家已绑定该快捷键时不接管，防止与HackTimeTargeting.ProcessTriggers的JustPressed重复触发
         private static void HandleHackToggleKeyFallback() {
-            if (_currentStep != 0 && _currentStep != 5) {
+            if (_phase != Phase.Running) {
                 _prevFallbackKeyDown = false;
                 return;
             }
@@ -303,8 +303,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
 
             bool nowDown = Main.keyState.IsKeyDown(Keys.N);
             if (nowDown && !_prevFallbackKeyDown) {
-                if (HackTime.Active) HackTime.Deactivate();
-                else HackTime.Activate();
+                HackTime.Toggle();
             }
             _prevFallbackKeyDown = nowDown;
         }

@@ -1,4 +1,5 @@
 using CalamityOverhaul.Content.ADV.EntrustManager;
+using CalamityOverhaul.Content.ADV.Scenarios.Shepel;
 using Terraria;
 using Terraria.ID;
 using Terraria.Localization;
@@ -121,7 +122,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.TrialQuests
         public override void PostUpdateWorld() {
             if (Main.dedServ || Main.gameMenu) return;
 
-            if (!Main.LocalPlayer.HasItem(CWRID.Item_SHPC)) {
+            if (!FirstMetShepel.CanStartSHPCTrialQuests(Main.LocalPlayer)) {
                 return;
             }
 

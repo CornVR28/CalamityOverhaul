@@ -21,6 +21,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
             CybCourseCompletePanel.Hide();
             ScenarioManager.Reset<CybCourseOutroDialogue>();
             HackTime.InfiniteHack = false;
+            FirstMetShepel.TryGrantCybCourseMewtwoCompensation(Main.LocalPlayer);
             CybCourseWorld.Exit();
         }
 
