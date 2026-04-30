@@ -1,5 +1,7 @@
-﻿using System;
+﻿using CalamityOverhaul.Common;
+using System;
 using Terraria;
+using Terraria.Audio;
 using Terraria.DataStructures;
 using Terraria.ModLoader;
 
@@ -92,6 +94,10 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.VoidPortals
             savedZoom = Main.GameZoomTarget;
             currentZoom = savedZoom;
             cameraInit = false;
+
+            if (!VaultUtils.isServer) {
+                SoundEngine.PlaySound(CWRSound.VoidTruned);
+            }
         }
 
         /// <summary>

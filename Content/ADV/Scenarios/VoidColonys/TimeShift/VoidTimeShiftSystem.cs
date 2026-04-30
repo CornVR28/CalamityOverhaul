@@ -1,6 +1,8 @@
-﻿using InnoVault.PRT;
+﻿using CalamityOverhaul.Common;
+using InnoVault.PRT;
 using System;
 using Terraria;
+using Terraria.Audio;
 
 namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.TimeShift
 {
@@ -147,6 +149,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.TimeShift
                 toggleRequested = false;
                 transitionTimer = TransitionDuration;
                 CurrentEra = CurrentEra == VoidEra.Present ? VoidEra.Past : VoidEra.Present;
+                if (!VaultUtils.isServer) {
+                    SoundEngine.PlaySound(CurrentEra == VoidEra.Present ? CWRSound.InvasionPast : CWRSound.InvasionPastPosten);
+                }
             }
 
             if (transitionTimer > 0) {

@@ -106,7 +106,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.VoidPortals
             if (!CanTeleport || player == null || !player.active) return;
             AbandonedPortalSession.RequestClose();
             player.GetModPlayer<VoidTransportPlayer>().StartTransport(PortalMouthCenter, VoidColony.Enter);
-            SoundEngine.PlaySound(SoundID.Item122 with { Volume = 0.8f, Pitch = -0.45f }, WorldCenter);
         }
 
         private void UpdateRepair() {

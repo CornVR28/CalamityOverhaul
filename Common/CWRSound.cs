@@ -102,5 +102,8 @@ namespace CalamityOverhaul.Common
         public static SoundStyle Hacker;
         public static SoundStyle Scanning;
         public static SoundStyle ShortCircuit;
+        public static SoundStyle VoidTruned;
+        public static SoundStyle InvasionPast;
+        public static SoundStyle InvasionPastPosten;
     }
 }
