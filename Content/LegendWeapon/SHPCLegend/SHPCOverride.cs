@@ -40,7 +40,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
         /// <summary>
         /// 左键散射角度（弧度）
         /// </summary>
-        private const float BeamSpreadAngle = 0.12f;
+        private const float BeamSpreadAngle = 0.08f;
 
         public override int TargetID => CWRID.Item_SHPC;
 
@@ -145,23 +145,23 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
 
         public static void LoadWeaponData() {
             DamageDictionary = new Dictionary<int, int>(){
-                {0, 15 },
-                {1, 18 },
-                {2, 23 },
-                {3, 28 },
-                {4, 35 },
-                {5, 117 },
-                {6, 130 },
-                {7, 150 },
-                {8, 175 },
-                {9, 200 },
-                {10, 280 },
-                {11, 540 },
-                {12, 700 },
-                {13, 1400 },
-                {14, 2000 },
-                {15, 3001 },
-                {16, 8888 }
+                {0, 8 },
+                {1, 10 },
+                {2, 13 },
+                {3, 17 },
+                {4, 24 },
+                {5, 48 },
+                {6, 55 },
+                {7, 66 },
+                {8, 88 },
+                {9, 110 },
+                {10, 140 },
+                {11, 260 },
+                {12, 380 },
+                {13, 500 },
+                {14, 1000 },
+                {15, 2077 },
+                {16, 6666 }
             };
         }
 
@@ -223,7 +223,6 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
         /// </summary>
         public override bool? On_Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source,
             Vector2 position, Vector2 velocity, int type, int damage, float knockback) {
-
             if (player.altFunctionUse == 2) {
                 // 右键：先生成手持弹幕（绘制武器 + 控制手臂动画）
                 int heldIdx = Projectile.NewProjectile(source, player.Center, Vector2.Zero,
@@ -234,7 +233,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
                 Vector2 spawnPos = player.Center + velocity.SafeNormalize(Vector2.UnitX) * 70f;
                 Projectile.NewProjectile(source, spawnPos, Vector2.Zero,
                     ModContent.ProjectileType<CyberChargeOrbProj>(),
-                    damage * 2, knockback, player.whoAmI,
+                    damage * 3, knockback, player.whoAmI,
                     ai1: heldIdx);
             }
             else {

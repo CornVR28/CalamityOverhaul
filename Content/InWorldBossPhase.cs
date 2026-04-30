@@ -294,7 +294,7 @@ namespace CalamityOverhaul.Content
                 return level;
             }
 
-            if (DownedV5.Invoke()) {
+            if (DownedV5.Invoke() || Downed7.Invoke() || Downed8.Invoke()) {
                 level = 6;
             }
             else {
@@ -357,7 +357,7 @@ namespace CalamityOverhaul.Content
                 return level;
             }
 
-            if (Downed29.Invoke() || Downed30.Invoke()) {
+            if (Downed29.Invoke() && Downed30.Invoke()) {
                 level = 15;
             }
             else {
