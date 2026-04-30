@@ -477,6 +477,10 @@ HackTime: {
 	// BossClass: BOSS CLASS
 	// EliteUnit: ELITE UNIT
 	// HostileEntity: HOSTILE ENTITY
+	// TownNpc: TOWN NPC
+	// FriendlyUnit: FRIENDLY UNIT
+	// PassiveCritter: PASSIVE CRITTER
+	// NeutralEntity: NEUTRAL ENTITY
 	// ThreatLabel: THREAT
 	// ThreatExtreme: EXTREME
 	// ThreatHigh: HIGH
@@ -524,6 +528,55 @@ HackTime: {
 	// TileScanSealed: SEALED
 	// TileScanOnline: ONLINE
 	// TileScanIntact: INTACT
+	// TileScanMisc: MISC
+	// TileScanMiscPile: MISC PILE
+	// ProjectileScanName: NAME
+	// ProjectileScanClass: CLASS
+	// ProjectileScanSpeed: SPEED
+	// ProjectileScanKnockback: KNOCKBACK
+	// ProjectileScanPenetrate: PENETRATION
+	// ProjectileScanTimeLeft: TIME LEFT
+	// ProjectileScanOwner: SOURCE
+	// ProjectileScanAI: AI
+	// ProjectileScanPosition: POSITION
+	// ProjectileScanHostile: HOSTILE PROJECTILE
+	// ProjectileScanFriendly: FRIENDLY PROJECTILE
+	// ProjectileScanNeutral: NEUTRAL PROJECTILE
+	// ProjectileScanMinion: MINION PROJECTILE
+	// ProjectileScanSentry: SENTRY PROJECTILE
+	// ProjectileScanTrap: TRAP PROJECTILE
+	// ProjectileScanInfinite: INFINITE
+	// ProjectileScanOwnerWorld: WORLD/ENVIRONMENT
+	// WaterScanLiquid: LIQUID
+	// WaterScanEnvironment: ENVIRONMENT
+	// WaterScanDepth: DEPTH
+	// WaterScanWorldLayer: WORLD LAYER
+	// WaterScanTileCoord: TILE COORD
+	// WaterScanContainment: CONTAINMENT
+	// WaterScanWater: WATER
+	// WaterScanLava: LAVA
+	// WaterScanHoney: HONEY
+	// WaterScanShimmer: SHIMMER
+	// WaterScanLayerSky: SKY
+	// WaterScanLayerSurface: SURFACE
+	// WaterScanLayerUnderground: UNDERGROUND
+	// WaterScanLayerCavern: CAVERN
+	// WaterScanLayerUnderworld: UNDERWORLD
+	// WaterScanEnvOcean: OCEAN WATER
+	// WaterScanEnvDesert: DESERT WATER
+	// WaterScanEnvSnow: SNOW WATER
+	// WaterScanEnvJungle: JUNGLE WATER
+	// WaterScanEnvCorruption: CORRUPTION WATER
+	// WaterScanEnvCrimson: CRIMSON WATER
+	// WaterScanEnvHallow: HALLOWED WATER
+	// WaterScanEnvDungeon: DUNGEON WATER
+	// WaterScanEnvMushroom: MUSHROOM WATER
+	// WaterScanEnvUnderworld: UNDERWORLD LIQUID
+	// WaterScanContainmentPocket: CONTAINED POCKET
+	// WaterScanContainmentChannel: CHANNEL
+	// WaterScanContainmentOpen: OPEN BODY
+	// WaterScanStatusStill: STILL
+	// WaterScanStatusFlowing: FLOWING
 	// CatParanormal: Mods.CalamityOverhaul.UI.HackTime.CatParanormal
 	// WraithScanName: Mods.CalamityOverhaul.UI.HackTime.WraithScanName
 	// WraithScanNameValue: Mods.CalamityOverhaul.UI.HackTime.WraithScanNameValue

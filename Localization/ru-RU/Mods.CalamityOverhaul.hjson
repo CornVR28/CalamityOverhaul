@@ -142,9 +142,11 @@ QuickHack: {
 
 HackTargetType: {
 	// NpcTargetType.DisplayName: Npc Target Type
+	// ProjectileTargetType.DisplayName: Projectile Target Type
 	// SignalTowerTargetType.DisplayName: Signal Tower Target Type
 	// TileTargetType.DisplayName: Tile Target Type
 	// TurretTargetType.DisplayName: Turret Target Type
+	// WaterTargetType.DisplayName: Liquid Target Type
 	// WraithTargetType.DisplayName: Wraith Target Type
 }
 
@@ -274,4 +276,5 @@ TileNameFallback: {
 	// CrimsonAltar: Crimson Altar
 	// Tile192: Leaves of the Tree of Life
 	// Tile187: Weed
+	// Tile352: Thorns
 }

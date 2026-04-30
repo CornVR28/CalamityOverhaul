@@ -1,4 +1,5 @@
 ﻿using CalamityOverhaul.Common;
+using InnoVault.Trails;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
@@ -11,8 +12,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend
 {
     ///<summary>
     ///海洋洪流子弹
+    ///<br/>核心水流通过 <see cref="IPrimitiveDrawable"/> + <c>OceanCurrentTrail.fx</c> 着色器渲染（域扭曲噪声卷流、焦散、流条、边缘泡沫带）
+    ///<br/>水滴、泡沫与头部水球通过 <c>OceanWaterBlob.fx</c> 着色器渲染（程序化折射、动态焦散、自适应泡沫、生物荧光内核）
+    ///<br/>CPU 端只负责物理与状态机；所有视觉合成均交由 GPU
     ///</summary>
-    internal class OceanCurrent : ModProjectile, IAdditiveDrawable
+    internal class OceanCurrent : ModProjectile, IAdditiveDrawable, IPrimitiveDrawable
     {
         public override string Texture => CWRConstant.Placeholder;
 
@@ -43,9 +47,13 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend
         private readonly List<MarineLife> marineLifeParticles = new();
         private const int MaxMarineLife = 15;
 
-        //核心水流拖尾
-        private readonly List<Vector2> coreTrail = new();
-        private const int MaxCoreTrail = 20;
+        //GPU 核心水流条带（替代纯CPU线段绘制）
+        private const int TrailLen = 32;
+        private Vector2[] trailPositions;
+        private int trailValidCount;
+        private Trail trail;
+        ///<summary>核心水流绘制淡入/淡出系数（流注阶段过度到飞溅/消散时平滑收尾）</summary>
+        private float streamFade;
 
         //物理参数
         private const float WaterViscosity = 0.985f;
@@ -127,6 +135,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend
 
             //更新所有粒子系统
             UpdateCoreTrail();
+            UpdateStreamFade();
             UpdateWaterDroplets();
             UpdateFoamParticles();
             UpdateMarineLife();
@@ -478,12 +487,34 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend
             }
         }
 
-        //更新核心拖尾
+        //更新核心拖尾（固定长度数组，头部为 [0]，尾端为 [TrailLen-1]）
         private void UpdateCoreTrail() {
-            coreTrail.Insert(0, Projectile.Center);
-            if (coreTrail.Count > MaxCoreTrail) {
-                coreTrail.RemoveAt(coreTrail.Count - 1);
+            trailPositions ??= new Vector2[TrailLen];
+            if (trailValidCount == 0) {
+                for (int i = 0; i < TrailLen; i++) {
+                    trailPositions[i] = Projectile.Center;
+                }
+                trailValidCount = 1;
+                return;
             }
+
+            for (int i = TrailLen - 1; i > 0; i--) {
+                trailPositions[i] = trailPositions[i - 1];
+            }
+            trailPositions[0] = Projectile.Center;
+            if (trailValidCount < TrailLen) trailValidCount++;
+        }
+
+        //依据状态平滑推进 streamFade（拖尾整体亮度/可见度）
+        private void UpdateStreamFade() {
+            float target = State switch {
+                OceanState.Streaming => 1f,
+                OceanState.Splashing => 0.45f,
+                OceanState.Dispersing => 0f,
+                _ => 0f
+            };
+            streamFade = MathHelper.Lerp(streamFade, target, 0.16f);
+            if (streamFade < 0.002f) streamFade = 0f;
         }
 
         //进入飞溅状态
@@ -614,131 +645,225 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend
 
         public override bool PreDraw(ref Color lightColor) => false;
 
-        void IAdditiveDrawable.DrawAdditiveAfterNon(SpriteBatch spriteBatch) {
-            //绘制海洋生物
-            DrawMarineLife();
+        //============================================================
+        //拖尾宽度函数：头部快速上升 → 沿途逐渐收窄 → 末端收为 0
+        //与 streamFade 联动以平滑融入飞溅/消散阶段
+        //============================================================
+        private float TrailWidthFunction(float progress) {
+            float validRatio = MathF.Max((float)trailValidCount / TrailLen, 0.1f);
+            float t = MathHelper.Clamp(progress / validRatio, 0f, 1f);
 
-            //绘制泡沫
-            DrawFoamParticles();
+            //头部光锥：在前 6% 段从 0 急速升至 1（消除起手时的硬切口）
+            float noseRise = MathF.Sin(MathF.Min(t / 0.06f, 1f) * MathHelper.PiOver2);
+            //尾端平滑收尖
+            float tailTaper = 1f - MathF.Pow(t, 1.85f);
+            float width = noseRise * tailTaper;
 
-            //绘制水滴
-            DrawWaterDroplets();
-
-            //绘制核心水流
-            if (State == OceanState.Streaming) {
-                DrawStreamCore();
-            }
+            return MathF.Max(width, 0f) * (Projectile.width * 0.3f) * (0.35f + 0.65f * streamFade);
         }
 
-        //绘制水滴粒子(适配3x3 Spray帧图)
-        private void DrawWaterDroplets() {
-            SpriteBatch sb = Main.spriteBatch;
-            Texture2D glowTex = CWRAsset.Spray.Value; //3x3 水滴帧图
-            Texture2D streamTex = CWRAsset.LightShot.Value;
+        private static Color TrailColorFunction(Vector2 _) => Color.White;
 
-            int columns = 3;
-            int rows = 3;
-            int frameWidth = glowTex.Width / columns;
-            int frameHeight = glowTex.Height / rows;
+        //============================================================
+        //IPrimitiveDrawable —— GPU 核心水流条带渲染
+        //域扭曲噪声卷流 + 焦散波光 + 流条 + 边缘泡沫带
+        //============================================================
+        void IPrimitiveDrawable.DrawPrimitives() {
+            if (trailPositions == null || trailValidCount < 3) return;
+            if (streamFade < 0.01f) return;
+
+            Effect shader = EffectLoader.OceanCurrentTrail?.Value;
+            if (shader == null) return;
+            Texture2D noise = CWRAsset.PerlinNoise?.Value;
+            Texture2D flow = CWRAsset.Airflow?.Value;
+            if (noise == null || flow == null) return;
+
+            trail ??= new Trail(trailPositions, TrailWidthFunction, TrailColorFunction);
+            trail.TrailPositions = trailPositions;
+
+            //头部不透明度系数：飞溅阶段进一步乘以 Projectile.alpha 衰减
+            float alphaMult = 1f - Projectile.alpha / 255f;
+            float speed = Projectile.velocity.Length();
+            float speedRatio = MathHelper.Clamp(speed / 18f, 0f, 1f);
+            float foamDensity = MathHelper.Clamp(speedRatio * 0.7f + 0.30f, 0f, 1f);
+
+            shader.Parameters["transformMatrix"]?.SetValue(VaultUtils.GetTransfromMatrix());
+            shader.Parameters["uTime"]?.SetValue((float)Main.timeForVisualEffects * 0.045f);
+            shader.Parameters["fadeAlpha"]?.SetValue(MathHelper.Clamp(streamFade * alphaMult, 0f, 1f));
+            shader.Parameters["pulse"]?.SetValue(glowPulse);
+            shader.Parameters["speedRatio"]?.SetValue(speedRatio);
+            shader.Parameters["foamDensity"]?.SetValue(foamDensity);
+            shader.Parameters["deepColor"]?.SetValue(DeepOcean.ToVector3());
+            shader.Parameters["shallowColor"]?.SetValue(ShallowOcean.ToVector3());
+            shader.Parameters["foamColor"]?.SetValue(OceanFoam.ToVector3());
+            shader.Parameters["bioColor"]?.SetValue(BioluminescentBlue.ToVector3());
+            shader.Parameters["uNoiseTex"]?.SetValue(noise);
+            shader.Parameters["uFlowTex"]?.SetValue(flow);
+
+            GraphicsDevice device = Main.graphics.GraphicsDevice;
+            BlendState prevBlend = device.BlendState;
+            device.BlendState = BlendState.Additive;
+            trail.DrawTrail(shader);
+            device.BlendState = prevBlend ?? BlendState.AlphaBlend;
+        }
+
+        //============================================================
+        //IAdditiveDrawable —— 水滴/泡沫/头部水球的 GPU 着色器渲染
+        //一个 Immediate 批次中复用 OceanWaterBlob.fx，按组改参数
+        //============================================================
+        void IAdditiveDrawable.DrawAdditiveAfterNon(SpriteBatch spriteBatch) {
+            //海洋生物保留 CPU 风格化粒子绘制（不属于水状物质）
+            DrawMarineLife();
+
+            Effect shader = EffectLoader.OceanWaterBlob?.Value;
+            Texture2D noise = CWRAsset.PerlinNoise?.Value;
+
+            if (shader == null || noise == null) {
+                //回退到无 Shader 的常规绘制
+                DrawFoamParticles();
+                DrawWaterDroplets();
+                if (streamFade > 0.05f) {
+                    DrawStreamCore();
+                }
+                return;
+            }
+
+            //结束父级 Additive 批次，切换到 Immediate 模式以应用自定义着色器
+            spriteBatch.End();
+            spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive, SamplerState.LinearClamp,
+                DepthStencilState.None, RasterizerState.CullNone, shader, Main.GameViewMatrix.TransformationMatrix);
+
+            //---- A. 泡沫（SoftGlow 单帧贴图，可用较强折射） ----
+            SetWaterBlobShaderParams(shader, noise, foamThreshold: 0.18f, refract: 0.045f, shimmerSpeed: 4.5f);
+            DrawFoamParticlesShader(spriteBatch);
+
+            //---- B. 水滴（Spray 3x3 帧图，折射量受帧界限制需保守） ----
+            SetWaterBlobShaderParams(shader, noise, foamThreshold: 0.32f, refract: 0.022f, shimmerSpeed: 7.5f);
+            DrawWaterDropletsShader(spriteBatch);
+
+            //---- C. 头部水球（SoftGlow 单帧贴图，强折射+强焦散表现"水流冲头"） ----
+            if (streamFade > 0.05f) {
+                SetWaterBlobShaderParams(shader, noise, foamThreshold: 0.22f, refract: 0.07f, shimmerSpeed: 10f);
+                DrawStreamCoreShader(spriteBatch);
+            }
+
+            spriteBatch.End();
+
+            //恢复父级期望的 Deferred + Additive + PointWrap 批次状态
+            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive, SamplerState.PointWrap,
+                DepthStencilState.None, RasterizerState.CullNone, null, Main.GameViewMatrix.TransformationMatrix);
+        }
+
+        private void SetWaterBlobShaderParams(Effect shader, Texture2D noise,
+            float foamThreshold, float refract, float shimmerSpeed) {
+            shader.Parameters["uTime"]?.SetValue((float)Main.timeForVisualEffects * 0.04f);
+            shader.Parameters["foamThreshold"]?.SetValue(foamThreshold);
+            shader.Parameters["refractStrength"]?.SetValue(refract);
+            shader.Parameters["coreShimmerSpeed"]?.SetValue(shimmerSpeed);
+            shader.Parameters["foamColor"]?.SetValue(OceanFoam.ToVector3());
+            shader.Parameters["bioColor"]?.SetValue(BioluminescentBlue.ToVector3());
+            shader.Parameters["highlightColor"]?.SetValue(Vector3.One);
+            shader.Parameters["uNoiseTex"]?.SetValue(noise);
+        }
+
+        //============================================================
+        //水滴粒子 —— Shader 渲染（OceanWaterBlob.fx）
+        //每个水滴只需一次 Draw：折射、焦散、生物荧光内核全部由 GPU 合成
+        //仅高速非飞溅水滴额外绘制一次水流尾迹
+        //============================================================
+        private void DrawWaterDropletsShader(SpriteBatch sb) {
+            Texture2D dropletTex = CWRAsset.Spray.Value;
+            const int columns = 3;
+            const int rows = 3;
+            int frameWidth = dropletTex.Width / columns;
+            int frameHeight = dropletTex.Height / rows;
+            Vector2 origin = new(frameWidth / 2f, frameHeight / 2f);
 
             foreach (var droplet in waterDroplets) {
                 Vector2 drawPos = droplet.Position - Main.screenPosition;
-                float scale = droplet.Size * 0.09f;
+                float scale = droplet.Size * 0.10f;
 
-                //海洋蓝色渐变
-                Color deepColor = Color.Lerp(DeepOcean, ShallowOcean, droplet.ColorVariant);
-                Color waterColor = deepColor * droplet.Opacity;
+                Color baseTint = Color.Lerp(DeepOcean, ShallowOcean, droplet.ColorVariant);
+                Color tint = baseTint * droplet.Opacity;
 
-                //帧源矩形
                 int frameIndex = droplet.Frame % (columns * rows);
                 int fx = frameIndex % columns * frameWidth;
                 int fy = frameIndex / columns * frameHeight;
                 Rectangle source = new(fx, fy, frameWidth, frameHeight);
 
-                //水滴主体
-                sb.Draw(
-                    glowTex,
-                    drawPos,
-                    source,
-                    waterColor,
-                    droplet.Rotation,
-                    new Vector2(frameWidth / 2f, frameHeight / 2f),
-                    scale * 1.3f,
-                    SpriteEffects.None,
-                    0
-                );
+                sb.Draw(dropletTex, drawPos, source, tint, droplet.Rotation, origin,
+                    scale * 1.4f, SpriteEffects.None, 0f);
 
-                //水滴高光 (同一帧, 缩放与颜色变化)
-                Color highlightColor = BioluminescentBlue * droplet.Opacity * 0.7f;
-                sb.Draw(
-                    glowTex,
-                    drawPos,
-                    source,
-                    highlightColor,
-                    droplet.Rotation * 1.5f,
-                    new Vector2(frameWidth / 2f, frameHeight / 2f),
-                    scale * 0.7f,
-                    SpriteEffects.None,
-                    0
-                );
-
-                //拉伸效果（快速移动的水滴）
+                //高速非飞溅水滴：沿速度方向再绘制一道拉伸水绺
                 if (!droplet.IsSplash && droplet.Velocity.Length() > 5f) {
-                    float rotation = droplet.Velocity.ToRotation();
-                    Color trailColor = waterColor * 0.5f;
-                    sb.Draw(
-                        streamTex,
-                        drawPos,
-                        null,
-                        trailColor,
-                        rotation,
-                        streamTex.Size() / 2f,
-                        new Vector2(scale * 0.12f, scale * 0.25f),
-                        SpriteEffects.None,
-                        0
-                    );
+                    float vRot = droplet.Velocity.ToRotation();
+                    Color stretchTint = Color.Lerp(BioluminescentBlue, ShallowOcean, 0.35f) * (droplet.Opacity * 0.55f);
+                    sb.Draw(dropletTex, drawPos, source, stretchTint, vRot, origin,
+                        new Vector2(scale * 1.9f, scale * 0.55f), SpriteEffects.None, 0f);
                 }
             }
         }
 
-        //绘制泡沫粒子
+        //回退路径：无 Shader 时的简单绘制
+        private void DrawWaterDroplets() {
+            SpriteBatch sb = Main.spriteBatch;
+            Texture2D glowTex = CWRAsset.Spray.Value;
+            const int columns = 3;
+            const int rows = 3;
+            int frameWidth = glowTex.Width / columns;
+            int frameHeight = glowTex.Height / rows;
+            Vector2 origin = new(frameWidth / 2f, frameHeight / 2f);
+
+            foreach (var droplet in waterDroplets) {
+                Vector2 drawPos = droplet.Position - Main.screenPosition;
+                float scale = droplet.Size * 0.09f;
+                Color tint = Color.Lerp(DeepOcean, ShallowOcean, droplet.ColorVariant) * droplet.Opacity;
+
+                int frameIndex = droplet.Frame % (columns * rows);
+                int fx = frameIndex % columns * frameWidth;
+                int fy = frameIndex / columns * frameHeight;
+                Rectangle source = new(fx, fy, frameWidth, frameHeight);
+
+                sb.Draw(glowTex, drawPos, source, tint, droplet.Rotation, origin,
+                    scale * 1.3f, SpriteEffects.None, 0);
+                sb.Draw(glowTex, drawPos, source, BioluminescentBlue * droplet.Opacity * 0.7f,
+                    droplet.Rotation * 1.5f, origin, scale * 0.7f, SpriteEffects.None, 0);
+            }
+        }
+
+        //============================================================
+        //泡沫粒子 —— Shader 渲染（OceanWaterBlob.fx）
+        //比 CPU 双层叠加更柔和、自带程序化气泡边缘
+        //============================================================
+        private void DrawFoamParticlesShader(SpriteBatch sb) {
+            Texture2D foamTex = CWRAsset.SoftGlow.Value;
+            Vector2 origin = foamTex.Size() * 0.5f;
+
+            foreach (var foam in foamParticles) {
+                Vector2 drawPos = foam.Position - Main.screenPosition;
+                float scale = foam.Size * 0.075f;
+                float popLerp = foam.PopPhase;
+
+                //破裂阶段越靠后，整体透明度衰减越快、尺寸略微膨胀
+                Color foamTint = OceanFoam * foam.Opacity * (1f - popLerp * 0.45f);
+                foamTint.A = 0;
+                sb.Draw(foamTex, drawPos, null, foamTint, foam.Rotation, origin,
+                    scale * (1f + popLerp * 0.55f), SpriteEffects.None, 0f);
+            }
+        }
+
+        //回退路径：无 Shader 时的简单绘制
         private void DrawFoamParticles() {
             SpriteBatch sb = Main.spriteBatch;
             Texture2D glowTex = CWRAsset.SoftGlow.Value;
+            Vector2 origin = glowTex.Size() * 0.5f;
 
             foreach (var foam in foamParticles) {
                 Vector2 drawPos = foam.Position - Main.screenPosition;
                 float scale = foam.Size * 0.06f;
-
-                //泡沫白色
-                Color foamColor = OceanFoam * foam.Opacity * (1f - foam.PopPhase * 0.5f);
-
-                //泡沫主体
-                sb.Draw(
-                    glowTex,
-                    drawPos,
-                    null,
-                    foamColor * 0.8f,
-                    foam.Rotation,
-                    glowTex.Size() / 2f,
-                    scale * (1f + foam.PopPhase * 0.3f),
-                    SpriteEffects.None,
-                    0
-                );
-
-                //泡沫边缘
-                Color edgeColor = new Color(150, 200, 255) * foam.Opacity * 0.5f;
-                sb.Draw(
-                    glowTex,
-                    drawPos,
-                    null,
-                    edgeColor,
-                    foam.Rotation * 1.3f,
-                    glowTex.Size() / 2f,
-                    scale * 1.4f * (1f + foam.PopPhase * 0.4f),
-                    SpriteEffects.None,
-                    0
-                );
+                Color foamTint = OceanFoam * foam.Opacity * (1f - foam.PopPhase * 0.5f);
+                sb.Draw(glowTex, drawPos, null, foamTint * 0.8f, foam.Rotation, origin,
+                    scale * (1f + foam.PopPhase * 0.3f), SpriteEffects.None, 0);
             }
         }
 
@@ -803,87 +928,44 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend
             }
         }
 
-        //绘制水流核心
+        //============================================================
+        //头部水球 —— Shader 渲染（OceanWaterBlob.fx）
+        //由 SoftGlow 圆点贴图作为基底，shader 注入折射、焦散、生物荧光
+        //核心条带本身由 IPrimitiveDrawable + OceanCurrentTrail.fx 渲染
+        //============================================================
+        private void DrawStreamCoreShader(SpriteBatch sb) {
+            Texture2D glow = CWRAsset.SoftGlow.Value;
+            Vector2 headPos = Projectile.Center - Main.screenPosition;
+            Vector2 origin = glow.Size() * 0.5f;
+
+            float headPulse = 0.85f + 0.15f * MathF.Sin((float)Main.timeForVisualEffects * 0.18f);
+            float baseScale = headPulse * streamFade;
+
+            //外层柔光（生物荧光蓝晕）
+            Color outerTint = Color.Lerp(BioluminescentBlue, OceanFoam, glowPulse * 0.45f);
+            outerTint.A = 0;
+            sb.Draw(glow, headPos, null, outerTint * (streamFade * 0.85f), 0f, origin,
+                1.55f * baseScale, SpriteEffects.None, 0f);
+
+            //内核高亮（白炽水流冲尖）
+            Color coreTint = Color.Lerp(OceanFoam, Color.White, 0.55f);
+            coreTint.A = 0;
+            sb.Draw(glow, headPos, null, coreTint * (streamFade * glowPulse), 0f, origin,
+                0.65f * baseScale, SpriteEffects.None, 0f);
+        }
+
+        //回退路径：无 Shader 时的简化头部
         private void DrawStreamCore() {
             SpriteBatch sb = Main.spriteBatch;
-            if (coreTrail.Count < 2) return;
-
-            Texture2D coreTex = CWRAsset.LightShot.Value;
-
-            //绘制核心拖尾
-            for (int i = 0; i < coreTrail.Count - 1; i++) {
-                float progress = 1f - i / (float)coreTrail.Count;
-                Vector2 drawPos = coreTrail[i] - Main.screenPosition;
-                Vector2 toNext = coreTrail[i + 1] - coreTrail[i];
-                float rotation = toNext.ToRotation();
-
-                //海洋蓝色渐变
-                Color coreColor = Color.Lerp(
-                    BioluminescentBlue,
-                    ShallowOcean,
-                    progress
-                ) * progress * glowPulse * 0.9f;
-
-                float scale = progress * 0.12f;
-
-                sb.Draw(
-                    coreTex,
-                    drawPos,
-                    null,
-                    coreColor,
-                    rotation,
-                    coreTex.Size() / 2f,
-                    new Vector2(scale * 3f, scale * 1.2f),
-                    SpriteEffects.None,
-                    0
-                );
-
-                //外层光晕
-                Color glowColor = new Color(100, 180, 255) * progress * glowPulse * 0.5f;
-                sb.Draw(
-                    coreTex,
-                    drawPos,
-                    null,
-                    glowColor,
-                    rotation,
-                    coreTex.Size() / 2f,
-                    new Vector2(scale * 5f, scale * 2.5f),
-                    SpriteEffects.None,
-                    0
-                );
-            }
-
-            //绘制水流头部
+            Texture2D glow = CWRAsset.SoftGlow.Value;
             Vector2 headPos = Projectile.Center - Main.screenPosition;
-            Color headColor = BioluminescentBlue * glowPulse;
+            Vector2 origin = glow.Size() * 0.5f;
 
-            sb.Draw(
-                coreTex,
-                headPos,
-                null,
-                headColor,
-                Projectile.velocity.ToRotation(),
-                coreTex.Size() / 2f,
-                new Vector2(0.18f, 0.14f),
-                SpriteEffects.None,
-                0
-            );
-
-            //头部强光核心（波动效果）
-            Texture2D starTex = CWRAsset.StarTexture_White.Value;
-            float pulseScale = 0.1f + (float)Math.Sin(wavePhase) * 0.02f;
-            Color starColor = Color.White * glowPulse * 0.9f;
-            sb.Draw(
-                starTex,
-                headPos,
-                null,
-                starColor,
-                StreamLife * 0.08f,
-                starTex.Size() / 2f,
-                pulseScale,
-                SpriteEffects.None,
-                0
-            );
+            Color outerTint = BioluminescentBlue * glowPulse;
+            sb.Draw(glow, headPos, null, outerTint * streamFade, 0f, origin,
+                1.4f * streamFade, SpriteEffects.None, 0);
+            sb.Draw(glow, headPos, null, Color.White * (streamFade * glowPulse * 0.75f), 0f, origin,
+                0.5f * streamFade, SpriteEffects.None, 0);
         }
 
         public override void OnKill(int timeLeft) {

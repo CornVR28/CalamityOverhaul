@@ -84,6 +84,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             shader.Parameters["intensity"]?.SetValue(Cyberspace.Intensity);
             shader.Parameters["expandProgress"]?.SetValue(Cyberspace.ExpandProgress);
             shader.Parameters["dimStrength"]?.SetValue(Cyberspace.DimStrength);
+            shader.Parameters["motionFade"]?.SetValue(Cyberspace.MotionFade);
             Vector2 domainCenter = Main.LocalPlayer.Center;
             float effectiveRadius = Cyberspace.Radius * Cyberspace.ExpandProgress;
             shader.Parameters["setPoint"]?.SetValue(domainCenter);

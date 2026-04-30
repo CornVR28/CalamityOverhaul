@@ -530,6 +530,53 @@ HackTime: {
 	TileScanIntact: 完整
 	TileScanMisc: 杂物
 	TileScanMiscPile: 杂物堆
+	ProjectileScanName: 名称
+	ProjectileScanClass: 类型
+	ProjectileScanSpeed: 速度
+	ProjectileScanKnockback: 击退
+	ProjectileScanPenetrate: 穿透
+	ProjectileScanTimeLeft: 剩余时间
+	ProjectileScanOwner: 来源
+	ProjectileScanAI: AI
+	ProjectileScanPosition: 坐标
+	ProjectileScanHostile: 敌对弹幕
+	ProjectileScanFriendly: 友方弹幕
+	ProjectileScanNeutral: 中立弹幕
+	ProjectileScanMinion: 仆从弹幕
+	ProjectileScanSentry: 哨兵弹幕
+	ProjectileScanTrap: 机关弹幕
+	ProjectileScanInfinite: 无限
+	ProjectileScanOwnerWorld: 世界/环境
+	WaterScanLiquid: 液体
+	WaterScanEnvironment: 环境
+	WaterScanDepth: 深度
+	WaterScanWorldLayer: 世界层
+	WaterScanTileCoord: 格坐标
+	WaterScanContainment: 容器结构
+	WaterScanWater: 水
+	WaterScanLava: 岩浆
+	WaterScanHoney: 蜂蜜
+	WaterScanShimmer: 微光
+	WaterScanLayerSky: 天空
+	WaterScanLayerSurface: 地表
+	WaterScanLayerUnderground: 地下
+	WaterScanLayerCavern: 洞穴
+	WaterScanLayerUnderworld: 地狱
+	WaterScanEnvOcean: 海洋水域
+	WaterScanEnvDesert: 沙漠水域
+	WaterScanEnvSnow: 雪原水域
+	WaterScanEnvJungle: 丛林水域
+	WaterScanEnvCorruption: 腐化水域
+	WaterScanEnvCrimson: 猩红水域
+	WaterScanEnvHallow: 神圣水域
+	WaterScanEnvDungeon: 地牢水域
+	WaterScanEnvMushroom: 蘑菇水域
+	WaterScanEnvUnderworld: 地狱液体
+	WaterScanContainmentPocket: 封闭水囊
+	WaterScanContainmentChannel: 管道/水道
+	WaterScanContainmentOpen: 开放水体
+	WaterScanStatusStill: 静止
+	WaterScanStatusFlowing: 流动中
 	CatParanormal: 灵异
 	WraithScanName: 标识
 	WraithScanNameValue: 未知厉鬼

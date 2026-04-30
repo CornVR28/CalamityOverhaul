@@ -72,7 +72,10 @@ namespace CalamityOverhaul.Content.HackTimes
             currentTargetKind = targetKind;
             QuickHackDef.GetFilteredIndices(targetKind, filteredIndices);
             displayCount = filteredIndices.Count;
-            if (displayCount == 0) return;
+            if (displayCount == 0) {
+                Hide();
+                return;
+            }
 
             if (slotFlyIn == null || slotFlyIn.Length != displayCount) {
                 slotFlyIn = new float[displayCount];

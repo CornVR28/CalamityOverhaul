@@ -114,6 +114,57 @@ namespace CalamityOverhaul.Content.HackTimes
         public static LocalizedText TileScanMisc { get; private set; }
         public static LocalizedText TileScanMiscPile { get; private set; }
 
+        //弹幕扫描本地化字段
+        public static LocalizedText ProjectileScanName { get; private set; }
+        public static LocalizedText ProjectileScanClass { get; private set; }
+        public static LocalizedText ProjectileScanSpeed { get; private set; }
+        public static LocalizedText ProjectileScanKnockback { get; private set; }
+        public static LocalizedText ProjectileScanPenetrate { get; private set; }
+        public static LocalizedText ProjectileScanTimeLeft { get; private set; }
+        public static LocalizedText ProjectileScanOwner { get; private set; }
+        public static LocalizedText ProjectileScanAI { get; private set; }
+        public static LocalizedText ProjectileScanPosition { get; private set; }
+        public static LocalizedText ProjectileScanHostile { get; private set; }
+        public static LocalizedText ProjectileScanFriendly { get; private set; }
+        public static LocalizedText ProjectileScanNeutral { get; private set; }
+        public static LocalizedText ProjectileScanMinion { get; private set; }
+        public static LocalizedText ProjectileScanSentry { get; private set; }
+        public static LocalizedText ProjectileScanTrap { get; private set; }
+        public static LocalizedText ProjectileScanInfinite { get; private set; }
+        public static LocalizedText ProjectileScanOwnerWorld { get; private set; }
+
+        //液体扫描本地化字段
+        public static LocalizedText WaterScanLiquid { get; private set; }
+        public static LocalizedText WaterScanEnvironment { get; private set; }
+        public static LocalizedText WaterScanDepth { get; private set; }
+        public static LocalizedText WaterScanWorldLayer { get; private set; }
+        public static LocalizedText WaterScanTileCoord { get; private set; }
+        public static LocalizedText WaterScanContainment { get; private set; }
+        public static LocalizedText WaterScanWater { get; private set; }
+        public static LocalizedText WaterScanLava { get; private set; }
+        public static LocalizedText WaterScanHoney { get; private set; }
+        public static LocalizedText WaterScanShimmer { get; private set; }
+        public static LocalizedText WaterScanLayerSky { get; private set; }
+        public static LocalizedText WaterScanLayerSurface { get; private set; }
+        public static LocalizedText WaterScanLayerUnderground { get; private set; }
+        public static LocalizedText WaterScanLayerCavern { get; private set; }
+        public static LocalizedText WaterScanLayerUnderworld { get; private set; }
+        public static LocalizedText WaterScanEnvOcean { get; private set; }
+        public static LocalizedText WaterScanEnvDesert { get; private set; }
+        public static LocalizedText WaterScanEnvSnow { get; private set; }
+        public static LocalizedText WaterScanEnvJungle { get; private set; }
+        public static LocalizedText WaterScanEnvCorruption { get; private set; }
+        public static LocalizedText WaterScanEnvCrimson { get; private set; }
+        public static LocalizedText WaterScanEnvHallow { get; private set; }
+        public static LocalizedText WaterScanEnvDungeon { get; private set; }
+        public static LocalizedText WaterScanEnvMushroom { get; private set; }
+        public static LocalizedText WaterScanEnvUnderworld { get; private set; }
+        public static LocalizedText WaterScanContainmentPocket { get; private set; }
+        public static LocalizedText WaterScanContainmentChannel { get; private set; }
+        public static LocalizedText WaterScanContainmentOpen { get; private set; }
+        public static LocalizedText WaterScanStatusStill { get; private set; }
+        public static LocalizedText WaterScanStatusFlowing { get; private set; }
+
         //炮台扫描本地化字段
         public static LocalizedText TurretScanName { get; private set; }
         public static LocalizedText TurretScanLaserName { get; private set; }
@@ -229,6 +280,55 @@ namespace CalamityOverhaul.Content.HackTimes
             TileScanIntact = this.GetLocalization(nameof(TileScanIntact));
             TileScanMisc = this.GetLocalization(nameof(TileScanMisc));
             TileScanMiscPile = this.GetLocalization(nameof(TileScanMiscPile));
+
+            ProjectileScanName = this.GetLocalization(nameof(ProjectileScanName));
+            ProjectileScanClass = this.GetLocalization(nameof(ProjectileScanClass));
+            ProjectileScanSpeed = this.GetLocalization(nameof(ProjectileScanSpeed));
+            ProjectileScanKnockback = this.GetLocalization(nameof(ProjectileScanKnockback));
+            ProjectileScanPenetrate = this.GetLocalization(nameof(ProjectileScanPenetrate));
+            ProjectileScanTimeLeft = this.GetLocalization(nameof(ProjectileScanTimeLeft));
+            ProjectileScanOwner = this.GetLocalization(nameof(ProjectileScanOwner));
+            ProjectileScanAI = this.GetLocalization(nameof(ProjectileScanAI));
+            ProjectileScanPosition = this.GetLocalization(nameof(ProjectileScanPosition));
+            ProjectileScanHostile = this.GetLocalization(nameof(ProjectileScanHostile));
+            ProjectileScanFriendly = this.GetLocalization(nameof(ProjectileScanFriendly));
+            ProjectileScanNeutral = this.GetLocalization(nameof(ProjectileScanNeutral));
+            ProjectileScanMinion = this.GetLocalization(nameof(ProjectileScanMinion));
+            ProjectileScanSentry = this.GetLocalization(nameof(ProjectileScanSentry));
+            ProjectileScanTrap = this.GetLocalization(nameof(ProjectileScanTrap));
+            ProjectileScanInfinite = this.GetLocalization(nameof(ProjectileScanInfinite));
+            ProjectileScanOwnerWorld = this.GetLocalization(nameof(ProjectileScanOwnerWorld));
+
+            WaterScanLiquid = this.GetLocalization(nameof(WaterScanLiquid));
+            WaterScanEnvironment = this.GetLocalization(nameof(WaterScanEnvironment));
+            WaterScanDepth = this.GetLocalization(nameof(WaterScanDepth));
+            WaterScanWorldLayer = this.GetLocalization(nameof(WaterScanWorldLayer));
+            WaterScanTileCoord = this.GetLocalization(nameof(WaterScanTileCoord));
+            WaterScanContainment = this.GetLocalization(nameof(WaterScanContainment));
+            WaterScanWater = this.GetLocalization(nameof(WaterScanWater));
+            WaterScanLava = this.GetLocalization(nameof(WaterScanLava));
+            WaterScanHoney = this.GetLocalization(nameof(WaterScanHoney));
+            WaterScanShimmer = this.GetLocalization(nameof(WaterScanShimmer));
+            WaterScanLayerSky = this.GetLocalization(nameof(WaterScanLayerSky));
+            WaterScanLayerSurface = this.GetLocalization(nameof(WaterScanLayerSurface));
+            WaterScanLayerUnderground = this.GetLocalization(nameof(WaterScanLayerUnderground));
+            WaterScanLayerCavern = this.GetLocalization(nameof(WaterScanLayerCavern));
+            WaterScanLayerUnderworld = this.GetLocalization(nameof(WaterScanLayerUnderworld));
+            WaterScanEnvOcean = this.GetLocalization(nameof(WaterScanEnvOcean));
+            WaterScanEnvDesert = this.GetLocalization(nameof(WaterScanEnvDesert));
+            WaterScanEnvSnow = this.GetLocalization(nameof(WaterScanEnvSnow));
+            WaterScanEnvJungle = this.GetLocalization(nameof(WaterScanEnvJungle));
+            WaterScanEnvCorruption = this.GetLocalization(nameof(WaterScanEnvCorruption));
+            WaterScanEnvCrimson = this.GetLocalization(nameof(WaterScanEnvCrimson));
+            WaterScanEnvHallow = this.GetLocalization(nameof(WaterScanEnvHallow));
+            WaterScanEnvDungeon = this.GetLocalization(nameof(WaterScanEnvDungeon));
+            WaterScanEnvMushroom = this.GetLocalization(nameof(WaterScanEnvMushroom));
+            WaterScanEnvUnderworld = this.GetLocalization(nameof(WaterScanEnvUnderworld));
+            WaterScanContainmentPocket = this.GetLocalization(nameof(WaterScanContainmentPocket));
+            WaterScanContainmentChannel = this.GetLocalization(nameof(WaterScanContainmentChannel));
+            WaterScanContainmentOpen = this.GetLocalization(nameof(WaterScanContainmentOpen));
+            WaterScanStatusStill = this.GetLocalization(nameof(WaterScanStatusStill));
+            WaterScanStatusFlowing = this.GetLocalization(nameof(WaterScanStatusFlowing));
 
             TurretScanName = this.GetLocalization(nameof(TurretScanName));
             TurretScanLaserName = this.GetLocalization(nameof(TurretScanLaserName));

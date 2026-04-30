@@ -21,5 +21,9 @@ namespace CalamityOverhaul.Content.HackTimes
         Turret = 8,
         //虚空聚落信号塔等承担广播/扫描职能的核心Actor
         SignalTower = 16,
+        //弹幕目标（敌对/友方/陷阱等Projectile实体）
+        Projectile = 32,
+        //液体目标（水、岩浆、蜂蜜、微光等）
+        Water = 64,
     }
 }

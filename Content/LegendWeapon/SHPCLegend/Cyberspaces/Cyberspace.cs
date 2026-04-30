@@ -193,6 +193,17 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         /// </summary>
         public static float EffectTime { get; private set; }
 
+        /// <summary>
+        /// 玩家移动淡化系数 (0~1)：玩家移动越快越接近1
+        /// <br/>着色器将依据此值淡化"装饰层"细节(数据流/脉冲环/能量裂纹/辉光粒子/底层暗流/扫描环)
+        /// <br/>同时保留"骨架层"(网格线、节点、领域氛围底色)以保证沉浸感与可读性
+        /// </summary>
+        public static float MotionFade { get; private set; }
+
+        //换算玩家速度为目标淡化值所用的"满速度阈值"(像素/帧)
+        //超过该速度即视为完全运动状态；正常跑速约3，霜火靴约6.5，翅膀飞行约9
+        private const float MotionFadeFullSpeed = 5.5f;
+
         private static float targetIntensity;
 
         //爆发阶段：每层持续帧数递增（高层领域大，过渡更久）
@@ -353,7 +364,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
 
             //领域处于激活态时按当前层消耗 RAM；耗尽即触发系统崩溃强制关闭
             if (Active && CurrentLayer >= 1 && !HackTime.InfiniteHack) {
-                float drain = LayerRamDrainPerSecond[CurrentLayer - 1];
+                float drain = LayerRamDrainPerSecond[CurrentLayer - 1] * TimeGear.TimeScale;
                 RamSystem.ConsumeOverTime(drain);
                 if (RamSystem.CurrentRam <= 0f) {
                     TriggerSystemCrash();
@@ -364,6 +375,10 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             float dt = 1f / 60f;
             float timeSpeed = TimeGear.IsTimeSlowed ? MathHelper.Max(TimeGear.TimeScale, 0.1f) : 1f;
             EffectTime += dt * timeSpeed;
+
+            //玩家运动淡化：速度越大越接近1，移动时迅速上升、停下后缓慢回落
+            //—— 用velocity.Length()而非位置差，避免被动平台/反弹等情况误判为静止
+            UpdateMotionFade();
 
             //强度过渡：关闭时Intensity收缩要比layerExpand更慢，确保收缩动画可见
             float intensityLerp;
@@ -436,6 +451,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             Active = false;
             Intensity = 0f;
             EffectTime = 0f;
+            MotionFade = 0f;
             CurrentLayer = 0;
             lastLayer = 1;
             targetIntensity = 0f;
@@ -444,6 +460,29 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             for (int i = 0; i < MaxLayerCount; i++) {
                 layerExpand[i] = 0f;
                 layerBurstTimer[i] = 0;
+            }
+        }
+
+        /// <summary>
+        /// 推进 <see cref="MotionFade"/>：根据本地玩家速度计算目标值，移动时快上升、停步后慢下降
+        /// <br/>领域未激活时强制收敛到0，避免开启时携带残值
+        /// </summary>
+        private static void UpdateMotionFade() {
+            float target = 0f;
+            //仅当领域可见时(intensity 仍在播放) 才考虑追踪玩家速度
+            if (Intensity > 0.001f) {
+                Player p = Main.LocalPlayer;
+                if (p != null && p.active && !p.dead) {
+                    float speed = p.velocity.Length();
+                    target = MathHelper.Clamp(speed / MotionFadeFullSpeed, 0f, 1f);
+                }
+            }
+
+            //上升快(8帧达90%)、回落慢(约30帧才完全消除)，避免短暂停顿就闪回细节
+            float lerpRate = target > MotionFade ? 0.18f : 0.06f;
+            MotionFade = MathHelper.Lerp(MotionFade, target, lerpRate);
+            if (MotionFade < 0.001f) {
+                MotionFade = 0f;
             }
         }
 

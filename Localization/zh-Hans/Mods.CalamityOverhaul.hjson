@@ -142,9 +142,11 @@ QuickHack: {
 
 HackTargetType: {
 	// NpcTargetType.DisplayName: Npc Target Type
+	ProjectileTargetType.DisplayName: 弹幕目标
 	// SignalTowerTargetType.DisplayName: Signal Tower Target Type
 	// TileTargetType.DisplayName: Tile Target Type
 	// TurretTargetType.DisplayName: Turret Target Type
+	WaterTargetType.DisplayName: 液体目标
 	// WraithTargetType.DisplayName: Wraith Target Type
 }
 

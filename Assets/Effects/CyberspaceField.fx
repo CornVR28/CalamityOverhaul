@@ -13,6 +13,7 @@ float radius;           // 领域半径（世界像素）
 float intensity;        // 0-1 效果强度（淡入淡出）
 float expandProgress;   // 0-1 展开进度
 float dimStrength;      // 压暗强度 (0=不压暗, 1=最大压暗)
+float motionFade;       // 0-1 玩家运动淡化：移动越快越大，会模糊淡化装饰层细节，保留网格与背景
 float2 setPoint;        // 领域中心（世界坐标）
 float2 screenPosition;  // 屏幕左上角（世界坐标）
 float2 worldViewSize;   // 缩放修正后的世界可视范围（非屏幕像素尺寸）
@@ -311,17 +312,29 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0) : COLOR0
     float3 cNodeColor = float3(0.95, 0.25, 0.18);
     float3 cCrackGlow = float3(1.0,  0.22, 0.12);
 
+    // ================================================================
+    // 玩家运动淡化：移动时模糊掉装饰层细节，保留网格骨架与领域背景
+    // detailMul: 普通装饰层(数据流/脉冲环/裂纹/粒子/底层暗流)的淡化系数
+    //   stationary -> 1.0 (全显), full motion -> 0.18 (仅留极弱残影)
+    // entityMul:  实体扫描环的淡化系数(更克制，保留可读性以利战斗追踪)
+    //   stationary -> 1.0, full motion -> 0.55
+    // 网格线/节点/边缘呼吸光属于"骨架"——不参与淡化
+    // ================================================================
+    float detailMul = 1.0 - saturate(motionFade) * 0.82;
+    float entityMul = 1.0 - saturate(motionFade) * 0.45;
+
     // --- 合成加法层 ---
     float3 additive = float3(0, 0, 0);
-    additive += cAbyssRed   * digitalField;           // A: 底层暗流
-    additive += cBloodRed   * gridLine * 0.8;         // B: 栅格走线+能量流
-    additive += cNodeColor  * node;                   // C: 节点亮点
-    additive += cAbyssRed   * dataStream;             // F: 垂直数据流
-    additive += cBrightRed  * pulse;                  // G: 双频脉冲环
-    additive += cCrackGlow  * edgeTotal;              // H: 边缘能量裂纹
-    additive += cHotAmber   * particle;               // J: 辉光粒子
-    additive += cBrightRed  * entityRingTotal;        // K: 实体扫描环
-    additive += cWhiteRed   * entityScanTotal * 0.55; // K: 扫描弧高亮
+    additive += cAbyssRed   * digitalField * detailMul;            // A: 底层暗流(花纹) -> 淡化
+    additive += cBloodRed   * gridLine * 0.8;                      // B: 栅格走线(骨架) -> 保留
+    additive += cNodeColor  * node;                                // C: 节点亮点(骨架) -> 保留
+    additive += cAbyssRed   * dataStream * detailMul;              // F: 垂直数据流(数据块) -> 淡化
+    additive += cBrightRed  * pulse * detailMul;                   // G: 双频脉冲环(花纹) -> 淡化
+    //H: 边缘呼吸光保留为氛围背景，仅淡化细碎裂纹图案
+    additive += cCrackGlow  * (edgeBase + edgeCrack * detailMul);  // H
+    additive += cHotAmber   * particle * detailMul;                // J: 辉光粒子(花纹) -> 淡化
+    additive += cBrightRed  * entityRingTotal * entityMul;         // K: 实体扫描环 -> 弱淡化
+    additive += cWhiteRed   * entityScanTotal * 0.55 * entityMul;  // K: 扫描弧高亮 -> 弱淡化
 
     // ================================================================
     // 最终合成
