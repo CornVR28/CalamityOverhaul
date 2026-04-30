@@ -514,7 +514,6 @@ namespace CalamityOverhaul.Content.HackTimes
             HackTimeFreeze.Deactivate();
             HackTimeUI.Instance?.Queue?.Clear();
             HackEffectTracker.Reset();
-            HackTimeTileCyberPass.ReleaseRT();
             RamSystem.Reset();
         }
     }
