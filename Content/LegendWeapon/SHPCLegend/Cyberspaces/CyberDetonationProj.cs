@@ -27,7 +27,6 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
 
         private float chargeRatio;
         private float explosionRadius;
-        private bool hasDealtDamage;
         /// <summary>继承自充能球的超驱量 0-1</summary>
         private float overdriveAmount;
 

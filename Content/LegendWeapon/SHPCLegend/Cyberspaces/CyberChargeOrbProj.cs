@@ -249,7 +249,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             }
 
             //检测右键释放 → 发射
-            if (!owner.PressKey(false)) {
+            if (!DownRight) {
                 if (chargeTime >= MinChargeFrames) {
                     LaunchOrb(owner);
                 }
