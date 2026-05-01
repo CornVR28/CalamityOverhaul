@@ -1,4 +1,4 @@
-ItemFilterUI: {
+﻿ItemFilterUI: {
 	HintText: 左键点击可添加项目
 	HintText2: 左键点击可移除项目
 	CloseHint: "[ESC]键或[右键点击]可关闭"
@@ -750,16 +750,16 @@ SHPCUI: {
 	Cyber_DrainPerSec: -{0}/秒
 	Cyber_SustainTime: 可维持 ~{0} 秒
 	Cyber_SustainInfinite: 可维持 ∞
-	// Modify_Title: MODIFY
-	// Modify_Subtitle: Gun Augmentation
-	// Modify_Description: Install modification parts into SHPC chassis
-	// Modify_SlotEmpty: EMPTY
-	// Talk_Title: TALK
-	// Talk_Subtitle: Neural Link
-	// Talk_Description: Open a direct channel to SHPC
-	// Talk_Status_Busy: BUSY
-	// Talk_Status_Ready: READY
-	Cyber_Skill_Restart_Name: 系统重启
+	Modify_Title: 武器改装
+	Modify_Subtitle: 武器增强
+	Modify_Description: 在 SHPC 底盘中安装改装零件
+	Modify_SlotEmpty: 空置
+	Talk_Title: 对话
+	Talk_Subtitle: 神经连接
+	Talk_Description: 开启与 SHPC 的直接通讯频道
+	Talk_Status_Busy: 占线
+	Talk_Status_Ready: 就绪
+	Cyber_Skill_Restart_Name: 重启自身
 	Cyber_Skill_Restart_Desc: 撕开领域、压缩为维度核心裂缝，再炸裂复原并完全恢复自身状态
 }
 

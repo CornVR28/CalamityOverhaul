@@ -349,10 +349,10 @@ float4 PixelShaderFunction(float2 uv : TEXCOORD0, float4 vcol : COLOR0) : COLOR0
     }
 
     //==================================================
-    //输出
+    //输出（按 outA 预乘以匹配 AlphaBlend，避免空区域漏出底色）
     //==================================================
     float finalA = outA * uAlpha;
-    return float4(outCol * uAlpha, finalA);
+    return float4(outCol * finalA, finalA);
 }
 
 technique Technique1
