@@ -247,7 +247,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             Vector2 perpDir = Projectile.velocity.SafeNormalize(Vector2.UnitX).RotatedBy(MathHelper.PiOver2);
             float od = overdriveAmount;
             float spread = 8f + od * 16f;
-            int count = od > 0.3f ? 6 : 2;
+            bool isod = od > 0.3f;
+            int count = isod ? 3 : 2;
 
             // 超驱时混合配色（高温红白）
             Color mainCol = Color.Lerp(theme.ParticleMain, OverdriveTheme.ParticleMain, od);
@@ -260,7 +261,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
                     + perpDir * Main.rand.NextFloat(-2f - od * 2f, 2f + od * 2f);
 
                 float scale = Main.rand.NextFloat(0.6f, 1.4f + od * 1.2f);
-                int lifeTime = Main.rand.Next(15, 35 + (int)(od * 20f));
+                int lifeTime = Main.rand.Next(15, 35);
 
                 PRTLoader.AddParticle(new PRT_CyberSquare(
                     spawnPos, particleVel,
@@ -271,7 +272,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
 
             // 超驱时大量横向散射粒子（高温红炽强调）
             if (od > 0.3f && glitchBurstIntensity > 0.1f) {
-                int burstCount = 4 + (int)(glitchBurstIntensity * 6f);
+                int burstCount = 3 + (int)(glitchBurstIntensity * 4f);
                 for (int i = 0; i < burstCount; i++) {
                     Vector2 burstVel = perpDir * Main.rand.NextFloat(-8f, 8f)
                         + Projectile.velocity.SafeNormalize(Vector2.Zero) * Main.rand.NextFloat(-2f, 2f);
