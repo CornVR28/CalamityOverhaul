@@ -1,6 +1,7 @@
 ﻿using CalamityOverhaul.Common;
 using CalamityOverhaul.Content.HackTimes;
 using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
+using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Restart;
 using CalamityOverhaul.Content.RAMSystems;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Graphics;
@@ -106,6 +107,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                             () => SHPCUI.Cyber_Skill_Teleport_Name.Value,
                             () => SHPCUI.Cyber_Skill_Teleport_Desc.Value,
                             () => CWRKeySystem.Legend_Teleport,
+                            requiredLayer: 1),
+                        new SkillEntry(
+                            () => SHPCUI.Cyber_Skill_Restart_Name.Value,
+                            () => SHPCUI.Cyber_Skill_Restart_Desc.Value,
+                            () => CWRKeySystem.Legend_Restart,
                             requiredLayer: 1)
                     ];
                 case 2:
@@ -166,13 +172,27 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
         /// <summary>
         /// 取得指定层(1..3)三级技能面板的屏幕矩形
         /// 面板锁定于二级面板右侧，按层数纵向分布（上/中/下）
+        /// 高度依据该层技能数量自适应，确保多技能也能完整展开
         /// </summary>
         private static Rectangle GetSkillPanelRect(in Layout layout, int layer) {
             int x = layout.Panel.Right + (int)SkillPanelGapX;
             float ringY = layout.RingCenter.Y;
             float yOffset = (layer - 2) * SkillPanelYOffset;
-            int y = (int)(ringY + yOffset - SkillPanelH * 0.5f);
-            return new Rectangle(x, y, (int)SkillPanelW, (int)SkillPanelH);
+            int height = ComputeSkillPanelHeight(layer);
+            int y = (int)(ringY + yOffset - height * 0.5f);
+            return new Rectangle(x, y, (int)SkillPanelW, height);
+        }
+
+        /// <summary>
+        /// 根据该层技能数量计算面板高度：单技能维持紧凑，多技能时按 80px 步长展开
+        /// </summary>
+        private static int ComputeSkillPanelHeight(int layer) {
+            int count = GetLayerSkills(layer).Length;
+            if (count <= 1) {
+                return (int)SkillPanelH;
+            }
+            //首技能基线 40px(标题+分割线) + 每条 80px + 末尾 8px 留白
+            return 40 + count * 80 + 8;
         }
 
         /// <summary>

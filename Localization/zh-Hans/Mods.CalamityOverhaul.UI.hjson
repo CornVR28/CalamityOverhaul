@@ -1,4 +1,4 @@
-﻿ItemFilterUI: {
+ItemFilterUI: {
 	HintText: 左键点击可添加项目
 	HintText2: 左键点击可移除项目
 	CloseHint: "[ESC]键或[右键点击]可关闭"
@@ -759,6 +759,8 @@ SHPCUI: {
 	// Talk_Description: Open a direct channel to SHPC
 	// Talk_Status_Busy: BUSY
 	// Talk_Status_Ready: READY
+	Cyber_Skill_Restart_Name: 系统重启
+	Cyber_Skill_Restart_Desc: 撕开领域、压缩为维度核心裂缝，再炸裂复原并完全恢复自身状态
 }
 
 EntrustManagerLead: {

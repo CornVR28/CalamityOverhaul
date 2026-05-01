@@ -1,6 +1,7 @@
 ﻿using CalamityOverhaul.Common;
 using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Banish;
 using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.DomainFreeze;
+using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Restart;
 using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Teleport;
 using InnoVault.RenderHandles;
 using Microsoft.Xna.Framework.Graphics;
@@ -31,6 +32,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
                 CyberBanish.Reset();
                 CyberDomainFreeze.Reset();
                 CyberTeleport.Reset();
+                CyberRestart.Reset();
                 return;
             }
 
@@ -38,6 +40,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             CyberBanish.Update();
             CyberDomainFreeze.Update();
             CyberTeleport.Update();
+            CyberRestart.Update();
         }
 
         public override void DrawNPCsOverTiles(SpriteBatch spriteBatch, GraphicsDevice graphicsDevice, RenderTarget2D screenSwap) {

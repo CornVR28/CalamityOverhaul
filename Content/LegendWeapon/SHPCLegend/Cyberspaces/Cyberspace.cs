@@ -21,14 +21,31 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         void ICWRLoader.UnLoadData() => Reset();
 
         /// <summary>
-        /// 赛博空间是否处于激活状态
-        /// </summary>
+        /// 赛博空间是否处于激活状态/*  */
+        /// </summary>/*  */
         public static bool Active { get; private set; }
 
         /// <summary>
-        /// 当前效果强度 (0-1)，用于着色器 intensity 参数
+        /// 内部强度原值，<see cref="Update"/> 与逻辑判定均直接读写此字段
         /// </summary>
-        public static float Intensity { get; set; }
+        private static float intensityRaw;
+
+        /// <summary>
+        /// 当前效果强度 (0-1)，用于着色器 intensity 参数
+        /// <br/>外部读取时会自动叠乘 <see cref="RestartCollapse"/> 得到的视觉抑制系数，
+        /// 以便重启演出阶段领域整体可视化收缩，但不污染内部 lerp 状态
+        /// </summary>
+        public static float Intensity {
+            get => intensityRaw * (1f - MathHelper.Clamp(RestartCollapse, 0f, 1f));
+            set => intensityRaw = value;
+        }
+
+        /// <summary>
+        /// 重启演出专用视觉抑制系数 (0=正常, 1=完全收缩为奇点)
+        /// <br/>仅影响 <see cref="Intensity"/> 与 <see cref="EffectiveOuterRadius"/> 的对外展示，
+        /// 不会回写到内部状态——演出结束后归零即可恢复原貌
+        /// </summary>
+        public static float RestartCollapse { get; set; }
 
         /// <summary>
         /// 领域中心(世界坐标)，普通情况下每帧贴附在玩家中心
@@ -170,7 +187,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
                     float r = GetLayerRadius(i) * layerExpand[i];
                     if (r > maxR) maxR = r;
                 }
-                return maxR;
+                //重启演出阶段把视觉外径压向奇点；逻辑层 layerExpand 不变，演出结束自然恢复
+                return maxR * (1f - MathHelper.Clamp(RestartCollapse, 0f, 1f));
             }
         }
 
@@ -431,7 +449,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
                 //关闭阶段：Intensity最后消失，速率极慢
                 intensityLerp = 0.015f;
             }
-            Intensity = MathHelper.Lerp(Intensity, targetIntensity, intensityLerp);
+            //内部 lerp 直接操作原值，避免被 RestartCollapse 多次缩放
+            intensityRaw = MathHelper.Lerp(intensityRaw, targetIntensity, intensityLerp);
 
             //逐层展开/收缩（高层用更缓的lerp，过渡更平滑可见）
             for (int i = 0; i < MaxLayerCount; i++) {
@@ -457,7 +476,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             }
 
             //二层以上：周期性从外环释放环境故障闪电
-            if (CurrentLayer >= 2 && Intensity > 0.5f) {
+            //此处用原值，重启收缩期间不需要它频繁触发
+            if (CurrentLayer >= 2 && intensityRaw > 0.5f && RestartCollapse < 0.2f) {
                 ambientBoltTimer--;
                 if (ambientBoltTimer <= 0) {
                     SpawnAmbientBolts();
@@ -474,8 +494,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
                         break;
                     }
                 }
-                if (allCollapsed && Intensity < 0.005f) {
-                    Intensity = 0f;
+                if (allCollapsed && intensityRaw < 0.005f) {
+                    intensityRaw = 0f;
                     EffectTime = 0f;
                     ambientBoltTimer = 0;
                 }
@@ -487,7 +507,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         /// </summary>
         public static void Reset() {
             Active = false;
-            Intensity = 0f;
+            intensityRaw = 0f;
+            RestartCollapse = 0f;
             EffectTime = 0f;
             MotionFade = 0f;
             CurrentLayer = 0;

@@ -28,6 +28,7 @@ namespace CalamityOverhaul.Common
         public static Asset<Effect> DropPodShockwave { get; set; }
         public static Asset<Effect> DropPodHeatHaze { get; set; }
         public static Asset<Effect> CyberShockwave { get; set; }
+        public static Asset<Effect> CyberRestartField { get; set; }
         public static Asset<Effect> CyberBoundaryRing { get; set; }
         public static Asset<Effect> CyberGlitchBolt { get; set; }
         public static Asset<Effect> CyberRiftSlash { get; set; }
