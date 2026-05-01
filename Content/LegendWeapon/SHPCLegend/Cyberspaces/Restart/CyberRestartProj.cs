@@ -396,22 +396,22 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Restart
             float breath = 0.92f + 0.08f * MathF.Sin(t * 0.22f + coreSeed * 5f);
             float scale = pulse * breath;
 
-            //外层红黑光晕：先压底色，体积比之前大约一倍，颜色压暖避免刺眼
+            //外层红黑光晕：再放大一倍体积，颜色压暖避免刺眼
             Color outerHaloDeep = new Color(0.55f, 0.06f, 0.08f) * fade * 0.6f;
             Main.spriteBatch.Draw(glow, drawPos, null, outerHaloDeep, 0f, glowOrigin,
-                new Vector2(3.6f * scale), SpriteEffects.None, 0f);
+                new Vector2(7.2f * scale), SpriteEffects.None, 0f);
             Color outerHaloWarm = new Color(0.85f, 0.20f, 0.15f) * fade * 0.45f;
             Main.spriteBatch.Draw(glow, drawPos, null, outerHaloWarm, 0f, glowOrigin,
-                new Vector2(2.4f * scale), SpriteEffects.None, 0f);
+                new Vector2(4.8f * scale), SpriteEffects.None, 0f);
 
-            //黑椭圆基底：尺寸放大到原来约 2 倍
+            //黑椭圆基底：再放大一倍
             Color baseBlack = new Color(0.03f, 0.0f, 0.0f) * fade * 0.95f;
             Main.spriteBatch.Draw(pixel, drawPos, null, baseBlack, 0f, origin,
-                new Vector2(72f * scale, 210f * scale), SpriteEffects.None, 0f);
+                new Vector2(144f * scale, 420f * scale), SpriteEffects.None, 0f);
 
             //放射状辐条：12+8 双层细线，模拟核心向外放出的光辐
-            //—— 主层 12 条均匀分布，时间相位让它们慢慢转动
-            //—— 辅层 8 条偏移半角度+不同长度，错落感
+            //主层 12 条均匀分布，时间相位让它们慢慢转动
+            //辅层 8 条偏移半角度+不同长度，错落感
             int spokeMain = 12;
             float spokeSpin = t * 0.020f + coreSeed * 0.7f;
             for (int i = 0; i < spokeMain; i++) {
@@ -420,13 +420,13 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Restart
                 float seed = MathF.Sin(i * 12.9898f + coreSeed * 78.233f);
                 seed = seed - MathF.Floor(seed);
                 float jitter = 0.65f + 0.35f * MathF.Sin(t * 0.7f + i * 1.3f + coreSeed * 4f);
-                float spokeLen = (170f + 35f * seed) * scale * jitter;
-                float spokeWidth = 1.6f + 0.6f * MathF.Sin(t * 0.5f + i * 2.1f);
+                float spokeLen = (340f + 70f * seed) * scale * jitter;
+                float spokeWidth = 3.2f + 1.2f * MathF.Sin(t * 0.5f + i * 2.1f);
                 Color spokeCore = new Color(1f, 0.45f, 0.30f) * fade * 0.7f * jitter;
                 Color spokeEdge = new Color(0.65f, 0.10f, 0.10f) * fade * 0.55f * jitter;
                 Vector2 mid = drawPos;
                 Main.spriteBatch.Draw(pixel, mid, null, spokeEdge, ang, origin,
-                    new Vector2(spokeLen * 1.05f, spokeWidth + 1.2f), SpriteEffects.None, 0f);
+                    new Vector2(spokeLen * 1.05f, spokeWidth + 2.4f), SpriteEffects.None, 0f);
                 Main.spriteBatch.Draw(pixel, mid, null, spokeCore, ang, origin,
                     new Vector2(spokeLen, spokeWidth), SpriteEffects.None, 0f);
             }
@@ -437,38 +437,38 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Restart
                 float seed = MathF.Sin(i * 23.451f - coreSeed * 47.7f);
                 seed = seed - MathF.Floor(seed);
                 float jitter = 0.6f + 0.4f * MathF.Sin(t * 0.9f + i * 0.8f);
-                float spokeLen = (110f + 50f * seed) * scale * jitter;
+                float spokeLen = (220f + 100f * seed) * scale * jitter;
                 Color spokeCore = new Color(1f, 0.55f, 0.25f) * fade * 0.55f * jitter;
                 Main.spriteBatch.Draw(pixel, drawPos, null, spokeCore, ang, origin,
-                    new Vector2(spokeLen, 1.0f), SpriteEffects.None, 0f);
+                    new Vector2(spokeLen, 2.0f), SpriteEffects.None, 0f);
             }
 
             //水平吸积带：仿黑洞吸积盘，比辐条更长更亮，常驻 + 节奏脉动
             float diskPulse = 0.7f + 0.3f * MathF.Sin(t * 0.5f + coreSeed * 9f);
-            float diskLen = 320f * scale * diskPulse;
+            float diskLen = 640f * scale * diskPulse;
             Color diskGlow = new Color(0.55f, 0.10f, 0.10f) * fade * 0.8f;
             Color diskCore = new Color(1f, 0.45f, 0.25f) * fade * 0.9f;
             Color diskHot = new Color(1f, 0.75f, 0.45f) * fade * diskPulse;
             //柔光底
             Main.spriteBatch.Draw(glow, drawPos, null, diskGlow, 0f, glowOrigin,
-                new Vector2(diskLen / glow.Width * 1.4f, 0.85f * scale), SpriteEffects.None, 0f);
+                new Vector2(diskLen / glow.Width * 1.4f, 1.7f * scale), SpriteEffects.None, 0f);
             //中段红
             Main.spriteBatch.Draw(pixel, drawPos, null, diskCore, 0f, origin,
-                new Vector2(diskLen, 4.2f * scale), SpriteEffects.None, 0f);
+                new Vector2(diskLen, 8.4f * scale), SpriteEffects.None, 0f);
             //芯亮线
             Main.spriteBatch.Draw(pixel, drawPos, null, diskHot, 0f, origin,
-                new Vector2(diskLen * 0.85f, 1.4f * scale), SpriteEffects.None, 0f);
+                new Vector2(diskLen * 0.85f, 2.8f * scale), SpriteEffects.None, 0f);
 
-            //红色核心竖缝：保留旧造型但放大约一倍，并叠一层更细更亮的内芯
+            //红色核心竖缝：再放大一倍，并叠一层更细更亮的内芯
             Color slitDeep = new Color(0.95f, 0.10f, 0.18f) * fade * 0.9f;
             Color slitHot = new Color(1f, 0.55f, 0.45f) * fade * pulse;
             Color slitInner = new Color(1f, 0.85f, 0.65f) * fade * pulse * 0.85f;
             Main.spriteBatch.Draw(pixel, drawPos, null, slitDeep, 0f, origin,
-                new Vector2(16f * scale, 180f * scale), SpriteEffects.None, 0f);
+                new Vector2(32f * scale, 360f * scale), SpriteEffects.None, 0f);
             Main.spriteBatch.Draw(pixel, drawPos, null, slitHot, 0f, origin,
-                new Vector2(5f * scale, 160f * scale), SpriteEffects.None, 0f);
+                new Vector2(10f * scale, 320f * scale), SpriteEffects.None, 0f);
             Main.spriteBatch.Draw(pixel, drawPos, null, slitInner, 0f, origin,
-                new Vector2(1.8f, 150f * scale), SpriteEffects.None, 0f);
+                new Vector2(3.6f, 300f * scale), SpriteEffects.None, 0f);
 
             //横向抽搐短闪
             float jitter2 = MathF.Sin(t * 1.7f + coreSeed * 23f);
@@ -476,13 +476,13 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Restart
                 float intensity = jitter2 - 0.4f;
                 Color cross = new Color(1f, 0.55f, 0.35f) * fade * intensity;
                 Main.spriteBatch.Draw(pixel, drawPos, null, cross, 0f, origin,
-                    new Vector2(120f * scale, 2.0f), SpriteEffects.None, 0f);
+                    new Vector2(240f * scale, 4.0f), SpriteEffects.None, 0f);
             }
 
             //中心暖白聚光：作为最高光，但用偏暖的 (1, .82, .55) 避开纯白
             Color centerHot = new Color(1f, 0.82f, 0.55f) * fade * pulse * 0.85f;
             Main.spriteBatch.Draw(glow, drawPos, null, centerHot, 0f, glowOrigin,
-                new Vector2(0.85f * scale), SpriteEffects.None, 0f);
+                new Vector2(1.7f * scale), SpriteEffects.None, 0f);
         }
 
         //炸裂闪带：奇点尾段一拍达峰的横+竖大十字白热闪
