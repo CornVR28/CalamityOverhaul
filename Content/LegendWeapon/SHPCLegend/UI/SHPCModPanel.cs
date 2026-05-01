@@ -14,39 +14,45 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
     /// </summary>
     internal static class SHPCModPanel
     {
-        public const float PanelW = 300f;
-        public const float PanelH = 260f;
-        private const float EdgePad = 12f;
+        //空间布局缩放系数，面板/插槽偏移/枪体处于该系数下，略大以缓解拥挤感
+        private const float Scale = 1f;
+        //字号缩放系数，与面板状态区保持一致比例
+        private const float FontScale = 1.2f;
+
+        public const float PanelW = 300f * Scale;
+        public const float PanelH = 260f * Scale;
+        private const float EdgePad = 12f * Scale;
 
         private const int SlotCount = 6;
-        private const float SlotW = 56f;
-        private const float SlotH = 22f;
+        private const float SlotW = 56f * Scale;
+        private const float SlotH = 22f * Scale;
 
         //六个插槽中心相对于枪体中心的偏移
         private static readonly Vector2[] SlotOffsets = {
-            new(0f, -76f),    //BARREL  枪管  正上
-            new(84f, -38f),   //OPTIC   瞄具  右上
-            new(84f, 38f),    //POWER   能源  右下
-            new(0f, 76f),     //STOCK   枪托  正下
-            new(-84f, 38f),   //GRIP    握把  左下
-            new(-84f, -38f),  //FRAME   机匣  左上
+            new(0f, -76f * Scale),               //BARREL  枪管  正上
+            new(84f * Scale, -38f * Scale),      //OPTIC   瞄具  右上
+            new(84f * Scale, 38f * Scale),       //POWER   能源  右下
+            new(0f, 76f * Scale),                //STOCK   枪托  正下
+            new(-84f * Scale, 38f * Scale),      //GRIP    握把  左下
+            new(-84f * Scale, -38f * Scale),     //FRAME   机匣  左上
         };
 
-        //枪体纹理显示缩放，SHPC原始贴图约82×26px，2.0x时绘制尺寸约164×52
-        private static float GunScale => 1.2f;
+        //枪体纹理显示缩放，SHPC原始贴图约82×26px，1.4x时绘制尺寸约115×36
+        private static float GunScale => 1.4f;
 
         //数据线在枪体纹理上的接出点，坐标单位为屏幕像素（相对枪体绘制中心）
-        //以枪口朝右为基准，对应SHPC贴图各功能区域的边缘位置
+        //以枪口朝右为基准，对应SHPC贴图各功能区域的边缘位置，按 GunScale 同步缩放
         //如果实际贴图尺寸与预估不符可按照以下规律等比调整：
         //  X轴：负值朝左（枪托侧），正值朝右（枪口侧），最大约±82*GunScale/2
         //  Y轴：负值朝上（瞄具/枪管顶），正值朝下（握把/弹匣底），最大约±26*GunScale/2
+        private const float ConnectFactor = 1.4f / 1.2f;
         private static readonly Vector2[] ConnectPoints = {
-            new(5f, -24f),   //BARREL  向上引出  枪管顶部
-            new(62f, -20f),  //OPTIC   右上引出  枪口侧上方
-            new(62f, 18f),   //POWER   右下引出  枪口侧下方
-            new(-55f, 26f),  //STOCK   向下引出  枪托底部
-            new(-15f, 26f),  //GRIP    左下引出  握把底部
-            new(-62f, -18f), //FRAME   左上引出  枪托侧上方
+            new(5f * ConnectFactor, -24f * ConnectFactor),   //BARREL  向上引出  枪管顶部
+            new(62f * ConnectFactor, -20f * ConnectFactor),  //OPTIC   右上引出  枪口侧上方
+            new(62f * ConnectFactor, 18f * ConnectFactor),   //POWER   右下引出  枪口侧下方
+            new(-55f * ConnectFactor, 26f * ConnectFactor),  //STOCK   向下引出  枪托底部
+            new(-15f * ConnectFactor, 26f * ConnectFactor),  //GRIP    左下引出  握把底部
+            new(-62f * ConnectFactor, -18f * ConnectFactor), //FRAME   左上引出  枪托侧上方
         };
 
         private static readonly string[] SlotLabels = {
@@ -116,27 +122,27 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
 
             //外框与四角L形装饰
             SHPCRenderer.DrawRectStroke(sb, px, rect, 1.2f, SHPCTheme.Border * (0.9f * a));
-            SHPCRenderer.DrawCornerBrackets(sb, px, rect, 10f, 1.5f, SHPCTheme.BorderHi * (0.9f * a));
+            SHPCRenderer.DrawCornerBrackets(sb, px, rect, 10f * Scale, 1.5f, SHPCTheme.BorderHi * (0.9f * a));
 
             //顶部青色色带
             SHPCRenderer.DrawFilledRect(sb, px,
-                new Rectangle(rect.X, rect.Y, rect.Width, 3),
+                new Rectangle(rect.X, rect.Y, rect.Width, (int)(3 * Scale)),
                 SHPCTheme.Cyan * (0.85f * a));
 
             DynamicSpriteFont font = FontAssets.MouseText.Value;
 
             //面板标题
             Utils.DrawBorderString(sb, SHPCUI.Modify_Title.Value,
-                new Vector2(rect.X + 10f, rect.Y + 7f), SHPCTheme.Text * a, 0.62f);
+                new Vector2(rect.X + 10f * Scale, rect.Y + 7f * Scale), SHPCTheme.Text * a, 0.62f * FontScale);
             Utils.DrawBorderString(sb, SHPCUI.Modify_Subtitle.Value,
-                new Vector2(rect.X + 10f, rect.Y + 24f), SHPCTheme.TextDim * a, 0.40f);
+                new Vector2(rect.X + 10f * Scale, rect.Y + 24f * Scale), SHPCTheme.TextDim * a, 0.40f * FontScale);
 
             //右上滚动ID码，增强科技感
             string idCode = $"SYS#{(int)(time * 13f) % 9999:D4}";
-            Vector2 idSz = font.MeasureString(idCode) * 0.42f;
+            Vector2 idSz = font.MeasureString(idCode) * (0.42f * FontScale);
             Utils.DrawBorderString(sb, idCode,
-                new Vector2(rect.Right - 10f - idSz.X, rect.Y + 9f),
-                SHPCTheme.Cyan * (0.70f * a), 0.42f);
+                new Vector2(rect.Right - 10f * Scale - idSz.X, rect.Y + 9f * Scale),
+                SHPCTheme.Cyan * (0.70f * a), 0.42f * FontScale);
 
             //数据分析线（绘于枪体下方）
             DrawDataLines(sb, px, gun, hover, time, a);
@@ -166,7 +172,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
 
             //枪体光场中心转换为面板局部坐标
             Vector2 gunRel = new(gunCenter.X - rect.X, gunCenter.Y - rect.Y);
-            float gunRadius = 60f;
+            float gunRadius = 60f * Scale;
 
             effect.Parameters["uTime"]?.SetValue(time);
             effect.Parameters["uAlpha"]?.SetValue(a * 0.97f);
@@ -209,12 +215,12 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
 
                 //折点处的菱形节点
                 SHPCRenderer.DrawFilledRect(sb, px,
-                    new Rectangle((int)(mid.X - 2), (int)(mid.Y - 2), 4, 4),
+                    new Rectangle((int)(mid.X - 2 * Scale), (int)(mid.Y - 2 * Scale), (int)(4 * Scale), (int)(4 * Scale)),
                     lineCol);
 
                 //枪体接出点的小方块
                 SHPCRenderer.DrawFilledRect(sb, px,
-                    new Rectangle((int)(start.X - 2), (int)(start.Y - 2), 4, 4),
+                    new Rectangle((int)(start.X - 2 * Scale), (int)(start.Y - 2 * Scale), (int)(4 * Scale), (int)(4 * Scale)),
                     lineCol * 1.2f);
 
                 //悬停时线上增加流动脉冲效果
@@ -223,7 +229,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                     Vector2 pulseA = Vector2.Lerp(start, mid, t);
                     Vector2 pulseB = Vector2.Lerp(mid, slotCenter, t);
                     Vector2 pulsePos = t < 0.5f ? pulseA : pulseB;
-                    SHPCRenderer.DrawDisc(sb, px, pulsePos, 2.2f, 2f,
+                    SHPCRenderer.DrawDisc(sb, px, pulsePos, 2.2f * Scale, 2f,
                         SHPCTheme.CyanHi * (0.8f * a));
                 }
             }
@@ -250,27 +256,27 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
 
             //悬停时四角装饰
             if (isHover) {
-                SHPCRenderer.DrawCornerBrackets(sb, px, r, 4f, 1.2f, SHPCTheme.CyanHi * a);
+                SHPCRenderer.DrawCornerBrackets(sb, px, r, 4f * Scale, 1.2f, SHPCTheme.CyanHi * a);
             }
 
             //左侧状态色条（空槽为暗色，已安装时可改为亮色）
             SHPCRenderer.DrawFilledRect(sb, px,
-                new Rectangle(r.X, r.Y, 3, r.Height),
+                new Rectangle(r.X, r.Y, (int)(3 * Scale), r.Height),
                 (isHover ? SHPCTheme.Cyan : SHPCTheme.Border) * (0.8f * a));
 
             //槽位标签
-            float labelScale = 0.38f;
+            float labelScale = 0.38f * FontScale;
             Vector2 labelSz = font.MeasureString(label) * labelScale;
             Utils.DrawBorderString(sb, label,
-                new Vector2(r.X + 7f, r.Y + (r.Height - labelSz.Y) * 0.5f),
+                new Vector2(r.X + 7f * Scale, r.Y + (r.Height - labelSz.Y) * 0.5f),
                 (isHover ? SHPCTheme.Text : SHPCTheme.TextDim) * a, labelScale);
 
             //右侧空槽标记
             const string emptyMark = "--";
-            const float emptyScale = 0.34f;
+            const float emptyScale = 0.34f * FontScale;
             Vector2 emptySz = font.MeasureString(emptyMark) * emptyScale;
             Utils.DrawBorderString(sb, emptyMark,
-                new Vector2(r.Right - 6f - emptySz.X, r.Y + (r.Height - emptySz.Y) * 0.5f),
+                new Vector2(r.Right - 6f * Scale - emptySz.X, r.Y + (r.Height - emptySz.Y) * 0.5f),
                 SHPCTheme.TextDim * (0.55f * a), emptyScale);
         }
 

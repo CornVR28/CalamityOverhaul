@@ -19,13 +19,16 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
     /// </summary>
     internal static class SHPCCyberPanel
     {
-        public const float PanelW = 248f;
-        public const float PanelH = 210f;
-        private const float EdgePad = 12f;
+        //整体UI放大系数，所有尺寸字号都按此比例缩放，便于统一调节
+        private const float Scale = 1f;
+
+        public const float PanelW = 248f * Scale;
+        public const float PanelH = 210f * Scale;
+        private const float EdgePad = 12f * Scale;
 
         //三色环主区域参数
-        private const float RingOuterR = 50f;
-        private const float RingInnerR = 32f;
+        private const float RingOuterR = 50f * Scale;
+        private const float RingInnerR = 32f * Scale;
         //三色环纵向相对面板的位置比例，略向上偏离正中心，给底部按钮留出空间
         private const float RingCenterYRatio = 0.44f;
 
@@ -35,28 +38,28 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
         private const float StartAngle = -MathHelper.PiOver2;
 
         //底部开关按钮与提示的纵向布局
-        private const int ToggleHeight = 26;
+        private const int ToggleHeight = (int)(26 * Scale);
         //开关按钮底部相对面板底边的距离
-        private const int ToggleBottomMargin = 24;
+        private const int ToggleBottomMargin = (int)(24 * Scale);
         //快捷键提示底部相对面板底边的距离
-        private const int HintBottomMargin = 4;
+        private const int HintBottomMargin = (int)(4 * Scale);
 
         //三级技能面板尺寸与定位
-        private const float SkillPanelW = 250f;
-        private const float SkillPanelH = 128f;
-        private const float SkillPanelGapX = 16f;
+        private const float SkillPanelW = 250f * Scale;
+        private const float SkillPanelH = 128f * Scale;
+        private const float SkillPanelGapX = 16f * Scale;
         //单个技能条目中描述文本的行高（像素）
-        private const int SkillDescLineHeight = 16;
+        private const int SkillDescLineHeight = (int)(16 * Scale);
         //单个技能条目除描述多行以外的固定高度（标题区 30 + 状态行+底部间距 28）
-        private const int SkillEntryFixedHeight = 30 + 28;
+        private const int SkillEntryFixedHeight = (int)((30 + 28) * Scale);
         //技能列表内容左右内边距
-        private const int SkillEntryLeftPad = 10;
+        private const int SkillEntryLeftPad = (int)(10 * Scale);
         //技能描述文本缩放
-        private const float SkillDescScale = 0.54f;
+        private const float SkillDescScale = 0.54f * Scale;
         //三级面板纵向偏移：L1 在上、L2 在中、L3 在下
-        private const float SkillPanelYOffset = 64f;
+        private const float SkillPanelYOffset = 64f * Scale;
         //段悬停时外径最大延展量
-        private const float SegmentExpandMax = 14f;
+        private const float SegmentExpandMax = 14f * Scale;
 
         /// <summary>
         /// 面板内可点击控件枚举
@@ -156,9 +159,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             Vector2 ringCenter = new(
                 panel.X + panel.Width * 0.32f,
                 panel.Y + panel.Height * RingCenterYRatio);
-            int toggleW = panel.Width - 24;
+            int toggleW = panel.Width - (int)(24 * Scale);
             int toggleY = panel.Bottom - ToggleBottomMargin - ToggleHeight;
-            Rectangle toggle = new(panel.X + 12, toggleY, toggleW, ToggleHeight);
+            Rectangle toggle = new(panel.X + (int)(12 * Scale), toggleY, toggleW, ToggleHeight);
 
             return new Layout {
                 Panel = panel,
@@ -311,7 +314,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             DrawShaderBackground(sb, px, rect, panelAlpha, globalAlpha);
 
             //外框 + 四角L形装饰
-            SHPCRenderer.DrawCornerBrackets(sb, px, rect, 9f, 1.5f,
+            SHPCRenderer.DrawCornerBrackets(sb, px, rect, 9f * Scale, 1.5f,
                 new Color(255, 90, 80) * (0.95f * a));
             SHPCRenderer.DrawRectStroke(sb, px, rect, 1.2f, new Color(140, 30, 30) * (0.9f * a));
 
@@ -319,16 +322,16 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
 
             //标题
             Utils.DrawBorderString(sb, SHPCUI.Cyber_PanelTitle.Value,
-                new Vector2(rect.X + 10, rect.Y + 7), new Color(255, 230, 230) * a, 0.62f);
+                new Vector2(rect.X + 10f * Scale, rect.Y + 7f * Scale), new Color(255, 230, 230) * a, 0.62f * Scale);
             Utils.DrawBorderString(sb, SHPCUI.Cyber_PanelSubtitle.Value,
-                new Vector2(rect.X + 10, rect.Y + 24), new Color(180, 60, 60) * a, 0.40f);
+                new Vector2(rect.X + 10f * Scale, rect.Y + 24f * Scale), new Color(180, 60, 60) * a, 0.40f * Scale);
 
             //右上ID码，每秒滚动
             string idCode = $"#{(int)(time * 11f) % 999:D3}";
-            Vector2 idSize = font.MeasureString(idCode) * 0.45f;
+            Vector2 idSize = font.MeasureString(idCode) * (0.45f * Scale);
             Utils.DrawBorderString(sb, idCode,
-                new Vector2(rect.Right - 10 - idSize.X, rect.Y + 9),
-                new Color(255, 120, 100) * (0.85f * a), 0.45f);
+                new Vector2(rect.Right - 10f * Scale - idSize.X, rect.Y + 9f * Scale),
+                new Color(255, 120, 100) * (0.85f * a), 0.45f * Scale);
 
             //三色环主体
             DrawTriRing(sb, px, layout.RingCenter, time, hover, a);
@@ -345,7 +348,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                 ? CWRKeySystem.Legend_Domain.GetAssignedKeys()[0]
                 : "?";
             string hint = string.Format(SHPCUI.Cyber_Hint.Value, keyName);
-            const float hintScale = 0.50f;
+            const float hintScale = 0.50f * Scale;
             Vector2 hintSize = font.MeasureString(hint) * hintScale;
             Utils.DrawBorderString(sb, hint,
                 new Vector2(rect.X + (rect.Width - hintSize.X) * 0.5f,
@@ -405,14 +408,14 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
         private static void DrawTriRing(SpriteBatch sb, Texture2D px,
             Vector2 center, float time, HitKind hover, float a) {
             //中央深色底盘
-            SHPCRenderer.DrawDisc(sb, px, center, RingInnerR - 4f, 4f,
+            SHPCRenderer.DrawDisc(sb, px, center, RingInnerR - 4f * Scale, 4f,
                 new Color(10, 4, 6) * a);
 
             //核心心跳
             float beat = 0.5f + 0.5f * MathF.Sin(time * 3f);
             float beatScale = Cyberspace.Active ? 0.6f + 0.4f * Cyberspace.Intensity : 0.25f;
             SHPCRenderer.DrawDisc(sb, px, center,
-                (RingInnerR - 12f) * (0.55f + 0.10f * beat), 3f,
+                (RingInnerR - 12f * Scale) * (0.55f + 0.10f * beat), 3f,
                 new Color(255, 80, 60) * (beatScale * a));
 
             //三段
@@ -433,17 +436,17 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             //中央层数文本
             DynamicSpriteFont font = FontAssets.MouseText.Value;
             string txt = Cyberspace.Active ? Cyberspace.CurrentLayer.ToString() : "0";
-            Vector2 size = font.MeasureString(txt) * 0.95f;
+            Vector2 size = font.MeasureString(txt) * (0.95f * Scale);
             Color textCol = Cyberspace.Active ? new Color(255, 220, 215) : new Color(120, 80, 80);
             Utils.DrawBorderString(sb, txt,
-                center - size * 0.5f + new Vector2(0f, -2f), textCol * a, 0.95f);
+                center - size * 0.5f + new Vector2(0f, -2f * Scale), textCol * a, 0.95f * Scale);
 
             //中央上方LAYER小字
             string label = SHPCUI.Cyber_LayerLabel.Value;
-            Vector2 lblSize = font.MeasureString(label) * 0.35f;
+            Vector2 lblSize = font.MeasureString(label) * (0.35f * Scale);
             Utils.DrawBorderString(sb, label,
-                center + new Vector2(-lblSize.X * 0.5f, -RingInnerR + 6f),
-                new Color(180, 70, 70) * (0.85f * a), 0.35f);
+                center + new Vector2(-lblSize.X * 0.5f, -RingInnerR + 6f * Scale),
+                new Color(180, 70, 70) * (0.85f * a), 0.35f * Scale);
         }
 
         /// <summary>
@@ -535,9 +538,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             Vector2 textPos = center + SHPCRenderer.AngleDir(midA) * (RingInnerR + RingOuterR) * 0.5f;
             DynamicSpriteFont font = FontAssets.MouseText.Value;
             string s = layer.ToString();
-            Vector2 sz = font.MeasureString(s) * 0.55f;
+            Vector2 sz = font.MeasureString(s) * (0.55f * Scale);
             Color tc = litFlag ? new Color(255, 250, 240) : new Color(180, 100, 90);
-            Utils.DrawBorderString(sb, s, textPos - sz * 0.5f, tc * a, 0.55f);
+            Utils.DrawBorderString(sb, s, textPos - sz * 0.5f, tc * a, 0.55f * Scale);
         }
 
         /// <summary>
@@ -545,15 +548,15 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
         /// </summary>
         private static void DrawStatusColumn(SpriteBatch sb, DynamicSpriteFont font,
             Rectangle panel, in Layout layout, float a) {
-            float colX = layout.RingCenter.X + RingOuterR + 18f;
-            float colY = panel.Y + 44f;
-            float lineH = 18f;
+            float colX = layout.RingCenter.X + RingOuterR + 18f * Scale;
+            float colY = panel.Y + 44f * Scale;
+            float lineH = 18f * Scale;
 
             string state = Cyberspace.Active
                 ? SHPCUI.Cyber_StateOnline.Value
                 : SHPCUI.Cyber_StateOffline.Value;
             Color stateCol = Cyberspace.Active ? new Color(255, 200, 180) : new Color(140, 80, 80);
-            Utils.DrawBorderString(sb, state, new Vector2(colX, colY), stateCol * a, 0.56f);
+            Utils.DrawBorderString(sb, state, new Vector2(colX, colY), stateCol * a, 0.56f * Scale);
             colY += lineH;
 
             //每层激活标记 + 该层的 RAM 消耗速度
@@ -562,7 +565,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                 bool lit = Cyberspace.Active && Cyberspace.CurrentLayer >= layer;
                 string mark = lit ? "[#]" : "[ ]";
                 Color tc = lit ? new Color(255, 200, 170) : new Color(120, 60, 60);
-                Utils.DrawBorderString(sb, $"{mark} L{layer}", new Vector2(colX, colY), tc * a, 0.50f);
+                Utils.DrawBorderString(sb, $"{mark} L{layer}", new Vector2(colX, colY), tc * a, 0.50f * Scale);
 
                 //每层消耗速度："-X.X/s"，当前激活层用更亮的红色
                 float drainRate = Cyberspace.GetLayerDrainRate(layer);
@@ -570,7 +573,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                     string drainTxt = string.Format(SHPCUI.Cyber_DrainPerSec.Value, drainRate.ToString("F1"));
                     Color drainCol = lit ? new Color(255, 200, 170) : new Color(140, 80, 80);
                     Utils.DrawBorderString(sb, drainTxt,
-                        new Vector2(colX + 36f, colY + 1f), drainCol * a, 0.44f);
+                        new Vector2(colX + 36f * Scale, colY + 1f), drainCol * a, 0.44f * Scale);
                 }
                 colY += lineH;
             }
@@ -578,10 +581,10 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             //当前层的 SUSTAIN 估算："SUSTAIN ~Xs"
             //仅在激活态显示，剩余时间过短(<2s)用闪烁红警示，无限模式下显示 ∞
             if (Cyberspace.Active && Cyberspace.CurrentLayer >= 1) {
-                colY += 2f;
+                colY += 2f * Scale;
                 if (HackTime.InfiniteHack) {
                     Utils.DrawBorderString(sb, SHPCUI.Cyber_SustainInfinite.Value,
-                        new Vector2(colX, colY), new Color(255, 230, 200) * a, 0.46f);
+                        new Vector2(colX, colY), new Color(255, 230, 200) * a, 0.46f * Scale);
                 }
                 else {
                     float drainNow = Cyberspace.GetCurrentDrainRate();
@@ -603,7 +606,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                             sustainCol = new Color(220, 200, 180);
                         }
                         Utils.DrawBorderString(sb, sustainTxt,
-                            new Vector2(colX, colY), sustainCol * a, 0.46f);
+                            new Vector2(colX, colY), sustainCol * a, 0.46f * Scale);
                     }
                 }
             }
@@ -628,17 +631,17 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             SHPCRenderer.DrawRectStroke(sb, px, r, 1.4f, border * a);
 
             //方块端帽
-            int capSize = 4;
+            int capSize = (int)(4 * Scale);
             SHPCRenderer.DrawFilledRect(sb, px,
                 new Rectangle(r.X - 2, r.Y + r.Height / 2 - capSize, capSize, capSize * 2), border * a);
             SHPCRenderer.DrawFilledRect(sb, px,
                 new Rectangle(r.Right - 2, r.Y + r.Height / 2 - capSize, capSize, capSize * 2), border * a);
 
-            Vector2 size = font.MeasureString(txt) * 0.50f;
+            Vector2 size = font.MeasureString(txt) * (0.60f * Scale);
             Color textCol = active ? new Color(255, 240, 230) : new Color(255, 200, 180);
             Utils.DrawBorderString(sb, txt,
                 new Vector2(r.X + (r.Width - size.X) * 0.5f, r.Y + (r.Height - size.Y) * 0.5f - 1f),
-                textCol * a, 0.60f);
+                textCol * a, 0.60f * Scale);
         }
 
         /// <summary>
@@ -672,7 +675,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             }
 
             //入场偏移：从二级面板右侧向外滑出
-            float slide = (1f - expandAmt) * 22f;
+            float slide = (1f - expandAmt) * 22f * Scale;
             Rectangle drawRect = new(
                 skillRect.X - (int)slide, skillRect.Y,
                 skillRect.Width, skillRect.Height);
@@ -706,7 +709,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             //外框 + 四角L形装饰
             SHPCRenderer.DrawRectStroke(sb, px, drawRect, 1.2f,
                 new Color(140, 30, 30) * (0.9f * a));
-            SHPCRenderer.DrawCornerBrackets(sb, px, drawRect, 8f, 1.5f,
+            SHPCRenderer.DrawCornerBrackets(sb, px, drawRect, 8f * Scale, 1.5f,
                 hot * (0.95f * a));
 
             //顶部扫光带，随时间在面板宽度上推进
@@ -726,52 +729,52 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                 : layer == 2 ? SHPCUI.Cyber_Layer2_Title.Value
                 : SHPCUI.Cyber_Layer3_Title.Value;
             string layerTag = $"L{layer}";
-            const float tagScale = 0.62f;
-            const float titleScale = 0.65f;
+            const float tagScale = 0.62f * Scale;
+            const float titleScale = 0.65f * Scale;
             Utils.DrawBorderString(sb, layerTag,
-                new Vector2(drawRect.X + 10, drawRect.Y + 6),
+                new Vector2(drawRect.X + 10f * Scale, drawRect.Y + 6f * Scale),
                 hot * a, tagScale);
             Vector2 tagSize = font.MeasureString(layerTag) * tagScale;
             Utils.DrawBorderString(sb, title,
-                new Vector2(drawRect.X + 10 + tagSize.X + 8, drawRect.Y + 9),
+                new Vector2(drawRect.X + 10f * Scale + tagSize.X + 8f * Scale, drawRect.Y + 9f * Scale),
                 new Color(255, 230, 220) * a, titleScale);
 
             //右上 ID 码
             string idCode = $"S{layer}{((int)(time * 7f) % 99):D2}";
-            const float idScale = 0.42f;
+            const float idScale = 0.42f * Scale;
             Vector2 idSize = font.MeasureString(idCode) * idScale;
             Utils.DrawBorderString(sb, idCode,
-                new Vector2(drawRect.Right - 8 - idSize.X, drawRect.Y + 10),
+                new Vector2(drawRect.Right - 8f * Scale - idSize.X, drawRect.Y + 10f * Scale),
                 hot * (0.75f * a), idScale);
 
             //横向分割线
-            int divY = drawRect.Y + 32;
+            int divY = drawRect.Y + (int)(32 * Scale);
             SHPCRenderer.DrawFilledRect(sb, px,
-                new Rectangle(drawRect.X + 8, divY, drawRect.Width - 16, 1),
+                new Rectangle(drawRect.X + (int)(8 * Scale), divY, drawRect.Width - (int)(16 * Scale), 1),
                 new Color(120, 30, 30) * (0.65f * a));
 
             //技能列表
             SkillEntry[] skills = GetLayerSkills(layer);
             if (skills.Length == 0) {
                 //无特有技能时给出占位提示
-                const float noneScale = 0.60f;
+                const float noneScale = 0.60f * Scale;
                 string none = SHPCUI.Cyber_NoSkill.Value;
                 Vector2 sz = font.MeasureString(none) * noneScale;
                 Utils.DrawBorderString(sb, none,
                     new Vector2(drawRect.X + (drawRect.Width - sz.X) * 0.5f,
-                        drawRect.Y + 50),
+                        drawRect.Y + 50f * Scale),
                     new Color(170, 110, 100) * a, noneScale);
 
-                const float footerScale = 0.52f;
+                const float footerScale = 0.52f * Scale;
                 string footer = SHPCUI.Cyber_LayerBaseFooter.Value;
                 Vector2 fsz = font.MeasureString(footer) * footerScale;
                 Utils.DrawBorderString(sb, footer,
                     new Vector2(drawRect.X + (drawRect.Width - fsz.X) * 0.5f,
-                        drawRect.Y + 80),
+                        drawRect.Y + 80f * Scale),
                     new Color(180, 130, 120) * (0.85f * a), footerScale);
             }
             else {
-                int entryY = divY + 8;
+                int entryY = divY + (int)(8 * Scale);
                 float descMaxW = drawRect.Width - SkillEntryLeftPad * 2;
                 for (int i = 0; i < skills.Length; i++) {
                     int entryHeight = ComputeSkillEntryHeight(font, skills[i], descMaxW);
@@ -792,10 +795,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             Color nameCol = unlocked ? new Color(255, 240, 230) : new Color(170, 120, 110);
             Color descCol = unlocked ? new Color(220, 180, 170) : new Color(140, 90, 85);
 
-            const float keyScale = 0.60f;
-            const float nameScale = 0.65f;
-            const float statusScale = 0.52f;
-            const int keyHeight = 24;
+            const float keyScale = 0.60f * Scale;
+            const float nameScale = 0.65f * Scale;
+            const float statusScale = 0.52f * Scale;
+            const int keyHeight = (int)(24 * Scale);
+            const int keyPadX = (int)(14 * Scale);
 
             //快捷键徽标，绘制于条目右上
             ModKeybind keybind = entry.Hotkey?.Invoke();
@@ -805,31 +809,31 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             string keyTxt = $"[{keyName}]";
             Vector2 keySize = font.MeasureString(keyTxt) * keyScale;
             Rectangle keyRect = new(
-                panel.Right - 10 - (int)keySize.X - 14,
+                panel.Right - (int)(10 * Scale) - (int)keySize.X - keyPadX,
                 entryY - 2,
-                (int)keySize.X + 14, keyHeight);
+                (int)keySize.X + keyPadX, keyHeight);
             Color keyBg = unlocked ? hot * 0.35f : new Color(60, 40, 40) * 0.6f;
             SHPCRenderer.DrawFilledRect(sb, px, keyRect, keyBg * a);
             SHPCRenderer.DrawRectStroke(sb, px, keyRect, 1.1f,
                 (unlocked ? hot : new Color(120, 80, 80)) * (0.95f * a));
             Color keyTextCol = unlocked ? new Color(255, 245, 230) : new Color(170, 130, 120);
             Utils.DrawBorderString(sb, keyTxt,
-                new Vector2(keyRect.X + 7, keyRect.Y + (keyRect.Height - keySize.Y) * 0.5f - 1f),
+                new Vector2(keyRect.X + 7f * Scale, keyRect.Y + (keyRect.Height - keySize.Y) * 0.5f - 1f),
                 keyTextCol * a, keyScale);
 
             //技能名（左对齐，避开右上徽标）
             string name = entry.Name?.Invoke() ?? string.Empty;
-            float nameMaxX = keyRect.X - 6;
+            float nameMaxX = keyRect.X - 6f * Scale;
             string trimmedName = TrimToWidth(font, name, nameScale, nameMaxX - (panel.X + SkillEntryLeftPad));
             Utils.DrawBorderString(sb, trimmedName,
-                new Vector2(panel.X + SkillEntryLeftPad, entryY + 2),
+                new Vector2(panel.X + SkillEntryLeftPad, entryY + 2f * Scale),
                 nameCol * a, nameScale);
 
             //描述自动换行：超出面板内宽时按字符断行，避免长描述被简单省略
             string desc = entry.Desc?.Invoke() ?? string.Empty;
             float descMaxW = panel.Width - SkillEntryLeftPad * 2;
             int lineCount = 0;
-            int descTopY = entryY + 30;
+            int descTopY = entryY + (int)(30 * Scale);
             foreach (string line in EnumerateWrappedLines(font, desc, SkillDescScale, descMaxW)) {
                 Utils.DrawBorderString(sb, line,
                     new Vector2(panel.X + SkillEntryLeftPad, descTopY + lineCount * SkillDescLineHeight),
@@ -841,7 +845,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             }
 
             //解锁状态行：紧随描述末行之后，避免长描述与状态行重叠
-            int statusY = descTopY + lineCount * SkillDescLineHeight + 4;
+            int statusY = descTopY + lineCount * SkillDescLineHeight + (int)(4 * Scale);
             string status = unlocked
                 ? SHPCUI.Cyber_SkillUnlocked.Value
                 : string.Format(SHPCUI.Cyber_SkillLocked.Value, entry.RequiredLayer);
@@ -931,12 +935,12 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             float a = baseAlpha * MathHelper.Clamp(expandAmt * 1.2f, 0f, 1f);
             GetSegmentAngles(layer, out float a0, out float a1);
             float midA = (a0 + a1) * 0.5f;
-            float outerR = RingOuterR + expandAmt * SegmentExpandMax + 5f;
+            float outerR = RingOuterR + expandAmt * SegmentExpandMax + 5f * Scale;
             Vector2 segPoint = layout.RingCenter + SHPCRenderer.AngleDir(midA) * outerR;
             Vector2 panelAttach = new(drawRect.X, drawRect.Y + drawRect.Height * 0.5f);
 
             //中转点：水平在面板左侧附近，给一段内凹折角
-            Vector2 mid = new(panelAttach.X - 12f, panelAttach.Y);
+            Vector2 mid = new(panelAttach.X - 12f * Scale, panelAttach.Y);
 
             SHPCRenderer.DrawLine(sb, px, segPoint, mid, 1.2f, glow * (0.45f * a));
             SHPCRenderer.DrawLine(sb, px, mid, panelAttach, 1.6f, glow * (0.95f * a));
