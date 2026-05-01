@@ -1,4 +1,4 @@
-using CalamityOverhaul.Common;
+﻿using CalamityOverhaul.Common;
 using CalamityOverhaul.Content.HackTimes;
 using CalamityOverhaul.Content.RAMSystems;
 using System;
@@ -336,7 +336,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Restart
         /// </summary>
         private static void FinishRoutine() {
             progressTimer = 0;
-            cooldownTimer = CooldownFrames;
+            //cooldownTimer = CooldownFrames;//TODO:为了方便调试，暂时注释
             restoreFired = false;
         }
 
