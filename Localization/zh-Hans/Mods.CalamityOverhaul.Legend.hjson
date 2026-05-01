@@ -314,7 +314,7 @@ SHPCTrialQuestLine: {
 	Trial_0: 史莱姆清除
 	Trial_1: 眼部解剖
 	Trial_2: 生化样本
-	Trial_3: 污秽提纯
+	Trial_3: 骷髅王占位
 	Trial_4: 封印突破
 	Trial_5: 深海污染
 	Trial_6: 硫火采样
@@ -350,8 +350,7 @@ SHPCTrialQuestLine: {
 		'''
 	TrialSummary_3:
 		'''
-		凝胶居然衍生出了神？我感觉只是吞噬了太多杂质的污秽集合体
-		让我们对它来一次彻底的提纯分离，看看它还能剩下什么
+		骷髅王占位
 		'''
 	TrialSummary_4:
 		'''

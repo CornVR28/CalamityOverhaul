@@ -264,8 +264,8 @@ namespace CalamityOverhaul.Content
             if (DownedV1.Invoke()) level = 2; else return level;
             //试炼2: 邪恶Boss（世吞/克脑）
             if (DownedV2.Invoke()) level = 3; else return level;
-            //试炼3: 史莱姆之神
-            if (Downed5.Invoke()) level = 4; else return level;
+            //试炼3: 骷髅王
+            if (DownedV4.Invoke()) level = 4; else return level;
             //试炼4: 血肉墙
             if (Main.hardMode) level = 5; else return level;
             //试炼5: 渊海灾虫
