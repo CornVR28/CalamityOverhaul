@@ -219,7 +219,9 @@ float3 burstField(float dist, float angle)
     if (w <= 0.0) return 0.0;
 
     //放射纹：高频角向脊线乘径向能量曲线
-    float rays = ridge(float2(angle * 1.6 / TAU + crackSeed, dist * 0.25 - uTime * 2.0));
+    //角向采样使用 ang01 = angle/TAU + 0.5（[0,1]），并乘以整数倍数 2.0，确保接缝处（ang01=0 与 1）采样一致，消除水平白带
+    float ang01 = angle / TAU + 0.5;
+    float rays = ridge(float2(ang01 * 2.0 + crackSeed, dist * 0.25 - uTime * 2.0));
     rays = pow(saturate(rays), 1.8);
     //径向能量在 0.05~1.0 之间从 1 到 0 平滑下降，并随 burstK 平移
     float radial = smoothstep(0.0, 0.15, dist) * (1.0 - smoothstep(0.7 + 0.3 * w, 1.0 + 0.3 * w, dist));
