@@ -172,6 +172,17 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
             currentPhase = LeadPhase.Complete;
         }
 
+        private static void AdvanceFromKeyPrompt() {
+            var ui = QuestManagerUI.Instance;
+            if (ui == null) return;
+
+            if (!ui.IsOpen)
+                ui.TogglePanel();
+
+            currentPhase = LeadPhase.PanelIntro;
+            animProgress = 0f;
+        }
+
         private static string GetBoundKeyName() {
             if (CWRKeySystem.QuestManager_Key == null) return null;
             var keys = CWRKeySystem.QuestManager_Key.GetAssignedKeys();
@@ -252,7 +263,7 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
             }
 
             if (DrawConfirmButton(sb, card, alpha, TextKeyPromptConfirmBtn.Value))
-                MarkGuideSeen();
+                AdvanceFromKeyPrompt();
         }
 
         // ─── 阶段2：面板右侧说明卡 ─────────────────────────────────────────────

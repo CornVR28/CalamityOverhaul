@@ -1,4 +1,5 @@
 ﻿using CalamityOverhaul.Common;
+using CalamityOverhaul.Content.HackTimes.Scannables;
 using CalamityOverhaul.Content.RAMSystems;
 using System;
 using System.Collections.Generic;

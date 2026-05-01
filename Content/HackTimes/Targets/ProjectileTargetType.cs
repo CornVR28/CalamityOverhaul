@@ -1,3 +1,4 @@
+﻿using CalamityOverhaul.Content.HackTimes.Scannables;
 using Terraria;
 using Terraria.ID;
 

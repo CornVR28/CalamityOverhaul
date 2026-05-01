@@ -2,7 +2,7 @@
 using System;
 using Terraria;
 
-namespace CalamityOverhaul.Content.HackTimes
+namespace CalamityOverhaul.Content.HackTimes.Scannables
 {
     /// <summary>
     /// NPC 扫描数据实现

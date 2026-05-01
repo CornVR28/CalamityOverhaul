@@ -1,5 +1,6 @@
 ﻿using CalamityOverhaul.Common;
 using CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.GlitchWraith;
+using CalamityOverhaul.Content.HackTimes.Scannables;
 using Terraria;
 using Terraria.ModLoader;
 

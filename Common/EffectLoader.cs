@@ -82,6 +82,7 @@ namespace CalamityOverhaul.Common
         public static Asset<Effect> BrimstoneDialogueBox { get; set; }
         public static Asset<Effect> SeaDialogueBox { get; set; }
         public static Asset<Effect> EntrustGuideCard { get; set; }
+        public static Asset<Effect> MurasamaPhantomPanel { get; set; }
         public static Asset<Effect> CybCourseSky { get; set; }
         public static Asset<Effect> CybCourseLoading { get; set; }
         public static Asset<Effect> CybCourseEntryReveal { get; set; }

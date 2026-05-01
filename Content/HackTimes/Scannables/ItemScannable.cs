@@ -1,9 +1,9 @@
-using CalamityOverhaul.Content.HackTimes.Targets;
+﻿using CalamityOverhaul.Content.HackTimes.Targets;
 using System;
 using Terraria;
 using Terraria.ID;
 
-namespace CalamityOverhaul.Content.HackTimes
+namespace CalamityOverhaul.Content.HackTimes.Scannables
 {
     /// <summary>
     /// 掉落物扫描数据实现

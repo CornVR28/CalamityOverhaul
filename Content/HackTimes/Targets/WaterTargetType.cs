@@ -1,3 +1,5 @@
+﻿using CalamityOverhaul.Content.HackTimes.Scannables;
+
 namespace CalamityOverhaul.Content.HackTimes.Targets
 {
     /// <summary>

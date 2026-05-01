@@ -1,4 +1,5 @@
-﻿using CalamityOverhaul.Content.Industrials;
+﻿using CalamityOverhaul.Content.HackTimes.Scannables;
+using CalamityOverhaul.Content.Industrials;
 using CalamityOverhaul.Content.PRTTypes;
 using InnoVault.PRT;
 using InnoVault.TileProcessors;

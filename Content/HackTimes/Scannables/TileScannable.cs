@@ -6,7 +6,7 @@ using Terraria.Map;
 using Terraria.ModLoader;
 using Terraria.ObjectData;
 
-namespace CalamityOverhaul.Content.HackTimes
+namespace CalamityOverhaul.Content.HackTimes.Scannables
 {
     /// <summary>
     /// 物块扫描数据实现

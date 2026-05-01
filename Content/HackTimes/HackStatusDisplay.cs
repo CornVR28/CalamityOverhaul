@@ -1,4 +1,5 @@
-﻿using InnoVault.Actors;
+﻿using CalamityOverhaul.Content.HackTimes.Scannables;
+using InnoVault.Actors;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;

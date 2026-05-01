@@ -1,4 +1,6 @@
-﻿using InnoVault.RenderHandles;
+﻿using CalamityOverhaul.Common;
+using CalamityOverhaul.Content.HackTimes.Scannables;
+using InnoVault.RenderHandles;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;
@@ -86,12 +88,24 @@ namespace CalamityOverhaul.Content.HackTimes
             int rtH = Math.Min(worldBounds.Height + EdgePadding * 2, MaxRtSize);
             if (rtW <= 0 || rtH <= 0) return;
 
+            //低级光照/低水波会改变原版屏幕 RT 链路，此时切换 screenTarget 可能清空 UI 或主画面
+            if (RenderQualitySafety.NeedsScreenTargetFallback()) {
+                DrawDirectCompositeFallback(sb, worldBounds, effectStr, isSelected);
+                return;
+            }
+
             //此处由 EndEntityDraw 调用，主屏幕 RT 必为 Main.screenTarget
-            if (Main.screenTarget == null || Main.screenTarget.IsDisposed) return;
+            if (Main.screenTarget == null || Main.screenTarget.IsDisposed) {
+                DrawDirectCompositeFallback(sb, worldBounds, effectStr, isSelected);
+                return;
+            }
 
             //InnoVault 维护的全屏 swap RT，作为屏幕画面的备份载体
             RenderTarget2D screenSwap = RenderHandleLoader.ScreenSwap;
-            if (screenSwap == null || screenSwap.IsDisposed) return;
+            if (screenSwap == null || screenSwap.IsDisposed) {
+                DrawDirectCompositeFallback(sb, worldBounds, effectStr, isSelected);
+                return;
+            }
 
             EnsureRT(gd, rtW, rtH);
             if (_rt == null || _rt.IsDisposed) return;
@@ -146,22 +160,51 @@ namespace CalamityOverhaul.Content.HackTimes
         }
 
         /// <summary>
+        /// 低性能模式备用路径：不触碰屏幕 RT，只用多次偏移绘制模拟轮廓辉光。
+        /// </summary>
+        private static void DrawDirectCompositeFallback(SpriteBatch sb, Rectangle worldBounds,
+            float effectStr, bool isSelected) {
+
+            Color baseColor = isSelected ? HackTheme.Danger : HackTheme.Accent;
+            float alpha = MathHelper.Clamp(effectStr, 0f, 1f);
+            float pulse = 0.85f + MathF.Sin(Main.GlobalTimeWrappedHourly * 5f) * 0.15f;
+            Vector2 origin = new(worldBounds.X - Main.screenPosition.X, worldBounds.Y - Main.screenPosition.Y);
+
+            Vector2[] outlineOffsets = [
+                new(-2f, 0f), new(2f, 0f), new(0f, -2f), new(0f, 2f),
+                new(-2f, -2f), new(2f, -2f), new(-2f, 2f), new(2f, 2f)
+            ];
+
+            sb.Begin(SpriteSortMode.Deferred, BlendState.Additive,
+                SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone,
+                null, Main.GameViewMatrix.TransformationMatrix);
+
+            Color outlineColor = baseColor * (alpha * 0.18f * pulse);
+            foreach (Vector2 offset in outlineOffsets) {
+                RedrawTileRegion(sb, worldBounds, origin + offset, outlineColor);
+            }
+
+            RedrawTileRegion(sb, worldBounds, origin, baseColor * (alpha * 0.08f));
+            sb.End();
+        }
+
+        /// <summary>
         /// 按原始 FrameX/FrameY 将包围盒范围内的物块重绘到当前 RT
         /// <br/>RT 左上角对应包围盒左上角再偏移 EdgePadding 像素
         /// </summary>
-        private static void RedrawTileRegion(SpriteBatch sb, Rectangle worldBounds) {
-            int tx0 = worldBounds.X / 16;
-            int ty0 = worldBounds.Y / 16;
-            int tw = (worldBounds.Width + 15) / 16;
-            int th = (worldBounds.Height + 15) / 16;
-            //worldBounds 可能有负值偏移（树木扩展了分枝/树冠范围），用实际像素偏移修正
-            int baseOffsetX = EdgePadding - (worldBounds.X - tx0 * 16);
-            int baseOffsetY = EdgePadding - (worldBounds.Y - ty0 * 16);
+        private static void RedrawTileRegion(SpriteBatch sb, Rectangle worldBounds)
+            => RedrawTileRegion(sb, worldBounds, new Vector2(EdgePadding, EdgePadding), Color.White);
 
-            for (int i = 0; i < tw; i++) {
-                for (int j = 0; j < th; j++) {
-                    int x = tx0 + i;
-                    int y = ty0 + j;
+        private static void RedrawTileRegion(SpriteBatch sb, Rectangle worldBounds,
+            Vector2 destinationOrigin, Color color) {
+
+            int tx0 = (int)MathF.Floor(worldBounds.Left / 16f);
+            int ty0 = (int)MathF.Floor(worldBounds.Top / 16f);
+            int tx1 = (int)MathF.Ceiling(worldBounds.Right / 16f);
+            int ty1 = (int)MathF.Ceiling(worldBounds.Bottom / 16f);
+
+            for (int x = tx0; x < tx1; x++) {
+                for (int y = ty0; y < ty1; y++) {
                     if (x < 0 || x >= Main.maxTilesX || y < 0 || y >= Main.maxTilesY) continue;
                     Tile tile = Main.tile[x, y];
                     if (!tile.HasTile) continue;
@@ -172,12 +215,13 @@ namespace CalamityOverhaul.Content.HackTimes
                     if (tex == null) continue;
 
                     //树木 trunk 使用 20x20 源帧，且需要 -2 像素偏移对齐
+                    Vector2 dst = destinationOrigin + new Vector2(x * 16 - worldBounds.X, y * 16 - worldBounds.Y);
                     if (TileScannable.IsTreeTile(type)) {
                         Rectangle treeSrc = new(tile.TileFrameX, tile.TileFrameY, 20, 20);
-                        Vector2 treeDst = new(i * 16 + baseOffsetX - 2, j * 16 + baseOffsetY - 2);
-                        sb.Draw(tex, treeDst, treeSrc, Color.White);
+                        Vector2 treeDst = dst + new Vector2(-2f, -2f);
+                        sb.Draw(tex, treeDst, treeSrc, color);
                         //在 trunk 顶部绘制树冠，在侧分枝位置绘制分枝
-                        TryDrawTreeExtras(sb, type, x, y, i * 16 + baseOffsetX, j * 16 + baseOffsetY);
+                        TryDrawTreeExtras(sb, type, x, y, dst, color);
                         continue;
                     }
 
@@ -193,9 +237,7 @@ namespace CalamityOverhaul.Content.HackTimes
                     }
 
                     Rectangle src = new(tile.TileFrameX, tile.TileFrameY, srcW, srcH);
-                    //RT 内局部坐标：格偏移 * 16 + 修正后的基准偏移
-                    Vector2 dst = new(i * 16 + baseOffsetX, j * 16 + baseOffsetY);
-                    sb.Draw(tex, dst, src, Color.White);
+                    sb.Draw(tex, dst, src, color);
                 }
             }
         }
@@ -206,7 +248,9 @@ namespace CalamityOverhaul.Content.HackTimes
         /// <br/>frameY>=198 且 frameX=22 时表示该 trunk 上方应绘制树冠
         /// <br/>使用 TextureAssets.TreeTop[0] / TreeBranch[0]（Forest 风格），不完美但足够产生轮廓掩码
         /// </summary>
-        private static void TryDrawTreeExtras(SpriteBatch sb, int type, int tileX, int tileY, int rtBaseX, int rtBaseY) {
+        private static void TryDrawTreeExtras(SpriteBatch sb, int type, int tileX, int tileY,
+            Vector2 tileDst, Color color) {
+
             Tile tile = Main.tile[tileX, tileY];
             int fx = tile.TileFrameX;
             int fy = tile.TileFrameY;
@@ -217,8 +261,8 @@ namespace CalamityOverhaul.Content.HackTimes
                 if (topTex != null) {
                     //80x80 树冠，居中对齐 trunk（-32 像素），向上 -64 像素
                     Rectangle topSrc = new(0, 0, 80, 80);
-                    Vector2 topDst = new(rtBaseX - 32, rtBaseY - 80 + 16);
-                    sb.Draw(topTex, topDst, topSrc, Color.White);
+                    Vector2 topDst = tileDst + new Vector2(-32f, -64f);
+                    sb.Draw(topTex, topDst, topSrc, color);
                 }
             }
 
@@ -228,8 +272,8 @@ namespace CalamityOverhaul.Content.HackTimes
                 if (branchTex != null) {
                     Rectangle branchSrc = new(0, 0, 40, 40);
                     //左分枝贴在 trunk 左侧
-                    Vector2 branchDst = new(rtBaseX - 40, rtBaseY - 12);
-                    sb.Draw(branchTex, branchDst, branchSrc, Color.White);
+                    Vector2 branchDst = tileDst + new Vector2(-40f, -12f);
+                    sb.Draw(branchTex, branchDst, branchSrc, color);
                 }
             }
             //右分枝：frameX=44
@@ -238,8 +282,8 @@ namespace CalamityOverhaul.Content.HackTimes
                 if (branchTex != null) {
                     //右分枝使用第 2 列(x=42 偏移 40 宽度帧)
                     Rectangle branchSrc = new(42, 0, 40, 40);
-                    Vector2 branchDst = new(rtBaseX + 16, rtBaseY - 12);
-                    sb.Draw(branchTex, branchDst, branchSrc, Color.White);
+                    Vector2 branchDst = tileDst + new Vector2(16f, -12f);
+                    sb.Draw(branchTex, branchDst, branchSrc, color);
                 }
             }
         }

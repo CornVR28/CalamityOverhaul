@@ -59,6 +59,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         }
 
         private static void ApplyFullScreenShader(SpriteBatch spriteBatch, GraphicsDevice graphicsDevice, RenderTarget2D screenSwap) {
+            if (RenderQualitySafety.NeedsScreenTargetFallback()) {
+                DrawLowQualityFieldFallback(spriteBatch);
+                return;
+            }
+
             Effect shader = EffectLoader.CyberspaceField?.Value;
             Texture2D noiseTex = noise2?.Value;
             if (shader == null || noiseTex == null) return;
@@ -107,6 +112,87 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             shader.CurrentTechnique.Passes[0].Apply();
             spriteBatch.Draw(screenSwap, Vector2.Zero, Color.White);
             spriteBatch.End();
+        }
+
+        /// <summary>
+        /// 低水波/低级光照下不触碰 screenTarget，避免原版 RT 链路变化导致玩家或 UI 被清掉。
+        /// </summary>
+        private static void DrawLowQualityFieldFallback(SpriteBatch spriteBatch) {
+            Texture2D pixel = CWRAsset.Placeholder_White?.Value;
+            if (pixel == null) return;
+
+            float alpha = MathHelper.Clamp(Cyberspace.Intensity, 0f, 1f);
+            Color dimColor = new Color(22, 0, 0) * (alpha * Cyberspace.DimStrength * 0.55f);
+
+            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone);
+            spriteBatch.Draw(pixel, new Rectangle(0, 0, Main.screenWidth, Main.screenHeight), dimColor);
+            spriteBatch.End();
+
+            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive,
+                SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone,
+                null, Main.GameViewMatrix.TransformationMatrix);
+
+            for (int layer = 0; layer < Cyberspace.RenderLayerCount; layer++) {
+                float expand = Cyberspace.GetLayerExpand(layer);
+                if (expand < 0.08f) continue;
+
+                DrawLowQualityLayerGrid(spriteBatch, pixel, layer, expand, alpha);
+            }
+
+            spriteBatch.End();
+        }
+
+        private static void DrawLowQualityLayerGrid(SpriteBatch spriteBatch, Texture2D pixel,
+            int layer, float expand, float alpha) {
+
+            Vector2 center = Main.LocalPlayer.Center;
+            float radius = Cyberspace.GetLayerRadius(layer) * expand;
+            float gridSize = Cyberspace.GridSize;
+            if (radius < gridSize * 2f) return;
+
+            float time = Cyberspace.EffectTime;
+            float layerMult = 0.65f + layer * 0.18f;
+            Color lineColor = new Color(220, 35, 22) * (alpha * 0.13f * layerMult);
+            Color nodeColor = GetLayerGlowColor(layer, alpha * 0.28f * layerMult);
+
+            int minX = (int)MathF.Floor((center.X - radius) / gridSize);
+            int maxX = (int)MathF.Ceiling((center.X + radius) / gridSize);
+            int minY = (int)MathF.Floor((center.Y - radius) / gridSize);
+            int maxY = (int)MathF.Ceiling((center.Y + radius) / gridSize);
+
+            for (int gx = minX; gx <= maxX; gx++) {
+                float worldX = gx * gridSize;
+                float dx = worldX - center.X;
+                float halfY = MathF.Sqrt(MathF.Max(radius * radius - dx * dx, 0f));
+                if (halfY <= 0f) continue;
+
+                Vector2 pos = new(worldX - Main.screenPosition.X, center.Y - halfY - Main.screenPosition.Y);
+                spriteBatch.Draw(pixel, new Rectangle((int)pos.X, (int)pos.Y, 1, (int)(halfY * 2f)), lineColor);
+            }
+
+            for (int gy = minY; gy <= maxY; gy++) {
+                float worldY = gy * gridSize;
+                float dy = worldY - center.Y;
+                float halfX = MathF.Sqrt(MathF.Max(radius * radius - dy * dy, 0f));
+                if (halfX <= 0f) continue;
+
+                Vector2 pos = new(center.X - halfX - Main.screenPosition.X, worldY - Main.screenPosition.Y);
+                spriteBatch.Draw(pixel, new Rectangle((int)pos.X, (int)pos.Y, (int)(halfX * 2f), 1), lineColor);
+            }
+
+            for (int gx = minX; gx <= maxX; gx++) {
+                for (int gy = minY; gy <= maxY; gy++) {
+                    if ((gx + gy + layer) % 5 != 0) continue;
+
+                    Vector2 world = new(gx * gridSize, gy * gridSize);
+                    if (Vector2.DistanceSquared(world, center) > radius * radius) continue;
+
+                    float flicker = 0.55f + 0.45f * MathF.Sin(time * 3f + gx * 0.37f + gy * 0.19f);
+                    Vector2 screen = world - Main.screenPosition;
+                    spriteBatch.Draw(pixel, new Rectangle((int)screen.X - 1, (int)screen.Y - 1, 3, 3), nodeColor * flicker);
+                }
+            }
         }
 
         private static void DrawEdgeGlowRing(SpriteBatch spriteBatch) {

@@ -152,7 +152,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
 
             //微追踪：仅在有运动时执行，方向存入flyAngle，冻结时保留原方向
             if (effectiveSpeed > 0.01f) {
-                NPC target = Projectile.Center.FindClosestNPC(120f);
+                NPC target = Projectile.Center.FindClosestNPC(120f, true, true);
                 if (target != null && Projectile.numHits == 0) {
                     float targetAngle = (target.Center - Projectile.Center).ToRotation();
                     float angleDiff = MathHelper.WrapAngle(targetAngle - flyAngle);
