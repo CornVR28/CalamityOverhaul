@@ -107,13 +107,14 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Teleport
                 return;
             }
 
-            //RAM 检查
-            if (!HackTime.InfiniteHack && RamSystem.CurrentRam < RamCostPerCast) {
+            //RAM 检查：不足时除常规失败反馈外，还触发 HUD 红色故障闪烁
+            if (!HackTime.InfiniteHack && (RamSystem.IsLocked || RamSystem.CurrentRam < RamCostPerCast)) {
                 if (!VaultUtils.isServer) {
                     SoundEngine.PlaySound(CWRSound.FailureCurrent with {
                         Volume = 0.4f,
                         Pitch = -0.3f,
                     }, owner.Center);
+                    RamSystem.NotifyInsufficient();
                     Color denyColor = new(255, 90, 80);
                     CombatText.NewText(owner.Hitbox, denyColor, "// LOW RAM", true);
                 }

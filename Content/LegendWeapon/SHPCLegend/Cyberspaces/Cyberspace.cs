@@ -299,6 +299,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
                 if (resumeLayer < 1) {
                     if (!VaultUtils.isServer && owner != null) {
                         SoundEngine.PlaySound(CWRSound.FailureCurrent with { Volume = 0.45f, Pitch = -0.4f }, owner.Center);
+                        RamSystem.NotifyInsufficient();
                         Color denyColor = new(255, 90, 80);
                         CombatText.NewText(owner.Hitbox, denyColor, "// LOW RAM", true);
                     }
@@ -336,6 +337,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             if (layer > CurrentLayer && !CanAffordLayer(layer)) {
                 if (!VaultUtils.isServer && owner != null) {
                     SoundEngine.PlaySound(CWRSound.FailureCurrent with { Volume = 0.4f, Pitch = -0.3f }, owner.Center);
+                    RamSystem.NotifyInsufficient();
                     Color denyColor = new(255, 90, 80);
                     CombatText.NewText(owner.Hitbox, denyColor, $"// L{layer} - LOW RAM", true);
                 }

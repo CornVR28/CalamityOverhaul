@@ -217,14 +217,30 @@ float4 PixelShaderFunction(float2 uv : TEXCOORD0, float4 vcol : COLOR0) : COLOR0
         outA *= 1.0 - inGap * 0.25;
 
         //==========================
-        //低RAM故障叠加
+        //低RAM故障叠加：作用于整条弧段，包含空槽与填充格
+        //空槽改为深红底色，填充格叠加猩红脉冲，整体加扫描线与高频抖动
         //==========================
         float warnActive = uLowRam * (1.0 - uInfinite);
         if (warnActive > 0.01) {
-            //红色脉冲染色(仅在填充区轻微叠加)
-            float pulseWarn = sin(uTime * 6.0) * 0.5 + 0.5;
-            outCol = lerp(outCol, float3(0.85, 0.10, 0.12),
-                          warnActive * 0.18 * pulseWarn * filledHere);
+            float pulseWarn = sin(uTime * 8.0) * 0.5 + 0.5;
+            float fastFlash = step(0.5, frac(uTime * 14.0));
+            //空槽底色：从冷色背景平滑染向暗红
+            float3 emptyRed = float3(0.18, 0.015, 0.02);
+            float3 hotRed = float3(0.95, 0.08, 0.10);
+            //空槽染色强度：随警告强度饱和
+            float emptyMix = warnActive * (0.55 + pulseWarn * 0.35) * inCell;
+            outCol = lerp(outCol, emptyRed, emptyMix * (1.0 - filledHere));
+            //填充格上叠加猩红脉冲
+            outCol = lerp(outCol, hotRed,
+                          warnActive * (0.45 + pulseWarn * 0.4) * filledHere);
+            //横向扫描线：警告强度高时整条弧出现错位条带
+            float bandY = frac(p.y * 0.18 - uTime * 1.6);
+            float band = smoothstep(0.46, 0.5, bandY) * (1.0 - smoothstep(0.5, 0.54, bandY));
+            outCol += hotRed * band * warnActive * 0.55;
+            //高频闪烁亮度抖动
+            outCol *= 1.0 + warnActive * fastFlash * 0.25;
+            //保证空槽也有可见 alpha
+            outA = max(outA, warnActive * 0.85 * inCell);
         }
 
         outA *= radialAA;
@@ -316,12 +332,20 @@ float4 PixelShaderFunction(float2 uv : TEXCOORD0, float4 vcol : COLOR0) : COLOR0
     }
 
     //==================================================
-    //低RAM整体偏红(全局染色)
+    //低RAM整体故障染色：装饰环、刻度、辉光一并染红，确保 RAM=0 锁定状态下也清晰可见
     //==================================================
     if (uLowRam > 0.01 && uInfinite < 0.5) {
-        float globalTint = uLowRam * (sin(uTime * 4.0) * 0.3 + 0.7) * 0.15;
-        outCol = lerp(outCol, outCol * float3(1.5, 0.4, 0.4) + float3(0.1, 0, 0),
-                      globalTint);
+        float pulseG = sin(uTime * 5.0) * 0.5 + 0.5;
+        float strength = saturate(uLowRam * (0.55 + pulseG * 0.45));
+        //通道交换 + 提红降蓝绿
+        float3 tinted = float3(
+            outCol.r * 1.6 + max(outCol.g, outCol.b) * 0.65 + 0.08,
+            outCol.g * 0.18,
+            outCol.b * 0.18);
+        outCol = lerp(outCol, tinted, strength);
+        //周期性高频暗闪，模拟显示器故障
+        float glitch = step(0.8, frac(uTime * 11.0));
+        outCol *= 1.0 - strength * glitch * 0.35;
     }
 
     //==================================================

@@ -61,8 +61,90 @@ namespace CalamityOverhaul.Content.RAMSystems
         /// 消耗 RAM 后到开始恢复的延迟（秒）
         /// </summary>
         public const float RecoveryDelay = 1.5f;
+        /// <summary>
+        /// RAM 不足闪烁提示持续帧数（玩家试图使用却 RAM 不够时的故障警示时长）
+        /// </summary>
+        public const int InsufficientFlashFrames = 30;
         //tModLoader 固定每秒 60 tick
         private const float TickSeconds = 1f / 60f;
+
+        //系统锁定计时（帧）：>0 时 RAM 被强制锁定为 0，期间禁止消耗与恢复
+        private static int lockTimer;
+        private static int lockTotalFrames;
+        //RAM 不足闪烁计时（帧）：>0 时 HUD 应进行红色故障闪烁
+        private static int flashTimer;
+
+        #endregion
+
+        #region 锁定与故障反馈
+
+        /// <summary>
+        /// 当前是否处于系统锁定（重启演出后等冷却期）
+        /// <br/>锁定期间 RAM 持续为 0、不消耗、不恢复，HUD 应整体显示为红色故障样式
+        /// </summary>
+        public static bool IsLocked => lockTimer > 0;
+
+        /// <summary>
+        /// 系统锁定剩余帧数
+        /// </summary>
+        public static int LockRemain => lockTimer;
+
+        /// <summary>
+        /// 系统锁定总帧数（演出/HUD 可用于推算进度）
+        /// </summary>
+        public static int LockTotal => lockTotalFrames;
+
+        /// <summary>
+        /// 当前是否处于 RAM 不足故障闪烁
+        /// </summary>
+        public static bool IsFlashing => flashTimer > 0;
+
+        /// <summary>
+        /// 取得 HUD 用警告强度 (0..1)，已组合锁定与故障闪烁
+        /// <br/>锁定状态恒定为 1，故障闪烁随计时衰减
+        /// </summary>
+        public static float GetWarningPulse() {
+            if (lockTimer > 0) {
+                return 1f;
+            }
+            if (flashTimer > 0) {
+                float k = flashTimer / (float)InsufficientFlashFrames;
+                return MathHelper.Clamp(k, 0f, 1f);
+            }
+            return 0f;
+        }
+
+        /// <summary>
+        /// 触发系统锁定：立即榨干 RAM 并锁定为 0，持续指定帧数
+        /// <br/>由 CyberRestart 等需要硬冷却的技能在生效后调用
+        /// </summary>
+        public static void SystemLock(int frames) {
+            if (frames <= 0) {
+                return;
+            }
+            var local = Local;
+            local.CurrentRam = 0f;
+            local.RecoveryCooldown = 0f;
+            lockTimer = frames;
+            lockTotalFrames = frames;
+            local.InvokeOnDepleted();
+        }
+
+        /// <summary>
+        /// 触发 RAM 不足故障闪烁（HUD 短暂红色闪烁提示玩家 RAM 不够用）
+        /// </summary>
+        public static void NotifyInsufficient() {
+            flashTimer = InsufficientFlashFrames;
+        }
+
+        /// <summary>
+        /// 立即解除系统锁定（仅用于读档/卸载等极端情形）
+        /// </summary>
+        public static void ClearLock() {
+            lockTimer = 0;
+            lockTotalFrames = 0;
+            flashTimer = 0;
+        }
 
         #endregion
 
@@ -175,12 +257,20 @@ namespace CalamityOverhaul.Content.RAMSystems
             if (HackTime.InfiniteHack) {
                 return true;
             }
+            //锁定期一律视为不足
+            if (lockTimer > 0) {
+                return false;
+            }
             return Local.CurrentRam >= cost;
         }
 
         public static bool TryConsume(int cost) {
             if (HackTime.InfiniteHack) {
                 return true;
+            }
+            //锁定中拒绝消耗
+            if (lockTimer > 0) {
+                return false;
             }
             var local = Local;
             if (local.CurrentRam < cost) {
@@ -203,6 +293,10 @@ namespace CalamityOverhaul.Content.RAMSystems
                 return;
             }
             if (ramPerSecond <= 0f) {
+                return;
+            }
+            //锁定期间不再额外扣 RAM
+            if (lockTimer > 0) {
                 return;
             }
             var local = Local;
@@ -233,6 +327,23 @@ namespace CalamityOverhaul.Content.RAMSystems
         public static void Update() {
             var local = Local;
             local.RecomputeEffective();
+
+            //故障闪烁计时独立推进
+            if (flashTimer > 0) {
+                flashTimer--;
+            }
+
+            //系统锁定：强制 RAM 为 0、阻断本帧恢复
+            if (lockTimer > 0) {
+                lockTimer--;
+                local.CurrentRam = 0f;
+                local.RecoveryCooldown = 0f;
+                if (lockTimer == 0) {
+                    lockTotalFrames = 0;
+                }
+                return;
+            }
+
             if (HackTime.Active) {
                 return;
             }
@@ -255,6 +366,9 @@ namespace CalamityOverhaul.Content.RAMSystems
         public static void Reset() {
             var local = Local;
             local.RecoveryCooldown = 0f;
+            lockTimer = 0;
+            lockTotalFrames = 0;
+            flashTimer = 0;
             local.RecomputeEffective();
             local.CurrentRam = local.MaxRam;
         }

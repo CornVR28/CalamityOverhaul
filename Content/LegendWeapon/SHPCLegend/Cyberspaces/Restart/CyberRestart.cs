@@ -30,9 +30,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Restart
         public const float RamCostPerCast = 6f;
 
         /// <summary>
-        /// 触发后冷却帧数（约 12 秒），重启即刻恢复全状态，必须有较长间隔
+        /// 重启生效后，RAM 锁定为 0 的帧数（约 12 秒）。锁定期间 RAM 不恢复，也不能使用任何消耗 RAM 的技能，以此代替传统冷却
         /// </summary>
-        public const int CooldownFrames = 60 * 12;
+        public const int RamLockFrames = 60 * 12;
 
         //——四阶段帧时点，TotalFrames 为整体演出长度——
         /// <summary>撕裂阶段终点：黑墙裂缝在领域中蔓延</summary>
@@ -47,7 +47,6 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Restart
         public const int TotalFrames = PhaseBurstEnd;
 
         //本地玩家专用计时
-        private static int cooldownTimer;
         private static int progressTimer;
         //演出锚定层数：触发时领域所处层数，炸裂阶段恢复时使用
         private static int anchorLayer;
@@ -66,14 +65,14 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Restart
             : MathHelper.Clamp((float)progressTimer / TotalFrames, 0f, 1f);
 
         /// <summary>
-        /// 当前剩余冷却帧（HUD/UI 可读）
+        /// 当前剩余冷却帧（HUD/UI 可读），现代表 RAM 锁定剩余帧数
         /// </summary>
-        public static int CooldownRemain => cooldownTimer;
+        public static int CooldownRemain => RamSystem.LockRemain;
 
         /// <summary>
-        /// 是否处于冷却中
+        /// 是否处于冷却中（RAM 锁定期即冷却期）
         /// </summary>
-        public static bool OnCooldown => cooldownTimer > 0;
+        public static bool OnCooldown => RamSystem.IsLocked;
 
         /// <summary>
         /// 演出阶段枚举
@@ -124,13 +123,17 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Restart
             if (Cyberspace.Intensity < 0.5f) return;
             if (Cyberspace.CurrentLayer < RequiredLayer) return;
 
-            //演出进行中或冷却中——拒绝并播放失败反馈
-            if (progressTimer > 0 || cooldownTimer > 0) {
+            //演出进行中或 RAM 锁定中——拒绝并播放失败反馈
+            if (progressTimer > 0 || RamSystem.IsLocked) {
                 if (!VaultUtils.isServer) {
                     SoundEngine.PlaySound(CWRSound.FailureCurrent with {
                         Volume = 0.35f,
                         Pitch = -0.4f,
                     }, owner.Center);
+                    //锁定中仍尝试重启，额外推一个闪烁提醒
+                    if (RamSystem.IsLocked) {
+                        RamSystem.NotifyInsufficient();
+                    }
                 }
                 return;
             }
@@ -142,6 +145,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Restart
                         Volume = 0.4f,
                         Pitch = -0.3f,
                     }, owner.Center);
+                    RamSystem.NotifyInsufficient();
                     Color denyColor = new(255, 90, 80);
                     CombatText.NewText(owner.Hitbox, denyColor, "// LOW RAM", true);
                 }
@@ -186,7 +190,6 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Restart
         /// 每帧推进：演出进度推进、各阶段视觉/逻辑钩子触发
         /// </summary>
         public static void Update() {
-            if (cooldownTimer > 0) cooldownTimer--;
             if (progressTimer <= 0) {
                 //非演出态保证 RestartCollapse 不残留
                 if (Cyberspace.RestartCollapse > 0f) {
@@ -271,8 +274,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Restart
                 }
             }
 
-            //RAM 直接刷满，呼应"系统重启完成"
-            RamSystem.Refill();
+            //RAM 不再刷满：重启代价为榨干并锁定 RAM，HUD 进入红色故障状态，以此取代冷却机制
+            RamSystem.SystemLock(RamLockFrames);
 
             //短暂无敌防止刚恢复就被秒
             owner.immune = true;
@@ -332,11 +335,10 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Restart
         }
 
         /// <summary>
-        /// 演出收尾：清空进度、设置冷却
+        /// 演出收尾：清空进度（冷却现由 RamSystem 锁定接管）
         /// </summary>
         private static void FinishRoutine() {
             progressTimer = 0;
-            //cooldownTimer = CooldownFrames;//TODO:为了方便调试，暂时注释
             restoreFired = false;
         }
 
@@ -344,7 +346,6 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Restart
         /// 立即清空所有计时器（如玩家退出/读档）
         /// </summary>
         public static void Reset() {
-            cooldownTimer = 0;
             progressTimer = 0;
             anchorLayer = 0;
             restoreFired = false;

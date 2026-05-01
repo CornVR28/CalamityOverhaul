@@ -278,7 +278,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
                     PRTLoader.AddParticle(new PRT_CyberSquare(
                         Projectile.Center, burstVel,
                         OverdriveTheme.ParticleEdge, OverdriveTheme.ParticleMain,
-                        Main.rand.NextFloat(1.0f, 2.4f), Main.rand.Next(8, 18)
+                        Main.rand.NextFloat(1.0f, 2.4f), Main.rand.Next(4, 6)//时间别太长
                     ));
                 }
             }

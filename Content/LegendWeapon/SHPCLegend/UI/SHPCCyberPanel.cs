@@ -45,6 +45,14 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
         private const float SkillPanelW = 250f;
         private const float SkillPanelH = 128f;
         private const float SkillPanelGapX = 16f;
+        //单个技能条目中描述文本的行高（像素）
+        private const int SkillDescLineHeight = 16;
+        //单个技能条目除描述多行以外的固定高度（标题区 30 + 状态行+底部间距 28）
+        private const int SkillEntryFixedHeight = 30 + 28;
+        //技能列表内容左右内边距
+        private const int SkillEntryLeftPad = 10;
+        //技能描述文本缩放
+        private const float SkillDescScale = 0.54f;
         //三级面板纵向偏移：L1 在上、L2 在中、L3 在下
         private const float SkillPanelYOffset = 64f;
         //段悬停时外径最大延展量
@@ -184,15 +192,35 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
         }
 
         /// <summary>
-        /// 根据该层技能数量计算面板高度：单技能维持紧凑，多技能时按 80px 步长展开
+        /// 根据该层技能数量与描述文本实际换行行数动态计算面板高度
+        /// 无技能占位面板维持原始紧凑高度，多技能按描述行数逐条累加
         /// </summary>
         private static int ComputeSkillPanelHeight(int layer) {
-            int count = GetLayerSkills(layer).Length;
-            if (count <= 1) {
+            SkillEntry[] skills = GetLayerSkills(layer);
+            if (skills.Length == 0) {
                 return (int)SkillPanelH;
             }
-            //首技能基线 40px(标题+分割线) + 每条 80px + 末尾 8px 留白
-            return 40 + count * 80 + 8;
+            DynamicSpriteFont font = FontAssets.MouseText.Value;
+            float descMaxW = SkillPanelW - SkillEntryLeftPad * 2;
+            //头部标题区 40 + 下方留白 8
+            int total = 40 + 8;
+            foreach (SkillEntry entry in skills) {
+                total += ComputeSkillEntryHeight(font, entry, descMaxW);
+            }
+            return Math.Max(total, (int)SkillPanelH);
+        }
+
+        /// <summary>
+        /// 计算单个技能条目的完整高度（含描述多行）
+        /// </summary>
+        private static int ComputeSkillEntryHeight(DynamicSpriteFont font,
+            SkillEntry entry, float descMaxW) {
+            string desc = entry.Desc?.Invoke() ?? string.Empty;
+            int lines = MeasureWrappedLineCount(font, desc, SkillDescScale, descMaxW);
+            if (lines < 1) {
+                lines = 1;
+            }
+            return SkillEntryFixedHeight + lines * SkillDescLineHeight;
         }
 
         /// <summary>
@@ -744,16 +772,18 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             }
             else {
                 int entryY = divY + 8;
+                float descMaxW = drawRect.Width - SkillEntryLeftPad * 2;
                 for (int i = 0; i < skills.Length; i++) {
+                    int entryHeight = ComputeSkillEntryHeight(font, skills[i], descMaxW);
                     DrawSkillEntry(sb, px, font, drawRect, entryY,
                         skills[i], hot, a);
-                    entryY += 80;
+                    entryY += entryHeight;
                 }
             }
         }
 
         /// <summary>
-        /// 单条技能条目：左侧名称 + 描述，右侧快捷键徽标，下方解锁状态
+        /// 单条技能条目：左侧名称 + 描述（自动换行），右侧快捷键徽标，下方解锁状态
         /// </summary>
         private static void DrawSkillEntry(SpriteBatch sb, Texture2D px,
             DynamicSpriteFont font, Rectangle panel, int entryY,
@@ -764,10 +794,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
 
             const float keyScale = 0.60f;
             const float nameScale = 0.65f;
-            const float descScale = 0.54f;
             const float statusScale = 0.52f;
             const int keyHeight = 24;
-            const int leftPad = 10;
 
             //快捷键徽标，绘制于条目右上
             ModKeybind keybind = entry.Hotkey?.Invoke();
@@ -792,27 +820,83 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             //技能名（左对齐，避开右上徽标）
             string name = entry.Name?.Invoke() ?? string.Empty;
             float nameMaxX = keyRect.X - 6;
-            string trimmedName = TrimToWidth(font, name, nameScale, nameMaxX - (panel.X + leftPad));
+            string trimmedName = TrimToWidth(font, name, nameScale, nameMaxX - (panel.X + SkillEntryLeftPad));
             Utils.DrawBorderString(sb, trimmedName,
-                new Vector2(panel.X + leftPad, entryY + 2),
+                new Vector2(panel.X + SkillEntryLeftPad, entryY + 2),
                 nameCol * a, nameScale);
 
-            //描述（截断到面板宽度内）
+            //描述自动换行：超出面板内宽时按字符断行，避免长描述被简单省略
             string desc = entry.Desc?.Invoke() ?? string.Empty;
-            float descMaxW = panel.Width - leftPad * 2;
-            string trimmedDesc = TrimToWidth(font, desc, descScale, descMaxW);
-            Utils.DrawBorderString(sb, trimmedDesc,
-                new Vector2(panel.X + leftPad, entryY + 30),
-                descCol * a, descScale);
+            float descMaxW = panel.Width - SkillEntryLeftPad * 2;
+            int lineCount = 0;
+            int descTopY = entryY + 30;
+            foreach (string line in EnumerateWrappedLines(font, desc, SkillDescScale, descMaxW)) {
+                Utils.DrawBorderString(sb, line,
+                    new Vector2(panel.X + SkillEntryLeftPad, descTopY + lineCount * SkillDescLineHeight),
+                    descCol * a, SkillDescScale);
+                lineCount++;
+            }
+            if (lineCount < 1) {
+                lineCount = 1;
+            }
 
-            //解锁状态行
+            //解锁状态行：紧随描述末行之后，避免长描述与状态行重叠
+            int statusY = descTopY + lineCount * SkillDescLineHeight + 4;
             string status = unlocked
                 ? SHPCUI.Cyber_SkillUnlocked.Value
                 : string.Format(SHPCUI.Cyber_SkillLocked.Value, entry.RequiredLayer);
             Color statusCol = unlocked ? new Color(120, 220, 130) : new Color(220, 110, 100);
             Utils.DrawBorderString(sb, status,
-                new Vector2(panel.X + leftPad, entryY + 56),
+                new Vector2(panel.X + SkillEntryLeftPad, statusY),
                 statusCol * a, statusScale);
+        }
+
+        /// <summary>
+        /// 估算给定文本按指定最大宽度换行后的行数
+        /// </summary>
+        private static int MeasureWrappedLineCount(DynamicSpriteFont font, string text,
+            float scale, float maxWidth) {
+            if (string.IsNullOrEmpty(text) || maxWidth <= 0f) {
+                return 1;
+            }
+            int count = 0;
+            foreach (string _ in EnumerateWrappedLines(font, text, scale, maxWidth)) {
+                count++;
+            }
+            return count <= 0 ? 1 : count;
+        }
+
+        /// <summary>
+        /// 按字符级别贪心切分文本以适配最大宽度，逐行 yield
+        /// 中英混排下足以胜任，避免在描述里插换行符
+        /// </summary>
+        private static System.Collections.Generic.IEnumerable<string> EnumerateWrappedLines(
+            DynamicSpriteFont font, string text, float scale, float maxWidth) {
+            if (string.IsNullOrEmpty(text)) {
+                yield break;
+            }
+            if (maxWidth <= 1f) {
+                yield return text;
+                yield break;
+            }
+            int start = 0;
+            int n = text.Length;
+            while (start < n) {
+                int len = 1;
+                int lastFit = 1;
+                while (start + len <= n) {
+                    float w = font.MeasureString(text.AsSpan(start, len).ToString()).X * scale;
+                    if (w <= maxWidth) {
+                        lastFit = len;
+                        len++;
+                    }
+                    else {
+                        break;
+                    }
+                }
+                yield return text.Substring(start, lastFit);
+                start += lastFit;
+            }
         }
 
         /// <summary>

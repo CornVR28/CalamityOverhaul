@@ -1,5 +1,6 @@
 ﻿using CalamityOverhaul.Common;
 using CalamityOverhaul.Content.HackTimes;
+using CalamityOverhaul.Content.RAMSystems;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Graphics;
 using System;
@@ -530,6 +531,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                     lowRam = MathHelper.Clamp(1f - (currentRam - 0.5f) / 1.5f, 0f, 1f);
                 }
             }
+            //系统锁定/RAM 不足故障闪烁直接拉到上限
+            lowRam = MathF.Max(lowRam, RamSystem.GetWarningPulse());
 
             Effect effect = EffectLoader.HackRamArc?.Value;
             if (effect != null) {

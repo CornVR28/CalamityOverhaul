@@ -163,13 +163,15 @@ namespace CalamityOverhaul.Content.HackTimes
             Rectangle dest = new((int)qLeft, (int)qTop, qW, qH);
             Vector2 relCenter = new(center.X - qLeft, center.Y - qTop);
 
-            //低RAM警告强度(平滑)
+            //低RAM警告强度(平滑)：组合自然低位 + 系统锁定/不足闪烁
             float lowRam = 0f;
             if (!HackTime.InfiniteHack) {
                 if (RamSystem.CurrentRam < 0.5f) lowRam = 1f;
                 else if (RamSystem.CurrentRam <= 2f)
                     lowRam = MathHelper.Clamp(1f - (RamSystem.CurrentRam - 0.5f) / 1.5f, 0f, 1f);
             }
+            //系统锁定/不足闪烁直接拉满故障色
+            lowRam = MathF.Max(lowRam, RamSystem.GetWarningPulse());
 
             effect.Parameters["uTime"]?.SetValue(timer);
             effect.Parameters["uAlpha"]?.SetValue(alpha);
