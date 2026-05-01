@@ -50,6 +50,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
                 chargeRatio = MathHelper.Clamp(Projectile.ai[0], 0f, 1f);
                 overdriveAmount = MathHelper.Clamp(Projectile.ai[1], 0f, 1f);
                 explosionRadius = MathHelper.Lerp(BaseExplosionRadius, MaxExplosionRadius, chargeRatio);
+                //超驱时实际爆炸半径同步扩大，与视觉范围保持一致
+                if (overdriveAmount > 0f)
+                    explosionRadius *= 1f + overdriveAmount * 0.5f;
                 Projectile.localAI[0] = 1f;
 
                 // 设置碰撞范围用于伤害检测
@@ -186,7 +189,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             shader.Parameters["overdriveAmount"]?.SetValue(od);
 
             Vector2 drawPos = Projectile.Center - Main.screenPosition;
-            float drawDiameter = explosionRadius * (2.2f + od * 1.0f); // 超驱时视觉更大
+            float drawDiameter = explosionRadius * 2.2f;
 
             Main.spriteBatch.End();
             Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
