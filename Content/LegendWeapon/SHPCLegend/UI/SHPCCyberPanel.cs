@@ -324,14 +324,14 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             Utils.DrawBorderString(sb, SHPCUI.Cyber_PanelTitle.Value,
                 new Vector2(rect.X + 10f * Scale, rect.Y + 7f * Scale), new Color(255, 230, 230) * a, 0.62f * Scale);
             Utils.DrawBorderString(sb, SHPCUI.Cyber_PanelSubtitle.Value,
-                new Vector2(rect.X + 10f * Scale, rect.Y + 24f * Scale), new Color(180, 60, 60) * a, 0.40f * Scale);
+                new Vector2(rect.X + 10f * Scale, rect.Y + 24f * Scale), new Color(205, 85, 80) * a, 0.40f * Scale);
 
             //右上ID码，每秒滚动
             string idCode = $"#{(int)(time * 11f) % 999:D3}";
             Vector2 idSize = font.MeasureString(idCode) * (0.45f * Scale);
             Utils.DrawBorderString(sb, idCode,
                 new Vector2(rect.Right - 10f * Scale - idSize.X, rect.Y + 9f * Scale),
-                new Color(255, 120, 100) * (0.85f * a), 0.45f * Scale);
+                new Color(255, 135, 115) * (0.85f * a), 0.45f * Scale);
 
             //三色环主体
             DrawTriRing(sb, px, layout.RingCenter, time, hover, a);
@@ -353,7 +353,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             Utils.DrawBorderString(sb, hint,
                 new Vector2(rect.X + (rect.Width - hintSize.X) * 0.5f,
                     rect.Bottom - HintBottomMargin - hintSize.Y),
-                new Color(220, 130, 120) * (0.85f * a), hintScale);
+                new Color(230, 145, 135) * (0.85f * a), hintScale);
 
             //三级技能面板，最后绘制保证置顶
             DrawSkillPanels(sb, px, font, layout, panelAlpha, globalAlpha, time);
@@ -437,7 +437,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             DynamicSpriteFont font = FontAssets.MouseText.Value;
             string txt = Cyberspace.Active ? Cyberspace.CurrentLayer.ToString() : "0";
             Vector2 size = font.MeasureString(txt) * (0.95f * Scale);
-            Color textCol = Cyberspace.Active ? new Color(255, 220, 215) : new Color(120, 80, 80);
+            Color textCol = Cyberspace.Active ? new Color(255, 225, 220) : new Color(145, 100, 100);
             Utils.DrawBorderString(sb, txt,
                 center - size * 0.5f + new Vector2(0f, -2f * Scale), textCol * a, 0.95f * Scale);
 
@@ -446,7 +446,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             Vector2 lblSize = font.MeasureString(label) * (0.35f * Scale);
             Utils.DrawBorderString(sb, label,
                 center + new Vector2(-lblSize.X * 0.5f, -RingInnerR + 6f * Scale),
-                new Color(180, 70, 70) * (0.85f * a), 0.35f * Scale);
+                new Color(205, 95, 90) * (0.85f * a), 0.35f * Scale);
         }
 
         /// <summary>
@@ -539,7 +539,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             DynamicSpriteFont font = FontAssets.MouseText.Value;
             string s = layer.ToString();
             Vector2 sz = font.MeasureString(s) * (0.55f * Scale);
-            Color tc = litFlag ? new Color(255, 250, 240) : new Color(180, 100, 90);
+            Color tc = litFlag ? new Color(255, 250, 240) : new Color(200, 115, 105);
             Utils.DrawBorderString(sb, s, textPos - sz * 0.5f, tc * a, 0.55f * Scale);
         }
 
@@ -555,7 +555,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             string state = Cyberspace.Active
                 ? SHPCUI.Cyber_StateOnline.Value
                 : SHPCUI.Cyber_StateOffline.Value;
-            Color stateCol = Cyberspace.Active ? new Color(255, 200, 180) : new Color(140, 80, 80);
+            Color stateCol = Cyberspace.Active ? new Color(255, 210, 190) : new Color(160, 100, 100);
             Utils.DrawBorderString(sb, state, new Vector2(colX, colY), stateCol * a, 0.56f * Scale);
             colY += lineH;
 
@@ -564,14 +564,14 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                 int layer = i + 1;
                 bool lit = Cyberspace.Active && Cyberspace.CurrentLayer >= layer;
                 string mark = lit ? "[#]" : "[ ]";
-                Color tc = lit ? new Color(255, 200, 170) : new Color(120, 60, 60);
+                Color tc = lit ? new Color(255, 210, 180) : new Color(145, 85, 85);
                 Utils.DrawBorderString(sb, $"{mark} L{layer}", new Vector2(colX, colY), tc * a, 0.50f * Scale);
 
                 //每层消耗速度："-X.X/s"，当前激活层用更亮的红色
                 float drainRate = Cyberspace.GetLayerDrainRate(layer);
                 if (drainRate > 0f) {
                     string drainTxt = string.Format(SHPCUI.Cyber_DrainPerSec.Value, drainRate.ToString("F1"));
-                    Color drainCol = lit ? new Color(255, 200, 170) : new Color(140, 80, 80);
+                    Color drainCol = lit ? new Color(255, 210, 180) : new Color(160, 100, 100);
                     Utils.DrawBorderString(sb, drainTxt,
                         new Vector2(colX + 36f * Scale, colY + 1f), drainCol * a, 0.44f * Scale);
                 }
@@ -603,7 +603,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                             sustainCol = new Color(255, 170, 130);
                         }
                         else {
-                            sustainCol = new Color(220, 200, 180);
+                            sustainCol = new Color(230, 210, 190);
                         }
                         Utils.DrawBorderString(sb, sustainTxt,
                             new Vector2(colX, colY), sustainCol * a, 0.46f * Scale);
@@ -638,7 +638,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                 new Rectangle(r.Right - 2, r.Y + r.Height / 2 - capSize, capSize, capSize * 2), border * a);
 
             Vector2 size = font.MeasureString(txt) * (0.60f * Scale);
-            Color textCol = active ? new Color(255, 240, 230) : new Color(255, 200, 180);
+            Color textCol = active ? new Color(255, 242, 232) : new Color(255, 210, 190);
             Utils.DrawBorderString(sb, txt,
                 new Vector2(r.X + (r.Width - size.X) * 0.5f, r.Y + (r.Height - size.Y) * 0.5f - 1f),
                 textCol * a, 0.60f * Scale);
@@ -763,7 +763,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                 Utils.DrawBorderString(sb, none,
                     new Vector2(drawRect.X + (drawRect.Width - sz.X) * 0.5f,
                         drawRect.Y + 50f * Scale),
-                    new Color(170, 110, 100) * a, noneScale);
+                    new Color(190, 125, 115) * a, noneScale);
 
                 const float footerScale = 0.52f * Scale;
                 string footer = SHPCUI.Cyber_LayerBaseFooter.Value;
@@ -771,7 +771,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                 Utils.DrawBorderString(sb, footer,
                     new Vector2(drawRect.X + (drawRect.Width - fsz.X) * 0.5f,
                         drawRect.Y + 80f * Scale),
-                    new Color(180, 130, 120) * (0.85f * a), footerScale);
+                    new Color(195, 145, 135) * (0.85f * a), footerScale);
             }
             else {
                 int entryY = divY + (int)(8 * Scale);
@@ -792,8 +792,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             DynamicSpriteFont font, Rectangle panel, int entryY,
             SkillEntry entry, Color hot, float a) {
             bool unlocked = Cyberspace.Active && Cyberspace.CurrentLayer >= entry.RequiredLayer;
-            Color nameCol = unlocked ? new Color(255, 240, 230) : new Color(170, 120, 110);
-            Color descCol = unlocked ? new Color(220, 180, 170) : new Color(140, 90, 85);
+            Color nameCol = unlocked ? new Color(255, 242, 232) : new Color(190, 135, 125);
+            Color descCol = unlocked ? new Color(230, 190, 180) : new Color(160, 105, 100);
 
             const float keyScale = 0.60f * Scale;
             const float nameScale = 0.65f * Scale;
@@ -816,7 +816,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             SHPCRenderer.DrawFilledRect(sb, px, keyRect, keyBg * a);
             SHPCRenderer.DrawRectStroke(sb, px, keyRect, 1.1f,
                 (unlocked ? hot : new Color(120, 80, 80)) * (0.95f * a));
-            Color keyTextCol = unlocked ? new Color(255, 245, 230) : new Color(170, 130, 120);
+            Color keyTextCol = unlocked ? new Color(255, 246, 232) : new Color(190, 145, 135);
             Utils.DrawBorderString(sb, keyTxt,
                 new Vector2(keyRect.X + 7f * Scale, keyRect.Y + (keyRect.Height - keySize.Y) * 0.5f - 1f),
                 keyTextCol * a, keyScale);
@@ -849,7 +849,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             string status = unlocked
                 ? SHPCUI.Cyber_SkillUnlocked.Value
                 : string.Format(SHPCUI.Cyber_SkillLocked.Value, entry.RequiredLayer);
-            Color statusCol = unlocked ? new Color(120, 220, 130) : new Color(220, 110, 100);
+            Color statusCol = unlocked ? new Color(135, 230, 145) : new Color(230, 120, 110);
             Utils.DrawBorderString(sb, status,
                 new Vector2(panel.X + SkillEntryLeftPad, statusY),
                 statusCol * a, statusScale);
