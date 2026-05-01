@@ -30,6 +30,8 @@ namespace CalamityOverhaul.Common
         public static Asset<Effect> CyberShockwave { get; set; }
         public static Asset<Effect> CyberBoundaryRing { get; set; }
         public static Asset<Effect> CyberGlitchBolt { get; set; }
+        public static Asset<Effect> CyberRiftSlash { get; set; }
+        public static Asset<Effect> CyberReform { get; set; }
         public static Asset<Effect> CyberTraceBeam { get; set; }
         public static Asset<Effect> CyberEnergyOrb { get; set; }
         public static Asset<Effect> CyberDetonation { get; set; }

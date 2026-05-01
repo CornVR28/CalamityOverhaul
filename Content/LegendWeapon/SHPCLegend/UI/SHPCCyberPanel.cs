@@ -100,6 +100,14 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
         /// </summary>
         private static SkillEntry[] GetLayerSkills(int layer) {
             switch (layer) {
+                case 1:
+                    return [
+                        new SkillEntry(
+                            () => SHPCUI.Cyber_Skill_Teleport_Name.Value,
+                            () => SHPCUI.Cyber_Skill_Teleport_Desc.Value,
+                            () => CWRKeySystem.Legend_Teleport,
+                            requiredLayer: 1)
+                    ];
                 case 2:
                     return [
                         new SkillEntry(

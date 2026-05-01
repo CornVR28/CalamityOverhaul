@@ -72,6 +72,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
         public static LocalizedText Cyber_SkillUnlocked { get; private set; }
         public static LocalizedText Cyber_SkillLocked { get; private set; }
         public static LocalizedText Cyber_KeyUnbound { get; private set; }
+        public static LocalizedText Cyber_Skill_Teleport_Name { get; private set; }
+        public static LocalizedText Cyber_Skill_Teleport_Desc { get; private set; }
         public static LocalizedText Cyber_Skill_Banish_Name { get; private set; }
         public static LocalizedText Cyber_Skill_Banish_Desc { get; private set; }
         public static LocalizedText Cyber_Skill_Freeze_Name { get; private set; }
@@ -122,6 +124,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             Cyber_SkillUnlocked = this.GetLocalization(nameof(Cyber_SkillUnlocked), () => "[#] UNLOCKED");
             Cyber_SkillLocked = this.GetLocalization(nameof(Cyber_SkillLocked), () => "[X] Requires Layer {0}");
             Cyber_KeyUnbound = this.GetLocalization(nameof(Cyber_KeyUnbound), () => "?");
+            Cyber_Skill_Teleport_Name = this.GetLocalization(nameof(Cyber_Skill_Teleport_Name), () => "RIFT TELEPORT");
+            Cyber_Skill_Teleport_Desc = this.GetLocalization(nameof(Cyber_Skill_Teleport_Desc), () => "Tear a dimensional rift to the cursor and reform inside the domain.");
             Cyber_Skill_Banish_Name = this.GetLocalization(nameof(Cyber_Skill_Banish_Name), () => "CYBER BANISH");
             Cyber_Skill_Banish_Desc = this.GetLocalization(nameof(Cyber_Skill_Banish_Desc), () => "Send the foe under the cursor into deep cyberspace.");
             Cyber_Skill_Freeze_Name = this.GetLocalization(nameof(Cyber_Skill_Freeze_Name), () => "DOMAIN FREEZE");

@@ -743,6 +743,8 @@ SHPCUI: {
 	Cyber_SkillUnlocked: "[#] UNLOCKED"
 	Cyber_SkillLocked: "[X] Requires Layer {0}"
 	Cyber_KeyUnbound: ?
+	Cyber_Skill_Teleport_Name: RIFT TELEPORT
+	Cyber_Skill_Teleport_Desc: Tear a dimensional rift to the cursor and reform inside the domain.
 	Cyber_Skill_Banish_Name: CYBER BANISH
 	Cyber_Skill_Banish_Desc: Send the foe under the cursor into deep cyberspace.
 	Cyber_Skill_Freeze_Name: DOMAIN FREEZE

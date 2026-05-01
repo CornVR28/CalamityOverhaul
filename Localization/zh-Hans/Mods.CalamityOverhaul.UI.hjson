@@ -740,6 +740,8 @@ SHPCUI: {
 	Cyber_SkillUnlocked: "[#] 已解锁"
 	Cyber_SkillLocked: "[X] 需要 {0} 层领域"
 	Cyber_KeyUnbound: 未绑定
+	Cyber_Skill_Teleport_Name: 维度瞬移
+	Cyber_Skill_Teleport_Desc: 化作维度数据裂缝劈向光标，并在黑墙数据块的聚拢中重现
 	Cyber_Skill_Banish_Name: 赛博放逐
 	Cyber_Skill_Banish_Desc: 将光标下的敌人送入深层赛博空间
 	Cyber_Skill_Freeze_Name: 领域冻结
