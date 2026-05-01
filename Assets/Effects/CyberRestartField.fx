@@ -172,9 +172,10 @@ float3 singularityCore(float2 centered, float dist)
     float w = singularityK;
     if (w <= 0.0) return 0.0;
 
-    //核心整体尺寸：随 w 起伏、随 burstK 急速塌缩
+    //核心整体尺寸：随 w 起伏、随 burstK 急速塌缩；放大约一倍并加入低频呼吸
     float pulse = 0.85 + 0.15 * sin(uTime * 12.0 + crackSeed * 9.0);
-    float coreSize = lerp(0.04, 0.085, w) * pulse;
+    float breath = 0.92 + 0.08 * sin(uTime * 3.5 + crackSeed * 5.0);
+    float coreSize = lerp(0.085, 0.165, w) * pulse * breath;
     float burstShrink = 1.0 - burstK;
     coreSize *= burstShrink;
 
