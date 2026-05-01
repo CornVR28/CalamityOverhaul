@@ -40,7 +40,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             Projectile.penetrate = -1;
             Projectile.timeLeft = Lifetime;
             Projectile.usesLocalNPCImmunity = true;
-            Projectile.localNPCHitCooldown = -1; // 每个NPC只命中一次
+            Projectile.localNPCHitCooldown = 24; // 每个NPC只命中一次
             Projectile.DamageType = DamageClass.Magic;
         }
 

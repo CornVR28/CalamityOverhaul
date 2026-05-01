@@ -239,7 +239,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
                 Vector2 spawnPos = player.Center + velocity.SafeNormalize(Vector2.UnitX) * 70f;
                 Projectile.NewProjectile(source, spawnPos, Vector2.Zero,
                     ModContent.ProjectileType<CyberChargeOrbProj>(),
-                    damage * 3, knockback, player.whoAmI,
+                    damage * 2, knockback, player.whoAmI,
                     ai1: heldIdx);
             }
             else {
