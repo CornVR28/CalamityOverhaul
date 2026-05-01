@@ -84,6 +84,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Quest
         private void SyncCampsiteQuest(QuestManagerUI manager, ADVSave save) {
             //已完成首次对话 → 标记完成
             if (save.Get<OldDukeADVData>().OldDukeFirstCampsiteDialogueCompleted) {
+                EnsureCampsiteEntry(manager, completed: true);
                 manager.SetEntryStatus(CAMPSITE_KEY, QuestEntryStatus.Completed, 1f);
                 return;
             }
@@ -94,27 +95,13 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Quest
                 return;
             }
 
-            //注册或更新
-            var entry = manager.GetEntry(CAMPSITE_KEY);
-            if (entry == null) {
-                entry = new FindCampsiteQuestEntry(CAMPSITE_KEY, CampsiteTitle, CampsiteSummary, QuestCategory) {
-                    Priority = 60,
-                    EntryStyle = new SulfseaEntryStyle(),
-                    TrackerStyle = new SulfseaTrackerWidgetStyle(),
-                    ObjectiveFormat = CampsiteObjective,
-                    LocationFormat = CampsiteLocation,
-                    DistanceFormat = CampsiteDistance,
-                    InteractFormat = CampsiteInteract,
-                    QuestCompleteFormat = CampsiteComplete,
-                    HoldFragmentHintFormat = CampsiteHoldHint
-                };
-                manager.RegisterQuest(entry);
-            }
+            EnsureCampsiteEntry(manager);
         }
 
         private void SyncFragmentQuest(QuestManagerUI manager, ADVSave save) {
             //已完成 → 标记完成
             if (save.Get<OldDukeADVData>().OldDukeFindFragmentsQuestCompleted) {
+                EnsureFragmentEntry(manager, completed: true);
                 manager.SetEntryStatus(FRAGMENT_KEY, QuestEntryStatus.Completed, 1f);
                 return;
             }
@@ -125,22 +112,45 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Quest
                 return;
             }
 
-            //注册或更新
-            var entry = manager.GetEntry(FRAGMENT_KEY);
-            if (entry == null) {
-                entry = new FindFragmentQuestEntry(FRAGMENT_KEY, FragmentTitle, FragmentSummary, QuestCategory) {
-                    Priority = 55,
-                    EntryStyle = new SulfseaEntryStyle(),
-                    TrackerStyle = new SulfseaTrackerWidgetStyle(),
-                    ObjectiveFormat = FragmentObjective,
-                    CollectFormat = FragmentCollect,
-                    CurrentFormat = FragmentCurrent,
-                    ReturnFormat = FragmentReturn,
-                    QuestCompleteFormat = FragmentComplete,
-                    HintFormat = FragmentHint
-                };
-                manager.RegisterQuest(entry);
-            }
+            EnsureFragmentEntry(manager);
+        }
+
+        private static void EnsureCampsiteEntry(QuestManagerUI manager, bool completed = false) {
+            if (manager.GetEntry(CAMPSITE_KEY) != null) return;
+
+            var entry = new FindCampsiteQuestEntry(CAMPSITE_KEY, CampsiteTitle, CampsiteSummary, QuestCategory) {
+                Priority = 60,
+                Status = completed ? QuestEntryStatus.Completed : QuestEntryStatus.Active,
+                Progress = completed ? 1f : 0f,
+                EntryStyle = new SulfseaEntryStyle(),
+                TrackerStyle = new SulfseaTrackerWidgetStyle(),
+                ObjectiveFormat = CampsiteObjective,
+                LocationFormat = CampsiteLocation,
+                DistanceFormat = CampsiteDistance,
+                InteractFormat = CampsiteInteract,
+                QuestCompleteFormat = CampsiteComplete,
+                HoldFragmentHintFormat = CampsiteHoldHint
+            };
+            manager.RegisterQuest(entry);
+        }
+
+        private static void EnsureFragmentEntry(QuestManagerUI manager, bool completed = false) {
+            if (manager.GetEntry(FRAGMENT_KEY) != null) return;
+
+            var entry = new FindFragmentQuestEntry(FRAGMENT_KEY, FragmentTitle, FragmentSummary, QuestCategory) {
+                Priority = 55,
+                Status = completed ? QuestEntryStatus.Completed : QuestEntryStatus.Active,
+                Progress = completed ? 1f : 0f,
+                EntryStyle = new SulfseaEntryStyle(),
+                TrackerStyle = new SulfseaTrackerWidgetStyle(),
+                ObjectiveFormat = FragmentObjective,
+                CollectFormat = FragmentCollect,
+                CurrentFormat = FragmentCurrent,
+                ReturnFormat = FragmentReturn,
+                QuestCompleteFormat = FragmentComplete,
+                HintFormat = FragmentHint
+            };
+            manager.RegisterQuest(entry);
         }
     }
 }

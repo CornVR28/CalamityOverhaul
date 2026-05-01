@@ -123,24 +123,17 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest
                 return;
             }
 
+            if (completed) {
+                EnsureQuestEntry(manager, key, title, summary, targetNpcType, requiredContribution,
+                    priority, QuestEntryStatus.Completed, onUnsuspended);
+                manager.SetEntryStatus(key, QuestEntryStatus.Completed, 1f);
+                return;
+            }
+
             //已拒绝 → 以挂起状态注册到管理器，允许玩家手动取消挂起重新接受
             if (declined) {
-                var entry = manager.GetEntry(key);
-                if (entry == null) {
-                    entry = new SupCalHuntQuestEntry(key, title, summary, QuestCategory) {
-                        Priority = priority,
-                        EntryStyle = new BrimstoneEntryStyle(),
-                        TrackerStyle = new BrimstoneTrackerWidgetStyle(),
-                        TargetNpcType = targetNpcType,
-                        RequiredContribution = requiredContribution,
-                        SummonHintFormat = TrackerSummonHint,
-                        ContributionFormat = TrackerContribution,
-                        RequiredFormat = TrackerRequired,
-                        OnUnsuspended = onUnsuspended
-                    };
-                    entry.Status = QuestEntryStatus.Suspended;
-                    manager.RegisterQuest(entry);
-                }
+                EnsureQuestEntry(manager, key, title, summary, targetNpcType, requiredContribution,
+                    priority, QuestEntryStatus.Suspended, onUnsuspended);
                 return;
             }
 
@@ -149,27 +142,38 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest
                 return;
             }
 
-            var activeEntry = manager.GetEntry(key);
-            if (activeEntry == null) {
-                activeEntry = new SupCalHuntQuestEntry(key, title, summary, QuestCategory) {
-                    Priority = priority,
-                    EntryStyle = new BrimstoneEntryStyle(),
-                    TrackerStyle = new BrimstoneTrackerWidgetStyle(),
-                    TargetNpcType = targetNpcType,
-                    RequiredContribution = requiredContribution,
-                    SummonHintFormat = TrackerSummonHint,
-                    ContributionFormat = TrackerContribution,
-                    RequiredFormat = TrackerRequired
-                };
-                manager.RegisterQuest(activeEntry);
-            }
+            var activeEntry = EnsureQuestEntry(manager, key, title, summary, targetNpcType,
+                requiredContribution, priority, QuestEntryStatus.Active, onUnsuspended);
 
-            if (completed) {
-                manager.SetEntryStatus(key, QuestEntryStatus.Completed, 1f);
-            }
-            else if (!completed && activeEntry.Status == QuestEntryStatus.Completed) {
+            if (activeEntry.Status == QuestEntryStatus.Completed) {
                 manager.SetEntryStatus(key, QuestEntryStatus.Active, 0f);
             }
+        }
+
+        private static EntrustEntryData EnsureQuestEntry(
+            QuestManagerUI manager, string key,
+            LocalizedText title, LocalizedText summary,
+            int targetNpcType, float requiredContribution,
+            int priority, QuestEntryStatus status,
+            Action onUnsuspended = null) {
+            var entry = manager.GetEntry(key);
+            if (entry != null) return entry;
+
+            entry = new SupCalHuntQuestEntry(key, title, summary, QuestCategory) {
+                Priority = priority,
+                Status = status,
+                Progress = status == QuestEntryStatus.Completed ? 1f : 0f,
+                EntryStyle = new BrimstoneEntryStyle(),
+                TrackerStyle = new BrimstoneTrackerWidgetStyle(),
+                TargetNpcType = targetNpcType,
+                RequiredContribution = requiredContribution,
+                SummonHintFormat = TrackerSummonHint,
+                ContributionFormat = TrackerContribution,
+                RequiredFormat = TrackerRequired,
+                OnUnsuspended = onUnsuspended
+            };
+            manager.RegisterQuest(entry);
+            return entry;
         }
     }
 }

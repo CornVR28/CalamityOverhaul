@@ -12,7 +12,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend.TrialQuests
     /// <summary>
     /// 比目鱼传奇试炼线——将14段试炼注册到 <see cref="QuestManagerUI"/>，
     /// 并根据 <see cref="InWorldBossPhase.Halibut_Level"/> 实时同步状态。<br/>
-    /// 同时仅显示当前进行中的试炼和上一个已完成的试炼
+    /// 同时显示当前进行中的试炼和所有已完成的试炼
     /// </summary>
     internal class HalibutTrialQuestLine : ModSystem, ILocalizedModType
     {
@@ -134,39 +134,46 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend.TrialQuests
         /// <summary>
         /// 同步单条试炼的注册与状态<br/>
         /// 当前等级 == 试炼索引 → Active（进行中）<br/>
-        /// 当前等级 == 试炼索引+1 → Completed（最近完成，保留显示）<br/>
-        /// 其他 → 从管理器移除
+        /// 当前等级 > 试炼索引 → Completed（已完成，保留显示）<br/>
+        /// 未来试炼 → 从管理器移除
         /// </summary>
         private void SyncTrial(QuestManagerUI manager, int trialIndex, int currentLevel) {
             string key = KEY_PREFIX + trialIndex;
 
             if (trialIndex == currentLevel && currentLevel < TRIAL_COUNT) {
                 //当前进行中的试炼
-                var entry = manager.GetEntry(key);
+                var entry = EnsureTrialEntry(manager, trialIndex);
                 if (entry == null) {
-                    entry = CreateTrialEntry(trialIndex);
-                    manager.RegisterQuest(entry);
+                    return;
                 }
                 else if (entry.Status == QuestEntryStatus.Completed) {
                     manager.SetEntryStatus(key, QuestEntryStatus.Active, 0f);
                 }
             }
-            else if (trialIndex == currentLevel - 1 && currentLevel > 0) {
-                //上一条已完成的试炼（保留显示）
-                var entry = manager.GetEntry(key);
-                if (entry == null) {
-                    entry = CreateTrialEntry(trialIndex);
-                    entry.Status = QuestEntryStatus.Completed;
-                    entry.Progress = 1f;
-                    manager.RegisterQuest(entry);
-                }
-                else if (entry.Status != QuestEntryStatus.Completed) {
+            else if (trialIndex < currentLevel) {
+                //已完成的试炼（保留显示）
+                var entry = EnsureTrialEntry(manager, trialIndex, completed: true);
+                if (entry != null && entry.Status != QuestEntryStatus.Completed) {
                     manager.SetEntryStatus(key, QuestEntryStatus.Completed, 1f);
                 }
             }
             else {
                 manager.UnregisterQuest(key);
             }
+        }
+
+        private HalibutTrialQuestEntry EnsureTrialEntry(QuestManagerUI manager, int trialIndex, bool completed = false) {
+            string key = KEY_PREFIX + trialIndex;
+            var entry = manager.GetEntry(key) as HalibutTrialQuestEntry;
+            if (entry != null) return entry;
+
+            entry = CreateTrialEntry(trialIndex);
+            if (completed) {
+                entry.Status = QuestEntryStatus.Completed;
+                entry.Progress = 1f;
+            }
+            manager.RegisterQuest(entry);
+            return entry;
         }
 
         private HalibutTrialQuestEntry CreateTrialEntry(int trialIndex) {

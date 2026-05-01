@@ -96,11 +96,15 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Quest.FishoilQuest
         }
 
         /// <summary>将鱼油任务注册到委托管理器，如已存在则跳过</summary>
-        internal static void RegisterQuestEntry() {
+        internal static void RegisterQuestEntry(bool completed = false) {
             var manager = QuestManagerUI.Instance;
             if (manager == null) return;
             if (manager.GetEntry(FishoilQuestEntry.QuestKey) != null) return;
             var entry = FishoilQuestEntry.Create();
+            if (completed) {
+                entry.Status = QuestEntryStatus.Completed;
+                entry.Progress = 1f;
+            }
             manager.RegisterQuest(entry);
         }
 
@@ -119,12 +123,13 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Quest.FishoilQuest
             }
 
             //已接受 → 确保条目存在
-            RegisterQuestEntry();
+            bool completed = save.Get<HalibutADVData>().FishoilQuestCompleted;
+            RegisterQuestEntry(completed);
             var entry = manager.GetEntry(FishoilQuestEntry.QuestKey);
             if (entry == null) return;
 
             //已完成 → 标记完成
-            if (save.Get<HalibutADVData>().FishoilQuestCompleted) {
+            if (completed) {
                 manager.SetEntryStatus(FishoilQuestEntry.QuestKey, QuestEntryStatus.Completed, 1f);
                 return;
             }

@@ -65,6 +65,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.Quest
         private void SyncDeployQuest(QuestManagerUI manager, ADVSave save) {
             //已完成 → 标记完成
             if (save.Get<DraedonADVData>().DeploySignaltowerQuestCompleted) {
+                EnsureDeployEntry(manager, completed: true);
                 manager.SetEntryStatus(DEPLOY_KEY, QuestEntryStatus.Completed, 1f);
                 return;
             }
@@ -85,21 +86,25 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.Quest
                 return;
             }
 
-            //注册或更新
-            var entry = manager.GetEntry(DEPLOY_KEY);
-            if (entry == null) {
-                entry = new DeploySignaltowerQuestEntry(DEPLOY_KEY, DeployTitle, DeploySummary, QuestCategory) {
-                    Priority = 50,
-                    TrackerStyle = new DraedonTrackerWidgetStyle(),
-                    NearestTargetFormat = TrackerNearestTarget,
-                    NodeNameFormat = TrackerNodeName,
-                    InRangeFormat = TrackerInRange,
-                    DistanceFormat = TrackerDistance,
-                    DeployProgressFormat = TrackerDeployProgress,
-                    QuestCompleteFormat = TrackerQuestComplete
-                };
-                manager.RegisterQuest(entry);
-            }
+            EnsureDeployEntry(manager);
+        }
+
+        private static void EnsureDeployEntry(QuestManagerUI manager, bool completed = false) {
+            if (manager.GetEntry(DEPLOY_KEY) != null) return;
+
+            var entry = new DeploySignaltowerQuestEntry(DEPLOY_KEY, DeployTitle, DeploySummary, QuestCategory) {
+                Priority = 50,
+                Status = completed ? QuestEntryStatus.Completed : QuestEntryStatus.Active,
+                Progress = completed ? 1f : 0f,
+                TrackerStyle = new DraedonTrackerWidgetStyle(),
+                NearestTargetFormat = TrackerNearestTarget,
+                NodeNameFormat = TrackerNodeName,
+                InRangeFormat = TrackerInRange,
+                DistanceFormat = TrackerDistance,
+                DeployProgressFormat = TrackerDeployProgress,
+                QuestCompleteFormat = TrackerQuestComplete
+            };
+            manager.RegisterQuest(entry);
         }
     }
 }

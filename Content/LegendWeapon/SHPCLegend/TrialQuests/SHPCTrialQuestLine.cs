@@ -162,30 +162,37 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.TrialQuests
             string key = KEY_PREFIX + trialIndex;
 
             if (trialIndex == currentLevel && currentLevel < TRIAL_COUNT) {
-                var entry = manager.GetEntry(key);
+                var entry = EnsureTrialEntry(manager, trialIndex);
                 if (entry == null) {
-                    entry = CreateTrialEntry(trialIndex);
-                    manager.RegisterQuest(entry);
+                    return;
                 }
                 else if (entry.Status == QuestEntryStatus.Completed) {
                     manager.SetEntryStatus(key, QuestEntryStatus.Active, 0f);
                 }
             }
-            else if (trialIndex == currentLevel - 1 && currentLevel > 0) {
-                var entry = manager.GetEntry(key);
-                if (entry == null) {
-                    entry = CreateTrialEntry(trialIndex);
-                    entry.Status = QuestEntryStatus.Completed;
-                    entry.Progress = 1f;
-                    manager.RegisterQuest(entry);
-                }
-                else if (entry.Status != QuestEntryStatus.Completed) {
+            else if (trialIndex < currentLevel) {
+                var entry = EnsureTrialEntry(manager, trialIndex, completed: true);
+                if (entry != null && entry.Status != QuestEntryStatus.Completed) {
                     manager.SetEntryStatus(key, QuestEntryStatus.Completed, 1f);
                 }
             }
             else {
                 manager.UnregisterQuest(key);
             }
+        }
+
+        private SHPCTrialQuestEntry EnsureTrialEntry(QuestManagerUI manager, int trialIndex, bool completed = false) {
+            string key = KEY_PREFIX + trialIndex;
+            var entry = manager.GetEntry(key) as SHPCTrialQuestEntry;
+            if (entry != null) return entry;
+
+            entry = CreateTrialEntry(trialIndex);
+            if (completed) {
+                entry.Status = QuestEntryStatus.Completed;
+                entry.Progress = 1f;
+            }
+            manager.RegisterQuest(entry);
+            return entry;
         }
 
         private SHPCTrialQuestEntry CreateTrialEntry(int trialIndex) {
