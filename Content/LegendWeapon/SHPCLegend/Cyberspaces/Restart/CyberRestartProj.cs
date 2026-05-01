@@ -280,17 +280,17 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Restart
                     if (segLen < 0.5f) continue;
                     float rot = MathF.Atan2(d.Y, d.X);
 
-                    //核心暗红，外焰深红黑
+                    //核心暗红，外焰深红黑；与 shader 端裂缝互为细节，整体保持纤细
                     float fade = retract * (0.55f + 0.45f * grow);
-                    Color core = new Color(0.85f, 0.10f, 0.12f) * fade * 0.85f;
-                    Color edge = new Color(0.20f, 0.02f, 0.04f) * fade * 1.0f;
+                    Color core = new Color(0.85f, 0.10f, 0.12f) * fade * 0.7f;
+                    Color edge = new Color(0.18f, 0.02f, 0.04f) * fade * 0.85f;
 
-                    //黑色外框：宽度比内芯大，营造"黑墙"轮廓
+                    //黑色外框：仅作"剃刀边"使用，不再营造扇形带感
                     Main.spriteBatch.Draw(pixel, mid, null, edge, rot, origin,
-                        new Vector2(segLen + 2f, 9f), SpriteEffects.None, 0f);
+                        new Vector2(segLen + 1.5f, 3.6f), SpriteEffects.None, 0f);
                     //红色内焰
                     Main.spriteBatch.Draw(pixel, mid, null, core, rot, origin,
-                        new Vector2(segLen + 1f, 3.2f), SpriteEffects.None, 0f);
+                        new Vector2(segLen + 1f, 1.6f), SpriteEffects.None, 0f);
                 }
 
                 //裂缝末端的故障亮点

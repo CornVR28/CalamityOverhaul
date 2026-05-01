@@ -35,47 +35,104 @@ float ridge(float2 uv)
 }
 
 //黑墙裂缝（极坐标角度切槽 + 噪声扰动 + 径向衰减）
-//返回 (核心红, 黑墙轮廓, 末端高光)
+//黑墙裂缝：用平滑随机角度替代等分槽，得到非周期、纤细如剃刀的裂缝线
+//返回 (核心红芯, 黑墙轮廓, 末端高光)
 float3 cracks(float2 centered, float dist, float angle)
 {
-    const float CrackCount = 7.0;
+    const float CrackCount = 5.0;
     float ang01 = angle / TAU + 0.5;
+    //slot 仍按等分查找最近的两条裂缝候选，但每条裂缝有独立角度偏移，避免硬扇形周期感
     float slot = ang01 * CrackCount + crackSeed * 11.0;
     float idx = floor(slot);
-    float f = frac(slot) - 0.5;//[-0.5,0.5] 槽内偏移
-    float seed = hash11(idx + crackSeed * 17.0);
 
-    //每条裂缝独立生长延迟
-    float delay = seed * 0.55;
-    float local = saturate((tearK - delay) / max(0.0001, 1.0 - delay));
-    float grow = 1.0 - pow(1.0 - local, 2.6);
-    //收缩阶段被吸回中心
-    float retract = 1.0 - collapseK;
-    retract *= retract;
-    float reach = grow * retract;
+    //叠加多条候选裂缝（当前槽 + 左右相邻槽），加权后取最近，抹平槽边界
+    float coreSum = 0.0;
+    float wallSum = 0.0;
+    float tipSum = 0.0;
 
-    //裂缝沿径向折线扰动
-    float jn = tex2D(noiseTex, float2(dist * 2.4 - uTime * 0.45, seed * 1.3)).g;
-    float curve = (jn - 0.5) * 0.10 * sin(dist * 11.0 + seed * 9.0);
-    float lateral = f * (0.10 + 0.18 * sin(dist * 5.0 + seed * 6.0)) - curve;
+    [unroll] for (int k = -1; k <= 1; k++)
+    {
+        float si = idx + (float)k;
+        float seed = hash11(si * 1.37 + crackSeed * 17.0);
+        //每条裂缝在槽内有 ±0.45 的角度漂移，避免均匀分布
+        float drift = (seed - 0.5) * 0.9;
+        //裂缝在该槽内的中线位置
+        float center = (si + 0.5 + drift) / CrackCount;//[0,1]
+        float dAng = ang01 - center;
+        //角向距离折叠到 [-0.5, 0.5]
+        dAng = dAng - floor(dAng + 0.5);
+        //仅相邻槽内才考虑（简单距离剔除）
+        if (abs(dAng) > 1.0 / CrackCount) continue;
 
-    //径向半宽：靠近中心收窄、靠近外端略宽再收尾
-    float taper = sin(saturate(dist / max(reach, 0.001)) * PI);//端点 0、中段 1
-    float half = (0.012 + 0.045 * taper) * (0.6 + 0.4 * grow);
+        //每条裂缝的生长延迟与进度
+        float delay = seed * 0.55;
+        float local = saturate((tearK - delay) / max(0.0001, 1.0 - delay));
+        float grow = 1.0 - pow(1.0 - local, 2.6);
+        //收缩阶段被吸回中心，使用更线性的回拉曲线避免突然消失
+        float retract = saturate(1.0 - pow(collapseK, 0.7));
+        float reach = grow * retract;
+        if (reach <= 0.0001) continue;
 
-    //长度限制
-    float withinLen = smoothstep(reach, reach - 0.04, dist);
-    float coreMask = smoothstep(half, 0.0, abs(lateral)) * withinLen;
-    //黑墙：比 core 更宽、更慢衰减
-    float wallMask = smoothstep(half * 3.4, 0.0, abs(lateral)) * withinLen;
-    wallMask = max(wallMask - coreMask * 0.85, 0.0);
+        //裂缝径向折线扰动：低频 + 高频混合
+        float jLow = tex2D(noiseTex, float2(dist * 1.4 - uTime * 0.25, seed * 1.3)).g;
+        float jHi = tex2D(noiseTex, float2(dist * 4.8 + uTime * 0.5, seed * 2.7 + 0.5)).b;
+        float curve = (jLow - 0.5) * 0.045 + (jHi - 0.5) * 0.020 * sin(dist * 9.0 + seed * 7.0);
+        //角向距离换算为线性偏移，单位与 dAng 相同
+        float lateral = dAng - curve;
 
-    //末端高光
-    float tipBand = smoothstep(reach * 0.92, reach, dist) * (1.0 - smoothstep(reach, reach + 0.04, dist));
-    float tipPulse = 0.5 + 0.5 * sin(uTime * 9.0 + seed * 13.0);
-    float tipMask = tipBand * coreMask * (0.4 + 0.6 * tipPulse);
+        //径向半宽：保持纤细，仅在中段轻微鼓起，端点收针
+        float radK = saturate(dist / max(reach, 0.001));
+        float taper = sin(radK * PI);
+        //核心宽度小于槽宽 4%，黑墙宽度仅 12%，杜绝扇形切割观感
+        float halfCore = (0.0035 + 0.012 * taper) * (0.7 + 0.3 * grow);
+        float halfWall = halfCore * 2.6;
 
-    return float3(coreMask, wallMask, tipMask) * (1.0 - smoothstep(0.95, 1.05, dist));
+        //长度限制
+        float withinLen = smoothstep(reach + 0.02, reach - 0.02, dist);
+        float aLat = abs(lateral);
+        float coreMask = smoothstep(halfCore, 0.0, aLat) * withinLen;
+        float wallMask = smoothstep(halfWall, halfCore * 0.6, aLat) * withinLen;
+
+        //末端高光
+        float tipBand = smoothstep(reach * 0.88, reach, dist) * (1.0 - smoothstep(reach, reach + 0.04, dist));
+        float tipPulse = 0.5 + 0.5 * sin(uTime * 9.0 + seed * 13.0);
+        float tipMask = tipBand * coreMask * (0.4 + 0.6 * tipPulse);
+
+        coreSum = max(coreSum, coreMask);
+        wallSum = max(wallSum, wallMask);
+        tipSum = max(tipSum, tipMask);
+    }
+
+    //外缘 0.95-1.05 软衰减
+    float outerFade = 1.0 - smoothstep(0.92, 1.05, dist);
+    return float3(coreSum, wallSum, tipSum) * outerFade;
+}
+
+//大尺度湍流黑墙：跨越整个领域的不规则黑色团块，强化"被撕开的黑墙数据" 氛围
+//返回 (黑墙浓度, 暗红高光)
+float2 darkWallTurbulence(float2 centered, float dist, float angle)
+{
+    //演出权重：撕裂段缓起，收缩段达到峰值，奇点/炸裂衰退
+    float w = saturate(tearK * 0.65 + collapseK * 0.85 - singularityK * 0.4 - burstK * 0.85);
+    if (w <= 0.0) return 0.0;
+
+    //极坐标采样：低频湍流（角向 + 径向缓慢推进）
+    float ang01 = angle / TAU + 0.5;
+    float2 uv0 = float2(ang01 * 1.8 + uTime * 0.04, dist * 0.55 - uTime * 0.07);
+    float2 uv1 = float2(ang01 * 3.4 - uTime * 0.06, dist * 1.1 + uTime * 0.05);
+    float n0 = tex2D(noiseTex, uv0 + crackSeed * 0.3).r;
+    float n1 = tex2D(noiseTex, uv1 + crackSeed * 0.7).g;
+    float field = n0 * 0.65 + n1 * 0.45;
+
+    //阈值化得到大块"黑墙"，边缘羽化避免硬切
+    float wallSoft = smoothstep(0.55, 0.85, field);
+    //局部脊线给一些暗红边光
+    float ridgeN = 1.0 - abs(field * 2.0 - 1.0);
+    float ember = smoothstep(0.78, 1.0, ridgeN);
+
+    //径向遮罩：内 0.10 留白避开核心，外 0.95 软淡出
+    float radialMask = smoothstep(0.10, 0.25, dist) * (1.0 - smoothstep(0.92, 1.05, dist));
+    return float2(wallSoft, ember) * radialMask * w;
 }
 
 //收缩阶段：径向向内的数据流细带 + 螺旋渐暗涡
@@ -99,12 +156,12 @@ float3 collapseStreams(float dist, float angle)
     float fine = tex2D(noiseTex, float2(spin * 0.30, dist * 2.6 + uTime * 0.3)).b;
     fine = smoothstep(0.55, 0.95, fine);
 
-    float streams = ribbon * radial * (0.55 + 0.55 * fine) * w;
+    float streams = ribbon * radial * (0.35 + 0.55 * fine) * w * 0.7;
 
-    //引力涡环：单条粗黑环线沿外径收缩
+    //引力涡环：用更柔的环带替代之前的明显黑环
     float ringR = lerp(0.92, 0.05, pow(w, 1.3));
     float ringDist = abs(dist - ringR);
-    float ringMask = smoothstep(0.045, 0.0, ringDist) * w;
+    float ringMask = smoothstep(0.06, 0.0, ringDist) * w * 0.6;
 
     return float3(streams, ringMask, 0.0);
 }
@@ -186,6 +243,7 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0, float4 vertexColor : COLOR
 
     //四阶段累积色
     float3 cracksRGB = cracks(centered, dist, angle);
+    float2 wallRGB = darkWallTurbulence(centered, dist, angle);
     float3 collapseRGB = collapseStreams(dist, angle);
     float3 coreRGB = singularityCore(centered, dist);
     float3 burstRGB = burstField(dist, angle);
@@ -194,18 +252,23 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0, float4 vertexColor : COLOR
     float3 hotRed = float3(1.0, 0.40, 0.22);
     float3 coreRed = float3(0.85, 0.10, 0.10);
     float3 wall = float3(0.05, 0.01, 0.02);
+    float3 emberRed = float3(0.55, 0.05, 0.06);
     float3 white = float3(1.0, 0.92, 0.78);
 
     float3 col = 0.0;
-    //裂缝：黑墙先压暗，再叠红芯，最后叠末端高光
-    col += wall * cracksRGB.y * 1.2;
-    col += coreRed * cracksRGB.x * 1.0;
-    col += hotRed * cracksRGB.z * 1.4;
+    //大尺度黑墙湍流：作为底层氛围色，先于裂缝叠加，避免与裂缝硬切产生周期感
+    col += wall * wallRGB.x * 0.55;
+    col += emberRed * wallRGB.y * 0.65;
 
-    //收缩：暗红流条 + 黑环
-    col += coreRed * collapseRGB.x * 0.85;
-    col += hotRed * collapseRGB.x * 0.35;
-    col += wall * collapseRGB.y * 1.6;
+    //裂缝：纤细的黑墙轮廓 + 红芯 + 末端高光，权重压低避免主导画面
+    col += wall * cracksRGB.y * 0.9;
+    col += coreRed * cracksRGB.x * 0.85;
+    col += hotRed * cracksRGB.z * 1.2;
+
+    //收缩：暗红流条 + 柔和黑环
+    col += coreRed * collapseRGB.x * 0.7;
+    col += hotRed * collapseRGB.x * 0.3;
+    col += wall * collapseRGB.y * 1.0;
 
     //奇点：黑底压底 + 红裂芯 + 透镜暗环
     col -= wall * coreRGB.x * 1.4;//相当于在加法混合下抑制亮度，制造"黑洞感"
