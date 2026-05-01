@@ -70,9 +70,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend.UI
             }
 
             //按键触发抖动：如果处于冷却且试图使用
-            if (hp.RestartFishCooldown > 0 && CWRKeySystem.Halibut_Restart.JustPressed) TriggerShake(DomainSkill.Restart);
+            if (hp.RestartFishCooldown > 0 && CWRKeySystem.Legend_Restart.JustPressed) TriggerShake(DomainSkill.Restart);
             if (hp.SuperpositionCooldown > 0 && CWRKeySystem.Halibut_Superposition.JustPressed) TriggerShake(DomainSkill.Superposition);
-            if (hp.FishTeleportCooldown > 0 && CWRKeySystem.Halibut_Teleport.JustPressed) TriggerShake(DomainSkill.Teleport);
+            if (hp.FishTeleportCooldown > 0 && CWRKeySystem.Legend_Teleport.JustPressed) TriggerShake(DomainSkill.Teleport);
 
             //衰减 shake 值
             DecayShake(DomainSkill.Restart);

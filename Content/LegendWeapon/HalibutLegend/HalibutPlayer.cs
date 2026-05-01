@@ -610,7 +610,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend
                 }
             }
             //既然总部认为我已经死了，那么就让你们看看，我死后，到底会发生什么事情
-            else if (CWRKeySystem.Halibut_Restart.JustPressed) {
+            else if (CWRKeySystem.Legend_Restart.JustPressed) {
                 if (SeaDomainLayers >= 5) {//大于等于五层领域后才能使用
                     RestartFish.AltUse(Player);
                 }
@@ -622,7 +622,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend
                 }
             }
             //领域传送
-            else if (CWRKeySystem.Halibut_Teleport.JustPressed) {
+            else if (CWRKeySystem.Legend_Teleport.JustPressed) {
                 if (SeaDomainActive) {
                     FishTeleport.AltUse(Player);
                 }

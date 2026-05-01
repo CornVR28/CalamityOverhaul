@@ -12,10 +12,10 @@ namespace CalamityOverhaul.Common
         public static ModKeybind QuestManager_Key { get; private set; }
         public static ModKeybind Legend_UIControl { get; private set; }
         public static ModKeybind Legend_Domain { get; private set; }
-        public static ModKeybind Halibut_Clone { get; private set; }
-        public static ModKeybind Halibut_Restart { get; private set; }
-        public static ModKeybind Halibut_Superposition { get; private set; }
-        public static ModKeybind Halibut_Teleport { get; private set; }
+        public static ModKeybind Legend_Restart { get; private set; }
+        public static ModKeybind Legend_Teleport { get; private set; }
+        public static ModKeybind Halibut_Clone { get; private set; }       
+        public static ModKeybind Halibut_Superposition { get; private set; }       
         public static ModKeybind Halibut_Skill_L { get; private set; }
         public static ModKeybind Halibut_Skill_R { get; private set; }
         public static ModKeybind WeponSkill_Q { get; private set; }
@@ -39,10 +39,10 @@ namespace CalamityOverhaul.Common
             Murasama_DownKey = KeybindLoader.RegisterKeybind(mod, "Murasama_DownKey", "X");
             Legend_UIControl = KeybindLoader.RegisterKeybind(mod, "Legend_UIControl", "M");
             Legend_Domain = KeybindLoader.RegisterKeybind(mod, "Legend_Domain", "Q");
-            Halibut_Clone = KeybindLoader.RegisterKeybind(mod, "Halibut_Clone", "J");
-            Halibut_Restart = KeybindLoader.RegisterKeybind(mod, "Halibut_Restart", "H");
-            Halibut_Superposition = KeybindLoader.RegisterKeybind(mod, "Halibut_Superposition", "F");
-            Halibut_Teleport = KeybindLoader.RegisterKeybind(mod, "Halibut_Teleport", "G");
+            Legend_Teleport = KeybindLoader.RegisterKeybind(mod, "Halibut_Teleport", "G");
+            Legend_Restart = KeybindLoader.RegisterKeybind(mod, "Halibut_Restart", "H");
+            Halibut_Clone = KeybindLoader.RegisterKeybind(mod, "Halibut_Clone", "J");           
+            Halibut_Superposition = KeybindLoader.RegisterKeybind(mod, "Halibut_Superposition", "F");          
             Halibut_Skill_L = KeybindLoader.RegisterKeybind(mod, "Halibut_Skill_L", "Q");
             Halibut_Skill_R = KeybindLoader.RegisterKeybind(mod, "Halibut_Skill_R", "E");
             WeponSkill_Q = KeybindLoader.RegisterKeybind(mod, "WeponSkill_Q", "Q");
@@ -66,9 +66,9 @@ namespace CalamityOverhaul.Common
             Murasama_DownKey = null;
             Legend_Domain = null;
             Halibut_Clone = null;
-            Halibut_Restart = null;
+            Legend_Restart = null;
             Halibut_Superposition = null;
-            Halibut_Teleport = null;
+            Legend_Teleport = null;
             Legend_UIControl = null;
             Halibut_Skill_L = null;
             Halibut_Skill_R = null;
