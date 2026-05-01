@@ -53,7 +53,9 @@ float3 cracks(float2 centered, float dist, float angle)
     [unroll] for (int k = -1; k <= 1; k++)
     {
         float si = idx + (float)k;
-        float seed = hash11(si * 1.37 + crackSeed * 17.0);
+        //hash 输入按 CrackCount 取模，让左右接缝处取到同一条裂缝种子
+        float siMod = si - CrackCount * floor(si / CrackCount);
+        float seed = hash11(siMod * 1.37 + crackSeed * 17.0);
         //每条裂缝在槽内有 ±0.45 的角度漂移，避免均匀分布
         float drift = (seed - 0.5) * 0.9;
         //裂缝在该槽内的中线位置
@@ -117,9 +119,10 @@ float2 darkWallTurbulence(float2 centered, float dist, float angle)
     if (w <= 0.0) return 0.0;
 
     //极坐标采样：低频湍流（角向 + 径向缓慢推进）
+    //角向乘以整数倍频，确保 ang01=0 与 ang01=1 在接缝处采样一致，避免左侧水平线像素跳跃
     float ang01 = angle / TAU + 0.5;
-    float2 uv0 = float2(ang01 * 1.8 + uTime * 0.04, dist * 0.55 - uTime * 0.07);
-    float2 uv1 = float2(ang01 * 3.4 - uTime * 0.06, dist * 1.1 + uTime * 0.05);
+    float2 uv0 = float2(ang01 * 2.0 + uTime * 0.04, dist * 0.55 - uTime * 0.07);
+    float2 uv1 = float2(ang01 * 3.0 - uTime * 0.06, dist * 1.1 + uTime * 0.05);
     float n0 = tex2D(noiseTex, uv0 + crackSeed * 0.3).r;
     float n1 = tex2D(noiseTex, uv1 + crackSeed * 0.7).g;
     float field = n0 * 0.65 + n1 * 0.45;
@@ -142,10 +145,12 @@ float3 collapseStreams(float dist, float angle)
     if (w <= 0.0) return 0.0;
 
     //螺旋角：让径向条带跟随角度产生螺线感，同时随时间向内推进
-    float spin = angle * 3.0 + uTime * 1.6 + crackSeed * 5.0;
+    //以 ang01×3 作为角向采样频率，保证接缝处（ang01=0 与 1）在采样空间为整数倍距离，水平接缝消失
+    float ang01s = angle / TAU + 0.5;
+    float spin = ang01s * 3.0 + uTime * 0.25 + crackSeed * 0.8;
     //径向相位：dist 越大相位越落后，模拟"外缘起步、向内追赶"
     float radPhase = dist * 14.0 - uTime * 6.0 * (0.4 + 0.8 * w);
-    float ribbon = ridge(float2(spin * 0.18, radPhase * 0.05));
+    float ribbon = ridge(float2(spin, radPhase * 0.05));
     ribbon = pow(saturate(ribbon), 2.4);
 
     //径向条带衰减：center 处归零（已被奇点吃掉）、外缘随阶段进度回收
@@ -153,7 +158,7 @@ float3 collapseStreams(float dist, float angle)
     float radial = smoothstep(0.02, 0.10, dist) * (1.0 - smoothstep(outerLimit - 0.10, outerLimit, dist));
 
     //角向高频细栅
-    float fine = tex2D(noiseTex, float2(spin * 0.30, dist * 2.6 + uTime * 0.3)).b;
+    float fine = tex2D(noiseTex, float2(spin * 1.6, dist * 2.6 + uTime * 0.3)).b;
     fine = smoothstep(0.55, 0.95, fine);
 
     float streams = ribbon * radial * (0.35 + 0.55 * fine) * w * 0.7;
