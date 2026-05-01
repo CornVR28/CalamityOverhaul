@@ -1,4 +1,4 @@
-﻿HalibutText: {
+HalibutText: {
 	FishByStudied:
 		'''
 		[i:CalamityMod/HalibutCannon]:
@@ -348,10 +348,7 @@ SHPCTrialQuestLine: {
 		无论那是盘踞腐土的巨虫，还是支配血肉的大脑，它们都是极佳的生化样本
 		去切下它们的核心，我要研究这种恐怖的生态侵蚀性
 		'''
-	TrialSummary_3:
-		'''
-		骷髅王占位
-		'''
+	TrialSummary_3: 骷髅王占位
 	TrialSummary_4:
 		'''
 		一道横亘在地狱的血肉长墙，它是旧时代的封印

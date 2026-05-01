@@ -1,17 +1,17 @@
 // ============================================================================
-// CyberRiftSlash.fx — 赛博空间维度数据裂缝着色器（瞬移技能专用）
-// 黑墙数据撕裂：白炽核 + 鲜橙红中层 + 暗红黑墙余烬 + 平行幽灵线
-// 强调"力量感与干脆感"——快速延伸/全亮闪烁/急速尾缩三段动画
-// Trail条带渲染，配合 CyberRiftSlashProj 使用
+// CyberRiftSlash.fx —— 赛博空间数据走廊着色器（瞬移传输通道）
+// 玩家化为像素数据块沿走廊从起点流向终点
+// 整个走廊以"黑墙AI"为母题：硬边像素格 + 二进制小字形 + 数据流脉冲 + 色差撕裂
 // ============================================================================
 
 float4x4 transformMatrix;
 float uTime;
-float fadeAlpha;        //整体透明度 0~1
-float visibleStart;     //可见段起点 0~1（尾收缩时上升）
-float visibleEnd;       //可见段终点 0~1（头延伸时上升）
+float fadeAlpha;        //总体透明度 0~1
+float visibleStart;     //可见区间起点 0~1（尾收时上升）
+float visibleEnd;       //可见区间终点 0~1（头延伸时上升）
 float glitchSeed;       //本实例随机种子
-float impactPulse;      //冲击脉冲强度（命中目标瞬间提亮，0~1）
+float impactPulse;      //命中目标的脉冲强度 0~1
+float corridorLength;   //走廊像素长度，用于动态调整像素格密度（防止短/长距离形变）
 
 texture uNoiseTex;
 sampler noiseSamp = sampler_state
@@ -47,11 +47,34 @@ PSInput VertexShaderFunction(VSInput v)
     return o;
 }
 
+//哈希工具
 float hash21(float2 p)
 {
     float3 p3 = frac(float3(p.xyx) * float3(0.1031, 0.1030, 0.0973));
     p3 += dot(p3, p3.yzx + 33.33);
     return frac((p3.x + p3.y) * p3.z);
+}
+
+float hash11(float p)
+{
+    p = frac(p * 0.1031);
+    p *= p + 33.33;
+    p *= p + p;
+    return frac(p);
+}
+
+//每个 4x6 子像素格的内置字形蒙版，实现伪二进制字符
+//用一个 4x6=24 位伪查找表近似（用 hash 当字模索引）
+float glyphMask(float2 cellUV, float glyphId)
+{
+    //cellUV 期望在 0~1
+    //把 cell 内部分成 4x6 子像素
+    float2 sub = floor(cellUV * float2(4.0, 6.0));
+    //字形哈希：每个子像素一个开关
+    float h = hash21(sub + float2(glyphId * 13.7, glyphId * 7.3));
+    //保留中央列概率更高，让字形看起来更像字符竖笔
+    float colWeight = (sub.x == 1.0 || sub.x == 2.0) ? 0.42 : 0.62;
+    return step(colWeight, h);
 }
 
 float4 PixelShaderFunction(PSInput input) : COLOR0
@@ -61,137 +84,167 @@ float4 PixelShaderFunction(PSInput input) : COLOR0
     float cross_ = uv.y;
     float crossDist = abs(cross_ - 0.5) * 2.0;
 
-    // ---- 可见区域遮罩 ----
-    float headMask = smoothstep(visibleEnd + 0.04, visibleEnd - 0.02, along);
-    float tailMask = smoothstep(visibleStart - 0.02, visibleStart + 0.04, along);
+    //可见区间裁剪（带轻微羽化）
+    float headMask = smoothstep(visibleEnd + 0.025, visibleEnd - 0.015, along);
+    float tailMask = smoothstep(visibleStart - 0.015, visibleStart + 0.025, along);
     float visMask = headMask * tailMask;
     if (visMask < 0.001)
         return float4(0, 0, 0, 0);
 
-    // ---- 噪声采样 ----
-    float n1 = tex2D(noiseSamp, frac(float2(along * 3.5 + uTime * 1.4, cross_ * 0.6 + glitchSeed))).r;
-    float n2 = tex2D(noiseSamp, frac(float2(along * 8.0 - uTime * 2.3, cross_ * 1.4 + 0.37))).g;
-    float n3 = tex2D(noiseSamp, frac(float2(along * 2.0 + uTime * 0.7, cross_ * 2.8 + 0.61))).b;
+    //=========================================================
+    //走廊像素格定义：长度自适应密度，让像素始终保持~6~10px
+    //corridorLength 来自 CPU 端，单位世界像素
+    //=========================================================
+    float colCount = clamp(corridorLength / 14.0, 16.0, 64.0);
+    float rowCount = 7.0; //横向 7 行，中行=主轴
 
-    // ============================================================
-    // A. 核心裂缝——白热维度撕裂芯（撕开现实的高能缝隙）
-    // ============================================================
-    float coreW = 0.085 + n1 * 0.05;
-    float core = 1.0 - smoothstep(0.0, coreW, crossDist);
-    core = pow(saturate(core), 1.2);
-    //核心持续高频闪烁，营造能量过载感
-    float coreFlicker = 0.78 + 0.22 * sin(uTime * 28.0 + along * 60.0 + glitchSeed * 11.0);
-    core *= coreFlicker;
+    //把 uv 映射到格子坐标
+    float2 gridIdx = floor(float2(along * colCount, cross_ * rowCount));
+    float2 gridFrac = frac(float2(along * colCount, cross_ * rowCount));
 
-    // ============================================================
-    // B. 中层鲜橙红辉光——主色调（区别于赛博领域底层的深红，更亮更饱和）
-    // ============================================================
-    float midW = 0.30 + n2 * 0.10;
-    float mid = 1.0 - smoothstep(coreW * 0.5, midW, crossDist);
-    mid = pow(saturate(mid), 1.15) * 0.78;
+    //中心行索引
+    float midRow = floor(rowCount * 0.5);
+    float rowDist = abs(gridIdx.y - midRow); //距离中行的行数
 
-    // ============================================================
-    // C. 外层暗红黑墙余烬光晕
-    // ============================================================
-    float outer = 1.0 - smoothstep(0.18, 0.95, crossDist);
-    outer *= 0.32;
+    //=========================================================
+    //数据流脉冲：从起点往终点扫一道亮带（让走廊"运行"起来）
+    //=========================================================
+    //每帧的扫描位置（在 0~1.5 之间循环，超出 1 后逐渐淡出）
+    float flowPhase = frac(uTime * 0.45 + glitchSeed * 0.31);
+    float flowDist = abs(along - flowPhase);
+    float flowPulse = exp(-flowDist * flowDist * 18.0);
+    //叠加第二条反相扫描，制造"双向吞吐"的赛博节拍
+    float flowPhase2 = frac(uTime * 0.27 + 0.5 + glitchSeed * 0.13);
+    float flowDist2 = abs(along - flowPhase2);
+    flowPulse += exp(-flowDist2 * flowDist2 * 28.0) * 0.5;
 
-    // ============================================================
-    // D. 平行幽灵线——表现"维度裂缝"的多层位错感
-    // ============================================================
-    //上下两条平行的次级亮带，距中线约 0.22 处
-    float ghostUpper = 1.0 - smoothstep(0.0, 0.05, abs(cross_ - 0.5 - 0.22));
-    float ghostLower = 1.0 - smoothstep(0.0, 0.05, abs(cross_ - 0.5 + 0.22));
-    float ghostMod = 0.5 + 0.5 * sin(along * 70.0 + uTime * 18.0 + glitchSeed * 6.0);
-    float ghost = (ghostUpper + ghostLower) * ghostMod * 0.55;
-    //向尖端集中（让幽灵线在头部更明显）
-    ghost *= smoothstep(0.0, 0.4, along);
+    //=========================================================
+    //每个像素格的状态：通过 hash 决定开关、亮度、颜色档
+    //=========================================================
+    float timeBucket = floor(uTime * 9.0); //每秒约 9 次刷新
+    float hCell = hash21(gridIdx + float2(timeBucket * 1.7, glitchSeed * 11.3));
+    //中心行更可能"亮"，外侧行更可能"暗"——模拟数据沿主轴密集传输
+    float onThreshold = lerp(0.18, 0.78, rowDist / (rowCount * 0.5));
+    float cellOn = step(onThreshold, hCell);
 
-    // ============================================================
-    // E. 数字数据方块——黑墙入侵的破碎数据流
-    // ============================================================
-    //大方块层（沿裂缝主轴硬切的块）
-    float bx = floor(along * 22.0 + glitchSeed * 5.0);
-    float by = floor(cross_ * 5.0);
-    float blockTime = floor(uTime * 12.0);
-    float bHash = hash21(float2(bx + blockTime * 7.1, by + glitchSeed * 13.0));
-    float blockOn = step(0.55, bHash);
-    float blockFill = bHash * blockOn;
-    //硬边矩形内边距
-    float bxFrac = frac(along * 22.0 + glitchSeed * 5.0);
-    float byFrac = frac(cross_ * 5.0);
-    float blockEdge = step(0.07, bxFrac) * step(bxFrac, 0.93)
-                    * step(0.09, byFrac) * step(byFrac, 0.91);
-    blockFill *= blockEdge;
+    //每个亮格的亮度档：黑墙暗块 / 中亮 / 高亮
+    float hLevel = hash21(gridIdx + float2(timeBucket * 0.7 + 9.0, glitchSeed * 5.1));
+    float levelHot = step(0.78, hLevel);    //热块
+    float levelMid = step(0.40, hLevel) * (1.0 - levelHot); //中亮
+    //levelDim = !hot && !mid（默认黑墙暗块）
 
-    //小碎片层
-    float sbx = floor(along * 56.0);
-    float sby = floor(cross_ * 10.0);
-    float sTime = floor(uTime * 18.0);
-    float sHash = hash21(float2(sbx + sTime * 11.3, sby + glitchSeed * 7.7));
-    float subBlock = step(0.74, sHash) * sHash;
-    subBlock *= (1.0 - crossDist * 0.55);
+    //数据流脉冲增加亮度档：脉冲扫过时所有暗块也提一档
+    float pulseBoost = saturate(flowPulse * 1.4);
 
-    // ============================================================
-    // F. 沿裂缝快速流动的数据条纹（强调"劈"的方向感）
-    // ============================================================
-    float streamUV = frac(along * 14.0 - uTime * 6.0 + glitchSeed * 4.0);
-    float stream = smoothstep(0.0, 0.06, streamUV) * smoothstep(0.32, 0.10, streamUV);
-    stream *= (1.0 - crossDist * 0.7) * 0.55;
+    //=========================================================
+    //每格内的字形蒙版（伪二进制字符）——让每个格子看起来是个数据块
+    //=========================================================
+    float glyphId = hash21(gridIdx + float2(timeBucket * 0.31, glitchSeed * 3.7));
+    float glyph = glyphMask(gridFrac, glyphId);
+    //字形小边距（让格子之间留缝，呈现像素阵列感）
+    float gutter = step(0.08, gridFrac.x) * step(gridFrac.x, 0.92)
+                 * step(0.10, gridFrac.y) * step(gridFrac.y, 0.90);
 
-    // ============================================================
-    // G. 边缘腐蚀——撕裂边界的不规则噪声
-    // ============================================================
-    float edgeNoise = n2 * 0.20 + n3 * 0.20;
-    float edgeMask = 1.0 - smoothstep(0.48 - edgeNoise, 0.94, crossDist);
+    //=========================================================
+    //中央主轴白热脊线：稳定不熄灭，标识数据走廊主干
+    //=========================================================
+    float spineCore = 1.0 - smoothstep(0.0, 0.085, crossDist);
+    spineCore = pow(saturate(spineCore), 1.4);
+    //微弱高频抖动避免死板
+    float spineFlicker = 0.85 + 0.15 * sin(uTime * 32.0 + along * 90.0 + glitchSeed * 7.0);
+    spineCore *= spineFlicker;
 
-    // ============================================================
-    // H. 尖端能量爆发——强调"劈砍"的尖锐感（沿延伸前端集中能量）
-    // ============================================================
+    //=========================================================
+    //色差撕裂：左右两侧偏移采样产生霓虹分裂感
+    //=========================================================
+    float chromaOffset = 0.04 * (0.4 + flowPulse * 0.8);
+    float crossL = cross_ - chromaOffset / rowCount;
+    float crossR = cross_ + chromaOffset / rowCount;
+    float idxLY = floor(crossL * rowCount);
+    float idxRY = floor(crossR * rowCount);
+    float hCellL = hash21(float2(gridIdx.x, idxLY) + float2(timeBucket * 1.7, glitchSeed * 11.3));
+    float hCellR = hash21(float2(gridIdx.x, idxRY) + float2(timeBucket * 1.7, glitchSeed * 11.3));
+    float onL = step(onThreshold, hCellL);
+    float onR = step(onThreshold, hCellR);
+
+    //=========================================================
+    //边缘碎屑：可见末端附近溢出零散像素
+    //=========================================================
+    float edgeAlong = min(along - visibleStart, visibleEnd - along);
+    float edgeFringe = smoothstep(0.06, 0.0, edgeAlong);
+    float fringeHash = hash21(gridIdx + float2(timeBucket * 2.7 + 17.0, glitchSeed * 8.1));
+    float fringe = step(0.66, fringeHash) * edgeFringe;
+
+    //=========================================================
+    //外缘渐隐遮罩（避免走廊边界硬切）
+    //=========================================================
+    float corridorMask = 1.0 - smoothstep(0.62, 0.98, crossDist);
+
+    //=========================================================
+    //尖端能量爆发：当前 visibleEnd 处冲一发硬光
+    //=========================================================
     float tipDist = abs(along - visibleEnd);
-    float tipFlare = 1.0 - smoothstep(0.0, 0.05, tipDist);
-    tipFlare *= (1.0 - crossDist * 0.6);
-    float tipPulse = 0.5 + 0.5 * sin(uTime * 36.0 + glitchSeed * 9.0);
-    tipFlare *= 0.55 + 0.45 * tipPulse;
+    float tipFlare = 1.0 - smoothstep(0.0, 0.04, tipDist);
+    tipFlare *= (1.0 - crossDist * 0.5);
+    float tipPulse = 0.5 + 0.5 * sin(uTime * 38.0 + glitchSeed * 9.0);
+    tipFlare *= 0.5 + 0.5 * tipPulse;
 
-    //冲击脉冲：命中目标瞬间整段亮起一次
-    float impactGlow = impactPulse * (1.0 - crossDist * 0.4) * 0.7;
+    //命中冲击全段提亮
+    float impactGlow = impactPulse * (1.0 - crossDist * 0.3);
 
-    // ============================================================
-    // 颜色合成——突出橙红高亮主题，与领域底色形成层次差
-    // ============================================================
-    float3 cWhiteHot   = float3(1.00, 0.96, 0.88);
-    float3 cBrightOrng = float3(1.00, 0.45, 0.15);   //鲜橙红中层
-    float3 cBrightRed  = float3(1.00, 0.18, 0.08);   //鲜红辅助
-    float3 cDarkRed    = float3(0.30, 0.020, 0.030); //黑墙余烬
-    float3 cBlockOrng  = float3(0.95, 0.32, 0.10);   //数据方块橙
-    float3 cSubBlock   = float3(1.00, 0.55, 0.25);
-    float3 cStream     = float3(1.00, 0.40, 0.18);
-    float3 cTip        = float3(1.00, 0.70, 0.45);
-    float3 cGhost      = float3(1.00, 0.30, 0.12);
-    float3 cImpact     = float3(1.00, 0.80, 0.55);
+    //=========================================================
+    //合成像素数据块本体强度
+    //=========================================================
+    //有效像素 = 开关 * 字形 * 间距
+    float pixelCore = cellOn * glyph * gutter * corridorMask;
+    //热块强度
+    float pixelHot = pixelCore * (levelHot + pulseBoost * 0.4);
+    //中亮强度
+    float pixelMid = pixelCore * (levelMid + pulseBoost * 0.25);
+    //暗块强度（黑墙底）
+    float pixelDim = pixelCore * (1.0 - levelHot) * 0.55;
+
+    //色差侧影叠加（在像素核心轻微外偏）
+    float pixelChromaR = onR * glyph * gutter * corridorMask * 0.35;
+    float pixelChromaL = onL * glyph * gutter * corridorMask * 0.35;
+
+    //=========================================================
+    //颜色合成（黑墙暗红 + 鲜橙红 + 白热脊线 + 色差青/红）
+    //=========================================================
+    float3 cBlackWall = float3(0.10, 0.02, 0.04);   //黑墙暗块
+    float3 cMidOrange = float3(1.00, 0.42, 0.12);   //中亮橙
+    float3 cHotEmber  = float3(1.00, 0.78, 0.45);   //热块橙红
+    float3 cWhiteHot  = float3(1.00, 0.96, 0.86);   //白热脊
+    float3 cCyanShift = float3(0.20, 0.85, 1.00);   //色差青（偏冷）
+    float3 cRedShift  = float3(1.00, 0.20, 0.30);   //色差红
+    float3 cTip       = float3(1.00, 0.85, 0.60);
+    float3 cImpact    = float3(1.00, 0.92, 0.78);
 
     float3 color = float3(0, 0, 0);
-    color += cWhiteHot   * core;                            // A
-    color += cBrightOrng * mid * 0.7;                       // B 主橙
-    color += cBrightRed  * mid * 0.35;                      // B 红色辅助
-    color += cDarkRed    * outer;                           // C
-    color += cGhost      * ghost;                           // D 平行幽灵线
-    color += cBlockOrng  * blockFill * edgeMask * 0.65;     // E 大方块
-    color += cSubBlock   * subBlock * 0.40;                 // E 小碎片
-    color += cStream     * stream;                          // F 数据流
-    color += cTip        * tipFlare;                        // H 尖端
-    color += cImpact     * impactGlow;                      // 命中冲击
+    //黑墙底块
+    color += cBlackWall * pixelDim * 1.6;
+    //中亮像素
+    color += cMidOrange * pixelMid * 1.1;
+    //热块（脉冲带过会"白"一阵）
+    color += cHotEmber * pixelHot * (1.0 + pulseBoost * 0.6);
+    //白热脊线
+    color += cWhiteHot * spineCore;
+    //色差侧影
+    color += cRedShift  * pixelChromaR * 0.55;
+    color += cCyanShift * pixelChromaL * 0.45;
+    //尖端 + 命中冲击
+    color += cTip * tipFlare * 1.1;
+    color += cImpact * impactGlow * 0.9;
+    //碎屑
+    color += cMidOrange * fringe * 0.7;
 
+    //alpha：核心数据块叠加脊线、碎屑、冲击
     float alpha = saturate(
-        edgeMask
-        + core * 0.6
-        + ghost * 0.4
-        + blockFill * 0.30
-        + subBlock * 0.18
-        + stream * 0.20
-        + tipFlare * 0.30
-        + impactGlow * 0.45
+          pixelCore * 0.85
+        + spineCore * 0.95
+        + tipFlare * 0.7
+        + impactGlow * 0.6
+        + fringe * 0.55
     );
     alpha *= fadeAlpha * visMask;
 
@@ -200,9 +253,9 @@ float4 PixelShaderFunction(PSInput input) : COLOR0
 
 technique Technique1
 {
-    pass RiftSlashPass
+    pass CyberRiftSlashPass
     {
-        VertexShader = compile vs_2_0 VertexShaderFunction();
+        VertexShader = compile vs_3_0 VertexShaderFunction();
         PixelShader = compile ps_3_0 PixelShaderFunction();
     }
 }
