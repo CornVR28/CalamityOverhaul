@@ -141,6 +141,7 @@ QuickHack: {
 }
 
 HackTargetType: {
+	ItemTargetType.DisplayName: Item Target Type
 	NpcTargetType.DisplayName: Npc Target Type
 	ProjectileTargetType.DisplayName: Projectile Target Type
 	SignalTowerTargetType.DisplayName: Signal Tower Target Type

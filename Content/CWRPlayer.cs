@@ -6,7 +6,6 @@ using CalamityOverhaul.Content.Items.Rogue;
 using CalamityOverhaul.Content.LegendWeapon;
 using CalamityOverhaul.Content.NPCs.Modifys.Crabulons;
 using CalamityOverhaul.Content.Projectiles.Others;
-using CalamityOverhaul.Content.RAMSystems;
 using CalamityOverhaul.Content.RangedModify;
 using CalamityOverhaul.Content.RangedModify.Core;
 using CalamityOverhaul.OtherMods.HighFPSSupport;
@@ -291,7 +290,6 @@ namespace CalamityOverhaul.Content
             try {
                 tag["UnderstandWindGriven"] = UnderstandWindGriven;
                 tag["UnderstandWindGrivenMK2"] = UnderstandWindGrivenMK2;
-                RamSystem.WriteSave(tag);
             } catch (Exception ex) { CWRMod.Instance.Logger.Error($"CWRPlayer.SaveData An Error Has Cccurred: {ex.Message}"); }
         }
 
@@ -303,7 +301,6 @@ namespace CalamityOverhaul.Content
                 if (!tag.TryGet("UnderstandWindGrivenMK2", out UnderstandWindGrivenMK2)) {
                     UnderstandWindGrivenMK2 = false;
                 }
-                RamSystem.ReadSave(tag);
             } catch (Exception ex) { CWRMod.Instance.Logger.Error($"CWRPlayer.LoadData An Error Has Cccurred: {ex.Message}"); }
         }
 
@@ -348,7 +345,6 @@ namespace CalamityOverhaul.Content
             Information();
 
             //进入世界时把 RAM 重置为满（基础值已在 LoadData 中读取）
-            RamSystem.Refill();
 
             SpearOfLonginus.ZenithWorldAsset();
 

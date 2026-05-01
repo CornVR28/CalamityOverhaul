@@ -2,6 +2,7 @@
 using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
 using System;
 using System.Collections.Generic;
+using Terraria;
 using Terraria.ModLoader.IO;
 
 namespace CalamityOverhaul.Content.RAMSystems
@@ -19,6 +20,8 @@ namespace CalamityOverhaul.Content.RAMSystems
     internal class RamSystem : ICWRLoader
     {
         void ICWRLoader.UnLoadData() => UnloadReset();
+
+        private static RAMPlayer Local => Main.LocalPlayer.GetModPlayer<RAMPlayer>();
 
         #region 默认值与边界
 
@@ -61,114 +64,61 @@ namespace CalamityOverhaul.Content.RAMSystems
         //tModLoader 固定每秒 60 tick
         private const float TickSeconds = 1f / 60f;
 
-        //存档键
-        private const string SaveKey_BaseMax = "CWRRam_BaseMax";
-        private const string SaveKey_BaseRecover = "CWRRam_BaseRecover";
-        private const string SaveKey_CapacityChips = "CWRRam_CapacityChips";
-        private const string SaveKey_RecoveryChips = "CWRRam_RecoveryChips";
-
         #endregion
 
-        #region 永久基础值（可持久化）
+        #region 永久基础值（委托至 RAMPlayer 实例）
 
-        private static int _usedCapacityUpgradeChips;
-        /// <summary>
-        /// 已使用的 RAM 上限芯片数量，作为持久化进度的源数据
-        /// </summary>
-        public static int UsedCapacityUpgradeChips {
-            get => _usedCapacityUpgradeChips;
-            private set => _usedCapacityUpgradeChips = Math.Clamp(value, 0, MaxCapacityUpgradeChips);
-        }
+        public static int UsedCapacityUpgradeChips => Local.UsedCapacityUpgradeChips;
+        public static int UsedRecoveryUpgradeChips => Local.UsedRecoveryUpgradeChips;
 
-        private static int _usedRecoveryUpgradeChips;
-        /// <summary>
-        /// 已使用的 RAM 恢复速度芯片数量，作为持久化进度的源数据
-        /// </summary>
-        public static int UsedRecoveryUpgradeChips {
-            get => _usedRecoveryUpgradeChips;
-            private set => _usedRecoveryUpgradeChips = Math.Clamp(value, 0, MaxRecoveryUpgradeChips);
-        }
-
-        private static int _baseMaxRam = DefaultBaseMaxRam;
-        /// <summary>
-        /// 永久 RAM 基础上限，供物品/进度等永久升级写入，会被持久化到玩家存档
-        /// </summary>
         public static int BaseMaxRam {
-            get => _baseMaxRam;
-            set => _baseMaxRam = Math.Clamp(value, MinBaseMaxRam, SoftMaxBaseMaxRam);
+            get => Local.BaseMaxRam;
+            set => Local.BaseMaxRam = value;
         }
 
-        private static float _baseRecoveryRate = DefaultBaseRecoveryRate;
-        /// <summary>
-        /// 永久基础每秒恢复量，写入会持久化
-        /// </summary>
         public static float BaseRecoveryRate {
-            get => _baseRecoveryRate;
-            set => _baseRecoveryRate = Math.Max(value, 0f);
+            get => Local.BaseRecoveryRate;
+            set => Local.BaseRecoveryRate = value;
         }
 
         #endregion
 
-        #region 生效值（聚合后只读）
+        #region 生效值（委托至 RAMPlayer 实例）
 
-        /// <summary>
-        /// 当前生效的 RAM 上限（基础 + 所有激活修饰器）
-        /// </summary>
-        public static int MaxRam { get; private set; } = DefaultBaseMaxRam;
-        /// <summary>
-        /// 当前生效的每秒恢复量（基础 + 所有激活修饰器）
-        /// </summary>
-        public static float RecoveryRate { get; private set; } = DefaultBaseRecoveryRate;
+        public static int MaxRam => Local.MaxRam;
+        public static float RecoveryRate => Local.RecoveryRate;
 
-        private static float _currentRam = DefaultBaseMaxRam;
-        /// <summary>
-        /// 当前可用 RAM（精确浮点值，显示时取整）
-        /// </summary>
         public static float CurrentRam {
-            get => _currentRam;
-            set => _currentRam = Math.Clamp(value, 0f, MaxRam);
+            get => Local.CurrentRam;
+            set => Local.CurrentRam = value;
         }
 
-        /// <summary>
-        /// 当前可用 RAM 的整数显示值
-        /// </summary>
-        public static int DisplayCurrent => (int)CurrentRam;
-        /// <summary>
-        /// 当前 RAM 占最大值的比例(0~1)
-        /// </summary>
-        public static float Ratio => MaxRam > 0 ? CurrentRam / MaxRam : 0f;
+        public static int DisplayCurrent => Local.DisplayCurrent;
+        public static float Ratio => Local.Ratio;
 
         #endregion
 
         #region 动态修饰器注册表
 
-        private static readonly List<IRamModifierProvider> _providers = [];
-
-        /// <summary>
-        /// 注册一个动态 RAM 修饰来源，重复注册会被忽略
-        /// </summary>
         public static void RegisterProvider(IRamModifierProvider provider) {
             if (provider == null) {
                 return;
             }
-            if (!_providers.Contains(provider)) {
-                _providers.Add(provider);
+            if (!Local.Providers.Contains(provider)) {
+                Local.Providers.Add(provider);
             }
         }
 
-        /// <summary>
-        /// 注销修饰来源
-        /// </summary>
         public static void UnregisterProvider(IRamModifierProvider provider) {
             if (provider != null) {
-                _providers.Remove(provider);
+                Local.Providers.Remove(provider);
             }
         }
 
         /// <summary>
         /// 当前已注册的修饰器数量（仅供调试/UI 展示）
         /// </summary>
-        public static int ProviderCount => _providers.Count;
+        public static int ProviderCount => Local.Providers.Count;
 
         #endregion
 
@@ -198,79 +148,56 @@ namespace CalamityOverhaul.Content.RAMSystems
             if (!CanUseCapacityUpgradeChip) {
                 return false;
             }
-
-            UsedCapacityUpgradeChips++;
-            BaseMaxRam = DefaultBaseMaxRam + UsedCapacityUpgradeChips * CapacityUpgradeChipBonus;
-            RecomputeEffective();
+            var local = Local;
+            local.UsedCapacityUpgradeChips++;
+            local.BaseMaxRam = DefaultBaseMaxRam + local.UsedCapacityUpgradeChips * CapacityUpgradeChipBonus;
+            local.RecomputeEffective();
             Restore(CapacityUpgradeChipBonus);
             return true;
         }
 
-        /// <summary>
-        /// 使用一枚 RAM 恢复速度芯片，并同步永久基础值
-        /// </summary>
         public static bool TryUseRecoveryUpgradeChip() {
             if (!CanUseRecoveryUpgradeChip) {
                 return false;
             }
-
-            UsedRecoveryUpgradeChips++;
-            BaseRecoveryRate = DefaultBaseRecoveryRate + UsedRecoveryUpgradeChips * RecoveryUpgradeChipBonus;
-            RecomputeEffective();
+            var local = Local;
+            local.UsedRecoveryUpgradeChips++;
+            local.BaseRecoveryRate = DefaultBaseRecoveryRate + local.UsedRecoveryUpgradeChips * RecoveryUpgradeChipBonus;
+            local.RecomputeEffective();
             return true;
         }
-
-        #endregion
-
-        #region 事件
-
-        /// <summary>
-        /// 当 RAM 由非零跌至零时触发，可被外部系统订阅做"系统崩溃"反应
-        /// </summary>
-        public static event Action OnDepleted;
 
         #endregion
 
         #region 消耗与恢复
 
-        private static float recoveryCooldown;
-
-        /// <summary>
-        /// 检查是否有足够 RAM 执行指定一次性消耗
-        /// </summary>
         public static bool CanAfford(int cost) {
             if (HackTime.InfiniteHack) {
                 return true;
             }
-            return CurrentRam >= cost;
+            return Local.CurrentRam >= cost;
         }
 
-        /// <summary>
-        /// 一次性消耗 RAM，返回是否成功
-        /// </summary>
         public static bool TryConsume(int cost) {
             if (HackTime.InfiniteHack) {
                 return true;
             }
-            if (CurrentRam < cost) {
+            var local = Local;
+            if (local.CurrentRam < cost) {
                 return false;
             }
-            float prev = CurrentRam;
-            CurrentRam -= cost;
-            if (CurrentRam < 0f) {
-                CurrentRam = 0f;
+            float prev = local.CurrentRam;
+            local.CurrentRam -= cost;
+            if (local.CurrentRam < 0f) {
+                local.CurrentRam = 0f;
             }
-            recoveryCooldown = RecoveryDelay;
-            if (prev > 0f && CurrentRam <= 0f) {
-                OnDepleted?.Invoke();
+            local.RecoveryCooldown = RecoveryDelay;
+            if (prev > 0f && local.CurrentRam <= 0f) {
+                local.InvokeOnDepleted();
             }
             return true;
         }
 
-        /// <summary>
-        /// 持续消耗：按"每秒消耗量"在当前帧扣除一帧的份额
-        /// <br/>不触发恢复冷却（连续消耗自身已抑制恢复，避免冷却被反复刷新）
-        /// </summary>
         public static void ConsumeOverTime(float ramPerSecond) {
             if (HackTime.InfiniteHack) {
                 return;
@@ -278,89 +205,45 @@ namespace CalamityOverhaul.Content.RAMSystems
             if (ramPerSecond <= 0f) {
                 return;
             }
-            float prev = CurrentRam;
-            CurrentRam -= ramPerSecond * TickSeconds;
-            if (CurrentRam < 0f) {
-                CurrentRam = 0f;
+            var local = Local;
+            float prev = local.CurrentRam;
+            local.CurrentRam -= ramPerSecond * TickSeconds;
+            if (local.CurrentRam < 0f) {
+                local.CurrentRam = 0f;
             }
-            if (prev > 0f && CurrentRam <= 0f) {
-                OnDepleted?.Invoke();
+            if (prev > 0f && local.CurrentRam <= 0f) {
+                local.InvokeOnDepleted();
             }
         }
 
-        /// <summary>
-        /// 击杀回收：恢复指定量 RAM（不超过上限，不触发冷却）
-        /// </summary>
         public static void Restore(float amount) {
             if (amount <= 0f) {
                 return;
             }
-            CurrentRam = Math.Min(CurrentRam + amount, MaxRam);
+            var local = Local;
+            local.CurrentRam = Math.Min(local.CurrentRam + amount, local.MaxRam);
         }
 
-        /// <summary>
-        /// 将 RAM 充满（仅用于初始化或重置状态）
-        /// </summary>
-        public static void Refill() {
-            CurrentRam = MaxRam;
-            recoveryCooldown = 0f;
-        }
+        public static void Refill() => Local.Refill();
 
         #endregion
 
         #region 每帧更新
 
-        /// <summary>
-        /// 重新聚合所有修饰器得到当前生效值，并在 <see cref="MaxRam"/> 变小时夹紧 <see cref="CurrentRam"/>
-        /// </summary>
-        private static void RecomputeEffective() {
-            int max = BaseMaxRam;
-            float rec = BaseRecoveryRate;
-            for (int i = 0; i < _providers.Count; i++) {
-                IRamModifierProvider p = _providers[i];
-                if (p == null || !p.IsActive) {
-                    continue;
-                }
-                max += p.MaxRamBonus;
-                rec += p.RecoveryRateBonus;
-            }
-            if (max < MinBaseMaxRam) {
-                max = MinBaseMaxRam;
-            }
-            if (max > SoftMaxBaseMaxRam) {
-                max = SoftMaxBaseMaxRam;
-            }
-            if (rec < 0f) {
-                rec = 0f;
-            }
-            MaxRam = max;
-            RecoveryRate = rec;
-            if (_currentRam > MaxRam) {
-                _currentRam = MaxRam;
-            }
-        }
-
-        /// <summary>
-        /// 每帧推进：聚合修饰器、推进恢复
-        /// <br/>骇客时间激活期间冻结自动恢复
-        /// </summary>
         public static void Update() {
-            RecomputeEffective();
-
-            //骇客时间激活期间不恢复
+            var local = Local;
+            local.RecomputeEffective();
             if (HackTime.Active) {
                 return;
             }
-
-            if (recoveryCooldown > 0f) {
-                recoveryCooldown -= TickSeconds;
+            if (local.RecoveryCooldown > 0f) {
+                local.RecoveryCooldown -= TickSeconds;
                 return;
             }
-
-            if (CurrentRam < MaxRam) {
-                CurrentRam += RecoveryRate * TickSeconds;
-                if (CurrentRam > MaxRam) {
-                    CurrentRam = MaxRam;
+            if (local.CurrentRam < local.MaxRam) {
+                local.CurrentRam += local.RecoveryRate * TickSeconds;
+                if (local.CurrentRam > local.MaxRam) {
+                    local.CurrentRam = local.MaxRam;
                 }
             }
         }
@@ -369,85 +252,15 @@ namespace CalamityOverhaul.Content.RAMSystems
 
         #region 重置
 
-        /// <summary>
-        /// 软重置：保留 <see cref="BaseMaxRam"/> 与 <see cref="BaseRecoveryRate"/>，仅清理瞬时状态
-        /// <br/>用于回到主菜单等非卸载场景，避免清掉玩家进度
-        /// </summary>
         public static void Reset() {
-            recoveryCooldown = 0f;
-            RecomputeEffective();
-            CurrentRam = MaxRam;
+            var local = Local;
+            local.RecoveryCooldown = 0f;
+            local.RecomputeEffective();
+            local.CurrentRam = local.MaxRam;
         }
 
-        /// <summary>
-        /// 全量重置：连基础值与修饰器表都清空，仅由模组卸载路径调用
-        /// </summary>
         public static void UnloadReset() {
-            _providers.Clear();
-            OnDepleted = null;
-            UsedCapacityUpgradeChips = 0;
-            UsedRecoveryUpgradeChips = 0;
-            BaseMaxRam = DefaultBaseMaxRam;
-            BaseRecoveryRate = DefaultBaseRecoveryRate;
-            MaxRam = DefaultBaseMaxRam;
-            RecoveryRate = DefaultBaseRecoveryRate;
-            _currentRam = DefaultBaseMaxRam;
-            recoveryCooldown = 0f;
-        }
-
-        #endregion
-
-        #region 持久化
-
-        /// <summary>
-        /// 写入存档：基础上限与基础恢复速度
-        /// <br/>由 <c>CWRPlayer.SaveData</c> 在保存玩家时调用
-        /// </summary>
-        public static void WriteSave(TagCompound tag) {
-            tag[SaveKey_CapacityChips] = UsedCapacityUpgradeChips;
-            tag[SaveKey_RecoveryChips] = UsedRecoveryUpgradeChips;
-            tag[SaveKey_BaseMax] = BaseMaxRam;
-            tag[SaveKey_BaseRecover] = BaseRecoveryRate;
-        }
-
-        /// <summary>
-        /// 读取存档：未命中字段时回落到默认值，确保新角色与旧角色数据兼容
-        /// </summary>
-        public static void ReadSave(TagCompound tag) {
-            if (tag == null) {
-                UsedCapacityUpgradeChips = 0;
-                UsedRecoveryUpgradeChips = 0;
-            }
-            else {
-                UsedCapacityUpgradeChips = tag.TryGet(SaveKey_CapacityChips, out int capacityChips)
-                    ? capacityChips
-                    : GetLegacyCapacityChipCount(tag);
-                UsedRecoveryUpgradeChips = tag.TryGet(SaveKey_RecoveryChips, out int recoveryChips)
-                    ? recoveryChips
-                    : GetLegacyRecoveryChipCount(tag);
-            }
-
-            BaseMaxRam = DefaultBaseMaxRam + UsedCapacityUpgradeChips * CapacityUpgradeChipBonus;
-            BaseRecoveryRate = DefaultBaseRecoveryRate + UsedRecoveryUpgradeChips * RecoveryUpgradeChipBonus;
-            RecomputeEffective();
-            Refill();
-        }
-
-        private static int GetLegacyCapacityChipCount(TagCompound tag) {
-            if (!tag.TryGet(SaveKey_BaseMax, out int max)) {
-                return 0;
-            }
-
-            return Math.Clamp(max - DefaultBaseMaxRam, 0, MaxCapacityUpgradeChips);
-        }
-
-        private static int GetLegacyRecoveryChipCount(TagCompound tag) {
-            if (!tag.TryGet(SaveKey_BaseRecover, out float rec)) {
-                return 0;
-            }
-
-            int count = (int)MathF.Round((rec - DefaultBaseRecoveryRate) / RecoveryUpgradeChipBonus);
-            return Math.Clamp(count, 0, MaxRecoveryUpgradeChips);
+            //数据生命周期由 ModPlayer 实例管理，无需手动清理
         }
 
         #endregion

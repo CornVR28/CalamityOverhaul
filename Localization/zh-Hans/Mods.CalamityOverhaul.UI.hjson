@@ -547,6 +547,28 @@ HackTime: {
 	ProjectileScanTrap: 机关弹幕
 	ProjectileScanInfinite: 无限
 	ProjectileScanOwnerWorld: 世界/环境
+	ItemScanName: 名称
+	ItemScanClass: 类型
+	ItemScanStack: 堆叠
+	ItemScanValue: 价值
+	ItemScanRarity: 稀有度
+	ItemScanCombat: 战斗
+	ItemScanUtility: 功能
+	ItemScanPrefix: 前缀
+	ItemScanTypeId: 类型ID
+	ItemScanPosition: 坐标
+	ItemScanWeapon: 武器
+	ItemScanTool: 工具
+	ItemScanArmor: 护甲
+	ItemScanAccessory: 饰品
+	ItemScanAmmo: 弹药
+	ItemScanConsumable: 消耗品
+	ItemScanPlaceable: 可放置
+	ItemScanMaterial: 材料
+	ItemScanQuest: 任务物品
+	ItemScanMisc: 杂项物品
+	ItemScanNone: 无
+	ItemScanNoValue: 无价值
 	WaterScanLiquid: 液体
 	WaterScanEnvironment: 环境
 	WaterScanDepth: 深度

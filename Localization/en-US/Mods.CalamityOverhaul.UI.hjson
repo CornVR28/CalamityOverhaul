@@ -550,6 +550,28 @@ HackTime: {
 	ProjectileScanTrap: TRAP PROJECTILE
 	ProjectileScanInfinite: INFINITE
 	ProjectileScanOwnerWorld: WORLD/ENVIRONMENT
+	ItemScanName: NAME
+	ItemScanClass: CLASS
+	ItemScanStack: STACK
+	ItemScanValue: VALUE
+	ItemScanRarity: RARITY
+	ItemScanCombat: COMBAT
+	ItemScanUtility: UTILITY
+	ItemScanPrefix: PREFIX
+	ItemScanTypeId: TYPE ID
+	ItemScanPosition: POSITION
+	ItemScanWeapon: WEAPON
+	ItemScanTool: TOOL
+	ItemScanArmor: ARMOR
+	ItemScanAccessory: ACCESSORY
+	ItemScanAmmo: AMMO
+	ItemScanConsumable: CONSUMABLE
+	ItemScanPlaceable: PLACEABLE
+	ItemScanMaterial: MATERIAL
+	ItemScanQuest: QUEST ITEM
+	ItemScanMisc: MISC ITEM
+	ItemScanNone: NONE
+	ItemScanNoValue: NO VALUE
 	WaterScanLiquid: LIQUID
 	WaterScanEnvironment: ENVIRONMENT
 	WaterScanDepth: DEPTH

@@ -133,6 +133,30 @@ namespace CalamityOverhaul.Content.HackTimes
         public static LocalizedText ProjectileScanInfinite { get; private set; }
         public static LocalizedText ProjectileScanOwnerWorld { get; private set; }
 
+        //掉落物扫描本地化字段
+        public static LocalizedText ItemScanName { get; private set; }
+        public static LocalizedText ItemScanClass { get; private set; }
+        public static LocalizedText ItemScanStack { get; private set; }
+        public static LocalizedText ItemScanValue { get; private set; }
+        public static LocalizedText ItemScanRarity { get; private set; }
+        public static LocalizedText ItemScanCombat { get; private set; }
+        public static LocalizedText ItemScanUtility { get; private set; }
+        public static LocalizedText ItemScanPrefix { get; private set; }
+        public static LocalizedText ItemScanTypeId { get; private set; }
+        public static LocalizedText ItemScanPosition { get; private set; }
+        public static LocalizedText ItemScanWeapon { get; private set; }
+        public static LocalizedText ItemScanTool { get; private set; }
+        public static LocalizedText ItemScanArmor { get; private set; }
+        public static LocalizedText ItemScanAccessory { get; private set; }
+        public static LocalizedText ItemScanAmmo { get; private set; }
+        public static LocalizedText ItemScanConsumable { get; private set; }
+        public static LocalizedText ItemScanPlaceable { get; private set; }
+        public static LocalizedText ItemScanMaterial { get; private set; }
+        public static LocalizedText ItemScanQuest { get; private set; }
+        public static LocalizedText ItemScanMisc { get; private set; }
+        public static LocalizedText ItemScanNone { get; private set; }
+        public static LocalizedText ItemScanNoValue { get; private set; }
+
         //液体扫描本地化字段
         public static LocalizedText WaterScanLiquid { get; private set; }
         public static LocalizedText WaterScanEnvironment { get; private set; }
@@ -298,6 +322,29 @@ namespace CalamityOverhaul.Content.HackTimes
             ProjectileScanTrap = this.GetLocalization(nameof(ProjectileScanTrap));
             ProjectileScanInfinite = this.GetLocalization(nameof(ProjectileScanInfinite));
             ProjectileScanOwnerWorld = this.GetLocalization(nameof(ProjectileScanOwnerWorld));
+
+            ItemScanName = this.GetLocalization(nameof(ItemScanName));
+            ItemScanClass = this.GetLocalization(nameof(ItemScanClass));
+            ItemScanStack = this.GetLocalization(nameof(ItemScanStack));
+            ItemScanValue = this.GetLocalization(nameof(ItemScanValue));
+            ItemScanRarity = this.GetLocalization(nameof(ItemScanRarity));
+            ItemScanCombat = this.GetLocalization(nameof(ItemScanCombat));
+            ItemScanUtility = this.GetLocalization(nameof(ItemScanUtility));
+            ItemScanPrefix = this.GetLocalization(nameof(ItemScanPrefix));
+            ItemScanTypeId = this.GetLocalization(nameof(ItemScanTypeId));
+            ItemScanPosition = this.GetLocalization(nameof(ItemScanPosition));
+            ItemScanWeapon = this.GetLocalization(nameof(ItemScanWeapon));
+            ItemScanTool = this.GetLocalization(nameof(ItemScanTool));
+            ItemScanArmor = this.GetLocalization(nameof(ItemScanArmor));
+            ItemScanAccessory = this.GetLocalization(nameof(ItemScanAccessory));
+            ItemScanAmmo = this.GetLocalization(nameof(ItemScanAmmo));
+            ItemScanConsumable = this.GetLocalization(nameof(ItemScanConsumable));
+            ItemScanPlaceable = this.GetLocalization(nameof(ItemScanPlaceable));
+            ItemScanMaterial = this.GetLocalization(nameof(ItemScanMaterial));
+            ItemScanQuest = this.GetLocalization(nameof(ItemScanQuest));
+            ItemScanMisc = this.GetLocalization(nameof(ItemScanMisc));
+            ItemScanNone = this.GetLocalization(nameof(ItemScanNone));
+            ItemScanNoValue = this.GetLocalization(nameof(ItemScanNoValue));
 
             WaterScanLiquid = this.GetLocalization(nameof(WaterScanLiquid));
             WaterScanEnvironment = this.GetLocalization(nameof(WaterScanEnvironment));

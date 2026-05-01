@@ -25,5 +25,7 @@ namespace CalamityOverhaul.Content.HackTimes
         Projectile = 32,
         //液体目标（水、岩浆、蜂蜜、微光等）
         Water = 64,
+        //掉落物目标（世界中的Item实体）
+        Item = 128,
     }
 }

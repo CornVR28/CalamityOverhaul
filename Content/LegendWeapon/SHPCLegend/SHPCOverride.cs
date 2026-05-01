@@ -166,7 +166,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
                 {18, 1000 },
                 {19, 1100 },
                 {20, 1200 },
-                {21, 6666 }
+                {21, 1300 },
+                {22, 6666 },
             };
         }
 
