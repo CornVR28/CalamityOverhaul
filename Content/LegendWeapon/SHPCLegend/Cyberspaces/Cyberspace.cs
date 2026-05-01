@@ -558,7 +558,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
                 float remain = (float)domainEaseTimer / DomainEaseTotal;
                 float prog = 1f - remain;
                 float lerpRate = MathHelper.Lerp(0.06f, 0.25f, MathF.Pow(prog, 0.65f));
-                DomainCenter = Vector2.Lerp(DomainCenter, target, 0.1f);
+                DomainCenter = Vector2.Lerp(DomainCenter, target, lerpRate);
                 domainEaseTimer--;
                 if (domainEaseTimer == 0) {
                     DomainCenter = target;

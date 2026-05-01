@@ -128,10 +128,36 @@ float4 PixelShaderFunction(PSInput input) : COLOR0
     //角节点强调：四角小亮点（与领域栅格节点呼应）
     float node = (1.0 - smoothstep(0.0, 0.10, bx)) * (1.0 - smoothstep(0.0, 0.10, by));
 
-    //每格随机"亮档"：少数格子比其他更亮（对应领域里的"激活节点"）
+    //=========================================================
+    //黑墙细节层 1：每格随机"激活档"——多数为暗块，少数为高亮"在线"块
+    //=========================================================
     float lvl = hash21(cellIdx + float2(seed * 1.3, 41.0));
-    float isHot = step(0.78, lvl);
-    float hotPulse = 0.7 + 0.3 * sin(uTime * 6.0 + lvl * 12.0);
+    float isOnline = step(0.82, lvl);
+    //在线块的 1Hz 心跳
+    float onlinePulse = 0.6 + 0.4 * sin(uTime * 4.5 + lvl * 12.0);
+
+    //=========================================================
+    //黑墙细节层 2：噪声驱动的裂纹腐蚀——每格独立的损伤蒙版
+    //有的格子描边被"啃"出豁口，模拟黑墙的不规则侵蚀
+    //=========================================================
+    float2 crackUV = frac(toCell + cellIdx * 0.137 + seed * 0.31);
+    float crackN = tex2D(noiseSamp, crackUV).r;
+    //裂纹仅出现在描边附近（borderDist < 0.18）
+    float crackBand = (1.0 - smoothstep(0.04, 0.18, borderDist));
+    //裂纹密度：每格不同强度
+    float cellCrackBias = hash21(cellIdx + float2(seed * 9.1, 5.7));
+    float crackDamage = step(0.45 + cellCrackBias * 0.25, crackN) * crackBand;
+    //损伤会"扣掉"描边亮度，让边缘看起来锈蚀
+    float borderErode = saturate(crackDamage * 0.85);
+
+    //=========================================================
+    //黑墙细节层 3：内部单条暗扫描线
+    //=========================================================
+    //每格独立扫描相位
+    float scanPhase = frac(toCell.y - uTime * 0.45 + lvl * 7.7);
+    float scan = smoothstep(0.0, 0.04, scanPhase) * smoothstep(0.16, 0.04, scanPhase);
+    //仅在内填区域显现，避开描边
+    scan *= interiorMask;
 
     //归位 / 解构 边缘 SNAP（reform 临归位/decompose 刚撕开）
     float settleFlash = 0.0;
@@ -151,7 +177,7 @@ float4 PixelShaderFunction(PSInput input) : COLOR0
     }
 
     //=========================================================
-    //中心 SNAP 闪光：玩家在中心实体化
+    //中心 SNAP 闪光：玩家在中心实体化（深红基调，避免白热过曝）
     //=========================================================
     float snapRadial = 1.0 - smoothstep(0.0, 0.30, r);
     //倾斜十字撕裂带
@@ -164,43 +190,52 @@ float4 PixelShaderFunction(PSInput input) : COLOR0
     float band2 = exp(-pow(dot(p, float2(-d2.y, d2.x)) * 32.0, 2.0))
                 * smoothstep(0.45, 0.0, abs(dot(p, d2)));
     float snap = (snapRadial * 0.7 + (band1 + band2 * 0.85) * 0.9) * snapPulse;
+    //snap 极小芯（仅最中心 0.06 以内）才允许极弱白热点缀
+    float snapTinyCore = (1.0 - smoothstep(0.0, 0.04, r)) * snapPulse;
 
     //=========================================================
     //合成像素强度
     //=========================================================
     float showStrength = belongs * inside * activeStrength * dissMask;
-    //描边亮度（主视觉）
+    //描边亮度（主视觉）：在线块更亮，裂纹处被腐蚀扣减
     float borderAmt = showStrength * borderLine
-                    * (1.0 + isHot * 0.6 + settleFlash * 1.2 + (isHot * (hotPulse - 0.7)) * 1.3);
+                    * (1.0 + isOnline * 0.5 + settleFlash * 0.9 + isOnline * (onlinePulse - 0.6) * 0.8)
+                    * (1.0 - borderErode);
     //内填亮度（暗红填充）
     float interiorAmt = showStrength * interior * interiorMask
-                      * (0.55 + isHot * 0.4 + settleFlash * 0.6);
+                      * (0.50 + isOnline * 0.25 + settleFlash * 0.4);
+    //内部扫描线亮度
+    float scanAmt = showStrength * scan * (0.35 + isOnline * 0.4);
     //角节点
-    float nodeAmt = showStrength * node * (0.6 + isHot * 0.6 + settleFlash * 1.2);
+    float nodeAmt = showStrength * node * (0.50 + isOnline * 0.45 + settleFlash * 0.7);
 
     //=========================================================
-    //颜色（与领域边缘对齐：暗红 / 血红 / 鲜红 / 白热）
+    //颜色（与领域底色统一：暗红/血红/鲜红/裂纹光，无金黄、无过曝白）
+    //完全采用 CyberspaceField 的色板，确保黑墙调性一致
     //=========================================================
-    float3 cInteriorDark = float3(0.18, 0.02, 0.04);  //内填暗红
-    float3 cBorder       = float3(0.95, 0.18, 0.12);  //描边鲜红
-    float3 cBorderHot    = float3(1.00, 0.45, 0.22);  //热块描边
-    float3 cNode         = float3(1.00, 0.55, 0.30);  //角节点橙
-    float3 cSnapHot      = float3(1.00, 0.92, 0.78);
-    float3 cSnapWarm     = float3(1.00, 0.50, 0.20);
+    float3 cInteriorDark = float3(0.10, 0.012, 0.025); //内填暗红（更深）
+    float3 cBorder       = float3(0.78, 0.08,  0.07);  //描边血红
+    float3 cBorderHot    = float3(1.00, 0.18,  0.10);  //在线块描边鲜红（无橙黄）
+    float3 cNode         = float3(1.00, 0.22,  0.12);  //角节点裂纹光
+    float3 cScan         = float3(0.95, 0.15,  0.10);  //扫描线鲜红
+    float3 cSnapCore     = float3(1.00, 0.40,  0.25);  //SNAP 主色：深橙红，不再纯白
+    float3 cSnapTinyHot  = float3(1.00, 0.85,  0.65);  //仅极中心点的微弱热斑
 
     float3 col = float3(0, 0, 0);
-    col += cInteriorDark * interiorAmt * 1.4;
-    col += lerp(cBorder, cBorderHot, isHot * 0.7 + settleFlash * 0.6) * borderAmt;
-    col += cNode * nodeAmt * 0.7;
-    col += cSnapHot * snap;
-    col += cSnapWarm * snap * 0.55;
+    col += cInteriorDark * interiorAmt * 1.6;
+    col += lerp(cBorder, cBorderHot, isOnline * 0.7 + settleFlash * 0.5) * borderAmt;
+    col += cScan * scanAmt;
+    col += cNode * nodeAmt * 0.65;
+    col += cSnapCore * snap;
+    col += cSnapTinyHot * snapTinyCore * 0.6;
 
-    //alpha：描边为主，内填、角节点、SNAP 辅助
+    //alpha：描边为主，内填、扫描、节点、SNAP 辅助
     float alpha = saturate(
           borderAmt * 0.95
-        + interiorAmt * 0.65
-        + nodeAmt * 0.75
-        + snap * 0.95
+        + interiorAmt * 0.55
+        + scanAmt * 0.6
+        + nodeAmt * 0.65
+        + snap * 0.85
     );
     alpha *= fadeAlpha;
 
