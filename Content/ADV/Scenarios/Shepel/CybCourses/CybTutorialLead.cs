@@ -1,5 +1,6 @@
 ﻿using CalamityOverhaul.Common;
 using CalamityOverhaul.Content.ADV.EntrustManager;
+using CalamityOverhaul.Content.Cyberwares.UIs;
 using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -43,8 +44,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
                 this.GetLocalization("Step0_Title", () => "连接 SHPC"),
                 this.GetLocalization("Step1_Title", () => "核心节点"),
                 this.GetLocalization("Step2_Title", () => "CYBER DOMAIN"),
-                this.GetLocalization("Step3_Title", () => "CYBERWARE"),
-                this.GetLocalization("Step4_Title", () => "MODIFY"),
+                this.GetLocalization("Step3_Title", () => "MODIFY"),
+                this.GetLocalization("Step4_Title", () => "CYBERWARE"),
                 this.GetLocalization("Step5_Title", () => "TALK"),
                 this.GetLocalization("Step6_Title", () => "ENGRAM CALIBRATED"),
             };
@@ -52,9 +53,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
                 this.GetLocalization("Step0_Body", () => "将SHPC装备至武器栏并持握，HUD核心节点即会出现在屏幕左下角。"),
                 this.GetLocalization("Step1_Body", () => "点击左下角的核心节点可展开或收起操作面板。"),
                 this.GetLocalization("Step2_Body", () => "网域 — 部署并管理多层赛博空间层叠结构。\n点击高亮的扇区即可锁定该面板。"),
-                this.GetLocalization("Step3_Body", () => "赛博改装 — 查看并管理你的机体增强模块。\n点击高亮的扇区即可锁定该面板。"),
-                this.GetLocalization("Step4_Body", () => "改造 — 为SHPC安装或拆卸改造零件。\n点击高亮的扇区即可锁定该面板。"),
-                this.GetLocalization("Step5_Body", () => "神经链路 — 与SHPC建立直连通讯，开启对话。\n点击高亮的扇区即可锁定该面板。"),
+                this.GetLocalization("Step3_Body", () => "改造 — 为SHPC安装或拆卸改造零件。\n点击高亮的扇区即可锁定该面板。"),
+                this.GetLocalization("Step4_Body", () => "赛博改装 — 查看并管理你的机体增强模块。\n点击高亮的扇区即可打开义体界面。"),
+                this.GetLocalization("Step5_Body", () => "神经链路 — 与SHPC建立直连通讯，开启对话。\n点击高亮的扇区即可开启对话。"),
                 this.GetLocalization("Step6_Body", () => "所有接口已解析完毕。\n神经链路稳定，SHPC已就绪。"),
             };
             _textCalibrating = this.GetLocalization("Calibrating", () => "CALIBRATING...");
@@ -163,12 +164,23 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
                             AdvanceStep();
                             break;
                         }
-                        //step 2~5：玩家点击对应扇区，pinnedSector 锁定到目标值即推进
+                        //step 2~5：固定面板用 PinnedSector 推进，普通按钮用自身打开后的状态推进
                         if (_currentStep >= 2 && _currentStep <= 5) {
-                            int targetSector = _currentStep - 2;
+                            int targetSector = GetTargetSectorForStep(_currentStep);
                             int pinned = SHPCUI.Instance?.PinnedSector ?? -1;
-                            //pinned变化即认为玩家确实点过；锁定目标扇区即推进
-                            if (pinned == targetSector && _lastPinned != targetSector) {
+                            bool completed = false;
+                            if (targetSector == SHPCUI.CyberDomainSectorIndex
+                                || targetSector == SHPCUI.ModifySectorIndex) {
+                                //pinned变化即认为玩家确实点过；锁定目标扇区即推进
+                                completed = pinned == targetSector && _lastPinned != targetSector;
+                            }
+                            else if (targetSector == SHPCUI.CyberwareSectorIndex) {
+                                completed = CyberwareUI.Instance?.Active == true;
+                            }
+                            else if (targetSector == SHPCUI.TalkSectorIndex) {
+                                completed = ScenarioManager.IsActive();
+                            }
+                            if (completed) {
                                 _lastPinned = pinned;
                                 AdvanceStep();
                                 break;
@@ -217,6 +229,14 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
                 return _stepTimer >= AutoStepDuration;
             return false;
         }
+
+        private static int GetTargetSectorForStep(int step) => step switch {
+            2 => SHPCUI.CyberDomainSectorIndex,
+            3 => SHPCUI.ModifySectorIndex,
+            4 => SHPCUI.CyberwareSectorIndex,
+            5 => SHPCUI.TalkSectorIndex,
+            _ => -1,
+        };
 
         //在热键栏或背包中找SHPC并装备到当前持握槽
         private static void ForceEquipSHPC() {

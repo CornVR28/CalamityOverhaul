@@ -29,6 +29,10 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
     {
         public string LocalizationCategory => "UI";
         public static SHPCUI Instance => UIHandleLoader.GetUIHandleOfType<SHPCUI>();
+        internal const int CyberDomainSectorIndex = 0;
+        internal const int ModifySectorIndex = 1;
+        internal const int CyberwareSectorIndex = 2;
+        internal const int TalkSectorIndex = 3;
 
         #region 本地化
 
@@ -254,6 +258,17 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                     UsesFixedPanel = true,
                 },
                 new SHPCButtonDef {
+                    Title = () => Modify_Title.Value,
+                    Subtitle = () => Modify_Subtitle.Value,
+                    Description = () => Modify_Description.Value,
+                    Glyph = "M",
+                    Enabled = () => true,
+                    StatusValue = () => -1f,
+                    StatusText = () => "0/6",
+                    OnClick = null,
+                    UsesFixedPanel = true,
+                },
+                new SHPCButtonDef {
                     Title = () => Cyberware_Title.Value,
                     Subtitle = () => Cyberware_Subtitle.Value,
                     Description = () => Cyberware_Description.Value,
@@ -264,17 +279,6 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                         ? Cyberware_Status_Open.Value
                         : Cyberware_Status_Closed.Value,
                     OnClick = () => CyberwareUI.Instance?.Toggle(),
-                },
-                new SHPCButtonDef {
-                    Title = () => Modify_Title.Value,
-                    Subtitle = () => Modify_Subtitle.Value,
-                    Description = () => Modify_Description.Value,
-                    Glyph = "M",
-                    Enabled = () => true,
-                    StatusValue = () => -1f,
-                    StatusText = () => "0/6",
-                    OnClick = null,
-                    UsesFixedPanel = true,
                 },
                 new SHPCButtonDef {
                     Title = () => Talk_Title.Value,
@@ -348,7 +352,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             midA = 0f;
             Vector2 corePos = GetCorePosition();
             //不同面板高度不同，用各自的高度计算纵向偏移保证底部对齐核心
-            float panelH = idx == 2 ? SHPCModPanel.PanelH : SHPCCyberPanel.PanelH;
+            float panelH = idx == ModifySectorIndex ? SHPCModPanel.PanelH : SHPCCyberPanel.PanelH;
             anchor = new Vector2(
                 corePos.X + SHPCTheme.ButtonOuterR + 2f,
                 corePos.Y - panelH * 0.5f + 6f);
@@ -412,7 +416,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             if (pinnedSector >= 0 && pinnedSector < buttons.Count
                 && buttons[pinnedSector].UsesFixedPanel && pinnedPanelProgress > 0.4f) {
                 GetFixedPanelAnchor(pinnedSector, out Vector2 panelAnchor, out float panelMidA);
-                if (pinnedSector == 0) {
+                if (pinnedSector == CyberDomainSectorIndex) {
                     cyberLayout = SHPCCyberPanel.Compute(panelAnchor, panelMidA, pinnedPanelProgress);
                     cyberHover = SHPCCyberPanel.HitTest(cyberLayout, MousePosition);
                     cyberPanelHit = cyberLayout.Panel.Contains((int)MousePosition.X, (int)MousePosition.Y)
@@ -421,7 +425,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                         || cyberHover == SHPCCyberPanel.HitKind.Skill3;
                     cyberPanelVisible = true;
                 }
-                else if (pinnedSector == 2) {
+                else if (pinnedSector == ModifySectorIndex) {
                     modLayout = SHPCModPanel.Compute(panelAnchor, panelMidA, pinnedPanelProgress);
                     modHover = SHPCModPanel.HitTest(modLayout, MousePosition);
                     cyberPanelHit = modLayout.Panel.Contains((int)MousePosition.X, (int)MousePosition.Y);
@@ -578,11 +582,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             //固定二级面板
             if (pinnedSector >= 0 && pinnedSector < buttons.Count && pinnedPanelProgress > 0.02f) {
                 GetFixedPanelAnchor(pinnedSector, out Vector2 fAnchor, out float fMidA);
-                if (pinnedSector == 0) {
+                if (pinnedSector == CyberDomainSectorIndex) {
                     SHPCCyberPanel.Layout layout = SHPCCyberPanel.Compute(fAnchor, fMidA, pinnedPanelProgress);
                     SHPCCyberPanel.Draw(sb, px, layout, pinnedPanelProgress, globalAlpha, cyberHover);
                 }
-                else if (pinnedSector == 2) {
+                else if (pinnedSector == ModifySectorIndex) {
                     SHPCModPanel.Layout layout = SHPCModPanel.Compute(fAnchor, fMidA, pinnedPanelProgress);
                     SHPCModPanel.Draw(sb, px, layout, pinnedPanelProgress, globalAlpha, modHover);
                 }

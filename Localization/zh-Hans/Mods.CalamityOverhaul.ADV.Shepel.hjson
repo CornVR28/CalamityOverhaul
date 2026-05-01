@@ -221,23 +221,23 @@ CybTutorialLead: {
 		网域 — 部署并管理多层赛博空间层叠结构。
 		点击高亮的扇区即可锁定该面板。
 		'''
-	Step3_Title: CYBERWARE
+	Step3_Title: MODIFY
 	Step3_Body:
-		'''
-		赛博改装 — 查看并管理你的机体增强模块。
-		点击高亮的扇区即可锁定该面板。
-		'''
-	Step4_Title: MODIFY
-	Step4_Body:
 		'''
 		改造 — 为SHPC安装或拆卸改造零件。
 		点击高亮的扇区即可锁定该面板。
+		'''
+	Step4_Title: CYBERWARE
+	Step4_Body:
+		'''
+		赛博改装 — 查看并管理你的机体增强模块。
+		点击高亮的扇区即可打开义体界面。
 		'''
 	Step5_Title: TALK
 	Step5_Body:
 		'''
 		神经链路 — 与SHPC建立直连通讯，开启对话。
-		点击高亮的扇区即可锁定该面板。
+		点击高亮的扇区即可开启对话。
 		'''
 	Step6_Title: ENGRAM CALIBRATED
 	Step6_Body:
