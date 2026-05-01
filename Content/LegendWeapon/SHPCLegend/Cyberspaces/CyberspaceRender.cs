@@ -76,6 +76,17 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             if (screenSwap == null || screenSwap.IsDisposed) return;
             if (Main.screenTarget == null || Main.screenTarget.IsDisposed) return;
 
+            //水波质量从关/低切到中/高时，DrawNPCsOverTiles 触发点的活动 RT 不一定是 screenTarget
+            //此时再 SetRenderTarget(Main.screenTarget); Clear 会把本该写到 backbuffer 的画面整个顶替掉，
+            //表现就是整个 UI 和画面"消失"。检测到这种情况立刻走低质量回退路径
+            if (!RenderQualitySafety.IsScreenTargetActive(graphicsDevice)) {
+                DrawLowQualityFieldFallback(spriteBatch);
+                return;
+            }
+
+            //保存进入时的 RT 绑定，结束后再还原回去，避免改变上层管线对活动 RT 的预期
+            RenderTargetBinding[] previousTargets = graphicsDevice.GetRenderTargets();
+
             // 将当前屏幕内容复制到交换缓冲
             graphicsDevice.SetRenderTarget(screenSwap);
             graphicsDevice.Clear(Color.Transparent);
@@ -118,6 +129,12 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             shader.CurrentTechnique.Passes[0].Apply();
             spriteBatch.Draw(screenSwap, Vector2.Zero, Color.White);
             spriteBatch.End();
+
+            //还原进入时的 RT 绑定，防止改变上层管线对当前活动 RT 的预期
+            if (previousTargets != null && previousTargets.Length > 0
+                && previousTargets[0].RenderTarget != Main.screenTarget) {
+                graphicsDevice.SetRenderTargets(previousTargets);
+            }
         }
 
         /// <summary>
