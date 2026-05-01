@@ -29,7 +29,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         }
 
         public override void AI() {
-            Projectile.Center = Main.LocalPlayer.Center;
+            //跟随领域中心(支持瞬移期间领域缓动)，避免冲击波在玩家瞬间位移时跳到新位置
+            Projectile.Center = Cyberspace.DomainCenter;
             if (Projectile.localAI[0] == 0f) {
                 maxDrawRadius = Cyberspace.Radius * 1.1f;
                 Projectile.localAI[0] = 1f;

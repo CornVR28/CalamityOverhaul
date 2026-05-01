@@ -30,6 +30,18 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         /// </summary>
         public static float Intensity { get; set; }
 
+        /// <summary>
+        /// 领域中心(世界坐标)，普通情况下每帧贴附在玩家中心
+        /// <br/>瞬移演出期间会暂时锚定在出发点，再以缓动追上玩家，营造速度感
+        /// <br/>所有领域渲染/范围判定均应读取此值，而非 <see cref="Player.Center"/>
+        /// </summary>
+        public static Vector2 DomainCenter { get; private set; }
+
+        //领域中心缓动剩余帧；为 0 时直接同步玩家位置
+        private static int domainEaseTimer;
+        //缓动总帧数：本次"追赶"动画允许的最大长度
+        private const int DomainEaseTotal = 28;
+
         // ====== 多层领域配置 ======
 
         /// <summary>
@@ -385,6 +397,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
                 crashLockoutTimer--;
             }
 
+            //更新领域中心缓动：未在追赶中时直接贴附玩家，追赶中按 ease-in 速率收敛
+            UpdateDomainCenter();
+
             //领域处于激活态时按当前层消耗 RAM；耗尽即触发系统崩溃强制关闭
             if (Active && CurrentLayer >= 1 && !HackTime.InfiniteHack) {
                 float drain = LayerRamDrainPerSecond[CurrentLayer - 1] * TimeGear.TimeScale;
@@ -481,9 +496,53 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             targetIntensity = 0f;
             ambientBoltTimer = 0;
             crashLockoutTimer = 0;
+            DomainCenter = Vector2.Zero;
+            domainEaseTimer = 0;
             for (int i = 0; i < MaxLayerCount; i++) {
                 layerExpand[i] = 0f;
                 layerBurstTimer[i] = 0;
+            }
+        }
+
+        /// <summary>
+        /// 通知领域中心暂时停留在指定世界坐标，并在接下来的 <see cref="DomainEaseTotal"/> 帧内缓动追上玩家
+        /// <br/>用于赛博瞬移：玩家瞬间到达终点，但领域慢一拍跟进，强化"撕开维度向前冲"的速度感
+        /// </summary>
+        public static void NotifyTeleport(Vector2 anchorCenter) {
+            DomainCenter = anchorCenter;
+            domainEaseTimer = DomainEaseTotal;
+        }
+
+        /// <summary>
+        /// 推进领域中心缓动；非追赶状态下保持与玩家中心同步
+        /// </summary>
+        private static void UpdateDomainCenter() {
+            Player p = Main.LocalPlayer;
+            if (p == null || !p.active) {
+                domainEaseTimer = 0;
+                return;
+            }
+
+            Vector2 target = p.Center;
+            //领域完全收起时直接贴附，避免重新激活时残留旧坐标
+            if (!Active && Intensity < 0.001f && domainEaseTimer == 0) {
+                DomainCenter = target;
+                return;
+            }
+
+            if (domainEaseTimer > 0) {
+                //ease-in：起步慢、临近终点提速，最后强制贴齐
+                float remain = (float)domainEaseTimer / DomainEaseTotal;
+                float prog = 1f - remain;
+                float lerpRate = MathHelper.Lerp(0.06f, 0.45f, MathF.Pow(prog, 0.65f));
+                DomainCenter = Vector2.Lerp(DomainCenter, target, lerpRate);
+                domainEaseTimer--;
+                if (domainEaseTimer == 0) {
+                    DomainCenter = target;
+                }
+            }
+            else {
+                DomainCenter = target;
             }
         }
 
@@ -568,8 +627,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         public static bool IsInsideDomain(Vector2 worldPos) {
             //仅按视觉强度判定，避免Active翻转后与正在收缩的画面不一致
             if (Intensity < 0.01f) return false;
-            float dx = worldPos.X - Main.LocalPlayer.Center.X;
-            float dy = worldPos.Y - Main.LocalPlayer.Center.Y;
+            float dx = worldPos.X - DomainCenter.X;
+            float dy = worldPos.Y - DomainCenter.Y;
             return dx * dx + dy * dy <= EffectiveOuterRadius * EffectiveOuterRadius;
         }
 
@@ -583,7 +642,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
 
             IEntitySource source = player.GetSource_FromThis();
             float outerR = EffectiveOuterRadius;
-            Vector2 center = player.Center;
+            Vector2 center = DomainCenter;
 
             //1~(1+层数)条闪电从领域内部随机位置向外射出
             int count = Main.rand.Next(1, 1 + CurrentLayer);

@@ -93,7 +93,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             shader.Parameters["expandProgress"]?.SetValue(Cyberspace.ExpandProgress);
             shader.Parameters["dimStrength"]?.SetValue(Cyberspace.DimStrength);
             shader.Parameters["motionFade"]?.SetValue(Cyberspace.MotionFade);
-            Vector2 domainCenter = Main.LocalPlayer.Center;
+            Vector2 domainCenter = Cyberspace.DomainCenter;
             float effectiveRadius = Cyberspace.Radius * Cyberspace.ExpandProgress;
             shader.Parameters["setPoint"]?.SetValue(domainCenter);
             shader.Parameters["screenPosition"]?.SetValue(worldViewOrigin);
@@ -149,7 +149,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         private static void DrawLowQualityLayerGrid(SpriteBatch spriteBatch, Texture2D pixel,
             int layer, float expand, float alpha) {
 
-            Vector2 center = Main.LocalPlayer.Center;
+            Vector2 center = Cyberspace.DomainCenter;
             float radius = Cyberspace.GetLayerRadius(layer) * expand;
             float gridSize = Cyberspace.GridSize;
             if (radius < gridSize * 2f) return;
@@ -212,7 +212,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
 
         private static void DrawSingleEdgeGlowRing(SpriteBatch spriteBatch, Texture2D glowTex,
             int layer, float expand) {
-            Vector2 center = Main.LocalPlayer.Center;
+            Vector2 center = Cyberspace.DomainCenter;
             float r = Cyberspace.GetLayerRadius(layer) * expand;
             float gs = Cyberspace.GridSize;
             float time = Cyberspace.EffectTime;
@@ -289,7 +289,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
 
             Texture2D canvas = CWRAsset.Placeholder_White.Value;
             Texture2D noise = CWRAsset.Extra_193.Value;
-            Vector2 center = Main.LocalPlayer.Center;
+            Vector2 center = Cyberspace.DomainCenter;
             Vector2 drawPos = center - Main.screenPosition;
 
             spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,

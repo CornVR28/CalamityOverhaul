@@ -54,7 +54,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Banish
             if (!Cyberspace.Active || Cyberspace.Intensity < 0.5f || Cyberspace.CurrentLayer < 2) return;
 
             Vector2 mouse = Main.MouseWorld;
-            Vector2 domainCenter = Main.LocalPlayer.Center;
+            Vector2 domainCenter = Cyberspace.DomainCenter;
             float effectiveRadius = Cyberspace.Radius * Cyberspace.ExpandProgress;
 
             int bestIndex = -1;

@@ -30,7 +30,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.DomainFre
         }
 
         public override void AI() {
-            Projectile.Center = Main.LocalPlayer.Center;
+            Projectile.Center = Cyberspace.DomainCenter;
             if (Projectile.localAI[0] == 0f) {
                 if (!VaultUtils.isServer) {
                     SoundEngine.PlaySound(CWRSound.FaultOccurred, Projectile.Center);
