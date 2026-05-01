@@ -154,16 +154,20 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Teleport
                 hideTimer = HideDuration;
             }
 
-            //生成演出弹幕（NewProjectile 自带网络同步，远端也能看到裂缝/重现）
+            //生成演出弹幕（NewProjectile 自带网络同步，远端也能看到解构/走廊/重组）
             if (Main.myPlayer == owner.whoAmI) {
                 IEntitySource source = owner.GetSource_FromThis();
 
-                //裂缝主弹幕：从起点劈向终点，ai0/ai1 = 目标坐标
+                //起点解构弹幕：玩家化作像素数据块离心飞散
+                Projectile.NewProjectile(source, origin, Vector2.Zero,
+                    ModContent.ProjectileType<CyberPixelDecomposeProj>(), 0, 0, owner.whoAmI);
+
+                //数据走廊主弹幕：从起点到终点的传输管道，ai0/ai1 = 目标坐标
                 Projectile.NewProjectile(source, origin, Vector2.Zero,
                     ModContent.ProjectileType<CyberRiftSlashProj>(), 0, 0, owner.whoAmI,
                     ai0: target.X, ai1: target.Y);
 
-                //重现弹幕：在目标点黑墙数据块聚拢
+                //终点重组弹幕：像素数据块向心聚合并实体化
                 Projectile.NewProjectile(source, target, Vector2.Zero,
                     ModContent.ProjectileType<CyberReformProj>(), 0, 0, owner.whoAmI);
             }

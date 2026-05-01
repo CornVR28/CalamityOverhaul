@@ -528,7 +528,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         }
 
         /// <summary>
-        /// 通知领域中心暂时停留在指定世界坐标，并在接下来的 <see cref="DomainEaseTotal"/> 帧内缓动追上玩家
+        /// 通知领域中心暂时停留在指定世界坐标
         /// <br/>用于赛博瞬移：玩家瞬间到达终点，但领域慢一拍跟进，强化"撕开维度向前冲"的速度感
         /// </summary>
         public static void NotifyTeleport(Vector2 anchorCenter) {
@@ -557,8 +557,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
                 //ease-in：起步慢、临近终点提速，最后强制贴齐
                 float remain = (float)domainEaseTimer / DomainEaseTotal;
                 float prog = 1f - remain;
-                float lerpRate = MathHelper.Lerp(0.06f, 0.45f, MathF.Pow(prog, 0.65f));
-                DomainCenter = Vector2.Lerp(DomainCenter, target, lerpRate);
+                float lerpRate = MathHelper.Lerp(0.06f, 0.25f, MathF.Pow(prog, 0.65f));
+                DomainCenter = Vector2.Lerp(DomainCenter, target, 0.1f);
                 domainEaseTimer--;
                 if (domainEaseTimer == 0) {
                     DomainCenter = target;

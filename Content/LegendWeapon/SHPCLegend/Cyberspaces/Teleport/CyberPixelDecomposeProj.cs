@@ -7,24 +7,21 @@ using Terraria.ModLoader;
 namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Teleport
 {
     /// <summary>
-    /// 赛博瞬移终点演出弹幕（体素重组版）
-    /// <br/>整张演出由 CyberReform.fx 渲染：32x32 像素网格中每个数据块从外围"飞回"目标位置，
-    /// 临归位时还要再"咬"一记白热闪——这与 <see cref="CyberPixelDecomposeProj"/> 的离心解构形成镜像
-    /// <br/>渲染方式与 <see cref="CyberDetonationProj"/> 一致：单四边形 + Immediate 模式应用 shader
+    /// 赛博瞬移起点解构演出弹幕
+    /// <br/>玩家在起点被解构成像素数据块 → 沿 <see cref="CyberRiftSlashProj"/> 走廊离去
+    /// <br/>共用 CyberReform.fx，但 direction = -1：格子从轮廓位置向外飞散
+    /// <br/>与 <see cref="CyberReformProj"/> 形成"解构 → 传输 → 重组"三段式视觉闭环
     /// </summary>
-    internal class CyberReformProj : ModProjectile
+    internal class CyberPixelDecomposeProj : ModProjectile
     {
         public override string Texture => CWRConstant.Placeholder;
 
-        //生命：与 CyberTeleport.HideDuration(22) 对齐，留出 snap+消散尾
-        private const int Lifetime = 32;
-        //SNAP 闪光中心帧：玩家在中心实体化（≈22/32=0.69）
-        private const float SnapPeakT = 0.65f;
-        //演出整体可视半径（像素）
-        private const float DisplayRadius = 240f;
-
-        //向心方向 +1 = reform
-        private const float Direction = 1f;
+        //寿命：略短于走廊延伸时间，让"解构"先于走廊到达终点完成
+        private const int Lifetime = 22;
+        //演出整体可视半径
+        private const float DisplayRadius = 220f;
+        //离心方向 -1 = decompose
+        private const float Direction = -1f;
 
         private float seed;
 
@@ -57,29 +54,24 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Teleport
 
             float t = 1f - (float)Projectile.timeLeft / Lifetime;
 
-            //演出参数计算
-            //reformProgress：0~SnapPeakT 内格子从外飞向目标
-            float reformProgress = MathHelper.Clamp(t / SnapPeakT, 0f, 1f);
-            //snap 脉冲：以 SnapPeakT 为顶峰，宽 0.18 的钟形
-            float snapWindow = 0.18f;
-            float snapDelta = MathF.Abs(t - SnapPeakT);
-            float snap = MathF.Max(0f, 1f - snapDelta / snapWindow);
-            snap = MathF.Pow(snap, 1.5f);
-            //SNAP 后的消散
-            float dissipate = t > SnapPeakT
-                ? MathHelper.Clamp((t - SnapPeakT) / (1f - SnapPeakT), 0f, 1f)
-                : 0f;
+            //decompose: progress 0 = 完整轮廓刚开始撕裂；progress 1 = 完全飞散
+            float progress = MathHelper.Clamp(t, 0f, 1f);
+            //snap 在 0~0.15 内闪一记"撕开"白光
+            float snap = MathF.Max(0f, 1f - t / 0.15f);
+            snap = MathF.Pow(snap, 1.4f) * 0.85f;
+            //decompose 走 direction=-1，shader 内自带"早期最亮 → 飞远变暗"
+            float dissipate = 0f;
 
-            //淡入淡出
+            //淡入：极快 / 淡出：尾段抖一下
             float fadeAlpha;
-            if (t < 0.10f) fadeAlpha = MathHelper.SmoothStep(0f, 1f, t / 0.10f);
-            else if (t > 0.85f) fadeAlpha = MathHelper.SmoothStep(1f, 0f, (t - 0.85f) / 0.15f);
+            if (t < 0.05f) fadeAlpha = t / 0.05f;
+            else if (t > 0.75f) fadeAlpha = MathHelper.SmoothStep(1f, 0f, (t - 0.75f) / 0.25f);
             else fadeAlpha = 1f;
 
             shader.Parameters["uTime"]?.SetValue(
                 Cyberspace.Active ? Cyberspace.EffectTime : (float)Main.timeForVisualEffects * 0.04f);
             shader.Parameters["fadeAlpha"]?.SetValue(MathHelper.Clamp(fadeAlpha, 0f, 1f));
-            shader.Parameters["reformProgress"]?.SetValue(reformProgress);
+            shader.Parameters["reformProgress"]?.SetValue(progress);
             shader.Parameters["snapPulse"]?.SetValue(MathHelper.Clamp(snap, 0f, 1f));
             shader.Parameters["dissipate"]?.SetValue(dissipate);
             shader.Parameters["seed"]?.SetValue(seed);
