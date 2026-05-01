@@ -39,11 +39,6 @@ namespace CalamityOverhaul.Content.Cyberwares
         public virtual int CapacityCost => 1;
 
         /// <summary>
-        /// 义体的自定义描述文本（通过本地化key查找，在任意实例上均可工作）
-        /// </summary>
-        public string CyberwareDescription => this.GetLocalization("CyberDescription").Value;
-
-        /// <summary>
         /// 义体装备时触发的效果（子类可覆写）
         /// </summary>
         public virtual void OnEquip(Player player) { }
@@ -57,10 +52,6 @@ namespace CalamityOverhaul.Content.Cyberwares
         /// 义体装备期间每帧更新（子类可覆写）
         /// </summary>
         public virtual void UpdateEquipped(Player player) { }
-
-        public override void SetStaticDefaults() {
-            this.GetLocalization("CyberDescription", () => "");
-        }
 
         public override void SetDefaults() {
             Item.maxStack = 1;

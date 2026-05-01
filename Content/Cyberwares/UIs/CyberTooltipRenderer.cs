@@ -35,7 +35,7 @@ namespace CalamityOverhaul.Content.Cyberwares.UIs
             string name = item.Name ?? "???";
             string slotName = CyberwareUI.Instance?.GetSlotLabel((int)cyber.SlotCategory) ?? cyber.SlotCategory.ToString();
             string capText = $"CAPACITY COST: {cyber.CapacityCost}";
-            string desc = cyber.CyberwareDescription;
+            string desc = cyber.Tooltip.Value;
 
             // 测量尺寸
             float textScale = 0.68f;

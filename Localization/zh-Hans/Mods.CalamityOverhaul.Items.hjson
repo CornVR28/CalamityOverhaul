@@ -1607,8 +1607,7 @@ MechanizedWood: {
 
 SandevistansItem: {
 	DisplayName: 斯安维斯坦Mk5
-	Tooltip: ""
-	CyberDescription: 减缓感知时间流速70%，持续5秒。冷却15秒。
+	Tooltip: 减缓感知时间流速70%，持续5秒。冷却15秒。
 }
 
 RamCapacityUpgradeChip: {
