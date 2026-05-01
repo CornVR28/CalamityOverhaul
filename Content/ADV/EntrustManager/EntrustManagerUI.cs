@@ -156,7 +156,7 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
         /// <summary>上一帧鼠标中键是否按下，用于检测中键点击</summary>
         private bool prevMiddleDown;
 
-        private readonly string[] categoryKeys = ["All", "Active", "Completed", "Suspended"];
+        private readonly string[] categoryKeys = ["Active", "All", "Completed", "Suspended"];
         private string[] categoryNames;
 
         private static readonly RasterizerState ScissorRaster = new() { ScissorTestEnable = true };
@@ -315,8 +315,8 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
             currentStyle?.Reset();
 
             categoryNames = [
-                CategoryAll.Value,
                 CategoryActive.Value,
+                CategoryAll.Value,
                 CategoryCompleted.Value,
                 CategorySuspended.Value
             ];
@@ -678,7 +678,7 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
 
             IEnumerable<EntrustEntryData> source = allEntries;
             switch (selectedCategoryIndex) {
-                case 1: //Active
+                case 0: //Active
                     source = allEntries.Where(e =>
                         e.Status == QuestEntryStatus.Active || e.Status == QuestEntryStatus.Tracked);
                     break;
