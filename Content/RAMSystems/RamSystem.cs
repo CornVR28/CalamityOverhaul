@@ -39,6 +39,22 @@ namespace CalamityOverhaul.Content.RAMSystems
         /// </summary>
         public const int SoftMaxBaseMaxRam = 64;
         /// <summary>
+        /// RAM 上限芯片最多可使用次数
+        /// </summary>
+        public const int MaxCapacityUpgradeChips = 24;
+        /// <summary>
+        /// RAM 恢复速度芯片最多可使用次数
+        /// </summary>
+        public const int MaxRecoveryUpgradeChips = 30;
+        /// <summary>
+        /// 单个 RAM 上限芯片提供的基础上限
+        /// </summary>
+        public const int CapacityUpgradeChipBonus = 1;
+        /// <summary>
+        /// 单个 RAM 恢复速度芯片提供的基础每秒恢复量
+        /// </summary>
+        public const float RecoveryUpgradeChipBonus = 0.05f;
+        /// <summary>
         /// 消耗 RAM 后到开始恢复的延迟（秒）
         /// </summary>
         public const float RecoveryDelay = 1.5f;
@@ -48,10 +64,30 @@ namespace CalamityOverhaul.Content.RAMSystems
         //存档键
         private const string SaveKey_BaseMax = "CWRRam_BaseMax";
         private const string SaveKey_BaseRecover = "CWRRam_BaseRecover";
+        private const string SaveKey_CapacityChips = "CWRRam_CapacityChips";
+        private const string SaveKey_RecoveryChips = "CWRRam_RecoveryChips";
 
         #endregion
 
         #region 永久基础值（可持久化）
+
+        private static int _usedCapacityUpgradeChips;
+        /// <summary>
+        /// 已使用的 RAM 上限芯片数量，作为持久化进度的源数据
+        /// </summary>
+        public static int UsedCapacityUpgradeChips {
+            get => _usedCapacityUpgradeChips;
+            private set => _usedCapacityUpgradeChips = Math.Clamp(value, 0, MaxCapacityUpgradeChips);
+        }
+
+        private static int _usedRecoveryUpgradeChips;
+        /// <summary>
+        /// 已使用的 RAM 恢复速度芯片数量，作为持久化进度的源数据
+        /// </summary>
+        public static int UsedRecoveryUpgradeChips {
+            get => _usedRecoveryUpgradeChips;
+            private set => _usedRecoveryUpgradeChips = Math.Clamp(value, 0, MaxRecoveryUpgradeChips);
+        }
 
         private static int _baseMaxRam = DefaultBaseMaxRam;
         /// <summary>
@@ -146,6 +182,43 @@ namespace CalamityOverhaul.Content.RAMSystems
         /// 永久增加每秒基础恢复量（差值会写入持久化基础值）
         /// </summary>
         public static void IncreaseBaseRecoveryRateBy(float delta) => BaseRecoveryRate = BaseRecoveryRate + delta;
+        /// <summary>
+        /// 当前是否还能使用 RAM 上限芯片
+        /// </summary>
+        public static bool CanUseCapacityUpgradeChip => UsedCapacityUpgradeChips < MaxCapacityUpgradeChips;
+        /// <summary>
+        /// 当前是否还能使用 RAM 恢复速度芯片
+        /// </summary>
+        public static bool CanUseRecoveryUpgradeChip => UsedRecoveryUpgradeChips < MaxRecoveryUpgradeChips;
+
+        /// <summary>
+        /// 使用一枚 RAM 上限芯片，并同步永久基础值
+        /// </summary>
+        public static bool TryUseCapacityUpgradeChip() {
+            if (!CanUseCapacityUpgradeChip) {
+                return false;
+            }
+
+            UsedCapacityUpgradeChips++;
+            BaseMaxRam = DefaultBaseMaxRam + UsedCapacityUpgradeChips * CapacityUpgradeChipBonus;
+            RecomputeEffective();
+            Restore(CapacityUpgradeChipBonus);
+            return true;
+        }
+
+        /// <summary>
+        /// 使用一枚 RAM 恢复速度芯片，并同步永久基础值
+        /// </summary>
+        public static bool TryUseRecoveryUpgradeChip() {
+            if (!CanUseRecoveryUpgradeChip) {
+                return false;
+            }
+
+            UsedRecoveryUpgradeChips++;
+            BaseRecoveryRate = DefaultBaseRecoveryRate + UsedRecoveryUpgradeChips * RecoveryUpgradeChipBonus;
+            RecomputeEffective();
+            return true;
+        }
 
         #endregion
 
@@ -269,13 +342,13 @@ namespace CalamityOverhaul.Content.RAMSystems
 
         /// <summary>
         /// 每帧推进：聚合修饰器、推进恢复
-        /// <br/>骇客时间或赛博空间领域激活期间冻结自动恢复
+        /// <br/>骇客时间激活期间冻结自动恢复
         /// </summary>
         public static void Update() {
             RecomputeEffective();
 
-            //骇客时间或赛博空间激活期间不恢复（资源消耗与恢复不应同时进行）
-            if (HackTime.Active || Cyberspace.Active) {
+            //骇客时间激活期间不恢复
+            if (HackTime.Active) {
                 return;
             }
 
@@ -312,6 +385,8 @@ namespace CalamityOverhaul.Content.RAMSystems
         public static void UnloadReset() {
             _providers.Clear();
             OnDepleted = null;
+            UsedCapacityUpgradeChips = 0;
+            UsedRecoveryUpgradeChips = 0;
             BaseMaxRam = DefaultBaseMaxRam;
             BaseRecoveryRate = DefaultBaseRecoveryRate;
             MaxRam = DefaultBaseMaxRam;
@@ -329,6 +404,8 @@ namespace CalamityOverhaul.Content.RAMSystems
         /// <br/>由 <c>CWRPlayer.SaveData</c> 在保存玩家时调用
         /// </summary>
         public static void WriteSave(TagCompound tag) {
+            tag[SaveKey_CapacityChips] = UsedCapacityUpgradeChips;
+            tag[SaveKey_RecoveryChips] = UsedRecoveryUpgradeChips;
             tag[SaveKey_BaseMax] = BaseMaxRam;
             tag[SaveKey_BaseRecover] = BaseRecoveryRate;
         }
@@ -337,14 +414,40 @@ namespace CalamityOverhaul.Content.RAMSystems
         /// 读取存档：未命中字段时回落到默认值，确保新角色与旧角色数据兼容
         /// </summary>
         public static void ReadSave(TagCompound tag) {
-            BaseMaxRam = tag != null && tag.TryGet(SaveKey_BaseMax, out int max)
-                ? Math.Clamp(max, MinBaseMaxRam, SoftMaxBaseMaxRam)
-                : DefaultBaseMaxRam;
-            BaseRecoveryRate = tag != null && tag.TryGet(SaveKey_BaseRecover, out float rec)
-                ? Math.Max(rec, 0f)
-                : DefaultBaseRecoveryRate;
+            if (tag == null) {
+                UsedCapacityUpgradeChips = 0;
+                UsedRecoveryUpgradeChips = 0;
+            }
+            else {
+                UsedCapacityUpgradeChips = tag.TryGet(SaveKey_CapacityChips, out int capacityChips)
+                    ? capacityChips
+                    : GetLegacyCapacityChipCount(tag);
+                UsedRecoveryUpgradeChips = tag.TryGet(SaveKey_RecoveryChips, out int recoveryChips)
+                    ? recoveryChips
+                    : GetLegacyRecoveryChipCount(tag);
+            }
+
+            BaseMaxRam = DefaultBaseMaxRam + UsedCapacityUpgradeChips * CapacityUpgradeChipBonus;
+            BaseRecoveryRate = DefaultBaseRecoveryRate + UsedRecoveryUpgradeChips * RecoveryUpgradeChipBonus;
             RecomputeEffective();
             Refill();
+        }
+
+        private static int GetLegacyCapacityChipCount(TagCompound tag) {
+            if (!tag.TryGet(SaveKey_BaseMax, out int max)) {
+                return 0;
+            }
+
+            return Math.Clamp(max - DefaultBaseMaxRam, 0, MaxCapacityUpgradeChips);
+        }
+
+        private static int GetLegacyRecoveryChipCount(TagCompound tag) {
+            if (!tag.TryGet(SaveKey_BaseRecover, out float rec)) {
+                return 0;
+            }
+
+            int count = (int)MathF.Round((rec - DefaultBaseRecoveryRate) / RecoveryUpgradeChipBonus);
+            return Math.Clamp(count, 0, MaxRecoveryUpgradeChips);
         }
 
         #endregion

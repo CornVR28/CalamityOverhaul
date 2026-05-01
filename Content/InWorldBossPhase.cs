@@ -258,119 +258,50 @@ namespace CalamityOverhaul.Content
 
         public static int SHPC_Level() {
             int level = 0;
-
-            if (DownedV0.Invoke()) {
-                level = 1;
-            }
-            else {
-                return level;
-            }
-
-            if (DownedV1.Invoke()) {
-                level = 2;
-            }
-            else {
-                return level;
-            }
-
-            if (DownedV2.Invoke()) {
-                level = 3;
-            }
-            else {
-                return level;
-            }
-
-            if (Downed5.Invoke()) {
-                level = 4;
-            }
-            else {
-                return level;
-            }
-
-            if (Main.hardMode) {
-                level = 5;
-            }
-            else {
-                return level;
-            }
-
-            if (DownedV5.Invoke() || Downed7.Invoke() || Downed8.Invoke()) {
-                level = 6;
-            }
-            else {
-                return level;
-            }
-
-            if (DownedAnyMechBoss) {
-                level = 7;
-            }
-            else {
-                return level;
-            }
-
-            if (VDownedV7.Invoke() || Downed10.Invoke()) {
-                level = 8;
-            }
-            else {
-                return level;
-            }
-
-            if (DownedV7.Invoke()) {
-                level = 9;
-            }
-            else {
-                return level;
-            }
-
-            if (DownedV8.Invoke()) {
-                level = 10;
-            }
-            else {
-                return level;
-            }
-
-            if (VDownedV16.Invoke()) {
-                level = 11;
-            }
-            else {
-                return level;
-            }
-
-            if (Downed23.Invoke() || Downed19.Invoke()) {
-                level = 12;
-            }
-            else {
-                return level;
-            }
-
-            if (Downed27.Invoke()) {
-                level = 13;
-            }
-            else {
-                return level;
-            }
-
-            if (Downed28.Invoke()) {
-                level = 14;
-            }
-            else {
-                return level;
-            }
-
-            if (Downed29.Invoke() && Downed30.Invoke()) {
-                level = 15;
-            }
-            else {
-                return level;
-            }
-
-            if (Downed32.Invoke()) {
-                level = 16;
-            }
-            else {
-                return level;
-            }
-
+            //试炼0: 史莱姆王
+            if (DownedV0.Invoke()) level = 1; else return level;
+            //试炼1: 克苏鲁之眼
+            if (DownedV1.Invoke()) level = 2; else return level;
+            //试炼2: 邪恶Boss（世吞/克脑）
+            if (DownedV2.Invoke()) level = 3; else return level;
+            //试炼3: 史莱姆之神
+            if (Downed5.Invoke()) level = 4; else return level;
+            //试炼4: 血肉墙
+            if (Main.hardMode) level = 5; else return level;
+            //试炼5: 渊海灾虫
+            if (Downed8.Invoke()) level = 6; else return level;
+            //试炼6: 硫磺火元素
+            if (Downed7.Invoke()) level = 7; else return level;
+            //试炼7: 毁灭者
+            if (NPC.downedMechBoss1) level = 8; else return level;
+            //试炼8: 双子魔眼
+            if (NPC.downedMechBoss2) level = 9; else return level;
+            //试炼9: 机械骷髅王
+            if (NPC.downedMechBoss3) level = 10; else return level;
+            //试炼10: 灾厄之影
+            if (Downed10.Invoke()) level = 11; else return level;
+            //试炼11: 世纪之花
+            if (VDownedV7.Invoke()) level = 12; else return level;
+            //试炼12: 石巨人
+            if (DownedV7.Invoke()) level = 13; else return level;
+            //试炼13: 邪教徒
+            if (DownedV8.Invoke()) level = 14; else return level;
+            //试炼14: 月球领主
+            if (VDownedV16.Invoke()) level = 15; else return level;
+            //试炼15: 亵渎天神
+            if (Downed19.Invoke()) level = 16; else return level;
+            //试炼16: 噬魂幽花
+            if (Downed23.Invoke()) level = 17; else return level;
+            //试炼17: 神明吞噬者
+            if (Downed27.Invoke()) level = 18; else return level;
+            //试炼18: 丛林龙犽戎
+            if (Downed28.Invoke()) level = 19; else return level;
+            //试炼19: 星流巨械
+            if (Downed29.Invoke()) level = 20; else return level;
+            //试炼20: 至尊灾厄
+            if (Downed30.Invoke()) level = 21; else return level;
+            //试炼21: 终焉之战
+            if (Downed32.Invoke()) level = 22; else return level;
             return level;
         }
 

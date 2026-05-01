@@ -435,12 +435,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
 
             //领域快捷键：在手持SHPC且HUD可见时热键切换领域开关
             if (CWRKeySystem.Legend_Domain != null && CWRKeySystem.Legend_Domain.JustPressed) {
-                if (Cyberspace.Active) {
-                    Cyberspace.Deactivate();
-                }
-                else {
-                    Cyberspace.Activate(player);
-                }
+                Cyberspace.Toggle(player);
             }
 
             //鼠标交互占用

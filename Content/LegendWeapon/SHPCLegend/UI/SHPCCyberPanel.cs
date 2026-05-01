@@ -841,12 +841,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
         public static void HandleClick(HitKind hit, Player owner) {
             switch (hit) {
                 case HitKind.Toggle:
-                    if (Cyberspace.Active) {
-                        Cyberspace.Deactivate();
-                    }
-                    else {
-                        Cyberspace.Activate(owner);
-                    }
+                    Cyberspace.Toggle(owner);
                     break;
                 case HitKind.Layer1:
                 case HitKind.Layer2:

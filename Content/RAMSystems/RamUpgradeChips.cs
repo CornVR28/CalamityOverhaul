@@ -39,23 +39,16 @@ namespace CalamityOverhaul.Content.RAMSystems
 
     internal class RamCapacityUpgradeChip : BaseRamUpgradeChip
     {
-        private const int MaxRamBonus = 1;
+        protected override bool CanApplyUpgrade => RamSystem.CanUseCapacityUpgradeChip;
 
-        protected override bool CanApplyUpgrade => RamSystem.BaseMaxRam < RamSystem.SoftMaxBaseMaxRam;
-
-        protected override void ApplyUpgrade(Player player) {
-            RamSystem.IncreaseBaseMaxRamBy(MaxRamBonus);
-            RamSystem.Restore(MaxRamBonus);
-        }
+        protected override void ApplyUpgrade(Player player) => RamSystem.TryUseCapacityUpgradeChip();
     }
 
     internal class RamRecoveryUpgradeChip : BaseRamUpgradeChip
     {
-        private const float RecoveryBonus = 0.05f;
+        protected override bool CanApplyUpgrade => RamSystem.CanUseRecoveryUpgradeChip;
 
-        protected override bool CanApplyUpgrade => true;
-
-        protected override void ApplyUpgrade(Player player) => RamSystem.IncreaseBaseRecoveryRateBy(RecoveryBonus);
+        protected override void ApplyUpgrade(Player player) => RamSystem.TryUseRecoveryUpgradeChip();
     }
 
     internal class RamUpgradeChipLootSystem : ModSystem

@@ -219,6 +219,29 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         //上次关闭前的层数，用于下次激活时恢复
         private static int lastLayer = 1;
 
+        // UIHandle 更新和热键/鼠标输入可能在同一游戏帧内重复触发，手动开关需要防重入。
+        private static long lastManualToggleFrame = -1;
+
+        /// <summary>
+        /// 手动切换赛博空间领域开关。
+        /// <br/>同一游戏帧内只接受一次，避免热键与面板点击或重复 UI 更新互相抵消。
+        /// </summary>
+        public static bool Toggle(Player owner) {
+            long frame = (long)Main.GameUpdateCount;
+            if (lastManualToggleFrame == frame) {
+                return false;
+            }
+            lastManualToggleFrame = frame;
+
+            if (Active) {
+                Deactivate();
+            }
+            else {
+                Activate(owner);
+            }
+            return true;
+        }
+
         /// <summary>
         /// 激活赛博空间领域第一层（带爆发式展开+视觉特效）
         /// <br/>支持在前一次收缩动画尚未完成时立即重新展开，避免吞操作
@@ -454,6 +477,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             MotionFade = 0f;
             CurrentLayer = 0;
             lastLayer = 1;
+            lastManualToggleFrame = -1;
             targetIntensity = 0f;
             ambientBoltTimer = 0;
             crashLockoutTimer = 0;

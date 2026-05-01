@@ -353,17 +353,23 @@ SHPCTrialQuestLine: {
 	// Trial_2: Biochemical Sample
 	// Trial_3: Impurity Purification
 	// Trial_4: Seal Breach
-	// Trial_5: Night of Machines
-	// Trial_6: Iron Scrap Clearance
-	// Trial_7: Ecological Survey
-	// Trial_8: Ancient Technology
-	// Trial_9: Information Blockade
-	// Trial_10: Dark Side of the Moon
-	// Trial_11: Core Expedition
-	// Trial_12: Divine Domain Invasion
-	// Trial_13: Obtain Dragon Feathers
-	// Trial_14: Visit the Creator
-	// Trial_15: The Final Battle
+	// Trial_5: Deep-Sea Contamination
+	// Trial_6: Brimstone Sampling
+	// Trial_7: Mechanical Worm
+	// Trial_8: Twin-Eye Dismantling
+	// Trial_9: Steel Skull
+	// Trial_10: Shadow Analysis
+	// Trial_11: Ecological Survey
+	// Trial_12: Ancient Technology
+	// Trial_13: Information Blockade
+	// Trial_14: Dark Side of the Moon
+	// Trial_15: Core Expedition
+	// Trial_16: Phantom Observation
+	// Trial_17: Divine Domain Invasion
+	// Trial_18: Obtain Dragon Feathers
+	// Trial_19: Visit the Creator
+	// Trial_20: Witch Audit
+	// Trial_21: The Final Battle
 	/* TrialSummary_0:
 		'''
 		Friend, the task of restoring civilization has finally fallen into our hands.
@@ -397,65 +403,90 @@ SHPCTrialQuestLine: {
 		''' */
 	/* TrialSummary_5:
 		'''
-		Powerful mechanical invaders descend in the night—relics of a long-forgotten civilization.
-		The Destroyer, the Twins, Skeletron Prime—we must prove our worth against these iron giants.
-		Calamity's own spawn also stir; Cryogen and the Aquatic Scourge stand between us and the next chapter.
+		The giant worm of the Sulphurous Sea has surfaced.
+		Remove its feeding organs; I need to understand how this contamination source works.
 		''' */
 	/* TrialSummary_6:
 		'''
-		Good progress—some of these iron machines are already scrap.
-		Keep going, eliminate all remaining mechanical bosses.
+		The brimstone herald deep in the lava is spreading a high-heat reaction.
+		Extinguish its core flame, and record its energy conversion efficiency while you are there.
 		''' */
 	/* TrialSummary_7:
 		'''
-		Deep in the Jungle, several flamboyant buds have bloomed.
-		We need to investigate and collect experimental data.
-		That witch's clone is also wandering about.
-		Though just a clumsy imitation of necromancy,
-		it is more than enough to test our weapon performance.
-		Go destroy that counterfeit.
+		The first mechanical target is a giant steel worm.
+		Cut it into recyclable scrap, and try to preserve the drive structure.
 		''' */
 	/* TrialSummary_8:
+		'''
+		The second mechanical target is that pair of mirrored airborne eyes.
+		Dismantle their weapon modules one by one, and do not let the lasers ruin the samples.
+		''' */
+	/* TrialSummary_9:
+		'''
+		The final mechanical target wears the old king's skull.
+		Shatter that metal head, and we can shut down this mechanical invasion protocol.
+		''' */
+	/* TrialSummary_10:
+		'''
+		That witch's clone is wandering about.
+		Though just a clumsy imitation of necromancy,
+		it is more than enough to calibrate SHPC's calamity response model.
+		Go destroy that counterfeit.
+		''' */
+	/* TrialSummary_11:
+		'''
+		Deep in the Jungle, several flamboyant buds have bloomed.
+		We need to investigate and collect experimental data.
+		''' */
+	/* TrialSummary_12:
 		'''
 		The ancient robot deep in the Temple awaits a recharge activation.
 		Let us pay a visit and reverse-engineer that ancient technology while we're at it.
 		''' */
-	/* TrialSummary_9:
+	/* TrialSummary_13:
 		'''
 		Those fanatics at the Dungeon entrance are holding some ancient ritual,
 		attempting to block information from beyond the sky.
 		Interrupt them. Their superstitious spells cannot stop our technology.
 		I need those hidden star coordinates.
 		''' */
-	/* TrialSummary_10:
+	/* TrialSummary_14:
 		'''
 		The secrets of the dark side of the moon shall be known to us.
 		The world will return to its original state.
 		''' */
-	/* TrialSummary_11:
+	/* TrialSummary_15:
 		'''
 		The god parasitic in the planet's core has noticed us.
 		Go to the Underworld; I need knowledge on thermal energy utilization.
+		''' */
+	/* TrialSummary_16:
+		'''
 		The spirits of the Dungeon have gathered into a massive symbiote.
 		This is too interesting; we must go see it now.
 		''' */
-	/* TrialSummary_12:
+	/* TrialSummary_17:
 		'''
 		It is confirmed to be non-carbon-based life,
 		capable of tearing the spatial membrane with just its body.
 		It devours gods, but we are not gods; I imagine it might invite us for tea.
 		''' */
-	/* TrialSummary_13:
+	/* TrialSummary_18:
 		'''
 		The world's last Dragonborn. Wow, this is too cool!
 		Take me to see it; I want to obtain its feathers.
 		''' */
-	/* TrialSummary_14:
+	/* TrialSummary_19:
 		'''
 		It is time to visit my creator.
-		Or that witch; her existence troubles me.
+		Bring back the Exo Mechs' control core.
 		''' */
-	/* TrialSummary_15:
+	/* TrialSummary_20:
+		'''
+		That witch's existence troubles me.
+		Terminate her chaos experiment and end this farce.
+		''' */
+	/* TrialSummary_21:
 		'''
 		A grand melee! Enemies we once defeated have united,
 		preparing to launch a total assault on us.
