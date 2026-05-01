@@ -1,4 +1,5 @@
-﻿using InnoVault.RenderHandles;
+﻿using CalamityOverhaul.Common;
+using InnoVault.RenderHandles;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;
@@ -79,6 +80,16 @@ namespace CalamityOverhaul.Content.HackTimes
             if (screenSwap == null || screenSwap.IsDisposed) return;
             if (Main.screenTarget == null || Main.screenTarget.IsDisposed) return;
 
+            //低级光照/低水波等情况会改变原版屏幕 RT 链路；
+            //水波质量从关/低切到中/高的过渡帧里，EndCaptureDraw 时机的活动 RT 也可能不是 screenTarget。
+            //这种情况下若强行 SetRenderTarget(Main.screenTarget); Clear 会把本该写入 backbuffer 的画面顶替为透明，
+            //表现就是整个 UI 和画面"消失"。直接放弃本帧着色器路径，让原始屏幕原样输出
+            if (RenderQualitySafety.NeedsScreenTargetFallback()) return;
+            if (!RenderQualitySafety.IsScreenTargetActive(graphicsDevice)) return;
+
+            //保存进入时的 RT 绑定，结束后再还原回去，避免改变上层管线对活动 RT 的预期
+            RenderTargetBinding[] previousTargets = graphicsDevice.GetRenderTargets();
+
             //将当前屏幕复制到交换缓冲
             graphicsDevice.SetRenderTarget(screenSwap);
             graphicsDevice.Clear(Color.Transparent);
@@ -100,6 +111,12 @@ namespace CalamityOverhaul.Content.HackTimes
             shader.CurrentTechnique.Passes[0].Apply();
             spriteBatch.Draw(screenSwap, Vector2.Zero, Color.White);
             spriteBatch.End();
+
+            //还原进入时的 RT 绑定，避免对后续渲染阶段产生副作用
+            if (previousTargets != null && previousTargets.Length > 0
+                && previousTargets[0].RenderTarget != Main.screenTarget) {
+                graphicsDevice.SetRenderTargets(previousTargets);
+            }
         }
 
         /// <summary>

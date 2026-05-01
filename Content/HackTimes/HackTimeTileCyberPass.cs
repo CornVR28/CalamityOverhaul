@@ -100,6 +100,15 @@ namespace CalamityOverhaul.Content.HackTimes
                 return;
             }
 
+            //水波质量从关/低切到中/高的过渡帧，EndEntityDraw 时机的活动 RT 也可能不是 screenTarget。
+            //这种情况下若强行执行下面的"切 RT - 重画"流程，最后那次 SetRenderTarget(Main.screenTarget); Clear
+            //会把本该写到 backbuffer 的画面与 UI 顶替为透明，表现就是整个画面"消失"。
+            //检测到这种情况立即走不触碰屏幕 RT 的回退路径
+            if (!RenderQualitySafety.IsScreenTargetActive(gd)) {
+                DrawDirectCompositeFallback(sb, worldBounds, effectStr, isSelected);
+                return;
+            }
+
             //InnoVault 维护的全屏 swap RT，作为屏幕画面的备份载体
             RenderTarget2D screenSwap = RenderHandleLoader.ScreenSwap;
             if (screenSwap == null || screenSwap.IsDisposed) {
@@ -109,6 +118,9 @@ namespace CalamityOverhaul.Content.HackTimes
 
             EnsureRT(gd, rtW, rtH);
             if (_rt == null || _rt.IsDisposed) return;
+
+            //保存进入时的 RT 绑定，无论是正常返回还是异常都要还原
+            RenderTargetBinding[] previousTargets = gd.GetRenderTargets();
 
             try {
                 //阶段1：把当前 screenTarget 内容备份到 screenSwap
@@ -151,6 +163,12 @@ namespace CalamityOverhaul.Content.HackTimes
                 shader.CurrentTechnique.Passes[0].Apply();
                 sb.Draw(_rt, screenPos, Color.White);
                 sb.End();
+
+                //还原进入时的 RT 绑定，避免对后续渲染阶段产生副作用
+                if (previousTargets != null && previousTargets.Length > 0
+                    && previousTargets[0].RenderTarget != Main.screenTarget) {
+                    gd.SetRenderTargets(previousTargets);
+                }
             }
             catch {
                 //出错时确保切回主屏 RT，避免后续绘制写到错误目标
