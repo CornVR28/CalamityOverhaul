@@ -865,7 +865,7 @@ namespace CalamityOverhaul.Content.HackTimes
                 string hint = HackTime.RightClickHint.Value;
                 float hintPulse = MathF.Sin(timer * 1.8f) * 0.12f + 0.88f;
                 Utils.DrawBorderString(sb, hint, new Vector2(baseX, bottomY + 22f),
-                    HackTheme.TextDim * (alpha * 0.30f * hintPulse), 0.34f);
+                    HackTheme.TextDim * hintPulse, 0.8f);
             }
         }
 

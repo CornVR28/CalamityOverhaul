@@ -1,4 +1,6 @@
 ﻿using CalamityOverhaul.Common;
+using CalamityOverhaul.Content.HackTimes;
+using CalamityOverhaul.Content.RAMSystems;
 using System;
 using System.Collections.Generic;
 using Terraria;
@@ -19,6 +21,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Banish
         /// 放逐动画总时长（帧，约1.8秒 = 108帧）
         /// </summary>
         public const int BanishDuration = 108;
+
+        /// <summary>
+        /// 单次放逐消耗的RAM量
+        /// </summary>
+        public const int RamCostPerCast = 5;
 
         /// <summary>
         /// 当前正在被放逐的NPC列表
@@ -53,6 +60,19 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Banish
         public static void BanishAtCursor() {
             if (!Cyberspace.Active || Cyberspace.Intensity < 0.5f || Cyberspace.CurrentLayer < 2) return;
 
+            //RAM检查：不足时触发HUD故障闪烁提示
+            if (!HackTime.InfiniteHack && (RamSystem.IsLocked || !RamSystem.CanAfford(RamCostPerCast))) {
+                if (!VaultUtils.isServer) {
+                    SoundEngine.PlaySound(CWRSound.FailureCurrent with {
+                        Volume = 0.4f,
+                        Pitch = -0.3f,
+                    }, Main.LocalPlayer.Center);
+                    RamSystem.NotifyInsufficient();
+                    Terraria.CombatText.NewText(Main.LocalPlayer.Hitbox, new Microsoft.Xna.Framework.Color(255, 90, 80), "// LOW RAM", true);
+                }
+                return;
+            }
+
             Vector2 mouse = Main.MouseWorld;
             Vector2 domainCenter = Cyberspace.DomainCenter;
             float effectiveRadius = Cyberspace.Radius * Cyberspace.ExpandProgress;
@@ -85,6 +105,10 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Banish
             }
 
             if (bestIndex >= 0) {
+                //命中目标后消耗RAM
+                if (!HackTime.InfiniteHack) {
+                    RamSystem.TryConsume(RamCostPerCast);
+                }
                 StartBanish(bestIndex);
                 //同时把蠕虫体节、月总各实体等共享Boss体的群组成员一并拉入放逐
                 //成员若不在领域内也照样进入：放逐是Boss级处决，整体一起被抹消
