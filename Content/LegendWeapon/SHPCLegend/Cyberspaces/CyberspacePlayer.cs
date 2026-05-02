@@ -128,6 +128,14 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         //同帧内防重入开关
         private long lastManualToggleFrame = -1;
 
+        //是否因切换出 SHPC 而自动收起：切回 SHPC 时据此自动展开，避免玩家被迫重新点开
+        private bool autoSuspendedBySwap;
+
+        //极速换武器静默窗口计时（帧）：> 0 时重新激活会跳过 VFX/音效，避免反复切换时的演出鬼畜感
+        private int swapSilenceTimer;
+        //静默窗口长度，约 0.25 秒，覆盖正常鼠标滚轮的操作间隔
+        private const int SwapSilenceFrames = 15;
+
         public float GetLayerExpand(int layerIndex) {
             layerIndex = Math.Clamp(layerIndex, 0, Cyberspace.MaxLayerCount - 1);
             return layerExpand[layerIndex];
@@ -157,6 +165,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             }
             lastManualToggleFrame = frame;
 
+            //手动切换属于明确的玩家意图，必须清掉自动挂起标志，避免下一帧自动重开
+            autoSuspendedBySwap = false;
             if (Active) {
                 Deactivate();
             }
@@ -201,14 +211,18 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             Active = true;
             CurrentLayer = resumeLayer;
             targetIntensity = 1f;
-            for (int i = 0; i < resumeLayer; i++) {
-                layerBurstTimer[i] = Cyberspace.BurstDurations[i];
-            }
-            SpawnActivationVFX();
 
-            if (!VaultUtils.isServer) {
-                SoundEngine.PlaySound(CWRSound.FailureCurrent, Player.Center);
-                SoundEngine.PlaySound(CWRSound.Faultrelease, Player.Center);
+            //静默窗口内重新激活：只做平滑插值展开，跳过爆发动画/闪电/音效，避免快速切换时的演出鬼畜感
+            bool silent = swapSilenceTimer > 0;
+            if (!silent) {
+                for (int i = 0; i < resumeLayer; i++) {
+                    layerBurstTimer[i] = Cyberspace.BurstDurations[i];
+                }
+                SpawnActivationVFX();
+                if (!VaultUtils.isServer) {
+                    SoundEngine.PlaySound(CWRSound.FailureCurrent, Player.Center);
+                    SoundEngine.PlaySound(CWRSound.Faultrelease, Player.Center);
+                }
             }
         }
 
@@ -244,7 +258,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         /// <summary>
         /// 关闭领域，所有层带收缩动画
         /// </summary>
-        public void Deactivate() {
+        /// <param name="silent">为 true 时跳过关闭音效，用于极速换武器的静默收合</param>
+        public void Deactivate(bool silent = false) {
             Active = false;
             targetIntensity = 0f;
             if (CurrentLayer > 0) {
@@ -255,7 +270,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
                 layerBurstTimer[i] = 0;
             }
 
-            if (!VaultUtils.isServer && Player.whoAmI == Main.myPlayer) {
+            if (!silent && !VaultUtils.isServer && Player.whoAmI == Main.myPlayer) {
                 SoundEngine.PlaySound(CWRSound.Faultrelease, Player.Center);
             }
         }
@@ -283,9 +298,23 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         /// 主更新逻辑
         /// </summary>
         public void Update() {
-            //仅手持 SHPC 时才允许维持领域；切换其它武器立即关闭，避免领域脱离 SHPC 上下文存在
-            if (Active && Player.HeldItem.type != CWRID.Item_SHPC) {
-                Deactivate();
+            //SHPC 上下文校验：切出武器自动挂起、切回武器自动恢复，避免给玩家制造"卡手重开"的感觉
+            bool holdingShpc = Player.HeldItem.type == CWRID.Item_SHPC;
+            if (Active && !holdingShpc) {
+                //静默窗口内的关闭不再播放关闭音效，避免快速切换时重复叠声
+                bool silentClose = swapSilenceTimer > 0;
+                autoSuspendedBySwap = true;
+                swapSilenceTimer = SwapSilenceFrames;
+                Deactivate(silentClose);
+            }
+            else if (!Active && holdingShpc && autoSuspendedBySwap && crashLockoutTimer == 0) {
+                //切回 SHPC：尝试恢复到挂起前的层数；若 RAM/锁定不足，Activate 内部会自行兜底
+                autoSuspendedBySwap = false;
+                Activate();
+            }
+
+            if (swapSilenceTimer > 0) {
+                swapSilenceTimer--;
             }
 
             if (crashLockoutTimer > 0) {
@@ -378,6 +407,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             CurrentLayer = 0;
             lastLayer = 1;
             lastManualToggleFrame = -1;
+            autoSuspendedBySwap = false;
+            swapSilenceTimer = 0;
             targetIntensity = 0f;
             ambientBoltTimer = 0;
             crashLockoutTimer = 0;
