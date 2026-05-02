@@ -17,8 +17,12 @@ namespace CalamityOverhaul.Content.HackTimes
 
         //缓存列表避免每帧GC
         private readonly List<ActiveHackEffect> effectsCache = [];
+        //赛博精神病接触伤害冷却计时器
+        private int _cyberDamageCooldown;
 
         public override bool PreAI(NPC npc) {
+            //时停期间不执行任何骇入效果的AI干预
+            if (HackTimeFreeze.IsActive) return true;
             HackEffectTracker.GetEffects(npc.whoAmI, effectsCache);
             if (effectsCache.Count == 0) return true;
 
@@ -33,7 +37,7 @@ namespace CalamityOverhaul.Content.HackTimes
                         break;
                     //赛博精神病：重定向AI攻击最近NPC
                     case Cyberpsychosis:
-                        RedirectAI(npc, eff);
+                        RedirectAI(npc, eff, ref _cyberDamageCooldown);
                         allowAI = false;
                         break;
                     //视觉过载：NPC失去跟踪能力，随机游荡
@@ -81,7 +85,8 @@ namespace CalamityOverhaul.Content.HackTimes
         }
 
         //赛博精神病：重定向NPC攻击最近的其他NPC
-        private static void RedirectAI(NPC npc, ActiveHackEffect eff) {
+        private static void RedirectAI(NPC npc, ActiveHackEffect eff, ref int damageCooldown) {
+            if (damageCooldown > 0) damageCooldown--;
             //寻找最近的其他活跃NPC
             float closestDist = float.MaxValue;
             NPC closestNPC = null;
@@ -109,8 +114,8 @@ namespace CalamityOverhaul.Content.HackTimes
                 npc.direction = closestNPC.Center.X > npc.Center.X ? 1 : -1;
                 npc.spriteDirection = npc.direction;
 
-                //接触伤害
-                if (dist < (npc.width + closestNPC.width) * 0.6f) {
+                //接触伤害，60帧冷却防止帧伤
+                if (dist < (npc.width + closestNPC.width) * 0.6f && damageCooldown <= 0) {
                     int dmg = Math.Max(npc.damage / 2, 10);
                     NPC.HitInfo hitInfo = new() {
                         Damage = dmg,
@@ -118,6 +123,7 @@ namespace CalamityOverhaul.Content.HackTimes
                         HitDirection = npc.direction,
                     };
                     closestNPC.StrikeNPC(hitInfo);
+                    damageCooldown = 60;
                 }
             }
             else {
