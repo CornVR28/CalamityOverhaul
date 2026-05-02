@@ -82,6 +82,7 @@ namespace CalamityOverhaul.Content.Cyberwares.UIs
         private float currentAlpha;
         private float currentContentAlpha;
         private float closeLineGlow;
+        private bool closeButtonHovered;
 
         #endregion
 
@@ -205,6 +206,17 @@ namespace CalamityOverhaul.Content.Cyberwares.UIs
             inventoryPanel.Update(panelRect, slotRenderer.SelectedSlot, cyberPlayer);
             if (inventoryPanel.ActionThisFrame) {
                 panelRenderer.TriggerGlitch(0.5f);
+            }
+
+            //检测关闭按钮交互
+            Rectangle closeBtnRect = CyberPanelRenderer.GetCloseButtonRect(panelRect);
+            closeButtonHovered = closeBtnRect.Contains(Main.mouseX, Main.mouseY);
+            if (closeButtonHovered) {
+                player.mouseInterface = true;
+                if (Main.mouseLeft && Main.mouseLeftRelease) {
+                    Close();
+                    return;
+                }
             }
 
             //拦截面板区域内的游戏输入
@@ -333,6 +345,11 @@ namespace CalamityOverhaul.Content.Cyberwares.UIs
                 DepthStencilState.None, RasterizerState.CullCounterClockwise, null, Main.UIScaleMatrix);
 
             panelRenderer.DrawGlitchEffect(spriteBatch, currentAlpha, panelRect);
+
+            //关闭按钮——在ScissorTest之外绘制避免被裁剪
+            if (currentContentAlpha > 0.01f) {
+                panelRenderer.DrawCloseButton(spriteBatch, currentContentAlpha, panelRect, closeButtonHovered);
+            }
 
             //义体选择背包面板——在ScissorTest之外绘制，因为侧面板在主面板外侧
             if (currentContentAlpha > 0.01f) {

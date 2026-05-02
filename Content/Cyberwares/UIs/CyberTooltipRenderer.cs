@@ -38,9 +38,9 @@ namespace CalamityOverhaul.Content.Cyberwares.UIs
             string desc = cyber.Tooltip.Value;
 
             // 测量尺寸
-            float textScale = 0.68f;
-            float smallScale = 0.52f;
-            float descScale = 0.50f;
+            float textScale = 0.76f;
+            float smallScale = 0.60f;
+            float descScale = 0.56f;
 
             Vector2 nameSize = MeasureString(name, textScale);
             Vector2 slotSize = MeasureString(slotName, smallScale);

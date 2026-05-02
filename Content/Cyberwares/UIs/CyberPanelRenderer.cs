@@ -232,10 +232,10 @@ namespace CalamityOverhaul.Content.Cyberwares.UIs
                 new Vector2(panelCenter.X + notchW, divY), 1f, divBright * 0.5f);
 
             //标题文字
-            Vector2 titleSize = FontAssets.MouseText.Value.MeasureString(title) * 0.65f;
+            Vector2 titleSize = FontAssets.MouseText.Value.MeasureString(title) * 0.72f;
             Vector2 titlePos = new(panelCenter.X - titleSize.X / 2f, panelRect.Y + 7);
             Color titleColor = CyberwareTheme.Accent * (alpha * 0.95f);
-            Utils.DrawBorderString(sb, title, titlePos, titleColor, 0.65f);
+            Utils.DrawBorderString(sb, title, titlePos, titleColor, 0.72f);
 
             //标题两侧对称装饰线+尖括号
             float sideY = titlePos.Y + titleSize.Y * 0.45f;
@@ -261,7 +261,7 @@ namespace CalamityOverhaul.Content.Cyberwares.UIs
 
             //版本号
             Color verColor = CyberwareTheme.TextDim * (alpha * 0.5f);
-            Utils.DrawBorderString(sb, "v2.077", new Vector2(panelRect.Right - 70, panelRect.Y + 10), verColor, 0.36f);
+            Utils.DrawBorderString(sb, "v2.077", new Vector2(panelRect.Right - 100, panelRect.Y + 10), verColor, 0.42f);
 
             //底部状态栏独立背景区
             int footerH = 22;
@@ -282,12 +282,12 @@ namespace CalamityOverhaul.Content.Cyberwares.UIs
             sb.Draw(px, new Vector2(panelRect.X + 10, bottomTextY + 2), new Rectangle(0, 0, 1, 1),
                 statusDot, 0, Vector2.Zero, 4f, SpriteEffects.None, 0);
             Utils.DrawBorderString(sb, statusText, new Vector2(panelRect.X + 22, bottomTextY - 2),
-                CyberwareTheme.TextDim * alpha, 0.34f);
+                CyberwareTheme.TextDim * alpha, 0.42f);
 
             //右下角滚动数据标签
             string dataTag = $"NET::0x{(int)(globalTimer * 100) % 0xFFFF:X4}";
-            Utils.DrawBorderString(sb, dataTag, new Vector2(panelRect.Right - 115, bottomTextY - 2),
-                CyberwareTheme.AccentCyan * (alpha * 0.35f), 0.32f);
+            Utils.DrawBorderString(sb, dataTag, new Vector2(panelRect.Right - 130, bottomTextY - 2),
+                CyberwareTheme.AccentCyan * (alpha * 0.35f), 0.40f);
         }
 
         /// <summary>
@@ -309,6 +309,39 @@ namespace CalamityOverhaul.Content.Cyberwares.UIs
                 sb.Draw(px, new Rectangle(panelRect.X + offsetX, y, panelRect.Width, h),
                     new Rectangle(0, 0, 1, 1), gc);
             }
+        }
+
+        /// <summary>
+        ///返回关闭按钮的屏幕矩形，供交互检测复用
+        /// </summary>
+        public static Rectangle GetCloseButtonRect(Rectangle panelRect) {
+            return new Rectangle(panelRect.Right - 34, panelRect.Y + 4, 24, 20);
+        }
+
+        /// <summary>
+        ///绘制标题栏右侧的关闭按钮（X图标，悬停时红色高亮）
+        /// </summary>
+        public void DrawCloseButton(SpriteBatch sb, float alpha, Rectangle panelRect, bool isHovered) {
+            Texture2D px = CWRAsset.Placeholder_White?.Value;
+            if (px == null) return;
+
+            Rectangle btnRect = GetCloseButtonRect(panelRect);
+            float hov = isHovered ? 1f : 0f;
+
+            Color bgColor = Color.Lerp(CyberwareTheme.BgDark, CyberwareTheme.Accent, hov * 0.28f) * (alpha * 0.92f);
+            sb.Draw(px, btnRect, new Rectangle(0, 0, 1, 1), bgColor);
+
+            Color borderColor = Color.Lerp(CyberwareTheme.Border, CyberwareTheme.Accent, hov * 0.9f) * alpha;
+            sb.Draw(px, new Rectangle(btnRect.X, btnRect.Y, btnRect.Width, 1), new Rectangle(0, 0, 1, 1), borderColor);
+            sb.Draw(px, new Rectangle(btnRect.X, btnRect.Bottom - 1, btnRect.Width, 1), new Rectangle(0, 0, 1, 1), borderColor * 0.7f);
+            sb.Draw(px, new Rectangle(btnRect.X, btnRect.Y, 1, btnRect.Height), new Rectangle(0, 0, 1, 1), borderColor * 0.8f);
+            sb.Draw(px, new Rectangle(btnRect.Right - 1, btnRect.Y, 1, btnRect.Height), new Rectangle(0, 0, 1, 1), borderColor * 0.8f);
+
+            Color xColor = Color.Lerp(CyberwareTheme.TextDim, CyberwareTheme.Accent, hov) * alpha;
+            Vector2 center = btnRect.Center.ToVector2();
+            float s = 4.5f;
+            CyberwareTheme.DrawLine(sb, px, center + new Vector2(-s, -s), center + new Vector2(s, s), 1.6f, xColor);
+            CyberwareTheme.DrawLine(sb, px, center + new Vector2(s, -s), center + new Vector2(-s, s), 1.6f, xColor);
         }
 
         #endregion
