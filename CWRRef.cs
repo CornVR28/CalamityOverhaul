@@ -385,6 +385,45 @@ namespace CalamityOverhaul
         [CWRJITEnabled]
         private static bool GetPlayerAdrenalineModeInner(Player player) => player.Calamity().adrenalineModeActive;
 
+        /// <summary>
+        /// 抓取玩家的怒气与肾上腺素相关字段快照，仅在Calamity安装时生效
+        /// </summary>
+        public static void SnapshotRippers(Player player, ref float rage, ref float adrenaline
+            , ref int rageGainCooldown, ref int rageCombatFrames, ref int adrenalinePauseTimer) {
+            if (!Has) return;
+            SnapshotRippersInner(player, ref rage, ref adrenaline
+                , ref rageGainCooldown, ref rageCombatFrames, ref adrenalinePauseTimer);
+        }
+        [CWRJITEnabled]
+        private static void SnapshotRippersInner(Player player, ref float rage, ref float adrenaline
+            , ref int rageGainCooldown, ref int rageCombatFrames, ref int adrenalinePauseTimer) {
+            CalamityPlayer cp = player.Calamity();
+            rage = cp.rage;
+            adrenaline = cp.adrenaline;
+            rageGainCooldown = cp.rageGainCooldown;
+            rageCombatFrames = cp.rageCombatFrames;
+            adrenalinePauseTimer = cp.adrenalinePauseTimer;
+        }
+
+        /// <summary>
+        /// 将怒气与肾上腺素相关字段还原为快照值，仅在Calamity安装时生效
+        /// </summary>
+        public static void RestoreRippers(Player player, float rage, float adrenaline
+            , int rageGainCooldown, int rageCombatFrames, int adrenalinePauseTimer) {
+            if (!Has) return;
+            RestoreRippersInner(player, rage, adrenaline, rageGainCooldown, rageCombatFrames, adrenalinePauseTimer);
+        }
+        [CWRJITEnabled]
+        private static void RestoreRippersInner(Player player, float rage, float adrenaline
+            , int rageGainCooldown, int rageCombatFrames, int adrenalinePauseTimer) {
+            CalamityPlayer cp = player.Calamity();
+            cp.rage = rage;
+            cp.adrenaline = adrenaline;
+            cp.rageGainCooldown = rageGainCooldown;
+            cp.rageCombatFrames = rageCombatFrames;
+            cp.adrenalinePauseTimer = adrenalinePauseTimer;
+        }
+
         public static void LargeFieryExplosion(Projectile projectile) {
             if (!Has) return;
             LargeFieryExplosionInner(projectile);

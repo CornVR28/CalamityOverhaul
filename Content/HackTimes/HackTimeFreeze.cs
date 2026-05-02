@@ -1,4 +1,7 @@
 ﻿using CalamityOverhaul.Common;
+using InnoVault.GameSystem;
+using System;
+using System.Reflection;
 using Terraria;
 using Terraria.ModLoader;
 
@@ -11,6 +14,11 @@ namespace CalamityOverhaul.Content.HackTimes
     /// </summary>
     internal class HackTimeFreeze : ICWRLoader
     {
+        //Liquid.UpdateLiquid拦截委托
+        private delegate void Hook_UpdateLiquid(Action orig);
+        //Player.UpdateEquips拦截委托
+        private delegate void Hook_UpdateEquips(Action<Player, int> orig, Player self, int i);
+
         void ICWRLoader.UnLoadData() {
             IsActive = false;
             NPCFrozenPositions = null;
@@ -20,6 +28,7 @@ namespace CalamityOverhaul.Content.HackTimes
             ProjFrozenPositions = null;
             ProjFrozenVelocities = null;
             ProjSnapshotCaptured = null;
+            ProjSpawnedDuringFreeze = null;
             ProjSnapshotTypes = null;
             ProjSnapshotOwners = null;
             ProjSnapshotIdentities = null;
@@ -44,6 +53,8 @@ namespace CalamityOverhaul.Content.HackTimes
         internal static Vector2[] ProjFrozenVelocities;
         //弹幕快照是否有效
         internal static bool[] ProjSnapshotCaptured;
+        //标记该弹幕是否在冻结期间新生成，解冻时需清理避免造成爆发伤害
+        internal static bool[] ProjSpawnedDuringFreeze;
         //弹幕快照对应的类型/归属/身份，用于避免复用槽位时套用旧快照
         internal static int[] ProjSnapshotTypes;
         internal static int[] ProjSnapshotOwners;
@@ -57,9 +68,36 @@ namespace CalamityOverhaul.Content.HackTimes
             ProjFrozenPositions = new Vector2[Main.maxProjectiles];
             ProjFrozenVelocities = new Vector2[Main.maxProjectiles];
             ProjSnapshotCaptured = new bool[Main.maxProjectiles];
+            ProjSpawnedDuringFreeze = new bool[Main.maxProjectiles];
             ProjSnapshotTypes = new int[Main.maxProjectiles];
             ProjSnapshotOwners = new int[Main.maxProjectiles];
             ProjSnapshotIdentities = new int[Main.maxProjectiles];
+        }
+
+        void ICWRLoader.SetupData() {
+            //拦截液体更新，使水流在冻结期间不再传播
+            MethodInfo liquidMethod = typeof(Liquid).GetMethod("UpdateLiquid"
+                , BindingFlags.Public | BindingFlags.Static, null, Type.EmptyTypes, null);
+            if (liquidMethod != null) {
+                VaultHook.Add(liquidMethod, (Hook_UpdateLiquid)OnUpdateLiquidHook);
+            }
+
+            //拦截玩家装备更新，阻止饰品在冻结期间继续运行（包括其生成弹幕、扣除冷却等行为）
+            MethodInfo equipMethod = typeof(Player).GetMethod("UpdateEquips"
+                , BindingFlags.Public | BindingFlags.Instance, null, [typeof(int)], null);
+            if (equipMethod != null) {
+                VaultHook.Add(equipMethod, (Hook_UpdateEquips)OnUpdateEquipsHook);
+            }
+        }
+
+        private static void OnUpdateLiquidHook(Action orig) {
+            if (IsActive) return;
+            orig();
+        }
+
+        private static void OnUpdateEquipsHook(Action<Player, int> orig, Player self, int i) {
+            if (IsActive) return;
+            orig(self, i);
         }
 
         /// <summary>
@@ -78,6 +116,7 @@ namespace CalamityOverhaul.Content.HackTimes
         public static void Deactivate() {
             if (!IsActive) return;
             RestoreSnapshots();
+            KillProjectilesSpawnedDuringFreeze();
             ClearSnapshots();
             IsActive = false;
             TimeGear.Unregister("HackTimeFreeze");
@@ -94,7 +133,8 @@ namespace CalamityOverhaul.Content.HackTimes
             for (int i = 0; i < Main.maxProjectiles; i++) {
                 Projectile proj = Main.projectile[i];
                 if (proj.active) {
-                    CaptureProjectile(proj);
+                    //冻结开始前已存在的弹幕不算"冻结期间新生成"
+                    CaptureProjectile(proj, spawnedDuringFreeze: false);
                 }
             }
         }
@@ -112,7 +152,8 @@ namespace CalamityOverhaul.Content.HackTimes
                 || ProjSnapshotTypes[id] != proj.type
                 || ProjSnapshotOwners[id] != proj.owner
                 || ProjSnapshotIdentities[id] != proj.identity) {
-                CaptureProjectile(proj);
+                //首次出现且当前处于冻结状态，说明是冻结期间被生成
+                CaptureProjectile(proj, spawnedDuringFreeze: IsActive);
             }
         }
 
@@ -124,11 +165,12 @@ namespace CalamityOverhaul.Content.HackTimes
             NPCSnapshotTypes[id] = npc.type;
         }
 
-        private static void CaptureProjectile(Projectile proj) {
+        private static void CaptureProjectile(Projectile proj, bool spawnedDuringFreeze) {
             int id = proj.whoAmI;
             ProjFrozenPositions[id] = proj.position;
             ProjFrozenVelocities[id] = proj.velocity;
             ProjSnapshotCaptured[id] = true;
+            ProjSpawnedDuringFreeze[id] = spawnedDuringFreeze;
             ProjSnapshotTypes[id] = proj.type;
             ProjSnapshotOwners[id] = proj.owner;
             ProjSnapshotIdentities[id] = proj.identity;
@@ -153,12 +195,28 @@ namespace CalamityOverhaul.Content.HackTimes
             }
         }
 
+        private static void KillProjectilesSpawnedDuringFreeze() {
+            for (int i = 0; i < Main.maxProjectiles; i++) {
+                if (!ProjSpawnedDuringFreeze[i]) continue;
+                Projectile proj = Main.projectile[i];
+                if (!proj.active) continue;
+                //校验槽位未被复用
+                if (ProjSnapshotTypes[i] != proj.type
+                    || ProjSnapshotOwners[i] != proj.owner
+                    || ProjSnapshotIdentities[i] != proj.identity) {
+                    continue;
+                }
+                proj.Kill();
+            }
+        }
+
         private static void ClearSnapshots() {
             for (int i = 0; i < Main.maxNPCs; i++) {
                 NPCSnapshotCaptured[i] = false;
             }
             for (int i = 0; i < Main.maxProjectiles; i++) {
                 ProjSnapshotCaptured[i] = false;
+                ProjSpawnedDuringFreeze[i] = false;
             }
         }
 
@@ -200,6 +258,16 @@ namespace CalamityOverhaul.Content.HackTimes
 
             return false;
         }
+
+        public override bool CanHitPlayer(NPC npc, Player target, ref int cooldownSlot) {
+            if (HackTimeFreeze.IsActive) return false;
+            return true;
+        }
+
+        public override bool CanHitNPC(NPC npc, NPC target) {
+            if (HackTimeFreeze.IsActive) return false;
+            return true;
+        }
     }
 
     /// <summary>
@@ -221,6 +289,21 @@ namespace CalamityOverhaul.Content.HackTimes
 
             return false;
         }
+
+        public override bool? CanHitNPC(Projectile projectile, NPC target) {
+            if (HackTimeFreeze.IsActive) return false;
+            return null;
+        }
+
+        public override bool CanHitPlayer(Projectile projectile, Player target) {
+            if (HackTimeFreeze.IsActive) return false;
+            return true;
+        }
+
+        public override bool CanHitPvp(Projectile projectile, Player target) {
+            if (HackTimeFreeze.IsActive) return false;
+            return true;
+        }
     }
 
     /// <summary>
@@ -239,6 +322,22 @@ namespace CalamityOverhaul.Content.HackTimes
         private Rectangle frozenBodyFrame;
         private Rectangle frozenLegFrame;
         private Rectangle frozenHeadFrame;
+        //各类计时器快照，避免冷却条/无敌帧/呼吸条等持续推进
+        private int frozenPotionDelay;
+        private int frozenRestorationDelayTime;
+        private int frozenItemAnimation;
+        private int frozenItemAnimationMax;
+        private int frozenItemTime;
+        private int frozenImmuneTime;
+        private bool frozenImmune;
+        private int frozenBreath;
+        private int frozenBreathCD;
+        //Calamity怒气与肾上腺素快照
+        private float frozenRage;
+        private float frozenAdrenaline;
+        private int frozenRageGainCooldown;
+        private int frozenRageCombatFrames;
+        private int frozenAdrenalinePauseTimer;
 
         public override void PreUpdate() {
             if (!HackTimeFreeze.IsActive) {
@@ -246,13 +345,24 @@ namespace CalamityOverhaul.Content.HackTimes
                 return;
             }
 
-            //首次冻结时快照位置、朝向、动画帧
+            //首次冻结时快照位置、朝向、动画帧及各类计时器
             if (!positionCaptured) {
                 frozenPosition = Player.position;
                 frozenDirection = Player.direction;
                 frozenBodyFrame = Player.bodyFrame;
                 frozenLegFrame = Player.legFrame;
                 frozenHeadFrame = Player.headFrame;
+                frozenPotionDelay = Player.potionDelay;
+                frozenRestorationDelayTime = Player.restorationDelayTime;
+                frozenItemAnimation = Player.itemAnimation;
+                frozenItemAnimationMax = Player.itemAnimationMax;
+                frozenItemTime = Player.itemTime;
+                frozenImmuneTime = Player.immuneTime;
+                frozenImmune = Player.immune;
+                frozenBreath = Player.breath;
+                frozenBreathCD = Player.breathCD;
+                CWRRef.SnapshotRippers(Player, ref frozenRage, ref frozenAdrenaline
+                    , ref frozenRageGainCooldown, ref frozenRageCombatFrames, ref frozenAdrenalinePauseTimer);
                 positionCaptured = true;
             }
 
@@ -261,7 +371,6 @@ namespace CalamityOverhaul.Content.HackTimes
             Player.velocity = Vector2.Zero;
             //锁定朝向
             Player.direction = frozenDirection;
-            //Player.ChangeDir = 0;
             //防止解冻后摔落伤害
             Player.fallStart = (int)(Player.position.Y / 16f);
 
@@ -286,6 +395,19 @@ namespace CalamityOverhaul.Content.HackTimes
             Player.position = frozenPosition;
             Player.velocity = Vector2.Zero;
             Player.direction = frozenDirection;
+            //还原各类冷却计时器，使其在冻结期间不流逝
+            Player.potionDelay = frozenPotionDelay;
+            Player.restorationDelayTime = frozenRestorationDelayTime;
+            Player.itemAnimation = frozenItemAnimation;
+            Player.itemAnimationMax = frozenItemAnimationMax;
+            Player.itemTime = frozenItemTime;
+            Player.immuneTime = frozenImmuneTime;
+            Player.immune = frozenImmune;
+            Player.breath = frozenBreath;
+            Player.breathCD = frozenBreathCD;
+            //还原Calamity怒气与肾上腺素，阻止冻结期间充能或衰减
+            CWRRef.RestoreRippers(Player, frozenRage, frozenAdrenaline
+                , frozenRageGainCooldown, frozenRageCombatFrames, frozenAdrenalinePauseTimer);
         }
 
         public override void FrameEffects() {
