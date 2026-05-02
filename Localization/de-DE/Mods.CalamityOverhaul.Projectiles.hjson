@@ -486,25 +486,25 @@ Thomas: {
 // SupernovaExplosion.DisplayName: Supernova Explosion
 // StarfuryFallingStar.DisplayName: Starfury Falling Star
 // SpawnOldDukeWannaToFight.DisplayName: Spawn Old Duke Wanna To Fight
-// MachineTesla.DisplayName: Machine Tesla
-// CyberGlitchBoltProj.DisplayName: Cyber Glitch Bolt Proj
-// CyberShockwaveProj.DisplayName: Cyber Shockwave Proj
-// CyberTraceBeamProj.DisplayName: Cyber Trace Beam Proj
-// CyberChargeOrbProj.DisplayName: Cyber Charge Orb Proj
-// CyberDetonationProj.DisplayName: Cyber Detonation Proj
-// SHPCChargeHeldProj.DisplayName: S H P C Charge Held Proj
-// CyberFreezeWaveProj.DisplayName: Cyber Freeze Wave Proj
-// RevelationStar.DisplayName: Revelation Star
+// MachineTesla.DisplayName: Tesla Mecha
+// CyberGlitchBoltProj.DisplayName: Cyber Glitch Bolt
+// CyberShockwaveProj.DisplayName: Cyber Shockwave
+// CyberTraceBeamProj.DisplayName: Cyber Trace Beam
+// CyberChargeOrbProj.DisplayName: Cyber Charge Orb
+// CyberDetonationProj.DisplayName: Cyber Detonation
+// SHPCChargeHeldProj.DisplayName: SHPC Static Charge
+// CyberFreezeWaveProj.DisplayName: Cyber Freeze Wave
+// RevelationStar.DisplayName: Star of Revelation
 // RevelationDomain.DisplayName: Revelation Domain
 // DivineThunderStrike.DisplayName: Divine Thunder Strike
-// ApocalypseHorseman.DisplayName: Apocalypse Horseman
+// ApocalypseHorseman.DisplayName: Horseman of the Apocalypse
 // RevelationMeteorImpact.DisplayName: Revelation Meteor Impact
 // RevelationMeteorStrike.DisplayName: Revelation Meteor Strike
 
 RevelationSealJudgment: {
-	// Seal5Text: Fifth Seal
-	// Seal6Text: Sixth Seal
-	// Seal7Text: Seventh Seal
+	// Seal5Text: The Fifth Seal
+	// Seal6Text: The Sixth Seal
+	// Seal7Text: The Seventh Seal
 	// WorldJudgmentText: World Judgment
 	// DisplayName: Revelation Seal Judgment
 }
@@ -512,18 +512,18 @@ RevelationSealJudgment: {
 // VoidPortal.DisplayName: Void Portal
 // StarshipComet.DisplayName: Starship Comet
 // StarshipCometOrb.DisplayName: Starship Comet Orb
-// StarshipMaxRateRing.DisplayName: Starship Max Rate Ring
+// StarshipMaxRateRing.DisplayName: Starship Max-Rate Ring
 // StarshipMeteor.DisplayName: Starship Meteor
-// StarshipMicroGalaxy.DisplayName: Starship Micro Galaxy
-// StarshipMicroStar.DisplayName: Starship Micro Star
+// StarshipMicroGalaxy.DisplayName: Starship Micro-Galaxy
+// StarshipMicroStar.DisplayName: Starship Micro-Star
 // StarshipPlanet.DisplayName: Starship Planet
 // StarshipPlasmaBolt.DisplayName: Starship Plasma Bolt
 // StarshipWingman.DisplayName: Starship Wingman
 // VoidArrivalPortal.DisplayName: Void Arrival Portal
-// GatlinBullet.DisplayName: Gatlin Bullet
-// GatlinImpactBurst.DisplayName: Gatlin Impact Burst
-// CyberReformProj.DisplayName: Cyber Reform Proj
-// CyberRiftSlashProj.DisplayName: Cyber Rift Slash Proj
-// CyberRestartProj.DisplayName: Cyber Restart Proj
-// CyberPixelDecomposeProj.DisplayName: Cyber Pixel Decompose Proj
+// GatlinBullet.DisplayName: Gatling Bullet
+// GatlinImpactBurst.DisplayName: Gatling Impact Burst
+// CyberReformProj.DisplayName: Cyber Reform Bolt
+// CyberRiftSlashProj.DisplayName: Cyber Rift Slash
+// CyberRestartProj.DisplayName: Cyber Restart
+// CyberPixelDecomposeProj.DisplayName: Cyber Pixel Decomposition
 // MimicPhantom.DisplayName: Mimic Phantom

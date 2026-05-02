@@ -1,4 +1,4 @@
-﻿ShepelCyberActiveDialogue: {
+ShepelCyberActiveDialogue: {
 	RoleName: SHPC
 	Line_Intro: Domain activated, Master. Current tier is {0}. External signals have been completely blocked for you.
 	Line_LayerReport: The deeper the Domain goes, the broader the range of targets we can interfere with, but power consumption will multiply. Please keep an eye on your remaining RAM, Master.
@@ -248,7 +248,7 @@ CybTutorialLead: {
 	AwaitingEquip: AWAITING EQUIP...
 	Calibrating: CALIBRATING...
 	NextBtn: NEXT  >
-	HintStuck: "HINT: Try clicking the highlighted target area."
+	HintStuck: HINT: Try clicking the highlighted target area.
 }
 
 CybCourseHackIntroDialogue: {
@@ -306,9 +306,9 @@ HackTimeTutorialLead: {
 		Left-click to lock it as the scan target.
 		'''
 	HT_Step7_Body: Tile scanning interface parsed. The right panel displays available hack protocols for the current tile.
-	HT_HintStuck: "HINT: Click the NEXT button to forcefully skip."
+	HT_HintStuck: HINT: Click the NEXT button to forcefully skip.
 	HT_KeyUnbound: N (Temporary Toggle)
-	HT_KeyHintUnbound: "HINT: When the Hack Time hotkey is unbound, you can use [N] to temporarily toggle it during this tutorial; binding it in Settings > Controls is recommended."
+	HT_KeyHintUnbound: HINT: When the Hack Time hotkey is unbound, you can use [N] to temporarily toggle it during this tutorial; binding it in Settings > Controls is recommended.
 	HT_S00_Title: Activate Hack Mode
 	HT_S01_Title: Lock NPC Target
 	HT_S02_Title: Hack Protocol Panel
@@ -399,7 +399,7 @@ CybCourseCompletePanel: {
 	Stat3: "[#] Tile Scan Interface Calibration Complete"
 	BtnRetry: RETRY
 	BtnExit: EXIT
-	Footer: "Select to continue — RETRY to restart training, EXIT to leave Braindance"
+	Footer: Select to continue — RETRY to restart training, EXIT to leave Braindance
 }
 
 ShepelBloodMoonDialogue: {
@@ -514,5 +514,5 @@ CybCourseKeyBindReminderPanel: {
 	UnboundLabel: Unbound
 	BtnConfirm: Acknowledged
 	BtnLater: Handle Later
-	Footer: "Any option will disconnect the Braindance. Bindings can be adjusted at any time in settings in the main world."
+	Footer: Any option will disconnect the Braindance. Bindings can be adjusted at any time in settings in the main world.
 }

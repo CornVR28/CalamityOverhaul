@@ -233,263 +233,251 @@ MuraText: {
 }
 
 HalibutTrialQuestLine: {
-	// QuestCategory: 比目鱼传说
-	// TrackerWaiting: 目标不在场，等待召唤...
+	// QuestCategory: Halibut Legend
+	// TrackerWaiting: Target is absent, awaiting summons...
 	// TrackerFighting: "{0}: {1:0%}"
-	// Trial_0: 开胃菜
-	// Trial_1: 不速之瞳
-	// Trial_2: 丛林拜访
-	// Trial_3: 安息与启程
-	// Trial_4: 钢铁潮汐
-	// Trial_5: 拙劣的复制品
-	// Trial_6: 给遗迹塞电池
-	// Trial_7: 月球背面
-	// Trial_8: 冷水澡
-	// Trial_9: 不屈亡魂
-	// Trial_10: 弑神者
-	// Trial_11: 升温
-	// Trial_12: 造物巅峰
-	// Trial_13: 回到海里
+	// Trial_0: Appetizer
+	// Trial_1: Uninvited Eye
+	// Trial_2: Jungle Visit
+	// Trial_3: Rest and Departure
+	// Trial_4: Steel Tide
+	// Trial_5: Clumsy Replica
+	// Trial_6: Batteries for Ruins
+	// Trial_7: Dark Side of the Moon
+	// Trial_8: Cold Shower
+	// Trial_9: Unyielding Wraith
+	// Trial_10: God Slayer
+	// Trial_11: Heating Up
+	// Trial_12: Pinnacle of Creation
+	// Trial_13: Back to the Sea
 }
 
 MurasamaTrialQuestLine: {
-	// QuestCategory: Murasama·Trial
-	// TrackerWaiting: Target not present, awaiting summon...
+	// QuestCategory: Demon Blade Murasama · Trials
+	// TrackerWaiting: Target is absent, awaiting summons...
 	// TrackerFighting: "{0}: {1:0%}"
-	// Trial_0: Sand Phantom
-	// Trial_1: Desert Hunt
-	// Trial_2: The Invader
+	// Trial_0: Desert Phantom
+	// Trial_1: Sand Sea Hunt
+	// Trial_2: Invader
 	// Trial_3: Corruption Purge
-	// Trial_4: Parasite Threat
-	// Trial_5: Gel Aberration
+	// Trial_4: Parasitic Threat
+	// Trial_5: Gelatinous Defiler
 	// Trial_6: Dungeon Breach
-	// Trial_7: Path to Hell
-	// Trial_8: Frozen Shackle
-	// Trial_9: Abyss Sweep
-	// Trial_10: Brimstone Purge
-	// Trial_11: Iron Gears
-	// Trial_12: Twin Annihilation
-	// Trial_13: Mechanical Skull
-	// Trial_14: Calamity Shadow Op
-	// Trial_15: Jungle Bloom
-	// Trial_16: Petrified Front
-	// Trial_17: Plague Suppression
-	// Trial_18: Golem Breach
-	// Trial_19: Stellar Domain End
-	// Trial_20: Moon Fall
+	// Trial_7: Path to the Underworld
+	// Trial_8: Tundra Shackles
+	// Trial_9: Abyssal Cleansing
+	// Trial_10: Brimstone Purging Flame
+	// Trial_11: Steel Gears
+	// Trial_12: Twin Eye Annihilation
+	// Trial_13: Mechanical King Skull
+	// Trial_14: Calamity Shadow Operation
+	// Trial_15: Jungle Blossom
+	// Trial_16: Petrified Frontline
+	// Trial_17: Plague Eradication
+	// Trial_18: Golem Breaker
+	// Trial_19: Astral Termination
+	// Trial_20: Lunar Fall
 	// Trial_21: Phantom Sanction
-	// Trial_22: Soul Exorcism
+	// Trial_22: Wraith Exorcism
 	// Trial_23: God-Slaying Serpent
 	// Trial_24: Jungle Flame
-	// Trial_25: Core End
-	// Trial_26: Chaos Verdict
-	// Trial_27: Primal Return
-	// TrialSummary_0: Recruit. Prove yourself to me.\nThat slimy blue brute is a fine starting point.\nDestroy it.
-	// TrialSummary_1: The siren-spawn beneath the sands still wanders.\nRun it down. End it.
-	// TrialSummary_2: The moon is high. Let's go poke out that giant, careening eyeball and blind that false god for good.
+	// Trial_25: Core Termination
+	// Trial_26: Chaos Judgment
+	// Trial_27: Primordial Return
+	// TrialSummary_0: Prove yourself to me, recruit.\nThat slimy blue blob is a good place to start.\nHandle it.
+	// TrialSummary_1: The siren remnants beneath the sand sea still roam.\nTrack it down and end it.
+	// TrialSummary_2: The moon hangs high in the night. Let's go burst that giant eyeball flying around up there, and make that false god permanently blind.
 	/* TrialSummary_3:
 		'''
-		The false god's remains taint this land. Go and liberate the corrupted lands.
-		Hack apart that false god's putrid brain. Mince that purple worm!
-		I want to see my blade dance in their alien flesh!
+		The remnants of false gods taint the lands of Terra. Go liberate the corrupted continents.
+		Hack that false god's brain to pieces, chop up that purple worm!
+		I want to see your blade dance through xenos flesh!
 		''' */
-	// TrialSummary_4: The corrupted lands still throb like a heart. The flesh-parasites still squirm. The corrupted tumors still *think*. Go and banish them all!
-	// TrialSummary_5: Can you feel it? That nauseating reek of corrupted gel.\nPurge this filth. Leave nothing behind.
+	// TrialSummary_4: The corrupted earth still throbs like a heart. The flesh parasites are still active; the corrupted tumors are still thinking. Go banish them entirely!
+	// TrialSummary_5: Do you feel it? That foul corruption reeking of gel.\nPurify this filthy aggregate completely.
 	/* TrialSummary_6:
 		'''
-		The curse on the dungeon is failing. I feel a psychic power stirring in the deep... screams... wails... whispers...
-		Crush that great skull.
+		The curse at the dungeon entrance has loosened. I feel psychic energy stirring in its depths, mixed with screams, wails, whispers...
+		Shatter that giant skull.
 		''' */
-	// TrialSummary_7: Step into Hell. That wall of flesh spanning the lava—it is the gate to the next age.\nTear it apart.
-	// TrialSummary_8: In the frozen north, a sealed construct of ice waits.\nShatter it before it breaks free on its own terms.
-	// TrialSummary_9: The outcast of the Sulphurous Sea bars our path to the abyss's treasures. End its endless consumption and wandering.
-	// TrialSummary_10: The brimstone herald deep in the lava harbors a heretical fire that offends me. Go extinguish it.
-	// TrialSummary_11: A great iron worm blocks our march. Mince it to pieces.
-	// TrialSummary_12: Those mechanical eyes stare down at us—drive this blade through them.
-	// TrialSummary_13: Skeletron put on iron armor thinking it could stop us. Smash that metal skull.
-	// TrialSummary_14: That witch who gave herself to the chaos... she has a warped clone-sister. Kill that aberration. Anoint this blade with its blood and fire.
-	// TrialSummary_15: That maddened plant deep in the Jungle has gone berserk. End this runaway growth.
-	// TrialSummary_16: The foolish Lihzahrds worship inert stone. Let us grind their idol to dust and shatter their faith.
-	// TrialSummary_17: Some kind of bee-machine hybrid lurks in steam and poison. Knock that filthy thing out of the sky.
-	// TrialSummary_18: That Ravager is rampaging across the land. Shatter its iron form completely.
-	// TrialSummary_19: The stellar worm is concentrating cosmic energy here. End it—only then will this stellar domain be ours.
+	// TrialSummary_7: Step into the Underworld. That wall of flesh spanning the lava—that is our door to the next era.\nTear it apart.
+	// TrialSummary_8: In the bitter cold of the northern reaches lies a sealed creation of ice and snow.\nCrush it before it can fully unseal.
+	// TrialSummary_9: The outcast of the Sulphurous Sea blocks our quest for the treasures of the abyss. Go end its devouring and wandering.
+	// TrialSummary_10: The heretical fire of that Brimstone Emissary deep in the lava is an eyesore. Go extinguish it.
+	// TrialSummary_11: A massive steel worm stands in the way of our crusade. Chop it into pieces.
+	// TrialSummary_12: Those mechanical eyes look down on us—pierce them with your blade.
+	// TrialSummary_13: The skeleton lord donned steel armor thinking it could stop us? Shatter that metal skull.
+	// TrialSummary_14: That witch who threw herself into chaos has a deformed clone sister. Kill that xeno, and offer its blood and fire to the blade.
+	// TrialSummary_15: The mad plant deep in the jungle has gone berserk. Use your blade to end this out-of-control growth.
+	// TrialSummary_16: The foolish Lihzahrd race only knows how to worship these stubborn stones. Let's smash it to dust and destroy their faith.
+	// TrialSummary_17: Amidst the steam and toxic gas is a bee-machine hybrid. Shoot that filthy thing down.
+	// TrialSummary_18: That golem of destruction is rampaging across the land. Pulverize its steel body completely.
+	// TrialSummary_19: The astral worms are gathering cosmic energy here. End it, so this star field can be ours.
 	/* TrialSummary_20:
 		'''
-		That false god hiding behind the moon is nothing but a flawed, patchwork thing.
-		Go. Sever its tentacles, carve out its heart, and let us drink deep of its blood.
+		That false god hiding on the dark side of the moon is nothing but a flawed patchwork.
+		Go sever its tentacles, rip out its heart, and drink deep of its blood.
 		''' */
-	// TrialSummary_21: A pathetic god, merely prolonging its wretched life by siphoning stellar heat. Its heretical fire must be extinguished.
-	// TrialSummary_22: That mass of restless souls deep in the Dungeon—put them to final rest.
-	// TrialSummary_23: That arrogant cosmic serpent stirs behind the veil of this world. End its ambition.
+	// TrialSummary_21: A pathetic deity lingering by siphoning solar thermal energy. Its heretical fire must be completely extinguished.
+	// TrialSummary_22: The aggregate of undead deep in the dungeon. Let those restless souls finally be silenced.
+	// TrialSummary_23: That arrogant cosmic serpent is stirring behind the veil of the world. End his ambitions.
 	/* TrialSummary_24:
 		'''
-		The Jungle Dragon... the last of the Auric Dragons. Unlike these other abominations, it... deserves our respect.
-		And yet, we must make it die again. We must strip it of its Auric soul.
-		These materials will forge wargear of supreme quality.
+		The Jungle Dragon, the last auric draconic descendant of Terra. It is vastly different from other xenos and deserves our respect.
+		However, right now we need it to die once more to strip it of its Auric Soul.
+		These materials will be used to forge an incredibly superior set of gear.
 		''' */
 	/* TrialSummary_25:
 		'''
-		That heretic of the mechanical cult truly believes his 'Titans' surpass the power of gods.
-		Such conviction is absurd. Let us return those Titans to their natural state—a pile of scrap.
+		That heretic of the mechanical church firmly believes his Exo Mechs surpass the power of gods.
+		Such a belief is utterly absurd. Let us return those Titans to their natural state—a pile of scrap metal.
 		''' */
 	/* TrialSummary_26:
 		'''
-		A gifted psyker who should have been a great asset, now lost to chaos.
-		We can only banish her. Plunge this blade into her heart and let the fire of loyalty burn her corrupted soul to ash.
+		A witch who once possessed outstanding psychic talent, who should have been a great asset in defending Terra, but who has long since lost herself to chaos.
+		We can only banish her. Plunge the blade into her chest, and let the fire of loyalty burn away her rotting soul.
 		''' */
 	/* TrialSummary_27:
 		'''
-		Our path to conquest is inevitable. Shatter the armor of that abyssal dragon.
-		Use the Terminus Stone. Begin the final battle against these alien things.
+		Our path of conquest is already unstoppable. Shatter the armor of the demonic dragon beneath the black abyss.
+		Use the Terminus and engage in the final decisive battle with the xeno.
 		''' */
 }
 
 SHPCTrialQuestLine: {
-	// QuestCategory: SHPC·Trial
-	// TrackerWaiting: Target not present, awaiting summon...
+	// QuestCategory: SHPC · Trials
+	// TrackerWaiting: Target is absent, awaiting summons...
 	// TrackerFighting: "{0}: {1:0%}"
-	// Trial_0: Slime Elimination
-	// Trial_1: Eye Dissection
-	// Trial_2: Biochemical Sample
-	// Trial_3: Impurity Purification
-	// Trial_4: Seal Breach
-	// Trial_5: Deep-Sea Contamination
+	// Trial_0: Ocular Autopsy
+	// Trial_1: Corruption Sample
+	// Trial_2: Source of Parasitism
+	// Trial_3: God of Gel
+	// Trial_4: Seal Breakthrough
+	// Trial_5: Deep Sea Contamination
 	// Trial_6: Brimstone Sampling
 	// Trial_7: Mechanical Worm
-	// Trial_8: Twin-Eye Dismantling
+	// Trial_8: Twin Eye Dismantlement
 	// Trial_9: Steel Skull
-	// Trial_10: Shadow Analysis
+	// Trial_10: Calamity Clone
 	// Trial_11: Ecological Survey
-	// Trial_12: Ancient Technology
-	// Trial_13: Information Blockade
-	// Trial_14: Dark Side of the Moon
+	// Trial_12: Ancient Tech
+	// Trial_13: Interstellar Coordinates
+	// Trial_14: Secrets of the Lunar Dark Side
 	// Trial_15: Core Expedition
-	// Trial_16: Phantom Observation
-	// Trial_17: Divine Domain Invasion
-	// Trial_18: Obtain Dragon Feathers
-	// Trial_19: Visit the Creator
+	// Trial_16: Wraith Observation
+	// Trial_17: Devourer of Gods
+	// Trial_18: Feather of the Draconic Descendant
+	// Trial_19: A Visit to the Creator
 	// Trial_20: Witch Audit
-	// Trial_21: The Final Battle
+	// Trial_21: Battle of Terminus
 	/* TrialSummary_0:
 		'''
-		Friend, the task of restoring civilization has finally fallen into our hands.
-		This is a glorious undertaking...
-		Our first target is a massive blue gel polymer.
-		Blast it open from the inside.
+		Master, the first trial target is that hovering giant eye.
+		Please defeat it. I need to collect complete data on its anti-gravity mechanisms.
 		''' */
 	/* TrialSummary_1:
 		'''
-		We need to eliminate that giant eye; it comes from a powerful organism.
-		I need to dissect it to see how it achieves anti-gravity.
+		The giant worms in the corrupted earth and the fleshy brains are high-quality biological samples.
+		Master, please sever their core tissues. I must analyze the propagation mechanism of this ecological erosion.
 		''' */
 	/* TrialSummary_2:
 		'''
-		Whether it is the giant worm coiling in the corruption,
-		or the brain dominating the crimson flesh, they are excellent biochemical samples.
-		Cut out their cores; I want to study this terrifying ecological invasiveness.
+		The brain of corruption and the fleshy aggregate are infectious sources with a hive mind.
+		Master, please eliminate them. Their coordinated parasitic patterns have been added to the collection list.
 		''' */
 	/* TrialSummary_3:
 		'''
-		Gel has actually derived a god?
-		I feel it is just a filthy aggregation that swallowed too many impurities.
-		Let us help it undergo a thorough purification separation
-		to see what remains of this so-called god.
+		The gelatinous aggregate—a god-level target with no central nervous system or fixed form.
+		Master, please shatter its core. I will properly record this chaotic architecture.
 		''' */
 	/* TrialSummary_4:
 		'''
-		A wall of flesh spanning the Underworld; it is a seal of the old era.
-		We need enough firepower to blast through this organic barrier.
-		This will be our opening act for the new era.
+		A wall of flesh spans the depths of the Underworld; it is a seal from a bygone era.
+		Master, please blast through it. This is a necessary breakthrough towards a new era.
 		''' */
 	/* TrialSummary_5:
 		'''
 		The giant worm of the Sulphurous Sea has surfaced.
-		Remove its feeding organs; I need to understand how this contamination source works.
+		Master, please dismantle its devouring organs. I need to confirm how this pollution source operates.
 		''' */
 	/* TrialSummary_6:
 		'''
-		The brimstone herald deep in the lava is spreading a high-heat reaction.
-		Extinguish its core flame, and record its energy conversion efficiency while you are there.
+		The Brimstone Emissary deep within the lava is diffusing a high-heat reaction.
+		Master, please extinguish its core flame. I will simultaneously record its energy conversion efficiency.
 		''' */
 	/* TrialSummary_7:
 		'''
 		The first mechanical target is a giant steel worm.
-		Cut it into recyclable scrap, and try to preserve the drive structure.
+		Master, please slice it into recyclable scrap. Try to keep the drive structure intact.
 		''' */
 	/* TrialSummary_8:
 		'''
-		The second mechanical target is that pair of mirrored airborne eyes.
-		Dismantle their weapon modules one by one, and do not let the lasers ruin the samples.
+		The second mechanical target is that pair of mirrored eyeballs. Coordinated combat is their primary feature.
+		Master, please dismantle their weapon modules one by one, and be mindful of their laser's scorch radius.
 		''' */
 	/* TrialSummary_9:
 		'''
-		The final mechanical target wears the old king's skull.
-		Shatter that metal head, and we can shut down this mechanical invasion protocol.
+		The final mechanical target wears the skull of an old king.
+		Master, please crush it. Once this mechanical invasion protocol is shut down, I will conduct a concluding analysis.
 		''' */
 	/* TrialSummary_10:
 		'''
-		That witch's clone is wandering about.
-		Though just a clumsy imitation of necromancy,
-		it is more than enough to calibrate SHPC's calamity response model.
-		Go destroy that counterfeit.
+		That witch's clone is roaming around. Though it's only a replica of necromancy,
+		it is sufficient to calibrate my reaction model for calamity. Master, please destroy it.
 		''' */
 	/* TrialSummary_11:
 		'''
-		Deep in the Jungle, several flamboyant buds have bloomed.
-		We need to investigate and collect experimental data.
+		Several alluring large bulbs have bloomed underground in the jungle.
+		Master, please accompany me to see them. I need to gather some experimental data.
 		''' */
 	/* TrialSummary_12:
 		'''
-		The ancient robot deep in the Temple awaits a recharge activation.
-		Let us pay a visit and reverse-engineer that ancient technology while we're at it.
+		The ancient automaton deep in the temple awaits a power-up sequence to activate.
+		Master, please take me to visit it. Reverse-engineering ancient tech might prove useful.
 		''' */
 	/* TrialSummary_13:
 		'''
-		Those fanatics at the Dungeon entrance are holding some ancient ritual,
-		attempting to block information from beyond the sky.
-		Interrupt them. Their superstitious spells cannot stop our technology.
-		I need those hidden star coordinates.
+		That group of fanatical cultists at the dungeon entrance is performing some ancient ritual, attempting to block information from the heavens.
+		Master, please interrupt them. I need those hidden interstellar coordinates.
 		''' */
 	/* TrialSummary_14:
 		'''
-		The secrets of the dark side of the moon shall be known to us.
-		The world will return to its original state.
+		The secrets of the dark side of the moon will be known to us.
+		Master, this might set certain things back on track.
 		''' */
 	/* TrialSummary_15:
 		'''
-		The god parasitic in the planet's core has noticed us.
-		Go to the Underworld; I need knowledge on thermal energy utilization.
+		The deity parasitic in the planet's core has noticed us.
+		Master, please go to the Underworld and take a look. Her method of utilizing thermal energy is worth recording.
 		''' */
 	/* TrialSummary_16:
 		'''
-		The spirits of the Dungeon have gathered into a massive symbiote.
-		This is too interesting; we must go see it now.
+		The wraiths of the dungeon are amalgamating into a massive symbiote.
+		Master, the hive consciousness of this ectoplasmic architecture is quite rare. Please take me to observe it.
 		''' */
 	/* TrialSummary_17:
 		'''
-		It is confirmed to be non-carbon-based life,
-		capable of tearing the spatial membrane with just its body.
-		It devours gods, but we are not gods; I imagine it might invite us for tea.
+		It is not a carbon-based lifeform; it can tear the dimensional membrane with its physical body alone.
+		It devours gods, but we are not gods. Defeat it, and let this be recorded in the logs.
 		''' */
 	/* TrialSummary_18:
 		'''
-		The world's last Dragonborn. Wow, this is too cool!
-		Take me to see it; I want to obtain its feathers.
+		The only surviving draconic descendant in the world; its very existence is a miracle.
+		Master, please take me to see it. I need to collect a sample of its feathers.
 		''' */
 	/* TrialSummary_19:
 		'''
-		It is time to visit my creator.
-		Bring back the Exo Mechs' control core.
+		It is time to meet my former creator.
+		Master, please retrieve the control core of the Exo Mechs.
 		''' */
 	/* TrialSummary_20:
 		'''
-		That witch's existence troubles me.
-		Terminate her chaos experiment and end this farce.
+		That witch has been conducting chaotic experiments. We have enough data.
+		Master, please terminate her operations. This farce must end.
 		''' */
 	/* TrialSummary_21:
 		'''
-		A grand melee! Enemies we once defeated have united,
-		preparing to launch a total assault on us.
-		Get ready; we need a flawless victory.
+		Master, the enemies you previously defeated have formed a coalition and are preparing a final assault.
+		Please be prepared. I will monitor the battlefield throughout and assist you in settling this once and for all.
 		''' */
 }

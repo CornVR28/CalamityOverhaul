@@ -1,4 +1,4 @@
-﻿ItemFilterUI: {
+ItemFilterUI: {
 	HintText: 左键点击可添加项目
 	HintText2: 左键点击可移除项目
 	CloseHint: "[ESC]键或[右键点击]可关闭"
@@ -736,7 +736,7 @@ SHPCUI: {
 	Cyber_Layer1_Title: 基础接入
 	Cyber_Layer2_Title: 深层下潜
 	Cyber_Layer3_Title: 黑墙穿透
-	Cyber_NoSkill: "无特有技能"
+	Cyber_NoSkill: 无特有技能
 	Cyber_LayerBaseFooter: 基础层 — 仅用于建立领域场域
 	Cyber_SkillUnlocked: "[#] 已解锁"
 	Cyber_SkillLocked: "[X] 需要 {0} 层领域"
