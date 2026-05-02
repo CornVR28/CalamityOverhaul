@@ -74,6 +74,13 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
                 //Terraria 子世界帧率固定 60Hz
                 _entryRevealTime += 1f / 60f;
             }
+            //清理掉落物
+            for (int i = 0; i < Main.maxItems; i++) {
+                Item item = Main.item[i];
+                if (item.Alives() && item.CWR().InventoryTimer == 0) {
+                    item.TurnToAir();
+                }
+            }
         }
 
         //完全接管加载界面的绘制逻辑

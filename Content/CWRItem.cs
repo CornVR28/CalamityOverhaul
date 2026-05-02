@@ -51,7 +51,10 @@ namespace CalamityOverhaul.Content
         /// </summary>
         public bool hasHeldNoCanUseBool;
         /// <summary>
-
+        /// 在背包中的时间
+        /// </summary>
+        public int InventoryTimer;
+        /// <summary>
         /// 如果该物品被一个收集者视作为目标，那么该值会被设置为对应手臂的的弹幕索引
         /// </summary>
         internal int TargetByCollector = -1;
@@ -134,6 +137,7 @@ namespace CalamityOverhaul.Content
             cwr.IsHeldSwing = IsHeldSwing;
             cwr.heldProjType = heldProjType;
             cwr.hasHeldNoCanUseBool = hasHeldNoCanUseBool;
+            cwr.InventoryTimer = InventoryTimer;
             cwr.StorageUE = StorageUE;
             cwr.UEValue = UEValue;
             cwr.ConsumeUseUE = ConsumeUseUE;
@@ -338,6 +342,8 @@ namespace CalamityOverhaul.Content
             //玩家背包中的物品，使用PlayerInventory上下文，跨世界需要确认
             LegendData?.DoUpdate(item, LegendUpdateContext.PlayerInventory);
             RecoverUnloadedItem.UpdateInventory(item);
+            if (InventoryTimer < int.MaxValue)
+                InventoryTimer++;
         }
 
         public override void Update(Item item, ref float gravity, ref float maxFallSpeed) {
