@@ -71,10 +71,13 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
 
         /// <summary>
         /// 当前最外层目标半径
+        /// <br/>Active 时只看 <see cref="CurrentLayer"/>，避免从高层降回低层的 2~4 秒过渡期里
+        /// 高层残留的 layerExpand 把视觉半径撑大到外层，导致主着色器把整个屏幕都判为 inside 而整体染红
+        /// <br/>仅在领域已请求关闭、所有层都在收缩时回退到 <see cref="RenderLayerCount"/>，让收缩动画仍有目标参考
         /// </summary>
         public float Radius {
             get {
-                int rLayer = Math.Max(CurrentLayer, RenderLayerCount);
+                int rLayer = Active && CurrentLayer > 0 ? CurrentLayer : RenderLayerCount;
                 return rLayer > 0 ? Cyberspace.GetLayerRadius(rLayer - 1) : Cyberspace.BaseRadius;
             }
         }
