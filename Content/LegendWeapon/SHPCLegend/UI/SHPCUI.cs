@@ -60,6 +60,15 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
         public static LocalizedText Modify_Unequip { get; private set; }
         public static LocalizedText Modify_Equipped { get; private set; }
         public static LocalizedText Modify_NoMatch { get; private set; }
+        public static LocalizedText Modify_Close { get; private set; }
+        public static LocalizedText Modify_InstallSlot { get; private set; }
+        public static LocalizedText Modify_Current { get; private set; }
+        public static LocalizedText Modify_Slot_Barrel { get; private set; }
+        public static LocalizedText Modify_Slot_Optic { get; private set; }
+        public static LocalizedText Modify_Slot_Power { get; private set; }
+        public static LocalizedText Modify_Slot_Stock { get; private set; }
+        public static LocalizedText Modify_Slot_Grip { get; private set; }
+        public static LocalizedText Modify_Slot_Frame { get; private set; }
         public static LocalizedText State_On { get; private set; }
         public static LocalizedText State_Off { get; private set; }
         public static LocalizedText State_Layer { get; private set; }
@@ -118,6 +127,15 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             Modify_Unequip = this.GetLocalization(nameof(Modify_Unequip), () => "UNEQUIP");
             Modify_Equipped = this.GetLocalization(nameof(Modify_Equipped), () => "EQUIPPED");
             Modify_NoMatch = this.GetLocalization(nameof(Modify_NoMatch), () => "// no compatible modules in inventory");
+            Modify_Close = this.GetLocalization(nameof(Modify_Close), () => "CLOSE");
+            Modify_InstallSlot = this.GetLocalization(nameof(Modify_InstallSlot), () => "INSTALL \u00b7 {0}");
+            Modify_Current = this.GetLocalization(nameof(Modify_Current), () => "CURRENT: {0}");
+            Modify_Slot_Barrel = this.GetLocalization(nameof(Modify_Slot_Barrel), () => "BARREL");
+            Modify_Slot_Optic = this.GetLocalization(nameof(Modify_Slot_Optic), () => "OPTIC");
+            Modify_Slot_Power = this.GetLocalization(nameof(Modify_Slot_Power), () => "POWER");
+            Modify_Slot_Stock = this.GetLocalization(nameof(Modify_Slot_Stock), () => "STOCK");
+            Modify_Slot_Grip = this.GetLocalization(nameof(Modify_Slot_Grip), () => "GRIP");
+            Modify_Slot_Frame = this.GetLocalization(nameof(Modify_Slot_Frame), () => "FRAME");
             State_On = this.GetLocalization(nameof(State_On), () => "ON");
             State_Off = this.GetLocalization(nameof(State_Off), () => "OFF");
             State_Layer = this.GetLocalization(nameof(State_Layer), () => "L");

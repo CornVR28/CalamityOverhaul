@@ -758,6 +758,15 @@ SHPCUI: {
 	Modify_Unequip: 卸下
 	Modify_Equipped: 已装备
 	Modify_NoMatch: 背包中没有匹配的改件
+	Modify_Close: 关闭
+	Modify_InstallSlot: 安装 · {0}
+	Modify_Current: 当前: {0}
+	Modify_Slot_Barrel: 枪管
+	Modify_Slot_Optic: 瞄具
+	Modify_Slot_Power: 能源
+	Modify_Slot_Stock: 枪托
+	Modify_Slot_Grip: 握把
+	Modify_Slot_Frame: 机匣
 	Talk_Title: 对话
 	Talk_Subtitle: 神经连接
 	Talk_Description: 开启与 SHPC 的直接通讯频道

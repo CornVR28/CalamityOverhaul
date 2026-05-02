@@ -29,8 +29,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
 
         //六个插槽中心相对于枪体中心的偏移
         private static readonly Vector2[] SlotOffsets = {
-            new(0f, -76f * Scale),               //BARREL  枪管  正上
-            new(84f * Scale, -38f * Scale),      //OPTIC   瞄具  右上
+            new(84f * Scale, -38f * Scale),      //BARREL  枪管  右上（枪管向前延伸侧）
+            new(0f, -76f * Scale),               //OPTIC   瞄具  正上（镜座自然安装位）
             new(84f * Scale, 38f * Scale),       //POWER   能源  右下
             new(0f, 76f * Scale),                //STOCK   枪托  正下
             new(-84f * Scale, 38f * Scale),      //GRIP    握把  左下
@@ -47,16 +47,23 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
         //  Y轴：负值朝上（瞄具/枪管顶），正值朝下（握把/弹匣底），最大约±26*GunScale/2
         private const float ConnectFactor = 1.4f / 1.2f;
         private static readonly Vector2[] ConnectPoints = {
-            new(5f * ConnectFactor, -24f * ConnectFactor),   //BARREL  向上引出  枪管顶部
-            new(62f * ConnectFactor, -20f * ConnectFactor),  //OPTIC   右上引出  枪口侧上方
+            new(62f * ConnectFactor, -20f * ConnectFactor),  //BARREL  右上引出  枪口侧上方
+            new(5f * ConnectFactor, -24f * ConnectFactor),   //OPTIC   向上引出  枪管顶部镜座
             new(62f * ConnectFactor, 18f * ConnectFactor),   //POWER   右下引出  枪口侧下方
             new(-55f * ConnectFactor, 26f * ConnectFactor),  //STOCK   向下引出  枪托底部
             new(-15f * ConnectFactor, 26f * ConnectFactor),  //GRIP    左下引出  握把底部
             new(-62f * ConnectFactor, -18f * ConnectFactor), //FRAME   左上引出  枪托侧上方
         };
 
-        private static readonly string[] SlotLabels = {
-            "BARREL", "OPTIC", "POWER", "STOCK", "GRIP", "FRAME"
+        //槽位显示标签通过本地化系统获取，避免硬编码英文
+        private static string GetSlotLabel(int i) => i switch {
+            0 => SHPCUI.Modify_Slot_Barrel.Value,
+            1 => SHPCUI.Modify_Slot_Optic.Value,
+            2 => SHPCUI.Modify_Slot_Power.Value,
+            3 => SHPCUI.Modify_Slot_Stock.Value,
+            4 => SHPCUI.Modify_Slot_Grip.Value,
+            5 => SHPCUI.Modify_Slot_Frame.Value,
+            _ => "?",
         };
 
         public enum HitKind
@@ -169,7 +176,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                 bool isHover = hover == (HitKind)(i + 1);
                 bool isPinned = SHPCUI.Instance?.PinnedModuleSlot == i;
                 Item equipped = sd?.GetModule(i);
-                DrawSlot(sb, px, font, slotRect, SlotLabels[i], isHover || isPinned, equipped, a);
+                DrawSlot(sb, px, font, slotRect, GetSlotLabel(i), isHover || isPinned, equipped, a);
             }
 
             //SHPC枪体纹理（绘于最上层，置于分析线和槽位之上）

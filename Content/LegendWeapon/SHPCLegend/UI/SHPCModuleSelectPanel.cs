@@ -148,10 +148,10 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
 
             //标题
             string slotName = SlotLabel(slotIdx);
-            Utils.DrawBorderString(sb, "INSTALL · " + slotName,
+            Utils.DrawBorderString(sb, string.Format(SHPCUI.Modify_InstallSlot.Value, slotName),
                 new Vector2(rect.X + 10f * Scale, rect.Y + 7f * Scale), SHPCTheme.Text * a, 0.62f * FontScale);
             string subtitle = equipped != null
-                ? "CURRENT: " + equipped.Name
+                ? string.Format(SHPCUI.Modify_Current.Value, equipped.Name)
                 : SHPCUI.Modify_SlotEmpty.Value;
             Utils.DrawBorderString(sb, subtitle,
                 new Vector2(rect.X + 10f * Scale, rect.Y + 24f * Scale), SHPCTheme.TextDim * a, 0.40f * FontScale);
@@ -221,7 +221,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             DrawSmallButton(sb, px, font, layout.UnequipBtn,
                 SHPCUI.Modify_Unequip.Value, hover == HitKind.Unequip, equipped != null, a);
             DrawSmallButton(sb, px, font, layout.CloseBtn,
-                "CLOSE", hover == HitKind.Close, true, a);
+                SHPCUI.Modify_Close.Value, hover == HitKind.Close, true, a);
 
             //悬浮 tooltip
             if (hover == HitKind.Row && layout.HoveredRow >= 0 && layout.HoveredRow < count) {
@@ -351,12 +351,12 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
 
         private static string SlotLabel(int idx) {
             return idx switch {
-                0 => "BARREL",
-                1 => "OPTIC",
-                2 => "POWER",
-                3 => "STOCK",
-                4 => "GRIP",
-                5 => "FRAME",
+                0 => SHPCUI.Modify_Slot_Barrel.Value,
+                1 => SHPCUI.Modify_Slot_Optic.Value,
+                2 => SHPCUI.Modify_Slot_Power.Value,
+                3 => SHPCUI.Modify_Slot_Stock.Value,
+                4 => SHPCUI.Modify_Slot_Grip.Value,
+                5 => SHPCUI.Modify_Slot_Frame.Value,
                 _ => "?",
             };
         }

@@ -761,6 +761,15 @@ SHPCUI: {
 	Modify_Unequip: UNEQUIP
 	Modify_Equipped: EQUIPPED
 	Modify_NoMatch: No compatible modules in inventory
+	Modify_Close: CLOSE
+	Modify_InstallSlot: INSTALL · {0}
+	Modify_Current: "CURRENT: {0}"
+	Modify_Slot_Barrel: BARREL
+	Modify_Slot_Optic: OPTIC
+	Modify_Slot_Power: POWER
+	Modify_Slot_Stock: STOCK
+	Modify_Slot_Grip: GRIP
+	Modify_Slot_Frame: FRAME
 	Talk_Title: TALK
 	Talk_Subtitle: Neural Link
 	Talk_Description: Open a direct channel to SHPC
