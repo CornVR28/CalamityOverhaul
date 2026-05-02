@@ -50,10 +50,10 @@ namespace CalamityOverhaul.Content.HackTimes
         //固定数据行数（数组最大容量，绑定到数组长度，不能运行时修改）
         private const int MaxDataRowCount = 10;
         //字体大小
-        public static float FontHeader => 0.78f;
-        public static float FontRow => 0.68f;
-        public static float FontStatus => 0.68f;
-        public static float FontNoise => 0.58f;
+        public static float FontHeader => 0.90f;
+        public static float FontRow => 0.80f;
+        public static float FontStatus => 0.80f;
+        public static float FontNoise => 0.70f;
         //面板纵向锚点偏移倍率（相对listTotalH），越大越偏下
         public static float PanelVerticalOffsetRatio => 0.12f;
 
@@ -257,7 +257,7 @@ namespace CalamityOverhaul.Content.HackTimes
 
                 string hexTag = $"0x{(int)(timer * 50) % 0xFFFF:X4}";
                 Utils.DrawBorderString(sb, hexTag, new Vector2(baseX + PanelWidth - 96, curY),
-                    HackTheme.Accent * (alpha * 0.22f), 0.32f);
+                    HackTheme.Accent * (alpha * 0.22f), 0.44f);
             }
 
             DrawScanLineOverlay(sb, px, panelRect, alpha);
@@ -299,7 +299,7 @@ namespace CalamityOverhaul.Content.HackTimes
             string scanText = $"SCANNING... {(int)(scanProgress * 100)}%";
             float pulse = MathF.Sin(timer * 6f) * 0.2f + 0.8f;
             Utils.DrawBorderString(sb, scanText, new Vector2(baseX + 14, curY),
-                HackTheme.Uploading * (alpha * pulse), 0.48f);
+                HackTheme.Uploading * (alpha * pulse), 0.60f);
 
             //滚动数据噪声(模拟数据流)
             curY += 22f;

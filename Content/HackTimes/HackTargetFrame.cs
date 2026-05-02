@@ -114,21 +114,21 @@ namespace CalamityOverhaul.Content.HackTimes
                 float labelAlpha = (ease - 0.4f) / 0.6f * alpha;
 
                 string label = HackTime.TargetLocked.Value;
-                Vector2 labelSize = FontAssets.MouseText.Value.MeasureString(label) * 0.34f;
+                Vector2 labelSize = FontAssets.MouseText.Value.MeasureString(label) * 0.46f;
                 Vector2 labelPos = new(center.X - labelSize.X * 0.5f, center.Y - halfH - 22f);
-                Utils.DrawBorderString(sb, label, labelPos, HackTheme.Accent * (labelAlpha * 0.7f), 0.34f);
+                Utils.DrawBorderString(sb, label, labelPos, HackTheme.Accent * (labelAlpha * 0.7f), 0.46f);
 
                 if (!string.IsNullOrEmpty(targetName)) {
-                    Vector2 nameSize = FontAssets.MouseText.Value.MeasureString(targetName) * 0.36f;
+                    Vector2 nameSize = FontAssets.MouseText.Value.MeasureString(targetName) * 0.48f;
                     Vector2 namePos = new(center.X - nameSize.X * 0.5f, center.Y + halfH + 8f);
-                    Utils.DrawBorderString(sb, targetName, namePos, HackTheme.TextBright * (labelAlpha * 0.6f), 0.36f);
+                    Utils.DrawBorderString(sb, targetName, namePos, HackTheme.TextBright * (labelAlpha * 0.6f), 0.48f);
                 }
 
                 //状态信息（NPC为生命值百分比，物块为分类）
                 if (hpStr != null) {
-                    Vector2 hpSize = FontAssets.MouseText.Value.MeasureString(hpStr) * 0.26f;
+                    Vector2 hpSize = FontAssets.MouseText.Value.MeasureString(hpStr) * 0.38f;
                     Vector2 hpPos = new(center.X - hpSize.X * 0.5f, center.Y + halfH + 30f);
-                    Utils.DrawBorderString(sb, hpStr, hpPos, hpColor * (labelAlpha * 0.45f), 0.26f);
+                    Utils.DrawBorderString(sb, hpStr, hpPos, hpColor * (labelAlpha * 0.45f), 0.38f);
                 }
             }
 

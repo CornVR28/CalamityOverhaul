@@ -62,11 +62,11 @@ namespace CalamityOverhaul.Content.HackTimes
         //协议列表整体下移偏移，避免RAM弧形HUD遮挡
         private const float TopPadding = 60f;
         //===== 字体尺寸 =====
-        private const float FontName = 0.8f;
-        private const float FontDesc = 0.62f;
-        private const float FontIndex = 0.4f;
-        private const float FontTime = 0.40f;
-        private const float FontStatus = 0.36f;
+        private static float FontName => 0.92f;
+        private static float FontDesc => 0.74f;
+        private static float FontIndex => 0.52f;
+        private static float FontTime => 0.52f;
+        private static float FontStatus => 0.48f;
 
         public void Show(HackTargetKind targetKind = HackTargetKind.Npc) {
             currentTargetKind = targetKind;
@@ -511,7 +511,7 @@ namespace CalamityOverhaul.Content.HackTimes
             //=== 分类符号（色条旁的小标识符） ===
             string catSymbol = HackTheme.CategorySymbol(hack.Category);
             Color symColor = catColor * (alpha * (0.35f + hover * 0.3f));
-            Utils.DrawBorderString(sb, catSymbol, new Vector2(barX + 8, rect.Y + rect.Height * 0.5f - 6), symColor, 0.28f);
+            Utils.DrawBorderString(sb, catSymbol, new Vector2(barX + 8, rect.Y + rect.Height * 0.5f - 6), symColor, 0.40f);
 
             //=== 扫描线（悬停/上传/排队中时横扫） ===
             if (hover > 0.1f || isUploading || isQueued || HackTime.InfiniteHack) {
@@ -633,11 +633,11 @@ namespace CalamityOverhaul.Content.HackTimes
                 //纯RAM不足的禁用——显示闪烁红色LOCKED和RAM消耗
                 float lockPulse = MathF.Sin(timer * 5f + index) * 0.25f + 0.75f;
                 string lockStr = HackTime.Locked.Value;
-                Vector2 lockSize = FontAssets.MouseText.Value.MeasureString(lockStr) * 0.38f;
+                Vector2 lockSize = FontAssets.MouseText.Value.MeasureString(lockStr) * 0.50f;
                 Vector2 lockPos = new(rect.Right - lockSize.X - 14,
                     rect.Y + (rect.Height - lockSize.Y) * 0.5f - 8);
                 Utils.DrawBorderString(sb, lockStr, lockPos,
-                    HackTheme.Danger * (alpha * 0.7f * lockPulse), 0.38f);
+                    HackTheme.Danger * (alpha * 0.7f * lockPulse), 0.50f);
                 //RAM消耗（LOCKED下方）
                 string ramStr2 = $"{hack.RamCost} RAM";
                 Vector2 ramSize2 = FontAssets.MouseText.Value.MeasureString(ramStr2) * FontTime;
@@ -651,16 +651,16 @@ namespace CalamityOverhaul.Content.HackTimes
             else if (isCompleted) {
                 float flash = MathF.Sin(timer * 8f) * 0.3f + 0.7f;
                 string doneStr = HackTime.Done.Value;
-                Vector2 okSize = FontAssets.MouseText.Value.MeasureString(doneStr) * 0.42f;
+                Vector2 okSize = FontAssets.MouseText.Value.MeasureString(doneStr) * 0.54f;
                 Vector2 okPos = new(rect.Right - okSize.X - 14, rect.Y + (rect.Height - okSize.Y) * 0.5f);
-                Utils.DrawBorderString(sb, doneStr, okPos, HackTheme.Accent * (alpha * flash), 0.42f);
+                Utils.DrawBorderString(sb, doneStr, okPos, HackTheme.Accent * (alpha * flash), 0.54f);
             }
             else if (isQueued) {
                 string queuedStr = HackTime.Queued.Value;
-                Vector2 qSize = FontAssets.MouseText.Value.MeasureString(queuedStr) * 0.38f;
+                Vector2 qSize = FontAssets.MouseText.Value.MeasureString(queuedStr) * 0.50f;
                 Vector2 qPos = new(rect.Right - qSize.X - 14, rect.Y + (rect.Height - qSize.Y) * 0.5f);
                 float qPulse = MathF.Sin(timer * 3f) * 0.15f + 0.85f;
-                Utils.DrawBorderString(sb, queuedStr, qPos, HackTheme.Uploading * (alpha * 0.6f * qPulse), 0.38f);
+                Utils.DrawBorderString(sb, queuedStr, qPos, HackTheme.Uploading * (alpha * 0.6f * qPulse), 0.50f);
             }
             else {
                 //上传耗时（右上角）
@@ -685,9 +685,9 @@ namespace CalamityOverhaul.Content.HackTimes
 
                 //分类标签（右下角）
                 string catLabel = HackTheme.CategoryLabel(hack.Category);
-                Vector2 cls = FontAssets.MouseText.Value.MeasureString(catLabel) * 0.26f;
+                Vector2 cls = FontAssets.MouseText.Value.MeasureString(catLabel) * 0.38f;
                 Vector2 clp = new(rect.Right - cls.X - 14, rect.Bottom - cls.Y - 8);
-                Utils.DrawBorderString(sb, catLabel, clp, catColor * (alpha * 0.35f), 0.26f);
+                Utils.DrawBorderString(sb, catLabel, clp, catColor * (alpha * 0.35f), 0.38f);
             }
 
             //=== 上传时底部进度光条（会穿过条目底边） ===
@@ -853,12 +853,12 @@ namespace CalamityOverhaul.Content.HackTimes
             //伪十六进制标签
             string tag = $"NET::0x{(int)(timer * 100) % 0xFFFF:X4}";
             Utils.DrawBorderString(sb, tag, new Vector2(baseX + ItemWidth - 110, bottomY),
-                HackTheme.Accent * (alpha * 0.22f), 0.24f);
+                HackTheme.Accent * (alpha * 0.22f), 0.36f);
 
             //协议计数
             string countStr = HackTime.Protocols.Format(displayCount);
             Utils.DrawBorderString(sb, countStr, new Vector2(baseX + ItemWidth - 110, bottomY + 20),
-                HackTheme.TextDim * (alpha * 0.25f), 0.22f);
+                HackTheme.TextDim * (alpha * 0.25f), 0.34f);
         }
 
         #endregion
