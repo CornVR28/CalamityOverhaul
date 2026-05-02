@@ -302,9 +302,20 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                     if (iconScale > 1f) iconScale = 1f;
                     Vector2 iconCenter = new(r.Right - 6f * Scale - frame.Width * iconScale * 0.5f,
                         r.Y + r.Height * 0.5f);
-                    sb.Draw(iconTex, iconCenter, frame, Color.White * a, 0f,
-                        new Vector2(frame.Width * 0.5f, frame.Height * 0.5f),
-                        iconScale, SpriteEffects.None, 0f);
+                    //已装配的改件走赛博朋克滤镜，按其识别色重映射
+                    if (equipped.ModItem is Modules.SHPCModuleItem mod
+                        && Modules.SHPCModuleRender.Begin(sb, mod.TintColor,
+                            new Vector2(iconTex.Width, iconTex.Height), Main.UIScaleMatrix, mod.TintIntensity)) {
+                        sb.Draw(iconTex, iconCenter, frame, Color.White * a, 0f,
+                            new Vector2(frame.Width * 0.5f, frame.Height * 0.5f),
+                            iconScale, SpriteEffects.None, 0f);
+                        Modules.SHPCModuleRender.End(sb);
+                    }
+                    else {
+                        sb.Draw(iconTex, iconCenter, frame, Color.White * a, 0f,
+                            new Vector2(frame.Width * 0.5f, frame.Height * 0.5f),
+                            iconScale, SpriteEffects.None, 0f);
+                    }
                 }
             }
             else {

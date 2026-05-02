@@ -1693,3 +1693,165 @@ ResonanceFrameModule: {
 		Harmonic-stacked frame leaks an extra beam, intensifying the volley
 		''' */
 }
+
+AdaptiveOpticModule: {
+	// DisplayName: Adaptive Optic
+	/* Tooltip:
+		'''
+		SHPC Module · Optic Slot
+		Neural-link algorithms continuously correct trajectory, locking each beam tighter onto its target
+		''' */
+}
+
+AssaultStockModule: {
+	// DisplayName: Assault Stock
+	/* Tooltip:
+		'''
+		SHPC Module · Stock Slot
+		Adrenaline-assisted bracing cycles the weapon more aggressively, raising firepower at higher mana cost
+		''' */
+}
+
+BalancedGripModule: {
+	// DisplayName: Balanced Grip
+	/* Tooltip:
+		'''
+		SHPC Module · Grip Slot
+		Re-tuned weight distribution gives a small all-around boost to fire rate, damage and stability
+		''' */
+}
+
+CapacitorBankModule: {
+	// DisplayName: Capacitor Bank
+	/* Tooltip:
+		'''
+		SHPC Module · Power Slot
+		Dense capacitor stack tops the orb off in a much shorter cycle, but dampens its launch energy
+		''' */
+}
+
+CrystalGripModule: {
+	// DisplayName: Crystal Grip
+	/* Tooltip:
+		'''
+		SHPC Module · Grip Slot
+		Synthetic crystal dielectric resonates with the user, trimming mana cost and boosting crit, but slowing charge
+		''' */
+}
+
+EfficientGripModule: {
+	// DisplayName: Efficient Grip
+	/* Tooltip:
+		'''
+		SHPC Module · Grip Slot
+		Engineering-grade ergonomic grip refines both energy draw and trigger cadence
+		''' */
+}
+
+HeavyBarrelModule: {
+	// DisplayName: Heavy Barrel
+	/* Tooltip:
+		'''
+		SHPC Module · Barrel Slot
+		Reinforced rifling crushes spread and cadence, turning every shot into a heavy strike
+		''' */
+}
+
+HighVoltageCoreModule: {
+	// DisplayName: High Voltage Core
+	/* Tooltip:
+		'''
+		SHPC Module · Power Slot
+		Output voltage is pushed up the scale, amplifying both raw and merged-beam damage at extra mana cost
+		''' */
+}
+
+HoloOpticModule: {
+	// DisplayName: Holo Optic
+	/* Tooltip:
+		'''
+		SHPC Module · Optic Slot
+		Holographic reticle locks the impact point, slashing spread and accelerating the trigger at slight mana overhead
+		''' */
+}
+
+HypersonicBarrelModule: {
+	// DisplayName: Hypersonic Barrel
+	/* Tooltip:
+		'''
+		SHPC Module · Barrel Slot
+		Sonic-shock chamber pushes beams to extreme velocity, but fine homing can no longer keep up
+		''' */
+}
+
+KineticDamperModule: {
+	// DisplayName: Kinetic Damper Stock
+	/* Tooltip:
+		'''
+		SHPC Module · Stock Slot
+		Liquid damper swallows recoil, all but eliminating spread and granting a small crit edge
+		''' */
+}
+
+LightStockModule: {
+	// DisplayName: Light Stock
+	/* Tooltip:
+		'''
+		SHPC Module · Stock Slot
+		Carbon-composite frame greatly increases fire rate at a mild cost to stability and per-shot power
+		''' */
+}
+
+MultiCellFrameModule: {
+	// DisplayName: Multi-Cell Frame
+	/* Tooltip:
+		'''
+		SHPC Module · Frame Slot
+		Parallel cooling cells discharge two beams at once, widening coverage at the cost of per-beam damage
+		''' */
+}
+
+PlasmaInjectorModule: {
+	// DisplayName: Plasma Injector
+	/* Tooltip:
+		'''
+		SHPC Module · Power Slot
+		High-enthalpy plasma injection vastly amplifies orb velocity and merged-beam damage, charging slightly slower
+		''' */
+}
+
+QuantumFrameModule: {
+	// DisplayName: Quantum Frame
+	/* Tooltip:
+		'''
+		SHPC Module · Frame Slot
+		Quantum steering circuits make beams turn smarter and orbs fly faster at slightly elevated mana cost
+		''' */
+}
+
+ScattershotBarrelModule: {
+	// DisplayName: Scattershot Barrel
+	/* Tooltip:
+		'''
+		SHPC Module · Barrel Slot
+		Fractured muzzle splits each shot into a spray of beams, drastically expanding coverage but tanking per-beam damage
+		''' */
+}
+
+ThermalOpticModule: {
+	// DisplayName: Thermal Optic
+	/* Tooltip:
+		'''
+		SHPC Module · Optic Slot
+		Infrared lock makes beams cling to their target, doubling down with both precision and crit gains
+		''' */
+}
+
+VolatileFrameModule: {
+	// DisplayName: Volatile Frame
+	/* Tooltip:
+		'''
+		SHPC Module · Frame Slot
+		Overclocked cooling lattice squeezes out an extra beam and crit chance, while mana draw and spread spike
+		''' */
+}

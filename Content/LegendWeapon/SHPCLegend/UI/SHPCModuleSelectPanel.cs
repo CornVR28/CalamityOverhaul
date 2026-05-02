@@ -261,19 +261,23 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             //适配贴图最大尺寸
             float tw = tex.Width;
             float th = tex.Height;
-            //如果带帧动画，使用第一帧
-            if (Main.itemAnimations[item.type] != null) {
-                Rectangle frame = Main.itemAnimations[item.type].GetFrame(tex);
-                tw = frame.Width; th = frame.Height;
-                float scale = MathF.Min(maxSize / tw, maxSize / th);
-                if (scale > 1f) scale = 1f;
+            Rectangle frame = Main.itemAnimations[item.type] != null
+                ? Main.itemAnimations[item.type].GetFrame(tex)
+                : tex.Bounds;
+            tw = frame.Width; th = frame.Height;
+            float scale = MathF.Min(maxSize / tw, maxSize / th);
+            if (scale > 1f) scale = 1f;
+
+            //改件物品额外走赛博朋克滤镜，使背包列表中也能按色调区分
+            if (item.ModItem is SHPCModuleItem mod
+                && SHPCModuleRender.Begin(sb, mod.TintColor,
+                    new Vector2(tex.Width, tex.Height), Main.UIScaleMatrix, mod.TintIntensity)) {
                 sb.Draw(tex, center, frame, Color.White * a, 0f,
                     new Vector2(tw * 0.5f, th * 0.5f), scale, SpriteEffects.None, 0f);
+                SHPCModuleRender.End(sb);
             }
             else {
-                float scale = MathF.Min(maxSize / tw, maxSize / th);
-                if (scale > 1f) scale = 1f;
-                sb.Draw(tex, center, null, Color.White * a, 0f,
+                sb.Draw(tex, center, frame, Color.White * a, 0f,
                     new Vector2(tw * 0.5f, th * 0.5f), scale, SpriteEffects.None, 0f);
             }
         }
