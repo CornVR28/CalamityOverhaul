@@ -13,7 +13,6 @@ namespace CalamityOverhaul.Content.Cyberwares.Implementation.Sandevistans
     /// </summary>
     internal class SandevistanGhostActor : Actor
     {
-        private static Player ghostRenderPlayer;
         private static RenderTarget2D ghostRT;
         private static uint lastBatchDrawFrame;
 
@@ -82,89 +81,142 @@ namespace CalamityOverhaul.Content.Cyberwares.Implementation.Sandevistans
             //结束 ActorLoader 的批次
             spriteBatch.End();
 
-            // === Phase 1: 将所有残影绘制到独立RT ===
-            gd.SetRenderTarget(ghostRT);
-            gd.Clear(Color.Transparent);
+            //标记 SpriteBatch 的状态，确保异常路径下也能恢复 ActorLoader 期望的批次
+            bool batchActive = false;
 
-            //PlayerRenderer.DrawPlayer 内部管理自己的 Begin/End
-            //需要一个活跃批次让它的首次 End 不崩溃
+            try {
+                // === Phase 1: 将所有残影绘制到独立RT ===
+                gd.SetRenderTarget(ghostRT);
+                gd.Clear(Color.Transparent);
+
+                //PlayerRenderer.DrawPlayer 内部管理自己的 Begin/End
+                //需要一个活跃批次让它的首次 End 不崩溃
+                spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                    SamplerState.PointClamp, null, Main.Rasterizer, null, Main.GameViewMatrix.ZoomMatrix);
+                batchActive = true;
+
+                foreach (SandevistanGhostActor ghost in ghosts) {
+                    if (!ghost.Active || ghost.Alpha <= 0.01f) {
+                        continue;
+                    }
+
+                    if (ghost.OwnerIndex < 0 || ghost.OwnerIndex >= Main.maxPlayers) {
+                        continue;
+                    }
+
+                    Player source = Main.player[ghost.OwnerIndex];
+                    if (source == null || !source.active || source.dead) {
+                        continue;
+                    }
+
+                    DrawGhostFromSource(source, ghost);
+                }
+
+                //DrawPlayer 结束后会留一个活跃批次，关掉它
+                spriteBatch.End();
+                batchActive = false;
+
+                // === Phase 2: 切换回原始RT，用着色器处理ghost RT后绘制到屏幕 ===
+                RestorePreviousTargets(gd, previousTargets);
+
+                spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend);
+                batchActive = true;
+
+                spriteBatch.Draw(ghostRT, Vector2.Zero, Color.White);
+
+                spriteBatch.End();
+                batchActive = false;
+            }
+            catch (Exception ex) {
+                CWRMod.Instance?.Logger.Warn("[Sandevistan] Ghost render failed: " + ex);
+                if (batchActive) {
+                    try { spriteBatch.End(); } catch { }
+                }
+                RestorePreviousTargets(gd, previousTargets);
+            }
+
+            //恢复 ActorLoader 所需的原始批次（无论成功失败都需要）
             spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                SamplerState.PointClamp, null, Main.Rasterizer, null, Main.GameViewMatrix.ZoomMatrix);
+                Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer,
+                null, Main.GameViewMatrix.TransformationMatrix);
 
-            ghostRenderPlayer ??= new Player();
+            return false;
+        }
 
-            foreach (SandevistanGhostActor ghost in ghosts) {
-                if (!ghost.Active || ghost.Alpha <= 0.01f) {
-                    continue;
-                }
+        //直接借用源玩家做位置快照绘制，避免使用未初始化的 new Player() 触发 BoringSetup_End 除零
+        private static void DrawGhostFromSource(Player source, SandevistanGhostActor ghost) {
+            //保存原始状态
+            Vector2 origPosition = source.position;
+            Vector2 origVelocity = source.velocity;
+            int origDirection = source.direction;
+            Rectangle origBodyFrame = source.bodyFrame;
+            Rectangle origLegFrame = source.legFrame;
+            float origFullRotation = source.fullRotation;
+            Vector2 origFullRotationOrigin = source.fullRotationOrigin;
+            Color origSkin = source.skinColor;
+            Color origShirt = source.shirtColor;
+            Color origUnderShirt = source.underShirtColor;
+            Color origPants = source.pantsColor;
+            Color origShoe = source.shoeColor;
+            Color origHair = source.hairColor;
+            Color origEye = source.eyeColor;
 
-                Player source = Main.player[ghost.OwnerIndex];
-                if (source == null || !source.active) {
-                    continue;
-                }
+            try {
+                source.position = ghost.SnapshotPosition;
+                source.velocity = ghost.SnapshotVelocity;
+                source.direction = ghost.SnapshotDirection;
+                source.bodyFrame = ghost.SnapshotBodyFrame;
+                source.legFrame = ghost.SnapshotLegFrame;
+                source.fullRotation = ghost.SnapshotFullRotation;
+                source.fullRotationOrigin = ghost.SnapshotFullRotationOrigin;
 
-                Player gp = ghostRenderPlayer;
-                gp.CopyVisuals(source);
-                gp.ResetEffects();
-                gp.position = ghost.SnapshotPosition;
-                gp.velocity = ghost.SnapshotVelocity;
-                gp.direction = ghost.SnapshotDirection;
-                gp.bodyFrame = ghost.SnapshotBodyFrame;
-                gp.legFrame = ghost.SnapshotLegFrame;
-                gp.fullRotation = ghost.SnapshotFullRotation;
-                gp.fullRotationOrigin = ghost.SnapshotFullRotationOrigin;
-                gp.skinVariant = source.skinVariant;
-                gp.heldProj = -1;
-
-                //颜色渐变：蓝 → 青绿，RGB保持明亮，仅用A通道控制淡出
+                //颜色渐变：蓝 → 青绿，仅用 A 通道控制淡出
                 float fadeProgress = 1f - ghost.Alpha;
                 Color startColor = new Color(0, 180, 255, 255);
                 Color endColor = new Color(0, 255, 200, 255);
                 Color tint = Color.Lerp(startColor, endColor, fadeProgress);
                 tint.A = (byte)(255 * ghost.Alpha);
 
-                gp.skinColor = tint;
-                gp.shirtColor = tint;
-                gp.underShirtColor = tint;
-                gp.pantsColor = tint;
-                gp.shoeColor = tint;
-                gp.hairColor = tint;
-                gp.eyeColor = tint;
+                source.skinColor = tint;
+                source.shirtColor = tint;
+                source.underShirtColor = tint;
+                source.pantsColor = tint;
+                source.shoeColor = tint;
+                source.hairColor = tint;
+                source.eyeColor = tint;
 
                 Main.PlayerRenderer.DrawPlayer(
-                    Main.Camera, gp, gp.position,
-                    gp.fullRotation, gp.fullRotationOrigin
+                    Main.Camera, source, source.position,
+                    source.fullRotation, source.fullRotationOrigin
                 );
             }
+            finally {
+                //恢复原始状态
+                source.position = origPosition;
+                source.velocity = origVelocity;
+                source.direction = origDirection;
+                source.bodyFrame = origBodyFrame;
+                source.legFrame = origLegFrame;
+                source.fullRotation = origFullRotation;
+                source.fullRotationOrigin = origFullRotationOrigin;
+                source.skinColor = origSkin;
+                source.shirtColor = origShirt;
+                source.underShirtColor = origUnderShirt;
+                source.pantsColor = origPants;
+                source.shoeColor = origShoe;
+                source.hairColor = origHair;
+                source.eyeColor = origEye;
+            }
+        }
 
-            //DrawPlayer 结束后会留一个活跃批次，关掉它
-            spriteBatch.End();
-
-            // === Phase 2: 切换回原始RT，用着色器处理ghost RT后绘制到屏幕 ===
-            if (previousTargets.Length > 0) {
-                gd.SetRenderTarget((RenderTarget2D)previousTargets[0].RenderTarget);
+        private static void RestorePreviousTargets(GraphicsDevice gd, RenderTargetBinding[] previousTargets) {
+            if (previousTargets != null && previousTargets.Length > 0
+                && previousTargets[0].RenderTarget != null) {
+                gd.SetRenderTargets(previousTargets);
             }
             else {
                 gd.SetRenderTarget(null);
             }
-
-            spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend);
-
-            //Effect shader = SandevistanAssets.SandevistanGhost;
-            //if (shader != null) {
-            //    shader.Parameters["glowIntensity"]?.SetValue(0.4f);
-            //    shader.CurrentTechnique.Passes[0].Apply();
-            //}
-
-            spriteBatch.Draw(ghostRT, Vector2.Zero, Color.White);
-            spriteBatch.End();
-
-            //恢复 ActorLoader 所需的原始批次
-            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
-                Main.DefaultSamplerState, DepthStencilState.None, Main.Rasterizer,
-                null, Main.GameViewMatrix.TransformationMatrix);
-
-            return false;
         }
 
         private static void EnsureRT(GraphicsDevice gd) {
