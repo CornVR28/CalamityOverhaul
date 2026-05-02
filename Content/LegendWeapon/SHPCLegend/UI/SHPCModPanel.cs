@@ -34,9 +34,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             new(84f * Scale, -38f * Scale),      //BARREL  枪管  右上（枪管向前延伸侧）
             new(0f, -76f * Scale),               //OPTIC   瞄具  正上（镜座自然安装位）
             new(84f * Scale, 38f * Scale),       //POWER   能源  右下
-            new(0f, 76f * Scale),                //STOCK   枪托  正下
+            new(-84f * Scale, -38f * Scale),     //STOCK   枪托  左上
             new(-84f * Scale, 38f * Scale),      //GRIP    握把  左下
-            new(-84f * Scale, -38f * Scale),     //FRAME   机匣  左上
+            new(0f, 76f * Scale),                //FRAME   机匣  正下
         };
 
         //枪体纹理显示缩放，SHPC原始贴图约82×26px，1.4x时绘制尺寸约115×36
@@ -52,9 +52,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             new(62f * ConnectFactor, -20f * ConnectFactor),  //BARREL  右上引出  枪口侧上方
             new(5f * ConnectFactor, -24f * ConnectFactor),   //OPTIC   向上引出  枪管顶部镜座
             new(62f * ConnectFactor, 18f * ConnectFactor),   //POWER   右下引出  枪口侧下方
-            new(-55f * ConnectFactor, 26f * ConnectFactor),  //STOCK   向下引出  枪托底部
+            new(-62f * ConnectFactor, -18f * ConnectFactor), //STOCK   左上引出  枪托侧上方
             new(-15f * ConnectFactor, 26f * ConnectFactor),  //GRIP    左下引出  握把底部
-            new(-62f * ConnectFactor, -18f * ConnectFactor), //FRAME   左上引出  枪托侧上方
+            new(-55f * ConnectFactor, 26f * ConnectFactor),  //FRAME   向下引出  机匣底部
         };
 
         //槽位显示标签通过本地化系统获取，避免硬编码英文
