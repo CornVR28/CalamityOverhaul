@@ -47,6 +47,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
         /// </summary>
         public static void Exit() {
             CybCourseCompletePanel.Hide();
+            CybCourseKeyBindReminderPanel.Hide();
             ScenarioManager.Reset<CybCourseOutroDialogue>();
             HackTime.InfiniteHack = false;
             CybCourseWorld.Exit();

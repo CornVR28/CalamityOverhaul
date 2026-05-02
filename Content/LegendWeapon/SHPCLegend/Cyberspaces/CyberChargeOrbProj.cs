@@ -95,6 +95,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         /// <summary>蓄力循环音效跟踪</summary>
         private SlotId chargeSoundSlot;
 
+        /// <summary>蹄力时间倍率，由 localAI[1] 注入；默认 1f</summary>
+        private float chargeTimeMul = 1f;
+        /// <summary>能量球飞行速度倍率，由 localAI[2] 注入；默认 1f</summary>
+        private float flySpeedMul = 1f;
+
         private OrbState State {
             get => (OrbState)Projectile.ai[0];
             set => Projectile.ai[0] = (float)value;
@@ -137,6 +142,13 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             if (!Owner.active || Owner.dead) {
                 Projectile.Kill();
                 return;
+            }
+
+            //首帧读取改件倍率注入值
+            if (Projectile.localAI[0] == 0f) {
+                chargeTimeMul = Projectile.localAI[1] > 0f ? Projectile.localAI[1] : 1f;
+                flySpeedMul = Projectile.localAI[2] > 0f ? Projectile.localAI[2] : 1f;
+                Projectile.localAI[0] = 1f;
             }
 
             //超驱检测与过渡
@@ -212,7 +224,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             else {
                 chargeTime++;
             }
-            chargeRatio = MathHelper.Clamp((float)chargeTime / MaxChargeFrames, 0f, 1f);
+            chargeRatio = MathHelper.Clamp((float)chargeTime / (MaxChargeFrames * MathF.Max(chargeTimeMul, 0.1f)), 0f, 1f);
 
             //蓄力音效：从开始蓄力即播放，pitch 随蓄力比例递增，超驱时额外升调+抖动
             if (chargeTime == 1 && Main.netMode != NetmodeID.Server) {
@@ -313,7 +325,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             Vector2 aimDir = UnitToMouseV;
             flyAngle = aimDir.ToRotation();
             float timeScale = TimeGear.TimeScale;
-            Projectile.velocity = aimDir * FlySpeed * timeScale;
+            Projectile.velocity = aimDir * FlySpeed * flySpeedMul * timeScale;
             Projectile.tileCollide = true;
             Projectile.timeLeft = 300; //飞行最多5秒
 
@@ -344,7 +356,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         private void AI_Flying() {
             //根据变速齿轮缩放飞行速度，方向从flyAngle恢复避免冻结后丢失
             float timeScale = TimeGear.TimeScale;
-            float effectiveSpeed = FlySpeed * timeScale;
+            float effectiveSpeed = FlySpeed * flySpeedMul * timeScale;
             Projectile.velocity = flyAngle.ToRotationVector2() * effectiveSpeed;
 
             Projectile.rotation = flyAngle;

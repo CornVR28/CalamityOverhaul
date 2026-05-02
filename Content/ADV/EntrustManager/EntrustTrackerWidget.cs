@@ -77,6 +77,22 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
             }
         }
 
+        /// <summary>追踪栏当前是否已基本完全展示</summary>
+        public bool IsFullyVisible => slideProgress > 0.85f && trackedEntries.Count > 0;
+
+        /// <summary>追踪栏当前可见性进度，0~1</summary>
+        public float VisibleProgress => slideProgress;
+
+        /// <summary>获取所有被关注条目的整体外接矩形，用于外部 UI 定位</summary>
+        public Rectangle GetTrackerBounds() {
+            if (trackedEntries.Count == 0) return Rectangle.Empty;
+            Rectangle union = GetWidgetRect(0);
+            for (int i = 1; i < trackedEntries.Count; i++) {
+                union = Rectangle.Union(union, GetWidgetRect(i));
+            }
+            return union;
+        }
+
         public override void OnEnterWorld() {
             slideProgress = 0f;
             collapseProgress = 0f;

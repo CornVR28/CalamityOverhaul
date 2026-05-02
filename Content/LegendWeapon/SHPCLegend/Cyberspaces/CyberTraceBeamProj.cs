@@ -114,6 +114,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         /// <summary>当前帧有效拖尾顶点数，供 WidthFunction 使用</summary>
         private int currentValidCount;
 
+        /// <summary>追踪强度倍率，由 ai[1] 注入；默认 1f</summary>
+        private float homingMul = 1f;
+
         #endregion
 
         public override void SetStaticDefaults() {
@@ -144,6 +147,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
                 if (themeIndex < 0) themeIndex = 0;
                 theme = Themes[themeIndex];
                 flyAngle = Projectile.velocity.ToRotation();
+                //ai[1] 由发射处注入，>0 时作为追踪倍率，未设置（==0）按 1f 处理
+                homingMul = Projectile.ai[1] > 0f ? Projectile.ai[1] : 1f;
                 Projectile.localAI[0] = 1f;
             }
 
@@ -152,11 +157,12 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
 
             //微追踪：仅在有运动时执行，方向存入flyAngle，冻结时保留原方向
             if (effectiveSpeed > 0.01f) {
-                NPC target = Projectile.Center.FindClosestNPC(120f, true, true);
+                float searchRange = 120f * MathF.Max(homingMul, 1f);
+                NPC target = Projectile.Center.FindClosestNPC(searchRange, true, true);
                 if (target != null && Projectile.numHits == 0) {
                     float targetAngle = (target.Center - Projectile.Center).ToRotation();
                     float angleDiff = MathHelper.WrapAngle(targetAngle - flyAngle);
-                    float maxTurn = 0.04f;
+                    float maxTurn = 0.04f * homingMul;
                     flyAngle += MathHelper.Clamp(angleDiff, -maxTurn, maxTurn);
                 }
             }

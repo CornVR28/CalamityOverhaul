@@ -17,10 +17,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios
         /// </summary>
         public virtual string Key => Name;
         /// <summary>
-        /// 场景是否已完成
-        /// </summary>
-        public bool IsCompleted { get; private set; }
-        /// <summary>
         /// 声明式触发策略，由<see cref="ADVScenarioScheduler"/>统一评估。
         /// 返回null表示该场景使用传统的<see cref="Update"/>手写逻辑
         /// </summary>
@@ -431,10 +427,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios
         }
 
         internal void Complete() {
-            if (!IsCompleted) {
-                IsCompleted = true;
-                OnScenarioComplete();
-            }
+            OnScenarioComplete();
 
             lines.Clear();
 
@@ -450,6 +443,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios
 
         public virtual void Update(ADVSave save, Player player) { }
 
-        public void Reset() => IsCompleted = false;
+        public virtual void Reset() { }
     }
 }

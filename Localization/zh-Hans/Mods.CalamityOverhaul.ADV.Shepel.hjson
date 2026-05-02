@@ -502,3 +502,17 @@ ShepelUnderworldDialogue: {
 	VBloodMoon_Line1: 血月加地狱，两套警报系统同时运行，有点忙。
 	VBloodMoon_Line2: 不过数据倒是很丰富。主人请多注意安全。
 }
+
+CybCourseKeyBindReminderPanel: {
+	// Title: BIND ALERT
+	// Subtitle: 未绑定的核心快捷键
+	/* Hint:
+		'''
+		以下快捷键尚未绑定，离开超梦后将无法正常使用对应功能。
+		请前往 [设置 → 控件] 中为它们指定按键。
+		''' */
+	// UnboundLabel: 未绑定
+	// BtnConfirm: 我已知晓
+	// BtnLater: 稍后处理
+	// Footer: "// 任意选项都将断开超梦连接，绑定可在主世界设置中随时调整"
+}

@@ -1,4 +1,4 @@
-ElementWhip: {
+﻿ElementWhip: {
 	DisplayName: 元素长鞭
 	Tooltip:
 		'''
@@ -1618,4 +1618,67 @@ RamRecoveryUpgradeChip: {
 Mewtwo: {
 	DisplayName: 超梦芯片
 	Tooltip: 使用后进入超梦
+}
+
+RapidBarrelModule: {
+	DisplayName: 速射枪管
+	Tooltip:
+		'''
+		SHPC 改件 · 枪管插槽
+		超长复进簧带来灼热脉冲，但代价是稳定性与单发威力
+		'''
+}
+
+FocusBarrelModule: {
+	DisplayName: 聚束枪管
+	Tooltip:
+		'''
+		SHPC 改件 · 枪管插槽
+		三束追踪光束被强制汇拢为一束，造成灾难性的集中打击
+		'''
+}
+
+PrecisionOpticModule: {
+	DisplayName: 精密瞄具
+	Tooltip:
+		'''
+		SHPC 改件 · 瞄具插槽
+		激光辅助瞄准消除全部弹道散布，并提供额外暴击机率
+		'''
+}
+
+OverloadCoreModule: {
+	DisplayName: 超载核心
+	Tooltip:
+		'''
+		SHPC 改件 · 能源插槽
+		以更快的循环逻辑取代缓冲，使能量球蓄力更快、飞行更迅猛
+		'''
+}
+
+SteadyStockModule: {
+	DisplayName: 稳压枪托
+	Tooltip:
+		'''
+		SHPC 改件 · 枪托插槽
+		复合式重型枪托吸纳冲击，以一定射速换取每发额外伤害
+		'''
+}
+
+HarmonyGripModule: {
+	DisplayName: 谐振握把
+	Tooltip:
+		'''
+		SHPC 改件 · 握把插槽
+		生物电感传导握把以人体导通法力，大幅压低魔力消耗
+		'''
+}
+
+ResonanceFrameModule: {
+	DisplayName: 共振机匣
+	Tooltip:
+		'''
+		SHPC 改件 · 机匣插槽
+		谐波叠加机匣额外溢出一束光束，火力倾泻更加密集
+		'''
 }

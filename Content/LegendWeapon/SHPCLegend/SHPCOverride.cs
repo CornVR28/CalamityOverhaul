@@ -1,5 +1,6 @@
 ﻿using CalamityOverhaul.Common;
 using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
+using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules;
 using InnoVault.GameSystem;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -177,6 +178,14 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
 
         public override bool On_ModifyWeaponDamage(Item item, Player player, ref StatModifier damage) => SHPCDamage(item, ref damage);
 
+        public override bool? On_ModifyWeaponCrit(Item item, Player player, ref float crit) {
+            ShootContext ctx = SHPCModificationSystem.Resolve(item);
+            if (ctx.CritAdd != 0) {
+                crit += ctx.CritAdd;
+            }
+            return null;
+        }
+
         public override bool? On_ModifyTooltips(Item item, List<TooltipLine> tooltips) {
             CWRItem.OverModifyTooltip(item, tooltips);
             SetTooltip(item, ref tooltips);
@@ -196,6 +205,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
         /// <br/>左键时：正常使用
         /// </summary>
         public override bool? On_CanUseItem(Item item, Player player) {
+            ShootContext ctx = SHPCModificationSystem.Resolve(item);
             if (player.altFunctionUse == 2) {
                 // 右键蓄力模式：channel + noUseGraphic，且场上没有同类蓄力弹幕
                 item.channel = true;
@@ -205,11 +215,13 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
                 return player.ownedProjectileCounts[ModContent.ProjectileType<SHPCChargeHeldProj>()] <= 0;
             }
             else {
-                // 左键射击模式
+                // 左键射击模式，按改件攻速倍率缩放 useTime
                 item.channel = false;
                 item.noUseGraphic = false;
                 item.UseSound = null;
-                item.useAnimation = item.useTime = LeftClickUseTime;
+                int scaled = (int)(LeftClickUseTime / MathF.Max(ctx.AttackSpeedMul, 0.1f));
+                if (scaled < 1) scaled = 1;
+                item.useAnimation = item.useTime = scaled;
                 return true;
             }
         }
@@ -225,7 +237,10 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
         public override void ModifyManaCost(Item item, Player player, ref float reduce, ref float mult) {
             if (player.altFunctionUse == 2) {
                 mult *= 0f;
+                return;
             }
+            ShootContext ctx = SHPCModificationSystem.Resolve(item);
+            mult *= ctx.ManaCostMul;
         }
 
         /// <summary>
@@ -235,6 +250,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
         /// </summary>
         public override bool? On_Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source,
             Vector2 position, Vector2 velocity, int type, int damage, float knockback) {
+            ShootContext ctx = SHPCModificationSystem.Resolve(item);
             if (player.altFunctionUse == 2) {
                 // 右键：先生成手持弹幕（绘制武器 + 控制手臂动画）
                 int heldIdx = Projectile.NewProjectile(source, player.Center, Vector2.Zero,
@@ -243,28 +259,43 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
 
                 // 再生成蓄力能量球，ai[1] 传递手持弹幕索引以定位枪口
                 Vector2 spawnPos = player.Center + velocity.SafeNormalize(Vector2.UnitX) * 70f;
-                Projectile.NewProjectile(source, spawnPos, Vector2.Zero,
+                int orbDamage = (int)(damage * 2 * ctx.DamageMul);
+                int orbIdx = Projectile.NewProjectile(source, spawnPos, Vector2.Zero,
                     ModContent.ProjectileType<CyberChargeOrbProj>(),
-                    damage * 2, knockback, player.whoAmI,
+                    orbDamage, knockback, player.whoAmI,
                     ai1: heldIdx);
+                //通过 localAI 传递蓄力时间与飞行速度倍率，能量球首帧读取
+                if (orbIdx >= 0 && orbIdx < Main.maxProjectiles) {
+                    Main.projectile[orbIdx].localAI[1] = ctx.ChargeTimeMul;
+                    Main.projectile[orbIdx].localAI[2] = ctx.OrbSpeedMul;
+                }
             }
             else {
-                // 左键：发射三发追踪光束，带小幅散射
+                // 左键：根据改件决定单发或散射
                 SoundEngine.PlaySound(SoundID.Item92, player.Center);
-                Vector2 baseVel = velocity.SafeNormalize(Vector2.UnitX) * 14f;
+                float speedMul = MathF.Max(ctx.BeamSpeedMul, 0.1f);
+                Vector2 baseVel = velocity.SafeNormalize(Vector2.UnitX) * (14f * speedMul);
                 Vector2 dir = velocity.UnitVector();
                 position += new Vector2(dir.X * 20, -12);
-                for (int i = 0; i < BeamCount; i++) {
-                    // 均匀散射 + 少量随机偏移
-                    float spreadOffset = (i - (BeamCount - 1) / 2f) * BeamSpreadAngle;
-                    float randomOffset = Main.rand.NextFloat(-0.03f, 0.03f);
+
+                int beams = ctx.MergeBeams ? 1 : System.Math.Max(1, BeamCount + ctx.BeamCountAdd);
+                float spreadAngle = BeamSpreadAngle * MathF.Max(ctx.SpreadMul, 0f);
+                int finalDamage = (int)(damage * ctx.DamageMul * (ctx.MergeBeams ? ctx.MergedDamageBonus : 1f));
+                if (finalDamage < 1) finalDamage = 1;
+
+                for (int i = 0; i < beams; i++) {
+                    float spreadOffset = beams > 1 ? (i - (beams - 1) / 2f) * spreadAngle : 0f;
+                    float randomOffset = spreadAngle > 0f ? Main.rand.NextFloat(-0.03f, 0.03f) : 0f;
                     Vector2 shotVel = baseVel.RotatedBy(spreadOffset + randomOffset);
 
-                    // ai[0] 传递颜色主题索引（0=蓝, 1=黄, 2=青）
-                    Projectile.NewProjectile(source, position + shotVel * 2f, shotVel,
+                    int beamIdx = Projectile.NewProjectile(source, position + shotVel * 2f, shotVel,
                         ModContent.ProjectileType<CyberTraceBeamProj>(),
-                        damage, knockback, player.whoAmI,
+                        finalDamage, knockback, player.whoAmI,
                         ai0: Main.rand.Next(3));
+                    //ai[1] 传递追踪倍率，>0 时弹幕首帧应用
+                    if (beamIdx >= 0 && beamIdx < Main.maxProjectiles) {
+                        Main.projectile[beamIdx].ai[1] = ctx.HomingMul;
+                    }
                 }
             }
 
@@ -282,6 +313,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
 
         public static bool SHPCDamage(Item Item, ref StatModifier damage) {
             CWRUtils.ModifyLegendWeaponDamageFunc(Item, GetOnDamage(Item), GetStartDamage, ref damage);
+            //叠加改件提供的伤害倍率
+            ShootContext ctx = SHPCModificationSystem.Resolve(Item);
+            if (ctx.DamageMul != 1f) {
+                damage *= ctx.DamageMul;
+            }
             return false;
         }
 

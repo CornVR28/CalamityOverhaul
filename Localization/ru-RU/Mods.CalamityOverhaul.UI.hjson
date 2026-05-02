@@ -754,6 +754,10 @@ SHPCUI: {
 	// Modify_Subtitle: Gun Augmentation
 	// Modify_Description: Install modification parts into SHPC chassis
 	// Modify_SlotEmpty: EMPTY
+	// Modify_Install: INSTALL
+	// Modify_Unequip: UNEQUIP
+	// Modify_Equipped: EQUIPPED
+	// Modify_NoMatch: "// no compatible modules in inventory"
 	// Talk_Title: TALK
 	// Talk_Subtitle: Neural Link
 	// Talk_Description: Open a direct channel to SHPC
@@ -781,6 +785,21 @@ EntrustManagerLead: {
 	TextStyleButtonAction: " →  切换界面样式"
 	TextStyleButtonDesc: "     可以在荒漠、嘉登与森林风格之间循环切换"
 	TextConfirmBtn: 明白了
+	// TextTrackPromptTitle: 关注感兴趣的委托
+	// TextTrackPromptHintLabel: 右键单击委托
+	// TextTrackPromptHintAction: " →  设为已关注"
+	// TextTrackPromptDesc: "     被关注的委托会被固定显示在屏幕左侧的追踪栏中，方便随时查看进度"
+	// TextTrackPromptNextBtn: 下一步
+	// TextTrackerIntroTitle: 委托追踪栏
+	// TextTrackerIntroLine1: 屏幕左侧的追踪栏会常驻显示所有被关注的委托
+	// TextTrackerIntroLine2: 按住左键拖动它，可以在垂直方向调整位置
+	// TextTrackerIntroLine3: 打开委托管理器时追踪栏会自动收起，避免遮挡
+	// TextTrackerIntroNextBtn: 下一步
+	// TextSuspendIntroTitle: 挂起不感兴趣的委托
+	// TextSuspendIntroHintLabel: 中键单击委托
+	// TextSuspendIntroHintAction: " →  挂起委托"
+	// TextSuspendIntroDesc1: "     挂起后的委托不会出现在左侧追踪栏中，适合暂时搁置"
+	// TextSuspendIntroDesc2: "     可在  已挂起  选项卡中找到它们并恢复关注"
 }
 
 AbandonedPortalStrings: {

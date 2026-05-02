@@ -56,6 +56,10 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
         public static LocalizedText Modify_Subtitle { get; private set; }
         public static LocalizedText Modify_Description { get; private set; }
         public static LocalizedText Modify_SlotEmpty { get; private set; }
+        public static LocalizedText Modify_Install { get; private set; }
+        public static LocalizedText Modify_Unequip { get; private set; }
+        public static LocalizedText Modify_Equipped { get; private set; }
+        public static LocalizedText Modify_NoMatch { get; private set; }
         public static LocalizedText State_On { get; private set; }
         public static LocalizedText State_Off { get; private set; }
         public static LocalizedText State_Layer { get; private set; }
@@ -110,6 +114,10 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             Modify_Subtitle = this.GetLocalization(nameof(Modify_Subtitle), () => "Gun Augmentation");
             Modify_Description = this.GetLocalization(nameof(Modify_Description), () => "Install modification parts into SHPC chassis");
             Modify_SlotEmpty = this.GetLocalization(nameof(Modify_SlotEmpty), () => "EMPTY");
+            Modify_Install = this.GetLocalization(nameof(Modify_Install), () => "INSTALL");
+            Modify_Unequip = this.GetLocalization(nameof(Modify_Unequip), () => "UNEQUIP");
+            Modify_Equipped = this.GetLocalization(nameof(Modify_Equipped), () => "EQUIPPED");
+            Modify_NoMatch = this.GetLocalization(nameof(Modify_NoMatch), () => "// no compatible modules in inventory");
             State_On = this.GetLocalization(nameof(State_On), () => "ON");
             State_Off = this.GetLocalization(nameof(State_Off), () => "OFF");
             State_Layer = this.GetLocalization(nameof(State_Layer), () => "L");
@@ -171,6 +179,75 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
 
         #endregion
 
+        //供 SHPCModPanel 调用：打开三级模块选择面板
+        public void OpenModuleSelect(int slotIdx) {
+            if (slotIdx < 0 || slotIdx >= 6) {
+                pinnedModuleSlot = -1;
+                return;
+            }
+            pinnedModuleSlot = slotIdx;
+        }
+
+        public void CloseModuleSelect() {
+            pinnedModuleSlot = -1;
+        }
+
+        public int PinnedModuleSlot => pinnedModuleSlot;
+
+        /// <summary>
+        /// 处理三级模块选择面板的左键点击
+        /// </summary>
+        private void HandleModuleSelectClick(Player owner) {
+            if (pinnedModuleSlot < 0) {
+                return;
+            }
+            if (moduleHover == SHPCModuleSelectPanel.HitKind.Close) {
+                pinnedModuleSlot = -1;
+                return;
+            }
+            Item heldItem = owner.GetItem();
+            SHPCData sd = SHPCData.TryGet(heldItem);
+            if (sd == null) {
+                return;
+            }
+            if (moduleHover == SHPCModuleSelectPanel.HitKind.Unequip) {
+                Item taken = sd.TakeModule(pinnedModuleSlot);
+                if (taken != null && !taken.IsAir) {
+                    owner.QuickSpawnItem(owner.GetSource_Misc("SHPCModule"), taken, taken.stack);
+                }
+                return;
+            }
+            if (moduleHover == SHPCModuleSelectPanel.HitKind.Row) {
+                int rowIdx = moduleLayout.HoveredRow;
+                System.Collections.Generic.IReadOnlyList<Item> list =
+                    SHPCModuleSelectPanel.CurrentCandidates;
+                if (rowIdx < 0 || rowIdx >= list.Count) {
+                    return;
+                }
+                Item picked = list[rowIdx];
+                //装入新模块，旧模块返还为新背包物品
+                Item swapped = sd.PutModule(pinnedModuleSlot, picked);
+                //从背包移除一个 picked
+                int found = -1;
+                for (int i = 0; i < owner.inventory.Length; i++) {
+                    if (owner.inventory[i] == picked) {
+                        found = i;
+                        break;
+                    }
+                }
+                if (found >= 0) {
+                    owner.inventory[found].stack--;
+                    if (owner.inventory[found].stack <= 0) {
+                        owner.inventory[found].TurnToAir();
+                    }
+                }
+                if (swapped != null && !swapped.IsAir) {
+                    owner.QuickSpawnItem(owner.GetSource_Misc("SHPCModule"), swapped, swapped.stack);
+                }
+                return;
+            }
+        }
+
         //供外部代码（如教程系统）强制展开操作面板
         public void ForceExpand() {
             if (expanded) return;
@@ -218,6 +295,14 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
         private SHPCCyberPanel.HitKind cyberHover;
         //缓存上一帧改造面板悬停的插槽
         private SHPCModPanel.HitKind modHover;
+        //当前固定的三级模块选择面板对应槽位索引，-1为未开启
+        private int pinnedModuleSlot = -1;
+        //三级模块选择面板的不透明度，平滑跟随
+        private float modulePanelProgress;
+        //缓存上一帧三级模块选择面板悬停命中
+        private SHPCModuleSelectPanel.HitKind moduleHover;
+        //三级模块选择面板布局缓存（每帧重建）
+        private SHPCModuleSelectPanel.Layout moduleLayout;
 
         //全局时间，单位秒
         private float time;
@@ -409,6 +494,13 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             if (pinnedSector < 0 && pinnedPanelProgress < 0.02f) {
                 pinnedPanelProgress = 0f;
             }
+            //三级模块面板进度：仅在二级面板为 Modify 且已选中插槽时打开
+            float moduleTarget = (pinnedSector == ModifySectorIndex && pinnedModuleSlot >= 0
+                && pinnedPanelProgress > 0.6f) ? 1f : 0f;
+            modulePanelProgress = MathHelper.Lerp(modulePanelProgress, moduleTarget, 0.22f);
+            if (pinnedSector != ModifySectorIndex) {
+                pinnedModuleSlot = -1;
+            }
             cyberHover = SHPCCyberPanel.HitKind.None;
             modHover = SHPCModPanel.HitKind.None;
             SHPCCyberPanel.Layout cyberLayout = default;
@@ -431,6 +523,20 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                     modLayout = SHPCModPanel.Compute(panelAnchor, panelMidA, pinnedPanelProgress);
                     modHover = SHPCModPanel.HitTest(modLayout, MousePosition);
                     cyberPanelHit = modLayout.Panel.Contains((int)MousePosition.X, (int)MousePosition.Y);
+
+                    //三级模块选择面板：叠在 mod 面板右侧（复用 outDir偏移）
+                    if (pinnedModuleSlot >= 0 && modulePanelProgress > 0.4f) {
+                        Vector2 outDir = SHPCRenderer.AngleDir(panelMidA);
+                        Vector2 modAnchor = panelAnchor + outDir * (SHPCModPanel.PanelW + 12f);
+                        moduleLayout = SHPCModuleSelectPanel.Compute(modAnchor, panelMidA, modulePanelProgress);
+                        SHPCModuleSelectPanel.RefreshCandidates((Modules.SHPCSlotCategory)pinnedModuleSlot);
+                        moduleHover = SHPCModuleSelectPanel.HitTest(ref moduleLayout, MousePosition,
+                            SHPCModuleSelectPanel.CurrentCandidates.Count);
+                        if (moduleLayout.Panel.Contains((int)MousePosition.X, (int)MousePosition.Y)) {
+                            cyberPanelHit = true;
+                        }
+                        //三级面板存在时屏蔽二级插槽点击，仅保留 hover 插槽索引同步提示（可点击同一插槽关闭）
+                    }
                 }
             }
             //每帧推进赛博面板段位悬停延展进度，面板不可见时强制衰减
@@ -472,6 +578,10 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                         SHPCCyberPanel.HandleClick(cyberHover, player);
                         SoundEngine.PlaySound(SoundID.MenuTick);
                     }
+                }
+                else if (pinnedModuleSlot >= 0 && moduleHover != SHPCModuleSelectPanel.HitKind.None) {
+                    HandleModuleSelectClick(player);
+                    SoundEngine.PlaySound(SoundID.MenuTick);
                 }
                 else if (modHover != SHPCModPanel.HitKind.None) {
                     SHPCModPanel.HandleClick(modHover, player);
@@ -591,6 +701,26 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                 else if (pinnedSector == ModifySectorIndex) {
                     SHPCModPanel.Layout layout = SHPCModPanel.Compute(fAnchor, fMidA, pinnedPanelProgress);
                     SHPCModPanel.Draw(sb, px, layout, pinnedPanelProgress, globalAlpha, modHover);
+
+                    //三级模块选择面板
+                    if (pinnedModuleSlot >= 0 && modulePanelProgress > 0.02f) {
+                        Vector2 outDir = SHPCRenderer.AngleDir(fMidA);
+                        Vector2 modAnchor = fAnchor + outDir * (SHPCModPanel.PanelW + 12f);
+                        SHPCModuleSelectPanel.Layout modLayout = SHPCModuleSelectPanel.Compute(
+                            modAnchor, fMidA, modulePanelProgress);
+                        SHPCModuleSelectPanel.RefreshCandidates(
+                            (Modules.SHPCSlotCategory)pinnedModuleSlot);
+                        //重新 HitTest 以同步 HoveredRow（不影响点击逻辑）
+                        SHPCModuleSelectPanel.HitKind hover = SHPCModuleSelectPanel.HitTest(
+                            ref modLayout, MousePosition,
+                            SHPCModuleSelectPanel.CurrentCandidates.Count);
+                        Item heldItem = Main.LocalPlayer.GetItem();
+                        Item equipped = SHPCData.TryGet(heldItem) is SHPCData d
+                            ? d.GetModule(pinnedModuleSlot) : null;
+                        SHPCModuleSelectPanel.Draw(sb, px, modLayout,
+                            modulePanelProgress, globalAlpha, hover,
+                            pinnedModuleSlot, equipped);
+                    }
                 }
             }
         }

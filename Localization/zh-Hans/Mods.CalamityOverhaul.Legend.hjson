@@ -1,4 +1,4 @@
-﻿HalibutText: {
+HalibutText: {
 	FishByStudied:
 		'''
 		[i:CalamityMod/HalibutCannon]:
@@ -348,7 +348,7 @@ SHPCTrialQuestLine: {
 		腐化之脑与血肉聚合体都是具备群体意识的感染源。
 		主人，请清除它们。其协同寄生模式已纳入待采集列表。
 		'''
-	TrialSummary_3: 
+	TrialSummary_3:
 		'''
 		凝胶聚合体——无中枢、无固定形态的神明级目标。
 		主人，请击碎它的核心。这种混沌架构我会妥善记录。

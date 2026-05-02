@@ -6,7 +6,6 @@
     public interface IADVScenario
     {
         string Key { get; }
-        bool IsCompleted { get; }
         void Start();
         void Reset();
     }

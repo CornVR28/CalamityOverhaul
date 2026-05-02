@@ -19,6 +19,9 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
             KeyPrompt,
             PanelIntro,
             StyleButtonPrompt,
+            TrackPromptInPanel,
+            TrackerWidgetIntro,
+            SuspendInfoInPanel,
             Complete
         }
 
@@ -42,6 +45,24 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
         public static LocalizedText TextStyleButtonLabel { get; private set; }
         public static LocalizedText TextStyleButtonAction { get; private set; }
         public static LocalizedText TextStyleButtonDesc { get; private set; }
+        //阶段4：关注引导
+        public static LocalizedText TextTrackPromptTitle { get; private set; }
+        public static LocalizedText TextTrackPromptHintLabel { get; private set; }
+        public static LocalizedText TextTrackPromptHintAction { get; private set; }
+        public static LocalizedText TextTrackPromptDesc { get; private set; }
+        public static LocalizedText TextTrackPromptNextBtn { get; private set; }
+        //阶段5：追踪栏介绍
+        public static LocalizedText TextTrackerIntroTitle { get; private set; }
+        public static LocalizedText TextTrackerIntroLine1 { get; private set; }
+        public static LocalizedText TextTrackerIntroLine2 { get; private set; }
+        public static LocalizedText TextTrackerIntroLine3 { get; private set; }
+        public static LocalizedText TextTrackerIntroNextBtn { get; private set; }
+        //阶段6：挂起说明
+        public static LocalizedText TextSuspendIntroTitle { get; private set; }
+        public static LocalizedText TextSuspendIntroHintLabel { get; private set; }
+        public static LocalizedText TextSuspendIntroHintAction { get; private set; }
+        public static LocalizedText TextSuspendIntroDesc1 { get; private set; }
+        public static LocalizedText TextSuspendIntroDesc2 { get; private set; }
         public static LocalizedText TextConfirmBtn { get; private set; }
 
         public override void SetStaticDefaults() {
@@ -61,6 +82,21 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
             TextStyleButtonLabel = this.GetLocalization(nameof(TextStyleButtonLabel), () => "左键单击顶部小按钮");
             TextStyleButtonAction = this.GetLocalization(nameof(TextStyleButtonAction), () => " →  切换界面样式");
             TextStyleButtonDesc = this.GetLocalization(nameof(TextStyleButtonDesc), () => "     可以在荒漠、嘉登与森林风格之间循环切换");
+            TextTrackPromptTitle = this.GetLocalization(nameof(TextTrackPromptTitle), () => "关注感兴趣的委托");
+            TextTrackPromptHintLabel = this.GetLocalization(nameof(TextTrackPromptHintLabel), () => "右键单击委托");
+            TextTrackPromptHintAction = this.GetLocalization(nameof(TextTrackPromptHintAction), () => " →  设为已关注");
+            TextTrackPromptDesc = this.GetLocalization(nameof(TextTrackPromptDesc), () => "     被关注的委托会被固定显示在屏幕左侧的追踪栏中，方便随时查看进度");
+            TextTrackPromptNextBtn = this.GetLocalization(nameof(TextTrackPromptNextBtn), () => "下一步");
+            TextTrackerIntroTitle = this.GetLocalization(nameof(TextTrackerIntroTitle), () => "委托追踪栏");
+            TextTrackerIntroLine1 = this.GetLocalization(nameof(TextTrackerIntroLine1), () => "屏幕左侧的追踪栏会常驻显示所有被关注的委托");
+            TextTrackerIntroLine2 = this.GetLocalization(nameof(TextTrackerIntroLine2), () => "按住左键拖动它，可以在垂直方向调整位置");
+            TextTrackerIntroLine3 = this.GetLocalization(nameof(TextTrackerIntroLine3), () => "打开委托管理器时追踪栏会自动收起，避免遮挡");
+            TextTrackerIntroNextBtn = this.GetLocalization(nameof(TextTrackerIntroNextBtn), () => "下一步");
+            TextSuspendIntroTitle = this.GetLocalization(nameof(TextSuspendIntroTitle), () => "挂起不感兴趣的委托");
+            TextSuspendIntroHintLabel = this.GetLocalization(nameof(TextSuspendIntroHintLabel), () => "中键单击委托");
+            TextSuspendIntroHintAction = this.GetLocalization(nameof(TextSuspendIntroHintAction), () => " →  挂起委托");
+            TextSuspendIntroDesc1 = this.GetLocalization(nameof(TextSuspendIntroDesc1), () => "     挂起后的委托不会出现在左侧追踪栏中，适合暂时搁置");
+            TextSuspendIntroDesc2 = this.GetLocalization(nameof(TextSuspendIntroDesc2), () => "     可在  已挂起  选项卡中找到它们并恢复关注");
             TextConfirmBtn = this.GetLocalization(nameof(TextConfirmBtn), () => "明白了");
         }
 
@@ -137,6 +173,28 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
                     }
                     break;
 
+                case LeadPhase.TrackPromptInPanel:
+                    animProgress = MathHelper.Lerp(animProgress, 1f, AnimSpeed);
+                    //面板被关闭时退回按键提示阶段
+                    if (!ui.IsOpen) {
+                        currentPhase = LeadPhase.KeyPrompt;
+                        animProgress = 0f;
+                    }
+                    break;
+
+                case LeadPhase.TrackerWidgetIntro:
+                    animProgress = MathHelper.Lerp(animProgress, 1f, AnimSpeed);
+                    //进入该阶段时已手动关闭面板，如果玩家手动重新打开也不干预
+                    break;
+
+                case LeadPhase.SuspendInfoInPanel:
+                    animProgress = MathHelper.Lerp(animProgress, 1f, AnimSpeed);
+                    if (!ui.IsOpen) {
+                        currentPhase = LeadPhase.KeyPrompt;
+                        animProgress = 0f;
+                    }
+                    break;
+
                 case LeadPhase.Complete:
                     break;
             }
@@ -144,7 +202,8 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
 
         public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers) {
             if (currentPhase != LeadPhase.KeyPrompt && currentPhase != LeadPhase.PanelIntro
-                && currentPhase != LeadPhase.StyleButtonPrompt) return;
+                && currentPhase != LeadPhase.StyleButtonPrompt && currentPhase != LeadPhase.TrackPromptInPanel
+                && currentPhase != LeadPhase.TrackerWidgetIntro && currentPhase != LeadPhase.SuspendInfoInPanel) return;
             if (CybCourse.IsActive) return;
 
             int idx = layers.FindIndex(l => l.Name == "Vanilla: Mouse Text");
@@ -160,6 +219,12 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
                         DrawPanelIntroCard(sb);
                     else if (currentPhase == LeadPhase.StyleButtonPrompt)
                         DrawStyleButtonPromptCard(sb);
+                    else if (currentPhase == LeadPhase.TrackPromptInPanel)
+                        DrawTrackPromptCard(sb);
+                    else if (currentPhase == LeadPhase.TrackerWidgetIntro)
+                        DrawTrackerIntroCard(sb);
+                    else if (currentPhase == LeadPhase.SuspendInfoInPanel)
+                        DrawSuspendIntroCard(sb);
                     return true;
                 },
                 InterfaceScaleType.UI
@@ -415,7 +480,7 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
             bool clickedStyleButton = styleRect.Contains(Main.mouseX, Main.mouseY)
                 && Main.mouseLeft && !Main.mouseLeftRelease;
             if (clickedStyleButton || DrawConfirmButton(sb, card, alpha))
-                MarkGuideSeen();
+                StartTrackPrompt();
         }
 
         private static void DrawStyleButtonHighlight(SpriteBatch sb, Rectangle styleRect, float alpha) {
@@ -427,6 +492,248 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
             glowRect.Inflate(3, 3);
             BaseManagerStyle.StrokeRect(sb, glowRect, 1,
                 new Color(255, 230, 140, (int)(120 * alpha * pulse)));
+        }
+
+        // ─── 阶段4：关注委托引导卡 ────────────────────────────────────────────
+
+        //阶段4卡片尺寸
+        private const int CardW4 = 318;
+        private const int CardH4 = 122;
+
+        private static void StartTrackPrompt() {
+            currentPhase = LeadPhase.TrackPromptInPanel;
+            animProgress = 0f;
+        }
+
+        private static void DrawTrackPromptCard(SpriteBatch sb) {
+            var ui = QuestManagerUI.Instance;
+            if (ui == null) return;
+
+            float slideX = (1f - animProgress) * 80f;
+            float x = ui.PanelRightEdge + 15f - slideX;
+            float y = (Main.screenHeight - CardH4) * 0.5f;
+            float alpha = animProgress;
+            var card = new Rectangle((int)x, (int)y, CardW4, CardH4);
+
+            DrawCardBackground(sb, card, 1.5f, alpha);
+            DrawLeftArrow(sb, new Vector2(x - 8f, y + CardH4 * 0.5f), alpha);
+
+            var font = FontAssets.MouseText.Value;
+            float titleScale = 0.80f;
+            float bodyScale = 0.68f;
+            float subScale = 0.62f;
+            float px = x + 14f, py = y + 11f;
+            float lineH_t = font.MeasureString("A").Y * titleScale + 2f;
+            float lineH_b = font.MeasureString("A").Y * bodyScale + 2f;
+            float lineH_s = font.MeasureString("A").Y * subScale + 2f;
+
+            Utils.DrawBorderString(sb, TextTrackPromptTitle.Value,
+                new Vector2(px, py),
+                new Color(230, 225, 100, (int)(255 * alpha)), titleScale);
+            py += lineH_t + 2f;
+
+            BaseManagerStyle.FillRect(sb,
+                new Rectangle((int)px, (int)py, CardW4 - 28, 1),
+                new Color(130, 125, 70, (int)(130 * alpha)));
+            py += 6f;
+
+            float keyW = font.MeasureString(TextTrackPromptHintLabel.Value).X * bodyScale;
+            Utils.DrawBorderString(sb, TextTrackPromptHintLabel.Value,
+                new Vector2(px, py),
+                new Color(95, 210, 255, (int)(240 * alpha)), bodyScale);
+            Utils.DrawBorderString(sb, TextTrackPromptHintAction.Value,
+                new Vector2(px + keyW, py),
+                new Color(200, 240, 255, (int)(240 * alpha)), bodyScale);
+            py += lineH_b;
+
+            int descWrapW = (int)((CardW4 - 28) / subScale);
+            string[] wrapped = Utils.WordwrapString(TextTrackPromptDesc.Value, font, descWrapW, 99, out _);
+            foreach (string wl in wrapped) {
+                if (string.IsNullOrEmpty(wl)) continue;
+                Utils.DrawBorderString(sb, wl.TrimEnd('-', ' '), new Vector2(px, py),
+                    new Color(135, 170, 180, (int)(205 * alpha)), subScale);
+                py += lineH_s;
+            }
+
+            if (DrawConfirmButton(sb, card, alpha, TextTrackPromptNextBtn.Value))
+                StartTrackerWidgetIntro();
+        }
+
+        // ─── 阶段5：追踪栏侧边介绍卡 ────────────────────────────────────────────
+
+        //阶段5卡片尺寸
+        private const int CardW5 = 312;
+        private const int CardH5 = 138;
+
+        private static void StartTrackerWidgetIntro() {
+            //自动收起委托管理器面板，把焦点交给左侧追踪栏
+            var ui = QuestManagerUI.Instance;
+            if (ui != null && ui.IsOpen) ui.TogglePanel();
+            currentPhase = LeadPhase.TrackerWidgetIntro;
+            animProgress = 0f;
+        }
+
+        private static void DrawTrackerIntroCard(SpriteBatch sb) {
+            var widget = EntrustTrackerWidget.Instance;
+
+            //追踪栏外接矩形（如果不可用则使用一个屏幕左侧的预估区域）
+            Rectangle trackerRect;
+            if (widget != null && widget.GetTrackerBounds() is { Width: > 0 } bounds) {
+                trackerRect = bounds;
+            }
+            else {
+                trackerRect = new Rectangle(8, (int)(Main.screenHeight * 0.35f), 220, 100);
+            }
+
+            DrawTrackerHighlight(sb, trackerRect, animProgress);
+
+            float slideX = (1f - animProgress) * 70f;
+            float x = MathHelper.Clamp(trackerRect.Right + 18f + slideX, 20f, Main.screenWidth - CardW5 - 20f);
+            float y = MathHelper.Clamp(trackerRect.Y - 4f, 20f, Main.screenHeight - CardH5 - 20f);
+            float alpha = animProgress;
+            var card = new Rectangle((int)x, (int)y, CardW5, CardH5);
+
+            DrawCardBackground(sb, card, 0.25f, alpha);
+            DrawLeftArrow(sb, new Vector2(x - 8f, MathHelper.Clamp(trackerRect.Y + trackerRect.Height * 0.5f,
+                y + 14f, y + CardH5 - 14f)), alpha);
+
+            var font = FontAssets.MouseText.Value;
+            float titleScale = 0.80f;
+            float bodyScale = 0.66f;
+            float px = x + 14f, py = y + 11f;
+            float lineH_t = font.MeasureString("A").Y * titleScale + 2f;
+            float lineH_b = font.MeasureString("A").Y * bodyScale + 2f;
+
+            Utils.DrawBorderString(sb, TextTrackerIntroTitle.Value,
+                new Vector2(px, py),
+                new Color(255, 200, 110, (int)(255 * alpha)), titleScale);
+            py += lineH_t + 2f;
+
+            BaseManagerStyle.FillRect(sb,
+                new Rectangle((int)px, (int)py, CardW5 - 28, 1),
+                new Color(160, 130, 70, (int)(140 * alpha)));
+            py += 6f;
+
+            int descWrapW = (int)((CardW5 - 28) / bodyScale);
+            DrawBulletLine(sb, font, TextTrackerIntroLine1.Value, ref py, px, bodyScale, descWrapW,
+                new Color(225, 235, 245, (int)(235 * alpha)),
+                new Color(255, 200, 120, (int)(240 * alpha)), alpha);
+            DrawBulletLine(sb, font, TextTrackerIntroLine2.Value, ref py, px, bodyScale, descWrapW,
+                new Color(190, 210, 230, (int)(220 * alpha)),
+                new Color(255, 200, 120, (int)(240 * alpha)), alpha);
+            DrawBulletLine(sb, font, TextTrackerIntroLine3.Value, ref py, px, bodyScale, descWrapW,
+                new Color(170, 195, 215, (int)(210 * alpha)),
+                new Color(255, 200, 120, (int)(240 * alpha)), alpha);
+
+            if (DrawConfirmButton(sb, card, alpha, TextTrackerIntroNextBtn.Value))
+                StartSuspendIntro();
+        }
+
+        private static void DrawTrackerHighlight(SpriteBatch sb, Rectangle rect, float alpha) {
+            float pulse = 0.65f + MathF.Sin(shaderTimer * 38f) * 0.35f;
+            Rectangle glowRect = rect;
+            glowRect.Inflate(4, 4);
+            BaseManagerStyle.StrokeRect(sb, glowRect, 2,
+                new Color(255, 205, 110, (int)(195 * alpha * pulse)));
+            glowRect.Inflate(3, 3);
+            BaseManagerStyle.StrokeRect(sb, glowRect, 1,
+                new Color(255, 230, 160, (int)(110 * alpha * pulse)));
+        }
+
+        private static void DrawBulletLine(SpriteBatch sb, ReLogic.Graphics.DynamicSpriteFont font, string text,
+            ref float py, float px, float scale, int wrapWidth,
+            Color textColor, Color bulletColor, float alpha) {
+            //绘制项目符号
+            string bullet = "·";
+            float bulletW = font.MeasureString(bullet).X * scale + 4f;
+            Utils.DrawBorderString(sb, bullet, new Vector2(px, py), bulletColor, scale);
+
+            string[] wrapped = Utils.WordwrapString(text, font, wrapWidth, 99, out _);
+            float lineH = font.MeasureString("A").Y * scale + 2f;
+            bool first = true;
+            foreach (string wl in wrapped) {
+                if (string.IsNullOrEmpty(wl)) continue;
+                Utils.DrawBorderString(sb, wl.TrimEnd('-', ' '),
+                    new Vector2(px + bulletW, py), textColor, scale);
+                py += lineH;
+                first = false;
+            }
+            if (first) py += lineH;
+        }
+
+        // ─── 阶段6：挂起委托说明卡 ────────────────────────────────────────────
+
+        //阶段6卡片尺寸
+        private const int CardW6 = 318;
+        private const int CardH6 = 138;
+
+        private static void StartSuspendIntro() {
+            //重新打开面板，让玩家联系到挂起操作的位置
+            var ui = QuestManagerUI.Instance;
+            if (ui != null && !ui.IsOpen) ui.TogglePanel();
+            currentPhase = LeadPhase.SuspendInfoInPanel;
+            animProgress = 0f;
+        }
+
+        private static void DrawSuspendIntroCard(SpriteBatch sb) {
+            var ui = QuestManagerUI.Instance;
+            if (ui == null) return;
+
+            float slideX = (1f - animProgress) * 80f;
+            float x = ui.PanelRightEdge + 15f - slideX;
+            float y = (Main.screenHeight - CardH6) * 0.5f;
+            float alpha = animProgress;
+            var card = new Rectangle((int)x, (int)y, CardW6, CardH6);
+
+            DrawCardBackground(sb, card, 1f, alpha);
+            DrawLeftArrow(sb, new Vector2(x - 8f, y + CardH6 * 0.5f), alpha);
+
+            var font = FontAssets.MouseText.Value;
+            float titleScale = 0.80f;
+            float bodyScale = 0.68f;
+            float subScale = 0.62f;
+            float px = x + 14f, py = y + 11f;
+            float lineH_t = font.MeasureString("A").Y * titleScale + 2f;
+            float lineH_b = font.MeasureString("A").Y * bodyScale + 2f;
+            float lineH_s = font.MeasureString("A").Y * subScale + 2f;
+
+            Utils.DrawBorderString(sb, TextSuspendIntroTitle.Value,
+                new Vector2(px, py),
+                new Color(180, 235, 165, (int)(255 * alpha)), titleScale);
+            py += lineH_t + 2f;
+
+            BaseManagerStyle.FillRect(sb,
+                new Rectangle((int)px, (int)py, CardW6 - 28, 1),
+                new Color(110, 150, 100, (int)(140 * alpha)));
+            py += 6f;
+
+            float keyW = font.MeasureString(TextSuspendIntroHintLabel.Value).X * bodyScale;
+            Utils.DrawBorderString(sb, TextSuspendIntroHintLabel.Value,
+                new Vector2(px, py),
+                new Color(130, 220, 145, (int)(240 * alpha)), bodyScale);
+            Utils.DrawBorderString(sb, TextSuspendIntroHintAction.Value,
+                new Vector2(px + keyW, py),
+                new Color(195, 240, 195, (int)(240 * alpha)), bodyScale);
+            py += lineH_b;
+
+            int descWrapW = (int)((CardW6 - 28) / subScale);
+            string[] wrapped1 = Utils.WordwrapString(TextSuspendIntroDesc1.Value, font, descWrapW, 99, out _);
+            foreach (string wl in wrapped1) {
+                if (string.IsNullOrEmpty(wl)) continue;
+                Utils.DrawBorderString(sb, wl.TrimEnd('-', ' '), new Vector2(px, py),
+                    new Color(120, 155, 120, (int)(200 * alpha)), subScale);
+                py += lineH_s;
+            }
+            string[] wrapped2 = Utils.WordwrapString(TextSuspendIntroDesc2.Value, font, descWrapW, 99, out _);
+            foreach (string wl in wrapped2) {
+                if (string.IsNullOrEmpty(wl)) continue;
+                Utils.DrawBorderString(sb, wl.TrimEnd('-', ' '), new Vector2(px, py),
+                    new Color(120, 155, 120, (int)(200 * alpha)), subScale);
+                py += lineH_s;
+            }
+
+            if (DrawConfirmButton(sb, card, alpha))
+                MarkGuideSeen();
         }
 
         // ─── 着色器背景（含降级回退） ────────────────────────────────────────────

@@ -131,7 +131,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
             }
             if (_exitRect.Contains(mx, my)) {
                 Main.mouseLeft = false;
-                CybCourse.Exit();
+                //隐藏当前面板，再交由按键绑定提醒面板决定是否弹窗或直接退出
+                Hide();
+                CybCourseKeyBindReminderPanel.ShowOrExit();
             }
         }
 

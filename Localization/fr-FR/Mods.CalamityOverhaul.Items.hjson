@@ -1616,3 +1616,66 @@ Mewtwo: {
 	// DisplayName: Mewtwo
 	// Tooltip: ""
 }
+
+RapidBarrelModule: {
+	// DisplayName: Rapid Barrel
+	/* Tooltip:
+		'''
+		SHPC Module · Barrel Slot
+		Hyper-extended recoil spring delivers searing pulses at the cost of stability and per-shot power
+		''' */
+}
+
+FocusBarrelModule: {
+	// DisplayName: Focus Barrel
+	/* Tooltip:
+		'''
+		SHPC Module · Barrel Slot
+		Forces the three tracking beams to converge into one catastrophic concentrated strike
+		''' */
+}
+
+PrecisionOpticModule: {
+	// DisplayName: Precision Optic
+	/* Tooltip:
+		'''
+		SHPC Module · Optic Slot
+		Laser-assisted aiming eliminates all spread and grants additional crit chance
+		''' */
+}
+
+OverloadCoreModule: {
+	// DisplayName: Overload Core
+	/* Tooltip:
+		'''
+		SHPC Module · Power Slot
+		Replaces the buffer with a faster cycling logic, charging the orb faster and launching it harder
+		''' */
+}
+
+SteadyStockModule: {
+	// DisplayName: Steady Stock
+	/* Tooltip:
+		'''
+		SHPC Module · Stock Slot
+		Composite heavy stock absorbs recoil, trading some fire rate for extra damage per shot
+		''' */
+}
+
+HarmonyGripModule: {
+	// DisplayName: Harmony Grip
+	/* Tooltip:
+		'''
+		SHPC Module · Grip Slot
+		Bio-conductive grip channels mana through the body, drastically reducing mana cost
+		''' */
+}
+
+ResonanceFrameModule: {
+	// DisplayName: Resonance Frame
+	/* Tooltip:
+		'''
+		SHPC Module · Frame Slot
+		Harmonic-stacked frame leaks an extra beam, intensifying the volley
+		''' */
+}

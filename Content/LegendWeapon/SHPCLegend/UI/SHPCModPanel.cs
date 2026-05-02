@@ -99,7 +99,21 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
         }
 
         public static void HandleClick(HitKind hit, Player owner) {
-            //暂无实现，后续用于打开具体改件选择界面
+            if (hit < HitKind.Slot0 || hit > HitKind.Slot5) {
+                return;
+            }
+            int slotIdx = (int)hit - 1;
+            //点击同一插槽可关闭（但这里包含在 SHPCUI 使用位于后面的逻辑）
+            SHPCUI ui = SHPCUI.Instance;
+            if (ui == null) {
+                return;
+            }
+            if (ui.PinnedModuleSlot == slotIdx) {
+                ui.CloseModuleSelect();
+            }
+            else {
+                ui.OpenModuleSelect(slotIdx);
+            }
         }
 
         public static void Draw(SpriteBatch sb, Texture2D px, in Layout layout,
@@ -148,10 +162,14 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             DrawDataLines(sb, px, gun, hover, time, a);
 
             //六个改件槽位
+            Item heldItem = Main.LocalPlayer?.GetItem();
+            SHPCData sd = SHPCData.TryGet(heldItem);
             for (int i = 0; i < SlotCount; i++) {
                 Rectangle slotRect = GetSlotRect(layout, i);
                 bool isHover = hover == (HitKind)(i + 1);
-                DrawSlot(sb, px, font, slotRect, SlotLabels[i], isHover, a);
+                bool isPinned = SHPCUI.Instance?.PinnedModuleSlot == i;
+                Item equipped = sd?.GetModule(i);
+                DrawSlot(sb, px, font, slotRect, SlotLabels[i], isHover || isPinned, equipped, a);
             }
 
             //SHPC枪体纹理（绘于最上层，置于分析线和槽位之上）
@@ -236,7 +254,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
         }
 
         private static void DrawSlot(SpriteBatch sb, Texture2D px,
-            DynamicSpriteFont font, Rectangle r, string label, bool isHover, float a) {
+            DynamicSpriteFont font, Rectangle r, string label, bool isHover, Item equipped, float a) {
             //投影
             SHPCRenderer.DrawFilledRect(sb, px,
                 new Rectangle(r.X + 2, r.Y + 2, r.Width, r.Height),
@@ -271,13 +289,32 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                 new Vector2(r.X + 7f * Scale, r.Y + (r.Height - labelSz.Y) * 0.5f),
                 (isHover ? SHPCTheme.Text : SHPCTheme.TextDim) * a, labelScale);
 
-            //右侧空槽标记
-            const string emptyMark = "--";
-            const float emptyScale = 0.34f * FontScale;
-            Vector2 emptySz = font.MeasureString(emptyMark) * emptyScale;
-            Utils.DrawBorderString(sb, emptyMark,
-                new Vector2(r.Right - 6f * Scale - emptySz.X, r.Y + (r.Height - emptySz.Y) * 0.5f),
-                SHPCTheme.TextDim * (0.55f * a), emptyScale);
+            //右侧：已装配时绘制该模块图标，否则绘制空槽标记
+            if (equipped != null && !equipped.IsAir) {
+                Main.instance.LoadItem(equipped.type);
+                Texture2D iconTex = TextureAssets.Item[equipped.type]?.Value;
+                if (iconTex != null) {
+                    Rectangle frame = Main.itemAnimations[equipped.type] != null
+                        ? Main.itemAnimations[equipped.type].GetFrame(iconTex)
+                        : iconTex.Bounds;
+                    float maxIcon = r.Height - 4f;
+                    float iconScale = MathF.Min(maxIcon / frame.Width, maxIcon / frame.Height);
+                    if (iconScale > 1f) iconScale = 1f;
+                    Vector2 iconCenter = new(r.Right - 6f * Scale - frame.Width * iconScale * 0.5f,
+                        r.Y + r.Height * 0.5f);
+                    sb.Draw(iconTex, iconCenter, frame, Color.White * a, 0f,
+                        new Vector2(frame.Width * 0.5f, frame.Height * 0.5f),
+                        iconScale, SpriteEffects.None, 0f);
+                }
+            }
+            else {
+                const string emptyMark = "--";
+                const float emptyScale = 0.34f * FontScale;
+                Vector2 emptySz = font.MeasureString(emptyMark) * emptyScale;
+                Utils.DrawBorderString(sb, emptyMark,
+                    new Vector2(r.Right - 6f * Scale - emptySz.X, r.Y + (r.Height - emptySz.Y) * 0.5f),
+                    SHPCTheme.TextDim * (0.55f * a), emptyScale);
+            }
         }
 
         private static void DrawGunTexture(SpriteBatch sb, Texture2D px,
