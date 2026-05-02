@@ -15,7 +15,21 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
 
         public static bool IsActive => CybCourseWorld.Active;
 
-        public static void Enter() => CybCourseWorld.Enter();
+        public static void Enter() {
+            //在切换子世界前清理玩家身上的"跨世界引用"，否则进入子世界后
+            //RecipeBrowser/MagicStorage/Fargo 等 Mod 在 OnEnterWorld 里调 FindRecipes 时
+            //Recipe.CollectItemsToCraftWithFrom 会拿主世界的 chest/sign/TileEntity 索引去访问子世界的
+            //Main.chest[] / TileEntity.ByID（已被换成空的），从而抛 NullReferenceException 闪退
+            Player p = Main.LocalPlayer;
+            if (p != null && p.active) {
+                p.chest = -1;
+                p.sign = -1;
+                p.SetTalkNPC(-1, fromNet: false);
+                p.tileEntityAnchor.Clear();
+                Main.npcChatText = string.Empty;
+            }
+            CybCourseWorld.Enter();
+        }
 
         //由FirstMetShepel_CybCourseAccept在进入子世界前调用，标记回到主世界后需发放凭证
         internal static void ScheduleMewtwoGrant() => _grantMewtwoOnExit = true;
