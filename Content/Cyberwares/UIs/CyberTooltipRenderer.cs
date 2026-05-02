@@ -45,8 +45,14 @@ namespace CalamityOverhaul.Content.Cyberwares.UIs
             Vector2 nameSize = MeasureString(name, textScale);
             Vector2 slotSize = MeasureString(slotName, smallScale);
 
-            // 计算描述文本行
-            string[] descLines = WrapText(desc, 220f, descScale);
+            // 计算描述文本行，先按换行符分段再调用官方换行接口
+            var descLineList = new System.Collections.Generic.List<string>();
+            foreach (string para in desc.Split('\n')) {
+                foreach (string wl in Utils.WordwrapString(para.TrimEnd('\r'), FontAssets.MouseText.Value, (int)(220f / descScale), 99, out _)) {
+                    if (wl != null) descLineList.Add(wl);
+                }
+            }
+            string[] descLines = [.. descLineList];
 
             float contentWidth = Math.Max(nameSize.X + IconSize + Padding, 200f);
             contentWidth = Math.Max(contentWidth, slotSize.X + 80f);
@@ -169,29 +175,6 @@ namespace CalamityOverhaul.Content.Cyberwares.UIs
             return font.MeasureString(text) * scale;
         }
 
-        /// <summary>
-        /// 简易文本自动换行
-        /// </summary>
-        private static string[] WrapText(string text, float maxWidth, float scale) {
-            if (string.IsNullOrWhiteSpace(text)) return [];
 
-            string[] words = text.Split(' ');
-            System.Collections.Generic.List<string> lines = [];
-            string currentLine = "";
-
-            foreach (string word in words) {
-                string testLine = currentLine.Length == 0 ? word : currentLine + " " + word;
-                if (MeasureString(testLine, scale).X > maxWidth && currentLine.Length > 0) {
-                    lines.Add(currentLine);
-                    currentLine = word;
-                }
-                else {
-                    currentLine = testLine;
-                }
-            }
-            if (currentLine.Length > 0) lines.Add(currentLine);
-
-            return [.. lines];
-        }
     }
 }
