@@ -1,4 +1,5 @@
-﻿using Terraria;
+﻿using CalamityOverhaul.Common;
+using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -22,7 +23,7 @@ namespace CalamityOverhaul.Content.RAMSystems
             Item.consumable = true;
             Item.rare = ItemRarityID.Cyan;
             Item.value = Item.sellPrice(gold: 1);
-            Item.UseSound = SoundID.Item4;
+            Item.UseSound = CWRSound.ChipSet;
             Item.autoReuse = true;
         }
 

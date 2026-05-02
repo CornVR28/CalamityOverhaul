@@ -105,5 +105,6 @@ namespace CalamityOverhaul.Common
         public static SoundStyle VoidTruned;
         public static SoundStyle InvasionPast;
         public static SoundStyle InvasionPastPosten;
+        public static SoundStyle ChipSet;
     }
 }
