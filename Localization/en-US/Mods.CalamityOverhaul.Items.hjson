@@ -1,4 +1,4 @@
-ElementWhip: {
+﻿ElementWhip: {
 	DisplayName: Element Whip
 	Tooltip: A Whip infused with the energy of the Moon and the Elements.
 }
@@ -1618,11 +1618,6 @@ Elysium: {
 	Tooltip_JudgmentActiveText: Last Three Seals judgment in progress
 	Tooltip_RevelationActiveText: Revelation active Q:Meteor R:Seal Judgment RMB:Horsemen {0}/4
 	Tooltip_JudasWarningText: Warning: Judas's betrayal lurks beside you
-}
-
-MechanizedWood: {
-	DisplayName: Mechanized Wood
-	Tooltip: ""
 }
 
 SandevistansItem: {

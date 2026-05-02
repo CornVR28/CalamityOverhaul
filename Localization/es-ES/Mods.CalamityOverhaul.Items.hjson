@@ -1611,11 +1611,6 @@ Elysium: {
 	// Tooltip_JudasWarningText: Warning: Judas's betrayal lurks beside you
 }
 
-MechanizedWood: {
-	// DisplayName: Mechanized Wood
-	// Tooltip: ""
-}
-
 SandevistansItem: {
 	// DisplayName: Sandevistans Item
 	// Tooltip: Militech Sandevistan Mk.5 — Slows perceived time by 70% for 3.5 seconds. Cooldown 15s.
