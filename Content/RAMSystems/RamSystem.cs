@@ -21,7 +21,12 @@ namespace CalamityOverhaul.Content.RAMSystems
     {
         void ICWRLoader.UnLoadData() => UnloadReset();
 
-        private static RAMPlayer Local => Main.LocalPlayer.GetModPlayer<RAMPlayer>();
+        private static RAMPlayer Local {
+            get {
+                if (Main.LocalPlayer == null || !Main.LocalPlayer.active) return null;
+                return Main.LocalPlayer.GetModPlayer<RAMPlayer>();
+            }
+        }
 
         #region 默认值与边界
 
@@ -122,11 +127,14 @@ namespace CalamityOverhaul.Content.RAMSystems
             if (frames <= 0) {
                 return;
             }
-            var local = Local;
-            local.CurrentRam = 0f;
-            local.RecoveryCooldown = 0f;
             lockTimer = frames;
             lockTotalFrames = frames;
+            var local = Local;
+            if (local == null) {
+                return;
+            }
+            local.CurrentRam = 0f;
+            local.RecoveryCooldown = 0f;
             local.InvokeOnDepleted();
         }
 
@@ -150,33 +158,33 @@ namespace CalamityOverhaul.Content.RAMSystems
 
         #region 永久基础值（委托至 RAMPlayer 实例）
 
-        public static int UsedCapacityUpgradeChips => Local.UsedCapacityUpgradeChips;
-        public static int UsedRecoveryUpgradeChips => Local.UsedRecoveryUpgradeChips;
+        public static int UsedCapacityUpgradeChips => Local?.UsedCapacityUpgradeChips ?? 0;
+        public static int UsedRecoveryUpgradeChips => Local?.UsedRecoveryUpgradeChips ?? 0;
 
         public static int BaseMaxRam {
-            get => Local.BaseMaxRam;
-            set => Local.BaseMaxRam = value;
+            get => Local?.BaseMaxRam ?? DefaultBaseMaxRam;
+            set { var l = Local; if (l != null) l.BaseMaxRam = value; }
         }
 
         public static float BaseRecoveryRate {
-            get => Local.BaseRecoveryRate;
-            set => Local.BaseRecoveryRate = value;
+            get => Local?.BaseRecoveryRate ?? DefaultBaseRecoveryRate;
+            set { var l = Local; if (l != null) l.BaseRecoveryRate = value; }
         }
 
         #endregion
 
         #region 生效值（委托至 RAMPlayer 实例）
 
-        public static int MaxRam => Local.MaxRam;
-        public static float RecoveryRate => Local.RecoveryRate;
+        public static int MaxRam => Local?.MaxRam ?? DefaultBaseMaxRam;
+        public static float RecoveryRate => Local?.RecoveryRate ?? DefaultBaseRecoveryRate;
 
         public static float CurrentRam {
-            get => Local.CurrentRam;
-            set => Local.CurrentRam = value;
+            get => Local?.CurrentRam ?? 0f;
+            set { var l = Local; if (l != null) l.CurrentRam = value; }
         }
 
-        public static int DisplayCurrent => Local.DisplayCurrent;
-        public static float Ratio => Local.Ratio;
+        public static int DisplayCurrent => Local?.DisplayCurrent ?? 0;
+        public static float Ratio => Local?.Ratio ?? 0f;
 
         #endregion
 
@@ -186,21 +194,26 @@ namespace CalamityOverhaul.Content.RAMSystems
             if (provider == null) {
                 return;
             }
-            if (!Local.Providers.Contains(provider)) {
-                Local.Providers.Add(provider);
+            var local = Local;
+            if (local == null) {
+                return;
+            }
+            if (!local.Providers.Contains(provider)) {
+                local.Providers.Add(provider);
             }
         }
 
         public static void UnregisterProvider(IRamModifierProvider provider) {
-            if (provider != null) {
-                Local.Providers.Remove(provider);
+            if (provider == null) {
+                return;
             }
+            Local?.Providers.Remove(provider);
         }
 
         /// <summary>
         /// 当前已注册的修饰器数量（仅供调试/UI 展示）
         /// </summary>
-        public static int ProviderCount => Local.Providers.Count;
+        public static int ProviderCount => Local?.Providers.Count ?? 0;
 
         #endregion
 
@@ -231,6 +244,9 @@ namespace CalamityOverhaul.Content.RAMSystems
                 return false;
             }
             var local = Local;
+            if (local == null) {
+                return false;
+            }
             local.UsedCapacityUpgradeChips++;
             local.BaseMaxRam = DefaultBaseMaxRam + local.UsedCapacityUpgradeChips * CapacityUpgradeChipBonus;
             local.RecomputeEffective();
@@ -243,6 +259,9 @@ namespace CalamityOverhaul.Content.RAMSystems
                 return false;
             }
             var local = Local;
+            if (local == null) {
+                return false;
+            }
             local.UsedRecoveryUpgradeChips++;
             local.BaseRecoveryRate = DefaultBaseRecoveryRate + local.UsedRecoveryUpgradeChips * RecoveryUpgradeChipBonus;
             local.RecomputeEffective();
@@ -261,7 +280,11 @@ namespace CalamityOverhaul.Content.RAMSystems
             if (lockTimer > 0) {
                 return false;
             }
-            return Local.CurrentRam >= cost;
+            var local = Local;
+            if (local == null) {
+                return false;
+            }
+            return local.CurrentRam >= cost;
         }
 
         public static bool TryConsume(int cost) {
@@ -273,6 +296,9 @@ namespace CalamityOverhaul.Content.RAMSystems
                 return false;
             }
             var local = Local;
+            if (local == null) {
+                return false;
+            }
             if (local.CurrentRam < cost) {
                 return false;
             }
@@ -300,6 +326,9 @@ namespace CalamityOverhaul.Content.RAMSystems
                 return;
             }
             var local = Local;
+            if (local == null) {
+                return;
+            }
             float prev = local.CurrentRam;
             local.CurrentRam -= ramPerSecond * TickSeconds;
             if (local.CurrentRam < 0f) {
@@ -315,10 +344,13 @@ namespace CalamityOverhaul.Content.RAMSystems
                 return;
             }
             var local = Local;
+            if (local == null) {
+                return;
+            }
             local.CurrentRam = Math.Min(local.CurrentRam + amount, local.MaxRam);
         }
 
-        public static void Refill() => Local.Refill();
+        public static void Refill() => Local?.Refill();
 
         #endregion
 
@@ -326,6 +358,9 @@ namespace CalamityOverhaul.Content.RAMSystems
 
         public static void Update() {
             var local = Local;
+            if (local == null) {
+                return;
+            }
             local.RecomputeEffective();
 
             //故障闪烁计时独立推进
@@ -364,11 +399,12 @@ namespace CalamityOverhaul.Content.RAMSystems
         #region 重置
 
         public static void Reset() {
-            var local = Local;
-            local.RecoveryCooldown = 0f;
             lockTimer = 0;
             lockTotalFrames = 0;
             flashTimer = 0;
+            if (!Main.LocalPlayer.active) return;
+            var local = Local;
+            local.RecoveryCooldown = 0f;
             local.RecomputeEffective();
             local.CurrentRam = local.MaxRam;
         }
