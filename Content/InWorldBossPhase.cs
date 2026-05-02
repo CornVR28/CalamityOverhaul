@@ -258,14 +258,14 @@ namespace CalamityOverhaul.Content
 
         public static int SHPC_Level() {
             int level = 0;
-            //试炼0: 史莱姆王
-            if (DownedV0.Invoke()) level = 1; else return level;
-            //试炼1: 克苏鲁之眼
-            if (DownedV1.Invoke()) level = 2; else return level;
-            //试炼2: 邪恶Boss（世吞/克脑）
-            if (DownedV2.Invoke()) level = 3; else return level;
-            //试炼3: 骷髅王
-            if (DownedV4.Invoke()) level = 4; else return level;
+            //试炼0: 克苏鲁之眼
+            if (DownedV1.Invoke()) level = 1; else return level;
+            //试炼1: 邪恶Boss（世吞/克脑）
+            if (DownedV2.Invoke()) level = 2; else return level;
+            //试炼2: 腐巢意志/血肉宿主
+            if (Downed3.Invoke() || Downed4.Invoke()) level = 3; else return level;
+            //试炼3: 史莱姆之神
+            if (Downed5.Invoke()) level = 4; else return level;
             //试炼4: 血肉墙
             if (Main.hardMode) level = 5; else return level;
             //试炼5: 渊海灾虫

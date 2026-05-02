@@ -33,9 +33,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.TrialQuests
 
             TrialTitles = new LocalizedText[TRIAL_COUNT];
             string[] defaultTitles = [
-                "史莱姆清除",   //0 史莱姆王
-                "眼部解剖",     //1 克苏鲁之眼
-                "生化样本",     //2 世界吞噬者/克苏鲁之脑
+                "眼部解剖",     //0 克苏鲁之眼
+                "生化样本",     //1 世界吞噬者/克苏鲁之脑
+                "腐血追猎",     //2 腐巢意志/血肉宿主
                 "污秽提纯",     //3 史莱姆之神
                 "封印突破",     //4 血肉墙
                 "深海污染",     //5 渊海灾虫
@@ -63,9 +63,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.TrialQuests
 
             TrialSummaries = new LocalizedText[TRIAL_COUNT];
             string[] defaultSummaries = [
-                "朋友，复兴文明的任务终于落在了我两手上...第一个目标是一坨蓝色的凝胶聚合物，把它从内部轰开",
-                "我们需要干掉那只大眼球，我需要解剖它，看看它是如何实现反重力的",
+                "朋友，复兴文明的任务终于落在了我两手上...第一个目标是那只大眼球，我需要解剖它，看看它是如何实现反重力的",
                 "无论那是盘踞腐土的巨虫，还是支配血肉的大脑，去切下它们的核心",
+                "邪恶生态再次涌现新的造物——污秽聚合的腐巢意志，或是嗜血成群的血肉宿主，去清除掉它",
                 "凝胶居然衍生出了神？让我们对它来一次彻底的提纯分离，看看它还能剩下什么",
                 "一道横亘在地狱的血肉长墙，我们需要用足够的火力轰穿这道有机屏障",
                 "硫磺之海的巨虫已经浮出水面，把它的吞噬器官拆下来",
@@ -94,12 +94,12 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.TrialQuests
 
         public override void PostSetupContent() {
             trialTargetNpcs = new int[TRIAL_COUNT][];
-            //试炼0 (等级0→1): 史莱姆王
-            trialTargetNpcs[0] = [NPCID.KingSlime];
-            //试炼1 (等级1→2): 克苏鲁之眼
-            trialTargetNpcs[1] = [NPCID.EyeofCthulhu];
-            //试炼2 (等级2→3): 世界吞噬者 / 克苏鲁之脑
-            trialTargetNpcs[2] = [NPCID.EaterofWorldsHead, NPCID.BrainofCthulhu];
+            //试炼0 (等级0→1): 克苏鲁之眼
+            trialTargetNpcs[0] = [NPCID.EyeofCthulhu];
+            //试炼1 (等级1→2): 世界吞噬者 / 克苏鲁之脑
+            trialTargetNpcs[1] = [NPCID.EaterofWorldsHead, NPCID.BrainofCthulhu];
+            //试炼2 (等级2→3): 腐巢意志 / 血肉宿主
+            trialTargetNpcs[2] = [CWRID.NPC_HiveMind, CWRID.NPC_PerforatorHive];
             //试炼3 (等级3→4): 史莱姆之神
             trialTargetNpcs[3] = [CWRID.NPC_SlimeGodCore];
             //试炼4 (等级4→5): 血肉墙
