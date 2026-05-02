@@ -6,20 +6,20 @@ Murasama_TriggerKey.DisplayName: Мурасама: Спусковой крючо
 Murasama_DownKey.DisplayName: Мурасама: Удар в падении
 // Legend_UIControl.DisplayName: Toggle Legendary Weapon HUD
 // Legend_Domain.DisplayName: Domain Expansion
+// Legend_Teleport.DisplayName: Domain Teleport
+// Legend_Restart.DisplayName: Self-Restart
 Halibut_Clone.DisplayName: Палтус: Вторжение прошлого
-Halibut_Restart.DisplayName: Палтус: Перезагрузка
 Halibut_Superposition.DisplayName: Палтус: Суперпозиция
-Halibut_Teleport.DisplayName: Палтус: Телепортация в домен
 Halibut_Skill_L.DisplayName: Палтус: Предыдущий навык
 Halibut_Skill_R.DisplayName: Палтус: Следующий навык
-// WeponSkill_Q.DisplayName: Weapon: Left Skill
-// WeponSkill_R.DisplayName: Weapon: Right Skill
+// WeponSkill_Q.DisplayName: Weapon: Left Skill Key
+// WeponSkill_R.DisplayName: Weapon: Right Skill Key
 AriaofTheCosmos_Q.DisplayName: Ария Космоса: Страж звездного кольца
 AriaofTheCosmos_R.DisplayName: Ария Космоса: Гамма-всплеск
 JusticeUnveiled.DisplayName: Явление правосудия: Свершить правосудие
 EmblemOfDread_Dash.DisplayName: Знак Ужаса: Гравитационный Рывок
 EyeOfSingularity_QuantumLeap.DisplayName: Око Сингулярности: Квантовый Скачок
-// HackTime_Toggle.DisplayName: Toggle Hack Time
+// HackTime_Toggle.DisplayName: Hack Time
 // CyberBanish_Key.DisplayName: Cyberspace: Banish
 // CyberFreeze_Key.DisplayName: Cyberspace: Freeze
 // CyberwareSkill_Key.DisplayName: Cyberware Skill

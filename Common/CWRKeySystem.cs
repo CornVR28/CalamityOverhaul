@@ -33,28 +33,28 @@ namespace CalamityOverhaul.Common
             Mod mod = CWRMod.Instance;
             QuestLog_Key = KeybindLoader.RegisterKeybind(mod, "QuestLog_Key", "L");
             QuestManager_Key = KeybindLoader.RegisterKeybind(mod, "QuestManager_Key", "K");
-            HeavenfallLongbowSkillKey = KeybindLoader.RegisterKeybind(mod, "HeavenfallLongbowSkillKey", "Q");
-            InfinitePickSkillKey = KeybindLoader.RegisterKeybind(mod, "InfinitePickSkillKey", "C");
-            Murasama_TriggerKey = KeybindLoader.RegisterKeybind(mod, "Murasama_TriggerKey", "F");
-            Murasama_DownKey = KeybindLoader.RegisterKeybind(mod, "Murasama_DownKey", "X");
             Legend_UIControl = KeybindLoader.RegisterKeybind(mod, "Legend_UIControl", "M");
             Legend_Domain = KeybindLoader.RegisterKeybind(mod, "Legend_Domain", "Q");
-            Legend_Teleport = KeybindLoader.RegisterKeybind(mod, "Halibut_Teleport", "G");
-            Legend_Restart = KeybindLoader.RegisterKeybind(mod, "Halibut_Restart", "H");
+            Legend_Teleport = KeybindLoader.RegisterKeybind(mod, "Legend_Teleport", "G");
+            Legend_Restart = KeybindLoader.RegisterKeybind(mod, "Legend_Restart", "H");
             Halibut_Clone = KeybindLoader.RegisterKeybind(mod, "Halibut_Clone", "J");           
             Halibut_Superposition = KeybindLoader.RegisterKeybind(mod, "Halibut_Superposition", "F");          
             Halibut_Skill_L = KeybindLoader.RegisterKeybind(mod, "Halibut_Skill_L", "Q");
             Halibut_Skill_R = KeybindLoader.RegisterKeybind(mod, "Halibut_Skill_R", "E");
-            WeponSkill_Q = KeybindLoader.RegisterKeybind(mod, "WeponSkill_Q", "Q");
-            WeponSkill_R = KeybindLoader.RegisterKeybind(mod, "WeponSkill_R", "R");
-            JusticeUnveiled = KeybindLoader.RegisterKeybind(mod, "JusticeUnveiled", "W");
-            EmblemOfDread_Dash = KeybindLoader.RegisterKeybind(mod, "EmblemOfDread_Dash", "V");
-            EyeOfSingularity_QuantumLeap = KeybindLoader.RegisterKeybind(mod, "EyeOfSingularity_QuantumLeap", "B");
             HackTime_Toggle = KeybindLoader.RegisterKeybind(mod, "HackTime_Toggle", "N");
             CyberBanish_Key = KeybindLoader.RegisterKeybind(mod, "CyberBanish_Key", "Y");
             CyberFreeze_Key = KeybindLoader.RegisterKeybind(mod, "CyberFreeze_Key", "U");
             CyberwareSkill_Key = KeybindLoader.RegisterKeybind(mod, "CyberwareSkill_Key", "V");
             VoidTimeShift_Key = KeybindLoader.RegisterKeybind(mod, "VoidTimeShift_Key", "K");
+            HeavenfallLongbowSkillKey = KeybindLoader.RegisterKeybind(mod, "HeavenfallLongbowSkillKey", "Q");
+            InfinitePickSkillKey = KeybindLoader.RegisterKeybind(mod, "InfinitePickSkillKey", "C");
+            Murasama_TriggerKey = KeybindLoader.RegisterKeybind(mod, "Murasama_TriggerKey", "F");
+            Murasama_DownKey = KeybindLoader.RegisterKeybind(mod, "Murasama_DownKey", "X");
+            WeponSkill_Q = KeybindLoader.RegisterKeybind(mod, "WeponSkill_Q", "Q");
+            WeponSkill_R = KeybindLoader.RegisterKeybind(mod, "WeponSkill_R", "R");
+            JusticeUnveiled = KeybindLoader.RegisterKeybind(mod, "JusticeUnveiled", "W");
+            EmblemOfDread_Dash = KeybindLoader.RegisterKeybind(mod, "EmblemOfDread_Dash", "V");
+            EyeOfSingularity_QuantumLeap = KeybindLoader.RegisterKeybind(mod, "EyeOfSingularity_QuantumLeap", "B");
         }
 
         void ICWRLoader.UnLoadData() {
