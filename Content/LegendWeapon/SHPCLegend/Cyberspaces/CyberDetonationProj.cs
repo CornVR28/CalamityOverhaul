@@ -140,6 +140,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             float dist = Vector2.Distance(Projectile.Center, target.Center);
             float falloff = 1f - (dist / explosionRadius) * 0.5f;
             modifiers.FinalDamage *= MathHelper.Clamp(falloff, 0.5f, 1f);
+            if (target.IsWormBody()) {
+                modifiers.FinalDamage *= 0.5f;
+            }
         }
 
         public override bool ShouldUpdatePosition() => false;
