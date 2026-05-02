@@ -1864,3 +1864,8 @@ VolatileFrameModule: {
 		Overclocked cooling lattice squeezes out an extra beam and crit chance, while mana draw and spread spike
 		'''
 }
+
+MimicPerchedAuxBrain: {
+	DisplayName: Mimic Perched Aux Brain
+	Tooltip: ""
+}
