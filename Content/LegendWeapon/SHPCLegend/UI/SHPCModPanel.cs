@@ -1,7 +1,9 @@
 ﻿using CalamityOverhaul.Common;
+using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Graphics;
 using System;
+using System.Collections.Generic;
 using Terraria;
 using Terraria.GameContent;
 
@@ -181,6 +183,16 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
 
             //SHPC枪体纹理（绘于最上层，置于分析线和槽位之上）
             DrawGunTexture(sb, px, gun, time, a);
+
+            //悬停已装配槽位时在槽位正上方显示模块信息卡
+            if (hover >= HitKind.Slot0 && hover <= HitKind.Slot5) {
+                int hoverIdx = (int)hover - 1;
+                Item equipped = sd?.GetModule(hoverIdx);
+                if (equipped != null && !equipped.IsAir) {
+                    Rectangle slotRect = GetSlotRect(layout, hoverIdx);
+                    DrawEquippedTooltip(sb, px, font, slotRect, equipped, a);
+                }
+            }
         }
 
         private static void DrawShaderBackground(SpriteBatch sb, Texture2D px,
@@ -332,6 +344,105 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                 Utils.DrawBorderString(sb, emptyMark,
                     new Vector2(r.Right - 6f * Scale - emptySz.X, r.Y + (r.Height - emptySz.Y) * 0.5f),
                     SHPCTheme.TextDim * (0.55f * a), emptyScale);
+            }
+        }
+
+        private static void DrawEquippedTooltip(SpriteBatch sb, Texture2D px,
+            DynamicSpriteFont font, Rectangle slotRect, Item item, float a) {
+            List<string> lines = new();
+            List<Color> colors = new();
+
+            lines.Add(item.Name);
+            colors.Add(SHPCTheme.Text);
+
+            //物品tooltip第1行通常是槽位标注，整段都输出
+            if (item.ToolTip != null) {
+                int n = item.ToolTip.Lines;
+                for (int i = 0; i < n; i++) {
+                    string ln = item.ToolTip.GetLine(i);
+                    if (!string.IsNullOrWhiteSpace(ln)) {
+                        lines.Add(ln);
+                        colors.Add(SHPCTheme.TextDim);
+                    }
+                }
+            }
+
+            if (item.ModItem is SHPCModuleItem mod) {
+                foreach (string ln in mod.GetStatLines()) {
+                    if (string.IsNullOrEmpty(ln)) continue;
+                    lines.Add(ln);
+                    colors.Add(ln.StartsWith("-") ? new Color(255, 120, 110) : new Color(120, 255, 170));
+                }
+            }
+
+            float scale = 0.45f * FontScale;
+            float lineH = font.LineSpacing * scale;
+            float maxW = 0f;
+            foreach (string ln in lines) {
+                float w = font.MeasureString(ln).X * scale;
+                if (w > maxW) maxW = w;
+            }
+            const float padX = 10f;
+            const float padY = 7f;
+            float totalH = lineH * lines.Count + padY * 2f;
+            float totalW = maxW + padX * 2f;
+
+            //卡片在槽位正上方居中，空间不足时翻到槽位下方
+            float cardX = slotRect.X + (slotRect.Width - totalW) * 0.5f;
+            float cardY = slotRect.Y - totalH - 6f;
+            if (cardY < 4f) {
+                cardY = slotRect.Bottom + 6f;
+            }
+            if (cardX < 4f) cardX = 4f;
+            if (cardX + totalW > Main.screenWidth - 4f) cardX = Main.screenWidth - totalW - 4f;
+
+            Rectangle box = new((int)cardX, (int)cardY, (int)totalW, (int)totalH);
+
+            //投影
+            SHPCRenderer.DrawFilledRect(sb, px,
+                new Rectangle(box.X + 3, box.Y + 4, box.Width, box.Height),
+                new Color(0, 0, 0) * (0.55f * a));
+            //背景
+            SHPCRenderer.DrawFilledRect(sb, px, box, new Color(4, 14, 22) * (0.96f * a));
+            //顶部色带：按模块识别色高亮
+            Color topBar = item.ModItem is SHPCModuleItem m ? m.TintColor : SHPCTheme.Cyan;
+            SHPCRenderer.DrawFilledRect(sb, px,
+                new Rectangle(box.X, box.Y, box.Width, (int)(3f * Scale)), topBar * (0.85f * a));
+            //边框与四角装饰
+            SHPCRenderer.DrawRectStroke(sb, px, box, 1.2f, SHPCTheme.Border * (0.9f * a));
+            SHPCRenderer.DrawCornerBrackets(sb, px, box, 6f * Scale, 1.2f, SHPCTheme.BorderHi * (0.9f * a));
+
+            //图标（右上角小图）
+            Main.instance.LoadItem(item.type);
+            Texture2D iconTex = TextureAssets.Item[item.type]?.Value;
+            if (iconTex != null) {
+                Rectangle frame = Main.itemAnimations[item.type] != null
+                    ? Main.itemAnimations[item.type].GetFrame(iconTex)
+                    : iconTex.Bounds;
+                float maxIcon = 20f * Scale;
+                float iconScale = MathF.Min(maxIcon / frame.Width, maxIcon / frame.Height);
+                if (iconScale > 1f) iconScale = 1f;
+                Vector2 iconPos = new(box.Right - padX - frame.Width * iconScale * 0.5f,
+                    box.Y + padY + lineH * 0.5f);
+                if (item.ModItem is SHPCModuleItem modIcon
+                    && SHPCModuleRender.Begin(sb, modIcon.TintColor,
+                        new Vector2(iconTex.Width, iconTex.Height), Main.UIScaleMatrix, modIcon.TintIntensity)) {
+                    sb.Draw(iconTex, iconPos, frame, Color.White * a, 0f,
+                        new Vector2(frame.Width * 0.5f, frame.Height * 0.5f), iconScale, SpriteEffects.None, 0f);
+                    SHPCModuleRender.End(sb);
+                }
+                else {
+                    sb.Draw(iconTex, iconPos, frame, Color.White * a, 0f,
+                        new Vector2(frame.Width * 0.5f, frame.Height * 0.5f), iconScale, SpriteEffects.None, 0f);
+                }
+            }
+
+            //文字
+            float y = box.Y + padY;
+            for (int i = 0; i < lines.Count; i++) {
+                Utils.DrawBorderString(sb, lines[i],
+                    new Vector2(box.X + padX, y), colors[i] * a, scale);
+                y += lineH;
             }
         }
 

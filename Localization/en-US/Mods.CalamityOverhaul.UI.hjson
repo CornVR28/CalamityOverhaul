@@ -763,7 +763,7 @@ SHPCUI: {
 	Modify_NoMatch: No compatible modules in inventory
 	Modify_Close: CLOSE
 	Modify_InstallSlot: INSTALL · {0}
-	Modify_Current: "CURRENT: {0}"
+	Modify_Current: CURRENT: {0}
 	Modify_Slot_Barrel: BARREL
 	Modify_Slot_Optic: OPTIC
 	Modify_Slot_Power: POWER
