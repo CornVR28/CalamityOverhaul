@@ -216,6 +216,8 @@ namespace CalamityOverhaul.Content.HackTimes
         public static LocalizedText SignalTowerScanStatusElectrified { get; private set; }
         public static LocalizedText SignalTowerScanProtocol { get; private set; }
 
+        public static LocalizedText RightClickHint { get; private set; }
+
         public override void SetStaticDefaults() {
             Locked = this.GetLocalization(nameof(Locked));
             Done = this.GetLocalization(nameof(Done));
@@ -401,6 +403,8 @@ namespace CalamityOverhaul.Content.HackTimes
             SignalTowerScanStatusBroadcasting = this.GetLocalization(nameof(SignalTowerScanStatusBroadcasting));
             SignalTowerScanStatusElectrified = this.GetLocalization(nameof(SignalTowerScanStatusElectrified));
             SignalTowerScanProtocol = this.GetLocalization(nameof(SignalTowerScanProtocol));
+
+            RightClickHint = this.GetLocalization(nameof(RightClickHint));
         }
 
         #endregion

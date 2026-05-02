@@ -859,6 +859,14 @@ namespace CalamityOverhaul.Content.HackTimes
             string countStr = HackTime.Protocols.Format(displayCount);
             Utils.DrawBorderString(sb, countStr, new Vector2(baseX + ItemWidth - 110, bottomY + 20),
                 HackTheme.TextDim * (alpha * 0.25f), 0.34f);
+
+            //右键取消提示
+            if (HackTime.CurrentScanTarget != null) {
+                string hint = HackTime.RightClickHint.Value;
+                float hintPulse = MathF.Sin(timer * 1.8f) * 0.12f + 0.88f;
+                Utils.DrawBorderString(sb, hint, new Vector2(baseX, bottomY + 22f),
+                    HackTheme.TextDim * (alpha * 0.30f * hintPulse), 0.34f);
+            }
         }
 
         #endregion

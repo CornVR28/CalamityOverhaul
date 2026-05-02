@@ -636,6 +636,7 @@ HackTime: {
 	SignalTowerScanStatusBroadcasting: 正在广播
 	SignalTowerScanStatusElectrified: 过电残留
 	SignalTowerScanProtocol: 可用协议
+	RightClickHint: 右键取消选中目标
 }
 
 DecryptionStrings: {

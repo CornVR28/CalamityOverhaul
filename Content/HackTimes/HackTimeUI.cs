@@ -62,6 +62,16 @@ namespace CalamityOverhaul.Content.HackTimes
         //处理点击选择逻辑
         private void UpdateClickSelection(bool mouseOnPanel) {
             if (!HackTime.Active) return;
+
+            //右键取消选中
+            if (keyRightPressState == KeyPressState.Pressed && !mouseOnPanel) {
+                if (HackTime.CurrentScanTarget != null) {
+                    HackTime.DeselectTarget();
+                    Panel.Hide();
+                }
+                return;
+            }
+
             if (keyLeftPressState != KeyPressState.Pressed) return;
 
             //面板内点击优先交给面板处理
