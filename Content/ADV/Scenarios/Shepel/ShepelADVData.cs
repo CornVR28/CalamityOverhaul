@@ -24,7 +24,5 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel
         public int NightVariantSeed;
         //首次获得SHPC的完整初遇链是否已经收尾
         public bool FirstSHPCIntroCompleted;
-        //选择立即进入超梦教程后，正常退出教程时补发超梦接入凭证
-        public bool PendingCybCourseMewtwoCompensation;
     }
 }

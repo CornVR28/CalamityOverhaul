@@ -66,5 +66,14 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
                 }
             }
         }
+
+        public override void OnEnterWorld() {
+            //从超梦子世界回到主世界时发放超梦接入凭证，子世界加载期无效所以延迟到此处
+            if (CybCourseWorld.Active) return;
+            if (!CybCourse.TryConsumeGrantMewtwo()) return;
+            if (!Player.HasItem(ModContent.ItemType<Mewtwo>())) {
+                Player.QuickSpawnItem(Player.GetSource_GiftOrReward(), ModContent.ItemType<Mewtwo>(), 1);
+            }
+        }
     }
 }

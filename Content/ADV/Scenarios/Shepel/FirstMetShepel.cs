@@ -88,29 +88,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel
             }
         }
 
-        private static void MarkCybCourseMewtwoCompensationPending() {
-            if (Main.LocalPlayer.TryGetADVSave(out var save)) {
-                save.Get<ShepelADVData>().PendingCybCourseMewtwoCompensation = true;
-            }
-        }
-
-        internal static void TryGrantCybCourseMewtwoCompensation(Player player) {
-            if (player == null || !player.active || !player.TryGetADVSave(out var save)) {
-                return;
-            }
-
-            var data = save.Get<ShepelADVData>();
-            if (!data.PendingCybCourseMewtwoCompensation) {
-                return;
-            }
-
-            int mewtwoType = ModContent.ItemType<Mewtwo>();
-            if (!player.HasItem(mewtwoType)) {
-                player.QuickSpawnItem(player.GetSource_GiftOrReward(), mewtwoType, 1);
-            }
-            data.PendingCybCourseMewtwoCompensation = false;
-        }
-
         protected override void Build() {
             DialogueBoxBase.RegisterPortrait(RolenameSHPC.Value, texture: null);
             DialogueBoxBase.SetPortraitStyle(RolenameSHPC.Value, silhouette: false);
@@ -224,7 +201,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel
             }
             protected override void OnScenarioComplete() {
                 MarkFirstSHPCIntroCompleted();
-                MarkCybCourseMewtwoCompensationPending();
+                CybCourse.ScheduleMewtwoGrant();
                 if (Main.myPlayer == Main.LocalPlayer.whoAmI) {
                     CybCourse.Enter();
                 }

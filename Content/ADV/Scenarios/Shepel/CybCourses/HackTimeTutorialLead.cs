@@ -26,12 +26,25 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
         public string LocalizationCategory => "ADV.Shepel";
 
         //步骤元数据：是否自动推进
-        private static readonly bool[] StepIsAuto = { false, true, false, true, true, false, true, true };
+        //0 进入骇客 1 锁定NPC 2 协议面板介绍 3 加入队列
+        //4 退出执行 5 观察上传 6 进入骇客扫描物块 7 锁定物块
+        //8 加入物块协议 9 退出执行 10 观察上传 11 训练完成
+        private static readonly bool[] StepIsAuto = {
+            false, true, false, true,
+            false, true, false, true,
+            true, false, true, true,
+        };
+
+        //需要骇客时间处于激活状态才能推进的手动步骤（按NEXT会强制激活）
+        private static readonly HashSet<int> StepWantsActive = new() { 0, 6 };
+        //需要骇客时间退出才能推进的手动步骤（按NEXT会强制退出）
+        private static readonly HashSet<int> StepWantsInactive = new() { 4, 9 };
 
         private static LocalizedText[] _stepTitles;
         private static LocalizedText[] _stepBodies;
         private static LocalizedText _textWaiting;
         private static LocalizedText _textCalibrating;
+        private static LocalizedText _textObserving;
         private static LocalizedText _textNextBtn;
         private static LocalizedText _textKeyUnbound;
         private static LocalizedText _textKeyHintUnbound;
@@ -40,27 +53,48 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
 
         public override void SetStaticDefaults() {
             _stepTitles = new[] {
-                this.GetLocalization("HT_Step0_Title", () => "激活骇客模式"),
-                this.GetLocalization("HT_Step1_Title", () => "锁定目标"),
-                this.GetLocalization("HT_Step2_Title", () => "骇入协议面板"),
-                this.GetLocalization("HT_Step3_Title", () => "上传协议"),
-                this.GetLocalization("HT_Step4_Title", () => "NPC骇入完成"),
-                this.GetLocalization("HT_Step5_Title", () => "物块扫描"),
-                this.GetLocalization("HT_Step6_Title", () => "锁定物块目标"),
-                this.GetLocalization("HT_Step7_Title", () => "TILE SCAN COMPLETE"),
+                this.GetLocalization("HT_S00_Title", () => "激活骇客模式"),
+                this.GetLocalization("HT_S01_Title", () => "锁定NPC目标"),
+                this.GetLocalization("HT_S02_Title", () => "骇入协议面板"),
+                this.GetLocalization("HT_S03_Title", () => "加入上传队列"),
+                this.GetLocalization("HT_S04_Title", () => "退出骇客时间执行"),
+                this.GetLocalization("HT_S05_Title", () => "协议执行中"),
+                this.GetLocalization("HT_S06_Title", () => "再次进入骇客模式"),
+                this.GetLocalization("HT_S07_Title", () => "锁定物块目标"),
+                this.GetLocalization("HT_S08_Title", () => "加入物块协议"),
+                this.GetLocalization("HT_S09_Title", () => "退出骇客时间执行"),
+                this.GetLocalization("HT_S10_Title", () => "物块协议执行中"),
+                this.GetLocalization("HT_S11_Title", () => "训练完成"),
             };
             _stepBodies = new[] {
-                this.GetLocalization("HT_Step0_Body", () => "按下 {0} 键进入骇客时间模式。\n时间将冻结，赛博滤镜叠加于画面。"),
-                this.GetLocalization("HT_Step1_Body", () => "将光标悬停到高亮的圣诞坦克上，\n点击左键将其锁定为骇入目标。"),
-                this.GetLocalization("HT_Step2_Body", () => "右侧面板展示目标的可用骇入协议。\n不同协议消耗不同RAM并产生不同效果。"),
-                this.GetLocalization("HT_Step3_Body", () => "点击协议将其加入左侧上传队列，\n队列将依次执行骇入操作。"),
-                this.GetLocalization("HT_Step4_Body", () => "NPC骇入序列完成。下一阶段：物块扫描接口训练。"),
-                this.GetLocalization("HT_Step5_Body", () => "前方有一台热能发电机MK2。\n再次按下 {0} 重新激活骇客时间。"),
-                this.GetLocalization("HT_Step6_Body", () => "将光标悬停在发电机上，\n点击左键将其锁定为扫描目标。"),
-                this.GetLocalization("HT_Step7_Body", () => "物块扫描接口已解析。右侧面板展示当前物块的可用骇入协议。"),
+                this.GetLocalization("HT_S00_Body",
+                    () => "按下 {0} 键进入骇客时间模式。\n时间将冻结，赛博滤镜叠加于画面。"),
+                this.GetLocalization("HT_S01_Body",
+                    () => "将光标悬停到高亮的圣诞坦克上，\n点击左键将其锁定为骇入目标。"),
+                this.GetLocalization("HT_S02_Body",
+                    () => "右侧面板展示目标的可用骇入协议。\n不同协议消耗不同RAM并产生不同效果。"),
+                this.GetLocalization("HT_S03_Body",
+                    () => "点击右侧任一协议将其加入左侧上传队列，\n队列在骇客时间内仅排队不会推进。"),
+                this.GetLocalization("HT_S04_Body",
+                    () => "再次按下 {0} 退出骇客时间，\n协议将在实时世界中开始上传并生效。"),
+                this.GetLocalization("HT_S05_Body",
+                    () => "上传中... 观察目标遭受协议效果。\n队列清空后将进入下一阶段。"),
+                this.GetLocalization("HT_S06_Body",
+                    () => "前方走廊有一台热能发电机MK2。\n再次按下 {0} 进入骇客时间扫描物块。"),
+                this.GetLocalization("HT_S07_Body",
+                    () => "将光标悬停在高亮的发电机上，\n点击左键将其锁定为扫描目标。"),
+                this.GetLocalization("HT_S08_Body",
+                    () => "右侧面板展示物块专属协议。\n点击任一协议将其加入上传队列。"),
+                this.GetLocalization("HT_S09_Body",
+                    () => "再次按下 {0} 退出骇客时间，\n物块协议将在实时世界中执行。"),
+                this.GetLocalization("HT_S10_Body",
+                    () => "上传中... 观察发电机遭受协议效果。\n队列清空后训练即告完成。"),
+                this.GetLocalization("HT_S11_Body",
+                    () => "骇客协议训练全部完成。\n你已掌握扫描、协议、上传、生效的完整流程。"),
             };
             _textWaiting = this.GetLocalization("HT_Waiting", () => "AWAITING INPUT...");
             _textCalibrating = this.GetLocalization("HT_Calibrating", () => "DISCONNECTING...");
+            _textObserving = this.GetLocalization("HT_Observing", () => "UPLOADING...");
             _textNextBtn = this.GetLocalization("HT_NextBtn", () => "NEXT  >");
             _textHintStuck = this.GetLocalization("HT_HintStuck", () => "// HINT: 点击 NEXT 按钮可强制跳过");
             _textKeyUnbound = this.GetLocalization("HT_KeyUnbound", () => "N（临时开关）");
@@ -198,7 +232,14 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
             }
             npc.velocity = Vector2.Zero;
             npc.position = _npcSpawnPos;
-            npc.dontTakeDamage = true;
+            //观察上传阶段(step 5)允许NPC受击，让玩家直观看到协议效果与浮动伤害数
+            //其他阶段保持无敌避免误伤导致流程中断
+            npc.dontTakeDamage = !(_phase == Phase.Running && _currentStep == 5);
+            //观察阶段把NPC血量保持在足够值，防止累积伤害让其阵亡而提前结束watch
+            if (_phase == Phase.Running && _currentStep == 5) {
+                if (npc.life < npc.lifeMax / 2)
+                    npc.life = npc.lifeMax / 2;
+            }
         }
 
         public override void UpdateUI(GameTime gameTime) {
@@ -224,8 +265,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
                     _cardAnim = MathHelper.Lerp(_cardAnim, 1f, 0.16f);
                     _stepTimer += dt;
 
-                    //step≥1时若NPC意外丢失，自动重生避免卡阶段
-                    if (_currentStep >= 1 && _currentStep <= 4) {
+                    //圣诞坦克生命周期：进入物块阶段(step 6)前确保NPC可用
+                    if (_currentStep >= 1 && _currentStep <= 5) {
                         EnsureTankAlive();
                     }
 
@@ -242,25 +283,26 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
                         _stuckTimer = 0f;
                     }
                     else {
-                        //step 0特殊处理：玩家自行激活骇客模式时自动推进
-                        if (_currentStep == 0 && HackTime.Active) {
+                        int s = _currentStep;
+                        bool wantsActive = StepWantsActive.Contains(s);
+                        bool wantsInactive = StepWantsInactive.Contains(s);
+                        //自动推进：玩家自行进入或退出骇客时间
+                        if (wantsActive && HackTime.Active) {
                             AdvanceStep();
                             break;
                         }
-                        //step 5特殊处理：玩家自行重激活骇客模式时自动推进
-                        if (_currentStep == 5 && HackTime.Active) {
+                        if (wantsInactive && !HackTime.Active) {
                             AdvanceStep();
                             break;
                         }
+                        //NEXT按钮：强制达到所需的骇客时间状态后推进
                         if (mouseClicked && _nextBtnRect != Rectangle.Empty
                                 && _nextBtnRect.Contains(Main.mouseX, Main.mouseY)) {
                             Main.mouseLeft = false;
-                            //玩家点NEXT跳过，强制激活骇客模式
-                            if (_currentStep == 0 && !HackTime.Active)
+                            if (wantsActive && !HackTime.Active)
                                 HackTime.Activate();
-                            //玩家点NEXT跳过物块扫描引导，强制激活骇客时间确保step6可推进
-                            if (_currentStep == 5 && !HackTime.Active)
-                                HackTime.Activate();
+                            else if (wantsInactive && HackTime.Active)
+                                HackTime.Deactivate();
                             AdvanceStep();
                             break;
                         }
@@ -338,18 +380,31 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
         //各自动推进步骤的完成判定
         private static bool CheckAutoAdvance() {
             int step = _currentStep;
+            var queue = HackTimeUI.Instance?.Queue;
+            //step 1：玩家点击锁定SantaNK1
             if (step == 1) {
-                //玩家点击选中了SantaNK1
                 if (HackTime.SelectedTargetIndex < 0) return false;
                 NPC target = Main.npc[HackTime.SelectedTargetIndex];
                 return target.active && target.type == NPCID.SantaNK1;
             }
+            //step 3：玩家把至少一个NPC协议加入队列
             if (step == 3)
-                return (HackTimeUI.Instance?.Queue?.Entries.Count ?? 0) > 0;
-            if (step == 4)
-                return _stepTimer >= AutoStepDuration;
-            if (step == 6)
+                return (queue?.Entries.Count ?? 0) > 0;
+            //step 5：观察NPC协议上传
+            //条件：必须不在骇客时间（避免误以为冻结的队列推进）
+            //且队列已清空（说明上传完成、效果已施加）+ 缓冲时间让玩家看清效果
+            if (step == 5)
+                return _stepTimer >= 1.5f && !HackTime.Active && (queue?.IsEmpty ?? true);
+            //step 7：玩家锁定物块（发电机MK2）
+            if (step == 7)
                 return HackTime.Active && HackTime.CurrentScanTarget is TileScannable;
+            //step 8：玩家把至少一个物块协议加入队列
+            if (step == 8)
+                return (queue?.Entries.Count ?? 0) > 0;
+            //step 10：观察物块协议上传
+            if (step == 10)
+                return _stepTimer >= 1.5f && !HackTime.Active && (queue?.IsEmpty ?? true);
+            //step 11：训练完成，短暂展示后淡出
             if (step == StepIsAuto.Length - 1)
                 return _stepTimer >= AutoStepDuration;
             return false;
@@ -380,7 +435,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
             _stepTimer = 0f;
             _stuckTimer = 0f;
             _cardAnim = 0f;
-            if (_currentStep == 5)
+            //进入物块阶段（step 6开始）时清理掉NPC，避免遮挡发电机
+            if (_currentStep == 6)
                 CleanupTank();
             if (_currentStep >= StepIsAuto.Length) {
                 if (HackTime.Active)
@@ -477,8 +533,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
             string body = ResolveKeyTokens(_stepBodies[stepIdx].Value);
             bool isAuto = StepIsAuto[stepIdx];
             bool stuck = !isAuto && _stuckTimer >= StuckHintAfter;
-            //仅在需要按键的步骤（0/5）且玩家未绑定快捷键时，提示去控制设置中绑定
-            bool keyHint = (stepIdx == 0 || stepIdx == 5) && !IsHackToggleBound();
+            //仅在需要按键的步骤（进入/退出骇客时间）且玩家未绑定快捷键时，提示去控制设置中绑定
+            bool keyHint = (stepIdx == 0 || stepIdx == 4 || stepIdx == 6 || stepIdx == 9) && !IsHackToggleBound();
             float px2 = card.X + 14f;
             float py = card.Y + 12f;
 
@@ -537,10 +593,13 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
             //底部：自动步骤显示状态文字，手动步骤显示NEXT按钮
             if (isAuto) {
                 float blink = 0.72f + 0.28f * MathF.Sin(_shaderTimer * 22f);
-                bool isCompletionStep = stepIdx == 4 || stepIdx == StepIsAuto.Length - 1;
+                bool isObservingStep = stepIdx == 5 || stepIdx == 10;
+                bool isCompletionStep = stepIdx == StepIsAuto.Length - 1;
                 string standby = isCompletionStep
                     ? _textCalibrating.Value
-                    : _textWaiting.Value;
+                    : isObservingStep
+                        ? _textObserving.Value
+                        : _textWaiting.Value;
                 float sbW = font.MeasureString(standby).X * subSc;
                 Utils.DrawBorderString(sb, standby,
                     new Vector2(card.Right - 14f - sbW, card.Bottom - 16f),
@@ -575,10 +634,12 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
 
         private static void DrawHighlightForStep(SpriteBatch sb, Texture2D px, float alpha) {
             int stepIdx = (int)MathHelper.Clamp(_currentStep, 0, StepIsAuto.Length - 1);
-            if (stepIdx == 6) {
+            //step 7：玩家需要锁定发电机MK2，对其打高亮框
+            if (stepIdx == 7) {
                 DrawGeneratorHighlight(sb, px, alpha);
                 return;
             }
+            //step 1：玩家需要锁定圣诞坦克，对其打高亮框
             if (stepIdx != 1) return;
             if (_npcIndex < 0 || _npcIndex >= Main.maxNPCs) return;
 

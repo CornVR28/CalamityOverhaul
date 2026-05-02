@@ -9,19 +9,32 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
     //RETRY软重启时调用CybCourse.Restart()，不需要重新加载子世界
     internal class CybCourse
     {
+        //接受教程后进入子世界前置为true，退出时发放超梦接入凭证
+        //用静态字段而非存档标记，避免子世界存档与主世界存档不同步导致标记丢失
+        private static bool _grantMewtwoOnExit;
+
         public static bool IsActive => CybCourseWorld.Active;
 
         public static void Enter() => CybCourseWorld.Enter();
 
+        //由FirstMetShepel_CybCourseAccept在进入子世界前调用，标记回到主世界后需发放凭证
+        internal static void ScheduleMewtwoGrant() => _grantMewtwoOnExit = true;
+
+        //回到主世界时由CybCoursePlayer.OnEnterWorld调用，返回true表示需要发放
+        internal static bool TryConsumeGrantMewtwo() {
+            if (!_grantMewtwoOnExit) return false;
+            _grantMewtwoOnExit = false;
+            return true;
+        }
+
         /// <summary>
         /// 退出教程子世界
-        /// 同步清理 InfiniteHack、Outro 场景注册表与完成面板，避免下次进入时残留
+        /// 清理 InfiniteHack、Outro 场景与完成面板，并按需发放超梦接入凭证
         /// </summary>
         public static void Exit() {
             CybCourseCompletePanel.Hide();
             ScenarioManager.Reset<CybCourseOutroDialogue>();
             HackTime.InfiniteHack = false;
-            FirstMetShepel.TryGrantCybCourseMewtwoCompensation(Main.LocalPlayer);
             CybCourseWorld.Exit();
         }
 

@@ -177,6 +177,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
 
         public override bool On_ModifyWeaponDamage(Item item, Player player, ref StatModifier damage) => SHPCDamage(item, ref damage);
 
+        public override bool? On_ModifyTooltips(Item item, List<TooltipLine> tooltips) => false;
+
         public override void ModifyTooltips(Item item, List<TooltipLine> tooltips) => SetTooltip(item, ref tooltips);
 
         /// <summary>

@@ -95,6 +95,9 @@ namespace CalamityOverhaul.Content.Cyberwares.Implementation.Sandevistans
         public override void Update() {
             float target = Sandevistan.CooldownRatio;
             displayRatio += (target - displayRatio) * 0.1f;
+            if (MathF.Abs(displayRatio - target) < 0.005f) {
+                displayRatio = target;
+            }
             timer += 0.016f;
             bool active = Sandevistan.IsActive;
 

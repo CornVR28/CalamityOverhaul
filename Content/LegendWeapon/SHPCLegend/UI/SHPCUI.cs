@@ -368,6 +368,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
 
             //平滑跟随RAM当前值
             ramDisplayValue = MathHelper.Lerp(ramDisplayValue, RamSystem.CurrentRam, 0.12f);
+            if (MathF.Abs(ramDisplayValue - RamSystem.CurrentRam) < 0.01f) {
+                ramDisplayValue = RamSystem.CurrentRam;
+            }
 
             //展开进度推进
             float targetExpand = expanded ? 1f : 0f;
