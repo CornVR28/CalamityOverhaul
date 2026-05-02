@@ -636,6 +636,7 @@ HackTime: {
 	// SignalTowerScanStatusBroadcasting: Mods.CalamityOverhaul.UI.HackTime.SignalTowerScanStatusBroadcasting
 	// SignalTowerScanStatusElectrified: Mods.CalamityOverhaul.UI.HackTime.SignalTowerScanStatusElectrified
 	// SignalTowerScanProtocol: Mods.CalamityOverhaul.UI.HackTime.SignalTowerScanProtocol
+	// RightClickHint: "// RIGHT CLICK TO DESELECT"
 }
 
 DecryptionStrings: {

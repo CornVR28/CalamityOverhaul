@@ -1,4 +1,5 @@
 using CalamityOverhaul.Common;
+using CalamityOverhaul.Content.HackTimes;
 using Terraria;
 using Terraria.ModLoader;
 
@@ -15,6 +16,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Teleport
             if (Player.whoAmI != Main.myPlayer) return;
             if (CWRKeySystem.Legend_Teleport == null) return;
             if (!CWRKeySystem.Legend_Teleport.JustPressed) return;
+
+            //骇客时间激活期间禁止使用领域技能
+            if (HackTime.Active) return;
 
             //领域未激活时不抢按键，留给 Halibut 等其它系统响应
             if (!Cyberspace.Active) return;

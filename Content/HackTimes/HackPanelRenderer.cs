@@ -152,7 +152,7 @@ namespace CalamityOverhaul.Content.HackTimes
                     //禁用状态的槽位不响应悬停
                     int globalIdx = GetGlobalIndex(i);
                     var hack = QuickHackDef.GetByIndex(globalIdx);
-                    var qs = Queue?.GetSlotState(globalIdx) ?? QueueSlotState.None;
+                    var qs = Queue?.GetSlotState(globalIdx, HackTime.CurrentScanTarget) ?? QueueSlotState.None;
                     bool disabled = hack != null && !RamSystem.CanAfford(hack.RamCost)
                         || qs != QueueSlotState.None;
                     if (!disabled) hoveredSlot = i;
@@ -164,7 +164,7 @@ namespace CalamityOverhaul.Content.HackTimes
                 float target = 0f;
                 int gi = GetGlobalIndex(i);
                 if (i == hoveredSlot) target = 1f;
-                else if (Queue != null && Queue.GetSlotState(gi) == QueueSlotState.Uploading) target = 0.5f;
+                else if (Queue != null && Queue.GetSlotState(gi, HackTime.CurrentScanTarget) == QueueSlotState.Uploading) target = 0.5f;
                 slotHoverAnim[i] = MathHelper.Lerp(slotHoverAnim[i], target, 0.2f);
             }
         }
@@ -324,7 +324,7 @@ namespace CalamityOverhaul.Content.HackTimes
                     if (i == hoveredSlot) branchColor = HackTheme.Accent * (wireAlpha * 1f);
                     int gi = GetGlobalIndex(i);
                     if (Queue != null) {
-                        var qs = Queue.GetSlotState(gi);
+                        var qs = Queue.GetSlotState(gi, HackTime.CurrentScanTarget);
                         if (qs == QueueSlotState.Uploading) branchColor = HackTheme.Uploading * (wireAlpha * 0.8f);
                         else if (qs == QueueSlotState.Queued) branchColor = HackTheme.Uploading * (wireAlpha * 0.4f);
                     }
@@ -372,7 +372,7 @@ namespace CalamityOverhaul.Content.HackTimes
             if (Queue != null && glow != null && wireProgress > 0.3f) {
                 for (int i = 0; i < displayCount; i++) {
                     int gi = GetGlobalIndex(i);
-                    if (Queue.GetSlotState(gi) != QueueSlotState.Uploading) continue;
+                    if (Queue.GetSlotState(gi, HackTime.CurrentScanTarget) != QueueSlotState.Uploading) continue;
                     float itemCY = listStartY + i * (ItemHeight + ItemGap) + ItemHeight * 0.5f;
                     float pulseT = timer * 2f % 1f;
                     float pulseX = MathHelper.Lerp(trunkX, baseX - 4, pulseT);
@@ -405,7 +405,7 @@ namespace CalamityOverhaul.Content.HackTimes
                 float y = startY + i * (ItemHeight + ItemGap);
 
                 //禁用状态：RAM不足或该协议已在队列中，抑制悬停展开
-                QueueSlotState queueState = Queue?.GetSlotState(globalIdx) ?? QueueSlotState.None;
+                QueueSlotState queueState = Queue?.GetSlotState(globalIdx, HackTime.CurrentScanTarget) ?? QueueSlotState.None;
                 bool slotDisabled = !RamSystem.CanAfford(hack.RamCost)
                     || queueState != QueueSlotState.None;
                 if (slotDisabled) hover = 0f;
@@ -426,7 +426,7 @@ namespace CalamityOverhaul.Content.HackTimes
                 slotRects[i] = rect;
 
                 float itemAlpha = alpha * Math.Min(fly * 2.5f, 1f);
-                float queueProgress = Queue?.GetSlotProgress(globalIdx) ?? 0f;
+                float queueProgress = Queue?.GetSlotProgress(globalIdx, HackTime.CurrentScanTarget) ?? 0f;
 
                 DrawSingleItem(sb, px, itemAlpha, rect, hack, i, hover, queueState, queueProgress);
             }

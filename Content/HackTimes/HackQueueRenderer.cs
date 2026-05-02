@@ -36,24 +36,36 @@ namespace CalamityOverhaul.Content.HackTimes
 
         /// <summary>
         /// 向队列添加一个骇入协议
-        /// <br/>不允许同 slot 重复入队；具体目标种类由<see cref="IHackTarget"/>统一承载
+        /// <br/>不允许同一目标上的同一slot重复入队，但不同目标可以并行持有同一slot的骇入状态
         /// </summary>
         public bool Enqueue(QuickHackDef hack, int slotIndex, IHackTarget target) {
             if (target == null) return false;
             for (int i = 0; i < queue.Count; i++) {
-                if (queue[i].SlotIndex == slotIndex) return false;
+                if (queue[i].SlotIndex != slotIndex) continue;
+                if (queue[i].Target != null && queue[i].Target.TargetEquals(target)) return false;
             }
             queue.Add(new HackQueueEntry(hack, slotIndex, target));
             return true;
         }
 
-        //取消队列中指定slot的协议
+        //取消队列中指定slot的协议（任意目标，仅在显式取消场景使用）
         public void Cancel(int slotIndex) {
             for (int i = queue.Count - 1; i >= 0; i--) {
                 if (queue[i].SlotIndex == slotIndex) {
                     queue.RemoveAt(i);
                     break;
                 }
+            }
+        }
+
+        //取消队列中指定slot且作用于指定目标的协议
+        public void Cancel(int slotIndex, IHackTarget target) {
+            if (target == null) return;
+            for (int i = queue.Count - 1; i >= 0; i--) {
+                if (queue[i].SlotIndex != slotIndex) continue;
+                if (queue[i].Target == null || !queue[i].Target.TargetEquals(target)) continue;
+                queue.RemoveAt(i);
+                break;
             }
         }
 
@@ -95,6 +107,23 @@ namespace CalamityOverhaul.Content.HackTimes
             return best;
         }
 
+        //查询指定slot针对指定目标的状态，target为空时退化为忽略目标的版本
+        public QueueSlotState GetSlotState(int slotIndex, IHackTarget target) {
+            if (target == null) return GetSlotState(slotIndex);
+            QueueSlotState best = QueueSlotState.None;
+            for (int i = 0; i < queue.Count; i++) {
+                if (queue[i].SlotIndex != slotIndex) continue;
+                if (queue[i].Target == null || !queue[i].Target.TargetEquals(target)) continue;
+                var s = queue[i].State;
+                if (s == HackQueueState.Uploading) return QueueSlotState.Uploading;
+                if (s == HackQueueState.Waiting && best != QueueSlotState.Queued)
+                    best = QueueSlotState.Queued;
+                else if (s == HackQueueState.Completed && best == QueueSlotState.None)
+                    best = QueueSlotState.Completed;
+            }
+            return best;
+        }
+
         //获取某个hack slot的上传进度（重复时取最活跃的那个）
         public float GetSlotProgress(int slotIndex) {
             float best = 0f;
@@ -102,6 +131,24 @@ namespace CalamityOverhaul.Content.HackTimes
             for (int i = 0; i < queue.Count; i++) {
                 if (queue[i].SlotIndex != slotIndex) continue;
                 //优先返回Uploading的进度
+                if (queue[i].State == HackQueueState.Uploading)
+                    return queue[i].UploadProgress;
+                if (!found || queue[i].UploadProgress > best) {
+                    best = queue[i].UploadProgress;
+                    found = true;
+                }
+            }
+            return best;
+        }
+
+        //获取指定slot针对指定目标的上传进度
+        public float GetSlotProgress(int slotIndex, IHackTarget target) {
+            if (target == null) return GetSlotProgress(slotIndex);
+            float best = 0f;
+            bool found = false;
+            for (int i = 0; i < queue.Count; i++) {
+                if (queue[i].SlotIndex != slotIndex) continue;
+                if (queue[i].Target == null || !queue[i].Target.TargetEquals(target)) continue;
                 if (queue[i].State == HackQueueState.Uploading)
                     return queue[i].UploadProgress;
                 if (!found || queue[i].UploadProgress > best) {
@@ -188,6 +235,34 @@ namespace CalamityOverhaul.Content.HackTimes
                     return true;
                 }
                 if (queue[i].State == HackQueueState.Completed) {
+                    progress = 1f;
+                    completed = true;
+                    return true;
+                }
+            }
+            progress = 0f;
+            completed = false;
+            return false;
+        }
+
+        //获取作用于指定目标的活跃条目（Uploading 优先，其次 Completed）的进度
+        //仅返回与目标匹配的条目，避免多目标场景下把别的目标的进度画到当前选中头顶
+        public bool TryGetActiveEntry(IHackTarget target, out float progress, out bool completed) {
+            if (target != null) {
+                bool foundCompleted = false;
+                for (int i = 0; i < queue.Count; i++) {
+                    var entry = queue[i];
+                    if (entry.Target == null || !entry.Target.TargetEquals(target)) continue;
+                    if (entry.State == HackQueueState.Uploading) {
+                        progress = entry.UploadProgress;
+                        completed = false;
+                        return true;
+                    }
+                    if (entry.State == HackQueueState.Completed) {
+                        foundCompleted = true;
+                    }
+                }
+                if (foundCompleted) {
                     progress = 1f;
                     completed = true;
                     return true;

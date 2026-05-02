@@ -537,8 +537,8 @@ namespace CalamityOverhaul.Content.HackTimes
             //目标无变化时不做处理（点击同一目标不要重复重置上传）
             if (CurrentScanTarget != null && target.TargetEquals(CurrentScanTarget)) return;
 
-            //切换目标时取消正在进行的上传
-            HackTimeUI.Instance?.Panel.CancelUpload();
+            //切换目标时保留各目标自己的上传进度，不再清空队列也不退还 RAM
+            //每个目标的入队状态由队列按 (slot, target) 维度独立维护
 
             bool freshSelect = CurrentScanTarget == null;
             CurrentScanTarget = target;

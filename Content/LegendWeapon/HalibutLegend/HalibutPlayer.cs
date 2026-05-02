@@ -597,7 +597,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend
             }
 
             //海域领域激活检测，不要在服务器上访问按键
-            if (CWRKeySystem.Legend_Domain.JustPressed) {
+            //骇客时间激活期间禁止使用领域技能以及切换领域状态
+            if (Content.HackTimes.HackTime.Active) {
+                //后续领域相关的 JustPressed 全部跳过
+            }
+            else if (CWRKeySystem.Legend_Domain.JustPressed) {
                 if (SeaDomainLayers > 0 || SeaDomainActive) {
                     SeaDomain.AltUse(Player);
                 }

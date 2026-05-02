@@ -3,6 +3,7 @@ using CalamityOverhaul.Content.ADV.EntrustManager;
 using CalamityOverhaul.Content.ADV.Scenarios;
 using CalamityOverhaul.Content.ADV.Scenarios.Shepel;
 using CalamityOverhaul.Content.Cyberwares.UIs;
+using CalamityOverhaul.Content.HackTimes;
 using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
 using CalamityOverhaul.Content.QuestLogs;
 using CalamityOverhaul.Content.RAMSystems;
@@ -567,7 +568,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             }
 
             //领域快捷键：在手持SHPC且HUD可见时热键切换领域开关
-            if (CWRKeySystem.Legend_Domain != null && CWRKeySystem.Legend_Domain.JustPressed) {
+            //骇客时间激活期间禁止切换领域状态
+            if (!HackTime.Active && CWRKeySystem.Legend_Domain != null && CWRKeySystem.Legend_Domain.JustPressed) {
                 Cyberspace.Toggle(player);
             }
 

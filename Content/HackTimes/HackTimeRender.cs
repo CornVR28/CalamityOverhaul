@@ -56,7 +56,8 @@ namespace CalamityOverhaul.Content.HackTimes
 
                 var queue = HackTimeUI.Instance?.Queue;
                 if (queue != null && !queue.IsEmpty && HackTime.SelectedTargetIndex >= 0) {
-                    if (queue.TryGetActiveEntry(out float headProgress, out bool headCompleted)) {
+                    //仅取作用于当前选中NPC的活跃条目，避免把其它目标的进度画到当前选中头顶
+                    if (queue.TryGetActiveEntry(HackTime.CurrentScanTarget, out float headProgress, out bool headCompleted)) {
                         UploadOverlay.Draw(spriteBatch, HackTime.SelectedTargetIndex,
                             headProgress, headCompleted, HackTime.Intensity);
                     }
