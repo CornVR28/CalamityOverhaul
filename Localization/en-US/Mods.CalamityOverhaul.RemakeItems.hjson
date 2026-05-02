@@ -31,12 +31,9 @@ SHPCOverride: {
 	DisplayName: SHPC
 	Tooltip:
 		'''
-		Ejects orbs of unstable, concentrated soul energy that linger and explode after a delay
-		Orbs release seeking souls and lingering pickup souls after collapse
-		Orb effects vary depending on the Soul type used
-		Right Click to use the machine as a vacuum, pulling in lingering souls
-		Releasing the key discharges a torrent of soul lasers scaling with the number of souls pulled in
-		Hold Shift to open the Soul Core control panel
+		Left-click to fire three laser beams
+		Right-click and hold to charge energy
+		All attacks can be enhanced by the field
 		legend_Text
 		[Lang4]
 		'''

@@ -1,4 +1,4 @@
-MurasamaHeld.DisplayName: 分子斩切
+﻿MurasamaHeld.DisplayName: 分子斩切
 MuraTriggerDash.DisplayName: 分子斩切
 MuraBreakerSlash.DisplayName: 升龙半月
 MuraExecutionCut.DisplayName: 次元斩·终
@@ -486,44 +486,44 @@ SingularityBlackHole.DisplayName: 奇点黑洞
 SupernovaExplosion.DisplayName: 超新星爆发
 StarfuryFallingStar.DisplayName: 星怒落星
 SpawnOldDukeWannaToFight.DisplayName: 生成老公爵切磋
-// MachineTesla.DisplayName: Machine Tesla
-// CyberGlitchBoltProj.DisplayName: Cyber Glitch Bolt Proj
-// CyberShockwaveProj.DisplayName: Cyber Shockwave Proj
-// CyberTraceBeamProj.DisplayName: Cyber Trace Beam Proj
-// CyberChargeOrbProj.DisplayName: Cyber Charge Orb Proj
-// CyberDetonationProj.DisplayName: Cyber Detonation Proj
-// SHPCChargeHeldProj.DisplayName: S H P C Charge Held Proj
-// CyberFreezeWaveProj.DisplayName: Cyber Freeze Wave Proj
-// RevelationStar.DisplayName: Revelation Star
-// RevelationDomain.DisplayName: Revelation Domain
-// DivineThunderStrike.DisplayName: Divine Thunder Strike
-// ApocalypseHorseman.DisplayName: Apocalypse Horseman
-// RevelationMeteorImpact.DisplayName: Revelation Meteor Impact
-// RevelationMeteorStrike.DisplayName: Revelation Meteor Strike
+MachineTesla.DisplayName: 特斯拉机型
+CyberGlitchBoltProj.DisplayName: 赛博故障电矢
+CyberShockwaveProj.DisplayName: 赛博冲击波
+CyberTraceBeamProj.DisplayName: 赛博追踪射线
+CyberChargeOrbProj.DisplayName: 赛博充能球
+CyberDetonationProj.DisplayName: 赛博爆破
+SHPCChargeHeldProj.DisplayName: SHPC 蓄能场
+CyberFreezeWaveProj.DisplayName: 赛博冷冻波
+RevelationStar.DisplayName: 启示之星
+RevelationDomain.DisplayName: 启示领域
+DivineThunderStrike.DisplayName: 神圣雷击
+ApocalypseHorseman.DisplayName: 天启骑士
+RevelationMeteorImpact.DisplayName: 启示流星撞击
+RevelationMeteorStrike.DisplayName: 启示流星打击
 
 RevelationSealJudgment: {
 	Seal5Text: 第五印
 	Seal6Text: 第六印
 	Seal7Text: 第七印
 	WorldJudgmentText: 世界审判
-	// DisplayName: Revelation Seal Judgment
+	DisplayName: 启示封印审判
 }
 
-// VoidPortal.DisplayName: Void Portal
-// StarshipComet.DisplayName: Starship Comet
-// StarshipCometOrb.DisplayName: Starship Comet Orb
-// StarshipMaxRateRing.DisplayName: Starship Max Rate Ring
-// StarshipMeteor.DisplayName: Starship Meteor
-// StarshipMicroGalaxy.DisplayName: Starship Micro Galaxy
-// StarshipMicroStar.DisplayName: Starship Micro Star
-// StarshipPlanet.DisplayName: Starship Planet
-// StarshipPlasmaBolt.DisplayName: Starship Plasma Bolt
-// StarshipWingman.DisplayName: Starship Wingman
-// VoidArrivalPortal.DisplayName: Void Arrival Portal
-// GatlinBullet.DisplayName: Gatlin Bullet
-// GatlinImpactBurst.DisplayName: Gatlin Impact Burst
-// CyberReformProj.DisplayName: Cyber Reform Proj
-// CyberRiftSlashProj.DisplayName: Cyber Rift Slash Proj
-// CyberRestartProj.DisplayName: Cyber Restart Proj
-// CyberPixelDecomposeProj.DisplayName: Cyber Pixel Decompose Proj
-// MimicPhantom.DisplayName: Mimic Phantom
+VoidPortal.DisplayName: 虚空传送门
+StarshipComet.DisplayName: 星舰彗星
+StarshipCometOrb.DisplayName: 星舰彗星球
+StarshipMaxRateRing.DisplayName: 星舰极限能环
+StarshipMeteor.DisplayName: 星舰陨星
+StarshipMicroGalaxy.DisplayName: 星舰微型星系
+StarshipMicroStar.DisplayName: 星舰微型恒星
+StarshipPlanet.DisplayName: 星舰行星
+StarshipPlasmaBolt.DisplayName: 星舰等离子弹
+StarshipWingman.DisplayName: 星舰僚机
+VoidArrivalPortal.DisplayName: 虚空降临门
+GatlinBullet.DisplayName: 加特林弹丸
+GatlinImpactBurst.DisplayName: 加特林击中爆发
+CyberReformProj.DisplayName: 赛博重构弹
+CyberRiftSlashProj.DisplayName: 赛博裂隙斩
+CyberRestartProj.DisplayName: 赛博重启
+CyberPixelDecomposeProj.DisplayName: 赛博像素分解
+MimicPhantom.DisplayName: 拟态幻影

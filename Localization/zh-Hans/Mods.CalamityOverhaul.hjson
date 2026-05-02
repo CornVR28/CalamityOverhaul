@@ -8,18 +8,18 @@ Biomes: {
 	}
 
 	MachineBiome: {
-		// DisplayName: Machine Biome
-		// TownNPCDialogueName: the Machine Biome
+		DisplayName: Machine Biome
+		TownNPCDialogueName: the Machine Biome
 	}
 
 	DropPodBiome: {
-		// DisplayName: Drop Pod Biome
-		// TownNPCDialogueName: the Drop Pod Biome
+		DisplayName: Drop Pod Biome
+		TownNPCDialogueName: the Drop Pod Biome
 	}
 
 	VoidColonyBiome: {
-		// DisplayName: Void Colony Biome
-		// TownNPCDialogueName: the Void Colony Biome
+		DisplayName: Void Colony Biome
+		TownNPCDialogueName: the Void Colony Biome
 	}
 }
 
@@ -142,13 +142,13 @@ QuickHack: {
 
 HackTargetType: {
 	ItemTargetType.DisplayName: 掉落物目标
-	// NpcTargetType.DisplayName: Npc Target Type
+	NpcTargetType.DisplayName: NPC目标
 	ProjectileTargetType.DisplayName: 弹幕目标
-	// SignalTowerTargetType.DisplayName: Signal Tower Target Type
-	// TileTargetType.DisplayName: Tile Target Type
-	// TurretTargetType.DisplayName: Turret Target Type
+	SignalTowerTargetType.DisplayName: 信号塔目标
+	TileTargetType.DisplayName: 掉落物目标
+	TurretTargetType.DisplayName: 炮台目标
 	WaterTargetType.DisplayName: 液体目标
-	// WraithTargetType.DisplayName: Wraith Target Type
+	WraithTargetType.DisplayName: 液体目标
 }
 
 TileNameFallback: {
