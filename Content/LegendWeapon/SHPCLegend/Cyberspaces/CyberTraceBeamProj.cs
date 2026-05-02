@@ -455,7 +455,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
                     scale, Main.rand.Next(20, 40)
                 ));
             }
-            Projectile.damage = (int)(Projectile.damage * 0.75f);
+            Projectile.damage = (int)(Projectile.damage * 0.7f);
         }
 
         public override void OnKill(int timeLeft) {
