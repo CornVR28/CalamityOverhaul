@@ -156,9 +156,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
 
             //面板标题
             Utils.DrawBorderString(sb, SHPCUI.Modify_Title.Value,
-                new Vector2(rect.X + 10f * Scale, rect.Y + 7f * Scale), SHPCTheme.Text * a, 0.62f * FontScale);
+                new Vector2(rect.X + 10f * Scale, rect.Y + 7f * Scale), SHPCTheme.Text * a, 0.72f * FontScale);
             Utils.DrawBorderString(sb, SHPCUI.Modify_Subtitle.Value,
-                new Vector2(rect.X + 10f * Scale, rect.Y + 24f * Scale), SHPCTheme.TextDim * a, 0.40f * FontScale);
+                new Vector2(rect.X + 10f * Scale, rect.Y + 24f * Scale), SHPCTheme.TextDim * a, 0.52f * FontScale);
 
             //右上滚动ID码，增强科技感
             string idCode = $"SYS#{(int)(time * 13f) % 9999:D4}";
@@ -301,7 +301,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                 (isHover ? SHPCTheme.Cyan : SHPCTheme.Border) * (0.8f * a));
 
             //槽位标签
-            float labelScale = 0.38f * FontScale;
+            float labelScale = 0.50f * FontScale;
             Vector2 labelSz = font.MeasureString(label) * labelScale;
             Utils.DrawBorderString(sb, label,
                 new Vector2(r.X + 7f * Scale, r.Y + (r.Height - labelSz.Y) * 0.5f),
@@ -338,7 +338,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             }
             else {
                 const string emptyMark = "--";
-                const float emptyScale = 0.34f * FontScale;
+                const float emptyScale = 0.46f * FontScale;
                 Vector2 emptySz = font.MeasureString(emptyMark) * emptyScale;
                 Utils.DrawBorderString(sb, emptyMark,
                     new Vector2(r.Right - 6f * Scale - emptySz.X, r.Y + (r.Height - emptySz.Y) * 0.5f),
@@ -374,7 +374,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                 }
             }
 
-            float scale = 0.45f * FontScale;
+            float scale = 0.60f * FontScale;
             float lineH = font.LineSpacing * scale;
             float maxW = 0f;
             foreach (string ln in lines) {

@@ -22,11 +22,16 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
             return arr;
         }
 
+        private Item[] SafeModules() {
+            Modules ??= CreateEmptyModules();
+            return Modules;
+        }
+
         public Item GetModule(int slotIdx) {
             if (slotIdx < 0 || slotIdx >= SHPCData.SlotCount) {
                 return null;
             }
-            Item it = Modules[slotIdx];
+            Item it = SafeModules()[slotIdx];
             return it == null || it.IsAir ? null : it;
         }
 
@@ -34,8 +39,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
             if (slotIdx < 0 || slotIdx >= SHPCData.SlotCount) {
                 return null;
             }
-            Item old = Modules[slotIdx];
-            Modules[slotIdx] = new Item();
+            Item[] modules = SafeModules();
+            Item old = modules[slotIdx];
+            modules[slotIdx] = new Item();
             return old == null || old.IsAir ? null : old;
         }
 
@@ -43,10 +49,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
             if (slotIdx < 0 || slotIdx >= SHPCData.SlotCount || module == null || module.IsAir) {
                 return null;
             }
-            Item old = Modules[slotIdx];
+            Item[] modules = SafeModules();
+            Item old = modules[slotIdx];
             Item cloned = module.Clone();
             cloned.stack = 1;
-            Modules[slotIdx] = cloned;
+            modules[slotIdx] = cloned;
             return old == null || old.IsAir ? null : old;
         }
 
@@ -61,28 +68,39 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
         }
 
         public override void SaveData(TagCompound tag) {
-            for (int i = 0; i < SHPCData.SlotCount; i++) {
-                Item m = Modules[i];
-                if (m != null && !m.IsAir) {
-                    tag[$"SHPC_Mod_{i}"] = ItemIO.Save(m);
+            try {
+                Item[] modules = SafeModules();
+                for (int i = 0; i < SHPCData.SlotCount; i++) {
+                    Item m = modules[i];
+                    if (m != null && !m.IsAir) {
+                        tag[$"SHPC_Mod_{i}"] = ItemIO.Save(m);
+                    }
                 }
+            }
+            catch (System.Exception ex) {
+                CWRMod.Instance.Logger.Error($"SHPCPlayer.SaveData Error: {ex.Message}");
             }
         }
 
         public override void LoadData(TagCompound tag) {
-            Modules ??= CreateEmptyModules();
-            for (int i = 0; i < SHPCData.SlotCount; i++) {
-                if (tag.TryGet($"SHPC_Mod_{i}", out TagCompound modTag)) {
-                    try {
-                        Modules[i] = ItemIO.Load(modTag);
+            try {
+                Modules ??= CreateEmptyModules();
+                for (int i = 0; i < SHPCData.SlotCount; i++) {
+                    if (tag.TryGet($"SHPC_Mod_{i}", out TagCompound modTag)) {
+                        try {
+                            Modules[i] = ItemIO.Load(modTag);
+                        }
+                        catch {
+                            Modules[i] = new Item();
+                        }
                     }
-                    catch {
+                    else {
                         Modules[i] = new Item();
                     }
                 }
-                else {
-                    Modules[i] = new Item();
-                }
+            }
+            catch (System.Exception ex) {
+                CWRMod.Instance.Logger.Error($"SHPCPlayer.LoadData Error: {ex.Message}");
             }
         }
     }

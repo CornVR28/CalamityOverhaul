@@ -149,12 +149,12 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             //标题
             string slotName = SlotLabel(slotIdx);
             Utils.DrawBorderString(sb, string.Format(SHPCUI.Modify_InstallSlot.Value, slotName),
-                new Vector2(rect.X + 10f * Scale, rect.Y + 7f * Scale), SHPCTheme.Text * a, 0.62f * FontScale);
+                new Vector2(rect.X + 10f * Scale, rect.Y + 7f * Scale), SHPCTheme.Text * a, 0.72f * FontScale);
             string subtitle = equipped != null
                 ? string.Format(SHPCUI.Modify_Current.Value, equipped.Name)
                 : SHPCUI.Modify_SlotEmpty.Value;
             Utils.DrawBorderString(sb, subtitle,
-                new Vector2(rect.X + 10f * Scale, rect.Y + 24f * Scale), SHPCTheme.TextDim * a, 0.40f * FontScale);
+                new Vector2(rect.X + 10f * Scale, rect.Y + 24f * Scale), SHPCTheme.TextDim * a, 0.52f * FontScale);
 
             //列表区背景
             SHPCRenderer.DrawFilledRect(sb, px, layout.ListArea,
@@ -165,11 +165,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             int count = _candidates.Count;
             if (count == 0) {
                 string empty = SHPCUI.Modify_NoMatch.Value;
-                Vector2 sz = font.MeasureString(empty) * (0.45f * FontScale);
+                Vector2 sz = font.MeasureString(empty) * (0.58f * FontScale);
                 Utils.DrawBorderString(sb, empty,
                     new Vector2(layout.ListArea.X + (layout.ListArea.Width - sz.X) * 0.5f,
                                 layout.ListArea.Y + (layout.ListArea.Height - sz.Y) * 0.5f),
-                    SHPCTheme.TextDim * a, 0.45f * FontScale);
+                    SHPCTheme.TextDim * a, 0.58f * FontScale);
             }
             else {
                 for (int i = 0; i < count; i++) {
@@ -204,15 +204,15 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                         row.Y + (row.Height - font.LineSpacing * 0.5f) * 0.5f);
                     Color nameCol = (isEquipped ? SHPCTheme.Accent
                         : (isHover ? SHPCTheme.Text : SHPCTheme.TextDim)) * a;
-                    Utils.DrawBorderString(sb, _candidates[i].Name, textPos, nameCol, 0.5f * FontScale);
+                    Utils.DrawBorderString(sb, _candidates[i].Name, textPos, nameCol, 0.62f * FontScale);
 
                     //右侧标记
                     if (isEquipped) {
                         string mark = SHPCUI.Modify_Equipped.Value;
-                        Vector2 ms = font.MeasureString(mark) * (0.42f * FontScale);
+                        Vector2 ms = font.MeasureString(mark) * (0.54f * FontScale);
                         Utils.DrawBorderString(sb, mark,
                             new Vector2(row.Right - 6f * Scale - ms.X, textPos.Y),
-                            SHPCTheme.Accent * a, 0.42f * FontScale);
+                            SHPCTheme.Accent * a, 0.54f * FontScale);
                     }
                 }
             }
@@ -240,7 +240,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                           : SHPCTheme.Border * (0.7f * a);
             SHPCRenderer.DrawRectStroke(sb, px, r, 1f, border);
 
-            float scale = 0.45f * FontScale;
+            float scale = 0.58f * FontScale;
             Vector2 sz = font.MeasureString(label) * scale;
             Color textCol = !enabled ? SHPCTheme.Disabled * a
                 : (isHover ? SHPCTheme.Text : SHPCTheme.TextDim) * a;
@@ -314,7 +314,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             }
 
             //计算尺寸
-            float scale = 0.45f * FontScale;
+            float scale = 0.60f * FontScale;
             float maxW = 0f;
             float totalH = 0f;
             float lineH = font.LineSpacing * scale;
