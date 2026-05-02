@@ -249,7 +249,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
                 SoundEngine.PlaySound(SoundID.Item92, player.Center);
                 Vector2 baseVel = velocity.SafeNormalize(Vector2.UnitX) * 14f;
                 Vector2 dir = velocity.UnitVector();
-                position += new Vector2(dir.X * 20, -8);
+                position += new Vector2(dir.X * 20, -12);
                 for (int i = 0; i < BeamCount; i++) {
                     // 均匀散射 + 少量随机偏移
                     float spreadOffset = (i - (BeamCount - 1) / 2f) * BeamSpreadAngle;
