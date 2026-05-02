@@ -248,7 +248,7 @@ CybTutorialLead: {
 	AwaitingEquip: AWAITING EQUIP...
 	Calibrating: CALIBRATING...
 	NextBtn: NEXT  >
-	HintStuck: "// HINT: 试着点击高亮的目标区域"
+	HintStuck: HINT: 试着点击高亮的目标区域
 }
 
 CybCourseHackIntroDialogue: {
@@ -306,82 +306,82 @@ HackTimeTutorialLead: {
 		点击左键将其锁定为扫描目标。
 		'''
 	HT_Step7_Body: 物块扫描接口已解析。右侧面板展示当前物块的可用骇入协议。
-	HT_HintStuck: "// HINT: 点击 NEXT 按钮可强制跳过"
+	HT_HintStuck: HINT: 点击 NEXT 按钮可强制跳过
 	HT_KeyUnbound: N（临时开关）
-	HT_KeyHintUnbound: "// 提示：未绑定骇客时间快捷键时，本教程内可用 [N] 临时开关；建议在 设置 > 控制 中绑定。"
-	// HT_S00_Title: Activate Hack Mode
-	// HT_S01_Title: Lock NPC Target
-	// HT_S02_Title: Hack Protocol Panel
-	// HT_S03_Title: Add to Upload Queue
-	// HT_S04_Title: Exit Hack Time Execution
-	// HT_S05_Title: Protocol Executing
-	// HT_S06_Title: Re-enter Hack Mode
-	// HT_S07_Title: Lock Tile Target
-	// HT_S08_Title: Add Tile Protocol
-	// HT_S09_Title: Exit Hack Time Execution
-	// HT_S10_Title: Tile Protocol Executing
-	// HT_S11_Title: Training Complete
-	/* HT_S00_Body:
+	HT_KeyHintUnbound: 提示：未绑定骇客时间快捷键时，本教程内可用 [N] 临时开关；建议在 设置 > 控制 中绑定。
+	HT_S00_Title: 激活骇客模式
+	HT_S01_Title: 锁定NPC目标
+	HT_S02_Title: 骇入协议面板
+	HT_S03_Title: 加入上传队列
+	HT_S04_Title: 退出骇客时间执行
+	HT_S05_Title: 协议执行中
+	HT_S06_Title: 再次进入骇客模式
+	HT_S07_Title: 锁定物块目标
+	HT_S08_Title: 加入物块协议
+	HT_S09_Title: 退出骇客时间执行
+	HT_S10_Title: 物块协议执行中
+	HT_S11_Title: 训练完成
+	HT_S00_Body:
 		'''
-		Press the {0} key to enter Hack Time mode.
-		Time will freeze, and a cyber filter will overlay the screen.
-		''' */
-	/* HT_S01_Body:
+		按下 {0} 键进入骇客时间模式。
+		时间将冻结，赛博滤镜叠加于画面。
 		'''
-		Hover your cursor over the highlighted Everscream.
-		Left-click to lock it as the hack target.
-		''' */
-	/* HT_S02_Body:
+	HT_S01_Body:
 		'''
-		The right panel displays the available hack protocols for the target.
-		Different protocols consume different amounts of RAM and produce different effects.
-		''' */
-	/* HT_S03_Body:
+		将光标悬停到高亮的圣诞坦克上，
+		点击左键将其锁定为骇入目标。
 		'''
-		Click any protocol on the right to add it to the upload queue on the left.
-		The queue only stacks during Hack Time and will not advance.
-		''' */
-	/* HT_S04_Body:
+	HT_S02_Body:
 		'''
-		Press {0} again to exit Hack Time.
-		The protocols will begin uploading and take effect in the real-time world.
-		''' */
-	/* HT_S05_Body:
+		右侧面板展示目标的可用骇入协议。
+		不同协议消耗不同RAM并产生不同效果。
 		'''
-		Uploading... Observe the target suffering the protocol effects.
-		The next stage will begin once the queue is cleared.
-		''' */
-	/* HT_S06_Body:
+	HT_S03_Body:
 		'''
-		There is a Thermal Generator MK2 in the corridor ahead.
-		Press {0} again to enter Hack Time and scan the tile.
-		''' */
-	/* HT_S07_Body:
+		点击右侧任一协议将其加入左侧上传队列，
+		队列在骇客时间内仅排队不会推进。
 		'''
-		Hover your cursor over the highlighted generator.
-		Left-click to lock it as the scan target.
-		''' */
-	/* HT_S08_Body:
+	HT_S04_Body:
 		'''
-		The right panel displays tile-exclusive protocols.
-		Click any protocol to add it to the upload queue.
-		''' */
-	/* HT_S09_Body:
+		再次按下 {0} 退出骇客时间，
+		协议将在实时世界中开始上传并生效。
 		'''
-		Press {0} again to exit Hack Time.
-		Tile protocols will execute in the real-time world.
-		''' */
-	/* HT_S10_Body:
+	HT_S05_Body:
 		'''
-		Uploading... Observe the generator suffering the protocol effects.
-		Training will conclude once the queue is cleared.
-		''' */
-	/* HT_S11_Body:
+		上传中... 观察目标遭受协议效果。
+		队列清空后将进入下一阶段。
 		'''
-		Hack protocol training fully complete.
-		You have mastered the complete flow of scanning, protocol selection, uploading, and execution.
-		''' */
-	// HT_Observing: UPLOADING...
+	HT_S06_Body:
+		'''
+		前方走廊有一台热能发电机MK2。
+		再次按下 {0} 进入骇客时间扫描物块。
+		'''
+	HT_S07_Body:
+		'''
+		将光标悬停在高亮的发电机上，
+		点击左键将其锁定为扫描目标。
+		'''
+	HT_S08_Body:
+		'''
+		右侧面板展示物块专属协议。
+		点击任一协议将其加入上传队列。
+		'''
+	HT_S09_Body:
+		'''
+		再次按下 {0} 退出骇客时间，
+		物块协议将在实时世界中执行。
+		'''
+	HT_S10_Body:
+		'''
+		上传中... 观察发电机遭受协议效果。
+		队列清空后训练即告完成。
+		'''
+	HT_S11_Body:
+		'''
+		骇客协议训练全部完成。
+		你已掌握扫描、协议、上传、生效的完整流程。
+		'''
+	HT_Observing: UPLOADING...
 }
 
 CybCourseOutroDialogue: {
@@ -399,7 +399,7 @@ CybCourseCompletePanel: {
 	Stat3: "[#] 物块扫描接口校准完毕"
 	BtnRetry: RETRY
 	BtnExit: EXIT
-	Footer: "// 选择以继续 — RETRY 重启训练，EXIT 离开超梦"
+	Footer: 选择以继续 — RETRY 重启训练，EXIT 离开超梦
 }
 
 ShepelBloodMoonDialogue: {
@@ -504,15 +504,15 @@ ShepelUnderworldDialogue: {
 }
 
 CybCourseKeyBindReminderPanel: {
-	// Title: BIND ALERT
-	// Subtitle: Unbound Core Hotkeys
-	/* Hint:
+	Title: BIND ALERT
+	Subtitle: Unbound Core Hotkeys
+	Hint:
 		'''
 		The following hotkeys are currently unbound. You will be unable to use their corresponding features normally after leaving the Braindance.
 		Please assign keys to them in [Settings → Controls].
-		''' */
-	// UnboundLabel: Unbound
-	// BtnConfirm: Acknowledged
-	// BtnLater: Handle Later
-	// Footer: Any option will disconnect the Braindance. Bindings can be adjusted at any time in settings in the main world.
+		'''
+	UnboundLabel: Unbound
+	BtnConfirm: Acknowledged
+	BtnLater: Handle Later
+	Footer: Any option will disconnect the Braindance. Bindings can be adjusted at any time in settings in the main world.
 }
