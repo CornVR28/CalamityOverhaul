@@ -176,10 +176,10 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
 
         public override void SetDefaults(Item item) => SetDefaultsFunc(item);
 
-        public override bool On_ModifyWeaponDamage(Item item, Player player, ref StatModifier damage) => SHPCDamage(item, ref damage);
+        public override bool On_ModifyWeaponDamage(Item item, Player player, ref StatModifier damage) => SHPCDamage(item, player, ref damage);
 
         public override bool? On_ModifyWeaponCrit(Item item, Player player, ref float crit) {
-            ShootContext ctx = SHPCModificationSystem.Resolve(item);
+            ShootContext ctx = SHPCModificationSystem.Resolve(player);
             if (ctx.CritAdd != 0) {
                 crit += ctx.CritAdd;
             }
@@ -205,7 +205,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
         /// <br/>左键时：正常使用
         /// </summary>
         public override bool? On_CanUseItem(Item item, Player player) {
-            ShootContext ctx = SHPCModificationSystem.Resolve(item);
+            ShootContext ctx = SHPCModificationSystem.Resolve(player);
             if (player.altFunctionUse == 2) {
                 // 右键蓄力模式：channel + noUseGraphic，且场上没有同类蓄力弹幕
                 item.channel = true;
@@ -239,7 +239,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
                 mult *= 0f;
                 return;
             }
-            ShootContext ctx = SHPCModificationSystem.Resolve(item);
+            ShootContext ctx = SHPCModificationSystem.Resolve(player);
             mult *= ctx.ManaCostMul;
         }
 
@@ -250,7 +250,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
         /// </summary>
         public override bool? On_Shoot(Item item, Player player, EntitySource_ItemUse_WithAmmo source,
             Vector2 position, Vector2 velocity, int type, int damage, float knockback) {
-            ShootContext ctx = SHPCModificationSystem.Resolve(item);
+            ShootContext ctx = SHPCModificationSystem.Resolve(player);
             if (player.altFunctionUse == 2) {
                 // 右键：先生成手持弹幕（绘制武器 + 控制手臂动画）
                 int heldIdx = Projectile.NewProjectile(source, player.Center, Vector2.Zero,
@@ -311,10 +311,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
             Item.CWR().LegendData = new SHPCData();
         }
 
-        public static bool SHPCDamage(Item Item, ref StatModifier damage) {
+        public static bool SHPCDamage(Item Item, Player player, ref StatModifier damage) {
             CWRUtils.ModifyLegendWeaponDamageFunc(Item, GetOnDamage(Item), GetStartDamage, ref damage);
-            //叠加改件提供的伤害倍率
-            ShootContext ctx = SHPCModificationSystem.Resolve(Item);
+            ShootContext ctx = SHPCModificationSystem.Resolve(player);
             if (ctx.DamageMul != 1f) {
                 damage *= ctx.DamageMul;
             }

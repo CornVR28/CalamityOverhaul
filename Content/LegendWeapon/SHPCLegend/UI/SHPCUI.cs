@@ -223,13 +223,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                 pinnedModuleSlot = -1;
                 return;
             }
-            Item heldItem = owner.GetItem();
-            SHPCData sd = SHPCData.TryGet(heldItem);
-            if (sd == null) {
-                return;
-            }
+            SHPCPlayer sp = SHPCPlayer.Get(owner);
             if (moduleHover == SHPCModuleSelectPanel.HitKind.Unequip) {
-                Item taken = sd.TakeModule(pinnedModuleSlot);
+                Item taken = sp.TakeModule(pinnedModuleSlot);
                 if (taken != null && !taken.IsAir) {
                     owner.QuickSpawnItem(owner.GetSource_Misc("SHPCModule"), taken, taken.stack);
                 }
@@ -243,8 +239,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                     return;
                 }
                 Item picked = list[rowIdx];
-                //装入新模块，旧模块返还为新背包物品
-                Item swapped = sd.PutModule(pinnedModuleSlot, picked);
+                Item swapped = sp.PutModule(pinnedModuleSlot, picked);
                 //从背包移除一个 picked
                 int found = -1;
                 for (int i = 0; i < owner.inventory.Length; i++) {
@@ -732,9 +727,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                         SHPCModuleSelectPanel.HitKind hover = SHPCModuleSelectPanel.HitTest(
                             ref modLayout, MousePosition,
                             SHPCModuleSelectPanel.CurrentCandidates.Count);
-                        Item heldItem = Main.LocalPlayer.GetItem();
-                        Item equipped = SHPCData.TryGet(heldItem) is SHPCData d
-                            ? d.GetModule(pinnedModuleSlot) : null;
+                        Item equipped = Main.LocalPlayer.GetModPlayer<SHPCPlayer>().GetModule(pinnedModuleSlot);
                         SHPCModuleSelectPanel.Draw(sb, px, modLayout,
                             modulePanelProgress, globalAlpha, hover,
                             pinnedModuleSlot, equipped);

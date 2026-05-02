@@ -171,13 +171,12 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             DrawDataLines(sb, px, gun, hover, time, a);
 
             //六个改件槽位
-            Item heldItem = Main.LocalPlayer?.GetItem();
-            SHPCData sd = SHPCData.TryGet(heldItem);
+            SHPCPlayer sp = Main.LocalPlayer != null ? SHPCPlayer.Get(Main.LocalPlayer) : null;
             for (int i = 0; i < SlotCount; i++) {
                 Rectangle slotRect = GetSlotRect(layout, i);
                 bool isHover = hover == (HitKind)(i + 1);
                 bool isPinned = SHPCUI.Instance?.PinnedModuleSlot == i;
-                Item equipped = sd?.GetModule(i);
+                Item equipped = sp?.GetModule(i);
                 DrawSlot(sb, px, font, slotRect, GetSlotLabel(i), isHover || isPinned, equipped, a);
             }
 
@@ -187,7 +186,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             //悬停已装配槽位时在槽位正上方显示模块信息卡
             if (hover >= HitKind.Slot0 && hover <= HitKind.Slot5) {
                 int hoverIdx = (int)hover - 1;
-                Item equipped = sd?.GetModule(hoverIdx);
+                Item equipped = sp?.GetModule(hoverIdx);
                 if (equipped != null && !equipped.IsAir) {
                     Rectangle slotRect = GetSlotRect(layout, hoverIdx);
                     DrawEquippedTooltip(sb, px, font, slotRect, equipped, a);
