@@ -451,6 +451,9 @@ namespace CalamityOverhaul.Content.HackTimes
         //无限骇入模式（无限袭击终态演出用）
         public static bool InfiniteHack { get; set; }
 
+        //进入骇客时间时的背包开关状态快照，退出时恢复
+        private static bool snapshotInventoryOpen;
+
         private static float targetIntensity;
         //运镜目标位置（选中NPC的中心世界坐标）
         private static Vector2 cameraTo;
@@ -475,6 +478,8 @@ namespace CalamityOverhaul.Content.HackTimes
                 //正在淡出中，直接反转回来，无需重置状态
                 Active = true;
                 targetIntensity = 1f;
+                snapshotInventoryOpen = Main.playerInventory;
+                Main.playerInventory = false;
                 HackTimeFreeze.Activate();
             }
             else {
@@ -495,6 +500,8 @@ namespace CalamityOverhaul.Content.HackTimes
             ReticleTimer = 0f;
             CameraOffset = Vector2.Zero;
             cameraTo = Vector2.Zero;
+            snapshotInventoryOpen = Main.playerInventory;
+            Main.playerInventory = false;
             HackTimeFreeze.Activate();
 
             if (!VaultUtils.isServer) {
@@ -509,6 +516,8 @@ namespace CalamityOverhaul.Content.HackTimes
             Active = false;
             targetIntensity = 0f;
             CurrentScanTarget = null;
+            Main.playerInventory = snapshotInventoryOpen;
+            snapshotInventoryOpen = false;
             HackTimeFreeze.Deactivate();
             HackTimeUI.Instance?.Panel.Hide();
         }
@@ -670,6 +679,7 @@ namespace CalamityOverhaul.Content.HackTimes
             ReticleTimer = 0f;
             CameraOffset = Vector2.Zero;
             cameraTo = Vector2.Zero;
+            snapshotInventoryOpen = false;
             InfiniteHack = false;
             HackTimeFreeze.Deactivate();
             HackTimeUI.Instance?.Queue?.Clear();
