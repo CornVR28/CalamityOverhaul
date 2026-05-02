@@ -1,4 +1,4 @@
-﻿ItemFilterUI: {
+ItemFilterUI: {
 	HintText: 左键点击可添加项目
 	HintText2: 左键点击可移除项目
 	CloseHint: "[ESC]键或[右键点击]可关闭"
@@ -757,7 +757,7 @@ SHPCUI: {
 	Modify_Install: 安装
 	Modify_Unequip: 卸下
 	Modify_Equipped: 已装备
-	Modify_NoMatch: 没有可装备的模块
+	Modify_NoMatch: 背包中没有匹配的改件
 	Talk_Title: 对话
 	Talk_Subtitle: 神经连接
 	Talk_Description: 开启与 SHPC 的直接通讯频道

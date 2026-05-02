@@ -247,6 +247,34 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
             return false;
         }
 
+        /// <summary>统计指定状态的条目数量，引导兜底逻辑用于检测玩家操作</summary>
+        public int CountByStatus(QuestEntryStatus status) {
+            int n = 0;
+            foreach (var e in allEntries) {
+                if (e.Status == status) n++;
+            }
+            return n;
+        }
+
+        /// <summary>取出第一条可被兜底自动关注的条目Key（优先 Active，其次 Suspended）</summary>
+        public string TryGetFirstTrackableKey() {
+            foreach (var e in allEntries) {
+                if (e.Status == QuestEntryStatus.Active) return e.Key;
+            }
+            foreach (var e in allEntries) {
+                if (e.Status == QuestEntryStatus.Suspended) return e.Key;
+            }
+            return null;
+        }
+
+        /// <summary>取出第一条可被兜底自动挂起的条目Key（优先非追踪的 Active）</summary>
+        public string TryGetFirstSuspendableKey() {
+            foreach (var e in allEntries) {
+                if (e.Status == QuestEntryStatus.Active) return e.Key;
+            }
+            return null;
+        }
+
         #endregion
 
         #region 样式系统

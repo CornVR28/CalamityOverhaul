@@ -43,12 +43,15 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
                 => "// 任意选项都将断开超梦连接，绑定可在主世界设置中随时调整");
         }
 
-        //面板尺寸：略大于完成面板，以容纳列表
-        private const int PanelW = 520;
-        private const int PanelMinH = 240;
-        private const int PanelMaxH = 520;
+        //面板尺寸
+        private const int PanelW = 540;
+        private const int PanelMaxH = 560;
         private const int EdgePad = 10;
-        private const int RowH = 30;
+        private const int RowH = 32;
+        //固定内容区高度（标题+副标题+分隔线+提示语+间距），按 MouseText 典型 fontH≈20 估算
+        private const int HeaderOverhead = 152;
+        //列表下方到面板底（按钮+脚注+内边距）
+        private const int FooterOverhead = 100;
 
         public static bool Visible => _phase != Phase.Hidden;
 
@@ -194,9 +197,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
             sb.Draw(px, new Rectangle(0, 0, Main.screenWidth, Main.screenHeight),
                 new Color(8, 4, 0, (int)(170 * _alpha)));
 
-            //依据未绑定项目数量动态计算面板高度
-            int rowsH = Math.Max(1, _entries.Count) * RowH;
-            int dynH = (int)MathHelper.Clamp(PanelMinH + rowsH - RowH, PanelMinH, PanelMaxH);
+            //依据实际内容块高度精确计算面板高度，避免列表与底部按钮区互相压缩
+            int dynH = Math.Clamp(HeaderOverhead + _entries.Count * RowH + FooterOverhead, HeaderOverhead + FooterOverhead, PanelMaxH);
             int cx = (Main.screenWidth - PanelW) / 2;
             int cy = (Main.screenHeight - dynH) / 2;
             float slideY = (1f - _alpha) * 28f;
@@ -238,10 +240,14 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
 
         private static void DrawPanelContent(SpriteBatch sb, Rectangle panel) {
             var font = FontAssets.MouseText.Value;
-            float titleSc = 1.20f;
-            float subSc = 0.66f;
-            float bodySc = 0.68f;
-            float footerSc = 0.55f;
+            float fontH = font.MeasureString("A").Y;
+            const float titleSc = 1.20f;
+            const float subSc = 0.64f;
+            const float bodySc = 0.68f;
+            const float footerSc = 0.55f;
+
+            //cursor-Y 流式布局，从顶部向下依次排列各区域，杜绝遮挡
+            float curY = panel.Y + 22f;
 
             //顶部呼吸光带
             float breath = 0.55f + 0.45f * MathF.Sin(_shaderTimer * 4f);
@@ -250,65 +256,71 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
                 new Color(255, 200, 90, (int)(150 * _alpha * breath)));
 
             //标题
-            float titleY = panel.Y + 22f;
+            float titleH = fontH * titleSc;
             BaseManagerStyle.DrawCenteredText(sb, Title.Value,
-                new Vector2(panel.Center.X, titleY + font.MeasureString("A").Y * titleSc * 0.5f),
+                new Vector2(panel.Center.X, curY + titleH * 0.5f),
                 new Color(255, 215, 130, (int)(255 * _alpha)), titleSc);
+            curY += titleH + 8f;
 
             //副标题
-            float subY = titleY + font.MeasureString("A").Y * titleSc + 4f;
+            float subH = fontH * subSc;
             BaseManagerStyle.DrawCenteredText(sb, Subtitle.Value,
-                new Vector2(panel.Center.X, subY + font.MeasureString("A").Y * subSc * 0.5f),
+                new Vector2(panel.Center.X, curY + subH * 0.5f),
                 new Color(245, 195, 140, (int)(200 * _alpha)), subSc);
+            curY += subH + 14f;
 
             //装饰分隔线
-            int divY = (int)(subY + font.MeasureString("A").Y * subSc + 10f);
             int divW = (int)(panel.Width * 0.55f);
             int divX = panel.Center.X - divW / 2;
             BaseManagerStyle.FillRect(sb,
-                new Rectangle(divX, divY, divW / 2 - 6, 1),
+                new Rectangle(divX, (int)curY, divW / 2 - 6, 1),
                 new Color(220, 170, 80, (int)(160 * _alpha)));
             BaseManagerStyle.FillRect(sb,
-                new Rectangle(divX + divW / 2 + 6, divY, divW / 2 - 6, 1),
+                new Rectangle(divX + divW / 2 + 6, (int)curY, divW / 2 - 6, 1),
                 new Color(220, 170, 80, (int)(160 * _alpha)));
             BaseManagerStyle.FillRect(sb,
-                new Rectangle(panel.Center.X - 3, divY - 1, 6, 3),
+                new Rectangle(panel.Center.X - 3, (int)curY - 1, 6, 3),
                 new Color(255, 220, 140, (int)(220 * _alpha)));
+            curY += 14f;
 
             //提示语
-            float hintY = divY + 10f;
             string[] hintLines = Hint.Value.Split('\n');
-            float hintLineH = font.MeasureString("A").Y * bodySc + 2f;
+            float hintLineH = fontH * bodySc + 4f;
             for (int i = 0; i < hintLines.Length; i++) {
                 BaseManagerStyle.DrawCenteredText(sb, hintLines[i],
-                    new Vector2(panel.Center.X, hintY + hintLineH * i + hintLineH * 0.5f),
+                    new Vector2(panel.Center.X, curY + hintLineH * 0.5f),
                     new Color(245, 220, 175, (int)(225 * _alpha)), bodySc);
+                curY += hintLineH;
             }
+            curY += 14f;
 
             //列表区
-            float listY = hintY + hintLineH * hintLines.Length + 10f;
-            int listX = panel.X + 36;
-            int listRight = panel.Right - 36;
+            int listX = panel.X + 40;
+            int listRight = panel.Right - 40;
             for (int i = 0; i < _entries.Count; i++) {
-                DrawKeyRow(sb, font, listX, listRight, (int)listY + i * RowH, _entries[i], i);
+                DrawKeyRow(sb, font, listX, listRight, (int)curY, _entries[i], i);
+                curY += RowH;
             }
 
-            //底部按钮区
+            //列表与按钮之间的间距
+            curY += 14f;
+
+            //底部按钮区 —— 跟随 curY，不再硬编码 panel.Bottom 偏移
             const int btnW = 150;
             const int btnH = 34;
-            int btnY = panel.Bottom - 70;
             int gap = 28;
             int btnTotalW = btnW * 2 + gap;
             int btnX = panel.Center.X - btnTotalW / 2;
 
-            _confirmRect = new Rectangle(btnX, btnY, btnW, btnH);
-            _laterRect = new Rectangle(btnX + btnW + gap, btnY, btnW, btnH);
+            _confirmRect = new Rectangle(btnX, (int)curY, btnW, btnH);
+            _laterRect = new Rectangle(btnX + btnW + gap, (int)curY, btnW, btnH);
             DrawPanelButton(sb, _confirmRect, BtnConfirm.Value, hot: true);
             DrawPanelButton(sb, _laterRect, BtnLater.Value, hot: false);
+            curY += btnH + 14f;
 
             //底部脚注
             BaseManagerStyle.DrawCenteredText(sb, Footer.Value,
-                new Vector2(panel.Center.X, panel.Bottom - 18f),
+                new Vector2(panel.Center.X, curY + fontH * footerSc * 0.5f),
                 new Color(225, 185, 130, (int)(180 * _alpha)), footerSc);
         }
 

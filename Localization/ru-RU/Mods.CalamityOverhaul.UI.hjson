@@ -757,7 +757,7 @@ SHPCUI: {
 	// Modify_Install: INSTALL
 	// Modify_Unequip: UNEQUIP
 	// Modify_Equipped: EQUIPPED
-	// Modify_NoMatch: "// no compatible modules in inventory"
+	// Modify_NoMatch: No compatible modules in inventory
 	// Talk_Title: TALK
 	// Talk_Subtitle: Neural Link
 	// Talk_Description: Open a direct channel to SHPC
