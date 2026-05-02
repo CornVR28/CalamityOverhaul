@@ -7,6 +7,7 @@ namespace CalamityOverhaul.Content.HackTimes.Protocols
 {
     /// <summary>
     /// 赛博精神病：使目标陷入狂暴攻击周围一切单位
+    /// <br/>对蠕虫类多体节 Boss 或月总等多实体 Boss，会自动扩散到群组内全部成员
     /// </summary>
     internal class Cyberpsychosis : QuickHackDef
     {
@@ -22,12 +23,11 @@ namespace CalamityOverhaul.Content.HackTimes.Protocols
             if (target is not NpcScannable s) return false;
             NPC npc = Main.npc[s.NpcIndex];
             //红色精神崩溃爆发
-            for (int i = 0; i < 12; i++) {
-                Vector2 vel = Main.rand.NextVector2CircularEdge(3.5f, 3.5f);
-                PRTLoader.AddParticle(new PRT_Spark(npc.Center, vel,
-                    false, 30, 1.0f, new Color(255, 30, 30)));
-            }
+            EmitBurstParticles(npc);
             CombatText.NewText(npc.Hitbox, new Color(255, 0, 50), HackTime.Cyberpsychosis.Value, true);
+            //扩散到群组其他成员，HasEffect 短路保证不会无限传播
+            HackEffectTracker.PropagateNpcEffectToGroup(this, s.NpcIndex,
+                caster?.whoAmI ?? Main.myPlayer, EmitBurstParticles);
             return true;
         }
 
@@ -53,6 +53,15 @@ namespace CalamityOverhaul.Content.HackTimes.Protocols
                 Vector2 vel = Main.rand.NextVector2CircularEdge(2f, 2f);
                 PRTLoader.AddParticle(new PRT_Spark(npc.Center, vel,
                     false, 15, 0.5f, new Color(180, 80, 80)));
+            }
+        }
+
+        //初始爆发粒子，单独抽出便于群组成员复用同样的视觉表现
+        private static void EmitBurstParticles(NPC npc) {
+            for (int i = 0; i < 12; i++) {
+                Vector2 vel = Main.rand.NextVector2CircularEdge(3.5f, 3.5f);
+                PRTLoader.AddParticle(new PRT_Spark(npc.Center, vel,
+                    false, 30, 1.0f, new Color(255, 30, 30)));
             }
         }
     }

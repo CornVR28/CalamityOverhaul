@@ -21,6 +21,15 @@ namespace CalamityOverhaul.Content.HackTimes.Protocols
         public override bool OnApply(IHackTarget target, Player caster) {
             if (target is not NpcScannable s) return false;
             NPC npc = Main.npc[s.NpcIndex];
+            EmitApplyParticles(npc);
+            //群组扩散，光学过载会令蠕虫所有体节同时失明
+            HackEffectTracker.PropagateNpcEffectToGroup(this, s.NpcIndex,
+                caster?.whoAmI ?? Main.myPlayer, EmitApplyParticles);
+            return true;
+        }
+
+        //初始爆发粒子，抽出复用给群组成员
+        private static void EmitApplyParticles(NPC npc) {
             //明亮白色闪光爆发
             for (int i = 0; i < 12; i++) {
                 Vector2 vel = Main.rand.NextVector2CircularEdge(5f, 5f);
@@ -33,7 +42,6 @@ namespace CalamityOverhaul.Content.HackTimes.Protocols
                     Main.rand.NextVector2Circular(1f, 1f),
                     false, 10, 2.5f, new Color(255, 255, 220)));
             }
-            return true;
         }
 
         public override bool OnTick(IHackTarget target, int elapsed) {

@@ -21,14 +21,21 @@ namespace CalamityOverhaul.Content.HackTimes.Protocols
         public override bool OnApply(IHackTarget target, Player caster) {
             if (target is not NpcScannable s) return false;
             NPC npc = Main.npc[s.NpcIndex];
-            //系统关机蓝屏粒子
+            EmitApplyParticles(npc);
+            CombatText.NewText(npc.Hitbox, new Color(40, 150, 255), HackTime.Rebooting.Value, true);
+            //群组扩散，蠕虫各体节、月总各实体一并被强制重启
+            HackEffectTracker.PropagateNpcEffectToGroup(this, s.NpcIndex,
+                caster?.whoAmI ?? Main.myPlayer, EmitApplyParticles);
+            return true;
+        }
+
+        //初始蓝屏粒子，抽出复用给群组成员
+        private static void EmitApplyParticles(NPC npc) {
             for (int i = 0; i < 12; i++) {
                 Vector2 vel = Main.rand.NextVector2CircularEdge(3f, 3f);
                 PRTLoader.AddParticle(new PRT_Spark(npc.Center, vel,
                     false, 25, 1.0f, new Color(40, 120, 255)));
             }
-            CombatText.NewText(npc.Hitbox, new Color(40, 150, 255), HackTime.Rebooting.Value, true);
-            return true;
         }
 
         public override bool OnTick(IHackTarget target, int elapsed) {

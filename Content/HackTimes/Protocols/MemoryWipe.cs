@@ -21,7 +21,16 @@ namespace CalamityOverhaul.Content.HackTimes.Protocols
         public override bool OnApply(IHackTarget target, Player caster) {
             if (target is not NpcScannable s) return false;
             NPC npc = Main.npc[s.NpcIndex];
-            //数据溶解粒子——向上飘散的数据碎片
+            EmitApplyParticles(npc);
+            CombatText.NewText(npc.Hitbox, new Color(80, 255, 200), HackTime.MemoryWiped.Value, true);
+            //群组扩散，蠕虫体节、月总实体共同失忆，HasEffect 短路防止无限递归
+            HackEffectTracker.PropagateNpcEffectToGroup(this, s.NpcIndex,
+                caster?.whoAmI ?? Main.myPlayer, EmitApplyParticles);
+            return true;
+        }
+
+        //初始数据溶解粒子，抽出复用给群组成员
+        private static void EmitApplyParticles(NPC npc) {
             for (int i = 0; i < 10; i++) {
                 Vector2 pos = npc.Center + Main.rand.NextVector2Circular(
                     npc.width * 0.3f, npc.height * 0.3f);
@@ -29,8 +38,6 @@ namespace CalamityOverhaul.Content.HackTimes.Protocols
                 PRTLoader.AddParticle(new PRT_Spark(pos, vel,
                     false, 30, 0.7f, new Color(50, 255, 180)));
             }
-            CombatText.NewText(npc.Hitbox, new Color(80, 255, 200), HackTime.MemoryWiped.Value, true);
-            return true;
         }
 
         public override bool OnTick(IHackTarget target, int elapsed) {

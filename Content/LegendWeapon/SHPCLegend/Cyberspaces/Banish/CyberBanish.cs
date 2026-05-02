@@ -86,8 +86,22 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Banish
 
             if (bestIndex >= 0) {
                 StartBanish(bestIndex);
+                //同时把蠕虫体节、月总各实体等共享Boss体的群组成员一并拉入放逐
+                //成员若不在领域内也照样进入：放逐是Boss级处决，整体一起被抹消
+                NPC root = Main.npc[bestIndex];
+                NpcGroupHelper.CollectGroupIndices(root, banishGroupBuffer);
+                for (int i = 0; i < banishGroupBuffer.Count; i++) {
+                    int memberIdx = banishGroupBuffer[i];
+                    if (memberIdx == bestIndex) continue;
+                    if (IsBanishing(memberIdx)) continue;
+                    StartBanish(memberIdx);
+                }
+                banishGroupBuffer.Clear();
             }
         }
+
+        //群组放逐用的复用缓冲，避免每次扩散都重新分配
+        private static readonly List<int> banishGroupBuffer = [];
 
         /// <summary>
         /// 启动对指定NPC的放逐

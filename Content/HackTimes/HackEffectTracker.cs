@@ -226,6 +226,36 @@ namespace CalamityOverhaul.Content.HackTimes
         /// <summary>所有 NPC 维度的活跃效果列表（只读访问）</summary>
         public static IReadOnlyList<ActiveHackEffect> AllActiveEffects => activeEffects;
 
+        //群组扩散用的复用缓冲，所有 NPC 协议共享，避免每次都分配
+        private static readonly List<NPC> groupBuffer = [];
+
+        /// <summary>
+        /// 把 <paramref name="hack"/> 类型的效果从 <paramref name="rootNpcIndex"/> 扩散到其所属
+        /// 多实体 Boss 群组（蠕虫体节、月总核心+手部+真眼等）的全部活跃成员
+        /// <br/>已经持有同类型效果的成员会被跳过，因此不会触发无限递归
+        /// </summary>
+        /// <param name="hack">要扩散的协议实例</param>
+        /// <param name="rootNpcIndex">触发源 NPC 索引</param>
+        /// <param name="casterIndex">施法玩家 whoAmI</param>
+        /// <param name="onSpread">每个新感染的成员被附加效果时的视觉回调，可空</param>
+        /// <typeparam name="T">协议类型，用于 HasEffect 短路判定</typeparam>
+        public static void PropagateNpcEffectToGroup<T>(T hack, int rootNpcIndex,
+            int casterIndex, System.Action<NPC> onSpread = null) where T : QuickHackDef {
+            if (hack == null || rootNpcIndex < 0 || rootNpcIndex >= Main.maxNPCs) return;
+            NPC root = Main.npc[rootNpcIndex];
+            if (root == null || !root.active) return;
+
+            Common.NpcGroupHelper.CollectGroup(root, groupBuffer);
+            for (int i = 0; i < groupBuffer.Count; i++) {
+                NPC member = groupBuffer[i];
+                if (member.whoAmI == rootNpcIndex) continue;
+                if (HasEffect<T>(member.whoAmI)) continue;
+                onSpread?.Invoke(member);
+                ApplyNpcEffect(hack, member.whoAmI, casterIndex);
+            }
+            groupBuffer.Clear();
+        }
+
         //击杀带有骇入效果的 NPC 时，汇总所有效果的 RAM 消耗并按比例返还
         private static void OnHackedTargetKilled(NPC target, int npcIndex) {
             killRefundedThisFrame.Add(npcIndex);
