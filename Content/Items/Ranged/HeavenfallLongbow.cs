@@ -190,23 +190,30 @@ namespace CalamityOverhaul.Content.Items.Ranged
 
         public static void Obliterate(Vector2 origPos) {
             const int maxLengthSquared = 90000;
-
-            List<List<int>> allSegmentLists = CWRLoad.AllBossSegmentLists;
+            //已处理过的群组锚点集合，避免对同一个Boss重复触发
+            HashSet<int> handledAnchors = [];
+            //群组成员复用缓冲
+            List<NPC> groupBuffer = [];
 
             foreach (NPC npc in Main.ActiveNPCs) {
                 if (npc.Center.To(origPos).LengthSquared() > maxLengthSquared) {
                     continue;
                 }
-
-                foreach (List<int> segments in allSegmentLists) {
-                    if (segments.Contains(npc.type)) {
-                        foreach (NPC npcToKill in Main.npc.Where(n => segments.Contains(n.type))) {
-                            KillAction(npcToKill);
-                        }
-                        break;
-                    }
+                int anchor = NpcGroupHelper.GetAnchorIndex(npc);
+                if (anchor >= 0 && !handledAnchors.Add(anchor)) {
+                    //同群组的别的体节已经被处理过，跳过
+                    continue;
                 }
-                KillAction(npc);
+                //收集整个群组（蠕虫所有体节、月总所有实体等）一并击杀
+                //无论它们是否都在范围内，避免出现"半个Boss被击杀"的情况
+                NpcGroupHelper.CollectGroup(npc, groupBuffer);
+                if (groupBuffer.Count == 0) {
+                    KillAction(npc);
+                    continue;
+                }
+                for (int i = 0; i < groupBuffer.Count; i++) {
+                    KillAction(groupBuffer[i]);
+                }
             }
         }
     }

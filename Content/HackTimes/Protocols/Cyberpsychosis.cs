@@ -1,21 +1,16 @@
-﻿using CalamityOverhaul.Common;
-using CalamityOverhaul.Content.HackTimes.Scannables;
+﻿using CalamityOverhaul.Content.HackTimes.Scannables;
 using CalamityOverhaul.Content.PRTTypes;
 using InnoVault.PRT;
-using System.Collections.Generic;
 using Terraria;
 
 namespace CalamityOverhaul.Content.HackTimes.Protocols
 {
     /// <summary>
     /// 赛博精神病：使目标陷入狂暴攻击周围一切单位
-    /// <br/>对蠕虫类多体节 Boss 或 月总等多实体 Boss，会自动扩散到群组内全部成员
+    /// <br/>对蠕虫类多体节 Boss 或月总等多实体 Boss，会自动扩散到群组内全部成员
     /// </summary>
     internal class Cyberpsychosis : QuickHackDef
     {
-        //群组扩散用的复用缓冲，避免每次施加都重新分配
-        private static readonly List<NPC> groupBuffer = [];
-
         public override void SetDefaults() {
             UploadTime = 150;
             RamCost = 5;
@@ -30,19 +25,9 @@ namespace CalamityOverhaul.Content.HackTimes.Protocols
             //红色精神崩溃爆发
             EmitBurstParticles(npc);
             CombatText.NewText(npc.Hitbox, new Color(255, 0, 50), HackTime.Cyberpsychosis.Value, true);
-
-            //扩散到群组其他成员，靠 HasEffect 短路避免无限递归
-            //当前 NPC 已经在 tracker 中持有该效果，群组成员被 Apply 后会进入 pending 队列
-            //它们下一帧的 OnApply 再来这里时，所有兄弟都会因 HasEffect 命中而被跳过
-            NpcGroupHelper.CollectGroup(npc, groupBuffer);
-            for (int i = 0; i < groupBuffer.Count; i++) {
-                NPC member = groupBuffer[i];
-                if (member.whoAmI == npc.whoAmI) continue;
-                if (HackEffectTracker.HasEffect<Cyberpsychosis>(member.whoAmI)) continue;
-                EmitBurstParticles(member);
-                HackEffectTracker.Apply(this, member.whoAmI, caster?.whoAmI ?? Main.myPlayer);
-            }
-            groupBuffer.Clear();
+            //扩散到群组其他成员，HasEffect 短路保证不会无限传播
+            HackEffectTracker.PropagateNpcEffectToGroup(this, s.NpcIndex,
+                caster?.whoAmI ?? Main.myPlayer, EmitBurstParticles);
             return true;
         }
 
