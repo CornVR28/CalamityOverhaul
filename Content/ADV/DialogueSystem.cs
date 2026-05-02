@@ -33,6 +33,8 @@ namespace CalamityOverhaul.Content.ADV
             DialogueUIRegistry.Current?.SetTargetScale(CWRServerConfig.Instance.DialogueBox_Scale_Value);
             DialogueUIRegistry.Current?.LogicUpdate();
             ADVRewardPopup.Instance?.LogicUpdate();
+            //驱动场景管理器的待启动队列，让上一场景结束后自动衔接下一场景
+            ScenarioManager.UpdatePending();
         }
     }
 }
