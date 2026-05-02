@@ -145,11 +145,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
 
         public static void LoadWeaponData() {
             DamageDictionary = new Dictionary<int, int>(){
-                {0, 7 },
-                {1, 9 },
-                {2, 11 },
-                {3, 14 },
-                {4, 20 },
+                {0, 8 },
+                {1, 11 },
+                {2, 14 },
+                {3, 18 },
+                {4, 22 },
                 {5, 44 },
                 {6, 46 },
                 {7, 48 },
