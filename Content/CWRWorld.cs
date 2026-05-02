@@ -1,4 +1,5 @@
-﻿using CalamityOverhaul.Content.NPCs.Modifys.Crabulons;
+﻿using CalamityOverhaul.Content.HackTimes;
+using CalamityOverhaul.Content.NPCs.Modifys.Crabulons;
 using System.Collections.Generic;
 using Terraria;
 using Terraria.ID;
@@ -95,6 +96,9 @@ namespace CalamityOverhaul.Content
             if (Main.LocalPlayer != null && Main.LocalPlayer.active
                 && TimeFrozenTick > 0) {
                 return true;
+            }
+            if (HackTimeFreeze.IsActive) {
+                return false;
             }
             return false;
         }
