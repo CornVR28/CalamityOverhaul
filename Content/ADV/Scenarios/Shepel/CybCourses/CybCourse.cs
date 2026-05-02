@@ -50,12 +50,15 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
             CybTutorialLead.ResetForRetry();
             HackTimeTutorialLead.ResetForRetry();
 
-            //3. 重置 ScenarioManager 已运行场景，让自动开场重新生效
+            //3. 回滚物块到生成时的快照（包括墙体/帧数据/液体/坡度），并重新挂载MK2 的 TP 实体
+            CybCourseGen.RestoreSnapshot();
+
+            //4. 重置 ScenarioManager 已运行场景，让自动开场重新生效
             ScenarioManager.Reset<CybCourseIntroDialogue>();
             ScenarioManager.Reset<CybCourseHackIntroDialogue>();
             ScenarioManager.Reset<CybCourseOutroDialogue>();
 
-            //4. 重置玩家位置 / RAM / 骇客时间
+            //5. 重置玩家位置 / RAM / 骇客时间
             HackTime.Reset();
             RamSystem.Refill();
             Player p = Main.LocalPlayer;
@@ -67,7 +70,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
                 p.statLife = p.statLifeMax2;
             }
 
-            //5. 触发开场对话；CybTutorialLead.AutoTriggerIntro 会接力推进流程
+            //6. 触发开场对话；CybTutorialLead.AutoTriggerIntro 会接力推进流程
             //   _introAttempted 已在 ResetForRetry 中清零
         }
     }
