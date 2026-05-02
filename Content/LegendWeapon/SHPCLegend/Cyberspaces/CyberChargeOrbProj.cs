@@ -39,6 +39,10 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         private const int TrailParticleInterval = 2;
         /// <summary>球体离玩家中心的前方偏移距离</summary>
         private const float ChargeOffsetDist = 70f;
+        /// <summary>蓄力阶段魔力消耗间隔帧数</summary>
+        private const int ManaDrainInterval = 20;
+        /// <summary>每次消耗的魔力量</summary>
+        private const int ManaDrainCost = 5;
 
         #endregion
 
@@ -191,8 +195,16 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             //玩家面向光球方向
             owner.ChangeDir(aimDir.X > 0f ? 1 : -1);
 
-            //持续蓄力
-            chargeTime++;
+            //持续蓄力，魔力充足才推进进度
+            if (chargeRatio < 1f && chargeTime % ManaDrainInterval == 0 && Projectile.IsOwnedByLocalPlayer()) {
+                if (owner.CheckMana(ManaDrainCost, pay: true, blockQuickMana: false)) {
+                    chargeTime++;
+                }
+                //魔力不足时暂停蓄力，保持当前进度
+            }
+            else {
+                chargeTime++;
+            }
             chargeRatio = MathHelper.Clamp((float)chargeTime / MaxChargeFrames, 0f, 1f);
 
             //蓄力音效：从开始蓄力即播放，pitch 随蓄力比例递增，超驱时额外升调+抖动
