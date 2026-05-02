@@ -1,7 +1,6 @@
 ﻿using CalamityOverhaul.Common;
 using CalamityOverhaul.Content.HackTimes;
 using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
-using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Restart;
 using CalamityOverhaul.Content.RAMSystems;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Graphics;

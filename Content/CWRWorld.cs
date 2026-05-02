@@ -93,12 +93,12 @@ namespace CalamityOverhaul.Content
             if (Main.gameMenu) {
                 return false;
             }
+            if (HackTimeFreeze.IsActive) {
+                return true;
+            }
             if (Main.LocalPlayer != null && Main.LocalPlayer.active
                 && TimeFrozenTick > 0) {
                 return true;
-            }
-            if (HackTimeFreeze.IsActive) {
-                return false;
             }
             return false;
         }

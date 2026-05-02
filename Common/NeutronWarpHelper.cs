@@ -1,6 +1,5 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
 using Terraria;
-using Terraria.GameContent;
 
 namespace CalamityOverhaul.Common
 {

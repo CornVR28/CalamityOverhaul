@@ -14,8 +14,8 @@ namespace CalamityOverhaul.Common
         public static ModKeybind Legend_Domain { get; private set; }
         public static ModKeybind Legend_Restart { get; private set; }
         public static ModKeybind Legend_Teleport { get; private set; }
-        public static ModKeybind Halibut_Clone { get; private set; }       
-        public static ModKeybind Halibut_Superposition { get; private set; }       
+        public static ModKeybind Halibut_Clone { get; private set; }
+        public static ModKeybind Halibut_Superposition { get; private set; }
         public static ModKeybind Halibut_Skill_L { get; private set; }
         public static ModKeybind Halibut_Skill_R { get; private set; }
         public static ModKeybind WeponSkill_Q { get; private set; }
@@ -37,8 +37,8 @@ namespace CalamityOverhaul.Common
             Legend_Domain = KeybindLoader.RegisterKeybind(mod, "Legend_Domain", "Q");
             Legend_Teleport = KeybindLoader.RegisterKeybind(mod, "Legend_Teleport", "G");
             Legend_Restart = KeybindLoader.RegisterKeybind(mod, "Legend_Restart", "H");
-            Halibut_Clone = KeybindLoader.RegisterKeybind(mod, "Halibut_Clone", "J");           
-            Halibut_Superposition = KeybindLoader.RegisterKeybind(mod, "Halibut_Superposition", "F");          
+            Halibut_Clone = KeybindLoader.RegisterKeybind(mod, "Halibut_Clone", "J");
+            Halibut_Superposition = KeybindLoader.RegisterKeybind(mod, "Halibut_Superposition", "F");
             Halibut_Skill_L = KeybindLoader.RegisterKeybind(mod, "Halibut_Skill_L", "Q");
             Halibut_Skill_R = KeybindLoader.RegisterKeybind(mod, "Halibut_Skill_R", "E");
             HackTime_Toggle = KeybindLoader.RegisterKeybind(mod, "HackTime_Toggle", "N");

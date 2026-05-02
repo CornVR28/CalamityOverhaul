@@ -169,8 +169,7 @@ namespace CalamityOverhaul.Content.HackTimes
                     && previousTargets[0].RenderTarget != Main.screenTarget) {
                     gd.SetRenderTargets(previousTargets);
                 }
-            }
-            catch {
+            } catch {
                 //出错时确保切回主屏 RT，避免后续绘制写到错误目标
                 gd.SetRenderTarget(Main.screenTarget);
                 throw;

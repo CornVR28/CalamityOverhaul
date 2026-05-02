@@ -1,4 +1,4 @@
-using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Reflection;
 using Terraria;
@@ -71,8 +71,7 @@ namespace CalamityOverhaul.Common
             if (value is IConvertible convertible) {
                 try {
                     return convertible.ToDouble(null) <= 1d;
-                }
-                catch {
+                } catch {
                     return false;
                 }
             }

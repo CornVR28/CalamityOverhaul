@@ -1,9 +1,6 @@
 ﻿using CalamityOverhaul.Content.HackTimes;
-using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
 using System;
-using System.Collections.Generic;
 using Terraria;
-using Terraria.ModLoader.IO;
 
 namespace CalamityOverhaul.Content.RAMSystems
 {

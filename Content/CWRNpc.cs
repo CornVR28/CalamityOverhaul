@@ -152,7 +152,7 @@ namespace CalamityOverhaul.Content
         }
 
         public override bool PreAI(NPC npc) {
-            if (CWRWorld.CanTimeFrozen() || FrozenActivity) {
+            if (FrozenActivity) {
                 DoTimeFrozen(npc);
                 return false;
             }

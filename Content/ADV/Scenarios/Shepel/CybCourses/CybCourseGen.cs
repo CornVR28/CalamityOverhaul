@@ -2,7 +2,6 @@
 using InnoVault.TileProcessors;
 using Terraria;
 using Terraria.DataStructures;
-using Terraria.Enums;
 using Terraria.ID;
 using Terraria.IO;
 using Terraria.ModLoader;
@@ -231,7 +230,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
                 var existing = TileProcessorLoader.FindModulePreciseSearch(tpID, topLeft);
                 existing?.Kill();
             }
-            
+
 
             for (int x = 0; x < w; x++) {
                 for (int y = 0; y < h; y++) {

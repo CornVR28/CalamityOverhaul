@@ -176,14 +176,6 @@ namespace CalamityOverhaul.Content
         public override bool PreAI(Projectile projectile) {
             SendProjectileDyeItemID(projectile);//在AI中发送一次染色数据，在这里identity等数据已经分配好了
 
-            if (CWRWorld.CanTimeFrozen() && !projectile.hide && !projectile.friendly
-                && !Main.projPet[projectile.type] && !projectile.minion && !Main.projHook[projectile.type]
-                && !CWRLoad.ProjValue.ImmuneFrozen[projectile.type]) {
-                projectile.position = projectile.oldPosition;
-                projectile.timeLeft++;
-                return false;
-            }
-
             if (Viscosity && projectile.numHits > 0) {
                 if (!hitNPC.Alives()) {
                     projectile.Kill();

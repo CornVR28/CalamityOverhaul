@@ -124,7 +124,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.MurasamaLegend
                 {4, 30 },
                 {5, 40 },
                 {6, 45 },
-                {7, 52 },   
+                {7, 52 },
                 {8, 85 },//进入hardmode
                 {9, 95 },
                 {10, 100 },

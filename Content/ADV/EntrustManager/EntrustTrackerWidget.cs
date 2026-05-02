@@ -1,6 +1,6 @@
-﻿using InnoVault.UIHandles;
-using CalamityOverhaul.Content.HackTimes;
+﻿using CalamityOverhaul.Content.HackTimes;
 using CalamityOverhaul.Content.UIs.StorageUIs;
+using InnoVault.UIHandles;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;

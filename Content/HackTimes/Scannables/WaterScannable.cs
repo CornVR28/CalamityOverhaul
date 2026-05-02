@@ -1,5 +1,4 @@
 ﻿using CalamityOverhaul.Content.HackTimes.Targets;
-using System;
 using Terraria;
 using Terraria.ID;
 
