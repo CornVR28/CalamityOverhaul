@@ -493,15 +493,18 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
         /// <br/>当 maxRam 极大导致跨度超过软上限时，反向收紧每格使整体跨度饱和
         /// </summary>
         private static void ComputeRamArcParams(int maxRam,
-            out float aStart, out float aEnd, out float cellAngle, out float totalSweep) {
+            out float aStart, out float aEnd, out float cellAngle, out float totalSweep, out bool percentageMode) {
             float targetSweep = RamBaseCellAngle * maxRam + (maxRam - 1) * RamCellGap;
             if (targetSweep <= RamMaxTotalSweep) {
                 cellAngle = RamBaseCellAngle;
                 totalSweep = targetSweep;
+                percentageMode = false;
             }
             else {
+                //格子数超出弧段容纳上限，切换为纯百分比连续填充
                 totalSweep = RamMaxTotalSweep;
-                cellAngle = (RamMaxTotalSweep - (maxRam - 1) * RamCellGap) / maxRam;
+                cellAngle = RamBaseCellAngle;
+                percentageMode = true;
             }
             //围绕固定中线对称展开，让弧条像"扇子"一样左右拉伸
             aStart = RamMidAngle - totalSweep * 0.5f;
@@ -518,7 +521,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             if (maxRam <= 0 || globalAlpha < 0.01f) {
                 return;
             }
-            ComputeRamArcParams(maxRam, out float aStart, out float aEnd, out float cellAngle, out float totalSweep);
+            ComputeRamArcParams(maxRam, out float aStart, out float aEnd, out float cellAngle, out float totalSweep, out bool percentageMode);
             if (cellAngle <= 0.01f) {
                 return;
             }
@@ -537,11 +540,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             Effect effect = EffectLoader.HackRamArc?.Value;
             if (effect != null) {
                 DrawRAMBar_Shader(sb, px, center, currentRam, maxRam,
-                    aStart, cellAngle, lowRam, time, globalAlpha, effect);
+                    aStart, cellAngle, totalSweep, lowRam, time, globalAlpha, percentageMode, effect);
             }
             else {
                 DrawRAMBar_CPU(sb, px, center, currentRam, maxRam,
-                    aStart, aEnd, cellAngle, time, globalAlpha);
+                    aStart, aEnd, cellAngle, time, globalAlpha, percentageMode);
             }
 
             //数值标签，始终CPU绘制；锚定在弧条中线外缘
@@ -554,8 +557,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
         }
 
         private static void DrawRAMBar_Shader(SpriteBatch sb, Texture2D px, Vector2 center,
-            float currentRam, int maxRam, float aStart, float cellAngle, float lowRam,
-            float time, float globalAlpha, Effect effect) {
+            float currentRam, int maxRam, float aStart, float cellAngle, float totalSweep,
+            float lowRam, float time, float globalAlpha, bool percentageMode, Effect effect) {
             //包围盒：以核心为圆心，覆盖整个弧圈（含装饰环+余量）
             const float pad = 14f;
             float boxR = RamDecoOuterR + pad;
@@ -578,10 +581,20 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             effect.Parameters["uInnerR"]?.SetValue(RamInnerR);
             effect.Parameters["uOuterR"]?.SetValue(RamOuterR);
             effect.Parameters["uAStart"]?.SetValue(aStart);
-            effect.Parameters["uCellAngle"]?.SetValue(cellAngle);
-            effect.Parameters["uCellGap"]?.SetValue(RamCellGap);
-            effect.Parameters["uCellCount"]?.SetValue((float)maxRam);
-            effect.Parameters["uFillValue"]?.SetValue(currentRam);
+            if (percentageMode) {
+                //百分比模式：整段弧视作单格，填充量为比例
+                float ratio = maxRam > 0 ? currentRam / maxRam : 0f;
+                effect.Parameters["uCellAngle"]?.SetValue(totalSweep);
+                effect.Parameters["uCellGap"]?.SetValue(0f);
+                effect.Parameters["uCellCount"]?.SetValue(1f);
+                effect.Parameters["uFillValue"]?.SetValue(ratio);
+            }
+            else {
+                effect.Parameters["uCellAngle"]?.SetValue(cellAngle);
+                effect.Parameters["uCellGap"]?.SetValue(RamCellGap);
+                effect.Parameters["uCellCount"]?.SetValue((float)maxRam);
+                effect.Parameters["uFillValue"]?.SetValue(currentRam);
+            }
             effect.Parameters["uLowRam"]?.SetValue(lowRam);
             effect.Parameters["uInfinite"]?.SetValue(HackTime.InfiniteHack ? 1f : 0f);
             effect.Parameters["uDecoOuterR"]?.SetValue(RamDecoOuterR);
@@ -598,11 +611,33 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
 
         private static void DrawRAMBar_CPU(SpriteBatch sb, Texture2D px, Vector2 center,
             float currentRam, int maxRam, float aStart, float aEnd, float cellAngle,
-            float time, float globalAlpha) {
+            float time, float globalAlpha, bool percentageMode) {
             float a = globalAlpha;
             DrawArc(sb, px, center + new Vector2(1.5f, 2f),
                 RamInnerR, RamOuterR, aStart, aEnd,
                 SHPCTheme.ShadowDark * (0.5f * a));
+            if (percentageMode) {
+                //百分比模式：不绘制格子分隔线，以整段弧按比例填充
+                float ratio = maxRam > 0 ? MathHelper.Clamp(currentRam / maxRam, 0f, 1f) : 0f;
+                DrawArc(sb, px, center, RamInnerR + 1f, RamOuterR - 1f, aStart, aEnd, SHPCTheme.SlotBg * (0.92f * a));
+                DrawArc(sb, px, center, RamInnerR + 1f, RamInnerR + 3f, aStart, aEnd, SHPCTheme.ShadowDark * (0.5f * a));
+                if (ratio > 0.01f) {
+                    float fillEnd = MathHelper.Lerp(aStart, aEnd, ratio);
+                    Color fillCol = ratio >= 0.98f ? SHPCTheme.Cyan : Color.Lerp(SHPCTheme.Border, SHPCTheme.Cyan, ratio);
+                    DrawArc(sb, px, center, RamInnerR + 1f, RamOuterR - 2f, aStart, fillEnd, fillCol * (0.6f * a));
+                    DrawArc(sb, px, center, RamOuterR - 4f, RamOuterR - 1f, aStart, fillEnd, SHPCTheme.CyanHi * (ratio * 0.85f * a));
+                }
+                DrawArcStroke(sb, px, center, RamOuterR - 0.5f, aStart, aEnd, 1.2f, SHPCTheme.BorderHi * (0.75f * a));
+                DrawArcStroke(sb, px, center, RamInnerR + 0.5f, aStart, aEnd, 1.0f, SHPCTheme.Border * (0.55f * a));
+                float scanT2 = (time * 0.35f) % 1f;
+                float scanA2 = MathHelper.Lerp(aStart, aEnd, scanT2);
+                float scanW2 = (aEnd - aStart) * 0.07f;
+                DrawArc(sb, px, center, RamInnerR + 2f, RamOuterR - 2f,
+                    MathF.Max(aStart, scanA2 - scanW2 * 0.5f),
+                    MathF.Min(aEnd, scanA2 + scanW2 * 0.5f),
+                    SHPCTheme.CyanHi * (0.1f * a));
+                return;
+            }
             for (int i = 0; i < maxRam; i++) {
                 float cStart = aStart + i * (cellAngle + RamCellGap);
                 float cEnd = cStart + cellAngle;
