@@ -1,13 +1,14 @@
 ﻿using CalamityOverhaul.Content.HackTimes;
 using CalamityOverhaul.Content.RAMSystems;
 using Terraria;
+using Terraria.ModLoader;
 
 namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
 {
     //超梦教程关卡的入口控制
     //通过调用CybCourseWorld.Enter()进入，CybCourseWorld.Exit()退出
     //RETRY软重启时调用CybCourse.Restart()，不需要重新加载子世界
-    internal class CybCourse
+    internal class CybCourse : ModSystem
     {
         //接受教程后进入子世界前置为true，退出时发放超梦接入凭证
         //用静态字段而非存档标记，避免子世界存档与主世界存档不同步导致标记丢失
@@ -89,6 +90,13 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
 
             //6. 触发开场对话；CybTutorialLead.AutoTriggerIntro 会接力推进流程
             //   _introAttempted 已在 ResetForRetry 中清零
+        }
+
+        public override void PostUpdateEverything() {
+            if (!IsActive) {
+                return;
+            }
+            Main.newMusic = Main.musicBox2 = MusicLoader.GetMusicSlot("CalamityOverhaul/Assets/Sounds/Music/AloneInTheBackalleys");
         }
     }
 }
