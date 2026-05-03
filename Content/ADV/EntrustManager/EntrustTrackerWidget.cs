@@ -176,7 +176,7 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
                     isDragging = false;
                 }
             }
-            else if (hoverInMainPage && !entryConsumedInput && keyLeftPressState == KeyPressState.Held) {
+            else if (hoverInMainPage && !entryConsumedInput && keyLeftPressState == KeyPressState.Pressed) {
                 isDragging = true;
                 dragAnchor = Main.mouseY - widgetYOffset;
             }
