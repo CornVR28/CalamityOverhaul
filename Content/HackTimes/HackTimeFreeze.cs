@@ -285,6 +285,10 @@ namespace CalamityOverhaul.Content.HackTimes
 
         public override void PreUpdate() {
             if (!HackTimeFreeze.IsActive) {
+                if (positionCaptured) {
+                    //还原背包
+                    Main.playerInventory = snapshotInventoryOpen;
+                }
                 positionCaptured = false;
                 return;
             }
@@ -344,9 +348,6 @@ namespace CalamityOverhaul.Content.HackTimes
             Player.controlThrow = false;
             Player.controlSmart = false;
             Player.controlTorch = false;
-
-            //关闭背包
-            Main.playerInventory = false;
         }
 
         public override void PostUpdate() {
@@ -382,8 +383,9 @@ namespace CalamityOverhaul.Content.HackTimes
             //还原飞行时间，阻止翅膀耐久在冻结期间消耗或被系统归零
             Player.wingTime = frozenWingTime;
             Player.rocketTime = frozenRocketTime;
-            //还原背包
-            Main.playerInventory = snapshotInventoryOpen;
+
+            //关闭背包
+            Main.playerInventory = false;
         }
 
         public override void FrameEffects() {
@@ -397,6 +399,13 @@ namespace CalamityOverhaul.Content.HackTimes
         public override bool PreItemCheck() {
             if (HackTimeFreeze.IsActive) return false;
             return true;
+        }
+
+        public override void UpdateDead() {
+            if (Player.whoAmI != Main.myPlayer) return;
+            if (HackTime.Active || HackTimeFreeze.IsActive) {
+                HackTime.Deactivate();
+            }
         }
     }
 }

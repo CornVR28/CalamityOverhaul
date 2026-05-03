@@ -40,6 +40,7 @@ namespace CalamityOverhaul.Content.HackTimes
 
         public override void ProcessTriggers(Terraria.GameInput.TriggersSet triggersSet) {
             if (Player.whoAmI != Main.myPlayer) return;
+            if (Player.dead) return;
             if (CWRKeySystem.HackTime_Toggle != null && CWRKeySystem.HackTime_Toggle.JustPressed) {
                 HackTime.Toggle();
             }
