@@ -34,7 +34,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend
 
         public static void SetTooltip(Item item, ref List<TooltipLine> tooltips) {
             //试炼文本已迁移至委托系统(HalibutQuestLine)，此处仅保留传奇状态文本
-            tooltips.ReplacePlaceholder("legend_Text", CWRLocText.GetTextValue("Halibut_No_legend_Content_3"), "");
+            string keyDisplay = CWRKeySystem.QuestManager_Key?.GetAssignedKeys() is { Count: > 0 } k ? k[0] : CWRLocText.Instance.Notbound.Value;
+            tooltips.ReplacePlaceholder("legend_Text", CWRLocText.GetTextValue("Legend_QuestManager_Hint").Replace("{KEY}", keyDisplay), "");
             int index = InWorldBossPhase.Halibut_Level();
             string num = (index + 1).ToString();
             if (index == 16) {

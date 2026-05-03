@@ -41,6 +41,7 @@ CWRLocText: {
 	Halibut_No_legend_Content_2: Mec, j'ai été là tout le temps
 	Halibut_No_legend_Content_3: "[c/fff08c:Devenu plus fort au fil des voyages]"
 	Halibut_No_legend_Content_4: "[c/00707d:La lueur de la légende s'est estompée...]"
+	// Legend_QuestManager_Hint: Press [{KEY}] to open the quest list
 	Halibut_TextDictionary_Content_0: Ami, allons défier cette énorme créature gluante qui rampe sur la terre ferme.
 	Halibut_TextDictionary_Content_1: Il y a un grand œil qui nous fixe, c'est impoli, nous devons lui donner une leçon.
 	Halibut_TextDictionary_Content_2: La vie ne se trouve pas seulement dans les abysses, mais aussi dans la jungle. Ami, nous devons rendre visite au chef des abeilles là-bas.

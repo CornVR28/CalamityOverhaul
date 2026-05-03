@@ -9,7 +9,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.MurasamaLegend
     internal class TooltipHandler
     {
         public static void SetTooltip(Item item, ref List<TooltipLine> tooltips) {
-            tooltips.ReplacePlaceholder("legend_Text", CWRLocText.GetTextValue("Murasama_No_legend_Content_3"), "");
+            string keyDisplay = CWRKeySystem.QuestManager_Key?.GetAssignedKeys() is { Count: > 0 } k ? k[0] : CWRLocText.Instance.Notbound.Value;
+            tooltips.ReplacePlaceholder("legend_Text", CWRLocText.GetTextValue("Legend_QuestManager_Hint").Replace("{KEY}", keyDisplay), "");
             tooltips.InsertHotkeyBinding(CWRKeySystem.Murasama_TriggerKey, "[KEY1]", noneTip: CWRLocText.Instance.Notbound.Value);
             tooltips.InsertHotkeyBinding(CWRKeySystem.Murasama_DownKey, "[KEY2]", noneTip: CWRLocText.Instance.Notbound.Value);
 

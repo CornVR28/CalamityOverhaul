@@ -41,6 +41,7 @@ CWRLocText: {
 	Halibut_No_legend_Content_2: Эй, я здесь с самого начала
 	Halibut_No_legend_Content_3: "[c/fff08c:Становлюсь сильнее с каждым шагом пути]"
 	Halibut_No_legend_Content_4: "[c/00707d:Легендарное сияние угасло...]"
+	// Legend_QuestManager_Hint: Press [{KEY}] to open the quest list
 	Halibut_TextDictionary_Content_0: Друг, давай бросим вызов этому огромному, слизкому существу на суше.
 	Halibut_TextDictionary_Content_1: Там большой глаз, который на нас пялится. Это неуважительно; мы должны преподать ему урок.
 	Halibut_TextDictionary_Content_2: Жизнь процветает не только в Бездне, но и в Джунглях. Нам нужно навестить там королеву пчел.

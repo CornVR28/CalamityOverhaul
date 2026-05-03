@@ -41,6 +41,7 @@ CWRLocText: {
 	Halibut_No_legend_Content_2: Hermano, he estado aquí todo el tiempo
 	Halibut_No_legend_Content_3: "[c/fff08c:Me vuelvo más fuerte a medida que avanza el viaje]"
 	Halibut_No_legend_Content_4: "[c/00707d:El brillo de la leyenda se ha apagado...]"
+	// Legend_QuestManager_Hint: Press [{KEY}] to open the quest list
 	Halibut_TextDictionary_Content_0: Amigo, vamos a desafiar a esa enorme criatura terrestre pegajosa
 	Halibut_TextDictionary_Content_1: Hay un gran ojo mirándonos, eso es muy grosero, necesitamos enseñarle una lección
 	Halibut_TextDictionary_Content_2: En los lugares llenos de vida no solo hay abismos, también hay junglas, amigo, necesitamos visitar a la reina de las abejas

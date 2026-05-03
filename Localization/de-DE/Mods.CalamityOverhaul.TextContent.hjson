@@ -41,6 +41,7 @@ CWRLocText: {
 	Halibut_No_legend_Content_2: Kumpel, ich war die ganze Zeit hier
 	Halibut_No_legend_Content_3: "[c/fff08c:Stärker geworden mit jeder Reise]"
 	Halibut_No_legend_Content_4: "[c/00707d:Der Glanz der Legende ist verblasst...]"
+	// Legend_QuestManager_Hint: Press [{KEY}] to open the quest list
 	Halibut_TextDictionary_Content_0: Freund, lass uns dieses riesige, schleimige Landwesen herausfordern.
 	Halibut_TextDictionary_Content_1: Da ist ein großes Auge, das uns anstarrt. Das ist unhöflich, wir müssen ihm eine Lektion erteilen.
 	Halibut_TextDictionary_Content_2: Leben gibt es nicht nur in der Tiefe, sondern auch im Dschungel. Freund, wir müssen den Anführer der Bienen besuchen.
