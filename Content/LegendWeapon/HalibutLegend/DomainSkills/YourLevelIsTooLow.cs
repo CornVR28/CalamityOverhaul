@@ -447,8 +447,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend.DomainSkills
                     Owner.fullRotation,
                     Owner.fullRotationOrigin
                 );
-            }
-            finally {
+            } finally {
                 Owner.position = origPosition;
                 Owner.heldProj = origHeldProj;
                 Owner.skinColor = origSkin;

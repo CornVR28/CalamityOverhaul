@@ -126,8 +126,7 @@ namespace CalamityOverhaul.Content.Cyberwares.Implementation.Sandevistans
 
                 spriteBatch.End();
                 batchActive = false;
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
                 CWRMod.Instance?.Logger.Warn("[Sandevistan] Ghost render failed: " + ex);
                 if (batchActive) {
                     try { spriteBatch.End(); } catch { }
@@ -189,8 +188,7 @@ namespace CalamityOverhaul.Content.Cyberwares.Implementation.Sandevistans
                     Main.Camera, source, source.position,
                     source.fullRotation, source.fullRotationOrigin
                 );
-            }
-            finally {
+            } finally {
                 //恢复原始状态
                 source.position = origPosition;
                 source.velocity = origVelocity;

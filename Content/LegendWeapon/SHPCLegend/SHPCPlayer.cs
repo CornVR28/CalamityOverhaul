@@ -1,4 +1,4 @@
-using Terraria;
+﻿using Terraria;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 
@@ -76,8 +76,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
                         tag[$"SHPC_Mod_{i}"] = ItemIO.Save(m);
                     }
                 }
-            }
-            catch (System.Exception ex) {
+            } catch (System.Exception ex) {
                 CWRMod.Instance.Logger.Error($"SHPCPlayer.SaveData Error: {ex.Message}");
             }
         }
@@ -89,8 +88,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
                     if (tag.TryGet($"SHPC_Mod_{i}", out TagCompound modTag)) {
                         try {
                             Modules[i] = ItemIO.Load(modTag);
-                        }
-                        catch {
+                        } catch {
                             Modules[i] = new Item();
                         }
                     }
@@ -98,8 +96,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
                         Modules[i] = new Item();
                     }
                 }
-            }
-            catch (System.Exception ex) {
+            } catch (System.Exception ex) {
                 CWRMod.Instance.Logger.Error($"SHPCPlayer.LoadData Error: {ex.Message}");
             }
         }

@@ -1,12 +1,10 @@
-using CalamityOverhaul.Common;
-using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules;
+﻿using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Graphics;
 using System;
 using System.Collections.Generic;
 using Terraria;
 using Terraria.GameContent;
-using Terraria.UI.Chat;
 
 namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
 {
