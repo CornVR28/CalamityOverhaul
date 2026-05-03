@@ -28,6 +28,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
                 p.tileEntityAnchor.Clear();
                 Main.npcChatText = string.Empty;
             }
+            //进入子世界前拍摄主世界快照，回来时用于补全丢失的Boss进度与城镇NPC
+            CybCourseWorldGuard.Snapshot();
             CybCourseWorld.Enter();
         }
 
