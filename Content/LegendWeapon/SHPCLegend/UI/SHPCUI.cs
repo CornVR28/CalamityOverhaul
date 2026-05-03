@@ -715,7 +715,6 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                 }
                 else if (pinnedSector == ModifySectorIndex) {
                     SHPCModPanel.Layout layout = SHPCModPanel.Compute(fAnchor, fMidA, pinnedPanelProgress);
-                    
 
                     //三级模块选择面板
                     if (pinnedModuleSlot >= 0 && modulePanelProgress > 0.02f) {

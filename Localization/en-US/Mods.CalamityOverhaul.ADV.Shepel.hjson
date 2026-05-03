@@ -1,4 +1,4 @@
-ShepelCyberActiveDialogue: {
+﻿ShepelCyberActiveDialogue: {
 	RoleName: SHPC
 	Line_Intro: Domain activated, Master. Current tier is {0}. External signals have been completely blocked for you.
 	Line_LayerReport: The deeper the Domain goes, the broader the range of targets we can interfere with, but power consumption will multiply. Please keep an eye on your remaining RAM, Master.
@@ -406,12 +406,6 @@ ShepelBloodMoonDialogue: {
 	RoleName: SHPC
 	Line1: Lunar gravity data is anomalous. The density of nocturnal hostiles is climbing sharply. Confirmed as Blood Moon.
 	Line2: Sensors are a bit noisy, but I will hold the line here. Watch your step, Master.
-}
-
-ShepelLowHealthDialogue: {
-	RoleName: SHPC
-	Line1: Master, health is below one-quarter.
-	Line2: Please fall back for now; don't push yourself too hard.
 }
 
 ShepelPlayerRespawnDialogue: {

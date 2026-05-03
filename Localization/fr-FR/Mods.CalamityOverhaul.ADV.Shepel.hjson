@@ -392,12 +392,6 @@ ShepelBloodMoonDialogue: {
 	// Line2: Sensors are a bit noisy, but I will hold the line here. Watch your step, Master.
 }
 
-ShepelLowHealthDialogue: {
-	// RoleName: SHPC
-	// Line1: Master, health is below one-quarter.
-	// Line2: Please fall back for now; don't push yourself too hard.
-}
-
 ShepelPlayerRespawnDialogue: {
 	// RoleName: SHPC
 	// Line1: ...Vital signs re-established. Master, you were disconnected for a while.

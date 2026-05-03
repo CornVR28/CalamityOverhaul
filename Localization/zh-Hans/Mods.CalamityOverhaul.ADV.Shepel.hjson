@@ -408,12 +408,6 @@ ShepelBloodMoonDialogue: {
 	Line2: 传感器有些嘈杂，但我会一直守在此处。主人，留意脚下。
 }
 
-ShepelLowHealthDialogue: {
-	RoleName: SHPC
-	Line1: 主人，生命值不到四分之一了。
-	Line2: 请先撤退，不要逞强。
-}
-
 ShepelPlayerRespawnDialogue: {
 	RoleName: SHPC
 	Line1: ……生命体征重新建立了。主人，您刚才断线了一段时间。
