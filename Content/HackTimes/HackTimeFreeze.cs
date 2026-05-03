@@ -269,6 +269,14 @@ namespace CalamityOverhaul.Content.HackTimes
         private int frozenRageGainCooldown;
         private int frozenRageCombatFrames;
         private int frozenAdrenalinePauseTimer;
+        //HP、魔力及回复计时器快照
+        private int frozenStatLife;
+        private float frozenLifeRegenTime;
+        private int frozenStatMana;
+        private float frozenManaRegenDelay;
+        //buff持续时间快照，阻止药水病/闪避冷却等buff在冻结期间流逝
+        private int[] frozenBuffTime;
+        private int[] frozenBuffType;
 
         public override void PreUpdate() {
             if (!HackTimeFreeze.IsActive) {
@@ -294,6 +302,14 @@ namespace CalamityOverhaul.Content.HackTimes
                 frozenBreathCD = Player.breathCD;
                 CWRRef.SnapshotRippers(Player, ref frozenRage, ref frozenAdrenaline
                     , ref frozenRageGainCooldown, ref frozenRageCombatFrames, ref frozenAdrenalinePauseTimer);
+                frozenStatLife = Player.statLife;
+                frozenLifeRegenTime = Player.lifeRegenTime;
+                frozenStatMana = Player.statMana;
+                frozenManaRegenDelay = Player.manaRegenDelay;
+                frozenBuffTime ??= new int[Player.MaxBuffs];
+                frozenBuffType ??= new int[Player.MaxBuffs];
+                Array.Copy(Player.buffTime, frozenBuffTime, Player.MaxBuffs);
+                Array.Copy(Player.buffType, frozenBuffType, Player.MaxBuffs);
                 positionCaptured = true;
             }
 
@@ -339,6 +355,17 @@ namespace CalamityOverhaul.Content.HackTimes
             //还原Calamity怒气与肾上腺素，阻止冻结期间充能或衰减
             CWRRef.RestoreRippers(Player, frozenRage, frozenAdrenaline
                 , frozenRageGainCooldown, frozenRageCombatFrames, frozenAdrenalinePauseTimer);
+            //阻止HP和魔力在冻结期间自然恢复
+            Player.statLife = frozenStatLife;
+            Player.lifeRegenTime = frozenLifeRegenTime;
+            Player.statMana = frozenStatMana;
+            Player.manaRegenDelay = frozenManaRegenDelay;
+            //还原buff计时，阻止药水病/闪避冷却等在冻结期间流逝
+            for (int i = 0; i < Player.MaxBuffs; i++) {
+                if (Player.buffType[i] != 0 && Player.buffType[i] == frozenBuffType[i]) {
+                    Player.buffTime[i] = frozenBuffTime[i];
+                }
+            }
         }
 
         public override void FrameEffects() {
