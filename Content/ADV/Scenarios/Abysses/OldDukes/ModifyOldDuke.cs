@@ -258,6 +258,13 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes
                 return RunStorylineAI();
             }
 
+            //玩家选择战斗后，ShouldEnterStoryMode对ChoseToFight返回false，
+            //但开战过渡动画还未结束（RestoreCombatState尚未调用），需要继续驱动状态机
+            //否则RunStorylineAI不再执行，npc.friendly/dontTakeDamage/damage的残留值导致NPC无敌且无碰撞伤害
+            if (State == (float)OldDukeAIState.StartBattle) {
+                return RunStorylineAI();
+            }
+
             //营地重定向必须在ShouldLeaveAfterCooperation之前检查
             //因为AcceptedCooperation是永久状态，如果先检查ShouldLeaveAfterCooperation，
             //营地建成后每次召唤老公爵都会直接进入LeavingDive消失，永远到不了营地重定向
