@@ -66,7 +66,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend.DomainSkills
         public PlayerSnapshot Snapshot;
         public readonly List<Vector2> TrailPositions = new();
 
-        private const int MaxTrailLength = 28;
+        private const int MaxTrailLength = 14;
         private float spiralAngle;
         private readonly float timeWarpFactor;
         private float orbitRadius;
@@ -218,7 +218,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend.DomainSkills
             }
 
             Texture2D pixel = VaultAsset.placeholder2.Value;
-            int segments = 120;
+            int segments = 56;
             float angleStep = MathHelper.TwoPi / segments;
 
             for (int i = 0; i < segments; i++) {
@@ -482,7 +482,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend.DomainSkills
 
         private void InitializeTimeClones() {
             timeClones = new List<TimeClone>();
-            int cloneCount = 26;
+            int cloneCount = 12;
             float outerRing = 420f;
 
             for (int i = 0; i < cloneCount; i++) {
@@ -543,37 +543,55 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend.DomainSkills
             }
         }
 
+        //借用 Owner 进行快照式绘制，避免每帧 new Player() 触发的大量数组分配以及 CopyVisuals 的开销
         private void DrawTimeClone(TimeClone clone) {
             if (clone.Alpha < 0.05f) {
                 return;
             }
 
-            Player ghost = new Player();
+            //保存原始字段，绘制结束后恢复，避免影响真实玩家
+            Vector2 origPosition = Owner.position;
+            int origHeldProj = Owner.heldProj;
+            Color origSkin = Owner.skinColor;
+            Color origShirt = Owner.shirtColor;
+            Color origUnderShirt = Owner.underShirtColor;
+            Color origPants = Owner.pantsColor;
+            Color origShoe = Owner.shoeColor;
+            Color origHair = Owner.hairColor;
+            Color origEye = Owner.eyeColor;
 
-            ghost.CopyVisuals(Owner);
-            ghost.ResetEffects();
-            ghost.position = clone.Position - Owner.Size * 0.5f;
-            ghost.direction = Owner.direction;
-            ghost.bodyFrame = Owner.bodyFrame;
-            ghost.legFrame = Owner.legFrame;
+            try {
+                Owner.position = clone.Position - Owner.Size * 0.5f;
+                Owner.heldProj = -1;
 
-            Color ghostColor = new Color(170, 130, 255, 255) * clone.Alpha * 0.9f;
-            ghost.skinColor = ghostColor;
-            ghost.shirtColor = ghostColor;
-            ghost.underShirtColor = ghostColor;
-            ghost.pantsColor = ghostColor;
-            ghost.shoeColor = ghostColor;
-            ghost.hairColor = ghostColor;
-            ghost.eyeColor = ghostColor;
-            ghost.heldProj = -1;
+                Color ghostColor = new Color(170, 130, 255, 255) * clone.Alpha * 0.9f;
+                Owner.skinColor = ghostColor;
+                Owner.shirtColor = ghostColor;
+                Owner.underShirtColor = ghostColor;
+                Owner.pantsColor = ghostColor;
+                Owner.shoeColor = ghostColor;
+                Owner.hairColor = ghostColor;
+                Owner.eyeColor = ghostColor;
 
-            Main.PlayerRenderer.DrawPlayer(
+                Main.PlayerRenderer.DrawPlayer(
                     Main.Camera,
-                    ghost,
-                    ghost.position,
-                    0f,
-                    ghost.fullRotationOrigin
+                    Owner,
+                    Owner.position,
+                    Owner.fullRotation,
+                    Owner.fullRotationOrigin
                 );
+            }
+            finally {
+                Owner.position = origPosition;
+                Owner.heldProj = origHeldProj;
+                Owner.skinColor = origSkin;
+                Owner.shirtColor = origShirt;
+                Owner.underShirtColor = origUnderShirt;
+                Owner.pantsColor = origPants;
+                Owner.shoeColor = origShoe;
+                Owner.hairColor = origHair;
+                Owner.eyeColor = origEye;
+            }
         }
 
         public override bool PreDraw(ref Color lightColor) {

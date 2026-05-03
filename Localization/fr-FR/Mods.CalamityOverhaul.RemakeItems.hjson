@@ -3,8 +3,8 @@
 	Tooltip:
 		'''
 		Transforme les balles de fusil en projectiles marins
-		legend_Text
 		[Lang4]
+		legend_Text
 		'''
 }
 
@@ -18,8 +18,8 @@ MurasamaOverride: {
 		Ascension de Dragon recharge l'arme 1 après avoir touché un ennemi. Appuyer sur [KEY2] consomme 1 point de recharge d'arme, effectuant une attaque de plongée [Lang2]
 		Une fois que la valeur de recharge de l'arme atteint son maximum de 10 points, toucher à nouveau un ennemi avec Ascension de Dragon déclenchera une compétence finale  [Lang3]
 		[c/ff4500:"Il serait mieux avec une épée à chaîne"]
-		legend_Text
 		[Lang4]
+		legend_Text
 		'''
 }
 
@@ -33,8 +33,8 @@ SHPCOverride: {
 		Utilisez le Clic droit pour utiliser la machine comme un aspirateur, attirant les âmes résiduelles
 		Relâcher la touche décharge un torrent de lasers d'âme proportionnel au nombre d'âmes aspirées
 		Maintenez la touche Maj pour ouvrir le panneau de contrôle du Noyau d'Âme
-		legend_Text
 		[Lang4]
+		legend_Text
 		'''
 }
 

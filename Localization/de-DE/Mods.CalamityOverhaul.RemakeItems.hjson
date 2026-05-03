@@ -3,8 +3,8 @@
 	Tooltip:
 		'''
 		Verwandelt Gewehrkugeln in Meeresgeschosse
-		legend_Text
 		[Lang4]
+		legend_Text
 		'''
 }
 
@@ -18,8 +18,8 @@ MurasamaOverride: {
 		Bei einem Treffer des aufsteigenden Schnitts wird Waffe 1 aufgeladen. [KEY2] drücken, um 1 Punkt Waffenladungswert zu verbrauchen und einen abwärts gerichteten Schlag auszuführen [Lang2]
 		Bei maximaler Waffenladungswert von 10 Punkten wird bei einem weiteren Treffer des aufsteigenden Schnitts eine Finisher-Technik ausgelöst [Lang3]
 		[c/ff4500:"Eine Kettensägenklinge wäre besser"]
-		legend_Text
 		[Lang4]
+		legend_Text
 		'''
 }
 
@@ -33,8 +33,8 @@ SHPCOverride: {
 		Mache einen Rechtsklick, um die Maschine als Vakuum zu nutzen und Restseelen einzusaugen
 		Beim Loslassen wird ein Strom aus Seelenlasern abgefeuert, der mit der Anzahl der eingesaugten Seelen skaliert
 		Halte die Umschalttaste (Shift), um das Seelenkern-Kontrollfeld zu öffnen
-		legend_Text
 		[Lang4]
+		legend_Text
 		'''
 }
 

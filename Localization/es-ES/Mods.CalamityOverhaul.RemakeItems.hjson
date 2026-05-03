@@ -3,8 +3,8 @@
 	Tooltip:
 		'''
 		Convierte balas de mosquete en proyectiles oceánicos.
-		legend_Text
 		[Lang4]
+		legend_Text
 		'''
 }
 
@@ -24,8 +24,8 @@ MurasamaOverride: {
 		Cuando el valor de carga de la arma alcance el máximo de 10 puntos, 
 		un nuevo golpe ascendente que golpee a un enemigo activará un movimiento final [Lang3].
 		[c/ff4500:"Sería mejor si tuviera una espada de cadena."]
-		legend_Text
 		[Lang4]
+		legend_Text
 		'''
 }
 
@@ -39,8 +39,8 @@ SHPCOverride: {
 		Haz Clic derecho para usar la máquina como una aspiradora, atrayendo almas residuales
 		Al soltar la tecla, se descarga un torrente de láseres de alma que escala con la cantidad de almas atraídas
 		Mantén presionada la tecla Shift para abrir el panel de control del Núcleo de Alma
-		legend_Text
 		[Lang4]
+		legend_Text
 		'''
 }
 

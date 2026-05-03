@@ -408,39 +408,57 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend.DomainSkills
             }
         }
 
+        //借用 Owner 进行快照式绘制，避免每帧 new Player() 触发的大量数组分配以及 CopyVisuals 的开销
         private void DrawTimeClone(InfiniteTimeClone clone) {
             if (clone.Alpha < 0.05f) {
                 return;
             }
 
-            Player ghost = new Player();
-
-            ghost.CopyVisuals(Owner);
-            ghost.ResetEffects();
-            ghost.position = clone.Position - Owner.Size * 0.5f;
-            ghost.direction = Owner.direction;
-            ghost.bodyFrame = Owner.bodyFrame;
-            ghost.legFrame = Owner.legFrame;
-            ghost.heldProj = -1;
-
             Lighting.AddLight(clone.Position, TorchID.Blue);
 
-            Color ghostColor = Color.Blue;
-            ghost.skinColor = ghostColor;
-            ghost.shirtColor = ghostColor;
-            ghost.underShirtColor = ghostColor;
-            ghost.pantsColor = ghostColor;
-            ghost.shoeColor = ghostColor;
-            ghost.hairColor = ghostColor;
-            ghost.eyeColor = ghostColor;
+            //保存原始字段，绘制结束后恢复，避免影响真实玩家
+            Vector2 origPosition = Owner.position;
+            int origHeldProj = Owner.heldProj;
+            Color origSkin = Owner.skinColor;
+            Color origShirt = Owner.shirtColor;
+            Color origUnderShirt = Owner.underShirtColor;
+            Color origPants = Owner.pantsColor;
+            Color origShoe = Owner.shoeColor;
+            Color origHair = Owner.hairColor;
+            Color origEye = Owner.eyeColor;
 
-            Main.PlayerRenderer.DrawPlayer(
+            try {
+                Owner.position = clone.Position - Owner.Size * 0.5f;
+                Owner.heldProj = -1;
+
+                Color ghostColor = Color.Blue;
+                Owner.skinColor = ghostColor;
+                Owner.shirtColor = ghostColor;
+                Owner.underShirtColor = ghostColor;
+                Owner.pantsColor = ghostColor;
+                Owner.shoeColor = ghostColor;
+                Owner.hairColor = ghostColor;
+                Owner.eyeColor = ghostColor;
+
+                Main.PlayerRenderer.DrawPlayer(
                     Main.Camera,
-                    ghost,
-                    ghost.position,
-                    0f,
-                    ghost.fullRotationOrigin
+                    Owner,
+                    Owner.position,
+                    Owner.fullRotation,
+                    Owner.fullRotationOrigin
                 );
+            }
+            finally {
+                Owner.position = origPosition;
+                Owner.heldProj = origHeldProj;
+                Owner.skinColor = origSkin;
+                Owner.shirtColor = origShirt;
+                Owner.underShirtColor = origUnderShirt;
+                Owner.pantsColor = origPants;
+                Owner.shoeColor = origShoe;
+                Owner.hairColor = origHair;
+                Owner.eyeColor = origEye;
+            }
         }
 
         public override bool PreDraw(ref Color lightColor) {
