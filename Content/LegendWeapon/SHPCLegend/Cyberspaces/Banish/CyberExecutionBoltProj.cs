@@ -21,16 +21,12 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Banish
         public override string Texture => CWRConstant.Placeholder;
 
         private const int MaxLife = 38;
-        private const int MainKeyCountMin = 16;
-        private const int MainKeyCountMax = 24;
-        private const float MainSegLenMin = 55f;
-        private const float MainSegLenMax = 95f;
+        private const int MainKeyCountMin = 14;
+        private const int MainKeyCountMax = 20;
         private const float MainPeakWidth = 110f;
 
         private const int ForkKeyCountMin = 6;
-        private const int ForkKeyCountMax = 11;
-        private const float ForkSegLenMin = 28f;
-        private const float ForkSegLenMax = 55f;
+        private const int ForkKeyCountMax = 10;
         private const float ForkPeakWidth = 56f;
 
         private Vector2[] points;
@@ -138,86 +134,108 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Banish
         }
 
         private void GeneratePath() {
-            float angle = Projectile.ai[0];
-            int keyCount;
-            float segLenMin, segLenMax;
+            //先确定起点与终点：用"主轴+垂直偏移"模型，避免随机漫步导致的折叠/扭曲与急拐断裂
+            Vector2 start = Projectile.Center;
+            Vector2 end;
+            if (!ResolveEndPoint(out end)) {
+                //Fallback：沿入射角延伸一个默认长度
+                float defaultLen = IsFork ? 240f : 900f;
+                end = start + Projectile.ai[0].ToRotationVector2() * defaultLen;
+            }
 
-            if (IsFork) {
-                keyCount = Main.rand.Next(ForkKeyCountMin, ForkKeyCountMax);
-                segLenMin = ForkSegLenMin;
-                segLenMax = ForkSegLenMax;
+            Vector2 axis = end - start;
+            float length = axis.Length();
+            if (length < 1f) {
+                //长度过小时退化为短直线，至少保证两个端点，避免后续除零
+                points = new Vector2[2] { start, end };
+                pointCount = 2;
+                return;
             }
-            else {
-                keyCount = Main.rand.Next(MainKeyCountMin, MainKeyCountMax);
-                segLenMin = MainSegLenMin;
-                segLenMax = MainSegLenMax;
-            }
+            Vector2 axisUnit = axis / length;
+            Vector2 perp = new Vector2(-axisUnit.Y, axisUnit.X);
+
+            int keyCount = IsFork
+                ? Main.rand.Next(ForkKeyCountMin, ForkKeyCountMax)
+                : Main.rand.Next(MainKeyCountMin, MainKeyCountMax);
+            //至少保留4个关键点供Catmull-Rom插值
+            if (keyCount < 4) keyCount = 4;
+
+            //横向抖动幅度：主干更大、fork更小；并随长度成比例缩放但有上限
+            float baseAmp = IsFork
+                ? MathF.Min(length * 0.18f, 90f)
+                : MathF.Min(length * 0.16f, 220f);
 
             Vector2[] keys = new Vector2[keyCount];
-            Vector2 current = Projectile.Center;
-            keys[0] = current;
+            keys[0] = start;
+            keys[keyCount - 1] = end;
 
-            for (int i = 1; i < keyCount; i++) {
-                float distFactor = (float)i / keyCount;
-                float jag = Main.rand.NextFloat(-0.55f, 0.55f) * (0.55f + distFactor * 0.95f);
-                //18%概率出现大偏转（数字电路急拐）
-                if (Main.rand.NextFloat() < 0.18f) {
-                    jag = (Main.rand.NextBool() ? 1f : -1f) * 1.25f;
-                }
-                float segLen = Main.rand.NextFloat(segLenMin, segLenMax) * (0.7f + distFactor * 0.7f);
-                Vector2 step = (angle + jag).ToRotationVector2() * segLen;
-                current += step;
-                keys[i] = current;
+            //中间关键点：沿主轴均匀分布 + 垂直方向带"包络抖动"，端点处包络为0以保证精确连接
+            //包络采用 sin(t*PI)，中段最大、两端为0
+            float prevOffset = 0f;
+            for (int i = 1; i < keyCount - 1; i++) {
+                float t = (float)i / (keyCount - 1);
+                Vector2 onAxis = Vector2.Lerp(start, end, t);
+                float envelope = MathF.Sin(t * MathF.PI);
+                //生成带轻微"惯性"的偏移：本次目标 = 随机偏移；通过插值使曲线相对平滑而非锯齿
+                float target = Main.rand.NextFloat(-1f, 1f) * baseAmp * envelope;
+                float offset = MathHelper.Lerp(prevOffset, target, 0.65f);
+                prevOffset = offset;
+                //再叠加一层小幅高频噪声制造电流颤动观感
+                float jitter = Main.rand.NextFloat(-1f, 1f) * baseAmp * 0.18f * envelope;
+                keys[i] = onAxis + perp * (offset + jitter);
             }
 
-            //主干：把末端拉向Boss中心，制造"精确劈中"观感
-            //fork：末端拉向forkEndOverride（来自主干传入的中段位置外推点）
-            Vector2 anchorEnd = Vector2.Zero;
-            bool hasAnchor = false;
+            //Catmull-Rom 细分：每段插入若干子点，得到光滑无急拐的曲线
+            int subPerSeg = IsFork ? 4 : 6;
+            int segCount = keyCount - 1;
+            pointCount = segCount * subPerSeg + 1;
+            points = new Vector2[pointCount];
+            int writeIdx = 0;
+            for (int i = 0; i < segCount; i++) {
+                Vector2 p0 = keys[Math.Max(i - 1, 0)];
+                Vector2 p1 = keys[i];
+                Vector2 p2 = keys[i + 1];
+                Vector2 p3 = keys[Math.Min(i + 2, keyCount - 1)];
+                for (int s = 0; s < subPerSeg; s++) {
+                    float u = (float)s / subPerSeg;
+                    points[writeIdx++] = CatmullRom(p0, p1, p2, p3, u);
+                }
+            }
+            points[writeIdx] = keys[keyCount - 1];
+        }
+
+        /// <summary>
+        /// 解析当前弹幕的终点：主干用ai[2]指向的目标NPC中心；fork用localAI[1]/[2]携带的覆写终点
+        /// </summary>
+        private bool ResolveEndPoint(out Vector2 end) {
             if (IsFork) {
                 if (hasForkEnd) {
-                    anchorEnd = forkEndOverride;
-                    hasAnchor = true;
+                    end = forkEndOverride;
+                    return true;
+                }
+                end = default;
+                return false;
+            }
+            int targetIdx = (int)Projectile.ai[2];
+            if (targetIdx >= 0 && targetIdx < Main.maxNPCs) {
+                NPC npc = Main.npc[targetIdx];
+                if (npc.active) {
+                    //命中点带轻微抖动避免所有雷打到同一像素
+                    end = npc.Center + Main.rand.NextVector2Circular(npc.width * 0.3f, npc.height * 0.3f);
+                    return true;
                 }
             }
-            else {
-                int targetIdx = (int)Projectile.ai[2];
-                if (targetIdx >= 0 && targetIdx < Main.maxNPCs) {
-                    NPC npc = Main.npc[targetIdx];
-                    if (npc.active) {
-                        anchorEnd = npc.Center + Main.rand.NextVector2Circular(npc.width * 0.35f, npc.height * 0.35f);
-                        hasAnchor = true;
-                    }
-                }
-            }
+            end = default;
+            return false;
+        }
 
-            if (hasAnchor) {
-                //把后半段插值拉向anchorEnd，既保留前段抖动又精准命中
-                int blendStart = keyCount / 2;
-                for (int i = blendStart; i < keyCount; i++) {
-                    float bt = (float)(i - blendStart) / (keyCount - 1 - blendStart);
-                    bt = MathF.Pow(bt, 1.3f);
-                    keys[i] = Vector2.Lerp(keys[i], anchorEnd, bt);
-                }
-                keys[keyCount - 1] = anchorEnd;
-            }
-
-            //细分：每对关键帧间插入1个带垂直抖动的中间点
-            pointCount = keyCount * 2 - 1;
-            points = new Vector2[pointCount];
-            float perpJitter = IsFork ? 4f : 8f;
-            for (int i = 0; i < keyCount - 1; i++) {
-                points[i * 2] = keys[i];
-                Vector2 mid = (keys[i] + keys[i + 1]) * 0.5f;
-                Vector2 dir = keys[i + 1] - keys[i];
-                Vector2 perp = new Vector2(-dir.Y, dir.X);
-                if (perp.LengthSquared() > 0.01f) {
-                    perp.Normalize();
-                }
-                mid += perp * Main.rand.NextFloat(-perpJitter, perpJitter);
-                points[i * 2 + 1] = mid;
-            }
-            points[(keyCount - 1) * 2] = keys[keyCount - 1];
+        private static Vector2 CatmullRom(Vector2 p0, Vector2 p1, Vector2 p2, Vector2 p3, float t) {
+            float t2 = t * t;
+            float t3 = t2 * t;
+            return 0.5f * ((2f * p1)
+                + (-p0 + p2) * t
+                + (2f * p0 - 5f * p1 + 4f * p2 - p3) * t2
+                + (-p0 + 3f * p1 - 3f * p2 + p3) * t3);
         }
 
         private void ResizeToBounds() {

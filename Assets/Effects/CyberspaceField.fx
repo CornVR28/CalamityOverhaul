@@ -128,8 +128,8 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0) : COLOR0
     // skeletonMul: 作用于网格骨架/节点/边缘呼吸光等保留可读性的元素
     // ================================================================
     float mFade = saturate(motionFade);
-    float baseMul = 1.0 - mFade * 0.75;
-    float skeletonMul = 1.0 - mFade * 0.55;
+    float baseMul = 1.0 - mFade * 0.55;
+    float skeletonMul = 1.0 - mFade * 0.38;
 
     // ================================================================
     // 第一层：现实扭曲（黑墙侵蚀现实——核心新增效果）
@@ -331,7 +331,7 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0) : COLOR0
     // skeletonMul: 网格走线/节点/边缘呼吸光 -> 中度淡化
     //              stationary -> 1.0, full motion -> 0.45
     // ================================================================
-    float detailMul = 1.0 - mFade * 0.82;
+    float detailMul = 1.0 - mFade * 0.62;
     float entityMul = 1.0 - mFade * 0.45;
 
     // --- 合成加法层 ---
@@ -351,7 +351,7 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0) : COLOR0
     // 最终合成
     // ================================================================
     //整体加法亮度再叠一层运动淡化，让快速移动时的画面整体偏向"轻量描边"观感
-    float globalAddMul = lerp(1.0, 0.55, mFade);
+    float globalAddMul = lerp(1.0, 0.70, mFade);
     float3 finalColor = processed + additive * intensity * domainBreathe * globalAddMul;
 
     return float4(finalColor, original.a);

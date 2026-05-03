@@ -148,8 +148,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
 
             //运动淡化：移动时降低低质量回退的整体存在感，与高质量分支观感对齐
             float motion = MathHelper.Clamp(Cyberspace.MotionFade, 0f, 1f);
-            float baseMul = 1f - motion * 0.7f;
-            float detailMul = 1f - motion * 0.85f;
+            float baseMul = 1f - motion * 0.50f;
+            float detailMul = 1f - motion * 0.65f;
 
             float alpha = MathHelper.Clamp(Cyberspace.Intensity, 0f, 1f);
             Color dimColor = new Color(22, 0, 0) * (alpha * Cyberspace.DimStrength * 0.55f * baseMul);
@@ -246,7 +246,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             float time = Cyberspace.EffectTime;
             float effectIntensity = Cyberspace.Intensity;
             //边缘光晕属花纹层，移动时强淡化
-            float glowMotionMul = 1f - MathHelper.Clamp(Cyberspace.MotionFade, 0f, 1f) * 0.8f;
+            float glowMotionMul = 1f - MathHelper.Clamp(Cyberspace.MotionFade, 0f, 1f) * 0.60f;
 
             if (r < gs * 2) return;
 
@@ -322,7 +322,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             Vector2 center = Cyberspace.DomainCenter;
             Vector2 drawPos = center - Main.screenPosition;
             //边界环属于骨架级显示，移动时中度淡化以削弱晃眼感
-            float ringMotionMul = 1f - MathHelper.Clamp(Cyberspace.MotionFade, 0f, 1f) * 0.55f;
+            float ringMotionMul = 1f - MathHelper.Clamp(Cyberspace.MotionFade, 0f, 1f) * 0.38f;
 
             spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
                 SamplerState.LinearWrap, DepthStencilState.None, RasterizerState.CullNone,

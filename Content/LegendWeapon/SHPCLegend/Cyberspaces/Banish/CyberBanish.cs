@@ -87,8 +87,18 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Banish
             }
 
             if (boss) {
-                //Boss级目标：不抹除而是召唤大量故障天雷进行打击
-                CyberBossExecution.StartExecution(hitIndex, Main.LocalPlayer);
+                //Boss级目标：走完整放逐滤镜演出，收尾不抹除而是起动天雷打击
+                StartBanish(hitIndex, isBoss: true);
+                NPC bossRoot = Main.npc[hitIndex];
+                NpcGroupHelper.CollectGroupIndices(bossRoot, banishGroupBuffer);
+                for (int i = 0; i < banishGroupBuffer.Count; i++) {
+                    int memberIdx = banishGroupBuffer[i];
+                    if (memberIdx == hitIndex) continue;
+                    if (IsBanishing(memberIdx)) continue;
+                    //群组成员同样进入Boss版演出，由主体负责触发雷击
+                    StartBanish(memberIdx, isBoss: true);
+                }
+                banishGroupBuffer.Clear();
                 return;
             }
 
@@ -146,7 +156,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Banish
         /// <summary>
         /// 启动对指定NPC的放逐
         /// </summary>
-        public static void StartBanish(int npcIndex) {
+        public static void StartBanish(int npcIndex, bool isBoss = false) {
             if (IsBanishing(npcIndex)) return;
 
             NPC npc = Main.npc[npcIndex];
@@ -157,7 +167,10 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Banish
                 Timer = 0,
                 OriginalScale = npc.scale,
                 FreezePosition = npc.Center,
-                Seed = Main.rand.NextFloat()
+                Seed = Main.rand.NextFloat(),
+                IsBoss = isBoss,
+                OwnerWho = Main.myPlayer,
+                ExecutionTriggered = false,
             });
 
             // 冻结NPC运动
@@ -182,11 +195,29 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Banish
                     continue;
                 }
 
+                float progress = entry.Progress;
+
                 // 冻结NPC位置
                 npc.Center = entry.FreezePosition;
                 npc.velocity = Vector2.Zero;
 
-                float progress = entry.Progress;
+                if (entry.IsBoss) {
+                    //Boss版：不缩小、不抹除。末段触发雷击后仍保留滤镜到结束
+                    if (!Main.dedServ) {
+                        CyberBanishParticles.SpawnBanishParticles(npc, progress, entry.Seed);
+                    }
+
+                    if (!entry.ExecutionTriggered && progress >= 0.7f) {
+                        entry.ExecutionTriggered = true;
+                        Player owner = entry.OwnerWho >= 0 && entry.OwnerWho < Main.maxPlayers ? Main.player[entry.OwnerWho] : Main.LocalPlayer;
+                        CyberBossExecution.StartExecution(entry.NpcIndex, owner);
+                    }
+
+                    if (entry.Timer >= BanishDuration) {
+                        ActiveBanishments.RemoveAt(i);
+                    }
+                    continue;
+                }
 
                 // 阶段一 (0~0.5): 强烈故障闪烁，NPC保持原大小
                 // 阶段二 (0.5~0.85): 开始缩小 + 更激烈故障
@@ -230,6 +261,18 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Banish
         public float OriginalScale;
         public Vector2 FreezePosition;
         public float Seed;
+        /// <summary>
+        /// 是否为Boss级演出：不缩小不抹除，末段触发<see cref="CyberBossExecution"/>
+        /// </summary>
+        public bool IsBoss;
+        /// <summary>
+        /// 发起者whoAmI，Boss版雷击伤害会从该玩家读取SHPC面板
+        /// </summary>
+        public int OwnerWho;
+        /// <summary>
+        /// Boss版是否已触发雷击，避免重复调用StartExecution
+        /// </summary>
+        public bool ExecutionTriggered;
 
         /// <summary>
         /// 放逐进度 0→1
