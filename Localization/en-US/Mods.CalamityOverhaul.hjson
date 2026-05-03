@@ -1,10 +1,10 @@
-﻿EndlessDamageClassTextContent.EndlessDamageClass.DisplayName: Endless Damage
-Tools.RecipesLoseText: You can't just make this thing
+EndlessDamageClassTextContent.EndlessDamageClass.DisplayName: Endless Damage
+Tools.RecipesLoseText: You cannot craft this item directly!
 
 Biomes: {
 	TungstenBiome: {
-		DisplayName: Tungsten Biome
-		TownNPCDialogueName: the Tungsten Biome
+		DisplayName: Tungsten Riot
+		TownNPCDialogueName: the Tungsten biome
 	}
 
 	MachineBiome: {
@@ -40,122 +40,122 @@ Arcanes: {
 
 Resurrections: {
 	ResurrectionDeath: {
-		DeathText: "{0} was consumed by the Abyssal Resurgence"
-		WarningCombatText: The Abyss is devouring you...
-		DeathNoticeText: You have been swallowed by the Abyss...
-		MarkRemainText: The mark of the Abyss still clings to you...
-		RetainValueFormat: Resurgence Value: {0}%
+		DeathText: "{0} died from Abyssal Resurrection"
+		WarningCombatText: The Abyss is consuming you...
+		DeathNoticeText: You were consumed by the Abyss...
+		MarkRemainText: The mark of the Abyss still entwines you...
+		RetainValueFormat: Resurrection Value: {0}%
 	}
 }
 
 QuickHack: {
 	SynapseBurn: {
-		DisplayName: Synapse Burn
-		Description: Overloads target neural synapses, dealing sustained thermal damage
+		DisplayName: Synapse Burnout
+		Description: Overloads the target's neural synapses, dealing continuous thermal damage.
 	}
 
 	ShortCircuit: {
 		DisplayName: Short Circuit
-		Description: Releases an electromagnetic pulse dealing instant damage with brief paralysis
+		Description: Releases an EMP causing instant damage and brief paralysis.
 	}
 
 	Cyberpsychosis: {
 		DisplayName: Cyberpsychosis
-		Description: Drives the target into a frenzy, attacking all nearby units
+		Description: Drives the target into a frenzy, attacking all nearby units.
 	}
 
 	SystemReset: {
 		DisplayName: System Reset
-		Description: Forces a hard reboot on the target system, causing total shutdown
+		Description: Forces a system reboot on the target, completely paralyzing them.
 	}
 
 	OpticOverload: {
 		DisplayName: Optic Overload
-		Description: Blinds the target, disabling environmental awareness
+		Description: Blinds the target, making them unable to perceive their surroundings.
 	}
 
 	MemoryWipe: {
 		DisplayName: Memory Wipe
-		Description: Purges target hostility data, resetting threat tables
+		Description: Clears the target's hostility data, resetting their aggro list.
 	}
 
 	Contagion: {
 		DisplayName: Contagion
-		Description: Implants a self-replicating malware that spreads to nearby targets
+		Description: Implants a self-replicating malware that spreads to nearby targets.
 	}
 
 	TileDetonate: {
-		DisplayName: Tile Detonate
-		Description: Destabilizes structural integrity, triggering an area explosion
+		DisplayName: Tile Detonation
+		Description: Compromises structural integrity, triggering a localized explosion.
 	}
 
 	TilePhase: {
-		DisplayName: Phase Shift
-		Description: Hacks tile physics, making it intangible for a limited time
+		DisplayName: Phasing Protocol
+		Description: Alters the physical properties of a tile, making it intangible for a duration.
 	}
 
 	TileMagPull: {
-		DisplayName: Mag Pull
-		Description: Generates a magnetic field that pulls nearby items toward you
+		DisplayName: Magnetic Pull
+		Description: Generates a magnetic field, pulling nearby dropped items towards you.
 	}
 
 	MachineShortCircuit: {
-		DisplayName: Short Circuit
-		Description: Drains all energy and discharges an electric arc, damaging nearby entities
+		DisplayName: Machine Short Circuit
+		Description: Drains the target machine's energy, releasing electric arcs that damage nearby entities.
 	}
 
 	TurretHijack: {
 		DisplayName: Turret Hijack
-		Description: Overrides IFF module, flipping turret allegiance for a limited time
+		Description: Tampers with the IFF recognition module, temporarily flipping the turret's friend-or-foe identification.
 	}
 
 	FalseMemory: {
 		DisplayName: False Memory
-		Description: ""
+		Description: Implants false memories, causing a brief interruption in pursuit or suppressing their killing pattern.
 	}
 
 	SelfDismember: {
-		DisplayName: Self Dismember
-		Description: ""
+		DisplayName: Self-Dismemberment
+		Description: Forces the paranormal entity to dismember itself.
 	}
 
 	SystemHalt: {
 		DisplayName: System Halt
-		Description: ""
+		Description: Causes the target to briefly fall silent and cease all activities.
 	}
 
 	TurretCircuitOverload: {
-		DisplayName: Turret Circuit Overload
-		Description: ""
+		DisplayName: Circuit Overload
+		Description: Injects reverse current into the turret's power circuit, completely disabling it for a long duration.
 	}
 
 	TurretShortCircuit: {
 		DisplayName: Turret Short Circuit
-		Description: ""
+		Description: Instantly discharges the turret's energy to briefly stall it, immediately coming back online after recovery.
 	}
 
 	VirusBroadcast: {
 		DisplayName: Virus Broadcast
-		Description: ""
+		Description: Injects worm code into the signal tower, causing it to emit cyber EMP waves that short-circuit all turrets within broadcast range for a long duration.
 	}
 }
 
 HackTargetType: {
-	ItemTargetType.DisplayName: Item Target Type
-	NpcTargetType.DisplayName: Npc Target Type
-	ProjectileTargetType.DisplayName: Projectile Target Type
-	SignalTowerTargetType.DisplayName: Signal Tower Target Type
-	TileTargetType.DisplayName: Tile Target Type
-	TurretTargetType.DisplayName: Turret Target Type
-	WaterTargetType.DisplayName: Liquid Target Type
-	WraithTargetType.DisplayName: Wraith Target Type
+	ItemTargetType.DisplayName: Dropped Item Target
+	NpcTargetType.DisplayName: NPC Target
+	ProjectileTargetType.DisplayName: Projectile Target
+	SignalTowerTargetType.DisplayName: Signal Tower Target
+	TileTargetType.DisplayName: Tile Target
+	TurretTargetType.DisplayName: Turret Target
+	WaterTargetType.DisplayName: Liquid Target
+	WraithTargetType.DisplayName: Wraith Target
 }
 
 TileNameFallback: {
 	Dirt: Dirt Block
 	Stone: Stone Block
 	Grass: Grass
-	Plants: Wild Plant
+	Plants: Plants
 	Torch: Torch
 	Tree: Tree
 	Iron: Iron Ore
@@ -176,7 +176,7 @@ TileNameFallback: {
 	Container: Chest
 	Demonite: Demonite Ore
 	CorruptGrass: Corrupt Grass
-	CorruptPlants: Wild Corrupt Plant
+	CorruptPlants: Corrupt Plants
 	Ebonstone: Ebonstone Block
 	DemonAltar: Demon Altar
 	Sunflower: Sunflower
@@ -184,10 +184,10 @@ TileNameFallback: {
 	PiggyBank: Piggy Bank
 	WoodBlock: Wood
 	ShadowOrb: Shadow Orb
-	CorruptThorns: Corrupt Thorn
+	CorruptThorns: Corrupt Thorns
 	Candle: Candle
 	Chandelier: Chandelier
-	JackOLantern: Jack-o'-Lantern
+	JackOLantern: Jack 'O Lantern
 	Present: Present
 	Meteorite: Meteorite
 	GrayBrick: Gray Brick
@@ -213,20 +213,20 @@ TileNameFallback: {
 	Hellstone: Hellstone
 	Mud: Mud Block
 	JungleGrass: Jungle Grass
-	JunglePlants: Wild Jungle Plant
+	JunglePlants: Jungle Plants
 	JungleVine: Jungle Vine
-	Sapphire: Sapphire Stone Block
-	Ruby: Ruby Stone Block
-	Emerald: Emerald Stone Block
-	Topaz: Topaz Stone Block
-	Amethyst: Amethyst Stone Block
-	Diamond: Diamond Stone Block
-	JungleThorns: Jungle Thorn
+	Sapphire: Sapphire Block
+	Ruby: Ruby Block
+	Emerald: Emerald Block
+	Topaz: Topaz Block
+	Amethyst: Amethyst Block
+	Diamond: Diamond Block
+	JungleThorns: Jungle Thorns
 	MushroomGrass: Mushroom Grass
 	MushroomPlants: Glowing Mushroom
 	MushroomTree: Giant Glowing Mushroom
 	Plants2: Tall Grass
-	JunglePlants2: Tall Wild Jungle Plant
+	JunglePlants2: Tall Jungle Plants
 	ObsidianBrick: Obsidian Brick
 	HellstoneBrick: Hellstone Brick
 	Hellforge: Hellforge
@@ -234,7 +234,7 @@ TileNameFallback: {
 	Bed: Bed
 	Cactus: Cactus
 	Coral: Coral
-	ImmatureHerb: Herb Seedling
+	ImmatureHerb: Immature Herb
 	MatureHerb: Mature Herb
 	BloomingHerb: Blooming Herb
 	Tombstone: Tombstone
@@ -275,7 +275,7 @@ TileNameFallback: {
 	IronAnvil: Iron Anvil
 	LeadAnvil: Lead Anvil
 	CrimsonAltar: Crimson Altar
-	Tile192: Leaves of the Tree of Life
-	Tile187: Weed
+	Tile192: Living Wood Leaves
+	Tile187: Weeds
 	Tile352: Thorns
 }

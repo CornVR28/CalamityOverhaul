@@ -1,4 +1,4 @@
-MurasamaHeld.DisplayName: Murasama
+﻿MurasamaHeld.DisplayName: Murasama
 MuraTriggerDash.DisplayName: Murasama
 MuraBreakerSlash.DisplayName: Crescent Moon Slash
 MuraExecutionCut.DisplayName: Dimensional Severance - Finale
@@ -527,4 +527,4 @@ CyberRiftSlashProj.DisplayName: Cyber Rift Slash
 CyberRestartProj.DisplayName: Cyber Restart
 CyberPixelDecomposeProj.DisplayName: Cyber Pixel Decomposition
 MimicPhantom.DisplayName: Mimic Phantom
-CyberExecutionBoltProj.DisplayName: Cyber Execution Bolt Proj
+CyberExecutionBoltProj.DisplayName: Cyber Execution Bolt

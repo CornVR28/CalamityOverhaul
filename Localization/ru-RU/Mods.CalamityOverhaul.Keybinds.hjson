@@ -1,26 +1,26 @@
-QuestLog_Key.DisplayName: Книга заданий: Открыть/Закрыть
-QuestManager_Key.DisplayName: Менеджер заданий: Открыть/Закрыть
-HeavenfallLongbowSkillKey.DisplayName: Длинный лук Небесного падения: Вселенский суд
-InfinitePickSkillKey.DisplayName: Бесконечная кирка: Смена режима
-Murasama_TriggerKey.DisplayName: Мурасама: Спусковой крючок
-Murasama_DownKey.DisplayName: Мурасама: Удар в падении
-// Legend_UIControl.DisplayName: Toggle Legendary Weapon HUD
-// Legend_Domain.DisplayName: Domain Expansion
-// Legend_Teleport.DisplayName: Domain Teleport
-// Legend_Restart.DisplayName: Self-Restart
-Halibut_Clone.DisplayName: Палтус: Вторжение прошлого
+﻿QuestLog_Key.DisplayName: Журнал заданий: Открыть/Закрыть главный интерфейс
+QuestManager_Key.DisplayName: Поручения: Открыть/Закрыть панель управления
+HeavenfallLongbowSkillKey.DisplayName: Длинный лук "Падение небес": Суд Мироздания
+InfinitePickSkillKey.DisplayName: Бесконечная кирка: Смена формы
+Murasama_TriggerKey.DisplayName: Мурамаса: Кнопка курка
+Murasama_DownKey.DisplayName: Мурамаса: Удар в падении
+Legend_UIControl.DisplayName: Вкл/Выкл HUD легендарного оружия
+Legend_Domain.DisplayName: Развертывание домена
+Legend_Teleport.DisplayName: Телепортация домена
+Legend_Restart.DisplayName: Самоперезагрузка
+Halibut_Clone.DisplayName: Палтус: Вторжение прошлого воплощения
 Halibut_Superposition.DisplayName: Палтус: Суперпозиция
-Halibut_Skill_L.DisplayName: Палтус: Предыдущий навык
-Halibut_Skill_R.DisplayName: Палтус: Следующий навык
-// WeponSkill_Q.DisplayName: Weapon: Left Skill Key
-// WeponSkill_R.DisplayName: Weapon: Right Skill Key
+Halibut_Skill_L.DisplayName: Палтус: Переключить навык влево
+Halibut_Skill_R.DisplayName: Палтус: Переключить навык вправо
+WeponSkill_Q.DisplayName: Оружие: Левая кнопка навыка
+WeponSkill_R.DisplayName: Оружие: Правая кнопка навыка
 AriaofTheCosmos_Q.DisplayName: Ария Космоса: Страж звездного кольца
 AriaofTheCosmos_R.DisplayName: Ария Космоса: Гамма-всплеск
-JusticeUnveiled.DisplayName: Явление правосудия: Свершить правосудие
-EmblemOfDread_Dash.DisplayName: Знак Ужаса: Гравитационный Рывок
-EyeOfSingularity_QuantumLeap.DisplayName: Око Сингулярности: Квантовый Скачок
-// HackTime_Toggle.DisplayName: Hack Time
-// CyberBanish_Key.DisplayName: Cyberspace: Banish
-// CyberFreeze_Key.DisplayName: Cyberspace: Freeze
-// CyberwareSkill_Key.DisplayName: Cyberware Skill
-// VoidTimeShift_Key.DisplayName: Void Time Shift
+JusticeUnveiled.DisplayName: Явление Справедливости: Активация правосудия
+EmblemOfDread_Dash.DisplayName: Эмблема Ужаса: Гравитационный рывок
+EyeOfSingularity_QuantumLeap.DisplayName: Око Сингулярности: Квантовый скачок
+HackTime_Toggle.DisplayName: Время взлома
+CyberBanish_Key.DisplayName: Киберпространство: Изгнание
+CyberFreeze_Key.DisplayName: Киберпространство: Заморозка
+CyberwareSkill_Key.DisplayName: Навык киберимпланта
+VoidTimeShift_Key.DisplayName: Вторжение во время Пустоты

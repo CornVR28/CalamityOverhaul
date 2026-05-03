@@ -1,4 +1,4 @@
-ElementWhip: {
+﻿ElementWhip: {
 	DisplayName: Элементальный хлыст
 	Tooltip:
 		'''
@@ -1585,352 +1585,358 @@ Thrower: {
 Elysium: {
 	DisplayName: Элизиум
 	Tooltip: ""
-	// DiscipleName_0: Simon Peter
-	// DiscipleName_1: Saint Andrew
-	// DiscipleName_2: James
-	// DiscipleName_3: Saint John
-	// DiscipleName_4: Philip
-	// DiscipleName_5: Bartholomew
-	// DiscipleName_6: Thomas
-	// DiscipleName_7: Saint Matthew
-	// DiscipleName_8: James the Lesser
-	// DiscipleName_9: Thaddaeus
-	// DiscipleName_10: Simon the Zealot
-	// DiscipleName_11: Judas Iscariot
-	// HorsemanName_0: Pestilence
-	// HorsemanName_1: War
-	// HorsemanName_2: Famine
-	// HorsemanName_3: Death
-	// DiscipleFullText: Disciple slots full
-	// NoConvertTargetText: No convertible residents nearby
-	// DiscipleFallbackText: Disciple
-	// RevelationText: Revelation
-	// RevelationEndText: Revelation ended
-	// CelestialMeteorText: Celestial Meteor
-	// SealStarsText: Fifth Star Sixth Star Seventh Star
-	// HorsemenFullText: All Four Horsemen summoned
-	// HorsemanArrivalText: Horseman of {0} descends
-	// DiscipleJoinedText: "{0} has joined"
-	// JudasBetrayalText: Judas's Betrayal!
-	// JudasDeathReasonText: "{0} was betrayed by Judas"
-	// DiscipleMartyrText: "{0} was martyred"
-	// MartyrdomPowerText: Martyrdom {0}/11
-	// Tooltip_DiscipleCountText: Current Disciples: {0}/12
-	// Tooltip_NoDisciplesText: No disciples following
-	// Tooltip_MartyrdomPowerText: Martyrdom: {0} {1}/11
-	// Tooltip_RevelationReadyText: Press Q — John will be martyred, Revelation begins
-	// Tooltip_JudgmentActiveText: Last Three Seals judgment in progress
-	// Tooltip_RevelationActiveText: Revelation active Q:Meteor R:Seal Judgment RMB:Horsemen {0}/4
-	// Tooltip_JudasWarningText: Warning: Judas's betrayal lurks beside you
+	DiscipleName_0: Симон Петр
+	DiscipleName_1: Святой Андрей
+	DiscipleName_2: Иаков
+	DiscipleName_3: Святой Иоанн
+	DiscipleName_4: Филипп
+	DiscipleName_5: Варфоломей
+	DiscipleName_6: Фома
+	DiscipleName_7: Святой Матфей
+	DiscipleName_8: Иаков Алфеев
+	DiscipleName_9: Фаддей
+	DiscipleName_10: Симон Зилот
+	DiscipleName_11: Иуда
+	HorsemanName_0: Чума
+	HorsemanName_1: Война
+	HorsemanName_2: Голод
+	HorsemanName_3: Смерть
+	DiscipleFullText: Максимум апостолов
+	NoConvertTargetText: Поблизости нет жителей для обращения
+	DiscipleFallbackText: Апостол
+	RevelationText: Откровение
+	RevelationEndText: Откровение прервано
+	CelestialMeteorText: Небесный метеорит
+	SealStarsText: Пятая звезда Шестая звезда Седьмая звезда
+	HorsemenFullText: Четыре всадника в сборе
+	HorsemanArrivalText: "{0} прибыл"
+	DiscipleJoinedText: "{0} присоединился"
+	JudasBetrayalText: Предательство Иуды!
+	JudasDeathReasonText: Иуда предал {0}
+	DiscipleMartyrText: "{0} принял мученическую смерть"
+	MartyrdomPowerText: Сила Мученичества {0}/11
+	Tooltip_DiscipleCountText: Текущее количество апостолов: {0}/12
+	Tooltip_NoDisciplesText: Пока нет последователей-апостолов
+	Tooltip_MartyrdomPowerText: Сила Мученичества: {0} {1}/11
+	Tooltip_RevelationReadyText: Нажмите Q — Иоанн примет мученическую смерть, и грядет Откровение
+	Tooltip_JudgmentActiveText: Идет суд последних трех печатей, ожидание финального завершения
+	Tooltip_RevelationActiveText: Откровение свершилось: [Q] Метеорит, [R] Суд последних трех печатей, [ПКМ] Призыв Четырех Всадников {0}/4
+	Tooltip_JudasWarningText: Предупреждение: предательство Иуды уже скрывается рядом с вами
 }
 
 SandevistansItem: {
-	// DisplayName: Sandevistans Item
-	// Tooltip: Militech Sandevistan Mk.5 — Slows perceived time by 70% for 3.5 seconds. Cooldown 15s.
+	DisplayName: Сандевистан Mk.5
+	Tooltip: Замедляет восприятие времени на 70% в течение 5 секунд. Перезарядка 15 секунд.
 }
 
 RamCapacityUpgradeChip: {
-	// DisplayName: RAM Capacity Upgrade Chip
-	// Tooltip: Permanently increases base maximum RAM by 1
+	DisplayName: Чип расширения памяти ОЗУ
+	Tooltip: Использование навсегда увеличивает базовый предел ОЗУ на 1 единицу
 }
 
 RamRecoveryUpgradeChip: {
-	// DisplayName: RAM Recovery Upgrade Chip
-	// Tooltip: Permanently increases base RAM recovery speed by 0.05 per second
+	DisplayName: Чип ускорения восстановления ОЗУ
+	Tooltip: Использование навсегда увеличивает базовую скорость восстановления ОЗУ на 0.05 ед./сек
 }
 
 Mewtwo: {
-	// DisplayName: Mewtwo
-	// Tooltip: ""
+	DisplayName: Чип брейнданса
+	Tooltip: Использование погружает в брейнданс
 }
 
 RapidBarrelModule: {
-	// DisplayName: Rapid Barrel
-	/* Tooltip:
+	DisplayName: Скорострельный ствол
+	Tooltip:
 		'''
-		SHPC Module · Barrel Slot
-		Hyper-extended recoil spring delivers searing pulses at the cost of stability and per-shot power
-		''' */
+		Модуль SHPC · Слот ствола
+		Удлиненная возвратная пружина обеспечивает обжигающие импульсы ценой стабильности и урона за выстрел.
+		'''
 }
 
 FocusBarrelModule: {
-	// DisplayName: Focus Barrel
-	/* Tooltip:
+	DisplayName: Фокусирующий ствол
+	Tooltip:
 		'''
-		SHPC Module · Barrel Slot
-		Forces the three tracking beams to converge into one catastrophic concentrated strike
-		''' */
+		Модуль SHPC · Слот ствола
+		Три самонаводящихся луча принудительно сливаются в один, нанося разрушительный концентрированный удар.
+		'''
 }
 
 PrecisionOpticModule: {
-	// DisplayName: Precision Optic
-	/* Tooltip:
+	DisplayName: Точный прицел
+	Tooltip:
 		'''
-		SHPC Module · Optic Slot
-		Laser-assisted aiming eliminates all spread and grants additional crit chance
-		''' */
+		Модуль SHPC · Слот прицела
+		Лазерный помощник прицеливания полностью устраняет разброс лучей и дает дополнительный шанс критического удара.
+		'''
 }
 
 OverloadCoreModule: {
-	// DisplayName: Overload Core
-	/* Tooltip:
+	DisplayName: Перегруженное ядро
+	Tooltip:
 		'''
-		SHPC Module · Power Slot
-		Replaces the buffer with a faster cycling logic, charging the orb faster and launching it harder
-		''' */
+		Модуль SHPC · Слот энергии
+		Заменяет буферизацию более быстрой логикой цикла, что позволяет быстрее заряжать энергосферу и ускоряет её полет.
+		'''
 }
 
 SteadyStockModule: {
-	// DisplayName: Steady Stock
-	/* Tooltip:
+	DisplayName: Стабилизирующий приклад
+	Tooltip:
 		'''
-		SHPC Module · Stock Slot
-		Composite heavy stock absorbs recoil, trading some fire rate for extra damage per shot
-		''' */
+		Модуль SHPC · Слот приклада
+		Тяжелый композитный приклад поглощает отдачу, обменивая часть скорострельности на дополнительный урон каждого выстрела.
+		'''
 }
 
 HarmonyGripModule: {
-	// DisplayName: Harmony Grip
-	/* Tooltip:
+	DisplayName: Резонирующая рукоять
+	Tooltip:
 		'''
-		SHPC Module · Grip Slot
-		Bio-conductive grip channels mana through the body, drastically reducing mana cost
-		''' */
+		Модуль SHPC · Слот рукояти
+		Биоэлектрическая проводящая рукоять использует тело для передачи маны, значительно снижая её расход.
+		'''
 }
 
 ResonanceFrameModule: {
-	// DisplayName: Resonance Frame
-	/* Tooltip:
+	DisplayName: Резонансная ствольная коробка
+	Tooltip:
 		'''
-		SHPC Module · Frame Slot
-		Harmonic-stacked frame leaks an extra beam, intensifying the volley
-		''' */
+		Модуль SHPC · Слот ствольной коробки
+		Гармоническое наложение позволяет генерировать дополнительный луч, делая шквал огня более плотным.
+		'''
 }
 
 AdaptiveOpticModule: {
-	// DisplayName: Adaptive Optic
-	/* Tooltip:
+	DisplayName: Адаптивный прицел
+	Tooltip:
 		'''
-		SHPC Module · Optic Slot
-		Neural-link algorithms continuously correct trajectory, locking each beam tighter onto its target
-		''' */
+		Модуль SHPC · Слот прицела
+		Нейросетевые алгоритмы постоянно корректируют траекторию, обеспечивая быстрое и точное попадание каждого луча.
+		'''
 }
 
 AssaultStockModule: {
-	// DisplayName: Assault Stock
-	/* Tooltip:
+	DisplayName: Штурмовой приклад
+	Tooltip:
 		'''
-		SHPC Module · Stock Slot
-		Adrenaline-assisted bracing cycles the weapon more aggressively, raising firepower at higher mana cost
-		''' */
+		Модуль SHPC · Слот приклада
+		Адреналиновые опоры активируются при агрессивной стрельбе, повышая огневую мощь ценой повышенного расхода энергии.
+		'''
 }
 
 BalancedGripModule: {
-	// DisplayName: Balanced Grip
-	/* Tooltip:
+	DisplayName: Сбалансированная рукоять
+	Tooltip:
 		'''
-		SHPC Module · Grip Slot
-		Re-tuned weight distribution gives a small all-around boost to fire rate, damage and stability
-		''' */
+		Модуль SHPC · Слот рукояти
+		Перераспределение веса слегка улучшает скорострельность, урон и стабильность.
+		'''
 }
 
 CapacitorBankModule: {
-	// DisplayName: Capacitor Bank
-	/* Tooltip:
+	DisplayName: Массив конденсаторов
+	Tooltip:
 		'''
-		SHPC Module · Power Slot
-		Dense capacitor stack tops the orb off in a much shorter cycle, but dampens its launch energy
-		''' */
+		Модуль SHPC · Слот энергии
+		Стек конденсаторов высокой плотности заряжает энергосферу за более короткий цикл, но снижает кинетическую энергию на выходе.
+		'''
 }
 
 CrystalGripModule: {
-	// DisplayName: Crystal Grip
-	/* Tooltip:
+	DisplayName: Кристальная рукоять
+	Tooltip:
 		'''
-		SHPC Module · Grip Slot
-		Synthetic crystal dielectric resonates with the user, trimming mana cost and boosting crit, but slowing charge
-		''' */
+		Модуль SHPC · Слот рукояти
+		Синтетический кристалл резонирует с отдачей, экономя ману и повышая шанс крита, но замедляя ритм зарядки.
+		'''
 }
 
 EfficientGripModule: {
-	// DisplayName: Efficient Grip
-	/* Tooltip:
+	DisplayName: Эффективная рукоять
+	Tooltip:
 		'''
-		SHPC Module · Grip Slot
-		Engineering-grade ergonomic grip refines both energy draw and trigger cadence
-		''' */
+		Модуль SHPC · Слот рукояти
+		Инженерная эргономичная рукоять оптимизирует как энергопотребление, так и ритм нажатия на спусковой крючок.
+		'''
 }
 
 HeavyBarrelModule: {
-	// DisplayName: Heavy Barrel
-	/* Tooltip:
+	DisplayName: Тяжелый ствол
+	Tooltip:
 		'''
-		SHPC Module · Barrel Slot
-		Reinforced rifling crushes spread and cadence, turning every shot into a heavy strike
-		''' */
+		Модуль SHPC · Слот ствола
+		Утолщенные нарезы подавляют разброс и скорострельность, превращая каждый выстрел в тяжелый удар.
+		'''
 }
 
 HighVoltageCoreModule: {
-	// DisplayName: High Voltage Core
-	/* Tooltip:
+	DisplayName: Высоковольтное ядро
+	Tooltip:
 		'''
-		SHPC Module · Power Slot
-		Output voltage is pushed up the scale, amplifying both raw and merged-beam damage at extra mana cost
-		''' */
+		Модуль SHPC · Слот энергии
+		Повышает выходное напряжение, значительно увеличивая общий урон и урон от сфокусированного удара ценой расхода маны.
+		'''
 }
 
 HoloOpticModule: {
-	// DisplayName: Holo Optic
-	/* Tooltip:
+	DisplayName: Голографический прицел
+	Tooltip:
 		'''
-		SHPC Module · Optic Slot
-		Holographic reticle locks the impact point, slashing spread and accelerating the trigger at slight mana overhead
-		''' */
+		Модуль SHPC · Слот прицела
+		Голографическая сетка фиксирует точку попадания, сильно снижая разброс и ускоряя ритм стрельбы. Слегка повышает энергопотребление.
+		'''
 }
 
 HypersonicBarrelModule: {
-	// DisplayName: Hypersonic Barrel
-	/* Tooltip:
+	DisplayName: Сверхзвуковой ствол
+	Tooltip:
 		'''
-		SHPC Module · Barrel Slot
-		Sonic-shock chamber pushes beams to extreme velocity, but fine homing can no longer keep up
-		''' */
+		Модуль SHPC · Слот ствола
+		Звуковой удар разгоняет луч до предельной скорости, но делает точное самонаведение невозможным.
+		'''
 }
 
 KineticDamperModule: {
-	// DisplayName: Kinetic Damper Stock
-	/* Tooltip:
+	DisplayName: Кинетический демпфирующий приклад
+	Tooltip:
 		'''
-		SHPC Module · Stock Slot
-		Liquid damper swallows recoil, all but eliminating spread and granting a small crit edge
-		''' */
+		Модуль SHPC · Слот приклада
+		Жидкостный демпфер поглощает отдачу, сводя разброс почти к нулю и давая небольшой бонус к криту.
+		'''
 }
 
 LightStockModule: {
-	// DisplayName: Light Stock
-	/* Tooltip:
+	DisplayName: Легкий приклад
+	Tooltip:
 		'''
-		SHPC Module · Stock Slot
-		Carbon-composite frame greatly increases fire rate at a mild cost to stability and per-shot power
-		''' */
+		Модуль SHPC · Слот приклада
+		Карбоновый каркас заметно повышает скорострельность, но слегка снижает стабильность и урон от одного выстрела.
+		'''
 }
 
 MultiCellFrameModule: {
-	// DisplayName: Multi-Cell Frame
-	/* Tooltip:
+	DisplayName: Многокамерная ствольная коробка
+	Tooltip:
 		'''
-		SHPC Module · Frame Slot
-		Parallel cooling cells discharge two beams at once, widening coverage at the cost of per-beam damage
-		''' */
+		Модуль SHPC · Слот ствольной коробки
+		Параллельные камеры охлаждения испускают два луча одновременно, расширяя зону поражения, но снижая урон за попадание.
+		'''
 }
 
 PlasmaInjectorModule: {
-	// DisplayName: Plasma Injector
-	/* Tooltip:
+	DisplayName: Плазменный инжектор
+	Tooltip:
 		'''
-		SHPC Module · Power Slot
-		High-enthalpy plasma injection vastly amplifies orb velocity and merged-beam damage, charging slightly slower
-		''' */
+		Модуль SHPC · Слот энергии
+		Впрыск высокоэнтальпийной плазмы значительно увеличивает скорость энергосферы и сфокусированный урон, слегка замедляя зарядку.
+		'''
 }
 
 QuantumFrameModule: {
-	// DisplayName: Quantum Frame
-	/* Tooltip:
+	DisplayName: Квантовая ствольная коробка
+	Tooltip:
 		'''
-		SHPC Module · Frame Slot
-		Quantum steering circuits make beams turn smarter and orbs fly faster at slightly elevated mana cost
-		''' */
+		Модуль SHPC · Слот ствольной коробки
+		Квантовые контуры направленности позволяют лучам умнее огибать препятствия, а энергосферам — летать быстрее. Расход маны немного увеличен.
+		'''
 }
 
 ScattershotBarrelModule: {
-	// DisplayName: Scattershot Barrel
-	/* Tooltip:
+	DisplayName: Дробовой ствол
+	Tooltip:
 		'''
-		SHPC Module · Barrel Slot
-		Fractured muzzle splits each shot into a spray of beams, drastically expanding coverage but tanking per-beam damage
-		''' */
+		Модуль SHPC · Слот ствола
+		Рассекатель на дуле разделяет выстрел на несколько лучей-дробинок, резко увеличивая охват, но критически снижая урон одного луча.
+		'''
 }
 
 ThermalOpticModule: {
-	// DisplayName: Thermal Optic
-	/* Tooltip:
+	DisplayName: Тепловизионный прицел
+	Tooltip:
 		'''
-		SHPC Module · Optic Slot
-		Infrared lock makes beams cling to their target, doubling down with both precision and crit gains
-		''' */
+		Модуль SHPC · Слот прицела
+		Инфракрасный захват заставляет лучи вгрызаться в цель, как гончие, повышая как точность, так и шанс крита.
+		'''
 }
 
 VolatileFrameModule: {
-	// DisplayName: Volatile Frame
-	/* Tooltip:
+	DisplayName: Нестабильная ствольная коробка
+	Tooltip:
 		'''
-		SHPC Module · Frame Slot
-		Overclocked cooling lattice squeezes out an extra beam and crit chance, while mana draw and spread spike
-		''' */
+		Модуль SHPC · Слот ствольной коробки
+		Перегруженная структура охлаждения выдает дополнительные лучи и шанс крита, но потребление энергии и разброс взлетают до небес.
+		'''
 }
 
 NovaBarrelModule: {
-	// DisplayName: Nova Barrel
-	/* Tooltip:
+	DisplayName: Ствол "Нова"
+	Tooltip:
 		'''
-		SHPC Module · Barrel Slot
-		An overcharged plasma muzzle detonates a micro-pulse where each beam lands
-		The price is wider spread, weaker per-shot impact and heavier mana draw
-		''' */
+		Модуль SHPC · Слот ствола
+		Перегруженное плазменное дуло заставляет каждый луч при попадании вызывать микроимпульсный взрыв.
+		Это достигается ценой снижения дульной стабильности, ослабления урона каждого луча и повышенного расхода маны.
+		'''
 }
 
 PrismOpticModule: {
-	// DisplayName: Prism Optic
-	/* Tooltip:
+	DisplayName: Призматический прицел
+	Tooltip:
 		'''
-		SHPC Module · Optic Slot
-		A phase prism at the end of the optical path forks each beam into two splinters on expiration
-		Primary beams travel a touch shorter in exchange for a sharper crit window
-		''' */
+		Модуль SHPC · Слот прицела
+		Фазовая призма на конце оптического пути разделяет луч на два побочных.
+		Дальность полета основного луча немного сокращается, но появляется дополнительное окно для точных критических попаданий.
+		'''
 }
 
 TeslaCoreModule: {
-	// DisplayName: Tesla Core
-	/* Tooltip:
+	DisplayName: Ядро Теслы
+	Tooltip:
 		'''
-		SHPC Module · Power Slot
-		High-voltage arcing lets struck beams leap to the nearest foe
-		Each chained node inherits the on-hit behaviors, at a steeper mana cost
-		''' */
+		Модуль SHPC · Слот энергии
+		Высоковольтная дуга заставляет луч после попадания перескакивать на ближайшего врага.
+		Каждый узел в цепи наследует эффекты попадания, но расход маны возрастает пропорционально.
+		'''
 }
 
 RecoilStockModule: {
-	// DisplayName: Recoil Stock
-	/* Tooltip:
+	DisplayName: Реактивный приклад
+	Tooltip:
 		'''
-		SHPC Module · Stock Slot
-		An overload buffer converts orb detonations into kinetic propellant for the wielder
-		Beam range is extended in tandem; the trigger feels a touch sluggish
-		''' */
+		Модуль SHPC · Слот приклада
+		Амортизатор перегрузки преобразует ударную волну от взрыва энергосферы в кинетическую энергию, отталкивающую игрока.
+		Дальность полета луча также увеличивается, но темп стрельбы слегка замедляется.
+		'''
 }
 
 SwarmGripModule: {
-	// DisplayName: Swarm Grip
-	/* Tooltip:
+	DisplayName: Рукоять "Рой"
+	Tooltip:
 		'''
-		SHPC Module · Grip Slot
-		A neural-mesh grip releases a swarm of strongly homing micro-orbs the moment the orb detonates
-		Orb velocity dips and mana draw climbs as compensation
-		''' */
+		Модуль SHPC · Слот рукояти
+		Нейросетевая рукоять выпускает несколько самонаводящихся мини-сфер в момент взрыва энергосферы.
+		Начальная скорость энергосферы и расход маны приносятся в жертву этому эффекту.
+		'''
 }
 
 GravityFrameModule: {
-	// DisplayName: Gravity Frame
-	/* Tooltip:
+	DisplayName: Гравитационная ствольная коробка
+	Tooltip:
 		'''
-		SHPC Module · Frame Slot
-		A miniature singularity ring turns the energy orb into a gravitic well
-		It pulls nearby foes toward its core while charging and the detonation radius is greatly enlarged
-		The precision chamber makes charging feel slightly heavier
-		''' */
+		Модуль SHPC · Слот ствольной коробки
+		Микросингулярное кольцо превращает энергосферу в притягивающее устройство.
+		Во время зарядки она непрерывно стягивает ближайших врагов к центру сферы, а радиус взрыва значительно увеличивается.
+		Однако сложная конструкция немного замедляет ритм зарядки.
+		'''
 }
 
 MimicPerchedAuxBrain: {
-	// DisplayName: Mimic Perched Aux Brain
-	// Tooltip: ""
+	DisplayName: Мимикрирующий вспомогательный мозг
+	Tooltip:
+		'''
+		Разделяет носителя на четыре иллюзии, блуждающие вокруг него.
+		При получении удара настоящее тело, скрытое среди иллюзий, вызовет замешательство, станет невосприимчивым к этой атаке и избежит урона.
+		Одновременно с этим иллюзии бросятся на атакующего и взорвутся, нанося урон, зависящий от базовой атаки врага.
+		"Хаос, свирепость, злобные взгляды... но всё это прямо у тебя на затылке."
+		'''
 }

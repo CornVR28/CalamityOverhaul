@@ -1,7 +1,7 @@
-﻿ItemFilterUI: {
+ItemFilterUI: {
 	HintText: ЛКМ, чтобы добавить предмет
 	HintText2: ЛКМ, чтобы убрать предмет
-	CloseHint: "Нажмите [ESC] или [ПКМ], чтобы закрыть"
+	CloseHint: Нажмите [ESC] или [ПКМ], чтобы закрыть
 }
 
 LegendUpgradeConfirmUI: {
@@ -13,7 +13,7 @@ LegendUpgradeConfirmUI: {
 		'''
 	ConfirmText: Подтвердить улучшение
 	CancelText: Отмена
-	Success: "Оружие [ITEM] улучшено до уровня [LEVEL]"
+	Success: Оружие [ITEM] улучшено до уровня [LEVEL]
 }
 
 QuestTracker: {

@@ -1,4 +1,4 @@
-HalibutText: {
+﻿HalibutText: {
 	FishByStudied:
 		'''
 		[i:CalamityMod/HalibutCannon]:
@@ -233,275 +233,275 @@ MuraText: {
 }
 
 HalibutTrialQuestLine: {
-	// QuestCategory: Halibut Legend
-	// TrackerWaiting: Target is absent, awaiting summons...
-	// TrackerFighting: "{0}: {1:0%}"
-	// Trial_0: Appetizer
-	// Trial_1: Uninvited Eye
-	// Trial_2: Jungle Visit
-	// Trial_3: Rest and Departure
-	// Trial_4: Steel Tide
-	// Trial_5: Clumsy Replica
-	// Trial_6: Batteries for Ruins
-	// Trial_7: Dark Side of the Moon
-	// Trial_8: Cold Shower
-	// Trial_9: Unyielding Wraith
-	// Trial_10: God Slayer
-	// Trial_11: Heating Up
-	// Trial_12: Pinnacle of Creation
-	// Trial_13: Back to the Sea
+	QuestCategory: Легенда о Палтусе
+	TrackerWaiting: Цель отсутствует, ожидание призыва...
+	TrackerFighting: "{0}: {1:0%}"
+	Trial_0: Закуска
+	Trial_1: Незваное око
+	Trial_2: Визит в джунгли
+	Trial_3: Покой и отправление
+	Trial_4: Стальной прилив
+	Trial_5: Жалкая подделка
+	Trial_6: Батарейки для руин
+	Trial_7: Обратная сторона луны
+	Trial_8: Холодный душ
+	Trial_9: Непокорный фантом
+	Trial_10: Убийца богов
+	Trial_11: Градус повышается
+	Trial_12: Вершина творения
+	Trial_13: Возвращение в море
 }
 
 MurasamaTrialQuestLine: {
-	// QuestCategory: Demon Blade Murasama · Trials
-	// TrackerWaiting: Target is absent, awaiting summons...
-	// TrackerFighting: "{0}: {1:0%}"
-	// Trial_0: Desert Phantom
-	// Trial_1: Sand Sea Hunt
-	// Trial_2: Invader
-	// Trial_3: Corruption Purge
-	// Trial_4: Parasitic Threat
-	// Trial_5: Gelatinous Defiler
-	// Trial_6: Dungeon Breach
-	// Trial_7: Path to the Underworld
-	// Trial_8: Tundra Shackles
-	// Trial_9: Abyssal Cleansing
-	// Trial_10: Brimstone Purging Flame
-	// Trial_11: Steel Gears
-	// Trial_12: Twin Eye Annihilation
-	// Trial_13: Mechanical King Skull
-	// Trial_14: Calamity Shadow Operation
-	// Trial_15: Jungle Blossom
-	// Trial_16: Petrified Frontline
-	// Trial_17: Plague Eradication
-	// Trial_18: Golem Breaker
-	// Trial_19: Astral Termination
-	// Trial_20: Lunar Fall
-	// Trial_21: Phantom Sanction
-	// Trial_22: Wraith Exorcism
-	// Trial_23: God-Slaying Serpent
-	// Trial_24: Jungle Flame
-	// Trial_25: Core Termination
-	// Trial_26: Chaos Judgment
-	// Trial_27: Primordial Return
-	// TrialSummary_0: Prove yourself to me, recruit.\nThat slimy blue blob is a good place to start.\nHandle it.
-	// TrialSummary_1: The siren remnants beneath the sand sea still roam.\nTrack it down and end it.
-	// TrialSummary_2: The moon hangs high in the night. Let's go burst that giant eyeball flying around up there, and make that false god permanently blind.
-	/* TrialSummary_3:
+	QuestCategory: Мурамаса: Испытания
+	TrackerWaiting: Цель отсутствует, ожидание призыва...
+	TrackerFighting: "{0}: {1:0%}"
+	Trial_0: Тень в песках
+	Trial_1: Охота в песчаном море
+	Trial_2: Вторженец
+	Trial_3: Очищение от порчи
+	Trial_4: Паразитическая угроза
+	Trial_5: Бог скверны из геля
+	Trial_6: Прорыв Темницы
+	Trial_7: Путь в Преисподнюю
+	Trial_8: Оковы ледяной пустоши
+	Trial_9: Зачистка Бездны
+	Trial_10: Очищающее серное пламя
+	Trial_11: Стальные шестерни
+	Trial_12: Уничтожение двух очей
+	Trial_13: Механический череп-владыка
+	Trial_14: Операция «Тень Бедствия»
+	Trial_15: Цветок джунглей
+	Trial_16: Окаменевший фронт
+	Trial_17: Искоренение чумы
+	Trial_18: Пробитие защиты Голема
+	Trial_19: Конец звездного сектора
+	Trial_20: Падение Луны
+	Trial_21: Фантомное правосудие
+	Trial_22: Изгнание духов
+	Trial_23: Змей, убивающий богов
+	Trial_24: Пламя джунглей
+	Trial_25: Уничтожение ядра
+	Trial_26: Суд над Хаосом
+	Trial_27: Возвращение к истокам
+	TrialSummary_0: Новобранец, докажи мне свою ценность.\nТот скользкий синий толстяк — отличная отправная точка.\nПрикончи его.
+	TrialSummary_1: Под песчаным морем всё ещё бродят остатки пустынных тварей.\nВыследи и прикончи их.
+	TrialSummary_2: Ночная луна в зените. Давай проткнем этот огромный глаз, что мечется в небесах, и оставим этого лжебога слепым навсегда.
+	TrialSummary_3:
 		'''
-		The remnants of false gods taint the lands of Terra. Go liberate the corrupted continents.
-		Hack that false god's brain to pieces, chop up that purple worm!
-		I want to see your blade dance through xenos flesh!
-		''' */
-	// TrialSummary_4: The corrupted earth still throbs like a heart. The flesh parasites are still active; the corrupted tumors are still thinking. Go banish them entirely!
-	// TrialSummary_5: Do you feel it? That foul corruption reeking of gel.\nPurify this filthy aggregate completely.
-	/* TrialSummary_6:
+		Останки лжебогов оскверняют земли Террарии. Иди и освободи пораженные порчей континенты.
+		Раскромсай этот мозг лжебога и разруби на куски пурпурного червя!
+		Я хочу видеть, как твой клинок танцует в плоти ксеносов!
 		'''
-		The curse at the dungeon entrance has loosened. I feel psychic energy stirring in its depths, mixed with screams, wails, whispers...
-		Shatter that giant skull.
-		''' */
-	// TrialSummary_7: Step into the Underworld. That wall of flesh spanning the lava—that is our door to the next era.\nTear it apart.
-	// TrialSummary_8: In the bitter cold of the northern reaches lies a sealed creation of ice and snow.\nCrush it before it can fully unseal.
-	// TrialSummary_9: The outcast of the Sulphurous Sea blocks our quest for the treasures of the abyss. Go end its devouring and wandering.
-	// TrialSummary_10: The heretical fire of that Brimstone Emissary deep in the lava is an eyesore. Go extinguish it.
-	// TrialSummary_11: A massive steel worm stands in the way of our crusade. Chop it into pieces.
-	// TrialSummary_12: Those mechanical eyes look down on us—pierce them with your blade.
-	// TrialSummary_13: The skeleton lord donned steel armor thinking it could stop us? Shatter that metal skull.
-	// TrialSummary_14: That witch who threw herself into chaos has a deformed clone sister. Kill that xeno, and offer its blood and fire to the blade.
-	// TrialSummary_15: The mad plant deep in the jungle has gone berserk. Use your blade to end this out-of-control growth.
-	// TrialSummary_16: The foolish Lihzahrd race only knows how to worship these stubborn stones. Let's smash it to dust and destroy their faith.
-	// TrialSummary_17: Amidst the steam and toxic gas is a bee-machine hybrid. Shoot that filthy thing down.
-	// TrialSummary_18: That golem of destruction is rampaging across the land. Pulverize its steel body completely.
-	// TrialSummary_19: The astral worms are gathering cosmic energy here. End it, so this star field can be ours.
-	/* TrialSummary_20:
+	TrialSummary_4: Искаженные земли всё ещё пульсируют, словно сердце. Паразиты из плоти продолжают шевелиться, а гнилостные опухоли всё ещё мыслят. Иди и изгони их окончательно!
+	TrialSummary_5: Чувствуешь? Это зловонное разложение, сочащееся гелем.\nПолностью очисти этот омерзительный сгусток.
+	TrialSummary_6:
 		'''
-		That false god hiding on the dark side of the moon is nothing but a flawed patchwork.
-		Go sever its tentacles, rip out its heart, and drink deep of its blood.
-		''' */
-	// TrialSummary_21: A pathetic deity lingering by siphoning solar thermal energy. Its heretical fire must be completely extinguished.
-	// TrialSummary_22: The aggregate of undead deep in the dungeon. Let those restless souls finally be silenced.
-	// TrialSummary_23: That arrogant cosmic serpent is stirring behind the veil of the world. End his ambitions.
-	/* TrialSummary_24:
+		Проклятие у входа в Темницу ослабло. Я чувствую, как псионная энергия шевелится в глубинах, смешиваясь с воплями, стонами и шепотом...
+		Раздроби этот огромный череп.
 		'''
-		The Jungle Dragon, the last auric draconic descendant of Terra. It is vastly different from other xenos and deserves our respect.
-		However, right now we need it to die once more to strip it of its Auric Soul.
-		These materials will be used to forge an incredibly superior set of gear.
-		''' */
-	/* TrialSummary_25:
+	TrialSummary_7: Спустись в Преисподнюю. Та печать из плоти, нависшая над лавой — это наша дверь в новую эру.\nРазорви её на части.
+	TrialSummary_8: В суровых северных землях сковано ледяное создание.\nРазбей его вдребезги, прежде чем оно окончательно освободится.
+	TrialSummary_9: Отродье Серного моря мешает нам искать сокровища Бездны. Положи конец его блужданиям и пожиранию.
+	TrialSummary_10: Еретическое пламя серного посланника в глубинах лавы мозолит глаза. Иди и потуши его.
+	TrialSummary_11: Гигантский стальный червь преградил нам путь. Поруби его на куски.
+	TrialSummary_12: Эти механические глаза взирают на нас свысока — пронзи их своим клинком.
+	TrialSummary_13: Повелитель скелетов нацепил стальную броню в надежде остановить нас? Раздроби этот металлический череп.
+	TrialSummary_14: У той ведьмы, что отдалась Хаосу, есть уродливая сестра-клон. Убей эту мерзость, освяти клинок кровью и пламенем.
+	TrialSummary_15: В глубинах джунглей буйствует обезумевшее растение. Останови этот неконтролируемый рост лезвием меча.
+	TrialSummary_16: Глупые ящеры верят лишь в свои упрямые камни. Давай сотрем его в порошок и разрушим их веру.
+	TrialSummary_17: Среди пара и ядовитого газа скрывается механический пчелиный гибрид. Сбей эту грязную жестянку на землю.
+	TrialSummary_18: Этот голем разрушения идет напролом по земле. Преврати его стальной корпус в груду металлолома.
+	TrialSummary_19: Звездный червь стягивает сюда космическую энергию. Прикончи его, чтобы этот звездный сектор принадлежал нам.
+	TrialSummary_20:
 		'''
-		That heretic of the mechanical church firmly believes his Exo Mechs surpass the power of gods.
-		Such a belief is utterly absurd. Let us return those Titans to their natural state—a pile of scrap metal.
-		''' */
-	/* TrialSummary_26:
+		Тот лжебог, что прячется на обратной стороне Луны, всего лишь жалкая лоскутная поделка.
+		Отруби ему щупальца, вырви сердце и испей его крови.
 		'''
-		A witch who once possessed outstanding psychic talent, who should have been a great asset in defending Terra, but who has long since lost herself to chaos.
-		We can only banish her. Plunge the blade into her chest, and let the fire of loyalty burn away her rotting soul.
-		''' */
-	/* TrialSummary_27:
+	TrialSummary_21: Жалкое божество, цепляющееся за жизнь за счет поглощения тепла звезд. Его еретическое пламя должно быть потушено навсегда.
+	TrialSummary_22: Сгусток нежити из глубин Темницы. Заставь эти беспокойные души окончательно замолкнуть.
+	TrialSummary_23: Этот надменный космический змей замышляет неладное за кулисами мира. Положи конец его амбициям.
+	TrialSummary_24:
 		'''
-		Our path of conquest is already unstoppable. Shatter the armor of the demonic dragon beneath the black abyss.
-		Use the Terminus and engage in the final decisive battle with the xeno.
-		''' */
+		Дракон Джунглей — единственный оставшийся потомок золотых драконов Террарии. В отличие от других ксеносов, он заслуживает нашего уважения.
+		Однако сейчас мы должны заставить его вновь принять смерть, чтобы забрать его Аурические души.
+		Эти материалы пойдут на создание непревзойденного снаряжения.
+		'''
+	TrialSummary_25:
+		'''
+		Этот еретик из Механической Церкви слепо верит, что его Звездные Титаны превосходят силу богов.
+		Эта вера в высшей степени абсурдна. Давай вернем этих титанов в их естественное состояние — в кучу металлолома.
+		'''
+	TrialSummary_26:
+		'''
+		Ведьма, когда-то обладавшая выдающимся псионным талантом, могла бы стать великой защитницей Террарии, но давно заблудилась во тьме Хаоса.
+		Нам остается лишь изгнать её. Вонзи клинок ей в грудь, и пусть пламя лояльности выжжет её сгнившую душу.
+		'''
+	TrialSummary_27:
+		'''
+		Наш путь завоеваний уже не остановить. Разбей броню демонического змея, скрывающегося в черной Бездне.
+		Используй Камень Завершения и вступи в финальную битву с этой тварью.
+		'''
 }
 
 SHPCTrialQuestLine: {
-	// QuestCategory: SHPC · Trials
-	// TrackerWaiting: Target is absent, awaiting summons...
-	// TrackerFighting: "{0}: {1:0%}"
-	// Trial_0: Ocular Autopsy
-	// Trial_1: Corruption Sample
-	// Trial_2: Source of Parasitism
-	// Trial_3: God of Gel
-	// Trial_4: Seal Breakthrough
-	// Trial_5: Deep Sea Contamination
-	// Trial_6: Brimstone Sampling
-	// Trial_7: Mechanical Worm
-	// Trial_8: Twin Eye Dismantlement
-	// Trial_9: Steel Skull
-	// Trial_10: Calamity Clone
-	// Trial_11: Ecological Survey
-	// Trial_12: Ancient Tech
-	// Trial_13: Interstellar Coordinates
-	// Trial_14: Secrets of the Lunar Dark Side
-	// Trial_15: Core Expedition
-	// Trial_16: Wraith Observation
-	// Trial_17: Devourer of Gods
-	// Trial_18: Feather of the Draconic Descendant
-	// Trial_19: A Visit to the Creator
-	// Trial_20: Witch Audit
-	// Trial_21: Battle of Terminus
-	/* TrialSummary_0:
+	QuestCategory: SHPC: Испытания
+	TrackerWaiting: Цель отсутствует, ожидание призыва...
+	TrackerFighting: "{0}: {1:0%}"
+	Trial_0: Анатомирование глаза
+	Trial_1: Образцы порчи
+	Trial_2: Источник паразитов
+	Trial_3: Бог из геля
+	Trial_4: Прорыв печати
+	Trial_5: Загрязнение глубин
+	Trial_6: Забор образцов серного пламени
+	Trial_7: Механический червь
+	Trial_8: Разборка двух очей
+	Trial_9: Стальной череп
+	Trial_10: Клон Бедствия
+	Trial_11: Экологическая экспертиза
+	Trial_12: Древние технологии
+	Trial_13: Звездные координаты
+	Trial_14: Тайна обратной стороны Луны
+	Trial_15: Экспедиция к ядру
+	Trial_16: Наблюдение за фантомами
+	Trial_17: Пожиратель богов
+	Trial_18: Перо потомка драконов
+	Trial_19: Визит к Создателю
+	Trial_20: Аудит Ведьмы
+	Trial_21: Битва Завершения
+	TrialSummary_0:
 		'''
-		Master, the first trial target is that hovering giant eye.
-		Please defeat it. I need to collect complete data on its anti-gravity mechanisms.
-		''' */
-	/* TrialSummary_1:
+		Хозяин, наша первая цель — этот левитирующий гигантский глаз.
+		Пожалуйста, победите его. Мне нужно собрать полные данные о его механизме антигравитации.
 		'''
-		The giant worms in the corrupted earth and the fleshy brains are high-quality biological samples.
-		Master, please sever their core tissues. I must analyze the propagation mechanism of this ecological erosion.
-		''' */
-	/* TrialSummary_2:
+	TrialSummary_1:
 		'''
-		The brain of corruption and the fleshy aggregate are infectious sources with a hive mind.
-		Master, please eliminate them. Their coordinated parasitic patterns have been added to the collection list.
-		''' */
-	/* TrialSummary_3:
+		Гигантский червь и плотский мозг из пораженных земель — отличные биохимические образцы.
+		Хозяин, пожалуйста, отсеките их центральные ткани. Я хочу проанализировать механизм распространения этой экологической эрозии.
 		'''
-		The gelatinous aggregate—a god-level target with no central nervous system or fixed form.
-		Master, please shatter its core. I will properly record this chaotic architecture.
-		''' */
-	/* TrialSummary_4:
+	TrialSummary_2:
 		'''
-		A wall of flesh spans the depths of the Underworld; it is a seal from a bygone era.
-		Master, please blast through it. This is a necessary breakthrough towards a new era.
-		''' */
-	/* TrialSummary_5:
+		Мозг и сгусток плоти являются источниками инфекции с коллективным разумом.
+		Хозяин, пожалуйста, устраните их. Их модель симбиотического паразитизма уже добавлена в список для сбора данных.
 		'''
-		The giant worm of the Sulphurous Sea has surfaced.
-		Master, please dismantle its devouring organs. I need to confirm how this pollution source operates.
-		''' */
-	/* TrialSummary_6:
+	TrialSummary_3:
 		'''
-		The Brimstone Emissary deep within the lava is diffusing a high-heat reaction.
-		Master, please extinguish its core flame. I will simultaneously record its energy conversion efficiency.
-		''' */
-	/* TrialSummary_7:
+		Гелевый агрегат — цель божественного уровня без единого центра и фиксированной формы.
+		Хозяин, пожалуйста, разбейте его ядро. Я тщательно задокументирую эту хаотичную архитектуру.
 		'''
-		The first mechanical target is a giant steel worm.
-		Master, please slice it into recyclable scrap. Try to keep the drive structure intact.
-		''' */
-	/* TrialSummary_8:
+	TrialSummary_4:
 		'''
-		The second mechanical target is that pair of mirrored eyeballs. Coordinated combat is their primary feature.
-		Master, please dismantle their weapon modules one by one, and be mindful of their laser's scorch radius.
-		''' */
-	/* TrialSummary_9:
+		В глубинах Преисподней пролегает стена из плоти. Это печать прошлой эпохи.
+		Хозяин, пожалуйста, пробейте её огневой мощью. Это необходимый прорыв для шага в новую эру.
 		'''
-		The final mechanical target wears the skull of an old king.
-		Master, please crush it. Once this mechanical invasion protocol is shut down, I will conduct a concluding analysis.
-		''' */
-	/* TrialSummary_10:
+	TrialSummary_5:
 		'''
-		That witch's clone is roaming around. Though it's only a replica of necromancy,
-		it is sufficient to calibrate my reaction model for calamity. Master, please destroy it.
-		''' */
-	/* TrialSummary_11:
+		Гигантский червь Серного моря уже всплыл на поверхность.
+		Хозяин, пожалуйста, демонтируйте его пищеварительные органы. Мне нужно подтвердить принцип работы этого источника загрязнения.
 		'''
-		Several alluring large bulbs have bloomed underground in the jungle.
-		Master, please accompany me to see them. I need to gather some experimental data.
-		''' */
-	/* TrialSummary_12:
+	TrialSummary_6:
 		'''
-		The ancient automaton deep in the temple awaits a power-up sequence to activate.
-		Master, please take me to visit it. Reverse-engineering ancient tech might prove useful.
-		''' */
-	/* TrialSummary_13:
+		Серный посланник в глубинах лавы распространяет высокотемпературные реакции.
+		Хозяин, пожалуйста, погасите его центральное пламя. Я синхронно запишу эффективность преобразования энергии.
 		'''
-		That group of fanatical cultists at the dungeon entrance is performing some ancient ritual, attempting to block information from the heavens.
-		Master, please interrupt them. I need those hidden interstellar coordinates.
-		''' */
-	/* TrialSummary_14:
+	TrialSummary_7:
 		'''
-		The secrets of the dark side of the moon will be known to us.
-		Master, this might set certain things back on track.
-		''' */
-	/* TrialSummary_15:
+		Первая механическая цель — гигантский стальной червь.
+		Хозяин, пожалуйста, нарежьте его на перерабатываемый металлолом. Постарайтесь сохранить целостность приводных механизмов.
 		'''
-		The deity parasitic in the planet's core has noticed us.
-		Master, please go to the Underworld and take a look. Her method of utilizing thermal energy is worth recording.
-		''' */
-	/* TrialSummary_16:
+	TrialSummary_8:
 		'''
-		The wraiths of the dungeon are amalgamating into a massive symbiote.
-		Master, the hive consciousness of this ectoplasmic architecture is quite rare. Please take me to observe it.
-		''' */
-	/* TrialSummary_17:
+		Вторая механическая цель — это пара зеркальных глаз. Их главная особенность — совместные боевые действия.
+		Хозяин, пожалуйста, демонтируйте их боевые модули по одному. Остерегайтесь радиуса поражения лазерами.
 		'''
-		It is not a carbon-based lifeform; it can tear the dimensional membrane with its physical body alone.
-		It devours gods, but we are not gods. Defeat it, and let this be recorded in the logs.
-		''' */
-	/* TrialSummary_18:
+	TrialSummary_9:
 		'''
-		The only surviving draconic descendant in the world; its very existence is a miracle.
-		Master, please take me to see it. I need to collect a sample of its feathers.
-		''' */
-	/* TrialSummary_19:
+		Последняя механическая цель носит череп старого короля.
+		Хозяин, пожалуйста, раздробите его. После отключения этого протокола механического вторжения я проведу финальный анализ.
 		'''
-		It is time to meet my former creator.
-		Master, please retrieve the control core of the Exo Mechs.
-		''' */
-	/* TrialSummary_20:
+	TrialSummary_10:
 		'''
-		That witch has been conducting chaotic experiments. We have enough data.
-		Master, please terminate her operations. This farce must end.
-		''' */
-	/* TrialSummary_21:
+		Клон той Ведьмы бродит поблизости. Хотя это всего лишь некромантская подделка,
+		её будет достаточно для калибровки моей модели реагирования на Бедствия. Хозяин, пожалуйста, уничтожьте её.
 		'''
-		Master, the enemies you previously defeated have formed a coalition and are preparing a final assault.
-		Please be prepared. I will monitor the battlefield throughout and assist you in settling this once and for all.
-		''' */
+	TrialSummary_11:
+		'''
+		В подземельях джунглей распустились несколько демонических бутонов.
+		Хозяин, пожалуйста, сопроводите меня туда. Мне нужно собрать некоторые экспериментальные данные.
+		'''
+	TrialSummary_12:
+		'''
+		Древний робот в глубинах Храма ожидает зарядки и активации.
+		Хозяин, пожалуйста, отведите меня к нему. Реверс-инжиниринг древних технологий может оказаться полезным.
+		'''
+	TrialSummary_13:
+		'''
+		Группа фанатиков у входа в Темницу проводит древний ритуал, пытаясь заблокировать инопланетные сигналы.
+		Хозяин, пожалуйста, прервите их. Мне нужны скрытые ими звездные координаты.
+		'''
+	TrialSummary_14:
+		'''
+		Тайна обратной стороны Луны скоро станет нам известна.
+		Хозяин, возможно, это поможет вернуть некоторые вещи в правильное русло.
+		'''
+	TrialSummary_15:
+		'''
+		Божество, паразитирующее в ядре планеты, обратило на нас внимание.
+		Хозяин, пожалуйста, спуститесь в Преисподнюю. Её метод использования тепловой энергии заслуживает документирования.
+		'''
+	TrialSummary_16:
+		'''
+		Призраки Темницы сливаются воедино, образуя огромный симбиот.
+		Хозяин, коллективный разум такой эктоплазменной архитектуры — большая редкость. Пожалуйста, отведите меня для наблюдения.
+		'''
+	TrialSummary_17:
+		'''
+		Оно не является углеродной формой жизни и способно разрывать ткань пространства одним лишь телом.
+		Оно пожирает богов, но мы не боги. Победите его, чтобы этот бой вошел в протоколы.
+		'''
+	TrialSummary_18:
+		'''
+		Единственный выживший потомок драконов. Само его существование — чудо.
+		Хозяин, пожалуйста, отведите меня к нему. Мне нужно взять образец его перьев.
+		'''
+	TrialSummary_19:
+		'''
+		Пришло время встретиться с моим бывшим Создателем.
+		Хозяин, пожалуйста, извлеките ядра управления Звездных Титанов.
+		'''
+	TrialSummary_20:
+		'''
+		Эта Ведьма слишком долго проводила свои эксперименты с Хаосом. Данных собрано предостаточно.
+		Хозяин, пожалуйста, пресеките её действия. Этому фарсу пора положить конец.
+		'''
+	TrialSummary_21:
+		'''
+		Хозяин, поверженные ранее враги объединились в коалицию и готовятся к генеральному наступлению.
+		Пожалуйста, подготовьтесь. Я буду непрерывно мониторить поле боя, чтобы помочь вам покончить с ними за один раз.
+		'''
 }
 
 SHPCModuleStat: {
-	// AttackSpeed: "{0}% ATK SPEED"
-	// Damage: "{0}% DAMAGE"
-	// Spread: "{0}% SPREAD"
-	// BeamSpeed: "{0}% BEAM VELOCITY"
-	// Homing: "{0}% HOMING"
-	// MergedDamage: "{0}% MERGED DMG"
-	// ManaCost: "{0}% MANA COST"
-	// ChargeTime: "{0}% CHARGE TIME"
-	// OrbSpeed: "{0}% ORB SPEED"
-	// BeamLife: "{0}% BEAM RANGE"
-	// ExplosionRadius: "{0}% BLAST RADIUS"
-	// BeamCount: "{0} BEAM(S) / VOLLEY"
-	// Crit: "{0}% CRIT"
-	// Pierce: "{0} EXTRA PIERCE"
-	// Chain: "{0} CHAIN HOPS"
-	// Split: "{0} END-OF-LIFE SPLIT BEAMS"
-	// Minions: "{0} DETONATION SEEKER ORBS"
-	// MergeBeams: +MERGE 3 BEAMS INTO 1
-	// BeamExplodeOnHit: +BEAMS DETONATE A MICRO-PULSE ON HIT
-	// OrbDrainAura: +ORB SIPHONS NEARBY FOES WHILE CHARGING
-	// OrbExplosionPropels: +ORB DETONATION ROCKETS THE WIELDER AWAY
+	AttackSpeed: "{0}% Скорость атаки"
+	Damage: "{0}% Урон"
+	Spread: "{0}% Разброс"
+	BeamSpeed: "{0}% Скорость луча"
+	Homing: "{0}% Самонаведение"
+	MergedDamage: "{0}% Комбинированный урон"
+	ManaCost: "{0}% Расход маны"
+	ChargeTime: "{0}% Время заряда"
+	OrbSpeed: "{0}% Скорость энергосферы"
+	BeamLife: "{0}% Дальность полета луча"
+	ExplosionRadius: "{0}% Радиус взрыва"
+	BeamCount: "{0} лучей/залп"
+	Crit: "{0}% Крит. шанс"
+	Pierce: "{0} Доп. пробивание"
+	Chain: "{0} Цепных отскоков"
+	Split: "{0} Разделяющихся при исчезновении лучей"
+	Minions: "{0} Взрывных самонаводящихся мини-сфер"
+	MergeBeams: +3 луча объединяются в 1
+	BeamExplodeOnHit: +При попадании вызывает микроимпульсный взрыв
+	OrbDrainAura: +При зарядке непрерывно притягивает ближайших врагов
+	OrbExplosionPropels: +Взрыв энергосферы отталкивает игрока
 }
