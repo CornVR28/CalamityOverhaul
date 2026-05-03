@@ -4,6 +4,7 @@ using InnoVault.PRT;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
+using Terraria.ModLoader;
 
 namespace CalamityOverhaul.Content.HackTimes.Protocols
 {
@@ -24,31 +25,58 @@ namespace CalamityOverhaul.Content.HackTimes.Protocols
             SupportedTargets = HackTargetKind.Tile;
         }
 
+        //累计单个容器中物品的最高镐力
+        private static void AccumulatePickFromArray(Item[] items, ref int max) {
+            if (items == null) return;
+            for (int i = 0; i < items.Length; i++) {
+                Item it = items[i];
+                if (it != null && !it.IsAir && it.pick > max) {
+                    max = it.pick;
+                }
+            }
+        }
+
         //取玩家背包中所有物品的最高镐力，再与协议默认镐力取大值
         //这样适配所有原版及模组工具，因为它们都会把镐力写入Item.pick
         private static int GetEffectivePickPower(Player player) {
             int max = BasePickPower;
             if (player == null) return max;
-            //主背包
-            for (int i = 0; i < player.inventory.Length; i++) {
-                Item it = player.inventory[i];
-                if (it != null && !it.IsAir && it.pick > max) {
-                    max = it.pick;
-                }
-            }
-            //虚空袋等扩展容器：tModLoader提供GetAllInventorySlots
-            if (max < int.MaxValue) {
-                foreach (Item it in player.GetAllInventorySlots()) {
-                    if (it != null && !it.IsAir && it.pick > max) {
-                        max = it.pick;
-                    }
-                }
-            }
+            AccumulatePickFromArray(player.inventory, ref max);
+            //同时检查存钱罐等容器，便于把高级镐放在存款里也能识别
+            AccumulatePickFromArray(player.bank?.item, ref max);
+            AccumulatePickFromArray(player.bank2?.item, ref max);
+            AccumulatePickFromArray(player.bank3?.item, ref max);
+            AccumulatePickFromArray(player.bank4?.item, ref max);
             return max;
         }
 
+        //获取目标物块的镐力门槛
+        //模组方块通过ModTile.MinPick直接读取；原版方块沿用硬编码表，与Player.PickTile一致
+        private static int GetTileMinPick(int x, int y) {
+            Tile tile = Main.tile[x, y];
+            ushort type = tile.TileType;
+            ModTile modTile = TileLoader.GetTile(type);
+            if (modTile != null) {
+                return modTile.MinPick;
+            }
+            return GetVanillaMinPick(type);
+        }
+
+        //原版方块的镐力门槛硬编码表，复刻Player.PickTile中的判断
+        private static int GetVanillaMinPick(int type) {
+            if (type == TileID.Meteorite) return 50;
+            if (type == TileID.Demonite || type == TileID.Crimtane) return 55;
+            if (type == TileID.Ebonstone || type == TileID.Crimstone
+                || type == TileID.Pearlstone || type == TileID.Hellstone) return 65;
+            if (type == TileID.Cobalt || type == TileID.Palladium) return 100;
+            if (type == TileID.Mythril || type == TileID.Orichalcum) return 110;
+            if (type == TileID.Adamantite || type == TileID.Titanium) return 150;
+            if (type == TileID.Chlorophyte) return 200;
+            if (type == TileID.LihzahrdBrick) return 210;
+            return 0;
+        }
+
         //判断单格瓦砾是否能被当前镐力击碎
-        //同时遵循模组的MinPick设定，因为tModLoader会把它写入Main.tileMinPick
         private static bool CanBreakTileWithPickPower(int x, int y, int pickPower) {
             if (x < 0 || x >= Main.maxTilesX || y < 0 || y >= Main.maxTilesY) return false;
             Tile tile = Main.tile[x, y];
@@ -60,9 +88,9 @@ namespace CalamityOverhaul.Content.HackTimes.Protocols
             //锤系方块（如平台、灯笼链等）不算镐子可破，跳过避免误炸不该炸的设施
             if (Main.tileHammer[type]) return false;
             //部分基础设施保护：宝箱、出生点等
-            if (Main.tileContainer[type] || Main.tileDungeon[type] && !NPC.downedBoss3) return false;
+            if (Main.tileContainer[type] || (Main.tileDungeon[type] && !NPC.downedBoss3)) return false;
             //核心判断：镐力是否达到该物块要求
-            return pickPower >= Main.tileMinPick[type] && WorldGen.CanKillTile(x, y);
+            return pickPower >= GetTileMinPick(x, y) && WorldGen.CanKillTile(x, y);
         }
 
         public override bool CanApplyTo(IHackTarget target) {
@@ -75,7 +103,7 @@ namespace CalamityOverhaul.Content.HackTimes.Protocols
             }
             //目标本体的镐力门槛也必须满足，否则没有意义
             int pickPower = GetEffectivePickPower(Main.LocalPlayer);
-            return pickPower >= Main.tileMinPick[tile.TileType];
+            return pickPower >= GetTileMinPick(s.TileCoordX, s.TileCoordY);
         }
 
         public override bool OnApply(IHackTarget target, Player caster) {
