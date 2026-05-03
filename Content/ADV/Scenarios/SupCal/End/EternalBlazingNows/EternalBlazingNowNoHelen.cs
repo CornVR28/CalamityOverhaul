@@ -71,7 +71,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.End.EternalBlazingNows
             Add(Rolename1.Value, Line7.Value);
             Add(Rolename1.Value + supCalDespise, Line8.Value);
             Add(Rolename1.Value + supCalDespise, Line9.Value);
-            Add(Rolename1.Value + supCalDespise, Line10.Value, Screenjittering);
+            Add(Rolename1.Value + supCalDespise, Line10.Value);
         }
 
         protected override void OnScenarioStart() {
@@ -94,12 +94,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.End.EternalBlazingNows
             }
             //不在这里关闭粒子效果，让它延续到告别场景
             WitchFarewell.Spwan = true;
-        }
-
-        private void Screenjittering() {
-            PunchCameraModifier modifier = new PunchCameraModifier(Main.LocalPlayer.Center
-                , (Main.rand.NextFloat() * ((float)Math.PI * 2f)).ToRotationVector2(), 30f, 6f, 20, 1000f, FullName);
-            Main.instance.CameraModifiers.Add(modifier);
         }
     }
 }
