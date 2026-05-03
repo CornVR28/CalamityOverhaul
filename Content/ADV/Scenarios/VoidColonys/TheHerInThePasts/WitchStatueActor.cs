@@ -73,9 +73,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.TheHerInThePasts
         }
 
         public override void OnSpawn(params object[] args) {
-            Texture2D tex = ADVAsset.WitchStatue;
-            Width = tex?.Width ?? 120;
-            Height = tex?.Height ?? 260;
+            Width = 120;
+            Height = 260;
             DrawLayer = ActorDrawLayer.AfterTiles;
             DrawExtendMode = (int)(DomainMaxRadius * 1.4f);
             visibility = 0f;
@@ -169,78 +168,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.TheHerInThePasts
             }
 
             //绘制雕像本体
-            DrawStatue(spriteBatch);
+            //DrawStatue(spriteBatch);
 
             return false;
-        }
-
-        private void DrawStatue(SpriteBatch spriteBatch) {
-            Texture2D tex = ADVAsset.WitchStatue;
-            if (tex == null) return;
-
-            Vector2 drawPos = Center - Main.screenPosition;
-            Vector2 origin = new(tex.Width * 0.5f, tex.Height * 0.5f);
-
-            Color baseColor = Color.White * visibility;
-            //消散阶段整体再透明化
-            if (Phase == PhaseKind.Dissolve) {
-                baseColor *= 1f - dissolveT * 0.6f;
-            }
-
-            //直接绘制整张贴图
-            spriteBatch.Draw(tex, drawPos, null, baseColor, 0f, origin, 1f, SpriteEffects.None, 0f);
-
-            //鬼域展开期间的红光叠加，突出展开气势
-            float glowT = Phase == PhaseKind.Dissolve ? 0f : domainT;
-            if (glowT > 0.01f) {
-                Color glow = new Color(220, 40, 40, 0) * glowT * 0.45f * visibility;
-                spriteBatch.Draw(tex, drawPos, null, glow, 0f, origin, 1.02f, SpriteEffects.None, 0f);
-            }
-
-            //像素剥落
-            if (Phase == PhaseKind.Dissolve && dissolveT > 0.02f) {
-                DrawPixelDissolve(spriteBatch, drawPos, origin, tex);
-            }
-        }
-
-        private void DrawPixelDissolve(SpriteBatch spriteBatch, Vector2 drawPos, Vector2 origin, Texture2D tex) {
-            Texture2D pixel = CWRAsset.Placeholder_White?.Value ?? TextureAssets.MagicPixel.Value;
-            if (pixel == null) return;
-
-            int blockSize = 6;
-            int cols = tex.Width / blockSize;
-            int rows = tex.Height / blockSize;
-            //当前该被剥落覆盖的百分比，从上往下推进
-            float topThreshold = dissolveT;
-            //随机种子固定以保证每帧一致
-            int seed = WhoAmI * 7919;
-
-            for (int y = 0; y < rows; y++) {
-                float rowProgress = y / (float)rows;
-                //下面的格子更晚剥落
-                float localT = MathHelper.Clamp((topThreshold - rowProgress) * 2f, 0f, 1f);
-                if (localT <= 0f) continue;
-                for (int x = 0; x < cols; x++) {
-                    //每个格子用确定性随机判定剥落
-                    int hash = unchecked(seed + x * 73856093 + y * 19349663);
-                    float rnd = (hash & 0xFFFF) / 65535f;
-                    if (rnd > localT) continue;
-
-                    Vector2 pos = drawPos - origin + new Vector2(x * blockSize, y * blockSize);
-                    //被剥落格子，黑色覆盖
-                    Color cover = Color.Black * visibility * MathHelper.Clamp(localT * 1.3f, 0f, 1f);
-                    spriteBatch.Draw(pixel, pos, null, cover, 0f, Vector2.Zero, blockSize, SpriteEffects.None, 0f);
-
-                    //向上飞散的像素残片
-                    if (rnd < localT * 0.4f) {
-                        float driftY = -MathF.Sin(phaseTimer * 0.03f + x * 0.4f) * 16f * localT;
-                        float driftX = MathF.Cos(phaseTimer * 0.02f + y * 0.3f) * 4f * localT;
-                        Vector2 shardPos = pos + new Vector2(driftX, driftY - localT * 30f);
-                        Color shardColor = Color.Lerp(new Color(180, 175, 170), new Color(80, 30, 30), localT) * visibility * (1f - localT);
-                        spriteBatch.Draw(pixel, shardPos, null, shardColor, 0f, Vector2.Zero, blockSize * 0.8f, SpriteEffects.None, 0f);
-                    }
-                }
-            }
         }
     }
 }
