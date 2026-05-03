@@ -1,4 +1,4 @@
-using CalamityOverhaul.Common;
+﻿using CalamityOverhaul.Common;
 using InnoVault.Trails;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -23,11 +23,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Banish
         private const int MaxLife = 38;
         private const int MainKeyCountMin = 14;
         private const int MainKeyCountMax = 20;
-        private const float MainPeakWidth = 110f;
+        private const float MainPeakWidth = 80f;
 
         private const int ForkKeyCountMin = 6;
         private const int ForkKeyCountMax = 10;
-        private const float ForkPeakWidth = 56f;
+        private const float ForkPeakWidth = 36f;
 
         private Vector2[] points;
         private int pointCount;
