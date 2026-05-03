@@ -1,15 +1,17 @@
 ﻿using CalamityOverhaul.Content.HackTimes;
+using InnoVault.GameSystem;
 using Terraria;
 using Terraria.ModLoader;
 
 namespace CalamityOverhaul.Content
 {
     /// <summary>
-    /// 统一时间冻结NPC拦截器，同时处理TimeFrozenTick和HackTimeFreeze两种冻结模式
+    /// 更加强大的拦截ai
     /// </summary>
-    internal class TimeFreezeNPC : GlobalNPC
+    internal class TimeFreezeOverNPC : NPCOverride
     {
-        public override bool PreAI(NPC npc) {
+        public override int TargetID => -1;
+        public override bool AI() {
             if (HackTimeFreeze.IsActive) {
                 if (!HackTimeFreeze.ShouldFreezeNPC(npc)) {
                     return true;
@@ -29,7 +31,13 @@ namespace CalamityOverhaul.Content
             }
             return true;
         }
+    }
 
+    /// <summary>
+    /// 统一时间冻结NPC拦截器，同时处理TimeFrozenTick和HackTimeFreeze两种冻结模式
+    /// </summary>
+    internal class TimeFreezeNPC : GlobalNPC
+    {
         public override bool CanHitPlayer(NPC npc, Player target, ref int cooldownSlot) {
             if (HackTimeFreeze.IsActive) {
                 return false;
