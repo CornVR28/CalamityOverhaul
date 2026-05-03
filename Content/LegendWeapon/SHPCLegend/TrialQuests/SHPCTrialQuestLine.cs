@@ -1,5 +1,6 @@
 using CalamityOverhaul.Content.ADV.EntrustManager;
 using CalamityOverhaul.Content.ADV.Scenarios.Shepel;
+using System;
 using Terraria;
 using Terraria.ID;
 using Terraria.Localization;
@@ -25,6 +26,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.TrialQuests
         #endregion
 
         private static int[][] trialTargetNpcs;
+
+        /// <summary>每条试炼独立的完成判定，与等级顺序解耦，以避免乱序击败后试炼仍不能完成的问题</summary>
+        private static Func<bool>[] trialCompletedChecks;
 
         public override void SetStaticDefaults() {
             QuestCategory = this.GetLocalization(nameof(QuestCategory), () => "SHPC·试炼");
@@ -139,6 +143,31 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.TrialQuests
             trialTargetNpcs[20] = [CWRID.NPC_SupremeCalamitas];
             //试炼21 (等级21→22): 终焉之战，无可追踪的固定NPC，完成后等级直接变22
             trialTargetNpcs[21] = [];
+
+            //以下完成判定与 InWorldBossPhase.SHPC_Level() 中的跳级条件一一对应，仅去除“前置全部达成”的顺序锁
+            trialCompletedChecks = new Func<bool>[TRIAL_COUNT];
+            trialCompletedChecks[0] = InWorldBossPhase.DownedV1;
+            trialCompletedChecks[1] = InWorldBossPhase.DownedV2;
+            trialCompletedChecks[2] = () => InWorldBossPhase.Downed3.Invoke() || InWorldBossPhase.Downed4.Invoke();
+            trialCompletedChecks[3] = InWorldBossPhase.Downed5;
+            trialCompletedChecks[4] = () => Main.hardMode;
+            trialCompletedChecks[5] = InWorldBossPhase.Downed8;
+            trialCompletedChecks[6] = InWorldBossPhase.Downed7;
+            trialCompletedChecks[7] = () => NPC.downedMechBoss1;
+            trialCompletedChecks[8] = () => NPC.downedMechBoss2;
+            trialCompletedChecks[9] = () => NPC.downedMechBoss3;
+            trialCompletedChecks[10] = InWorldBossPhase.Downed10;
+            trialCompletedChecks[11] = InWorldBossPhase.VDownedV7;
+            trialCompletedChecks[12] = InWorldBossPhase.DownedV7;
+            trialCompletedChecks[13] = InWorldBossPhase.DownedV8;
+            trialCompletedChecks[14] = InWorldBossPhase.VDownedV16;
+            trialCompletedChecks[15] = InWorldBossPhase.Downed19;
+            trialCompletedChecks[16] = InWorldBossPhase.Downed23;
+            trialCompletedChecks[17] = InWorldBossPhase.Downed27;
+            trialCompletedChecks[18] = InWorldBossPhase.Downed28;
+            trialCompletedChecks[19] = InWorldBossPhase.Downed29;
+            trialCompletedChecks[20] = InWorldBossPhase.Downed30;
+            trialCompletedChecks[21] = InWorldBossPhase.Downed32;
         }
 
         public override void PostUpdateWorld() {
@@ -161,7 +190,18 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.TrialQuests
         private void SyncTrial(QuestManagerUI manager, int trialIndex, int currentLevel) {
             string key = KEY_PREFIX + trialIndex;
 
-            if (trialIndex == currentLevel && currentLevel < TRIAL_COUNT) {
+            bool isDone = (trialCompletedChecks[trialIndex]?.Invoke() == true) || (trialIndex < currentLevel);
+
+            if (trialIndex > currentLevel) {
+                manager.UnregisterQuest(key);
+            }
+            else if (isDone) {
+                var entry = EnsureTrialEntry(manager, trialIndex, completed: true);
+                if (entry != null && entry.Status != QuestEntryStatus.Completed) {
+                    manager.SetEntryStatus(key, QuestEntryStatus.Completed, 1f);
+                }
+            }
+            else {
                 var entry = EnsureTrialEntry(manager, trialIndex);
                 if (entry == null) {
                     return;
@@ -169,15 +209,6 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.TrialQuests
                 else if (entry.Status == QuestEntryStatus.Completed) {
                     manager.SetEntryStatus(key, QuestEntryStatus.Active, 0f);
                 }
-            }
-            else if (trialIndex < currentLevel) {
-                var entry = EnsureTrialEntry(manager, trialIndex, completed: true);
-                if (entry != null && entry.Status != QuestEntryStatus.Completed) {
-                    manager.SetEntryStatus(key, QuestEntryStatus.Completed, 1f);
-                }
-            }
-            else {
-                manager.UnregisterQuest(key);
             }
         }
 
@@ -202,6 +233,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.TrialQuests
                 EntryStyle = new SHPCEntryStyle(),
                 TrackerStyle = new SHPCTrackerWidgetStyle(),
                 TargetNpcTypes = trialTargetNpcs[trialIndex],
+                IsCompletedCheck = trialCompletedChecks[trialIndex],
                 WaitingHint = TrackerWaiting,
                 FightingFormat = TrackerFighting,
             };

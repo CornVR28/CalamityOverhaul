@@ -1037,6 +1037,8 @@ FishoilSubmitScenario: {
 	// StatusCompleted: Completed
 	// StatusSubmittable: Ready to Submit
 	// StatusCollectingFormat: Collecting ({0}/{1})
+	// NotEnoughResponse: 嗯？鱼好像不太够，再去捕一些回来吧
+	// AlreadyCompletedResponse: 鱼油已经给你了，再要的话还得等下次
 }
 
 FirstMetShepel: {

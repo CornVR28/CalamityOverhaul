@@ -587,7 +587,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                 effect.Parameters["uCellAngle"]?.SetValue(totalSweep);
                 effect.Parameters["uCellGap"]?.SetValue(0f);
                 effect.Parameters["uCellCount"]?.SetValue(1f);
-                effect.Parameters["uFillValue"]?.SetValue(ratio);
+                effect.Parameters["uFillValue"]?.SetValue(ratio * 0.58f);//这里最好还是乘个魔法系数0.58
             }
             else {
                 effect.Parameters["uCellAngle"]?.SetValue(cellAngle);

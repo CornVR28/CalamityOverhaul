@@ -11,6 +11,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.TrialQuests
         public int[] TargetNpcTypes { get; init; }
         public LocalizedText WaitingHint { get; init; }
         public LocalizedText FightingFormat { get; init; }
+        /// <summary>独立的完成判定，命中后无论等级是否推进都直接视为已完成（典型实现是读取对应Boss的Downed标志）</summary>
+        public Func<bool> IsCompletedCheck { get; init; }
 
         private bool isBossAlive;
         private float bossHealthRatio;
@@ -22,6 +24,15 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.TrialQuests
         public override void OnUpdate() {
             if (Status == QuestEntryStatus.Completed || Status == QuestEntryStatus.Failed
                 || Status == QuestEntryStatus.Suspended) return;
+
+            //已经达成完成判定：锁定显示，避免Boss死亡瞬间Progress跳回0造成视觉抖动
+            if (IsCompletedCheck != null && IsCompletedCheck.Invoke()) {
+                isBossAlive = false;
+                bossHealthRatio = 0f;
+                activeBossName = "";
+                Progress = 1f;
+                return;
+            }
 
             isBossAlive = false;
             float bestRatio = 1f;

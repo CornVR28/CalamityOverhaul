@@ -1,4 +1,5 @@
 ﻿using CalamityOverhaul.Content.ADV.EntrustManager;
+using System;
 using Terraria;
 using Terraria.ID;
 using Terraria.Localization;
@@ -33,6 +34,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.MurasamaLegend.TrialQuests
 
         /// <summary>每条试炼对应需要击杀的Boss NPC type列表</summary>
         private static int[][] trialTargetNpcs;
+
+        /// <summary>每条试炼独立的完成判定，与等级顺序解耦，以避免乱序击败后试炼仍不能完成的问题</summary>
+        private static Func<bool>[] trialCompletedChecks;
 
         public override void SetStaticDefaults() {
             QuestCategory = this.GetLocalization(nameof(QuestCategory), () => "鬼妖村正·试炼");
@@ -172,6 +176,37 @@ namespace CalamityOverhaul.Content.LegendWeapon.MurasamaLegend.TrialQuests
             trialTargetNpcs[26] = [CWRID.NPC_SupremeCalamitas];
             //试炼27 (27→28): 始源妖龙
             trialTargetNpcs[27] = [CWRID.NPC_PrimordialWyrmHead];
+
+            //以下完成判定与 InWorldBossPhase.Mura_Level() 中的跳级条件一一对应，仅去除“前置全部达成”的顺序锁
+            trialCompletedChecks = new Func<bool>[TRIAL_COUNT];
+            trialCompletedChecks[0] = InWorldBossPhase.DownedV0;
+            trialCompletedChecks[1] = InWorldBossPhase.Downed0;
+            trialCompletedChecks[2] = InWorldBossPhase.DownedV1;
+            trialCompletedChecks[3] = InWorldBossPhase.DownedV2;
+            trialCompletedChecks[4] = () => InWorldBossPhase.Downed3.Invoke() || InWorldBossPhase.Downed4.Invoke();
+            trialCompletedChecks[5] = InWorldBossPhase.Downed5;
+            trialCompletedChecks[6] = InWorldBossPhase.DownedV4;
+            trialCompletedChecks[7] = () => Main.hardMode;
+            trialCompletedChecks[8] = InWorldBossPhase.Downed6;
+            trialCompletedChecks[9] = InWorldBossPhase.Downed8;
+            trialCompletedChecks[10] = InWorldBossPhase.Downed7;
+            trialCompletedChecks[11] = () => NPC.downedMechBoss1;
+            trialCompletedChecks[12] = () => NPC.downedMechBoss2;
+            trialCompletedChecks[13] = () => NPC.downedMechBoss3;
+            trialCompletedChecks[14] = InWorldBossPhase.Downed10;
+            trialCompletedChecks[15] = InWorldBossPhase.VDownedV7;
+            trialCompletedChecks[16] = InWorldBossPhase.DownedV7;
+            trialCompletedChecks[17] = InWorldBossPhase.Downed14;
+            trialCompletedChecks[18] = InWorldBossPhase.Downed15;
+            trialCompletedChecks[19] = InWorldBossPhase.Downed16;
+            trialCompletedChecks[20] = InWorldBossPhase.VDownedV16;
+            trialCompletedChecks[21] = InWorldBossPhase.Downed19;
+            trialCompletedChecks[22] = InWorldBossPhase.Downed23;
+            trialCompletedChecks[23] = InWorldBossPhase.Downed27;
+            trialCompletedChecks[24] = InWorldBossPhase.Downed28;
+            trialCompletedChecks[25] = InWorldBossPhase.Downed29;
+            trialCompletedChecks[26] = InWorldBossPhase.Downed30;
+            trialCompletedChecks[27] = () => InWorldBossPhase.Downed31.Invoke() || InWorldBossPhase.Downed32.Invoke();
         }
 
         public override void PostUpdateWorld() {
@@ -195,24 +230,19 @@ namespace CalamityOverhaul.Content.LegendWeapon.MurasamaLegend.TrialQuests
 
         /// <summary>
         /// 同步单条试炼的注册与状态<br/>
-        /// 当前等级 == 试炼索引 → Active（进行中）<br/>
-        /// 当前等级 > 试炼索引 → Completed（已完成，保留显示）<br/>
-        /// 未来试炼 → 从管理器移除
+        /// 优先看独立完成判定：一旦命中直接Completed（防止乱序击败后试炼锁死在本地等级上）<br/>
+        /// 否则仅在 trialIndex == currentLevel 时作为Active显示，未来试炼从管理器移除
         /// </summary>
         private void SyncTrial(QuestManagerUI manager, int trialIndex, int currentLevel) {
             string key = KEY_PREFIX + trialIndex;
 
-            if (trialIndex == currentLevel && currentLevel < TRIAL_COUNT) {
-                //当前进行中的试炼
-                var entry = EnsureTrialEntry(manager, trialIndex);
-                if (entry == null) {
-                    return;
-                }
-                else if (entry.Status == QuestEntryStatus.Completed) {
-                    manager.SetEntryStatus(key, QuestEntryStatus.Active, 0f);
-                }
+            bool isDone = (trialCompletedChecks[trialIndex]?.Invoke() == true) || (trialIndex < currentLevel);
+
+            if (trialIndex > currentLevel) {
+                //等级还未到达的试炼，即使提前打了Boss也不提前显示
+                manager.UnregisterQuest(key);
             }
-            else if (trialIndex < currentLevel) {
+            else if (isDone) {
                 //已完成的试炼（保留显示）
                 var entry = EnsureTrialEntry(manager, trialIndex, completed: true);
                 if (entry != null && entry.Status != QuestEntryStatus.Completed) {
@@ -220,7 +250,14 @@ namespace CalamityOverhaul.Content.LegendWeapon.MurasamaLegend.TrialQuests
                 }
             }
             else {
-                manager.UnregisterQuest(key);
+                //trialIndex == currentLevel 且未完成，当前进行中的试炼
+                var entry = EnsureTrialEntry(manager, trialIndex);
+                if (entry == null) {
+                    return;
+                }
+                else if (entry.Status == QuestEntryStatus.Completed) {
+                    manager.SetEntryStatus(key, QuestEntryStatus.Active, 0f);
+                }
             }
         }
 
@@ -245,6 +282,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.MurasamaLegend.TrialQuests
                 EntryStyle = new PhantomEntryStyle(),
                 TrackerStyle = new PhantomTrackerWidgetStyle(),
                 TargetNpcTypes = trialTargetNpcs[trialIndex],
+                IsCompletedCheck = trialCompletedChecks[trialIndex],
                 WaitingHint = TrackerWaiting,
                 FightingFormat = TrackerFighting,
             };

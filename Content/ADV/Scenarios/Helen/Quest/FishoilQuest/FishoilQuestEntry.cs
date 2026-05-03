@@ -35,11 +35,78 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Quest.FishoilQuest
         private int currentFishCount;
         /// <summary>提交场景是否正在进行</summary>
         private bool submissionActive;
+        /// <summary>提交场景启动后的看门狗计时器，超时仍未活动则强制清理标志，避免被永久卡住</summary>
+        private int submissionWatchdog;
+        /// <summary>看门狗超时上限——足以覆盖入队与首帧 UI 拉起的延迟</summary>
+        private const int SubmissionWatchdogMax = 240;
 
         private readonly OceanTrackerWidgetStyle oceanStyle = new();
 
         public FishoilQuestEntry()
             : base(QuestKey, null, null, null) {
+        }
+
+        /// <summary>
+        /// 统计玩家当前可用于提交的候选鱼总数，
+        /// 同时计入 <see cref="Main.mouseItem"/>，避免触发判定与消耗判定不一致
+        /// </summary>
+        public static int CountAvailableFish(Player player) {
+            if (player == null) return 0;
+            int total = 0;
+            var inv = player.inventory;
+            for (int i = 0; i < inv.Length; i++) {
+                Item item = inv[i];
+                if (item != null && item.stack > 0
+                    && FishoilQuestScenario.CandidateFishTypes.Contains(item.type)) {
+                    total += item.stack;
+                }
+            }
+            //同时计入鼠标抓取的物品，避免玩家拖鱼瞬间触发与消耗的差异
+            if (Main.myPlayer == player.whoAmI) {
+                Item mouse = Main.mouseItem;
+                if (mouse != null && mouse.stack > 0
+                    && FishoilQuestScenario.CandidateFishTypes.Contains(mouse.type)) {
+                    total += mouse.stack;
+                }
+            }
+            return total;
+        }
+
+        /// <summary>从玩家背包与鼠标中按需消耗候选鱼，返回实际成功消耗的数量</summary>
+        public static int ConsumeAvailableFish(Player player, int amount) {
+            if (player == null || amount <= 0) return 0;
+            int remaining = amount;
+            var inv = player.inventory;
+            for (int i = 0; i < inv.Length && remaining > 0; i++) {
+                Item item = inv[i];
+                if (item == null || item.stack <= 0) continue;
+                if (!FishoilQuestScenario.CandidateFishTypes.Contains(item.type)) continue;
+                int consume = Math.Min(remaining, item.stack);
+                item.stack -= consume;
+                remaining -= consume;
+                if (item.stack <= 0) item.TurnToAir();
+            }
+            if (remaining > 0 && Main.myPlayer == player.whoAmI) {
+                Item mouse = Main.mouseItem;
+                if (mouse != null && mouse.stack > 0
+                    && FishoilQuestScenario.CandidateFishTypes.Contains(mouse.type)) {
+                    int consume = Math.Min(remaining, mouse.stack);
+                    mouse.stack -= consume;
+                    remaining -= consume;
+                    if (mouse.stack <= 0) mouse.TurnToAir();
+                }
+            }
+            return amount - remaining;
+        }
+
+        /// <summary>
+        /// 当前是否已通过持久化标志确认完成。所有自动触发逻辑都应优先看这个值
+        /// </summary>
+        public static bool IsPersistentlyCompleted() {
+            if (Main.LocalPlayer.TryGetADVSave(out var save)) {
+                return save.Get<HalibutADVData>().FishoilQuestCompleted;
+            }
+            return false;
         }
 
         /// <summary>
@@ -80,34 +147,46 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Quest.FishoilQuest
         }
 
         public override void OnUpdate() {
-            //统计背包里的候选鱼数量
-            Player player = Main.LocalPlayer;
-            currentFishCount = 0;
-            for (int i = 0; i < player.inventory.Length; i++) {
-                Item item = player.inventory[i];
-                if (item != null && item.stack > 0
-                    && FishoilQuestScenario.CandidateFishTypes.Contains(item.type)) {
-                    currentFishCount += item.stack;
-                }
-            }
+            //统计背包+鼠标中的候选鱼数量
+            currentFishCount = CountAvailableFish(Main.LocalPlayer);
 
             Progress = Math.Clamp(currentFishCount / (float)FishRequired, 0f, 1f);
             ProgressLabel ??= QuestTitle;
 
-            //场景完成后重置标记
-            if (submissionActive && !ScenarioManager.IsActive()) {
+            //已经持久化完成，确保任务条目状态同步并不再触发任何提交流程
+            if (IsPersistentlyCompleted()) {
+                if (Status != QuestEntryStatus.Completed) {
+                    QuestManagerUI.Instance?.SetEntryStatus(QuestKey, QuestEntryStatus.Completed, 1f);
+                }
                 submissionActive = false;
+                submissionWatchdog = 0;
+                return;
             }
 
-            //当任务处于关注状态且鱼够了，自动触发提交场景
-            if (Status == QuestEntryStatus.Tracked
+            //场景结束后或长时间未激活时，重置提交标志（看门狗）
+            if (submissionActive) {
+                if (ScenarioManager.IsActive(nameof(FishoilSubmitScenario))) {
+                    submissionWatchdog = 0;
+                }
+                else if (!ScenarioManager.IsActive()) {
+                    //没有任何场景在跑——之前的提交场景已结束或入队后被清空
+                    submissionActive = false;
+                    submissionWatchdog = 0;
+                }
+                else if (++submissionWatchdog > SubmissionWatchdogMax) {
+                    //别的场景把队列长时间占着，强制释放避免永久卡住
+                    submissionActive = false;
+                    submissionWatchdog = 0;
+                }
+            }
+
+            //当任务处于激活/关注状态且鱼够了，自动触发提交场景。
+            //Suspended 与 Completed 状态都不再自动触发，由玩家显式恢复关注后处理
+            if ((Status == QuestEntryStatus.Tracked || Status == QuestEntryStatus.Active)
                 && currentFishCount >= FishRequired
                 && !submissionActive
                 && !ScenarioManager.IsActive()) {
-                ScenarioManager.Reset<FishoilSubmitScenario>();
-                if (ScenarioManager.Start<FishoilSubmitScenario>()) {
-                    submissionActive = true;
-                }
+                TriggerSubmissionScenario();
             }
         }
 
@@ -115,14 +194,22 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Quest.FishoilQuest
             //从挂起恢复为关注时，清除持久化挂起标记
             if (oldStatus == QuestEntryStatus.Suspended && newStatus == QuestEntryStatus.Tracked) {
                 ClearSuspendedFlag();
-                //如果鱼够了，重新触发提交场景
-                if (currentFishCount >= FishRequired && !submissionActive && !ScenarioManager.IsActive()) {
-                    ScenarioManager.Reset<FishoilSubmitScenario>();
-                    if (ScenarioManager.Start<FishoilSubmitScenario>()) {
-                        submissionActive = true;
-                    }
+                //已经持久化完成则不再触发
+                if (IsPersistentlyCompleted()) {
+                    return;
                 }
+                //此处不直接读 currentFishCount，因为状态可能在 OnUpdate 之外变更，
+                //OnUpdate 下一帧自然会重新评估并触发，无需重复路径
             }
+        }
+
+        /// <summary>启动提交场景，统一通过此方法以确保 submissionActive 标志正确设置</summary>
+        private void TriggerSubmissionScenario() {
+            ScenarioManager.Reset<FishoilSubmitScenario>();
+            ScenarioManager.Start<FishoilSubmitScenario>();
+            //无论 Start 是直接启动还是入队，统一置位以避免重复触发
+            submissionActive = true;
+            submissionWatchdog = 0;
         }
 
         public override List<string> GetTrackerDetails() {

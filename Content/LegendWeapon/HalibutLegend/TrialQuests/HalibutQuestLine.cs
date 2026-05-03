@@ -2,6 +2,7 @@
 using CalamityOverhaul.Content.ADV.EntrustManager;
 using CalamityOverhaul.Content.ADV.Scenarios.Helen;
 using CalamityOverhaul.Content.ADV.Scenarios.Helen.Quest;
+using System;
 using Terraria;
 using Terraria.ID;
 using Terraria.Localization;
@@ -35,6 +36,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend.TrialQuests
 
         /// <summary>每条试炼对应需要击杀的Boss NPC type列表</summary>
         private static int[][] trialTargetNpcs;
+
+        /// <summary>每条试炼独立的完成判定，与等级顺序解耦，以避免乱序击败后试炼仍不能完成的问题</summary>
+        private static Func<bool>[] trialCompletedChecks;
 
         public override void SetStaticDefaults() {
             QuestCategory = this.GetLocalization(nameof(QuestCategory), () => "比目鱼传说");
@@ -100,6 +104,23 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend.TrialQuests
             //Halibut_Level()用 Downed31 || Downed32，Boss Rush无可追踪NPC
             //但完成Boss Rush后level直接变14，试炼13会被立即标记为Completed
             trialTargetNpcs[13] = [CWRID.NPC_PrimordialWyrmHead];
+
+            //以下完成判定与 InWorldBossPhase.Halibut_Level() 中的跳级条件一一对应，仅去除“前置全部达成”的顺序锁
+            trialCompletedChecks = new Func<bool>[TRIAL_COUNT];
+            trialCompletedChecks[0] = InWorldBossPhase.DownedV0;
+            trialCompletedChecks[1] = InWorldBossPhase.DownedV1;
+            trialCompletedChecks[2] = InWorldBossPhase.DownedV3;
+            trialCompletedChecks[3] = () => InWorldBossPhase.DownedV4.Invoke() && Main.hardMode;
+            trialCompletedChecks[4] = () => InWorldBossPhase.DownedV5.Invoke() || InWorldBossPhase.Downed8.Invoke();
+            trialCompletedChecks[5] = () => InWorldBossPhase.Downed10.Invoke() || InWorldBossPhase.VDownedV7.Invoke();
+            trialCompletedChecks[6] = InWorldBossPhase.DownedV7;
+            trialCompletedChecks[7] = InWorldBossPhase.VDownedV16;
+            trialCompletedChecks[8] = InWorldBossPhase.Downed19;
+            trialCompletedChecks[9] = InWorldBossPhase.Downed23;
+            trialCompletedChecks[10] = InWorldBossPhase.Downed27;
+            trialCompletedChecks[11] = InWorldBossPhase.Downed28;
+            trialCompletedChecks[12] = () => InWorldBossPhase.Downed29.Invoke() && InWorldBossPhase.Downed30.Invoke();
+            trialCompletedChecks[13] = () => InWorldBossPhase.Downed31.Invoke() || InWorldBossPhase.Downed32.Invoke();
         }
 
         public override void PostUpdateWorld() {
@@ -133,24 +154,21 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend.TrialQuests
 
         /// <summary>
         /// 同步单条试炼的注册与状态<br/>
-        /// 当前等级 == 试炼索引 → Active（进行中）<br/>
-        /// 当前等级 > 试炼索引 → Completed（已完成，保留显示）<br/>
-        /// 未来试炼 → 从管理器移除
+        /// 优先看独立完成判定：一旦命中直接Completed（防止乱序击败后试炼锁死在本地等级上）<br/>
+        /// 否则仅在 trialIndex == currentLevel 时作为Active显示，未来试炼从管理器移除
         /// </summary>
         private void SyncTrial(QuestManagerUI manager, int trialIndex, int currentLevel) {
             string key = KEY_PREFIX + trialIndex;
 
-            if (trialIndex == currentLevel && currentLevel < TRIAL_COUNT) {
-                //当前进行中的试炼
-                var entry = EnsureTrialEntry(manager, trialIndex);
-                if (entry == null) {
-                    return;
-                }
-                else if (entry.Status == QuestEntryStatus.Completed) {
-                    manager.SetEntryStatus(key, QuestEntryStatus.Active, 0f);
-                }
+            //两个条件取OR：独立判定命中，或等级系统已推进过该关
+            //任一为真都算完成，防止极端情况下等级推进了但独立判定漏判
+            bool isDone = (trialCompletedChecks[trialIndex]?.Invoke() == true) || (trialIndex < currentLevel);
+
+            if (trialIndex > currentLevel) {
+                //等级还未到达的试炼，即使提前打了Boss也不提前显示
+                manager.UnregisterQuest(key);
             }
-            else if (trialIndex < currentLevel) {
+            else if (isDone) {
                 //已完成的试炼（保留显示）
                 var entry = EnsureTrialEntry(manager, trialIndex, completed: true);
                 if (entry != null && entry.Status != QuestEntryStatus.Completed) {
@@ -158,7 +176,14 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend.TrialQuests
                 }
             }
             else {
-                manager.UnregisterQuest(key);
+                //trialIndex == currentLevel 且未完成，当前进行中的试炼
+                var entry = EnsureTrialEntry(manager, trialIndex);
+                if (entry == null) {
+                    return;
+                }
+                else if (entry.Status == QuestEntryStatus.Completed) {
+                    manager.SetEntryStatus(key, QuestEntryStatus.Active, 0f);
+                }
             }
         }
 
@@ -186,6 +211,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend.TrialQuests
                 EntryStyle = new OceanEntryStyle(),
                 TrackerStyle = new OceanTrackerWidgetStyle(),
                 TargetNpcTypes = trialTargetNpcs[trialIndex],
+                IsCompletedCheck = trialCompletedChecks[trialIndex],
                 WaitingHint = TrackerWaiting,
                 FightingFormat = TrackerFighting,
             };
