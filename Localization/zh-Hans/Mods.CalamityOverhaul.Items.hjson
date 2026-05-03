@@ -1,4 +1,4 @@
-ElementWhip: {
+﻿ElementWhip: {
 	DisplayName: 元素长鞭
 	Tooltip:
 		'''
@@ -1688,7 +1688,7 @@ AdaptiveOpticModule: {
 	Tooltip:
 		'''
 		SHPC 改件 · 瞄具插槽
-		神经联动算法持续修正弹道，使每束光更紧追目标
+		神经联动算法持续修正弹道，使每束光能快速而精准的命中目标
 		'''
 }
 
