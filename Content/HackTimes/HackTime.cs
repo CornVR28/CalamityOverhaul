@@ -500,7 +500,11 @@ namespace CalamityOverhaul.Content.HackTimes
             CameraOffset = Vector2.Zero;
             cameraTo = Vector2.Zero;
             HackTimeFreeze.Activate();
-
+            //记录飞行时间快照
+            if (Main.LocalPlayer.Alives()) {
+                Main.LocalPlayer.GetModPlayer<HackTimeFreezePlayer>().FrozenWingTime = Main.LocalPlayer.wingTime;
+                Main.LocalPlayer.GetModPlayer<HackTimeFreezePlayer>().FrozenRocketTime = Main.LocalPlayer.rocketTime;
+            }
             if (!VaultUtils.isServer) {
                 SoundEngine.PlaySound(CWRSound.Scanning, Main.LocalPlayer.Center);
             }
