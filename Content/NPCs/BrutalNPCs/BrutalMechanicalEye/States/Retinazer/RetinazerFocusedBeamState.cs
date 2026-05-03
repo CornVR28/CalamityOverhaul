@@ -49,7 +49,7 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalMechanicalEye.States.Re
         /// <summary>
         /// 激光发射间隔
         /// </summary>
-        private int FireInterval => Context.IsDeathMode ? 5 : 6;
+        private int FireInterval => Context.IsDeathMode ? 7 : 8;
 
         private TwinsStateContext Context;
         private Vector2 currentDirection;
@@ -264,7 +264,7 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalMechanicalEye.States.Re
                     npc.Center,
                     shootDir * 14f,
                     ModContent.ProjectileType<DeadLaser>(),
-                    40,
+                    32,
                     0f,
                     Main.myPlayer
                 );

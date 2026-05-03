@@ -44,7 +44,8 @@ namespace CalamityOverhaul.Content.UIs.BossBars
             foreach (NPC n in Main.ActiveNPCs) {
                 if (ExclusionList.Contains(n.type))
                     continue;
-                if (n.boss)
+                //realLife>=0表示该NPC是某段蠕虫子节点，跳过避免重复添加
+                if (n.boss && n.realLife < 0)
                     TryAddBar(n.whoAmI);
             }
 

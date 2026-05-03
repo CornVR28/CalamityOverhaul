@@ -180,7 +180,8 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalDestroyer.States
 
                 if (!VaultUtils.isClient) {
                     int projType = ModContent.ProjectileType<PrimeCannonOnSpan>();
-                    int damage = HeadPrimeAI.SetMultiplier(CWRRef.GetProjectileDamage(context.Npc, projType));
+                    //降低探针锁定攻击伤害约20%
+                    int damage = (int)(HeadPrimeAI.SetMultiplier(CWRRef.GetProjectileDamage(context.Npc, projType)) * 0.8f);
 
                     for (int i = 0; i < probeCount; i++) {
                         if (probeIndices[i] < 0) continue;

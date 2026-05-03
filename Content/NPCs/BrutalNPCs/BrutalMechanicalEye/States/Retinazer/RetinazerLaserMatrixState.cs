@@ -265,7 +265,7 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalMechanicalEye.States.Re
                             pointPos,
                             toCenter * LaserSpeed,
                             ProjectileID.DeathLaser,
-                            35,
+                            28,
                             0f,
                             Main.myPlayer
                         );
@@ -276,7 +276,7 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalMechanicalEye.States.Re
                             pointPos,
                             toCenter * (LaserSpeed * 0.7f),
                             ProjectileID.DeathLaser,
-                            30,
+                            24,
                             0f,
                             Main.myPlayer
                         );

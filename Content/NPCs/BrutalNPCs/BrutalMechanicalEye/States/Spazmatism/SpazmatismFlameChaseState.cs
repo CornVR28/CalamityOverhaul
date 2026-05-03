@@ -39,10 +39,10 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalMechanicalEye.States.Sp
             "Phase2Dash"
         ];
 
-        private float ChaseSpeed => Context.IsDeathMode ? 8f : 6f;
-        private float TurnSpeed => Context.IsDeathMode ? 0.16f : 0.12f;
-        private int FlameDuration => Context.IsDeathMode ? 120 : 150;
-        private int FlameInterval => Context.IsDeathMode ? 6 : 8;
+        private float ChaseSpeed => Context.IsDeathMode ? 7.5f : 5.5f;
+        private float TurnSpeed => Context.IsDeathMode ? 0.14f : 0.1f;
+        private int FlameDuration => Context.IsDeathMode ? 100 : 130;
+        private int FlameInterval => Context.IsDeathMode ? 9 : 11;
 
         private TwinsStateContext Context;
         private int comboStep;
@@ -82,7 +82,7 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalMechanicalEye.States.Sp
                         npc.Center,
                         fireVel,
                         ProjectileID.EyeFire,
-                        32,
+                        26,
                         0f,
                         Main.myPlayer
                     );

@@ -48,9 +48,9 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalMechanicalEye.States.Re
             "PrecisionSniper"
         ];
 
-        private int Duration => Context.IsDeathMode ? 120 : 150;
-        private int RapidFireRate => Context.IsDeathMode ? 12 : 15;
-        private float LaserSpeed => Context.IsDeathMode ? 18f : 16f;
+        private int Duration => Context.IsDeathMode ? 110 : 140;
+        private int RapidFireRate => Context.IsDeathMode ? 15 : 18;
+        private float LaserSpeed => Context.IsDeathMode ? 17f : 15f;
 
         private TwinsStateContext Context;
         private int comboStep;
@@ -95,7 +95,7 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalMechanicalEye.States.Re
                         npc.Center,
                         shootVel,
                         ProjectileID.DeathLaser,
-                        30,
+                        24,
                         0f,
                         Main.myPlayer
                     );

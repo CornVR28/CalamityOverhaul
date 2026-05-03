@@ -14,8 +14,8 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalMechanicalEye.States.Re
         public override string StateName => "RetinazerHorizontalBarrage";
         public override TwinsStateIndex StateIndex => TwinsStateIndex.RetinazerHorizontalBarrage;
 
-        private const int Duration = 150;
-        private int RapidFireRate => 15;
+        private const int Duration = 140;
+        private int RapidFireRate => 18;
 
         private TwinsStateContext Context;
         private int comboStep;
@@ -59,7 +59,7 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalMechanicalEye.States.Re
                         npc.Center,
                         shootVel,
                         ProjectileID.DeathLaser,
-                        30,
+                        24,
                         0f,
                         Main.myPlayer
                     );

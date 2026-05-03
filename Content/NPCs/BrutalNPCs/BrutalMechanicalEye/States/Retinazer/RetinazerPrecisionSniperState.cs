@@ -17,10 +17,10 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalMechanicalEye.States.Re
         public override string StateName => "RetinazerPrecisionSniper";
         public override TwinsStateIndex StateIndex => TwinsStateIndex.RetinazerPrecisionSniper;
 
-        private int ChargeTime => Context.IsDeathMode ? 65 : 80;
-        private int RecoveryTime => Context.IsDeathMode ? 95 : 110;
-        private int MaxSniperCount => Context.IsDeathMode ? 3 : 2;
-        private int ProjectileCount => Context.IsDeathMode ? 13 : 11;
+        private int ChargeTime => Context.IsDeathMode ? 70 : 85;
+        private int RecoveryTime => Context.IsDeathMode ? 105 : 120;
+        private int MaxSniperCount => Context.IsDeathMode ? 2 : 2;
+        private int ProjectileCount => Context.IsDeathMode ? 9 : 8;
         private float SpreadAngle => Context.IsDeathMode ? 60f : 50f;
         private float BaseSpeed => Context.IsDeathMode ? 7f : 5f;
 
@@ -90,7 +90,7 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalMechanicalEye.States.Re
                             npc.Center,
                             shootVel,
                             ModContent.ProjectileType<DeadLaser>(),
-                            50,
+                            38,
                             0f,
                             Main.myPlayer
                         );

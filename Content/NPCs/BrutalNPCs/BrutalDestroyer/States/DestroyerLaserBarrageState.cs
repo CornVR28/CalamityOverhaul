@@ -23,7 +23,8 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalDestroyer.States
 
             SetMovement(context, player.Center + player.velocity * 30f, 12f, 0.6f);
 
-            int fireRate = context.IsEnraged ? 3 : 5;
+            //放慢射速，给玩家更多躲避时间
+            int fireRate = context.IsEnraged ? 5 : 8;
             Timer++;
 
             //阶段1：充能预警
@@ -69,7 +70,8 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalDestroyer.States
 
             float speed = CWRWorld.Death ? 6f : 4f;
             Vector2 velocity = (context.Target.Center - source.Center).SafeNormalize(Vector2.Zero) * speed;
-            int damage = HeadPrimeAI.SetMultiplier(CWRRef.GetProjectileDamage(context.Npc, ProjectileID.DeathLaser));
+            //降低激光伤害约25%，避免大师模式下过于致命
+            int damage = (int)(HeadPrimeAI.SetMultiplier(CWRRef.GetProjectileDamage(context.Npc, ProjectileID.DeathLaser)) * 0.75f);
             Projectile.NewProjectile(source.GetSource_FromAI(), source.Center, velocity,
                 ProjectileID.DeathLaser, damage, 0f, Main.myPlayer, ai2: context.Npc.target);
         }
