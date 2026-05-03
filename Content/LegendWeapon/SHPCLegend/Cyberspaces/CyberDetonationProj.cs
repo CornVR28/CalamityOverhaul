@@ -53,6 +53,16 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
                 //超驱时实际爆炸半径同步扩大，与视觉范围保持一致
                 if (overdriveAmount > 0f)
                     explosionRadius *= 1f + overdriveAmount * 0.5f;
+                //改件半径倍率，由 SHPCOverride 通过 localAI[1] 注入；<=0 视为中性
+                float radiusMul = Projectile.localAI[1];
+                if (radiusMul > 0.01f) {
+                    explosionRadius *= radiusMul;
+                }
+                //允许由生成方直接覆盖最终半径（localAI[2] > 0 时使用绝对像素值）
+                float radiusOverride = Projectile.localAI[2];
+                if (radiusOverride > 1f) {
+                    explosionRadius = radiusOverride;
+                }
                 Projectile.localAI[0] = 1f;
 
                 // 设置碰撞范围用于伤害检测

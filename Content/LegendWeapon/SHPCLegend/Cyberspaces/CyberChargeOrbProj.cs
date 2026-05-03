@@ -100,6 +100,18 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         /// <summary>能量球飞行速度倍率，由 localAI[2] 注入；默认 1f</summary>
         private float flySpeedMul = 1f;
 
+        //═════════════ 改件行为注入字段 ═════════════
+        //由 SHPCOverride.OnShoot 在 Projectile.NewProjectile 之后直接写入
+
+        /// <summary>蓄力期间是否在球体周围持续吸引附近敌人</summary>
+        public bool DrainAura;
+        /// <summary>爆炸半径倍率（最终半径 = 基础 × 此值）</summary>
+        public float ExplosionRadiusMul = 1f;
+        /// <summary>爆炸时生成的迷你追踪光球数量</summary>
+        public int DetonationMinions;
+        /// <summary>爆炸时是否将玩家反推弹射</summary>
+        public bool ExplosionPropels;
+
         private OrbState State {
             get => (OrbState)Projectile.ai[0];
             set => Projectile.ai[0] = (float)value;
@@ -279,6 +291,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
                 }
             }
 
+            //改件钩子：蓄力到一定程度后开始吸引附近敌人
+            if (DrainAura && chargeRatio > 0.25f) {
+                ApplyDrainAura();
+            }
+
             //检测右键释放 → 发射
             if (!DownRight) {
                 if (chargeTime >= MinChargeFrames) {
@@ -288,6 +305,25 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
                     //蓄力不足，取消
                     Projectile.Kill();
                 }
+            }
+        }
+
+        /// <summary>
+        /// 引力光环：蓄力期间持续将范围内敌人朝球心拉拽，强度随蓄力比例增长
+        /// 仅在弹幕拥有者侧执行，避免多端施力冲突
+        /// </summary>
+        private void ApplyDrainAura() {
+            if (Projectile.owner != Main.myPlayer) return;
+            float radius = MathHelper.Lerp(220f, 460f, chargeRatio);
+            float radiusSq = radius * radius;
+            float pull = MathHelper.Lerp(0.2f, 0.85f, chargeRatio) * (1f + overdriveAmount * 0.5f);
+            for (int i = 0; i < Main.maxNPCs; i++) {
+                NPC npc = Main.npc[i];
+                if (!npc.active || npc.friendly || npc.dontTakeDamage || npc.immortal || npc.boss) continue;
+                Vector2 toOrb = Projectile.Center - npc.Center;
+                if (toOrb.LengthSquared() > radiusSq) continue;
+                if (toOrb.LengthSquared() < 16f) continue;
+                npc.velocity += toOrb.SafeNormalize(Vector2.Zero) * pull;
             }
         }
 
@@ -454,6 +490,48 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             );
             if (projIndex >= 0 && projIndex < Main.maxProjectiles) {
                 Main.projectile[projIndex].originalDamage = Projectile.originalDamage;
+                //通过 localAI[1] 传递改件提供的爆炸半径倍率
+                if (ExplosionRadiusMul > 0.01f && MathF.Abs(ExplosionRadiusMul - 1f) > 0.01f) {
+                    Main.projectile[projIndex].localAI[1] = ExplosionRadiusMul;
+                }
+            }
+
+            //改件钩子：爆炸时反推玩家
+            if (ExplosionPropels && Owner != null && Owner.active) {
+                Vector2 push = (Owner.Center - Projectile.Center).SafeNormalize(-Projectile.velocity.SafeNormalize(Vector2.UnitY));
+                float power = MathHelper.Lerp(8f, 22f, chargeRatio) + overdriveAmount * 6f;
+                Owner.velocity = push * power;
+                Owner.fallStart = (int)(Owner.position.Y / 16f); //取消摔落伤害
+            }
+
+            //改件钩子：爆炸时撒出迷你追踪光球（复用 CyberTraceBeamProj 的强追踪形态）
+            if (DetonationMinions > 0) {
+                SpawnDetonationMinions(damage);
+            }
+        }
+
+        /// <summary>
+        /// 在爆炸位置撒出若干强追踪迷你光束，伤害削弱、速度略降
+        /// </summary>
+        private void SpawnDetonationMinions(int detonationDamage) {
+            int n = DetonationMinions;
+            int dmg = (int)(detonationDamage * 0.35f);
+            if (dmg < 1) dmg = 1;
+            for (int i = 0; i < n; i++) {
+                float ang = MathHelper.TwoPi * i / n + Main.rand.NextFloat(-0.15f, 0.15f);
+                Vector2 vel = ang.ToRotationVector2() * Main.rand.NextFloat(8f, 12f);
+                int idx = Projectile.NewProjectile(Projectile.GetSource_FromThis(),
+                    Projectile.Center, vel,
+                    ModContent.ProjectileType<CyberTraceBeamProj>(),
+                    dmg, Projectile.knockBack, Projectile.owner,
+                    ai0: Main.rand.Next(3));
+                if (idx >= 0 && idx < Main.maxProjectiles) {
+                    Main.projectile[idx].ai[1] = 2.5f; //强力追踪
+                    if (Main.projectile[idx].ModProjectile is CyberTraceBeamProj child) {
+                        child.IsDerived = true;
+                        child.LifeMul = 0.7f;
+                    }
+                }
             }
         }
 

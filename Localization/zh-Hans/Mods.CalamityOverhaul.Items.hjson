@@ -1845,6 +1845,67 @@ VolatileFrameModule: {
 		'''
 }
 
+NovaBarrelModule: {
+	DisplayName: 新星枪管
+	Tooltip:
+		'''
+		SHPC 改件 · 枪管插槽
+		过载电浆膛口让每束光在命中时引爆一团微型脉冲炸裂
+		代价是膛口稳定性下滑、单发威力削弱与法力消耗加剧
+		'''
+}
+
+PrismOpticModule: {
+	DisplayName: 棱镜瞄具
+	Tooltip:
+		'''
+		SHPC 改件 · 瞄具插槽
+		光路终末处的相位棱镜分裂出两道副光束
+		主光束飞行距离略微缩短，但额外捕捉到精准的暴击窗口
+		'''
+}
+
+TeslaCoreModule: {
+	DisplayName: 特斯拉核心
+	Tooltip:
+		'''
+		SHPC 改件 · 能源插槽
+		高压电弧让命中后的光束跳跃至最近的敌人
+		链上每个节点都能继承命中行为，但魔力开销同步上扬
+		'''
+}
+
+RecoilStockModule: {
+	DisplayName: 反推枪托
+	Tooltip:
+		'''
+		SHPC 改件 · 枪托插槽
+		过载缓冲器将能量球的爆炸冲击转化为玩家的弹射动能
+		光束的射程也被同步延长，代价是扣动节奏轻微变迟
+		'''
+}
+
+SwarmGripModule: {
+	DisplayName: 蜂群握把
+	Tooltip:
+		'''
+		SHPC 改件 · 握把插槽
+		神经网络握把在能量球爆炸瞬间释放数颗强追踪迷你光球
+		能量球的初速与法力开销随之付出代价
+		'''
+}
+
+GravityFrameModule: {
+	DisplayName: 引力机匣
+	Tooltip:
+		'''
+		SHPC 改件 · 机匣插槽
+		微型奇点环将能量球转化为吸引装置
+		蓄力时持续把附近敌人拉向球心，爆炸范围显著放大
+		但精密腔体让蓄力节奏变得稍慢
+		'''
+}
+
 MimicPerchedAuxBrain: {
 	DisplayName: 拟态栖置副脑
 	Tooltip:

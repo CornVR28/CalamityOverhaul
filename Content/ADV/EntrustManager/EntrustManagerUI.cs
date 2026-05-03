@@ -658,7 +658,7 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
             Rectangle panelRect = GetPanelRect();
             Rectangle contentRect = GetContentRect(panelRect);
             //展开区域的可用宽度（与条目内文本对齐，减去左侧偏移）
-            float textScale = 0.62f;
+            float textScale = 0.70f;
             int wrapPixelWidth = (int)((contentRect.Width - 50f) / textScale);
 
             //按换行符拆分后逐段换行，与绘制逻辑一致

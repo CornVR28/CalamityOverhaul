@@ -268,6 +268,13 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
                 if (orbIdx >= 0 && orbIdx < Main.maxProjectiles) {
                     Main.projectile[orbIdx].localAI[1] = ctx.ChargeTimeMul;
                     Main.projectile[orbIdx].localAI[2] = ctx.OrbSpeedMul;
+                    //行为字段直接写入到 ModProjectile 实例
+                    if (Main.projectile[orbIdx].ModProjectile is CyberChargeOrbProj orb) {
+                        orb.DrainAura = ctx.OrbDrainAura;
+                        orb.ExplosionRadiusMul = ctx.OrbExplosionRadiusMul;
+                        orb.DetonationMinions = ctx.OrbDetonationMinions;
+                        orb.ExplosionPropels = ctx.OrbExplosionPropels;
+                    }
                 }
             }
             else {
@@ -295,6 +302,16 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
                     //ai[1] 传递追踪倍率，>0 时弹幕首帧应用
                     if (beamIdx >= 0 && beamIdx < Main.maxProjectiles) {
                         Main.projectile[beamIdx].ai[1] = ctx.HomingMul;
+                        //行为字段直接写入到 ModProjectile 实例（首帧读取）
+                        if (Main.projectile[beamIdx].ModProjectile is CyberTraceBeamProj beam) {
+                            beam.ExtraPierce = ctx.BeamExtraPierce;
+                            beam.LifeMul = ctx.BeamLifeMul;
+                            beam.ExplodeOnHit = ctx.BeamExplodeOnHit;
+                            beam.ExplodeRadius = ctx.BeamExplodeRadius;
+                            beam.ChainCount = ctx.BeamChainCount;
+                            beam.ChainRange = ctx.BeamChainRange;
+                            beam.SplitOnDeath = ctx.BeamSplitOnDeath;
+                        }
                     }
                 }
             }

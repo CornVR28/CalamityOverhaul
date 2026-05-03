@@ -47,8 +47,20 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
             foreach (string s in FloatStat("ManaCost", ctx.ManaCostMul)) yield return s;
             foreach (string s in FloatStat("ChargeTime", ctx.ChargeTimeMul)) yield return s;
             foreach (string s in FloatStat("OrbSpeed", ctx.OrbSpeedMul)) yield return s;
+            foreach (string s in FloatStat("BeamLife", ctx.BeamLifeMul)) yield return s;
+            foreach (string s in FloatStat("ExplosionRadius", ctx.OrbExplosionRadiusMul)) yield return s;
             if (ctx.BeamCountAdd != 0) yield return IntStat("BeamCount", ctx.BeamCountAdd);
             if (ctx.CritAdd != 0) yield return IntStat("Crit", ctx.CritAdd);
+            if (ctx.BeamExtraPierce != 0) yield return IntStat("Pierce", ctx.BeamExtraPierce);
+            if (ctx.BeamChainCount != 0) yield return IntStat("Chain", ctx.BeamChainCount);
+            if (ctx.BeamSplitOnDeath != 0) yield return IntStat("Split", ctx.BeamSplitOnDeath);
+            if (ctx.OrbDetonationMinions != 0) yield return IntStat("Minions", ctx.OrbDetonationMinions);
+            if (ctx.BeamExplodeOnHit)
+                yield return Language.GetTextValue("Mods.CalamityOverhaul.Legend.SHPCModuleStat.BeamExplodeOnHit");
+            if (ctx.OrbDrainAura)
+                yield return Language.GetTextValue("Mods.CalamityOverhaul.Legend.SHPCModuleStat.OrbDrainAura");
+            if (ctx.OrbExplosionPropels)
+                yield return Language.GetTextValue("Mods.CalamityOverhaul.Legend.SHPCModuleStat.OrbExplosionPropels");
         }
 
         private static IEnumerable<string> FloatStat(string key, float mulValue) {

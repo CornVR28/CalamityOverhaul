@@ -117,6 +117,30 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         /// <summary>追踪强度倍率，由 ai[1] 注入；默认 1f</summary>
         private float homingMul = 1f;
 
+        //═════════════ 改件行为注入字段 ═════════════
+        //由 SHPCOverride.OnShoot 在 Projectile.NewProjectile 之后直接写入
+        //首帧根据这些字段调整属性，命中/消亡时再消费
+
+        /// <summary>额外穿透次数</summary>
+        public int ExtraPierce;
+        /// <summary>生命周期倍率（>1 飞得更远）</summary>
+        public float LifeMul = 1f;
+        /// <summary>命中时引爆微型脉冲爆炸</summary>
+        public bool ExplodeOnHit;
+        /// <summary>微型爆炸半径（像素）</summary>
+        public float ExplodeRadius = 80f;
+        /// <summary>剩余链式跳跃次数（每次跳跃 -1）</summary>
+        public int ChainCount;
+        /// <summary>链式跳跃搜索半径</summary>
+        public float ChainRange = 240f;
+        /// <summary>消亡时分裂的副光束数量</summary>
+        public int SplitOnDeath;
+        /// <summary>是否为子代光束（避免分裂/链跳无限递归）</summary>
+        public bool IsDerived;
+
+        /// <summary>实际生命预算（按 LifeMul 缩放）</summary>
+        private float lifeBudget = TotalAICalls;
+
         #endregion
 
         public override void SetStaticDefaults() {
@@ -149,6 +173,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
                 flyAngle = Projectile.velocity.ToRotation();
                 //ai[1] 由发射处注入，>0 时作为追踪倍率，未设置（==0）按 1f 处理
                 homingMul = Projectile.ai[1] > 0f ? Projectile.ai[1] : 1f;
+                //首帧消费改件注入：调整穿透与生命预算
+                if (ExtraPierce > 0) {
+                    Projectile.penetrate += ExtraPierce;
+                }
+                lifeBudget = TotalAICalls * MathF.Max(LifeMul, 0.1f);
                 Projectile.localAI[0] = 1f;
             }
 
@@ -173,13 +202,13 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             //自管理生命周期：age按timeScale推进，时缓期间等比延长寿命
             age += timeScale;
             Projectile.timeLeft = MaxLife;
-            if (age >= TotalAICalls) {
+            if (age >= lifeBudget) {
                 Projectile.Kill();
                 return;
             }
 
             //渐变：基于age比例，不依赖timeLeft
-            float lifeRatio = age / TotalAICalls;
+            float lifeRatio = age / lifeBudget;
             if (lifeRatio < 0.08f) {
                 fadeAlpha = lifeRatio / 0.08f;
             }
@@ -456,6 +485,64 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
                 ));
             }
             Projectile.damage = (int)(Projectile.damage * 0.7f);
+
+            //改件钩子：仅本地玩家发射方处理派生弹幕，避免重复生成
+            if (Projectile.owner == Main.myPlayer && !IsDerived) {
+                if (ExplodeOnHit && ExplodeRadius > 1f) {
+                    SpawnMicroExplosion(target.Center);
+                }
+                if (ChainCount > 0) {
+                    SpawnChainBeam(target);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 命中处生成微型爆破，半径由 <see cref="ExplodeRadius"/> 控制
+        /// 复用 <see cref="CyberDetonationProj"/> 并通过 localAI[2] 强制覆盖半径
+        /// </summary>
+        private void SpawnMicroExplosion(Vector2 center) {
+            int dmg = Math.Max(Projectile.damage, 1);
+            int idx = Projectile.NewProjectile(Projectile.GetSource_FromThis(),
+                center, Vector2.Zero,
+                ModContent.ProjectileType<CyberDetonationProj>(),
+                dmg, 0f, Projectile.owner,
+                ai0: 0f, ai1: overdriveAmount);
+            if (idx >= 0 && idx < Main.maxProjectiles) {
+                Main.projectile[idx].localAI[2] = ExplodeRadius;
+                Main.projectile[idx].originalDamage = Projectile.originalDamage;
+            }
+        }
+
+        /// <summary>
+        /// 链式跳跃：从命中目标朝最近的另一只敌人弹出一束子光束
+        /// 子光束 IsDerived=true，避免再次链跳与分裂导致雪崩
+        /// </summary>
+        private void SpawnChainBeam(NPC source) {
+            NPC next = source.Center.FindClosestNPC(ChainRange, false, true);
+            if (next == null || next.whoAmI == source.whoAmI) {
+                //没找到就不消耗链跳次数
+                return;
+            }
+            Vector2 dir = (next.Center - source.Center).SafeNormalize(Vector2.UnitX);
+            int dmg = (int)(Projectile.damage * 0.85f);
+            if (dmg < 1) dmg = 1;
+            int idx = Projectile.NewProjectile(Projectile.GetSource_FromThis(),
+                source.Center, dir * Speed,
+                ModContent.ProjectileType<CyberTraceBeamProj>(),
+                dmg, Projectile.knockBack, Projectile.owner,
+                ai0: themeIndex);
+            if (idx >= 0 && idx < Main.maxProjectiles) {
+                Main.projectile[idx].ai[1] = MathHelper.Max(homingMul, 1.6f);
+                if (Main.projectile[idx].ModProjectile is CyberTraceBeamProj child) {
+                    child.IsDerived = true;
+                    child.ChainCount = ChainCount - 1;
+                    child.ChainRange = ChainRange;
+                    //保留爆炸属性以便链上每个节点都能炸
+                    child.ExplodeOnHit = ExplodeOnHit;
+                    child.ExplodeRadius = ExplodeRadius;
+                }
+            }
         }
 
         public override void OnKill(int timeLeft) {
@@ -472,6 +559,37 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
                     mainCol, edgeCol,
                     scale, Main.rand.Next(25, 50)
                 ));
+            }
+
+            //改件钩子：消亡时分裂出更小的副光束，向四周散射
+            if (Projectile.owner == Main.myPlayer && !IsDerived && SplitOnDeath > 0) {
+                SpawnSplitBeams();
+            }
+        }
+
+        /// <summary>
+        /// 消亡时朝四周分裂出副光束，伤害与速度均削弱
+        /// </summary>
+        private void SpawnSplitBeams() {
+            int n = SplitOnDeath;
+            int dmg = (int)(Projectile.damage * 0.6f);
+            if (dmg < 1) dmg = 1;
+            float baseAngle = Projectile.velocity.ToRotation();
+            for (int i = 0; i < n; i++) {
+                float ang = baseAngle + MathHelper.Lerp(-MathHelper.Pi * 0.6f, MathHelper.Pi * 0.6f, (i + 0.5f) / n);
+                Vector2 vel = ang.ToRotationVector2() * Speed * 0.7f;
+                int idx = Projectile.NewProjectile(Projectile.GetSource_FromThis(),
+                    Projectile.Center, vel,
+                    ModContent.ProjectileType<CyberTraceBeamProj>(),
+                    dmg, Projectile.knockBack, Projectile.owner,
+                    ai0: themeIndex);
+                if (idx >= 0 && idx < Main.maxProjectiles) {
+                    Main.projectile[idx].ai[1] = homingMul;
+                    if (Main.projectile[idx].ModProjectile is CyberTraceBeamProj child) {
+                        child.IsDerived = true;
+                        child.LifeMul = 0.55f;
+                    }
+                }
             }
         }
     }

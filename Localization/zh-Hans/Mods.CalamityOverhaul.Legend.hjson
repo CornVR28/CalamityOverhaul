@@ -455,7 +455,16 @@ SHPCModuleStat: {
 	ManaCost: "{0}% 法力消耗"
 	ChargeTime: "{0}% 蓄力时间"
 	OrbSpeed: "{0}% 能量球速度"
+	BeamLife: "{0}% 光束飞行距离"
+	ExplosionRadius: "{0}% 爆炸范围"
 	BeamCount: "{0} 束/轮"
 	Crit: "{0}% 暴击率"
+	Pierce: "{0} 额外穿透"
+	Chain: "{0} 次链式跳跃"
+	Split: "{0} 道消亡分裂副光束"
+	Minions: "{0} 颗爆炸追踪迷你光球"
 	MergeBeams: +3束光束合并为1束
+	BeamExplodeOnHit: +命中时引爆微型脉冲爆炸
+	OrbDrainAura: +蓄力时持续吸引附近敌人
+	OrbExplosionPropels: +能量球爆炸反推玩家弹射
 }

@@ -277,6 +277,18 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.SupCalDisplayTexts
             "SCalDesparationText4Rematch"
         };
 
+        //依据玩家是否持有比目鱼分发对应版本，避免比目鱼以陌生人身份贸然登场
+        private static void StartEternalBlazingNow() {
+            if (Main.LocalPlayer.HasHalibut()) {
+                ScenarioManager.Reset<EternalBlazingNow>();
+                ScenarioManager.Start<EternalBlazingNow>();
+            }
+            else {
+                ScenarioManager.Reset<EternalBlazingNowNoHelen>();
+                ScenarioManager.Start<EternalBlazingNowNoHelen>();
+            }
+        }
+
         public override bool PreHandle(ref string key, ref Color color) {
             //提取key的最后一部分(去除模组前缀)
             string result = key.Split('.').Last();
@@ -284,22 +296,19 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.SupCalDisplayTexts
             if (NPC.AnyNPCs(CWRID.NPC_SupremeCalamitas) && !VaultUtils.isServer) {
                 if (result == "SCalAcceptanceText3") {
                     //Boss已经进入濒死阶段，触发战败对话场景
-                    ScenarioManager.Reset<EternalBlazingNow>();
-                    ScenarioManager.Start<EternalBlazingNow>();
+                    StartEternalBlazingNow();
                     return false;
                 }
                 if (result == "SCalDesparationText4Rematch") {//如果已经是重复击杀
                     if (!EbnPlayer.OnEbn(Main.LocalPlayer)) {//但玩家因为某些原因还是没有完成BE结局
                         //就再次触发结局场景
-                        ScenarioManager.Reset<EternalBlazingNow>();
-                        ScenarioManager.Start<EternalBlazingNow>();
+                        StartEternalBlazingNow();
                         return false;
                     }
                 }
                 if (CWRMod.Instance.infernum != null && result == "SCalCongratulations") {
                     //Boss已经进入濒死阶段，触发战败对话场景
-                    ScenarioManager.Reset<EternalBlazingNow>();
-                    ScenarioManager.Start<EternalBlazingNow>();
+                    StartEternalBlazingNow();
                     return false;
                 }
             }

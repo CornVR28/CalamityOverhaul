@@ -451,7 +451,16 @@ SHPCModuleStat: {
 	// ManaCost: "{0}% MANA COST"
 	// ChargeTime: "{0}% CHARGE TIME"
 	// OrbSpeed: "{0}% ORB SPEED"
+	// BeamLife: "{0}% BEAM RANGE"
+	// ExplosionRadius: "{0}% BLAST RADIUS"
 	// BeamCount: "{0} BEAM(S) / VOLLEY"
 	// Crit: "{0}% CRIT"
+	// Pierce: "{0} EXTRA PIERCE"
+	// Chain: "{0} CHAIN HOPS"
+	// Split: "{0} END-OF-LIFE SPLIT BEAMS"
+	// Minions: "{0} DETONATION SEEKER ORBS"
 	// MergeBeams: +MERGE 3 BEAMS INTO 1
+	// BeamExplodeOnHit: +BEAMS DETONATE A MICRO-PULSE ON HIT
+	// OrbDrainAura: +ORB SIPHONS NEARBY FOES WHILE CHARGING
+	// OrbExplosionPropels: +ORB DETONATION ROCKETS THE WIELDER AWAY
 }

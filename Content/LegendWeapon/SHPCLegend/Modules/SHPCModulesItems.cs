@@ -356,4 +356,101 @@
             ctx.SpreadMul += 0.10f;
         }
     }
+
+    //═════════════════════════ 行为型改件（依赖弹幕钩子触发的特殊效果） ═════════════════════════
+
+    /// <summary>枪管：光束命中时引爆微型脉冲爆炸</summary>
+    internal sealed class NovaBarrelModule : SHPCModuleItem
+    {
+        public override string Texture => CWRConstant.Item_Tools + "Mewtwo";
+        public override SHPCSlotCategory SlotCategory => SHPCSlotCategory.Barrel;
+        //新星橘红
+        public override Color TintColor => new(255, 110, 50);
+
+        public override void Apply(ref ShootContext ctx) {
+            ctx.BeamExplodeOnHit = true;
+            ctx.BeamExplodeRadius = 90f;
+            //爆裂枪管自带较高的散布与法力开销
+            ctx.SpreadMul += 0.25f;
+            ctx.DamageMul += -0.20f;
+            ctx.ManaCostMul += 0.20f;
+        }
+    }
+
+    /// <summary>瞄具：光束消亡时分裂出 2 道副光束</summary>
+    internal sealed class PrismOpticModule : SHPCModuleItem
+    {
+        public override string Texture => CWRConstant.Item_Tools + "Mewtwo";
+        public override SHPCSlotCategory SlotCategory => SHPCSlotCategory.Optic;
+        //棱镜彩光
+        public override Color TintColor => new(190, 110, 255);
+
+        public override void Apply(ref ShootContext ctx) {
+            ctx.BeamSplitOnDeath += 2;
+            //分光透镜会让原始光束略微短命，但暴击爬升
+            ctx.BeamLifeMul += -0.15f;
+            ctx.CritAdd += 4;
+        }
+    }
+
+    /// <summary>能源：光束命中后向最近的敌人弹跳两次</summary>
+    internal sealed class TeslaCoreModule : SHPCModuleItem
+    {
+        public override string Texture => CWRConstant.Item_Tools + "Mewtwo";
+        public override SHPCSlotCategory SlotCategory => SHPCSlotCategory.Power;
+        //特斯拉电弧蓝白
+        public override Color TintColor => new(120, 220, 255);
+
+        public override void Apply(ref ShootContext ctx) {
+            ctx.BeamChainCount += 2;
+            ctx.BeamChainRange = 280f;
+            ctx.BeamExtraPierce += 1;
+            ctx.ManaCostMul += 0.15f;
+        }
+    }
+
+    /// <summary>枪托：能量球爆炸时反推玩家弹射</summary>
+    internal sealed class RecoilStockModule : SHPCModuleItem
+    {
+        public override string Texture => CWRConstant.Item_Tools + "Mewtwo";
+        public override SHPCSlotCategory SlotCategory => SHPCSlotCategory.Stock;
+        //火药钢蓝灰
+        public override Color TintColor => new(180, 180, 220);
+
+        public override void Apply(ref ShootContext ctx) {
+            ctx.OrbExplosionPropels = true;
+            ctx.BeamLifeMul += 0.30f;
+            ctx.AttackSpeedMul += -0.10f;
+        }
+    }
+
+    /// <summary>握把：能量球爆炸时撒出迷你追踪光束</summary>
+    internal sealed class SwarmGripModule : SHPCModuleItem
+    {
+        public override string Texture => CWRConstant.Item_Tools + "Mewtwo";
+        public override SHPCSlotCategory SlotCategory => SHPCSlotCategory.Grip;
+        //蜂群霓虹粉
+        public override Color TintColor => new(255, 80, 180);
+
+        public override void Apply(ref ShootContext ctx) {
+            ctx.OrbDetonationMinions += 4;
+            ctx.ManaCostMul += 0.20f;
+            ctx.OrbSpeedMul += -0.10f;
+        }
+    }
+
+    /// <summary>机匣：能量球蓄力时持续吸引附近敌人，爆炸范围扩大</summary>
+    internal sealed class GravityFrameModule : SHPCModuleItem
+    {
+        public override string Texture => CWRConstant.Item_Tools + "Mewtwo";
+        public override SHPCSlotCategory SlotCategory => SHPCSlotCategory.Frame;
+        //引力深紫
+        public override Color TintColor => new(90, 60, 200);
+
+        public override void Apply(ref ShootContext ctx) {
+            ctx.OrbDrainAura = true;
+            ctx.OrbExplosionRadiusMul += 0.40f;
+            ctx.ChargeTimeMul += 0.15f;
+        }
+    }
 }

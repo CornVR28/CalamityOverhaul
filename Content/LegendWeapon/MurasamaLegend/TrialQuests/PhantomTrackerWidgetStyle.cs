@@ -192,11 +192,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.MurasamaLegend.TrialQuests
             Vector2 titlePos = new(headerRect.X + 18, headerRect.Y + (headerRect.Height - 14f) / 2f);
             //血色拖尾阴影
             Utils.DrawBorderString(sb, title, titlePos + new Vector2(2, 1),
-                CrimsonDeep * (alpha * 0.65f), 0.76f);
+                CrimsonDeep * (alpha * 0.65f), 0.85f);
             Utils.DrawBorderString(sb, title, titlePos + new Vector2(0, 1),
-                BgVoid * (alpha * 0.5f), 0.76f);
+                BgVoid * (alpha * 0.5f), 0.85f);
             //主体文字
-            Utils.DrawBorderString(sb, title, titlePos, TitleBlade * alpha, 0.76f);
+            Utils.DrawBorderString(sb, title, titlePos, TitleBlade * alpha, 0.85f);
 
             //标题下方分段——短实线(粗) + 间距 + 长虚线
             int sepY = headerRect.Bottom - 1;

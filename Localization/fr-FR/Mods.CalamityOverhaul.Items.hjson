@@ -1842,6 +1842,67 @@ VolatileFrameModule: {
 		''' */
 }
 
+NovaBarrelModule: {
+	// DisplayName: Nova Barrel
+	/* Tooltip:
+		'''
+		SHPC Module · Barrel Slot
+		An overcharged plasma muzzle detonates a micro-pulse where each beam lands
+		The price is wider spread, weaker per-shot impact and heavier mana draw
+		''' */
+}
+
+PrismOpticModule: {
+	// DisplayName: Prism Optic
+	/* Tooltip:
+		'''
+		SHPC Module · Optic Slot
+		A phase prism at the end of the optical path forks each beam into two splinters on expiration
+		Primary beams travel a touch shorter in exchange for a sharper crit window
+		''' */
+}
+
+TeslaCoreModule: {
+	// DisplayName: Tesla Core
+	/* Tooltip:
+		'''
+		SHPC Module · Power Slot
+		High-voltage arcing lets struck beams leap to the nearest foe
+		Each chained node inherits the on-hit behaviors, at a steeper mana cost
+		''' */
+}
+
+RecoilStockModule: {
+	// DisplayName: Recoil Stock
+	/* Tooltip:
+		'''
+		SHPC Module · Stock Slot
+		An overload buffer converts orb detonations into kinetic propellant for the wielder
+		Beam range is extended in tandem; the trigger feels a touch sluggish
+		''' */
+}
+
+SwarmGripModule: {
+	// DisplayName: Swarm Grip
+	/* Tooltip:
+		'''
+		SHPC Module · Grip Slot
+		A neural-mesh grip releases a swarm of strongly homing micro-orbs the moment the orb detonates
+		Orb velocity dips and mana draw climbs as compensation
+		''' */
+}
+
+GravityFrameModule: {
+	// DisplayName: Gravity Frame
+	/* Tooltip:
+		'''
+		SHPC Module · Frame Slot
+		A miniature singularity ring turns the energy orb into a gravitic well
+		It pulls nearby foes toward its core while charging and the detonation radius is greatly enlarged
+		The precision chamber makes charging feel slightly heavier
+		''' */
+}
+
 MimicPerchedAuxBrain: {
 	// DisplayName: Mimic Perched Aux Brain
 	// Tooltip: ""

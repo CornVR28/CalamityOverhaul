@@ -295,12 +295,12 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager.Styles
             float headerBlink = MathF.Sin(headerGlowPhase) * 0.12f + 0.88f;
             Vector2 titlePos = new(headerRect.X + 40f, headerRect.Y + (headerRect.Height - 18f) / 2f);
             float maxHeaderTitleW = headerRect.Width - 110f;
-            if (font.MeasureString(title).X * 0.88f > maxHeaderTitleW) {
-                while (title.Length > 3 && font.MeasureString(title + "...").X * 0.88f > maxHeaderTitleW)
+            if (font.MeasureString(title).X * 1.0f > maxHeaderTitleW) {
+                while (title.Length > 3 && font.MeasureString(title + "...").X * 1.0f > maxHeaderTitleW)
                     title = title[..^1];
                 title += "...";
             }
-            Utils.DrawBorderString(sb, title, titlePos, PrimaryBright * (alpha * headerBlink), 0.88f);
+            Utils.DrawBorderString(sb, title, titlePos, PrimaryBright * (alpha * headerBlink), 1.0f);
 
             //右侧状态标签
             float tagBlink = MathF.Sin(headerGlowPhase * 1.6f) * 0.35f + 0.65f;
@@ -502,12 +502,12 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager.Styles
             float statusBadgeX = entryRect.Right - statusBadgeW - 28f;
             string displayTitle = entry.Title ?? "";
             float maxEntryTitleW = Math.Max(40f, statusBadgeX - titleX - 8f);
-            if (font.MeasureString(displayTitle).X * 0.78f > maxEntryTitleW) {
-                while (displayTitle.Length > 3 && font.MeasureString(displayTitle + "...").X * 0.78f > maxEntryTitleW)
+            if (font.MeasureString(displayTitle).X * 0.90f > maxEntryTitleW) {
+                while (displayTitle.Length > 3 && font.MeasureString(displayTitle + "...").X * 0.90f > maxEntryTitleW)
                     displayTitle = displayTitle[..^1];
                 displayTitle += "...";
             }
-            Utils.DrawBorderString(sb, displayTitle, new Vector2(titleX, titleY), titleColor, 0.78f);
+            Utils.DrawBorderString(sb, displayTitle, new Vector2(titleX, titleY), titleColor, 0.90f);
             Rectangle statusBadgeRect = new((int)statusBadgeX, entryRect.Y + 8, statusBadgeW, 15);
             DrawDraedonStatusBadge(sb, statusBadgeRect, statusText, entry.Status,
                 alpha, statusBadgeScale, entryIndex);
@@ -530,15 +530,15 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager.Styles
             Color summaryColor = PrimaryMid * (alpha * 0.6f);
             string summary = (entry.Summary ?? "").Replace("\r", "").Replace("\n", " ").Trim();
             float maxSummaryW = entryRect.Width - 50f - iconOffset;
-            if (font.MeasureString(summary).X * 0.65f > maxSummaryW) {
-                while (summary.Length > 3 && font.MeasureString(summary + "...").X * 0.65f > maxSummaryW)
+            if (font.MeasureString(summary).X * 0.72f > maxSummaryW) {
+                while (summary.Length > 3 && font.MeasureString(summary + "...").X * 0.72f > maxSummaryW)
                     summary = summary[..^1];
                 summary += "...";
             }
             float collapsedAlpha = 1f - entry.ExpandProgress;
             if (collapsedAlpha > 0.01f) {
                 Utils.DrawBorderString(sb, summary, new Vector2(titleX, summaryY),
-                    summaryColor * collapsedAlpha, 0.65f);
+                    summaryColor * collapsedAlpha, 0.72f);
             }
 
             //展开指示器
@@ -580,7 +580,7 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager.Styles
 
                 //自动换行描述文本
                 string fullText = entry.Summary ?? "";
-                float descScale = 0.62f;
+                float descScale = 0.70f;
                 int wrapWidth = (int)((entryRect.Width - 40f) / descScale);
                 Color descColor = new Color(170, 200, 220) * (expandAlpha * 0.75f);
 

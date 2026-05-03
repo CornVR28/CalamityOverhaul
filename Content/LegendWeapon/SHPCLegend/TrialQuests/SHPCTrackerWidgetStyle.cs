@@ -189,8 +189,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.TrialQuests
             //标题文字（投影+正文，CP2077终端字体感）
             Vector2 titlePos = new(headerRect.X + 15, headerRect.Y + (headerRect.Height - 14f) / 2f);
             Utils.DrawBorderString(sb, title, titlePos + new Vector2(0, 1),
-                TacDark * (alpha * 0.45f), 0.76f);
-            Utils.DrawBorderString(sb, title, titlePos, TitleBlue * alpha, 0.76f);
+                TacDark * (alpha * 0.45f), 0.85f);
+            Utils.DrawBorderString(sb, title, titlePos, TitleBlue * alpha, 0.85f);
 
             //标题下方分隔：短实线 + 间距 + 长虚线
             int sepY = headerRect.Bottom - 1;
