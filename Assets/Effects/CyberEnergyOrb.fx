@@ -169,6 +169,12 @@ float4 PixelShaderFunction(PSInput input) : COLOR0
     {
         float burst = glitchBurst;
 
+        //球体遮罩，防止故障特效泄露到圆形轮廓外形成方形边际
+        //中心保持完整强度，到边缘平滑衰减为零
+        float orbMask = 1.0 - smoothstep(0.18, 0.32, dist);
+        //更柔和的边缘遮罩，给环状特效用
+        float orbEdgeMask = 1.0 - smoothstep(0.22, 0.34, dist);
+
         // F-1. RGB通道分离（剧烈重采样）
         float splitDist = od * (0.015 + burst * 0.05);
         float splitAngle = uTime * 3.5 + burst * 8.0;
@@ -181,17 +187,17 @@ float4 PixelShaderFunction(PSInput input) : COLOR0
         rgbSplit.b = finalColor.b * (0.6 + bChan * 0.7);
         finalColor = lerp(finalColor, rgbSplit, od * 0.8);
 
-        // F-2. 方块腐蚀（大面积高亮闪烁）
+        // F-2. 方块腐蚀（大面积高亮闪烁，受球体遮罩约束）
         float2 blockUV = floor(uv * (10.0 + burst * 15.0)) / (10.0 + burst * 15.0);
         float blockID2 = hash21(blockUV + float2(floor(uTime * 12.0), 0.0));
         float blockThresh = 0.82 - burst * 0.35;
-        float blockOn = step(blockThresh, blockID2);
+        float blockOn = step(blockThresh, blockID2) * orbMask;
         finalColor += float3(1.0, 0.94, 0.82) * blockOn * od * (0.45 + burst * 1.0);
         alpha += blockOn * od * 0.15;
 
-        // F-3. 扫描线干扰（密集明亮）
+        // F-3. 扫描线干扰（密集明亮，受球体遮罩约束）
         float scanlineOD = frac(uv.y * 80.0 + uTime * 2.5);
-        scanlineOD = step(0.92, scanlineOD);
+        scanlineOD = step(0.92, scanlineOD) * orbMask;
         finalColor += effCore * scanlineOD * od * 0.8;
 
         // F-4. 全局闪烁（暴走式亮度抖动）
@@ -204,10 +210,10 @@ float4 PixelShaderFunction(PSInput input) : COLOR0
         finalColor += effGlow * odRing * od * (1.0 + burst * 1.5);
         alpha += odRing * od * 0.25;
 
-        // F-6. 水平撕裂带（随机黑带瞬闪）
+        // F-6. 水平撕裂带（随机黑带瞬闪，受球体遮罩约束）
         float tearY = floor(uv.y * 15.0);
         float tearHash = hash21(float2(tearY, floor(uTime * 18.0)));
-        float tearOn = step(0.90 - burst * 0.15, tearHash) * od;
+        float tearOn = step(0.90 - burst * 0.15, tearHash) * od * orbEdgeMask;
         finalColor *= 1.0 - tearOn * 0.6;
 
         // F-7. alpha大幅增强
