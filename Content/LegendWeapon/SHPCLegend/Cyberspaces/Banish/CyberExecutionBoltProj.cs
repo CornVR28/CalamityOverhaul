@@ -1,4 +1,6 @@
 ﻿using CalamityOverhaul.Common;
+using CalamityOverhaul.Content.PRTTypes;
+using InnoVault.PRT;
 using InnoVault.Trails;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -97,6 +99,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Banish
             }
 
             EmitLight();
+            EmitEndpointSparks(t);
         }
 
         private void EmitLight() {
@@ -104,8 +107,42 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Banish
             int idx = (int)(MathHelper.Clamp((visibleStart + visibleEnd) * 0.5f, 0f, 1f) * (pointCount - 1));
             Vector2 lightPos = points[idx];
             float intensity = fadeAlpha * (IsFork ? 0.8f : 1.4f);
-            //电青+紫红双色，呼应赛博空间故障感
             Lighting.AddLight(lightPos, new Vector3(0.55f, 0.85f, 1f) * intensity);
+        }
+
+        /// <summary>
+        /// 主干可见期间每帧在末端散出少量电流火花，持续强化电击穿透感
+        /// </summary>
+        private void EmitEndpointSparks(float t) {
+            if (IsFork || Main.dedServ) return;
+            if (!pathReady || points == null || pointCount < 2) return;
+            if (fadeAlpha < 0.3f) return;
+            //仅在延伸+全亮阶段（t < 0.65）发射，消退时不再补充
+            if (t > 0.65f) return;
+
+            //末端位置：当前visibleEnd对应的曲线点
+            int endIdx = Math.Clamp((int)(visibleEnd * (pointCount - 1)), 0, pointCount - 1);
+            Vector2 endPos = points[endIdx];
+
+            //每帧随机1-2颗火花，沿末端切线方向散射
+            int count = Main.rand.Next(1, 3);
+            Vector2 tangent = endIdx > 0 ? (endPos - points[endIdx - 1]) : Vector2.UnitX;
+            float baseAngle = tangent.LengthSquared() > 0.01f ? tangent.ToRotation() : 0f;
+
+            for (int i = 0; i < count; i++) {
+                float angle = baseAngle + Main.rand.NextFloat(-1.0f, 1.0f);
+                float speed = Main.rand.NextFloat(3f, 9f);
+                Vector2 vel = angle.ToRotationVector2() * speed;
+                Color col = Color.Lerp(new Color(120, 230, 255), Color.White, Main.rand.NextFloat());
+                PRTLoader.AddParticle(new PRT_Spark(
+                    endPos + Main.rand.NextVector2Circular(8f, 8f),
+                    vel,
+                    affectedByGravity: false,
+                    lifetime: Main.rand.Next(10, 22),
+                    scale: Main.rand.NextFloat(0.6f, 1.4f),
+                    color: col
+                ));
+            }
         }
 
         private void ComputeAnimation(float t) {
@@ -356,5 +393,51 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Banish
         private Color ColorFunction(Vector2 _) => Color.White;
 
         public override bool ShouldUpdatePosition() => false;
+
+        public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone) {
+            if (Main.dedServ) return;
+            Vector2 impactPos = target.Center;
+
+            //径向爆发电弧火花
+            int sparkCount = Main.rand.Next(14, 22);
+            for (int i = 0; i < sparkCount; i++) {
+                float angle = Main.rand.NextFloat(MathHelper.TwoPi);
+                float speed = Main.rand.NextFloat(5f, 18f);
+                Vector2 vel = angle.ToRotationVector2() * speed;
+                Color col = Color.Lerp(new Color(100, 210, 255), Color.White, Main.rand.NextFloat(0.3f, 1f));
+                PRTLoader.AddParticle(new PRT_Spark(
+                    impactPos + Main.rand.NextVector2Circular(10f, 10f),
+                    vel,
+                    affectedByGravity: true,
+                    lifetime: Main.rand.Next(18, 38),
+                    scale: Main.rand.NextFloat(0.8f, 2.0f),
+                    color: col
+                ));
+            }
+
+            //故障碎块四散
+            int glitchCount = Main.rand.Next(8, 14);
+            for (int i = 0; i < glitchCount; i++) {
+                float speed = Main.rand.NextFloat(3f, 10f);
+                Vector2 vel = Main.rand.NextVector2CircularEdge(speed, speed);
+                float scale = Main.rand.NextFloat(0.7f, 1.6f);
+                PRTLoader.AddParticle(new PRT_CyberSquare(
+                    impactPos + Main.rand.NextVector2Circular(12f, 12f),
+                    vel,
+                    new Color(80, 200, 255),
+                    Color.White,
+                    scale,
+                    Main.rand.Next(20, 40)
+                ));
+            }
+
+            //中心瞬间光爆
+            PRTLoader.AddParticle(new PRT_Light(
+                impactPos, Vector2.Zero,
+                scale: Main.rand.NextFloat(1.2f, 1.8f),
+                color: new Color(160, 230, 255),
+                lifetime: 12
+            ));
+        }
     }
 }
