@@ -35,6 +35,11 @@ namespace CalamityOverhaul.Content.ADV
             return (T)_modules[typeof(T)];
         }
 
+        /// <summary>
+        /// 枚举所有已注册的ADV数据模块
+        /// </summary>
+        public IEnumerable<ADVDataModule> AllModules => _modules.Values;
+
         public virtual TagCompound SaveData() {
             TagCompound tag = [];
             tag[VersionKey] = CurrentVersion;

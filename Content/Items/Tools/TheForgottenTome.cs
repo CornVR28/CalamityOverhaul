@@ -50,18 +50,20 @@ namespace CalamityOverhaul.Content.Items.Tools
         }
 
         internal static bool IsAnySaveDataActive(ADVSave save) {
-            FieldInfo[] fields = typeof(ADVSave).GetFields(BindingFlags.Public | BindingFlags.Instance);
-            foreach (FieldInfo field in fields) {
-                if (field.FieldType == typeof(bool)) {
-                    bool value = (bool)field.GetValue(save);
-                    if (value) {
-                        return true;
+            foreach (ADVDataModule module in save.AllModules) {
+                FieldInfo[] fields = module.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance);
+                foreach (FieldInfo field in fields) {
+                    if (field.FieldType == typeof(bool)) {
+                        bool value = (bool)field.GetValue(module);
+                        if (value) {
+                            return true;
+                        }
                     }
-                }
-                if (field.FieldType == typeof(int)) {
-                    int value = (int)field.GetValue(save);
-                    if (value != 0) {
-                        return true;
+                    if (field.FieldType == typeof(int)) {
+                        int value = (int)field.GetValue(module);
+                        if (value != 0) {
+                            return true;
+                        }
                     }
                 }
             }
@@ -79,22 +81,24 @@ namespace CalamityOverhaul.Content.Items.Tools
                 return resetFieldCount;
             }
 
-            FieldInfo[] fields = typeof(ADVSave).GetFields(BindingFlags.Public | BindingFlags.Instance);
             resetFieldCount = 0;
 
-            foreach (FieldInfo field in fields) {
-                if (field.FieldType == typeof(bool)) {
-                    bool value = (bool)field.GetValue(save);
-                    if (value) {
-                        field.SetValue(save, false);
-                        resetFieldCount++;
+            foreach (ADVDataModule module in save.AllModules) {
+                FieldInfo[] fields = module.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance);
+                foreach (FieldInfo field in fields) {
+                    if (field.FieldType == typeof(bool)) {
+                        bool value = (bool)field.GetValue(module);
+                        if (value) {
+                            field.SetValue(module, false);
+                            resetFieldCount++;
+                        }
                     }
-                }
-                if (field.FieldType == typeof(int)) {
-                    int value = (int)field.GetValue(save);
-                    if (value != 0) {
-                        field.SetValue(save, 0);
-                        resetFieldCount++;
+                    if (field.FieldType == typeof(int)) {
+                        int value = (int)field.GetValue(module);
+                        if (value != 0) {
+                            field.SetValue(module, 0);
+                            resetFieldCount++;
+                        }
                     }
                 }
             }
@@ -296,7 +300,9 @@ namespace CalamityOverhaul.Content.Items.Tools
             if (Timer >= RewindDuration) {
                 Phase = EffectPhase.Reset;
                 Timer = 0;
-                TheForgottenTome.ResetAllADVData(owner);
+                if (Projectile.IsOwnedByLocalPlayer()) {
+                    TheForgottenTome.ResetAllADVData(owner);
+                }
                 for (int i = 0; i < 40; i++) {
                     SpawnResetExplosion(owner.Center);
                 }
