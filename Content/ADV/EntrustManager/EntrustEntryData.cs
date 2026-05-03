@@ -47,8 +47,8 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
 
         /// <summary>显示名称，运行时从 <see cref="TitleText"/> 解析</summary>
         public string Title => TitleText?.Value ?? "";
-        /// <summary>任务简要描述，运行时从 <see cref="SummaryText"/> 解析</summary>
-        public string Summary => SummaryText?.Value ?? "";
+        /// <summary>任务简要描述，运行时从 <see cref="SummaryText"/> 解析，hjson未加引号字符串中的字面量 \n 会被规范化为真实换行符</summary>
+        public string Summary => SummaryText?.Value?.Replace("\\n", "\n") ?? "";
         /// <summary>分类标签，运行时从 <see cref="CategoryText"/> 解析</summary>
         public string Category => CategoryText?.Value ?? "";
         /// <summary>进度文本，运行时从 <see cref="ProgressLabel"/> 解析，null表示无进度文本</summary>
