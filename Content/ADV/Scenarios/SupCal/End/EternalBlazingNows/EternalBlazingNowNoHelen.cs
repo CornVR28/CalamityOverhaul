@@ -2,7 +2,6 @@
 using CalamityOverhaul.Content.ADV.DialogueBoxs.Styles;
 using System;
 using Terraria;
-using Terraria.Graphics.CameraModifiers;
 using Terraria.Localization;
 using Terraria.ModLoader;
 

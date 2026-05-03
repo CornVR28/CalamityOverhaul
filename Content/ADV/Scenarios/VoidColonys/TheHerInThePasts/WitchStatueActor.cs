@@ -1,8 +1,6 @@
 ﻿using InnoVault.Actors;
 using Microsoft.Xna.Framework.Graphics;
 using System;
-using Terraria;
-using Terraria.GameContent;
 
 namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.TheHerInThePasts
 {
