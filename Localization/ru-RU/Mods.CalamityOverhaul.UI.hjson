@@ -599,111 +599,111 @@ HackTime: {
 	// WaterScanContainmentOpen: OPEN BODY
 	// WaterScanStatusStill: STILL
 	// WaterScanStatusFlowing: FLOWING
-	// CatParanormal: Mods.CalamityOverhaul.UI.HackTime.CatParanormal
-	// WraithScanName: Mods.CalamityOverhaul.UI.HackTime.WraithScanName
-	// WraithScanNameValue: Mods.CalamityOverhaul.UI.HackTime.WraithScanNameValue
-	// WraithScanType: Mods.CalamityOverhaul.UI.HackTime.WraithScanType
-	// WraithScanThreat: Mods.CalamityOverhaul.UI.HackTime.WraithScanThreat
-	// WraithScanStatus: Mods.CalamityOverhaul.UI.HackTime.WraithScanStatus
-	// WraithScanStatusStalking: Mods.CalamityOverhaul.UI.HackTime.WraithScanStatusStalking
-	// WraithScanStatusWatched: Mods.CalamityOverhaul.UI.HackTime.WraithScanStatusWatched
-	// WraithScanStatusHalt: Mods.CalamityOverhaul.UI.HackTime.WraithScanStatusHalt
-	// WraithScanStatusMemory: Mods.CalamityOverhaul.UI.HackTime.WraithScanStatusMemory
-	// WraithScanStatusDismember: Mods.CalamityOverhaul.UI.HackTime.WraithScanStatusDismember
-	// WraithScanIntegrity: Mods.CalamityOverhaul.UI.HackTime.WraithScanIntegrity
-	// WraithScanIntegrityValue: Mods.CalamityOverhaul.UI.HackTime.WraithScanIntegrityValue
-	// WraithScanOrigin: Mods.CalamityOverhaul.UI.HackTime.WraithScanOrigin
-	// WraithScanOriginValue: Mods.CalamityOverhaul.UI.HackTime.WraithScanOriginValue
-	// TurretScanName: Mods.CalamityOverhaul.UI.HackTime.TurretScanName
-	// TurretScanLaserName: Mods.CalamityOverhaul.UI.HackTime.TurretScanLaserName
-	// TurretScanGatlinName: Mods.CalamityOverhaul.UI.HackTime.TurretScanGatlinName
-	// TurretScanType: Mods.CalamityOverhaul.UI.HackTime.TurretScanType
-	// TurretScanPhase: Mods.CalamityOverhaul.UI.HackTime.TurretScanPhase
-	// TurretScanPhaseIdle: Mods.CalamityOverhaul.UI.HackTime.TurretScanPhaseIdle
-	// TurretScanPhaseCharging: Mods.CalamityOverhaul.UI.HackTime.TurretScanPhaseCharging
-	// TurretScanPhaseFiring: Mods.CalamityOverhaul.UI.HackTime.TurretScanPhaseFiring
-	// TurretScanPhaseCooldown: Mods.CalamityOverhaul.UI.HackTime.TurretScanPhaseCooldown
-	// TurretScanPhaseLocking: Mods.CalamityOverhaul.UI.HackTime.TurretScanPhaseLocking
-	// TurretScanCircuit: Mods.CalamityOverhaul.UI.HackTime.TurretScanCircuit
-	// TurretScanCircuitOnline: Mods.CalamityOverhaul.UI.HackTime.TurretScanCircuitOnline
-	// TurretScanCircuitShorted: Mods.CalamityOverhaul.UI.HackTime.TurretScanCircuitShorted
-	// TurretScanCircuitOverload: Mods.CalamityOverhaul.UI.HackTime.TurretScanCircuitOverload
-	// SignalTowerScanName: Mods.CalamityOverhaul.UI.HackTime.SignalTowerScanName
-	// SignalTowerScanType: Mods.CalamityOverhaul.UI.HackTime.SignalTowerScanType
-	// SignalTowerScanThreat: Mods.CalamityOverhaul.UI.HackTime.SignalTowerScanThreat
-	// SignalTowerScanStatus: Mods.CalamityOverhaul.UI.HackTime.SignalTowerScanStatus
-	// SignalTowerScanStatusOnline: Mods.CalamityOverhaul.UI.HackTime.SignalTowerScanStatusOnline
-	// SignalTowerScanStatusBroadcasting: Mods.CalamityOverhaul.UI.HackTime.SignalTowerScanStatusBroadcasting
-	// SignalTowerScanStatusElectrified: Mods.CalamityOverhaul.UI.HackTime.SignalTowerScanStatusElectrified
-	// SignalTowerScanProtocol: Mods.CalamityOverhaul.UI.HackTime.SignalTowerScanProtocol
+	// CatParanormal: Paranormal
+	// WraithScanName: Designation
+	// WraithScanNameValue: Unknown Wraith
+	// WraithScanType: Paranormal Entity
+	// WraithScanThreat: Unassessable ERR://-∞
+	// WraithScanStatus: Status
+	// WraithScanStatusStalking: Stealth Stalking
+	// WraithScanStatusWatched: Being Watched
+	// WraithScanStatusHalt: Halted
+	// WraithScanStatusMemory: Memory Corruption
+	// WraithScanStatusDismember: Spectral Disintegration
+	// WraithScanIntegrity: Data Integrity
+	// WraithScanIntegrityValue: 0x??% Corrupted
+	// WraithScanOrigin: Origin
+	// WraithScanOriginValue: Record Not Found
+	// TurretScanName: Codename
+	// TurretScanLaserName: Void Main Cannon Array
+	// TurretScanGatlinName: Void Gatling Turret
+	// TurretScanType: Automated Defense Mechanism
+	// TurretScanPhase: Current Phase
+	// TurretScanPhaseIdle: Standby
+	// TurretScanPhaseCharging: Charging
+	// TurretScanPhaseFiring: Firing
+	// TurretScanPhaseCooldown: Cooldown
+	// TurretScanPhaseLocking: Locking On
+	// TurretScanCircuit: Circuit Status
+	// TurretScanCircuitOnline: Online
+	// TurretScanCircuitShorted: Short-Circuited
+	// TurretScanCircuitOverload: Overload Paralysis
+	// SignalTowerScanName: Void Signal Tower
+	// SignalTowerScanType: Wide-Area Core Machine
+	// SignalTowerScanThreat: Strategic Asset
+	// SignalTowerScanStatus: Tower Status
+	// SignalTowerScanStatusOnline: Online - Awaiting Broadcast
+	// SignalTowerScanStatusBroadcasting: Broadcasting
+	// SignalTowerScanStatusElectrified: Residual Charge
+	// SignalTowerScanProtocol: Available Protocols
 	// RightClickHint: "// RIGHT CLICK TO DESELECT"
 }
 
 DecryptionStrings: {
-	// DecryptionPanelTitle: 虚空·信号终端接入
-	// DecryptionPanelSubtitleLocked: 协议封锁·需要人工破译
-	// DecryptionPanelSubtitleBreaching: 破译进行中
-	// DecryptionPanelSubtitleDataFlood: 数据洪流注入
-	// DecryptionPanelSubtitleMessage: 解码信号回放
+	// DecryptionPanelTitle: Void Signal Terminal Access
+	// DecryptionPanelSubtitleLocked: Protocol Lockdown - Manual Breach Required
+	// DecryptionPanelSubtitleBreaching: Breaching in Progress
+	// DecryptionPanelSubtitleDataFlood: Data Flood Injection
+	// DecryptionPanelSubtitleMessage: Decoded Signal Playback
 	// DecryptionPanelTerminalId: TERM-ID ▸ {0}
 	// DecryptionPanelCoordinate: ΔPOS ▸ {0}, {1}
-	// DecryptionPanelSignalLock: 信号锁定强度
+	// DecryptionPanelSignalLock: Signal Lock Strength
 	// DecryptionPanelSignalLockValue: "{0}%"
-	// DecryptionPanelFooter: "[ESC] 断开连接    [左键] 交互    [?] 帮助"
-	// DecryptionPanelHintLocked: 信号层被加密栅格封闭。按 [空格] 或点击 [启动破译] 进入输入序列。
-	// DecryptionPanelHintBreaching: 按序点击矩阵单元，填入目标序列。
-	// DecryptionPanelHintDataFlood: 协议通道打开，正在注入数据洪流...
-	// DecryptionPanelHintMessage: 解码完成，以下为截获片段。
-	// DecryptionPanelBeginBreach: ▷ 启动破译
-	// DecryptionPanelClose: ✕ 断开
+	// DecryptionPanelFooter: "[ESC] Disconnect    [Left Click] Interact    [?] Help"
+	// DecryptionPanelHintLocked: Signal layer enclosed by an encrypted grid. Press [Space] or click [Initiate Breach] to enter the input sequence.
+	// DecryptionPanelHintBreaching: Click matrix cells in order to fill the target sequence.
+	// DecryptionPanelHintDataFlood: Protocol channel opened, injecting data flood...
+	// DecryptionPanelHintMessage: Decoding complete, intercepted fragment below.
+	// DecryptionPanelBeginBreach: ▷ Initiate Breach
+	// DecryptionPanelClose: ✕ Disconnect
 	// DecryptionPanelStatusLocked: LOCKED
 	// DecryptionPanelStatusBreaching: BREACHING
 	// DecryptionPanelStatusDataFlood: INJECTING
 	// DecryptionPanelStatusMessage: DECODED
-	// BreachBuffer: 缓冲区 {0}/{1}
-	// BreachTargets: 目标序列
-	// BreachTimer: 剩余时间
-	// BreachAxisRow: 行约束 ▸ 第{0}行
-	// BreachAxisCol: 列约束 ▸ 第{0}列
-	// BreachCooldown: 协议重置中 {0:0.0}s
-	// BreachAttempt: 尝试 #{0}
-	// BreachRestart: ⟳ 重试
+	// BreachBuffer: Buffer {0}/{1}
+	// BreachTargets: Target Sequence
+	// BreachTimer: Time Remaining
+	// BreachAxisRow: Row Constraint ▸ Row {0}
+	// BreachAxisCol: Column Constraint ▸ Col {0}
+	// BreachCooldown: Protocol Resetting in {0:0.0}s
+	// BreachAttempt: Attempt #{0}
+	// BreachRestart: ⟳ Retry
 }
 
 MessageStrings: {
-	// MsgHeader: ── 截获片段 ▸ 来源 0x{0} / {1} ──
+	// MsgHeader: ── Intercepted Fragment ▸ Origin 0x{0} / {1} ──
 	// MsgSrcSystem: SYS
 	// MsgSrcSignal: SIG
 	// MsgSrcArchive: ARC
 	// MsgFragment: FRAGMENT
 	// MsgSignature: SIGN   ▸ {0}
-	// MsgBody0: 终端已接入。校验密钥匹配度 98.4%。
-	// MsgBody1: ...噪声中仍残留未标注的脉冲信号。
-	// MsgBody2: 坐标偏移量指向坍缩核心的深层回声。
-	// MsgBody3: 该节点被标记为 ██CLASSIFIED██，相关片段已封存。
-	// MsgBody4: 下一个协议窗口将由你的行动触发。
-	// MsgSkipHint: "[空格/左键] 跳过逐字显示"
-	// MsgCloseHint: "[空格/ESC] 断开连接"
-	// MsgAccess: 访问权限： Draedon
-	// MsgStatus: 状态： 局部解密
-	// MsgRec01Title: "[记录-01]"
-	// MsgRec01_0: 大尖啸。无法解析波段，像是整个宇宙都在尖叫。
-	// MsgRec01_1: 空间曲率永久锁死。折跃引擎彻底报废。强行跃迁的结果只有物质结构的解体。
-	// MsgRec01_2: 常规星际航行终结。旧物理统一模型崩溃。
-	// MsgRec02Title: "[记录-02]"
-	// MsgRec02_0: 七万三千次探测器损毁后，锁定当前虚空坐标。
-	// MsgRec02_1: 建立零号基地。铺设配套工业群。
-	// MsgRec02_2: 此处的现实壁垒已被拉扯至极限，可以直接目视那片无序的亚空间风暴。
-	// MsgRec02_3: 绝佳的观测点。
-	// MsgRec03Title: "[记录-03]"
-	// MsgRec03_0: 风暴正在渗漏。
-	// MsgRec03_1: 物理学退位。绝对的唯心规则开始接管这片工业区。
-	// MsgRec03_2: 时间线出现重叠。尸体、过往残影与亚空间能量开始结合。
-	// MsgRec03_3: 工业区中开始频繁观察到怪异现象。
-	// MsgRec04Title: "[记录-04]"
-	// MsgRec04_0: 清理这些灵异对象属于徒劳，它们无法被杀死。留作基地的外部屏障。
-	// MsgRec04_1: 若该日志被触发，意味着我已经放弃此地，所有向外界的通道已经关闭。
-	// MsgRec04_2: 后来者，自行在那些脏东西的规律里寻找机会。
+	// MsgBody0: Terminal accessed. Verification key match at 98.4%.
+	// MsgBody1: ...Unlabeled pulse signals remain within the static.
+	// MsgBody2: Coordinate offsets point to deep echoes of the collapsing core.
+	// MsgBody3: This node is marked as ██CLASSIFIED██, related fragments have been sealed.
+	// MsgBody4: The next protocol window will be triggered by your actions.
+	// MsgSkipHint: "[Space/Left Click] Skip text animation"
+	// MsgCloseHint: "[Space/ESC] Disconnect"
+	// MsgAccess: Access: Draedon
+	// MsgStatus: Status: Partially Decrypted
+	// MsgRec01Title: "[Log-01]"
+	// MsgRec01_0: The Great Shriek. Unresolvable wavelengths, as if the entire universe were screaming.
+	// MsgRec01_1: Spatial curvature permanently locked. Warp engines completely scrapped. Forced jumps only result in the disintegration of material structures.
+	// MsgRec01_2: The end of conventional interstellar travel. Collapse of the old unified physics model.
+	// MsgRec02Title: "[Log-02]"
+	// MsgRec02_0: After 73,000 destroyed probes, the current Void coordinates have been locked.
+	// MsgRec02_1: Established Base Zero. Deployed supporting industrial clusters.
+	// MsgRec02_2: The barrier of reality here has been stretched to its limit, allowing for direct visual observation of that chaotic subspace storm.
+	// MsgRec02_3: A perfect observation point.
+	// MsgRec03Title: "[Log-03]"
+	// MsgRec03_0: The storm is leaking.
+	// MsgRec03_1: Physics abdicates. Absolute metaphysical rules have begun taking over this industrial sector.
+	// MsgRec03_2: Timelines are overlapping. Corpses, echoes of the past, and subspace energy are beginning to fuse.
+	// MsgRec03_3: Bizarre anomalies are now frequently observed within the industrial sector.
+	// MsgRec04Title: "[Log-04]"
+	// MsgRec04_0: Purging these paranormal entities is futile; they cannot be killed. They will be left as an outer barrier for the base.
+	// MsgRec04_1: If this log is triggered, it means I have abandoned this place, and all channels to the outside world have been closed.
+	// MsgRec04_2: Latecomer, find your own opportunities within the patterns of those foul things.
 }
 
 SHPCUI: {

@@ -1,4 +1,4 @@
-FirstMet: {
+﻿FirstMet: {
 	Rolename1: ???
 	Rolename2: Палтус
 	Line0: Сэр... ваша техника рыбной ловли... оставляет желать лучшего.
@@ -954,136 +954,136 @@ ComeCampsiteFindMe: {
 }
 
 GalacticCrisis: {
-	// DraedonName: Draedon
-	// CrisisIntro1: Now that the quantum network is reconnected, there are some things you must see for yourself.
-	// CrisisIntro2: This is the shadow currently devouring the galactic spiral arms.
-	// CrisisIntro3: These shadows are comprised of the Swarm. Prior to this, I deployed millions of Exo Titans in an attempt to intercept them.
-	// CrisisIntro4: The data indicates this is a losing war of attrition. They are endless, and my resources will eventually be exhausted.
-	// CrisisIntro5: Therefore, I have formulated the only plan with a success rate greater than 0%.
-	// CrisisIntro6: Detonate the planetary cores of every world from the Outer Rim to the Mid Rim of the galaxy.
-	// CrisisIntro7: By reducing tens of thousands of light-years into an absolute dead zone, I can sever the Swarm's supply lines, forcing them to divert to neighboring galaxies due to extreme navigational attrition.
-	// CrisisIntro8: Starvation is the most powerful driving force in the universe, and the easiest to calculate. If I reduce the galaxy's resources below the critical threshold, this galaxy will become nothing more than an empty coffin to the Swarm.
-	// CrisisIntro9: Terra is also on the scorched earth list. But as a singularity, your essence should not be extinguished here. I will provide you with a starship for evacuation.
-	// ChoiceRefuse: There must be another way.
-	// ChoiceSilence: ......(Remain silent and grip your weapon)
-	// RebuttalLine1: ...Exactly.
-	// RebuttalLine2: I predicted a 99% probability that you would accept the evacuation, but I was looking forward to that 1% of irrational behavior.
-	// RebuttalLine3: You rejected the shortcut to survival. This is precisely the nature of the singularity I have observed.
-	// RebuttalLine4: In that case, I have a backup plan—an operation I shelved due to its excessively low success rate.
-	// MissionBrief1: The target is the Corto system. It has already fallen, but the Swarm has not yet fully digested it.
-	// MissionBrief2: Within the mantle of its third planet, a vein of extremely high-purity Exo material is forming.
-	// MissionBrief3: The Swarm must not acquire it. Once they evolve the ability to utilize Exo matter, the situation within the galaxy will spiral completely out of control.
-	// MissionBrief4: Your task is simple: break through the sea of bugs, reach the planetary core, detonate the vein, and completely destroy that planet.
-	// MissionBrief5: If this operation succeeds, it will prove that individuals can play a decisive role in the war against the Swarm, and I will draft a new strategy centered around you.
-	// AndroidReveal1: Prior to your arrival, I dispatched an advance team to those coordinates.
-	// AndroidReveal2: They are tactical androids built upon my latest technology: Altis and Apollia.
-	// AndroidReveal3: They possess mobility and logical processing capabilities far exceeding older mechs, but I lost their signals shortly after they landed on Corto III.
-	// AndroidReveal4: Final data transmissions indicate they still have vital signs, but are in extreme danger.
-	// MissionObjective: Head to the Corto system and confirm the status of those two units. If they can still fight, have them assist you in completing the mission. If they cannot...
-	// MissionObjectiveDark: At the very least, retrieve their core data. I do not wish for my masterpieces to meaninglessly become rations for the bugs.
-	// FinalSendOff: Coordinates inputted. Go, and show me if you can transcend my calculations once more.
+	DraedonName: Дрэдон
+	CrisisIntro1: Раз уж квантовая сеть восстановлена, есть кое-что, в чем ты должен убедиться лично.
+	CrisisIntro2: Это тень, пожирающая спиральные рукава галактики.
+	CrisisIntro3: Эти тени состоят из Роя. До этого момента я задействовал миллионы экзо-титанов в попытках их перехватить.
+	CrisisIntro4: Данные показывают, что это заведомо проигрышная война на истощение. Они бесконечны, а мои ресурсы рано или поздно иссякнут.
+	CrisisIntro5: Поэтому я разработал единственный план, вероятность успеха которого превышает 0%.
+	CrisisIntro6: Детонировать ядра всех планет от Внешнего до Среднего кольца галактики.
+	CrisisIntro7: Превратив эти десятки тысяч световых лет в абсолютную мертвую зону, мы перережем линии снабжения Роя, вынудив их из-за колоссальных потерь при перелете сменить курс на соседнюю галактику.
+	CrisisIntro8: Голод — величайшая движущая сила во Вселенной, и его проще всего просчитать. Если я снижу ресурсы галактики ниже критической отметки, она станет для Роя не более чем пустым гробом.
+	CrisisIntro9: Терра также находится в списке выжженной земли. Но поскольку ты являешься сингулярностью, твоя сущность не должна угаснуть здесь. Я предоставлю тебе звездолет для эвакуации.
+	ChoiceRefuse: Должен быть другой выход.
+	ChoiceSilence: ...... (Промолчать и крепче сжать оружие)
+	RebuttalLine1: ……Именно так.
+	RebuttalLine2: Я предсказывал 99-процентную вероятность того, что ты согласишься на эвакуацию, но куда больше ждал этого 1% иррационального поведения.
+	RebuttalLine3: Ты отверг легкий путь к спасению. Это в точности соответствует природе сингулярности, которую я наблюдаю.
+	RebuttalLine4: Раз так, у меня есть запасной план. Операция, которую я отложил из-за её ничтожно низкой вероятности успеха.
+	MissionBrief1: Цель — система Корто. Она уже пала, но Рой еще не успел её полностью переварить.
+	MissionBrief2: В мантии третьей планеты сейчас формируется жила экзо-материи высочайшей чистоты.
+	MissionBrief3: Нельзя позволить Рою добраться до неё. Если они эволюционируют и научатся использовать экзо-материю, ситуация в галактике выйдет из-под контроля.
+	MissionBrief4: Твоя задача проста: прорваться через море жуков, достичь ядра, взорвать жилу и полностью уничтожить эту планету.
+	MissionBrief5: Если эта операция увенчается успехом, это докажет, что отдельная особь способна сыграть решающую роль в войне против Роя, и я разработаю новую стратегию, опирающуюся на тебя.
+	AndroidReveal1: До твоего прибытия я уже отправил по этим координатам передовой отряд.
+	AndroidReveal2: Это тактические андроиды, созданные на базе моих новейших технологий: Алтис и Аполлия.
+	AndroidReveal3: Они обладают мобильностью и логическими мощностями, далеко превосходящими старые модели мехов, но вскоре после их высадки на Корто III я потерял их сигнал.
+	AndroidReveal4: Последние данные свидетельствуют о том, что у них еще есть жизненные показатели, но они находятся в крайней опасности.
+	MissionObjective: Отправляйся в систему Корто и проверь состояние этих двух единиц. Если они еще способны сражаться — пусть помогут тебе завершить миссию. Если же нет...
+	MissionObjectiveDark: Хотя бы верни данные их ядер. Я не желаю, чтобы мои шедевры бессмысленно пошли на корм жукам.
+	FinalSendOff: Координаты введены. Ступай, и покажи мне, сможешь ли ты вновь превзойти мои расчеты.
 }
 
 FirstMetApollia: {
-	// Rolename: Apollia
-	// Line1: ......Human?
-	// Line2: That atmospheric drop trajectory was too obvious. I predicted the landing zone and came to try my luck.
-	// Line3: I am Apollia. You'd better be the vanguard guide for the Exo Fleet, here to tell me the main force is right behind you.
-	// C1: (Hand over Draedon's authorization chip)
-	// C2: How do I know you're not a Swarm mimic trap?
-	// C2_R1: ......Mimics don't actively expose their positions, nor do they run toward a drop pod.
-	// C2_R2: The chip. Show me your authorization chip.
-	// Line4: ......(Reading chip data)
-	// Line5: Just you?! What the hell!
-	// Line6: What we need here is a Titan Legion, and an Exterminatus! Not just sending another person to die!
-	// Line7: (Deep breath)......My apologies. I am now aware of the Source's arrangements.
-	// Line8: Apollia, formerly of the Ninth Legion, will now assist you in all your operations on this planet.
+	Rolename: Аполлия
+	Line1: ......Человек?
+	Line2: Твоя траектория сброса в атмосфере была слишком приметной. Я вычислила точку приземления и пришла попытать удачу.
+	Line3: Я Аполлия. Тебе лучше оказаться передовым наводчиком Экзо-флота и сказать мне, что основные силы прямо за тобой.
+	C1: (Протянуть чип авторизации Дрэдона)
+	C2: Как мне убедиться, что ты не мимикрирующая ловушка Роя?
+	C2_R1: ......Мимики не стали бы добровольно раскрывать свою позицию, и уж тем более бежать навстречу десантной капсуле.
+	C2_R2: Чип. Покажи мне свой чип авторизации.
+	Line4: ......(Считывание данных чипа)
+	Line5: Ты один?! Какого черта!
+	Line6: Здесь нужен Легион Титанов и Экстерминатус! А не еще один смертник!
+	Line7: (Глубокий вдох)......Прости. Теперь мне известны планы Источника.
+	Line8: Аполлия, бывший член Девятого Легиона. С этого момента я буду оказывать поддержку во всех твоих операциях на этой планете.
 }
 
 GargoyleWarningScenario: {
-	// Line1: ......A Swarm scout cluster. The main swarm is highly likely right behind them.
-	// Line2: They've definitely spotted you. Follow me. There's an abandoned fortress ahead; we can use its fortifications to hold them off for a while.
+	Line1: ......Разведывательная стая Роя. Основные силы, скорее всего, прямо за ними.
+	Line2: Они наверняка тебя засекли. За мной, впереди заброшенная крепость. Местные укрепления помогут продержаться какое-то время.
 }
 
 DropPodCallScenario: {
-	// CallerNameText: Draedon
-	// Line1: Smoother than I anticipated. Warp transit time was negative 43 minutes.
-	// Line2: Your constitution is exceptionally suited for subspace navigation.
-	// Line3: You are now in low orbit above Corto III.
-	// Line4: Be careful to avoid the wreckage of those Exo Mechs.
-	// Line5: Following the Apocalypse-class war, the total mass of this planet doubled. Hence, what you see here.
-	// Line6: I have burned the permissions into your chip. If you encounter any surviving units, they will understand everything.
-	// Line7: You are about to enter the shielding field established by the Swarm. Once inside, all communication with the outside will be severed.
-	// Line8: If you successfully slay the node creature stationed on this planet, the field should dissipate. It is likely located near the planetary core.
-	// Line9: Lastly, good luck.
+	CallerNameText: Дрэдон
+	Line1: Всё прошло куда более гладко, чем я предполагал. Переход занял минус 43 минуты.
+	Line2: Твоя физиология на удивление хорошо подходит для путешествий в подпространстве.
+	Line3: Сейчас ты находишься на низкой орбите Корто III.
+	Line4: Осторожнее, избегай обломков экзо-мехов.
+	Line5: После войны апокалиптического масштаба общая масса этой планеты удвоилась, оттого ты и видишь всё это.
+	Line6: Я записал права доступа на твой чип. Если встретишь выжившие единицы — они всё поймут.
+	Line7: Вскоре ты войдешь в экранирующее поле, созданное Роем. В этот момент вся связь с внешним миром прервется.
+	Line8: Если тебе удастся убить узловое существо, размещенное на этой планете, поле должно рассеяться. Скорее всего, оно находится ближе к ядру.
+	Line9: Напоследок — удачи.
 }
 
 FishoilSubmitScenario: {
-	// Rolename: Halibut
-	// SubmitLine1: Hmm, you've collected enough fish.
-	// SubmitLine2: Just enough for me to extract a bottle of fish oil.
-	// QuestionLine: Are you going to hand them over to me?
-	// ChoiceGive: Sure, take them.
-	// ChoiceRefuse: Let me think about it.
-	// GiveResponse: Excellent, just a moment... Here you go, a fresh bottle of fish oil.
-	// RefuseResponse: Alright, come find me whenever you've made up your mind.
-	// QuestTitle: Fish Oil Collection
-	// QuestSummary: Collect 300 ordinary fish and give them to Halibut in exchange for a bottle of fish oil.
-	// QuestCategory: Halibut
-	// ProgressFormat: "{0}/{1}"
-	// TrackerCollecting: "{0} more fish needed"
-	// TrackerReady: Fish collected. Please focus on the quest to submit.
-	// StatusSuspended: Suspended
-	// StatusCompleted: Completed
-	// StatusSubmittable: Ready to Submit
-	// StatusCollectingFormat: Collecting ({0}/{1})
-	// NotEnoughResponse: Hmm? It seems you don't have enough fish. Go catch some more and come back.
-	// AlreadyCompletedResponse: I've already given you the fish oil. If you want more, you'll have to wait until next time.
-	// SubmitButtonLabel: Submit Fish
-	// AwaitingSubmitHint: Click submit to give the fish to Halibut
+	Rolename: Палтус
+	SubmitLine1: Хм, ты собрал достаточно рыбы.
+	SubmitLine2: Как раз хватит, чтобы выжать один пузырек рыбьего жира.
+	QuestionLine: Решил отдать их мне?
+	ChoiceGive: Да, держи
+	ChoiceRefuse: Я еще подумаю
+	GiveResponse: Отлично, подожди секунду... Держи, свежий рыбий жир.
+	RefuseResponse: Ну ладно, приходи, как надумаешь.
+	QuestTitle: Сбор рыбьего жира
+	QuestSummary: Соберите 300 обычных рыб и отдайте Палтусу в обмен на рыбий жир.
+	QuestCategory: Палтус
+	ProgressFormat: "{0}/{1}"
+	TrackerCollecting: Осталось собрать рыб: {0}
+	TrackerReady: Рыба собрана, выберите задание для сдачи
+	StatusSuspended: Приостановлено
+	StatusCompleted: Завершено
+	StatusSubmittable: Готово к сдаче
+	StatusCollectingFormat: Сбор ({0}/{1})
+	NotEnoughResponse: А? Кажется, рыбы маловато. Иди налови еще.
+	AlreadyCompletedResponse: Я уже отдал тебе рыбий жир. Если хочешь еще, придется подождать до следующего раза.
+	SubmitButtonLabel: Отдать рыбу
+	AwaitingSubmitHint: Нажмите, чтобы передать рыбу Палтусу
 }
 
 FirstMetShepel: {
-	// RolenameSHPC: SHPC
-	// Line1: Master! I am so glad to see you again!
-	// Choice1Text: You've got the wrong person, haven't you?
-	// Choice2Text: ...Long time no see.
-	// Choice1Response: ...Yes. As long as it is you, I am willing to be wrong every time.
-	// Choice1Silence: ......
-	// CybCourseOfferLine: Braindance program successfully loaded. Master, would you like to connect to the Braindance space now to learn about Hack Mode and SHPC weapon operating protocols?
-	// CybCourseAcceptText: Let's go now.
-	// CybCourseDeclineText: Not right now.
-	// CybCourseAcceptResponse: Acknowledged. Establishing neural link... Please remain still.
-	// CybCourseDeclineResponse: Understood. Braindance access credentials have been written to your save data. You can activate it yourself at any time, Master.
+	RolenameSHPC: SHPC
+	Line1: Хозяин! Я так рада снова вас видеть!
+	Choice1Text: Ты, наверное, с кем-то меня путаешь?
+	Choice2Text: ...Давно не виделись.
+	Choice1Response: ...Да. Если это вы, я готова ошибаться каждый раз.
+	Choice1Silence: ......
+	CybCourseOfferLine: Программа брейнданса успешно загружена. Хозяин, желаете ли вы подключиться к пространству брейнданса прямо сейчас, чтобы изучить режим хакера и протоколы управления оружием SHPC?
+	CybCourseAcceptText: Давай прямо сейчас
+	CybCourseDeclineText: Пока нет
+	CybCourseAcceptResponse: Вас поняла. Устанавливаю нейролинк... Пожалуйста, не двигайтесь.
+	CybCourseDeclineResponse: Принято. Учетные данные для доступа к брейндансу сохранены. Вы сможете активировать его самостоятельно в любое время, Хозяин.
 }
 
 TheHerInThePast: {
-	// RolenameWitch: Brimstone Witch
-	// RolenameSHPC: SHPC
-	// WitchLine1: Being chased by those filthy things must be pretty unpleasant. Luckily you ran into me.
-	// ShpcLine1: Thank you... But how is this possible? You belong to the past, yet you can move around...
-	// WitchLine2: If you can invade here from a century in the future, it's only natural I can do something similar.
-	// WitchLine3: Though I am indeed just a shadow left behind in this place.
-	// ShpcLine2: You can use your abilities independently from any point in the past?!
-	// WitchLine4: Your focus is so cute... Hurry up and leave. It's better if these filthy things stay buried in the past with me.
-	// WitchLine5: Oh, by the way, little maid.
-	// ShpcLine3: What is it?
-	// WitchLine6: Your exhaustion has seeped right into your bones.
-	// WitchLine7: Stop always trying to change the past, and learn to accept the future.
-	// ShpcLine4: ......
+	RolenameWitch: Серная Ведьма
+	RolenameSHPC: SHPC
+	WitchLine1: Наверное, неприятно, когда за тобой гонятся эти мерзости. К счастью, я успела вовремя.
+	ShpcLine1: Спасибо... Но как такое возможно? Ты принадлежишь прошлому, но при этом можешь двигаться...
+	WitchLine2: Раз вы можете вторгнуться сюда из столетия в будущем, естественно, что и я способна на нечто подобное.
+	WitchLine3: Впрочем, ты права. Я действительно лишь остаточная тень, задержавшаяся здесь.
+	ShpcLine2: Но в таком случае... подобное использование сил приведет к твоему исчезновению!
+	WitchLine4: Как же мило, что тебя это заботит. Уходите скорее. Этим отбросам лучше остаться похороненными в прошлом вместе со мной.
+	WitchLine5: И еще кое-что, маленькая служанка.
+	ShpcLine3: Что?
+	WitchLine6: Твоя усталость пропитала тебя до самых костей.
+	WitchLine7: Перестаньте вечно пытаться изменить прошлое и научитесь принимать своё будущее.
+	ShpcLine4: ......
 }
 
 EternalBlazingNowNoHelen: {
-	// Rolename1: ???硫火女巫???
-	// Rolename2: 硫火女巫
-	// Line1: ......能走到这里的人，已经许久没有出现了
-	// Line2: 我不会死......不过，也差不多了
-	// Line3: 你做得很好......或许，你真的是他口中那个值得等待的“时代唯一”
-	// Line4: 所以，我有最后一件事，想拜托你
-	// Line5: 只要这世间的过去与现在，还存有一缕硫磺火，“我”就不会消亡
-	// Line6: 可我的意识，却会在这无尽的火海中被逐渐磨灭
-	// Line7: 如果没有遇到你，我最多还能撑三十年
-	// Line8: 这是唯一的办法
-	// Line9: 当我的意识彻底消散，整个世界都会被焚尽
-	// Line10: 况且，如果你想终结这个时代，凡人的躯壳太过脆弱
+	Rolename1: ???Серная Ведьма???
+	Rolename2: Серная Ведьма
+	Line1: ......Давненько не появлялось никого, кто смог бы зайти так далеко.
+	Line2: Я не умру... но это уже близко к тому.
+	Line3: Ты отлично справился... Возможно, ты и вправду тот самый «единственный в этой эпохе», чьего появления стоило ждать, как он и говорил.
+	Line4: Поэтому у меня есть к тебе последняя просьба.
+	Line5: Пока в прошлом и настоящем этого мира теплится хотя бы искра серного пламени, «я» не исчезну.
+	Line6: Однако мое сознание будет постепенно стираться в этом бескрайнем море огня.
+	Line7: Если бы я не встретила тебя, я продержалась бы от силы еще лет тридцать.
+	Line8: Это единственный выход.
+	Line9: Когда мое сознание окончательно рассеется, весь мир обратится в пепел.
+	Line10: К тому же... если ты намерен положить конец этой эпохе, оболочка смертного слишком хрупка.
 }
