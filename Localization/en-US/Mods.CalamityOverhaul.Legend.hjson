@@ -444,3 +444,18 @@ SHPCTrialQuestLine: {
 		Please be prepared. I will monitor the battlefield throughout and assist you in settling this once and for all.
 		'''
 }
+
+SHPCModuleStat: {
+	AttackSpeed: "{0}% ATK SPEED"
+	Damage: "{0}% DAMAGE"
+	Spread: "{0}% SPREAD"
+	BeamSpeed: "{0}% BEAM VELOCITY"
+	Homing: "{0}% HOMING"
+	MergedDamage: "{0}% MERGED DMG"
+	ManaCost: "{0}% MANA COST"
+	ChargeTime: "{0}% CHARGE TIME"
+	OrbSpeed: "{0}% ORB SPEED"
+	BeamCount: "{0} BEAM(S) / VOLLEY"
+	Crit: "{0}% CRIT"
+	MergeBeams: +MERGE 3 BEAMS INTO 1
+}

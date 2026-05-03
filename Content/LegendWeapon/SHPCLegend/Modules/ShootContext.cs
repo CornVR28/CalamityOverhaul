@@ -2,7 +2,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
 {
     /// <summary>
     /// SHPC 射击行为聚合上下文，所有改件通过 <see cref="SHPCModuleItem.Apply"/> 修改这些字段
-    /// 默认值都是中性值（1f 倍率、0 加成、false 标志），多改件累积时按乘法/加法叠加
+    /// 默认值都是中性值（1f 倍率、0 加成、false 标志），多改件累积时浮点倍率使用加算叠加
+    /// 每个改件只传入增量（如 +0.5f 表示+50%），最终值 = 1 + 各改件增量之和
     /// </summary>
     internal struct ShootContext
     {

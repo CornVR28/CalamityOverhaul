@@ -28,16 +28,5 @@ namespace CalamityOverhaul.Content.Items.Ranged
             Item.value = Item.buyPrice(1, 80, 0, 0);
             Item.SetHeldProj<StarshipHeld>();
         }
-
-        public override void AddRecipes() {
-            CreateRecipe().
-                AddIngredient(ItemID.LunarBar, 12).
-                AddIngredient(ItemID.FragmentVortex, 8).
-                AddIngredient(ItemID.FragmentNebula, 8).
-                AddIngredient(ItemID.FragmentSolar, 8).
-                AddIngredient(ItemID.FragmentStardust, 8).
-                AddTile(TileID.LunarCraftingStation).
-                Register();
-        }
     }
 }

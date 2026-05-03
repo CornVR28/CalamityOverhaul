@@ -715,7 +715,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                 }
                 else if (pinnedSector == ModifySectorIndex) {
                     SHPCModPanel.Layout layout = SHPCModPanel.Compute(fAnchor, fMidA, pinnedPanelProgress);
-                    SHPCModPanel.Draw(sb, px, layout, pinnedPanelProgress, globalAlpha, modHover);
+                    
 
                     //三级模块选择面板
                     if (pinnedModuleSlot >= 0 && modulePanelProgress > 0.02f) {
@@ -734,6 +734,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                             modulePanelProgress, globalAlpha, hover,
                             pinnedModuleSlot, equipped);
                     }
+
+                    SHPCModPanel.Draw(sb, px, layout, pinnedPanelProgress, globalAlpha, modHover);
                 }
             }
         }

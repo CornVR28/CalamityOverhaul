@@ -444,3 +444,18 @@ SHPCTrialQuestLine: {
 		请做好准备。我会全程监控战场，协助您一次了结。
 		'''
 }
+
+SHPCModuleStat: {
+	AttackSpeed: "{0}% 攻击速度"
+	Damage: "{0}% 伤害"
+	Spread: "{0}% 散布"
+	BeamSpeed: "{0}% 光束速度"
+	Homing: "{0}% 追踪"
+	MergedDamage: "{0}% 合并伤害"
+	ManaCost: "{0}% 法力消耗"
+	ChargeTime: "{0}% 蓄力时间"
+	OrbSpeed: "{0}% 能量球速度"
+	BeamCount: "{0} 束/轮"
+	Crit: "{0}% 暴击率"
+	MergeBeams: +3束光束合并为1束
+}

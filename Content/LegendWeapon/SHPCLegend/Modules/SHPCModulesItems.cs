@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
 {
     /// <summary>
@@ -17,15 +15,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
         public override Color TintColor => new(0, 240, 220);
 
         public override void Apply(ref ShootContext ctx) {
-            ctx.AttackSpeedMul *= 1.5f;
-            ctx.DamageMul *= 0.7f;
-            ctx.SpreadMul *= 1.4f;
-        }
-
-        public override IEnumerable<string> GetStatLines() {
-            yield return "+50% ATK SPEED";
-            yield return "-30% DAMAGE";
-            yield return "+40% SPREAD";
+            ctx.AttackSpeedMul += 0.5f;
+            ctx.DamageMul += -0.3f;
+            ctx.SpreadMul += 0.4f;
         }
     }
 
@@ -38,16 +30,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
 
         public override void Apply(ref ShootContext ctx) {
             ctx.MergeBeams = true;
-            ctx.BeamSpeedMul *= 1.6f;
-            ctx.HomingMul *= 2.5f;
-            ctx.MergedDamageBonus *= 3f;
-        }
-
-        public override IEnumerable<string> GetStatLines() {
-            yield return "+MERGE 3 BEAMS INTO 1";
-            yield return "+60% BEAM VELOCITY";
-            yield return "+150% HOMING";
-            yield return "+200% MERGED DMG";
+            ctx.BeamSpeedMul += 0.6f;
+            ctx.HomingMul += 1.5f;
+            ctx.MergedDamageBonus += 2f;
         }
     }
 
@@ -60,16 +45,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
 
         public override void Apply(ref ShootContext ctx) {
             ctx.BeamCountAdd += 2;
-            ctx.SpreadMul *= 2.2f;
-            ctx.DamageMul *= 0.55f;
-            ctx.BeamSpeedMul *= 0.9f;
-        }
-
-        public override IEnumerable<string> GetStatLines() {
-            yield return "+2 BEAMS / VOLLEY";
-            yield return "+120% SPREAD";
-            yield return "-45% DAMAGE";
-            yield return "-10% BEAM VELOCITY";
+            ctx.SpreadMul += 1.2f;
+            ctx.DamageMul += -0.45f;
+            ctx.BeamSpeedMul += -0.1f;
         }
     }
 
@@ -81,17 +59,10 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
         public override Color TintColor => new(255, 235, 60);
 
         public override void Apply(ref ShootContext ctx) {
-            ctx.BeamSpeedMul *= 1.8f;
-            ctx.AttackSpeedMul *= 1.20f;
-            ctx.DamageMul *= 0.85f;
-            ctx.HomingMul *= 0.5f;
-        }
-
-        public override IEnumerable<string> GetStatLines() {
-            yield return "+80% BEAM VELOCITY";
-            yield return "+20% ATK SPEED";
-            yield return "-15% DAMAGE";
-            yield return "-50% HOMING";
+            ctx.BeamSpeedMul += 0.8f;
+            ctx.AttackSpeedMul += 0.20f;
+            ctx.DamageMul += -0.15f;
+            ctx.HomingMul += -0.5f;
         }
     }
 
@@ -103,17 +74,10 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
         public override Color TintColor => new(220, 40, 60);
 
         public override void Apply(ref ShootContext ctx) {
-            ctx.DamageMul *= 1.65f;
-            ctx.AttackSpeedMul *= 0.7f;
-            ctx.SpreadMul *= 0.3f;
-            ctx.MergedDamageBonus *= 1.4f;
-        }
-
-        public override IEnumerable<string> GetStatLines() {
-            yield return "+65% DAMAGE";
-            yield return "-30% ATK SPEED";
-            yield return "-70% SPREAD";
-            yield return "+40% MERGED DMG";
+            ctx.DamageMul += 0.65f;
+            ctx.AttackSpeedMul += -0.3f;
+            ctx.SpreadMul += -0.7f;
+            ctx.MergedDamageBonus += 0.4f;
         }
     }
 
@@ -126,13 +90,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
         public override Color TintColor => new(80, 255, 200);
 
         public override void Apply(ref ShootContext ctx) {
-            ctx.SpreadMul *= 0f;
+            ctx.SpreadMul += -1.0f;
             ctx.CritAdd += 10;
-        }
-
-        public override IEnumerable<string> GetStatLines() {
-            yield return "-100% SPREAD";
-            yield return "+10% CRIT";
         }
     }
 
@@ -144,15 +103,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
         public override Color TintColor => new(255, 70, 200);
 
         public override void Apply(ref ShootContext ctx) {
-            ctx.HomingMul *= 1.8f;
-            ctx.AttackSpeedMul *= 1.15f;
-            ctx.DamageMul *= 0.95f;
-        }
-
-        public override IEnumerable<string> GetStatLines() {
-            yield return "+80% HOMING";
-            yield return "+15% ATK SPEED";
-            yield return "-5% DAMAGE";
+            ctx.HomingMul += 0.8f;
+            ctx.AttackSpeedMul += 0.15f;
+            ctx.DamageMul += -0.05f;
         }
     }
 
@@ -164,15 +117,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
         public override Color TintColor => new(255, 90, 110);
 
         public override void Apply(ref ShootContext ctx) {
-            ctx.HomingMul *= 2.5f;
+            ctx.HomingMul += 1.5f;
             ctx.CritAdd += 6;
-            ctx.SpreadMul *= 0.4f;
-        }
-
-        public override IEnumerable<string> GetStatLines() {
-            yield return "+150% HOMING";
-            yield return "+6% CRIT";
-            yield return "-60% SPREAD";
+            ctx.SpreadMul += -0.6f;
         }
     }
 
@@ -184,15 +131,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
         public override Color TintColor => new(50, 200, 255);
 
         public override void Apply(ref ShootContext ctx) {
-            ctx.SpreadMul *= 0.3f;
-            ctx.AttackSpeedMul *= 1.18f;
-            ctx.ManaCostMul *= 1.10f;
-        }
-
-        public override IEnumerable<string> GetStatLines() {
-            yield return "-70% SPREAD";
-            yield return "+18% ATK SPEED";
-            yield return "+10% MANA COST";
+            ctx.SpreadMul += -0.7f;
+            ctx.AttackSpeedMul += 0.18f;
+            ctx.ManaCostMul += 0.10f;
         }
     }
 
@@ -205,13 +146,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
         public override Color TintColor => new(180, 80, 255);
 
         public override void Apply(ref ShootContext ctx) {
-            ctx.OrbSpeedMul *= 1.4f;
-            ctx.ChargeTimeMul *= 0.8f;
-        }
-
-        public override IEnumerable<string> GetStatLines() {
-            yield return "+40% ORB SPEED";
-            yield return "-20% CHARGE TIME";
+            ctx.OrbSpeedMul += 0.4f;
+            ctx.ChargeTimeMul += -0.2f;
         }
     }
 
@@ -223,15 +159,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
         public override Color TintColor => new(80, 180, 255);
 
         public override void Apply(ref ShootContext ctx) {
-            ctx.DamageMul *= 1.30f;
-            ctx.MergedDamageBonus *= 1.5f;
-            ctx.ManaCostMul *= 1.30f;
-        }
-
-        public override IEnumerable<string> GetStatLines() {
-            yield return "+30% DAMAGE";
-            yield return "+50% MERGED DMG";
-            yield return "+30% MANA COST";
+            ctx.DamageMul += 0.30f;
+            ctx.MergedDamageBonus += 0.5f;
+            ctx.ManaCostMul += 0.30f;
         }
     }
 
@@ -243,15 +173,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
         public override Color TintColor => new(200, 255, 80);
 
         public override void Apply(ref ShootContext ctx) {
-            ctx.ChargeTimeMul *= 0.55f;
-            ctx.OrbSpeedMul *= 0.85f;
-            ctx.AttackSpeedMul *= 0.95f;
-        }
-
-        public override IEnumerable<string> GetStatLines() {
-            yield return "-45% CHARGE TIME";
-            yield return "-15% ORB SPEED";
-            yield return "-5% ATK SPEED";
+            ctx.ChargeTimeMul += -0.45f;
+            ctx.OrbSpeedMul += -0.15f;
+            ctx.AttackSpeedMul += -0.05f;
         }
     }
 
@@ -263,15 +187,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
         public override Color TintColor => new(255, 100, 220);
 
         public override void Apply(ref ShootContext ctx) {
-            ctx.OrbSpeedMul *= 1.55f;
-            ctx.MergedDamageBonus *= 1.75f;
-            ctx.ChargeTimeMul *= 1.20f;
-        }
-
-        public override IEnumerable<string> GetStatLines() {
-            yield return "+55% ORB SPEED";
-            yield return "+75% MERGED DMG";
-            yield return "+20% CHARGE TIME";
+            ctx.OrbSpeedMul += 0.55f;
+            ctx.MergedDamageBonus += 0.75f;
+            ctx.ChargeTimeMul += 0.20f;
         }
     }
 
@@ -284,13 +202,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
         public override Color TintColor => new(180, 200, 220);
 
         public override void Apply(ref ShootContext ctx) {
-            ctx.AttackSpeedMul *= 0.85f;
-            ctx.DamageMul *= 1.25f;
-        }
-
-        public override IEnumerable<string> GetStatLines() {
-            yield return "-15% ATK SPEED";
-            yield return "+25% DAMAGE";
+            ctx.AttackSpeedMul += -0.15f;
+            ctx.DamageMul += 0.25f;
         }
     }
 
@@ -302,15 +215,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
         public override Color TintColor => new(140, 180, 90);
 
         public override void Apply(ref ShootContext ctx) {
-            ctx.SpreadMul *= 0.5f;
-            ctx.AttackSpeedMul *= 0.92f;
+            ctx.SpreadMul += -0.5f;
+            ctx.AttackSpeedMul += -0.08f;
             ctx.CritAdd += 3;
-        }
-
-        public override IEnumerable<string> GetStatLines() {
-            yield return "-50% SPREAD";
-            yield return "-8% ATK SPEED";
-            yield return "+3% CRIT";
         }
     }
 
@@ -322,15 +229,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
         public override Color TintColor => new(160, 240, 240);
 
         public override void Apply(ref ShootContext ctx) {
-            ctx.AttackSpeedMul *= 1.30f;
-            ctx.DamageMul *= 0.90f;
-            ctx.SpreadMul *= 1.15f;
-        }
-
-        public override IEnumerable<string> GetStatLines() {
-            yield return "+30% ATK SPEED";
-            yield return "-10% DAMAGE";
-            yield return "+15% SPREAD";
+            ctx.AttackSpeedMul += 0.30f;
+            ctx.DamageMul += -0.10f;
+            ctx.SpreadMul += 0.15f;
         }
     }
 
@@ -342,15 +243,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
         public override Color TintColor => new(255, 100, 60);
 
         public override void Apply(ref ShootContext ctx) {
-            ctx.DamageMul *= 1.20f;
-            ctx.AttackSpeedMul *= 1.10f;
-            ctx.ManaCostMul *= 1.25f;
-        }
-
-        public override IEnumerable<string> GetStatLines() {
-            yield return "+20% DAMAGE";
-            yield return "+10% ATK SPEED";
-            yield return "+25% MANA COST";
+            ctx.DamageMul += 0.20f;
+            ctx.AttackSpeedMul += 0.10f;
+            ctx.ManaCostMul += 0.25f;
         }
     }
 
@@ -363,11 +258,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
         public override Color TintColor => new(120, 255, 180);
 
         public override void Apply(ref ShootContext ctx) {
-            ctx.ManaCostMul *= 0.5f;
-        }
-
-        public override IEnumerable<string> GetStatLines() {
-            yield return "-50% MANA COST";
+            ctx.ManaCostMul += -0.5f;
         }
     }
 
@@ -379,13 +270,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
         public override Color TintColor => new(60, 220, 120);
 
         public override void Apply(ref ShootContext ctx) {
-            ctx.ManaCostMul *= 0.75f;
-            ctx.AttackSpeedMul *= 1.12f;
-        }
-
-        public override IEnumerable<string> GetStatLines() {
-            yield return "-25% MANA COST";
-            yield return "+12% ATK SPEED";
+            ctx.ManaCostMul += -0.25f;
+            ctx.AttackSpeedMul += 0.12f;
         }
     }
 
@@ -397,15 +283,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
         public override Color TintColor => new(200, 130, 255);
 
         public override void Apply(ref ShootContext ctx) {
-            ctx.ManaCostMul *= 0.7f;
+            ctx.ManaCostMul += -0.3f;
             ctx.CritAdd += 5;
-            ctx.ChargeTimeMul *= 1.10f;
-        }
-
-        public override IEnumerable<string> GetStatLines() {
-            yield return "-30% MANA COST";
-            yield return "+5% CRIT";
-            yield return "+10% CHARGE TIME";
+            ctx.ChargeTimeMul += 0.10f;
         }
     }
 
@@ -417,15 +297,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
         public override Color TintColor => new(220, 180, 120);
 
         public override void Apply(ref ShootContext ctx) {
-            ctx.SpreadMul *= 0.8f;
-            ctx.AttackSpeedMul *= 1.08f;
-            ctx.DamageMul *= 1.06f;
-        }
-
-        public override IEnumerable<string> GetStatLines() {
-            yield return "-20% SPREAD";
-            yield return "+8% ATK SPEED";
-            yield return "+6% DAMAGE";
+            ctx.SpreadMul += -0.2f;
+            ctx.AttackSpeedMul += 0.08f;
+            ctx.DamageMul += 0.06f;
         }
     }
 
@@ -440,10 +314,6 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
         public override void Apply(ref ShootContext ctx) {
             ctx.BeamCountAdd += 1;
         }
-
-        public override IEnumerable<string> GetStatLines() {
-            yield return "+1 BEAM PER VOLLEY";
-        }
     }
 
     internal sealed class MultiCellFrameModule : SHPCModuleItem
@@ -455,14 +325,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
 
         public override void Apply(ref ShootContext ctx) {
             ctx.BeamCountAdd += 2;
-            ctx.DamageMul *= 0.78f;
-            ctx.SpreadMul *= 1.20f;
-        }
-
-        public override IEnumerable<string> GetStatLines() {
-            yield return "+2 BEAMS / VOLLEY";
-            yield return "-22% DAMAGE";
-            yield return "+20% SPREAD";
+            ctx.DamageMul += -0.22f;
+            ctx.SpreadMul += 0.20f;
         }
     }
 
@@ -474,15 +338,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
         public override Color TintColor => new(140, 80, 255);
 
         public override void Apply(ref ShootContext ctx) {
-            ctx.HomingMul *= 1.6f;
-            ctx.OrbSpeedMul *= 1.25f;
-            ctx.ManaCostMul *= 1.15f;
-        }
-
-        public override IEnumerable<string> GetStatLines() {
-            yield return "+60% HOMING";
-            yield return "+25% ORB SPEED";
-            yield return "+15% MANA COST";
+            ctx.HomingMul += 0.6f;
+            ctx.OrbSpeedMul += 0.25f;
+            ctx.ManaCostMul += 0.15f;
         }
     }
 
@@ -496,15 +354,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
         public override void Apply(ref ShootContext ctx) {
             ctx.BeamCountAdd += 1;
             ctx.CritAdd += 8;
-            ctx.ManaCostMul *= 1.30f;
-            ctx.SpreadMul *= 1.10f;
-        }
-
-        public override IEnumerable<string> GetStatLines() {
-            yield return "+1 BEAM / VOLLEY";
-            yield return "+8% CRIT";
-            yield return "+30% MANA COST";
-            yield return "+10% SPREAD";
+            ctx.ManaCostMul += 0.30f;
+            ctx.SpreadMul += 0.10f;
         }
     }
 }

@@ -314,9 +314,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
         public static bool SHPCDamage(Item Item, Player player, ref StatModifier damage) {
             CWRUtils.ModifyLegendWeaponDamageFunc(Item, GetOnDamage(Item), GetStartDamage, ref damage);
             ShootContext ctx = SHPCModificationSystem.Resolve(player);
-            if (ctx.DamageMul != 1f) {
-                damage *= ctx.DamageMul;
-            }
+            damage *= ctx.DamageMul;
             return false;
         }
 
