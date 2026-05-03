@@ -123,12 +123,21 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0) : COLOR0
     float domainBreathe = 0.92 + 0.08 * sin(uTime * 0.6);
 
     // ================================================================
+    // 运动淡化主系数：移动时整体领域简约化
+    // baseMul: 作用于失真/色差/压暗/红染等"大面积影响画面观感"的处理
+    // skeletonMul: 作用于网格骨架/节点/边缘呼吸光等保留可读性的元素
+    // ================================================================
+    float mFade = saturate(motionFade);
+    float baseMul = 1.0 - mFade * 0.75;
+    float skeletonMul = 1.0 - mFade * 0.55;
+
+    // ================================================================
     // 第一层：现实扭曲（黑墙侵蚀现实——核心新增效果）
     // ================================================================
     // 低频大尺度扭曲：整体空间弯曲（屏幕相对，不随摄像机滚动）
     float2 distUV1 = frac(screenUV * 0.0005 + float2(uTime * 0.022, uTime * 0.016));
     float2 warpDisp = tex2D(noiseTex, distUV1).rg * 2.0 - 1.0;
-    float warpStr = intensity * 0.0035 * (0.4 + edgeFactor * 1.2);
+    float warpStr = intensity * 0.0035 * (0.4 + edgeFactor * 1.2) * baseMul;
     float2 warpedCoords = coords + warpDisp * warpStr;
 
     // 高频小尺度扭曲叠加：局部数字毛刺（柔化，屏幕相对）
@@ -142,7 +151,7 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0) : COLOR0
     // 第二层：色差分离（增强版，边缘更强）
     // ================================================================
     float2 edgeDir = normalize(relPos + 0.001);
-    float caWorldPx = edgeFactor * 3.5 * intensity;
+    float caWorldPx = edgeFactor * 3.5 * intensity * baseMul;
     float2 caOffset = edgeDir * caWorldPx / worldViewSize;
     original.r = tex2D(uImage0, warpedCoords + caOffset).r;
     original.b = tex2D(uImage0, warpedCoords - caOffset * 0.7).b;
@@ -150,13 +159,14 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0) : COLOR0
     // ================================================================
     // 第三层：三阶色彩映射（深邃丰富的红色光谱）
     // ================================================================
+    //移动时减少压暗与红染，让画面视野恢复，避免快速移动叠加领域产生的晕眩感
     float targetDim = lerp(0.40, 0.18, centerFactor * 0.3);
-    float dimFactor = lerp(1.0, targetDim, intensity * dimStrength);
+    float dimFactor = lerp(1.0, targetDim, intensity * dimStrength * baseMul);
     float3 processed = original.rgb * dimFactor;
 
     float lum = dot(processed, float3(0.299, 0.587, 0.114));
     float3 gray = float3(lum, lum, lum);
-    processed = lerp(processed, gray, 0.58 * intensity);
+    processed = lerp(processed, gray, 0.58 * intensity * baseMul);
 
     // 三阶映射：深渊酒红→血红→炽热琥珀
     float3 shadowRed  = float3(0.14, 0.02, 0.05);
@@ -167,15 +177,15 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0) : COLOR0
         redMap = lerp(shadowRed, midRed, lum / 0.3);
     else
         redMap = lerp(midRed, highRed, saturate((lum - 0.3) / 0.7));
-    processed = lerp(processed, redMap * (lum * 0.65 + 0.35), 0.45 * intensity);
+    processed = lerp(processed, redMap * (lum * 0.65 + 0.35), 0.45 * intensity * baseMul);
 
     // 距离色温偏移：中心偏冷暗红，边缘偏热橙红
     float3 distTint = lerp(float3(0.0, -0.015, 0.01), float3(0.08, 0.03, -0.02), edgeFactor);
-    processed += distTint * intensity * lum;
+    processed += distTint * intensity * lum * baseMul;
 
     // 暗角
     float vignette = 1.0 - normDist * normDist * 0.28;
-    processed *= lerp(1.0, vignette, intensity);
+    processed *= lerp(1.0, vignette, intensity * baseMul);
 
     // ================================================================
     // 第四层：加法赛博特效
@@ -313,33 +323,36 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0) : COLOR0
     float3 cCrackGlow = float3(1.0,  0.22, 0.12);
 
     // ================================================================
-    // 玩家运动淡化：移动时模糊掉装饰层细节，保留网格骨架与领域背景
-    // detailMul: 普通装饰层(数据流/脉冲环/裂纹/粒子/底层暗流)的淡化系数
-    //   stationary -> 1.0 (全显), full motion -> 0.18 (仅留极弱残影)
-    // entityMul:  实体扫描环的淡化系数(更克制，保留可读性以利战斗追踪)
-    //   stationary -> 1.0, full motion -> 0.55
-    // 网格线/节点/边缘呼吸光属于"骨架"——不参与淡化
+    // 玩家运动淡化：移动时模糊掉装饰层细节，整体领域同步简约
+    // detailMul:   花纹层(数据流/脉冲环/裂纹/粒子/底层暗流) -> 强淡化
+    //              stationary -> 1.0 (全显), full motion -> 0.18 (仅留极弱残影)
+    // entityMul:   实体扫描环 -> 弱淡化(保留战斗可读性)
+    //              stationary -> 1.0, full motion -> 0.55
+    // skeletonMul: 网格走线/节点/边缘呼吸光 -> 中度淡化
+    //              stationary -> 1.0, full motion -> 0.45
     // ================================================================
-    float detailMul = 1.0 - saturate(motionFade) * 0.82;
-    float entityMul = 1.0 - saturate(motionFade) * 0.45;
+    float detailMul = 1.0 - mFade * 0.82;
+    float entityMul = 1.0 - mFade * 0.45;
 
     // --- 合成加法层 ---
     float3 additive = float3(0, 0, 0);
-    additive += cAbyssRed   * digitalField * detailMul;            // A: 底层暗流(花纹) -> 淡化
-    additive += cBloodRed   * gridLine * 0.8;                      // B: 栅格走线(骨架) -> 保留
-    additive += cNodeColor  * node;                                // C: 节点亮点(骨架) -> 保留
-    additive += cAbyssRed   * dataStream * detailMul;              // F: 垂直数据流(数据块) -> 淡化
-    additive += cBrightRed  * pulse * detailMul;                   // G: 双频脉冲环(花纹) -> 淡化
-    //H: 边缘呼吸光保留为氛围背景，仅淡化细碎裂纹图案
-    additive += cCrackGlow  * (edgeBase + edgeCrack * detailMul);  // H
-    additive += cHotAmber   * particle * detailMul;                // J: 辉光粒子(花纹) -> 淡化
-    additive += cBrightRed  * entityRingTotal * entityMul;         // K: 实体扫描环 -> 弱淡化
-    additive += cWhiteRed   * entityScanTotal * 0.55 * entityMul;  // K: 扫描弧高亮 -> 弱淡化
+    additive += cAbyssRed   * digitalField * detailMul;                       // A: 底层暗流(花纹) -> 淡化
+    additive += cBloodRed   * gridLine * 0.8 * skeletonMul;                   // B: 栅格走线(骨架) -> 中度淡化
+    additive += cNodeColor  * node * skeletonMul;                             // C: 节点亮点(骨架) -> 中度淡化
+    additive += cAbyssRed   * dataStream * detailMul;                         // F: 垂直数据流(数据块) -> 淡化
+    additive += cBrightRed  * pulse * detailMul;                              // G: 双频脉冲环(花纹) -> 淡化
+    //H: 边缘呼吸光按骨架淡化，细碎裂纹按花纹淡化
+    additive += cCrackGlow  * (edgeBase * skeletonMul + edgeCrack * detailMul); // H
+    additive += cHotAmber   * particle * detailMul;                           // J: 辉光粒子(花纹) -> 淡化
+    additive += cBrightRed  * entityRingTotal * entityMul;                    // K: 实体扫描环 -> 弱淡化
+    additive += cWhiteRed   * entityScanTotal * 0.55 * entityMul;             // K: 扫描弧高亮 -> 弱淡化
 
     // ================================================================
     // 最终合成
     // ================================================================
-    float3 finalColor = processed + additive * intensity * domainBreathe;
+    //整体加法亮度再叠一层运动淡化，让快速移动时的画面整体偏向"轻量描边"观感
+    float globalAddMul = lerp(1.0, 0.55, mFade);
+    float3 finalColor = processed + additive * intensity * domainBreathe * globalAddMul;
 
     return float4(finalColor, original.a);
 }

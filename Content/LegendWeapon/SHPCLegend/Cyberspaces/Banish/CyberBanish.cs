@@ -60,8 +60,16 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Banish
         public static void BanishAtCursor() {
             if (!Cyberspace.Active || Cyberspace.Intensity < 0.5f || Cyberspace.CurrentLayer < 2) return;
 
+            //先尝试找命中目标，再依据目标是否为Boss级决定走哪条RAM消耗与处理路径
+            int hitIndex = FindCursorTarget();
+            if (hitIndex < 0) return;
+
+            NPC hitNpc = Main.npc[hitIndex];
+            bool boss = CyberBossExecution.IsBossTier(hitNpc);
+            int ramCost = boss ? CyberBossExecution.RamCostPerCast : RamCostPerCast;
+
             //RAM检查：不足时触发HUD故障闪烁提示
-            if (!HackTime.InfiniteHack && (RamSystem.IsLocked || !RamSystem.CanAfford(RamCostPerCast))) {
+            if (!HackTime.InfiniteHack && (RamSystem.IsLocked || !RamSystem.CanAfford(ramCost))) {
                 if (!VaultUtils.isServer) {
                     SoundEngine.PlaySound(CWRSound.FailureCurrent with {
                         Volume = 0.4f,
@@ -73,6 +81,34 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Banish
                 return;
             }
 
+            //命中目标后消耗RAM
+            if (!HackTime.InfiniteHack) {
+                RamSystem.TryConsume(ramCost);
+            }
+
+            if (boss) {
+                //Boss级目标：不抹除而是召唤大量故障天雷进行打击
+                CyberBossExecution.StartExecution(hitIndex, Main.LocalPlayer);
+                return;
+            }
+
+            //普通目标：维持原有放逐演出，并将群组成员一并拉入放逐
+            StartBanish(hitIndex);
+            NPC root = Main.npc[hitIndex];
+            NpcGroupHelper.CollectGroupIndices(root, banishGroupBuffer);
+            for (int i = 0; i < banishGroupBuffer.Count; i++) {
+                int memberIdx = banishGroupBuffer[i];
+                if (memberIdx == hitIndex) continue;
+                if (IsBanishing(memberIdx)) continue;
+                StartBanish(memberIdx);
+            }
+            banishGroupBuffer.Clear();
+        }
+
+        /// <summary>
+        /// 在领域内、且光标命中的最近未处理NPC，找不到时返回-1
+        /// </summary>
+        private static int FindCursorTarget() {
             Vector2 mouse = Main.MouseWorld;
             Vector2 domainCenter = Cyberspace.DomainCenter;
             float effectiveRadius = Cyberspace.Radius * Cyberspace.ExpandProgress;
@@ -84,15 +120,13 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Banish
                 NPC npc = Main.npc[i];
                 if (!npc.active || npc.friendly || npc.townNPC) continue;
 
-                // 必须在领域内
                 float dx = npc.Center.X - domainCenter.X;
                 float dy = npc.Center.Y - domainCenter.Y;
                 if (dx * dx + dy * dy > effectiveRadius * effectiveRadius) continue;
 
-                // 已在放逐中则跳过
                 if (IsBanishing(i)) continue;
+                if (CyberBossExecution.IsExecuting(i)) continue;
 
-                // 光标命中判定（使用NPC碰撞箱 + 宽容边距）
                 Rectangle hitbox = npc.Hitbox;
                 hitbox.Inflate(8, 8);
                 if (!hitbox.Contains(mouse.ToPoint())) continue;
@@ -103,25 +137,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Banish
                     bestIndex = i;
                 }
             }
-
-            if (bestIndex >= 0) {
-                //命中目标后消耗RAM
-                if (!HackTime.InfiniteHack) {
-                    RamSystem.TryConsume(RamCostPerCast);
-                }
-                StartBanish(bestIndex);
-                //同时把蠕虫体节、月总各实体等共享Boss体的群组成员一并拉入放逐
-                //成员若不在领域内也照样进入：放逐是Boss级处决，整体一起被抹消
-                NPC root = Main.npc[bestIndex];
-                NpcGroupHelper.CollectGroupIndices(root, banishGroupBuffer);
-                for (int i = 0; i < banishGroupBuffer.Count; i++) {
-                    int memberIdx = banishGroupBuffer[i];
-                    if (memberIdx == bestIndex) continue;
-                    if (IsBanishing(memberIdx)) continue;
-                    StartBanish(memberIdx);
-                }
-                banishGroupBuffer.Clear();
-            }
+            return bestIndex;
         }
 
         //群组放逐用的复用缓冲，避免每次扩散都重新分配

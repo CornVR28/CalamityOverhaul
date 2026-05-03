@@ -1,4 +1,4 @@
-﻿MurasamaHeld.DisplayName: 分子斩切
+MurasamaHeld.DisplayName: 分子斩切
 MuraTriggerDash.DisplayName: 分子斩切
 MuraBreakerSlash.DisplayName: 升龙半月
 MuraExecutionCut.DisplayName: 次元斩·终
@@ -527,3 +527,4 @@ CyberRiftSlashProj.DisplayName: 赛博裂隙斩
 CyberRestartProj.DisplayName: 赛博重启
 CyberPixelDecomposeProj.DisplayName: 赛博像素分解
 MimicPhantom.DisplayName: 拟态幻影
+// CyberExecutionBoltProj.DisplayName: Cyber Execution Bolt Proj

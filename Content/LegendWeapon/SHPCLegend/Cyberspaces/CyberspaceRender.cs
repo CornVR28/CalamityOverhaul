@@ -30,6 +30,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             if (Main.gameMenu) {
                 Cyberspace.Reset();
                 CyberBanish.Reset();
+                CyberBossExecution.Reset();
                 CyberDomainFreeze.Reset();
                 CyberTeleport.Reset();
                 CyberRestart.Reset();
@@ -38,6 +39,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
 
             Cyberspace.Update();
             CyberBanish.Update();
+            CyberBossExecution.Update();
             CyberDomainFreeze.Update();
             CyberTeleport.Update();
             CyberRestart.Update();
@@ -144,8 +146,13 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             Texture2D pixel = CWRAsset.Placeholder_White?.Value;
             if (pixel == null) return;
 
+            //运动淡化：移动时降低低质量回退的整体存在感，与高质量分支观感对齐
+            float motion = MathHelper.Clamp(Cyberspace.MotionFade, 0f, 1f);
+            float baseMul = 1f - motion * 0.7f;
+            float detailMul = 1f - motion * 0.85f;
+
             float alpha = MathHelper.Clamp(Cyberspace.Intensity, 0f, 1f);
-            Color dimColor = new Color(22, 0, 0) * (alpha * Cyberspace.DimStrength * 0.55f);
+            Color dimColor = new Color(22, 0, 0) * (alpha * Cyberspace.DimStrength * 0.55f * baseMul);
 
             spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
                 SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone);
@@ -160,14 +167,14 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
                 float expand = Cyberspace.GetLayerExpand(layer);
                 if (expand < 0.08f) continue;
 
-                DrawLowQualityLayerGrid(spriteBatch, pixel, layer, expand, alpha);
+                DrawLowQualityLayerGrid(spriteBatch, pixel, layer, expand, alpha, baseMul, detailMul);
             }
 
             spriteBatch.End();
         }
 
         private static void DrawLowQualityLayerGrid(SpriteBatch spriteBatch, Texture2D pixel,
-            int layer, float expand, float alpha) {
+            int layer, float expand, float alpha, float baseMul, float detailMul) {
 
             Vector2 center = Cyberspace.DomainCenter;
             float radius = Cyberspace.GetLayerRadius(layer) * expand;
@@ -176,8 +183,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
 
             float time = Cyberspace.EffectTime;
             float layerMult = 0.65f + layer * 0.18f;
-            Color lineColor = new Color(220, 35, 22) * (alpha * 0.13f * layerMult);
-            Color nodeColor = GetLayerGlowColor(layer, alpha * 0.28f * layerMult);
+            //网格骨架按 baseMul 中度淡化，节点闪烁属花纹按 detailMul 强淡化
+            Color lineColor = new Color(220, 35, 22) * (alpha * 0.13f * layerMult * baseMul);
+            Color nodeColor = GetLayerGlowColor(layer, alpha * 0.28f * layerMult * detailMul);
 
             int minX = (int)MathF.Floor((center.X - radius) / gridSize);
             int maxX = (int)MathF.Ceiling((center.X + radius) / gridSize);
@@ -237,6 +245,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             float gs = Cyberspace.GridSize;
             float time = Cyberspace.EffectTime;
             float effectIntensity = Cyberspace.Intensity;
+            //边缘光晕属花纹层，移动时强淡化
+            float glowMotionMul = 1f - MathHelper.Clamp(Cyberspace.MotionFade, 0f, 1f) * 0.8f;
 
             if (r < gs * 2) return;
 
@@ -279,7 +289,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
                 pulse = MathF.Max(pulse, 0f);
                 //外层亮度递增
                 float layerMult = 1f + layer * 0.25f;
-                float alpha = pulse * effectIntensity * 0.4f * layerMult;
+                float alpha = pulse * effectIntensity * 0.4f * layerMult * glowMotionMul;
 
                 Color glowColor = GetLayerGlowColor(layer, alpha);
 
@@ -311,6 +321,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             Texture2D noise = CWRAsset.Extra_193.Value;
             Vector2 center = Cyberspace.DomainCenter;
             Vector2 drawPos = center - Main.screenPosition;
+            //边界环属于骨架级显示，移动时中度淡化以削弱晃眼感
+            float ringMotionMul = 1f - MathHelper.Clamp(Cyberspace.MotionFade, 0f, 1f) * 0.55f;
 
             spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
                 SamplerState.LinearWrap, DepthStencilState.None, RasterizerState.CullNone,
@@ -333,7 +345,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
                 shader.Parameters["uTime"]?.SetValue(time + layer * 7.3f);
                 shader.Parameters["ringProgress"]?.SetValue(ringPos);
                 shader.Parameters["ringThickness"]?.SetValue(thickness);
-                shader.Parameters["fadeAlpha"]?.SetValue(Cyberspace.Intensity);
+                shader.Parameters["fadeAlpha"]?.SetValue(Cyberspace.Intensity * ringMotionMul);
                 shader.CurrentTechnique.Passes[0].Apply();
 
                 float drawDiameter = quadHalf * 2f * 0.8f;

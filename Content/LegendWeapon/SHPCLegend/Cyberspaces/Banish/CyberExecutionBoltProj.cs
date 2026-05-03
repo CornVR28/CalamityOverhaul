@@ -1,0 +1,342 @@
+using CalamityOverhaul.Common;
+using InnoVault.Trails;
+using Microsoft.Xna.Framework.Graphics;
+using System;
+using Terraria;
+using Terraria.Audio;
+using Terraria.ID;
+using Terraria.ModLoader;
+
+namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Banish
+{
+    /// <summary>
+    /// Boss执行级故障天雷
+    /// <br/>放逐对Boss级目标改为召唤大量该弹幕进行高伤打击
+    /// <br/>视觉相比 <see cref="CyberGlitchBoltProj"/> 更庞大更帅气：更长更粗的主干、自动锁向Boss末端、附带分叉子雷
+    /// <br/>ai[0] 入射角度  ai[1] 起始延迟  ai[2] 目标NPC索引
+    /// <br/>localAI[0] 是否为分叉子雷（0=主干 1=分叉）
+    /// </summary>
+    internal class CyberExecutionBoltProj : ModProjectile, IPrimitiveDrawable
+    {
+        public override string Texture => CWRConstant.Placeholder;
+
+        private const int MaxLife = 38;
+        private const int MainKeyCountMin = 16;
+        private const int MainKeyCountMax = 24;
+        private const float MainSegLenMin = 55f;
+        private const float MainSegLenMax = 95f;
+        private const float MainPeakWidth = 110f;
+
+        private const int ForkKeyCountMin = 6;
+        private const int ForkKeyCountMax = 11;
+        private const float ForkSegLenMin = 28f;
+        private const float ForkSegLenMax = 55f;
+        private const float ForkPeakWidth = 56f;
+
+        private Vector2[] points;
+        private int pointCount;
+        private bool pathReady;
+        private bool forksSpawned;
+        private float glitchSeed;
+        private Trail trail;
+
+        private float visibleStart;
+        private float visibleEnd;
+        private float fadeAlpha;
+        //仅fork在生成时携带，由主干通过NewProjectile.ai[2]传入用于覆写目标终点（forkEndPoint X分量与Y分量打包到localAI[1]/[2]）
+        private Vector2 forkEndOverride;
+        private bool hasForkEnd;
+
+        private bool IsFork => Projectile.localAI[0] > 0.5f;
+
+        public override void SetDefaults() {
+            Projectile.width = 2;
+            Projectile.height = 2;
+            Projectile.friendly = true;
+            Projectile.hostile = false;
+            Projectile.tileCollide = false;
+            Projectile.ignoreWater = true;
+            Projectile.penetrate = -1;
+            Projectile.timeLeft = MaxLife;
+            Projectile.usesLocalNPCImmunity = true;
+            Projectile.localNPCHitCooldown = -1;
+            Projectile.DamageType = DamageClass.Magic;
+        }
+
+        public override void AI() {
+            //ai[1]延迟阶段：保持隐藏并刷新存活时间
+            if (Projectile.ai[1] > 0) {
+                Projectile.ai[1]--;
+                Projectile.timeLeft = MaxLife;
+                return;
+            }
+
+            if (!pathReady) {
+                //fork自带终点覆写：由生成方将终点坐标编码到localAI[1]/[2]
+                if (IsFork && (Projectile.localAI[1] != 0f || Projectile.localAI[2] != 0f)) {
+                    forkEndOverride = new Vector2(Projectile.localAI[1], Projectile.localAI[2]);
+                    hasForkEnd = true;
+                }
+                GeneratePath();
+                glitchSeed = Main.rand.NextFloat();
+                pathReady = true;
+                ResizeToBounds();
+                if (!IsFork && !VaultUtils.isServer) {
+                    SoundEngine.PlaySound(CWRSound.Thunder with {
+                        Volume = 0.55f,
+                        Pitch = -0.2f + Main.rand.NextFloat(-0.15f, 0.15f),
+                        PitchVariance = 0.12f,
+                    }, Projectile.Center);
+                }
+            }
+
+            float life = (float)Projectile.timeLeft / MaxLife;
+            float t = 1f - life;
+            ComputeAnimation(t);
+
+            //主干在延伸到一半左右时分裂出fork，仅生成一次
+            if (!IsFork && !forksSpawned && t > 0.22f && t < 0.5f) {
+                SpawnForks();
+                forksSpawned = true;
+            }
+
+            EmitLight();
+        }
+
+        private void EmitLight() {
+            if (!pathReady || points == null) return;
+            int idx = (int)(MathHelper.Clamp((visibleStart + visibleEnd) * 0.5f, 0f, 1f) * (pointCount - 1));
+            Vector2 lightPos = points[idx];
+            float intensity = fadeAlpha * (IsFork ? 0.8f : 1.4f);
+            //电青+紫红双色，呼应赛博空间故障感
+            Lighting.AddLight(lightPos, new Vector3(0.55f, 0.85f, 1f) * intensity);
+        }
+
+        private void ComputeAnimation(float t) {
+            if (t < 0.30f) {
+                //快速延伸（缓出）
+                float ext = t / 0.30f;
+                visibleEnd = 1f - MathF.Pow(1f - ext, 3.4f);
+                visibleStart = 0f;
+                fadeAlpha = MathHelper.SmoothStep(0.4f, 1f, ext);
+            }
+            else if (t < 0.55f) {
+                //全亮+连续闪烁，进入伤害高发段
+                visibleEnd = 1f;
+                visibleStart = 0f;
+                float flash = MathF.Sin((t - 0.30f) / 0.25f * MathF.PI * 2f);
+                fadeAlpha = 1.1f + flash * 0.35f;
+            }
+            else {
+                //从尾部收缩消失
+                float retract = (t - 0.55f) / 0.45f;
+                visibleEnd = 1f;
+                visibleStart = MathF.Pow(retract, 0.85f);
+                fadeAlpha = 1f - retract;
+            }
+            fadeAlpha = MathHelper.Clamp(fadeAlpha, 0f, 1.5f);
+        }
+
+        private void GeneratePath() {
+            float angle = Projectile.ai[0];
+            int keyCount;
+            float segLenMin, segLenMax;
+
+            if (IsFork) {
+                keyCount = Main.rand.Next(ForkKeyCountMin, ForkKeyCountMax);
+                segLenMin = ForkSegLenMin;
+                segLenMax = ForkSegLenMax;
+            }
+            else {
+                keyCount = Main.rand.Next(MainKeyCountMin, MainKeyCountMax);
+                segLenMin = MainSegLenMin;
+                segLenMax = MainSegLenMax;
+            }
+
+            Vector2[] keys = new Vector2[keyCount];
+            Vector2 current = Projectile.Center;
+            keys[0] = current;
+
+            for (int i = 1; i < keyCount; i++) {
+                float distFactor = (float)i / keyCount;
+                float jag = Main.rand.NextFloat(-0.55f, 0.55f) * (0.55f + distFactor * 0.95f);
+                //18%概率出现大偏转（数字电路急拐）
+                if (Main.rand.NextFloat() < 0.18f) {
+                    jag = (Main.rand.NextBool() ? 1f : -1f) * 1.25f;
+                }
+                float segLen = Main.rand.NextFloat(segLenMin, segLenMax) * (0.7f + distFactor * 0.7f);
+                Vector2 step = (angle + jag).ToRotationVector2() * segLen;
+                current += step;
+                keys[i] = current;
+            }
+
+            //主干：把末端拉向Boss中心，制造"精确劈中"观感
+            //fork：末端拉向forkEndOverride（来自主干传入的中段位置外推点）
+            Vector2 anchorEnd = Vector2.Zero;
+            bool hasAnchor = false;
+            if (IsFork) {
+                if (hasForkEnd) {
+                    anchorEnd = forkEndOverride;
+                    hasAnchor = true;
+                }
+            }
+            else {
+                int targetIdx = (int)Projectile.ai[2];
+                if (targetIdx >= 0 && targetIdx < Main.maxNPCs) {
+                    NPC npc = Main.npc[targetIdx];
+                    if (npc.active) {
+                        anchorEnd = npc.Center + Main.rand.NextVector2Circular(npc.width * 0.35f, npc.height * 0.35f);
+                        hasAnchor = true;
+                    }
+                }
+            }
+
+            if (hasAnchor) {
+                //把后半段插值拉向anchorEnd，既保留前段抖动又精准命中
+                int blendStart = keyCount / 2;
+                for (int i = blendStart; i < keyCount; i++) {
+                    float bt = (float)(i - blendStart) / (keyCount - 1 - blendStart);
+                    bt = MathF.Pow(bt, 1.3f);
+                    keys[i] = Vector2.Lerp(keys[i], anchorEnd, bt);
+                }
+                keys[keyCount - 1] = anchorEnd;
+            }
+
+            //细分：每对关键帧间插入1个带垂直抖动的中间点
+            pointCount = keyCount * 2 - 1;
+            points = new Vector2[pointCount];
+            float perpJitter = IsFork ? 4f : 8f;
+            for (int i = 0; i < keyCount - 1; i++) {
+                points[i * 2] = keys[i];
+                Vector2 mid = (keys[i] + keys[i + 1]) * 0.5f;
+                Vector2 dir = keys[i + 1] - keys[i];
+                Vector2 perp = new Vector2(-dir.Y, dir.X);
+                if (perp.LengthSquared() > 0.01f) {
+                    perp.Normalize();
+                }
+                mid += perp * Main.rand.NextFloat(-perpJitter, perpJitter);
+                points[i * 2 + 1] = mid;
+            }
+            points[(keyCount - 1) * 2] = keys[keyCount - 1];
+        }
+
+        private void ResizeToBounds() {
+            if (points == null || pointCount == 0) return;
+            Vector2 min = points[0];
+            Vector2 max = points[0];
+            for (int i = 1; i < pointCount; i++) {
+                min = Vector2.Min(min, points[i]);
+                max = Vector2.Max(max, points[i]);
+            }
+            //外扩一点容纳粗细
+            float pad = (IsFork ? ForkPeakWidth : MainPeakWidth) * 0.6f;
+            min -= new Vector2(pad);
+            max += new Vector2(pad);
+
+            Vector2 center = (min + max) * 0.5f;
+            Vector2 size = max - min;
+            int w = Math.Max(8, (int)size.X);
+            int h = Math.Max(8, (int)size.Y);
+            //保持几何中心不变
+            Projectile.position = center - new Vector2(w * 0.5f, h * 0.5f);
+            Projectile.width = w;
+            Projectile.height = h;
+        }
+
+        private void SpawnForks() {
+            //2-3条分叉，从主干靠中间的关键点向外抛出，长度约主干一半
+            int forkCount = Main.rand.Next(2, 4);
+            for (int i = 0; i < forkCount; i++) {
+                int branchIdx = Main.rand.Next(pointCount / 4, pointCount * 3 / 4);
+                Vector2 origin = points[branchIdx];
+                //取该处主干切线，再在垂直方向上偏转较大角度形成分叉
+                int aIdx = Math.Max(branchIdx - 1, 0);
+                int bIdx = Math.Min(branchIdx + 1, pointCount - 1);
+                Vector2 tangent = points[bIdx] - points[aIdx];
+                float baseAngle = tangent.LengthSquared() < 1f ? Projectile.ai[0] : tangent.ToRotation();
+                float forkAngle = baseAngle + Main.rand.NextFloat(-1.4f, 1.4f);
+                //fork终点：沿forkAngle再外延一段，制造"四散电弧"的观感
+                Vector2 forkEnd = origin + forkAngle.ToRotationVector2() * Main.rand.NextFloat(180f, 320f);
+
+                int forkDamage = (int)(Projectile.damage * 0.55f);
+                int idx = Projectile.NewProjectile(Projectile.GetSource_FromAI(),
+                    origin, Vector2.Zero,
+                    Type, Math.Max(1, forkDamage), Projectile.knockBack * 0.5f,
+                    Projectile.owner,
+                    ai0: forkAngle,
+                    ai1: 0f,
+                    ai2: -1f);
+                if (idx >= 0 && idx < Main.maxProjectiles) {
+                    Projectile fork = Main.projectile[idx];
+                    fork.localAI[0] = 1f;
+                    fork.localAI[1] = forkEnd.X;
+                    fork.localAI[2] = forkEnd.Y;
+                }
+            }
+        }
+
+        public override bool? Colliding(Rectangle projHitbox, Rectangle targetHitbox) {
+            if (!pathReady || points == null || Projectile.ai[1] > 0) return false;
+            //仅在可见且亮度>0时才允许造成伤害
+            if (fadeAlpha < 0.4f) return false;
+            if (visibleEnd <= visibleStart + 0.001f) return false;
+
+            int startIdx = Math.Clamp((int)MathF.Floor(visibleStart * (pointCount - 1)), 0, pointCount - 2);
+            int endIdx = Math.Clamp((int)MathF.Ceiling(visibleEnd * (pointCount - 1)), 1, pointCount - 1);
+            float radius = (IsFork ? ForkPeakWidth : MainPeakWidth) * 0.45f;
+            Vector2 boxPos = targetHitbox.TopLeft();
+            Vector2 boxSize = targetHitbox.Size();
+            float collisionPoint = 0f;
+
+            for (int i = startIdx; i < endIdx; i++) {
+                if (Collision.CheckAABBvLineCollision(boxPos, boxSize, points[i], points[i + 1], radius, ref collisionPoint)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public override bool PreDraw(ref Color lightColor) => false;
+
+        void IPrimitiveDrawable.DrawPrimitives() {
+            if (!pathReady || points == null || fadeAlpha < 0.01f || Projectile.ai[1] > 0) {
+                return;
+            }
+
+            Effect shader = EffectLoader.CyberGlitchBolt?.Value;
+            if (shader == null) return;
+            Texture2D noise = CWRAsset.Extra_193?.Value;
+            if (noise == null) return;
+
+            trail ??= new Trail(points, WidthFunction, ColorFunction);
+            trail.TrailPositions = points;
+
+            shader.Parameters["transformMatrix"]?.SetValue(VaultUtils.GetTransfromMatrix());
+            shader.Parameters["uTime"]?.SetValue(Cyberspace.Active ? Cyberspace.EffectTime : (float)Main.timeForVisualEffects * 0.04f);
+            shader.Parameters["fadeAlpha"]?.SetValue(MathHelper.Clamp(fadeAlpha, 0f, 1f));
+            shader.Parameters["visibleStart"]?.SetValue(visibleStart);
+            shader.Parameters["visibleEnd"]?.SetValue(visibleEnd);
+            shader.Parameters["glitchSeed"]?.SetValue(glitchSeed);
+            shader.Parameters["uNoiseTex"]?.SetValue(noise);
+
+            GraphicsDevice device = Main.graphics.GraphicsDevice;
+            device.BlendState = BlendState.Additive;
+            //叠加两次绘制制造光晕：第一次正常宽度，第二次加宽降亮做外辉光
+            trail.DrawTrail(shader);
+
+            shader.Parameters["fadeAlpha"]?.SetValue(MathHelper.Clamp(fadeAlpha * 0.55f, 0f, 1f));
+            trail.DrawTrail(shader);
+            device.BlendState = BlendState.AlphaBlend;
+        }
+
+        private float WidthFunction(float progress) {
+            float taper = MathF.Sin(progress * MathF.PI);
+            taper = MathF.Max(taper, 0.08f);
+            return (IsFork ? ForkPeakWidth : MainPeakWidth) * taper;
+        }
+
+        private Color ColorFunction(Vector2 _) => Color.White;
+
+        public override bool ShouldUpdatePosition() => false;
+    }
+}
