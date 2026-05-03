@@ -1,7 +1,7 @@
-ItemFilterUI: {
+﻿ItemFilterUI: {
 	HintText: ЛКМ, чтобы добавить предмет
-	HintText2: ЛКМ, чтобы удалить предмет
-	CloseHint: "[ESC] или [ПКМ], чтобы закрыть"
+	HintText2: ЛКМ, чтобы убрать предмет
+	CloseHint: "Нажмите [ESC] или [ПКМ], чтобы закрыть"
 }
 
 LegendUpgradeConfirmUI: {
@@ -11,78 +11,78 @@ LegendUpgradeConfirmUI: {
 		Уровень мира выше уровня оружия.
 		Улучшить {0} до уровня {1}?
 		'''
-	ConfirmText: Подтвердить
+	ConfirmText: Подтвердить улучшение
 	CancelText: Отмена
-	Success: "[ITEM] улучшен до уровня [LEVEL]"
+	Success: "Оружие [ITEM] улучшено до уровня [LEVEL]"
 }
 
 QuestTracker: {
 	DamageTrackerSystem: {
 		QuestFailedPrefix: Задание провалено
 		QuestCompletedPrefix: Задание выполнено!
-		FailureReasonWrongWeapon: Последний удар нанесен не требуемым оружием
-		FailureReasonInsufficientDamage: Недостаточно урона требуемым оружием
-		SuccessDamageContribution: Вклад в урон
+		FailureReasonWrongWeapon: Последний удар нанесен не указанным оружием
+		FailureReasonInsufficientDamage: Недостаточная доля урона от требуемого оружия
+		SuccessDamageContribution: Доля урона
 	}
 }
 
 SeaDialogueBox: {
-	ContinueHint: Далее
+	ContinueHint: Продолжить
 	FastHint: Ускорить
 }
 
 BrimstoneDialogueBox: {
-	ContinueHint: Далее
+	ContinueHint: Продолжить
 	FastHint: Ускорить
 }
 
 DraedonDialogueBox: {
-	ContinueHint: Далее
+	ContinueHint: Продолжить
 	FastHint: Ускорить
 }
 
 ExoMechdusaSumRender: {
-	ThanatosDescription: Танатос: ужасающий змей, закованный в тяжелую броню и оснащенный бесчисленными пушками.
-	AresDescription: Арес: колоссальная машина, несущая четыре супероружия, работающих на энергии экзо-призм.
-	ArtemisApolloDescription: Артемида и Аполлон: пара сверхпрочных автоматов с крайне нестабильными запасами энергии.
+	ThanatosDescription: Танатос — ужасающий гигантский змей, покрытый тяжелой броней и оснащенный бесчисленными автопушками.
+	AresDescription: Арес — колоссальный механизм, вооруженный четырьмя сверхмощными экзо-орудиями.
+	ArtemisApolloDescription: Артемида и Аполлон — пара сверхпрочных автоматонов с крайне нестабильным запасом энергии.
 }
 
 CQETConstructorTP: {
-	GuideText_NeedBlocks: Требуется {0} Блоков звездного потока
-	GuideText_Ready: Готов к работе!
-	GuideText_GroundIncomplete: Поверхность неровная!
+	GuideText_NeedBlocks: Требуется {0} экзо-пластин
+	GuideText_Ready: Готово!
+	GuideText_GroundIncomplete: Неровная поверхность!
 }
 
 SignalTowerTargetRenderer: {
 	InRangeText: В зоне действия
-	TargetCompletedText: Точка [NUM] завершена!
-	AllCompletedText: Квантовая сеть запутанности построена!
+	TargetCompletedText: Цель [NUM] выполнена!
+	AllCompletedText: Квантовая сеть завершена!
 }
 
 DraedonCallUI: {
-	TitleText: Вызов Дрэйдона
-	TitleTextDisabled: Вызов отключен
+	TitleText: Вызов Дрэдона
+	TitleTextDisabled: Вызов недоступен
 	CallButtonText: Начать вызов
 	CallingText: Вызов...
 	DisabledButtonText: Отключено
-	ConnectingText: Соединение...
-	ConnectedText: Соединено
-	DisabledReasonText: Дрэйдон уже вызван
+	ConnectingText: Подключение...
+	ConnectedText: Подключено
+	DisabledReasonText: Дрэдон уже вызван
 }
 
 TzeentchDialogueBox: {
-	ContinueHint: Далее
+	ContinueHint: Продолжить
 	FastHint: Ускорить
 }
 
 EnchantUI: {
-	ExpandHint: Развернуть меню ковки
-	CollapseHint: Свернуть меню ковки
+	ExpandHint: Развернуть интерфейс ковки
+	CollapseHint: Свернуть интерфейс ковки
 	EnchantTitle: Ковка
 }
 
 ConstructionBlueprintUI: {
-	UITitle: Автосборщик (Башня квантовой запутанности)
+	UITitle: Автостроитель (Квантовая башня)
 	MaterialsRequired: Требуемые материалы:
 	CloseHint: Нажмите, чтобы закрыть
 	CraftingStation: Рабочее место:
@@ -90,91 +90,91 @@ ConstructionBlueprintUI: {
 
 Generator: {
 	ThermalGeneratorUI: {
-		TitleText: Тепловой генератор
+		TitleText: Термальный генератор
 		FuelLabel: Топливо
 		TemperatureLabel: Температура
 		PowerLabel: Энергия
 		StatusLabel: Статус:
-		ActiveText: Работает
+		ActiveText: В работе
 		IdleText: Ожидание
 		EfficiencyText: Эффективность: {0}%
-		InsertFuelHint: Нажмите, чтобы положить/забрать топливо
+		InsertFuelHint: Нажмите, чтобы вставить/извлечь топливо
 		TemperatureUnit: °C
-		PowerUnit: UE
+		PowerUnit: ЕЭ
 	}
 }
 
 ChargingStationUI: {
 	TitleText: Зарядная станция
-	ItemSlotLabel: Предмет
+	ItemSlotLabel: Заряжаемый предмет
 	BatterySlotLabel: Батарея
 	StationEnergyLabel: Энергия станции
 	ItemChargeLabel: Заряд предмета
 	StatusLabel: Статус:
 	ChargingText: Зарядка
 	IdleText: Ожидание
-	InsertItemHint: Положите предмет для зарядки
-	InsertBatteryHint: Положите батарею Дрэйдона
-	EnergyUnit: UE
-	StationText1: Можно класть только заряжаемые предметы!
-	StationText2: Можно класть только батареи Дрэйдона!
+	InsertItemHint: Вставьте предмет для зарядки
+	InsertBatteryHint: Вставьте энергобатарею Дрэдона
+	EnergyUnit: ЕЭ
+	StationText1: Только для заряжаемых предметов!
+	StationText2: Только для энергобатарей Дрэдона!
 }
 
 SulfseaDialogueBox: {
-	ContinueHint: Далее
+	ContinueHint: Продолжить
 	FastHint: Ускорить
 }
 
 OldDukeShopUI: {
-	TitleText: Магазин Старого герцога
-	CurrencyName: Океанические фрагменты
-	HintTooltip: Прокрутка / Ползунок
+	TitleText: Лавка Старого Герцога
+	CurrencyName: Океанский фрагмент
+	HintTooltip: Прокрутка/Перетаскивание
 }
 
 OceanRaidersUI: {
-	TitleText: Хранилище Поглотителя
-	StorageText: Хранилище
+	TitleText: Хранилище Пожирателя Океанов
+	StorageText: Место в хранилище
 }
 
 OldDuchestUI: {
 	TitleText: Старый сундук
-	StorageText: Хранилище
+	StorageText: Место в хранилище
 }
 
 QuestLog: {
-	ObjectiveText: Цели
-	RewardText: Награды
-	ReceiveAwardText: Получить
+	ObjectiveText: Цель задания
+	RewardText: Награда
+	ReceiveAwardText: Получить награду
 	ProgressText: Прогресс
 	QuickReceiveAwardText: Получить всё
 	StyleSwitchText: Сменить стиль
 	NightModeText: Ночной режим
-	ResetViewText: Сброс вида
+	ResetViewText: Сбросить вид
 	SunModeText: Дневной режим
-	LauncherHoverText: ЛКМ: Взаимодействие, ПКМ: Перетаскивание
-	// QuestManagerText: 委托任务
+	LauncherHoverText: ЛКМ для взаимод., ПКМ для перетаскивания
+	QuestManagerText: Поручения
 }
 
 QuestNotificationSystem.Text1: Задание выполнено
 
 ExtraMain: {
-	// ExtraText: EXTRA
-	// GalleryText: GALLERY
-	// SceneText: SCENE
-	// MusicText: MUSIC
-	// StaffText: STAFF
-	// BackText: BACK
-	// LockedText: ???
+	ExtraText: Дополнительно
+	GalleryText: Галерея CG
+	SceneText: Повтор сцен
+	MusicText: Музыка
+	StaffText: Создатели
+	BackText: Назад
+	LockedText: ???
 }
 
 CompatibilityAlert: {
-	TitleText: Режим совместимости
+	TitleText: Включен режим совместимости
 	ContentText:
 		'''
-		Обнаружено отсутствие основного контента или конфликт версий. Некоторые функции отключены или работают в ограниченном режиме.
-		Если вы сделали это намеренно, проигнорируйте это сообщение.
+		Обнаружено отсутствие основного мода или конфликт версий. Некоторые функции отключены или ограничены.
+		Если это сделано намеренно, проигнорируйте это предупреждение.
 		Если это вызвано устаревшей версией, пожалуйста, дождитесь обновления.
-		Команда разработчиков обычно выпускает патчи совместимости в течение 12 часов.
+		Команда разработчиков обычно выпускает патч совместимости в течение 12 часов.
 		'''
 }
 
@@ -182,23 +182,23 @@ QuestWorldConfirmUI: {
 	TitleText: Проверка заданий
 	DescText:
 		'''
-		Обнаружен вход из другого мира.
+		Обнаружен переход из другого мира.
 		Проверить прогресс заданий в текущем мире?
 		'''
-	ConfirmText: Проверить
+	ConfirmText: Проверить задания
 	CancelText: Пропустить
 	EnabledText: Проверка заданий включена
 	DisabledText: Проверка заданий пропущена
 	DisabledOverlayText:
 		'''
-		Проверка заданий отключена в этом мире.
-		Перезайдите в мир, чтобы выбрать снова.
+		Проверка заданий в этом мире отключена.
+		Перезайдите в мир, чтобы изменить настройки.
 		'''
 }
 
 Incinerator: {
 	IncineratorUI: {
-		TitleText: Электрический инсинератор
+		TitleText: Электрический мусоросжигатель
 		InputLabel: Вход
 		OutputLabel: Выход
 		ProgressLabel: Прогресс
@@ -207,9 +207,9 @@ Incinerator: {
 		SmeltingText: Сжигание
 		IdleText: Ожидание
 		NoPowerText: Нет энергии
-		InputHint: Положите предметы для сжигания
-		OutputHint: Нажмите, чтобы забрать результат
-		PowerUnit: UE
+		InputHint: Вставьте предмет для сжигания
+		OutputHint: Нажмите, чтобы забрать
+		PowerUnit: ЕЭ
 	}
 }
 
@@ -217,32 +217,32 @@ ItemPipeline: {
 	Normal: Обычный
 	Output: Выход
 	Input: Вход
-	NotEndpointHint: Вход/Выход можно ставить только на концах трубы
+	NotEndpointHint: Ввод/вывод можно установить только на концах трубы
 }
 
 ThrowerUI: {
-	TitleText: Выбрасыватель предметов
+	TitleText: Метатель предметов
 	InventoryLabel: Хранилище
 	ControlLabel: Панель управления
 	SpeedLabel: Сила броска
 	AngleLabel: Угол разброса
 	IntervalLabel: Интервал
 	DirectionLabel: Направление
-	StartText: Старт
+	StartText: Запуск
 	StopText: Стоп
-	StatusRunning: Работает
+	StatusRunning: В работе
 	StatusIdle: Ожидание
 	StatusNoEnergy: Нет энергии
 	StatusNoItems: Нет предметов
 	EnergyLabel: Энергия
-	DropHint: Положите предметы
-	AmmoModeOnText: Режим стрельбы
-	AmmoModeOffText: Режим броска
-	AmmoModeHint: Режим стрельбы: Выстреливает снарядами, соответствующими боеприпасам
+	DropHint: Вставьте предмет
+	AmmoModeOnText: Стрельба снарядами
+	AmmoModeOffText: Метание предметов
+	AmmoModeHint: Режим снарядов: выстреливает соответствующим снарядом при загрузке боеприпасов
 }
 
 SHPCSoulSelectUI: {
-	TitleText: Ядро души
+	TitleText: Ядро Души
 	SoulNameLight: Свет
 	SoulNameNight: Ночь
 	SoulNameFlight: Полет
@@ -251,584 +251,584 @@ SHPCSoulSelectUI: {
 	SoulNameFright: Ужас
 	TooltipSoulPrefix: ""
 	StatusActive: "[Активно]"
-	StatusClickToSelect: "[Нажмите для выбора]"
+	StatusClickToSelect: "[Нажмите, чтобы выбрать]"
 }
 
 ElysiumUI: {
 	TitleText: Элизиум
 	DiscipleCountText: Апостолы
-	TotalBonusText: Благословение
+	TotalBonusText: Священная благодать
 	DamageText: Урон
 	DefenseText: Защита
-	CritText: Крит
-	RegenText: Реген
+	CritText: Крит. шанс
+	RegenText: Регенерация
 	EmptySlotText: Пусто
-	JudasWarningText: Внимание: Здесь таится предательство Иуды
-	BonusLabel: Пассивный
+	JudasWarningText: Внимание: здесь скрывается предательство Иуды
+	BonusLabel: Пассивный эффект
 	AbilityLabel: Способность
-	DragHintText: Перетащите апостола, чтобы сменить его роль
-	SwapSuccessText: Роль изменена
-	SwapFailText: Ошибка смены
-	CannotSwapText: Нельзя переместить в эту ячейку
-	// AbilityBrief_0: Rock Shield
-	// AbilityBrief_1: Fishing Net Bind
-	// AbilityBrief_2: Thunder Judgment
-	// AbilityBrief_3: Revelation Sight
-	// AbilityBrief_4: Holy Light Guide
-	// AbilityBrief_5: Truth Revelation
-	// AbilityBrief_6: Doubt's Touch
-	// AbilityBrief_7: Wealth Blessing
-	// AbilityBrief_8: Devotion Healing
-	// AbilityBrief_9: Miracle Manifest
-	// AbilityBrief_10: Zealous Force
-	// AbilityBrief_11: Betrayal Pact
+	DragHintText: Перетащите апостола, чтобы изменить его роль
+	SwapSuccessText: Роль успешно изменена
+	SwapFailText: Ошибка изменения роли
+	CannotSwapText: Невозможно переместить на эту позицию
+	AbilityBrief_0: Щит Скалы
+	AbilityBrief_1: Оковы Сети
+	AbilityBrief_2: Суд Грома
+	AbilityBrief_3: Взор Откровения
+	AbilityBrief_4: Свет Истины
+	AbilityBrief_5: Слово Откровения
+	AbilityBrief_6: Касание Сомнения
+	AbilityBrief_7: Благословение Богатства
+	AbilityBrief_8: Жертвенное Исцеление
+	AbilityBrief_9: Явление Чуда
+	AbilityBrief_10: Сила Фанатика
+	AbilityBrief_11: Пакт Предателя
 }
 
 MartyrdomBarUI: {
-	// SlotLabel_0: Pe
-	// SlotLabel_1: An
-	// SlotLabel_2: Ja
-	// SlotLabel_3: Jo
-	// SlotLabel_4: Ph
-	// SlotLabel_5: Ba
-	// SlotLabel_6: Th
-	// SlotLabel_7: Mt
-	// SlotLabel_8: Jl
-	// SlotLabel_9: Td
-	// SlotLabel_10: Si
-	// SlotLabel_11: Ju
-	// RevelationJudgingText: Revelation Last Three Seals in progress
-	// RevelationStatusText: Revelation Horsemen {0}/4 Q:Meteor R:Judgment
-	// RevelationReadyText: Press Q — Revelation ready
-	// MartyrdomPowerText: Martyrdom {0}/11
+	SlotLabel_0: Пет
+	SlotLabel_1: Анд
+	SlotLabel_2: Иак
+	SlotLabel_3: Иоа
+	SlotLabel_4: Фил
+	SlotLabel_5: Вар
+	SlotLabel_6: Фом
+	SlotLabel_7: Мат
+	SlotLabel_8: ИаМ
+	SlotLabel_9: Фад
+	SlotLabel_10: Сим
+	SlotLabel_11: Иуд
+	RevelationJudgingText: Откровение: Идет суд последних трех печатей
+	RevelationStatusText: Откровение: Четыре Всадника {0}/4 (Q - Метеорит, R - Суд)
+	RevelationReadyText: Нажмите Q — Откровение готово
+	MartyrdomPowerText: Сила Мученичества {0}/11
 }
 
 MenuModify.OverhaulSettingsButtonText: Настройки Overhaul
 
 OverhaulSettingsUI: {
-	TitleText: Настройки мода
+	TitleText: Настройки Overhaul
 	CloseText: Закрыть
 	ContentSettingsText: Настройки контента
-	ReloadHintText: "[c/FF6666:* Опции, помеченные этим знаком, требуют перезагрузки мода]"
-	WeaponOverrideText: Управление модификацией оружия
-	SearchHintText: Поиск по названию или ключевым словам...
+	ReloadHintText: "[c/FF6666:* Опции с этой меткой требуют перезагрузки мода]"
+	WeaponOverrideText: Управление изменениями оружия
+	SearchHintText: Поиск по названию...
 	EnableAllText: Включить всё
 	DisableAllText: Отключить всё
 	WorldGenSettingsText: Настройки генерации мира
-	WorldGenFooterHintText: Эти настройки вступят в силу при следующем создании мира.
+	WorldGenFooterHintText: Эти настройки вступят в силу при создании нового мира
 	DensityExtinctionText: Вымирание
 	DensityRareText: Редко
-	DensityNormalText: Обычное
+	DensityNormalText: Нормально
 	DensityCommonText: Часто
 	DensityFloodText: Изобилие
-	DensityEverywhereText: Повсюду
-	ResetDefaultText: Сбросить по умолчанию
+	DensityEverywhereText: Повсеместно
+	ResetDefaultText: По умолчанию
 	DensityTooltipText: Плотность генерации структур
 	CompatibilitySettingsText: Настройки совместимости
-	CompatibilityFooterHintText: Эти параметры используются для решения проблем совместимости с другими модами.
-	CompatHighFPSLabelText: Автоматически отключать интерполяцию движения HighFPSSupport
+	CompatibilityFooterHintText: Эти опции используются для решения проблем совместимости с другими модами
+	CompatHighFPSLabelText: Автоматически отключать интерполяцию движений HighFPSSupport
 	CompatHighFPSTooltipText:
 		'''
-		Функция интерполяции движения в HighFPSSupport вызывает серьезное смещение некоторых визуальных эффектов, таких как отображение удерживаемого оружия и выброс гильз.
-		Включение этой опции автоматически отключит данную функцию при входе в мир для обеспечения корректного отображения.
-		[c/FF6666:Не рекомендуется отключать эту опцию, если вы явно не готовы к визуальным артефактам и понимаете их причину.]
+		Интерполяция движений в HighFPSSupport может вызывать визуальные искажения при отображении оружия и гильз.
+		Включение этой опции автоматически отключает эту функцию при входе в мир для корректного отображения.
+		[c/FF6666:Не рекомендуется отключать эту опцию, если вы не готовы мириться с визуальными багами.]
 		'''
-	CompatHighFPSNotInstalledText: "[c/888888:(Мод HighFPSSupport не установлен; этот параметр сейчас не активен.)]"
+	CompatHighFPSNotInstalledText: "[c/888888:(Мод HighFPSSupport не установлен, эта опция сейчас ни на что не влияет)]"
 }
 
 OverhaulSettingsButton.OverhaulSettingsButtonText: Настройки Overhaul
 
 GalacticCrisisRender: {
-	// HeaderStellarNavigation: ◢ STELLAR NAVIGATION ◣
-	// HeaderKortoSystemOverview: ◢ KORTO SYSTEM OVERVIEW ◣
-	// HeaderGalacticStrategicMap: ◢ GALACTIC STRATEGIC MAP ◣
-	// MarkerTerra: TERRA
-	// ExtinctionProtocolWarning: ◢ EXTINCTION PROTOCOL ACTIVE ◣
-	// KortoSystemLabel: KORTO SYSTEM
-	// KortoTargetLocked: ◢ TARGET LOCKED ◣
-	// KortoStarLabel: KORTO
-	// KortoIIILabel: KORTO-III
-	// KortoPrimaryObjective: ◢ PRIMARY OBJECTIVE ◣
-	// KortoClassTerrestrial: CLASS: TERRESTRIAL
-	// KortoThreatCritical: THREAT: CRITICAL
-	// KortoPlanetCountInfo: KORTO SYSTEM — 6 PLANETS
-	// KortoStatusCompromised: STATUS: COMPROMISED
-	// HeaderAndroidProfile: ◢ TACTICAL ANDROID DOSSIER ◣
-	// AndroidArtisName: ARTIS
-	// AndroidApolaName: APOLA
-	// AndroidCodename: CODENAME
-	// AndroidClassLabel: CLASS: TACTICAL ANDROID
-	// AndroidStatusLabel: STATUS
-	// AndroidStatusLost: SIGNAL LOST
+	HeaderStellarNavigation: ◢ ЗВЕЗДНАЯ НАВИГАЦИЯ ◣
+	HeaderKortoSystemOverview: ◢ ОБЗОР СИСТЕМЫ КОРТО ◣
+	HeaderGalacticStrategicMap: ◢ ГАЛАКТИЧЕСКАЯ СТРАТЕГИЧЕСКАЯ КАРТА ◣
+	MarkerTerra: Терра
+	ExtinctionProtocolWarning: ◢ АКТИВИРОВАНО ◣
+	KortoSystemLabel: Система Корто
+	KortoTargetLocked: ◢ ЦЕЛЬ ЗАХВАЧЕНА ◣
+	KortoStarLabel: Корто
+	KortoIIILabel: Корто-III
+	KortoPrimaryObjective: ◢ ГЛАВНАЯ ЦЕЛЬ ◣
+	KortoClassTerrestrial: Тип: Землеподобная планета
+	KortoThreatCritical: Угроза: Критическая
+	KortoPlanetCountInfo: Система Корто — 6 планет
+	KortoStatusCompromised: Статус: Захвачена
+	HeaderAndroidProfile: ◢ ТАКТИЧЕСКОЕ ДОСЬЕ АНДРОИДА ◣
+	AndroidArtisName: АРТИС
+	AndroidApolaName: АПОЛА
+	AndroidCodename: КОДОВОЕ ИМЯ
+	AndroidClassLabel: КЛАСС: ТАКТИЧЕСКИЙ АНДРОИД
+	AndroidStatusLabel: СТАТУС
+	AndroidStatusLost: СИГНАЛ ПОТЕРЯН
 }
 
 TransitionScene: {
-	// LoadingText: 数据链接中
-	// InitializingText: 正在初始化协议
-	// Hint0: 不要问为什么杀异形，而是要问为何不杀
-	// Hint1: 阿切隆协议是嘉登最高级别的应急方案之一
-	// Hint2: 战术人形无所畏惧，因为恐惧本身就是他们的武器
-	// Hint3: 嘉登的机械造物已经超越了现实的极限
-	// Hint4: 没有大到无法接受的牺牲，没有小到可以原谅的背叛
-	// Hint5: 任何足够先进的技术，皆与魔法无异
-	// Hint6: 灾厄之中蕴藏着超越一切的可能性
-	// Hint7: 嘉登从不做无意义的事，每一步都是精密计算的结果
-	// Hint8: 数据即是力量，知识即是武装
-	// Hint9: 机械不会背叛，但操控机械的人或许会
+	LoadingText: Установка соединения
+	InitializingText: Инициализация протоколов
+	Hint0: Не спрашивайте, почему нужно убивать ксеносов. Спрашивайте, почему не убивать.
+	Hint1: Протокол Ахерон — один из экстренных планов высшего уровня Дрэдона.
+	Hint2: Тактические андроиды не знают страха, ведь сам страх является их оружием.
+	Hint3: Механические творения Дрэдона превзошли пределы реальности.
+	Hint4: Нет жертвы слишком большой, и нет предательства слишком малого, чтобы его простить.
+	Hint5: Любая достаточно развитая технология неотличима от магии.
+	Hint6: В бедствиях таится потенциал, превосходящий всё сущее.
+	Hint7: Дрэдон никогда не делает ничего бессмысленного; каждый шаг — результат точных расчетов.
+	Hint8: Данные — это сила, знания — это броня.
+	Hint9: Машины не предают, но те, кто ими управляет — могут.
 }
 
 StarStreamDialogueBox: {
-	// ContinueHint: 继续
-	// FastHint: 加速
+	ContinueHint: Продолжить
+	FastHint: Ускорить
 }
 
 ApolliaHeroPanelUI: {
-	// TitleText: 阿波利娅
-	// HPLabel: 生命值
-	// DamageLabel: 伤害
-	// DefenseLabel: 防御
-	// CommandLabel: 作战指令
-	// CmdFollow: 跟随
-	// CmdHold: 驻守
-	// CmdAggressive: 进攻
-	// CmdDefensive: 防御
+	TitleText: Аполлия
+	HPLabel: Здоровье
+	DamageLabel: Урон
+	DefenseLabel: Защита
+	CommandLabel: Боевые команды
+	CmdFollow: Следовать
+	CmdHold: Удерживать позицию
+	CmdAggressive: В атаку
+	CmdDefensive: В защиту
 }
 
 DraedonIncomingCall: {
-	// IncomingLabel: 来电通讯
-	// AnswerHint: 点击接听
-	// ConnectingLabel: 连接中
-	// EndLabel: 结束
-	// NextLabel: 继续
-	// TimerLabel: 时长
-	// UnknownCaller: 未知
-	// ChannelPrefix: CH
+	IncomingLabel: Входящий вызов
+	AnswerHint: Нажмите, чтобы ответить
+	ConnectingLabel: Соединение
+	EndLabel: Завершить
+	NextLabel: Продолжить
+	TimerLabel: Длительность
+	UnknownCaller: Неизвестно
+	ChannelPrefix: КАНАЛ
 }
 
 QuestManagerUI: {
-	// TitleText: 任务管理
-	// CategoryAll: 全部
-	// CategoryActive: 进行中
-	// CategoryCompleted: 已完成
-	// CategorySuspended: 挂起
-	// EmptyHintText: 暂无任务...
-	// TrackHintText: "[右键] 关注/取消关注"
-	// SuspendHintText: "[中键] 挂起/恢复"
-	// OpenHintText: 按 [L] 打开任务管理
-	// HeaderStatusTag: ◈ ACTIVE
-	// FooterStatsFormat: TOTAL: {0}  |  ACTIVE: {1}
-	// ExpandHintText: "[左键] 展开/收起详情"
-	// EntryStatusActive: 进行中
-	// EntryStatusTracked: 已关注
-	// EntryStatusSuspended: 已挂起
-	// EntryStatusCompleted: 已完成
-	// EntryStatusFailed: 已失败
+	TitleText: Управление поручениями
+	CategoryAll: Все
+	CategoryActive: Активные
+	CategoryCompleted: Выполненные
+	CategorySuspended: Приостановленные
+	EmptyHintText: Поручений нет...
+	TrackHintText: "[ПКМ] Отслеживать / Не отслеживать"
+	SuspendHintText: "[СКМ] Приостановить / Возобновить"
+	OpenHintText: Нажмите [L], чтобы открыть управление поручениями
+	HeaderStatusTag: ◈ АКТИВНО
+	FooterStatsFormat: ВСЕГО: {0}  |  АКТИВНЫХ: {1}
+	ExpandHintText: "[ЛКМ] Развернуть / Свернуть детали"
+	EntryStatusActive: Активно
+	EntryStatusTracked: Отслеживается
+	EntryStatusSuspended: Приостановлено
+	EntryStatusCompleted: Выполнено
+	EntryStatusFailed: Провалено
 }
 
 CyberwareUI: {
-	// TitleText: CYBERWARE
-	// StatusText: SYSTEM STATUS: OPERATIONAL
-	// SlotSelectedText: "[ SELECTED ]"
-	// SlotEmptyText: EMPTY
-	// Slot_FrontalCortex: FRONTAL CORTEX
-	// Slot_OcularSystem: OCULAR SYSTEM
-	// Slot_LeftArm: LEFT ARM
-	// Slot_Hands: HANDS
-	// Slot_LeftLeg: LEFT LEG
-	// Slot_Feet: FEET
-	// Slot_OperatingSystem: OPERATING SYSTEM
-	// Slot_CirculatorySystem: CIRCULATORY SYS
-	// Slot_RightArm: RIGHT ARM
-	// Slot_Skeleton: SKELETON
-	// Slot_RightLeg: RIGHT LEG
-	// Slot_NervousSystem: NERVOUS SYSTEM
+	TitleText: Киберимпланты
+	StatusText: Состояние системы: В норме
+	SlotSelectedText: "[ Выбрано ]"
+	SlotEmptyText: Пусто
+	Slot_FrontalCortex: Лобная кора
+	Slot_OcularSystem: Оптическая система
+	Slot_LeftArm: Левая рука
+	Slot_Hands: Кисти рук
+	Slot_LeftLeg: Левая нога
+	Slot_Feet: Ступни
+	Slot_OperatingSystem: Операционная система
+	Slot_CirculatorySystem: Кровеносная система
+	Slot_RightArm: Правая рука
+	Slot_Skeleton: Скелет
+	Slot_RightLeg: Правая нога
+	Slot_NervousSystem: Нервная система
 }
 
 SHPCDialogueBox: {
-	// ContinueHint: 继续
-	// FastHint: 加速
+	ContinueHint: Продолжить
+	FastHint: Ускорить
 }
 
 EntrustManagerNotification: {
-	// LabelNewQuest: 新委托
-	// LabelTracked: 已关注
-	// LabelUntracked: 取消关注
-	// LabelSuspended: 已挂起
-	// LabelUnsuspended: 已恢复
-	// LabelCompleted: 委托完成
+	LabelNewQuest: Новое поручение
+	LabelTracked: Отслеживается
+	LabelUntracked: Больше не отслеживается
+	LabelSuspended: Приостановлено
+	LabelUnsuspended: Возобновлено
+	LabelCompleted: Поручение выполнено
 }
 
 HackTime: {
-	// Locked: LOCKED
-	// Done: DONE
-	// Queued: QUEUED
-	// UploadingText: UPLOADING...
-	// BreachReady: BREACH PROTOCOL // READY
-	// UploadComplete: >> UPLOAD COMPLETE <<
-	// UploadQueue: "// UPLOAD QUEUE"
-	// TargetLocked: "// TARGET LOCKED"
-	// HpFormat: HP {0}%
-	// Protocols: "[{0} PROTOCOLS]"
-	// RamDepleted: !! RAM DEPLETED !!
-	// LowRam: ! LOW RAM !
-	// Scanning: SCANNING...
-	// AnalysisComplete: ANALYSIS COMPLETE
-	// TypeLabel: TYPE
-	// BossClass: BOSS CLASS
-	// EliteUnit: ELITE UNIT
-	// HostileEntity: HOSTILE ENTITY
-	// TownNpc: TOWN NPC
-	// FriendlyUnit: FRIENDLY UNIT
-	// PassiveCritter: PASSIVE CRITTER
-	// NeutralEntity: NEUTRAL ENTITY
-	// ThreatLabel: THREAT
-	// ThreatExtreme: EXTREME
-	// ThreatHigh: HIGH
-	// ThreatModerate: MODERATE
-	// ThreatLow: LOW
-	// DefLabel: DEF
-	// DmgLabel: DMG
-	// KbResLabel: KB.RES
-	// Breach: BREACH
-	// InitBreach: "// INITIALIZING BREACH"
-	// SystemBreach: "// SYSTEM BREACH"
-	// Rebooting: REBOOTING...
-	// SystemOnline: SYSTEM ONLINE
-	// MemoryWiped: ???
-	// Cyberpsychosis: CYBERPSYCHOSIS
-	// RamRefund: +{0} RAM
-	// ActiveText: ACTIVE
-	// ActivePct: ACTIVE {0}%
-	// Complete: COMPLETE
-	// UploadingPct: UPLOADING {0}%
-	// CatLethal: LETHAL
-	// CatControl: CONTROL
-	// CatCovert: COVERT
-	// CatContagion: CONTAGION
-	// CatUnknown: UNKNOWN
-	// CatTileManip: TILE MANIP
-	// TileScanName: NAME
-	// TileScanClass: CLASS
-	// TileScanSize: SIZE
-	// TileScanHardness: HARDNESS
-	// TileScanStatus: STATUS
-	// TileScanCrafting: CRAFTING STATION
-	// TileScanContainer: CONTAINER
-	// TileScanLight: LIGHT SOURCE
-	// TileScanFurniture: FURNITURE
-	// TileScanBlock: STRUCTURE
-	// TileScanDungeon: DUNGEON MATERIAL
-	// TileScanLihzahrd: LIHZAHRD TECH
-	// TileScanHardnessExtreme: EXTREME
-	// TileScanHardnessHigh: HIGH
-	// TileScanHardnessNormal: MODERATE
-	// TileScanHardnessLow: LOW
-	// TileScanActive: ACTIVE
-	// TileScanInactive: INACTIVE
-	// TileScanSealed: SEALED
-	// TileScanOnline: ONLINE
-	// TileScanIntact: INTACT
-	// TileScanMisc: MISC
-	// TileScanMiscPile: MISC PILE
-	// ProjectileScanName: NAME
-	// ProjectileScanClass: CLASS
-	// ProjectileScanSpeed: SPEED
-	// ProjectileScanKnockback: KNOCKBACK
-	// ProjectileScanPenetrate: PENETRATION
-	// ProjectileScanTimeLeft: TIME LEFT
-	// ProjectileScanOwner: SOURCE
-	// ProjectileScanAI: AI
-	// ProjectileScanPosition: POSITION
-	// ProjectileScanHostile: HOSTILE PROJECTILE
-	// ProjectileScanFriendly: FRIENDLY PROJECTILE
-	// ProjectileScanNeutral: NEUTRAL PROJECTILE
-	// ProjectileScanMinion: MINION PROJECTILE
-	// ProjectileScanSentry: SENTRY PROJECTILE
-	// ProjectileScanTrap: TRAP PROJECTILE
-	// ProjectileScanInfinite: INFINITE
-	// ProjectileScanOwnerWorld: WORLD/ENVIRONMENT
-	// ItemScanName: NAME
-	// ItemScanClass: CLASS
-	// ItemScanStack: STACK
-	// ItemScanValue: VALUE
-	// ItemScanRarity: RARITY
-	// ItemScanCombat: COMBAT
-	// ItemScanUtility: UTILITY
-	// ItemScanPrefix: PREFIX
-	// ItemScanTypeId: TYPE ID
-	// ItemScanPosition: POSITION
-	// ItemScanWeapon: WEAPON
-	// ItemScanTool: TOOL
-	// ItemScanArmor: ARMOR
-	// ItemScanAccessory: ACCESSORY
-	// ItemScanAmmo: AMMO
-	// ItemScanConsumable: CONSUMABLE
-	// ItemScanPlaceable: PLACEABLE
-	// ItemScanMaterial: MATERIAL
-	// ItemScanQuest: QUEST ITEM
-	// ItemScanMisc: MISC ITEM
-	// ItemScanNone: NONE
-	// ItemScanNoValue: NO VALUE
-	// WaterScanLiquid: LIQUID
-	// WaterScanEnvironment: ENVIRONMENT
-	// WaterScanDepth: DEPTH
-	// WaterScanWorldLayer: WORLD LAYER
-	// WaterScanTileCoord: TILE COORD
-	// WaterScanContainment: CONTAINMENT
-	// WaterScanWater: WATER
-	// WaterScanLava: LAVA
-	// WaterScanHoney: HONEY
-	// WaterScanShimmer: SHIMMER
-	// WaterScanLayerSky: SKY
-	// WaterScanLayerSurface: SURFACE
-	// WaterScanLayerUnderground: UNDERGROUND
-	// WaterScanLayerCavern: CAVERN
-	// WaterScanLayerUnderworld: UNDERWORLD
-	// WaterScanEnvOcean: OCEAN WATER
-	// WaterScanEnvDesert: DESERT WATER
-	// WaterScanEnvSnow: SNOW WATER
-	// WaterScanEnvJungle: JUNGLE WATER
-	// WaterScanEnvCorruption: CORRUPTION WATER
-	// WaterScanEnvCrimson: CRIMSON WATER
-	// WaterScanEnvHallow: HALLOWED WATER
-	// WaterScanEnvDungeon: DUNGEON WATER
-	// WaterScanEnvMushroom: MUSHROOM WATER
-	// WaterScanEnvUnderworld: UNDERWORLD LIQUID
-	// WaterScanContainmentPocket: CONTAINED POCKET
-	// WaterScanContainmentChannel: CHANNEL
-	// WaterScanContainmentOpen: OPEN BODY
-	// WaterScanStatusStill: STILL
-	// WaterScanStatusFlowing: FLOWING
-	// CatParanormal: Paranormal
-	// WraithScanName: Designation
-	// WraithScanNameValue: Unknown Wraith
-	// WraithScanType: Paranormal Entity
-	// WraithScanThreat: Unassessable ERR://-∞
-	// WraithScanStatus: Status
-	// WraithScanStatusStalking: Stealth Stalking
-	// WraithScanStatusWatched: Being Watched
-	// WraithScanStatusHalt: Halted
-	// WraithScanStatusMemory: Memory Corruption
-	// WraithScanStatusDismember: Spectral Disintegration
-	// WraithScanIntegrity: Data Integrity
-	// WraithScanIntegrityValue: 0x??% Corrupted
-	// WraithScanOrigin: Origin
-	// WraithScanOriginValue: Record Not Found
-	// TurretScanName: Codename
-	// TurretScanLaserName: Void Main Cannon Array
-	// TurretScanGatlinName: Void Gatling Turret
-	// TurretScanType: Automated Defense Mechanism
-	// TurretScanPhase: Current Phase
-	// TurretScanPhaseIdle: Standby
-	// TurretScanPhaseCharging: Charging
-	// TurretScanPhaseFiring: Firing
-	// TurretScanPhaseCooldown: Cooldown
-	// TurretScanPhaseLocking: Locking On
-	// TurretScanCircuit: Circuit Status
-	// TurretScanCircuitOnline: Online
-	// TurretScanCircuitShorted: Short-Circuited
-	// TurretScanCircuitOverload: Overload Paralysis
-	// SignalTowerScanName: Void Signal Tower
-	// SignalTowerScanType: Wide-Area Core Machine
-	// SignalTowerScanThreat: Strategic Asset
-	// SignalTowerScanStatus: Tower Status
-	// SignalTowerScanStatusOnline: Online - Awaiting Broadcast
-	// SignalTowerScanStatusBroadcasting: Broadcasting
-	// SignalTowerScanStatusElectrified: Residual Charge
-	// SignalTowerScanProtocol: Available Protocols
-	// RightClickHint: "// RIGHT CLICK TO DESELECT"
+	Locked: Заблокировано
+	Done: Готово
+	Queued: В очереди
+	UploadingText: Загрузка...
+	BreachReady: Протокол взлома готов
+	UploadComplete: >> Загрузка завершена <<
+	UploadQueue: Очередь загрузки
+	TargetLocked: Цель захвачена
+	HpFormat: HP {0}%
+	Protocols: "[{0} Протоколов]"
+	RamDepleted: !! ОЗУ ИСЧЕРПАНА !!
+	LowRam: ! НЕДОСТАТОЧНО ОЗУ !
+	Scanning: Сканирование...
+	AnalysisComplete: Анализ завершен
+	TypeLabel: Тип
+	BossClass: Класс Босс
+	EliteUnit: Элитная единица
+	HostileEntity: Враждебная сущность
+	TownNpc: Горожанин
+	FriendlyUnit: Союзная единица
+	PassiveCritter: Безобидное существо
+	NeutralEntity: Нейтральная сущность
+	ThreatLabel: Угроза
+	ThreatExtreme: Экстремальная
+	ThreatHigh: Высокая
+	ThreatModerate: Средняя
+	ThreatLow: Низкая
+	DefLabel: Защита
+	DmgLabel: Урон
+	KbResLabel: Сопр. отбрасыванию
+	Breach: Взлом
+	InitBreach: Инициализация взлома
+	SystemBreach: Взлом системы
+	Rebooting: Перезагрузка...
+	SystemOnline: Система в сети
+	MemoryWiped: ???
+	Cyberpsychosis: Киберпсихоз
+	RamRefund: +{0} ОЗУ
+	ActiveText: Активно
+	ActivePct: Активно {0}%
+	Complete: Завершено
+	UploadingPct: Загрузка {0}%
+	CatLethal: Смертоносный
+	CatControl: Контроль
+	CatCovert: Скрытность
+	CatContagion: Заражение
+	CatUnknown: Неизвестно
+	CatTileManip: Управление блоками
+	TileScanName: Название
+	TileScanClass: Класс
+	TileScanSize: Размер
+	TileScanHardness: Прочность
+	TileScanStatus: Статус
+	TileScanCrafting: Рабочее место
+	TileScanContainer: Контейнер
+	TileScanLight: Источник света
+	TileScanFurniture: Мебель
+	TileScanBlock: Структура
+	TileScanDungeon: Материал Темницы
+	TileScanLihzahrd: Технология Ящров
+	TileScanHardnessExtreme: Экстремальная
+	TileScanHardnessHigh: Высокая
+	TileScanHardnessNormal: Средняя
+	TileScanHardnessLow: Низкая
+	TileScanActive: В работе
+	TileScanInactive: Отключено
+	TileScanSealed: Запечатано
+	TileScanOnline: В сети
+	TileScanIntact: Целостно
+	TileScanMisc: Разное
+	TileScanMiscPile: Куча мусора
+	ProjectileScanName: Название
+	ProjectileScanClass: Класс
+	ProjectileScanSpeed: Скорость
+	ProjectileScanKnockback: Отбрасывание
+	ProjectileScanPenetrate: Пробивание
+	ProjectileScanTimeLeft: Оставшееся время
+	ProjectileScanOwner: Владелец
+	ProjectileScanAI: ИИ
+	ProjectileScanPosition: Координаты
+	ProjectileScanHostile: Враждебный снаряд
+	ProjectileScanFriendly: Союзный снаряд
+	ProjectileScanNeutral: Нейтральный снаряд
+	ProjectileScanMinion: Снаряд миньона
+	ProjectileScanSentry: Снаряд стража
+	ProjectileScanTrap: Снаряд ловушки
+	ProjectileScanInfinite: Бесконечно
+	ProjectileScanOwnerWorld: Мир/Среда
+	ItemScanName: Название
+	ItemScanClass: Класс
+	ItemScanStack: В стаке
+	ItemScanValue: Ценность
+	ItemScanRarity: Редкость
+	ItemScanCombat: Боевой
+	ItemScanUtility: Вспомогательный
+	ItemScanPrefix: Префикс
+	ItemScanTypeId: ID типа
+	ItemScanPosition: Координаты
+	ItemScanWeapon: Оружие
+	ItemScanTool: Инструмент
+	ItemScanArmor: Броня
+	ItemScanAccessory: Аксессуар
+	ItemScanAmmo: Боеприпасы
+	ItemScanConsumable: Расходник
+	ItemScanPlaceable: Размещаемый
+	ItemScanMaterial: Материал
+	ItemScanQuest: Квестовый предмет
+	ItemScanMisc: Разное
+	ItemScanNone: Нет
+	ItemScanNoValue: Без ценности
+	WaterScanLiquid: Жидкость
+	WaterScanEnvironment: Среда
+	WaterScanDepth: Глубина
+	WaterScanWorldLayer: Слой мира
+	WaterScanTileCoord: Координаты блока
+	WaterScanContainment: Сосуд/Резервуар
+	WaterScanWater: Вода
+	WaterScanLava: Лава
+	WaterScanHoney: Мёд
+	WaterScanShimmer: Мерцание
+	WaterScanLayerSky: Небо
+	WaterScanLayerSurface: Поверхность
+	WaterScanLayerUnderground: Подземелье
+	WaterScanLayerCavern: Пещеры
+	WaterScanLayerUnderworld: Преисподняя
+	WaterScanEnvOcean: Воды Океана
+	WaterScanEnvDesert: Воды Пустыни
+	WaterScanEnvSnow: Воды Снегов
+	WaterScanEnvJungle: Воды Джунглей
+	WaterScanEnvCorruption: Воды Порчи
+	WaterScanEnvCrimson: Воды Багрянца
+	WaterScanEnvHallow: Воды Освящения
+	WaterScanEnvDungeon: Воды Темницы
+	WaterScanEnvMushroom: Грибные воды
+	WaterScanEnvUnderworld: Жидкости Преисподней
+	WaterScanContainmentPocket: Закрытый карман
+	WaterScanContainmentChannel: Канал/Труба
+	WaterScanContainmentOpen: Открытый водоём
+	WaterScanStatusStill: Неподвижно
+	WaterScanStatusFlowing: В движении
+	CatParanormal: Паранормальное
+	WraithScanName: Обозначение
+	WraithScanNameValue: Неизвестный Призрак
+	WraithScanType: Паранормальная сущность
+	WraithScanThreat: Оценка невозможна ERR://-∞
+	WraithScanStatus: Статус
+	WraithScanStatusStalking: Скрытое преследование
+	WraithScanStatusWatched: За вами наблюдают
+	WraithScanStatusHalt: Зависание
+	WraithScanStatusMemory: Повреждение памяти
+	WraithScanStatusDismember: Спектральная дезинтеграция
+	WraithScanIntegrity: Целостность данных
+	WraithScanIntegrityValue: 0x??%  Повреждено
+	WraithScanOrigin: Происхождение
+	WraithScanOriginValue: Запись не найдена
+	TurretScanName: Кодовое имя
+	TurretScanLaserName: Массив Главных Орудий Пустоты
+	TurretScanGatlinName: Скорострельная Турель Пустоты
+	TurretScanType: Механизм автозащиты
+	TurretScanPhase: Текущая фаза
+	TurretScanPhaseIdle: Ожидание
+	TurretScanPhaseCharging: Накопление энергии
+	TurretScanPhaseFiring: Ведение огня
+	TurretScanPhaseCooldown: Охлаждение
+	TurretScanPhaseLocking: Захват цели
+	TurretScanCircuit: Состояние цепи
+	TurretScanCircuitOnline: В сети
+	TurretScanCircuitShorted: Короткое замыкание
+	TurretScanCircuitOverload: Паралич от перегрузки
+	SignalTowerScanName: Сигнальная Башня Пустоты
+	SignalTowerScanType: Широковещательный механизм ядра
+	SignalTowerScanThreat: Стратегический актив
+	SignalTowerScanStatus: Состояние башни
+	SignalTowerScanStatusOnline: В сети · Ожидание трансляции
+	SignalTowerScanStatusBroadcasting: Идет трансляция
+	SignalTowerScanStatusElectrified: Остаточный заряд
+	SignalTowerScanProtocol: Доступные протоколы
+	RightClickHint: ПКМ для снятия выделения с цели
 }
 
 DecryptionStrings: {
-	// DecryptionPanelTitle: Void Signal Terminal Access
-	// DecryptionPanelSubtitleLocked: Protocol Lockdown - Manual Breach Required
-	// DecryptionPanelSubtitleBreaching: Breaching in Progress
-	// DecryptionPanelSubtitleDataFlood: Data Flood Injection
-	// DecryptionPanelSubtitleMessage: Decoded Signal Playback
-	// DecryptionPanelTerminalId: TERM-ID ▸ {0}
-	// DecryptionPanelCoordinate: ΔPOS ▸ {0}, {1}
-	// DecryptionPanelSignalLock: Signal Lock Strength
-	// DecryptionPanelSignalLockValue: "{0}%"
-	// DecryptionPanelFooter: "[ESC] Disconnect    [Left Click] Interact    [?] Help"
-	// DecryptionPanelHintLocked: Signal layer enclosed by an encrypted grid. Press [Space] or click [Initiate Breach] to enter the input sequence.
-	// DecryptionPanelHintBreaching: Click matrix cells in order to fill the target sequence.
-	// DecryptionPanelHintDataFlood: Protocol channel opened, injecting data flood...
-	// DecryptionPanelHintMessage: Decoding complete, intercepted fragment below.
-	// DecryptionPanelBeginBreach: ▷ Initiate Breach
-	// DecryptionPanelClose: ✕ Disconnect
-	// DecryptionPanelStatusLocked: LOCKED
-	// DecryptionPanelStatusBreaching: BREACHING
-	// DecryptionPanelStatusDataFlood: INJECTING
-	// DecryptionPanelStatusMessage: DECODED
-	// BreachBuffer: Buffer {0}/{1}
-	// BreachTargets: Target Sequence
-	// BreachTimer: Time Remaining
-	// BreachAxisRow: Row Constraint ▸ Row {0}
-	// BreachAxisCol: Column Constraint ▸ Col {0}
-	// BreachCooldown: Protocol Resetting in {0:0.0}s
-	// BreachAttempt: Attempt #{0}
-	// BreachRestart: ⟳ Retry
+	DecryptionPanelTitle: Доступ к сигнальному терминалу Пустоты
+	DecryptionPanelSubtitleLocked: Блокировка протокола · Требуется ручной взлом
+	DecryptionPanelSubtitleBreaching: Идет взлом
+	DecryptionPanelSubtitleDataFlood: Вливание потока данных
+	DecryptionPanelSubtitleMessage: Воспроизведение декодированного сигнала
+	DecryptionPanelTerminalId: TERM-ID ▸ {0}
+	DecryptionPanelCoordinate: ΔPOS ▸ {0}, {1}
+	DecryptionPanelSignalLock: Мощность сигнала
+	DecryptionPanelSignalLockValue: "{0}%"
+	DecryptionPanelFooter: "[ESC] Отключиться    [ЛКМ] Взаимодействовать    [?] Помощь"
+	DecryptionPanelHintLocked: Сигнальный слой закрыт зашифрованной сеткой. Нажмите [Пробел] или [Начать взлом], чтобы ввести последовательность.
+	DecryptionPanelHintBreaching: Нажимайте на ячейки матрицы по порядку, чтобы заполнить целевую последовательность.
+	DecryptionPanelHintDataFlood: Канал протокола открыт, идет вливание потока данных...
+	DecryptionPanelHintMessage: Декодирование завершено, перехваченный фрагмент ниже.
+	DecryptionPanelBeginBreach: ▷ Начать взлом
+	DecryptionPanelClose: ✕ Отключиться
+	DecryptionPanelStatusLocked: ЗАБЛОКИРОВАНО
+	DecryptionPanelStatusBreaching: ВЗЛОМ
+	DecryptionPanelStatusDataFlood: ВЛИВАНИЕ
+	DecryptionPanelStatusMessage: ДЕКОДИРОВАНО
+	BreachBuffer: Буфер {0}/{1}
+	BreachTargets: Целевая последовательность
+	BreachTimer: Оставшееся время
+	BreachAxisRow: Ограничение строки ▸ Строка {0}
+	BreachAxisCol: Ограничение столбца ▸ Столбец {0}
+	BreachCooldown: Сброс протокола через {0:0.0}с
+	BreachAttempt: Попытка #{0}
+	BreachRestart: ⟳ Повторить
 }
 
 MessageStrings: {
-	// MsgHeader: ── Intercepted Fragment ▸ Origin 0x{0} / {1} ──
-	// MsgSrcSystem: SYS
-	// MsgSrcSignal: SIG
-	// MsgSrcArchive: ARC
-	// MsgFragment: FRAGMENT
-	// MsgSignature: SIGN   ▸ {0}
-	// MsgBody0: Terminal accessed. Verification key match at 98.4%.
-	// MsgBody1: ...Unlabeled pulse signals remain within the static.
-	// MsgBody2: Coordinate offsets point to deep echoes of the collapsing core.
-	// MsgBody3: This node is marked as ██CLASSIFIED██, related fragments have been sealed.
-	// MsgBody4: The next protocol window will be triggered by your actions.
-	// MsgSkipHint: "[Space/Left Click] Skip text animation"
-	// MsgCloseHint: "[Space/ESC] Disconnect"
-	// MsgAccess: Access: Draedon
-	// MsgStatus: Status: Partially Decrypted
-	// MsgRec01Title: "[Log-01]"
-	// MsgRec01_0: The Great Shriek. Unresolvable wavelengths, as if the entire universe were screaming.
-	// MsgRec01_1: Spatial curvature permanently locked. Warp engines completely scrapped. Forced jumps only result in the disintegration of material structures.
-	// MsgRec01_2: The end of conventional interstellar travel. Collapse of the old unified physics model.
-	// MsgRec02Title: "[Log-02]"
-	// MsgRec02_0: After 73,000 destroyed probes, the current Void coordinates have been locked.
-	// MsgRec02_1: Established Base Zero. Deployed supporting industrial clusters.
-	// MsgRec02_2: The barrier of reality here has been stretched to its limit, allowing for direct visual observation of that chaotic subspace storm.
-	// MsgRec02_3: A perfect observation point.
-	// MsgRec03Title: "[Log-03]"
-	// MsgRec03_0: The storm is leaking.
-	// MsgRec03_1: Physics abdicates. Absolute metaphysical rules have begun taking over this industrial sector.
-	// MsgRec03_2: Timelines are overlapping. Corpses, echoes of the past, and subspace energy are beginning to fuse.
-	// MsgRec03_3: Bizarre anomalies are now frequently observed within the industrial sector.
-	// MsgRec04Title: "[Log-04]"
-	// MsgRec04_0: Purging these paranormal entities is futile; they cannot be killed. They will be left as an outer barrier for the base.
-	// MsgRec04_1: If this log is triggered, it means I have abandoned this place, and all channels to the outside world have been closed.
-	// MsgRec04_2: Latecomer, find your own opportunities within the patterns of those foul things.
+	MsgHeader: ── Перехваченный фрагмент ▸ Источник 0x{0} / {1} ──
+	MsgSrcSystem: СИС
+	MsgSrcSignal: СИГ
+	MsgSrcArchive: АРХ
+	MsgFragment: ФРАГМЕНТ
+	MsgSignature: ПОДПИСЬ  ▸ {0}
+	MsgBody0: Терминал подключен. Совпадение ключа проверки 98.4%.
+	MsgBody1: ...В шуме всё ещё остаются немаркированные импульсные сигналы.
+	MsgBody2: Смещение координат указывает на глубинные эхо-сигналы коллапсирующего ядра.
+	MsgBody3: Этот узел отмечен как ██СЕКРЕТНО██, связанные фрагменты запечатаны.
+	MsgBody4: Следующее окно протокола будет вызвано вашими действиями.
+	MsgSkipHint: "[Пробел/ЛКМ] Пропустить анимацию текста"
+	MsgCloseHint: "[Пробел/ESC] Отключиться"
+	MsgAccess: Права доступа: Дрэдон
+	MsgStatus: Статус: Частичная расшифровка
+	MsgRec01Title: "[Запись-01]"
+	MsgRec01_0: Великий Вопль. Неразрешимые диапазоны волн, как будто вся вселенная закричала.
+	MsgRec01_1: Искривление пространства намертво заблокировано. Варп-двигатели полностью выведены из строя. Принудительный прыжок ведет лишь к распаду материальных структур.
+	MsgRec01_2: Конец обычных межзвездных путешествий. Крах старой единой физической модели.
+	MsgRec02Title: "[Запись-02]"
+	MsgRec02_0: После уничтожения 73 000 зондов, текущие координаты Пустоты были зафиксированы.
+	MsgRec02_1: Основана База Ноль. Развернут сопутствующий промышленный комплекс.
+	MsgRec02_2: Барьер реальности здесь растянут до предела, позволяя напрямую визуально наблюдать за этим хаотичным штормом подпространства.
+	MsgRec02_3: Идеальная точка наблюдения.
+	MsgRec03Title: "[Запись-03]"
+	MsgRec03_0: Шторм просачивается.
+	MsgRec03_1: Физика сдает позиции. Абсолютные метафизические правила начинают захватывать этот промышленный сектор.
+	MsgRec03_2: Временные линии пересекаются. Трупы, эхо прошлого и энергия подпространства начинают сливаться воедино.
+	MsgRec03_3: В промышленной зоне стали часто наблюдаться аномальные явления.
+	MsgRec04Title: "[Запись-04]"
+	MsgRec04_0: Зачистка этих паранормальных сущностей бесполезна; их невозможно убить. Оставим их в качестве внешнего барьера для базы.
+	MsgRec04_1: Если этот журнал был активирован, это означает, что я покинул это место, и все каналы связи с внешним миром закрыты.
+	MsgRec04_2: Потомок, ищи свои собственные возможности в закономерностях этой мерзости.
 }
 
 SHPCUI: {
-	// CyberDomain_Title: CYBER DOMAIN
-	// CyberDomain_Subtitle: Domain Control
-	// CyberDomain_Description: Deploy and manage multi-layer cyberspace
-	// Cyberware_Title: CYBERWARE
-	// Cyberware_Subtitle: Body Augmentation
-	// Cyberware_Description: Open cyberware augmentation manager
-	// Cyberware_Status_Open: OPEN
-	// Cyberware_Status_Closed: CLOSED
-	// Status_Title: STATUS
-	// Status_Subtitle: System Diagnostics
-	// Status_Description: View current overload and cooldown info
-	// Status_OK: OK
-	// Config_Title: CONFIG
-	// Config_Subtitle: System Settings
-	// Config_Description: Adjust assist options and display parameters
-	// State_On: ON
-	// State_Off: OFF
-	// State_Layer: L
-	// Cyber_PanelTitle: CYBER DOMAIN
-	// Cyber_PanelSubtitle: BLACKWALL ACCESS
-	// Cyber_BtnActivate: ACTIVATE
-	// Cyber_BtnDeactivate: DEACTIVATE
-	// Cyber_LayerLabel: LAYER
-	// Cyber_StateOnline: ONLINE
-	// Cyber_StateOffline: OFFLINE
-	// Cyber_Hint: "[{0}] Toggle domain / Click ring segment to switch layer"
-	// Cyber_Layer1_Title: BASE ACCESS
-	// Cyber_Layer2_Title: DEEP DIVE
-	// Cyber_Layer3_Title: BLACKWALL BREACH
-	// Cyber_NoSkill: "// No exclusive skills."
-	// Cyber_LayerBaseFooter: Foundation layer — establishes the domain field.
-	// Cyber_SkillUnlocked: "[#] UNLOCKED"
-	// Cyber_SkillLocked: "[X] Requires Layer {0}"
-	// Cyber_KeyUnbound: ?
-	// Cyber_Skill_Teleport_Name: RIFT TELEPORT
-	// Cyber_Skill_Teleport_Desc: Tear a dimensional rift to the cursor and reform inside the domain.
-	// Cyber_Skill_Banish_Name: CYBER BANISH
-	// Cyber_Skill_Banish_Desc: Send the foe under the cursor into deep cyberspace.
-	// Cyber_Skill_Freeze_Name: DOMAIN FREEZE
-	// Cyber_Skill_Freeze_Desc: Lock every hostile entity inside the domain in place.
-	// Cyber_DrainHeader: RAM DRAIN
-	// Cyber_DrainPerSec: -{0}/s
-	// Cyber_SustainTime: SUSTAIN ~{0}s
-	// Cyber_SustainInfinite: SUSTAIN ∞
-	// Modify_Title: MODIFY
-	// Modify_Subtitle: Gun Augmentation
-	// Modify_Description: Install modification parts into SHPC chassis
-	// Modify_SlotEmpty: EMPTY
-	// Modify_Install: INSTALL
-	// Modify_Unequip: UNEQUIP
-	// Modify_Equipped: EQUIPPED
-	// Modify_NoMatch: No compatible modules in inventory
-	// Modify_Close: CLOSE
-	// Modify_InstallSlot: INSTALL · {0}
-	// Modify_Current: CURRENT: {0}
-	// Modify_Slot_Barrel: BARREL
-	// Modify_Slot_Optic: OPTIC
-	// Modify_Slot_Power: POWER
-	// Modify_Slot_Stock: STOCK
-	// Modify_Slot_Grip: GRIP
-	// Modify_Slot_Frame: FRAME
-	// Talk_Title: TALK
-	// Talk_Subtitle: Neural Link
-	// Talk_Description: Open a direct channel to SHPC
-	// Talk_Status_Busy: BUSY
-	// Talk_Status_Ready: READY
-	// Cyber_Skill_Restart_Name: SYSTEM REBOOT
-	// Cyber_Skill_Restart_Desc: Collapse the domain into a singularity and burst back fully restored.
+	CyberDomain_Title: Кибердомен
+	CyberDomain_Subtitle: КИБЕРПРОСТРАНСТВО
+	CyberDomain_Description: Развернуть/Управлять многоуровневым киберпространством
+	Cyberware_Title: Киберимпланты
+	Cyberware_Subtitle: ИМПЛАНТЫ
+	Cyberware_Description: Открыть менеджер кибернетических улучшений
+	Cyberware_Status_Open: Открыто
+	Cyberware_Status_Closed: Закрыто
+	Status_Title: Информация о статусе
+	Status_Subtitle: СТАТУС
+	Status_Description: Просмотр текущей информации о перегрузке и откате
+	Status_OK: ОК
+	Config_Title: Системные настройки
+	Config_Subtitle: КОНФИГУРАЦИЯ
+	Config_Description: Настройка вспомогательных опций и параметров отображения
+	State_On: Вкл
+	State_Off: Выкл
+	State_Layer: УР
+	Cyber_PanelTitle: Кибердомен
+	Cyber_PanelSubtitle: ДОСТУП К ЗАСЛОНУ
+	Cyber_BtnActivate: Активировать домен
+	Cyber_BtnDeactivate: Деактивировать домен
+	Cyber_LayerLabel: Уровень
+	Cyber_StateOnline: В сети
+	Cyber_StateOffline: Вне сети
+	Cyber_Hint: "[{0}] Переключить домен / Нажмите на сегмент кольца для смены уровня"
+	Cyber_Layer1_Title: Базовый доступ
+	Cyber_Layer2_Title: Глубокое погружение
+	Cyber_Layer3_Title: Прорыв заслона
+	Cyber_NoSkill: Нет уникальных навыков
+	Cyber_LayerBaseFooter: Базовый уровень — только для создания поля домена
+	Cyber_SkillUnlocked: "[#] Разблокировано"
+	Cyber_SkillLocked: "[X] Требуется домен {0} уровня"
+	Cyber_KeyUnbound: Не привязано
+	Cyber_Skill_Teleport_Name: Пространственный скачок
+	Cyber_Skill_Teleport_Desc: Превратиться в разлом пространственных данных к курсору и воссоздаться в скоплении блоков данных заслона.
+	Cyber_Skill_Banish_Name: Киберизгнание
+	Cyber_Skill_Banish_Desc: Отправить врага под курсором в глубины киберпространства.
+	Cyber_Skill_Freeze_Name: Заморозка домена
+	Cyber_Skill_Freeze_Desc: Заблокировать движение всех враждебных сущностей внутри домена.
+	Cyber_DrainHeader: Потребление ОЗУ
+	Cyber_DrainPerSec: -{0}/сек
+	Cyber_SustainTime: Поддержание ~{0} сек
+	Cyber_SustainInfinite: Поддержание ∞
+	Modify_Title: Модификация оружия
+	Modify_Subtitle: УЛУЧШЕНИЕ ОРУЖИЯ
+	Modify_Description: Установка модификаций в шасси SHPC
+	Modify_SlotEmpty: Пусто
+	Modify_Install: Установить
+	Modify_Unequip: Снять
+	Modify_Equipped: Экипировано
+	Modify_NoMatch: В инвентаре нет подходящих модификаций
+	Modify_Close: Закрыть
+	Modify_InstallSlot: Установка · {0}
+	Modify_Current: Текущее: {0}
+	Modify_Slot_Barrel: Ствол
+	Modify_Slot_Optic: Прицел
+	Modify_Slot_Power: Источник энергии
+	Modify_Slot_Stock: Приклад
+	Modify_Slot_Grip: Рукоять
+	Modify_Slot_Frame: Ствольная коробка
+	Talk_Title: Диалог
+	Talk_Subtitle: НЕЙРОСВЯЗЬ
+	Talk_Description: Открыть канал прямой связи с SHPC
+	Talk_Status_Busy: Занято
+	Talk_Status_Ready: Готово
+	Cyber_Skill_Restart_Name: Самоперезагрузка
+	Cyber_Skill_Restart_Desc: Разорвать домен, сжаться в разлом пространственного ядра, а затем взорваться, полностью восстановив свое состояние.
 }
 
 EntrustManagerLead: {
-	TextKeyPromptBound: 按 [{0}] 打开委托面板
-	TextKeyPromptWarnTitle: ⚠  委托快捷键尚未绑定！
-	TextKeyPromptDefaultKey: 当前按 [{0}]（默认键）可打开委托面板
-	TextKeyPromptBindHint: 建议前往  设置 → 控制  中绑定自定义按键
-	TextKeyPromptConfirmBtn: 我知道了
-	TextPanelIntroTitle: 委托操作说明
-	TextRightClickLabel: 右键单击委托条目
-	TextRightClickAction: " →  关注委托"
-	TextRightClickDesc: "     左侧追踪窗口将持续显示任务进度"
-	TextMiddleClickLabel: 中键单击委托条目
-	TextMiddleClickAction: " →  挂起委托"
-	TextMiddleClickDesc: "     暂时隐藏该委托，不在追踪窗口中显示"
-	TextStyleButtonTitle: 样式按钮提示
-	TextStyleButtonLabel: 左键单击顶部小按钮
-	TextStyleButtonAction: " →  切换界面样式"
-	TextStyleButtonDesc: "     可以在荒漠、嘉登与森林风格之间循环切换"
-	TextConfirmBtn: 明白了
-	// TextTrackPromptTitle: Track Commissions of Interest
-	// TextTrackPromptHintLabel: Right-click a commission
-	// TextTrackPromptHintAction: " →  Set to Tracked"
-	// TextTrackPromptDesc: "     Tracked commissions will be pinned to the tracker on the left side of the screen for easy progress monitoring"
-	// TextTrackPromptNextBtn: Next
-	// TextTrackerIntroTitle: Commission Tracker
-	// TextTrackerIntroLine1: The tracker on the left side of the screen persistently displays all tracked commissions
-	// TextTrackerIntroLine2: Hold Left-click to drag and adjust its vertical position
-	// TextTrackerIntroLine3: The tracker automatically collapses when the Commission Manager is open to prevent obstructing your view
-	// TextTrackerIntroNextBtn: Next
-	// TextSuspendIntroTitle: Suspend Unwanted Commissions
-	// TextSuspendIntroHintLabel: Middle-click a commission
-	// TextSuspendIntroHintAction: " →  Suspend Commission"
-	// TextSuspendIntroDesc1: "     Suspended commissions will not appear in the tracker on the left, perfect for shelving them temporarily"
-	// TextSuspendIntroDesc2: "     You can find them in the Suspended tab to restore tracking"
+	TextKeyPromptBound: Нажмите [{0}], чтобы открыть панель поручений
+	TextKeyPromptWarnTitle: ⚠ Горячая клавиша для поручений не назначена!
+	TextKeyPromptDefaultKey: Нажмите [{0}] (клавиша по умолчанию), чтобы открыть панель поручений
+	TextKeyPromptBindHint: Рекомендуется перейти в Настройки → Управление и назначить клавишу
+	TextKeyPromptConfirmBtn: Понятно
+	TextPanelIntroTitle: Руководство по поручениям
+	TextRightClickLabel: ПКМ по поручению
+	TextRightClickAction: " →  Отслеживать поручение"
+	TextRightClickDesc: "     Левое окно отслеживания будет постоянно показывать прогресс задания"
+	TextMiddleClickLabel: СКМ по поручению
+	TextMiddleClickAction: " →  Приостановить поручение"
+	TextMiddleClickDesc: "     Временно скрывает это поручение, чтобы оно не отображалось в окне отслеживания"
+	TextStyleButtonTitle: Смена стиля интерфейса
+	TextStyleButtonLabel: ЛКМ по маленькой кнопке сверху
+	TextStyleButtonAction: " →  Изменить стиль интерфейса"
+	TextStyleButtonDesc: "     Позволяет переключаться между стилями: Пустошь, Дрэдон и Лес"
+	TextConfirmBtn: Ясно
+	TextTrackPromptTitle: Отслеживайте интересующие поручения
+	TextTrackPromptHintLabel: ПКМ по поручению
+	TextTrackPromptHintAction: " →  Сделать отслеживаемым"
+	TextTrackPromptDesc: "     Отслеживаемые поручения закрепляются в левой части экрана для быстрого просмотра прогресса"
+	TextTrackPromptNextBtn: Далее
+	TextTrackerIntroTitle: Панель отслеживания
+	TextTrackerIntroLine1: Панель слева будет постоянно отображать все отслеживаемые поручения
+	TextTrackerIntroLine2: Удерживайте ЛКМ, чтобы перетаскивать её по вертикали
+	TextTrackerIntroLine3: Панель отслеживания автоматически сворачивается при открытии менеджера, чтобы не мешать
+	TextTrackerIntroNextBtn: Далее
+	TextSuspendIntroTitle: Скрывайте неинтересные поручения
+	TextSuspendIntroHintLabel: СКМ по поручению
+	TextSuspendIntroHintAction: " →  Приостановить поручение"
+	TextSuspendIntroDesc1: "     Приостановленные поручения не будут появляться на панели отслеживания"
+	TextSuspendIntroDesc2: "     Их можно найти во вкладке 'Приостановленные' и возобновить в любой момент"
 }
 
 AbandonedPortalStrings: {
-	// Title: Abandoned Portal Console
-	// BrokenSubtitle: Structure Fractured · Core Offline
-	// RepairingSubtitle: Auto-Repair Sequence Running
-	// RepairedSubtitle: Channel Stable · Void Coordinates Available
-	// BrokenBody: Faint subspace echoes still linger within the broken door frame. Once auto-repair is initiated, the portal will rebuild its positioning ring within minutes.
-	// RepairingBody: Nano-welds are reconstructing the rift restrainer. Please keep the surrounding area stable and wait for calibration to complete.
-	// RepairedBody: The portal has completed its auto-repair. The teleportation sequence will initiate a rift event before sending you into the Void.
-	// StartRepair: ▷ Initiate Auto-Repair
-	// Teleport: ▷ Initiate Teleport
-	// Close: ✕ Close
-	// ProgressFormat: Repair Progress {0}%
-	// StatusBroken: STATUS  ▌ OFFLINE
-	// StatusRepairing: STATUS  ▌ CALIBRATING
-	// StatusRepaired: STATUS  ▌ ONLINE
-	// DiagnosticHeader: "[DIAG]"
-	// DiagnosticBroken: ERR-0xC4: Positioning Ring Fractured / Main Power Loop Disconnected
-	// DiagnosticRepairing: INFO: Nano-weld array synchronizing... Do not move the portal base
-	// DiagnosticRepaired: OK: All Subsystems Online / Coordinate Parsing Ready
+	Title: Консоль заброшенного портала
+	BrokenSubtitle: Структура разрушена · Ядро не в сети
+	RepairingSubtitle: Запущена программа самовосстановления
+	RepairedSubtitle: Канал стабилен · Доступны координаты Бездны
+	BrokenBody: В разрушенной раме врат всё ещё сохраняются слабые отголоски подпространства. После активации самовосстановления портал восстановит позиционирующее кольцо за несколько минут.
+	RepairingBody: Нано-сварка перестраивает сдерживатель разлома. Пожалуйста, поддерживайте стабильность в прилегающей зоне до завершения калибровки.
+	RepairedBody: Врата завершили самовосстановление. Последовательность телепортации сначала развернет разлом, а затем отправит вас в мир Бездны.
+	StartRepair: ▷ Запустить программу самовосстановления
+	Teleport: ▷ Начать телепортацию
+	Close: ✕ Закрыть
+	ProgressFormat: Прогресс восстановления {0}%
+	StatusBroken: СТАТУС  ▌ ВНЕ СЕТИ
+	StatusRepairing: СТАТУС  ▌ КАЛИБРОВКА
+	StatusRepaired: СТАТУС  ▌ В СЕТИ
+	DiagnosticHeader: "[ДИАГНОСТИКА]"
+	DiagnosticBroken: ERR-0xC4: Разрыв кольца позиционирования / Главный энергетический контур отключен
+	DiagnosticRepairing: INFO: Синхронизация массива нано-сварки... Не сдвигайте основание врат
+	DiagnosticRepaired: OK: Все подсистемы в сети / Разрешение координат готово
 }
