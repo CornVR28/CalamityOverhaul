@@ -28,5 +28,11 @@ namespace CalamityOverhaul.Content.Items.Ranged
             Item.value = Item.buyPrice(1, 80, 0, 0);
             Item.SetHeldProj<StarshipHeld>();
         }
+
+        public override void AddRecipes() {
+            if (CWRRef.Has && CWRID.item_Starmada > 0 && CWRID.Item_ShadowspecBar > 0) {
+                CreateRecipe().AddIngredient(CWRID.item_Starmada).AddIngredient(CWRID.Item_ShadowspecBar, 5).Register();
+            }
+        }
     }
 }
