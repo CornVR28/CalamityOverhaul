@@ -160,13 +160,21 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Quest.FishoilQuest
         }
 
         private void OnRefuse() {
+            //同步置位"等待手动提交"持久化标志，
+            //不依赖子场景的 OnScenarioComplete，避免任何时序间隙导致 OnUpdate 抢先重新触发问询
+            if (Main.LocalPlayer.TryGetADVSave(out var save)
+                && !FishoilQuestEntry.IsPersistentlyCompleted()) {
+                save.Get<HalibutADVData>().FishoilQuestSuspended = true;
+            }
             ScenarioManager.Reset<FishoilSubmit_Refuse>();
             ScenarioManager.Start<FishoilSubmit_Refuse>();
             Complete();
         }
 
         /// <summary>
-        /// 拒绝子场景——将任务设为挂起
+        /// 拒绝子场景——只播放"好吧，什么时候想好了再来找我"对话，
+        /// 持久化标志已在父场景的 OnRefuse 中同步写入；
+        /// 此处保留作为兜底再次确认，防止存档接口在主线程上偶发不可用
         /// </summary>
         private class FishoilSubmit_Refuse : ADVScenarioBase
         {
@@ -180,10 +188,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Quest.FishoilQuest
             protected override void OnScenarioComplete() {
                 //已完成则不再改写状态
                 if (FishoilQuestEntry.IsPersistentlyCompleted()) return;
-                //将任务设为挂起
-                QuestManagerUI.Instance?.SetEntryStatus(
-                    FishoilQuestEntry.QuestKey, QuestEntryStatus.Suspended);
-                //持久化挂起状态
+                //兜底再写一次（同步路径已经写过，幂等）
                 if (Main.LocalPlayer.TryGetADVSave(out var save)) {
                     save.Get<HalibutADVData>().FishoilQuestSuspended = true;
                 }

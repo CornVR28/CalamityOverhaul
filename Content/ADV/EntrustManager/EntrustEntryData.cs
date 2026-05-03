@@ -110,6 +110,21 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
             return false;
         }
 
+        /// <summary>
+        /// 处理追踪窗口内的鼠标输入
+        /// 返回true表示本帧鼠标已被条目内的交互元素消费，
+        /// 此时追踪窗口应跳过拖拽起始判定，避免误触
+        /// </summary>
+        public virtual bool HandleTrackerInput(Rectangle widgetRect, Rectangle contentRect) {
+            return false;
+        }
+
+        /// <summary>
+        /// 条目希望追踪面板额外保留的高度，
+        /// 用于容纳按钮等不会出现在 GetTrackerDetails 中的可交互元素
+        /// </summary>
+        public virtual int GetTrackerExtraHeight() => 0;
+
         #endregion
 
         #region 生命周期

@@ -143,11 +143,23 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
 
             //鼠标交互
             hoverInMainPage = false;
+            bool entryConsumedInput = false;
             if (slideProgress > 0.3f) {
                 for (int i = 0; i < trackedEntries.Count; i++) {
                     var rect = GetWidgetRect(i);
                     if (rect.Contains(Main.mouseX, Main.mouseY)) {
                         hoverInMainPage = true;
+                        //让条目自身先有机会处理输入（如提交按钮），
+                        //若被消费则本帧不再触发拖拽，避免点按钮被误判为拖拽
+                        var entry = trackedEntries[i];
+                        Rectangle contentRect = new(
+                            rect.X + (int)WidgetPadding,
+                            rect.Y + 26,
+                            rect.Width - (int)(WidgetPadding * 2),
+                            rect.Height - 30);
+                        if (entry.HandleTrackerInput(rect, contentRect)) {
+                            entryConsumedInput = true;
+                        }
                         break;
                     }
                 }
@@ -164,7 +176,7 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
                     isDragging = false;
                 }
             }
-            else if (hoverInMainPage && keyLeftPressState == KeyPressState.Held) {
+            else if (hoverInMainPage && !entryConsumedInput && keyLeftPressState == KeyPressState.Held) {
                 isDragging = true;
                 dragAnchor = Main.mouseY - widgetYOffset;
             }
@@ -282,6 +294,8 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
                 contentH += 20; //进度条
             }
             contentH += 16; //底部边距
+            //条目自定义额外高度（用于容纳按钮等元素）
+            contentH += Math.Max(0, entry.GetTrackerExtraHeight());
 
             return Math.Clamp(contentH, baseH, WidgetMaxHeight);
         }

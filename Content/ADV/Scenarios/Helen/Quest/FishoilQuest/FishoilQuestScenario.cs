@@ -110,7 +110,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Quest.FishoilQuest
 
         /// <summary>
         /// 同步委托管理器中鱼油条目的注册与状态，
-        /// 未接受 → 移除条目；已接受 → 确保注册；已完成 → 标记完成；已挂起 → 标记挂起
+        /// 未接受 → 移除条目；已接受 → 确保注册；已完成 → 标记完成；
+        /// 注：已挂起（FishoilQuestSuspended）不再切换 UI 状态为 Suspended，
+        /// 因为挂起的条目会被侧边栏隐藏，改为通过条目内的提交按钮重新询问
         /// </summary>
         private static void SyncQuestEntry(ADVSave save) {
             var manager = QuestManagerUI.Instance;
@@ -131,12 +133,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Quest.FishoilQuest
             //已完成 → 标记完成
             if (completed) {
                 manager.SetEntryStatus(FishoilQuestEntry.QuestKey, QuestEntryStatus.Completed, 1f);
-                return;
-            }
-
-            //已挂起 → 恢复挂起状态
-            if (save.Get<HalibutADVData>().FishoilQuestSuspended) {
-                manager.SetEntryStatus(FishoilQuestEntry.QuestKey, QuestEntryStatus.Suspended);
             }
         }
 
