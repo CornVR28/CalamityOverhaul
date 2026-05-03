@@ -21,7 +21,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
         //整体UI放大系数，所有尺寸字号都按此比例缩放，便于统一调节
         private const float Scale = 1f;
         //字号缩放系数
-        private const float FontScale = 1f;
+        private const float FontScale = 1.1f;
 
         public const float PanelW = 248f * Scale;
         public const float PanelH = 210f * Scale;
