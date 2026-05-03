@@ -33,12 +33,9 @@ SHPCOverride: {
 	DisplayName: SHPC
 	Tooltip:
 		'''
-		Dispara orbes de energía de alma inestables y concentrados que persisten y explotan tras un retraso
-		Los orbes liberan almas buscadoras y almas residuales recolectables tras colapsar
-		Los efectos de los orbes varían según el tipo de alma utilizado
-		Haz Clic derecho para usar la máquina como una aspiradora, atrayendo almas residuales
-		Al soltar la tecla, se descarga un torrente de láseres de alma que escala con la cantidad de almas atraídas
-		Mantén presionada la tecla Shift para abrir el panel de control del Núcleo de Alma
+		Clic izquierdo para disparar tres rayos láser
+		Mantén clic derecho para cargar energía
+		Todos los ataques pueden ser potenciados por el Dominio
 		[Lang4]
 		legend_Text
 		'''
