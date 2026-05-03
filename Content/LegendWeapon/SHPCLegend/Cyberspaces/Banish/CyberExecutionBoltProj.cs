@@ -276,10 +276,10 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Banish
                 //fork终点：沿forkAngle再外延一段，制造"四散电弧"的观感
                 Vector2 forkEnd = origin + forkAngle.ToRotationVector2() * Main.rand.NextFloat(180f, 320f);
 
-                int forkDamage = (int)(Projectile.damage * 0.55f);
+                //fork纯视觉，不造成伤害
                 int idx = Projectile.NewProjectile(Projectile.GetSource_FromAI(),
                     origin, Vector2.Zero,
-                    Type, Math.Max(1, forkDamage), Projectile.knockBack * 0.5f,
+                    Type, 0, 0f,
                     Projectile.owner,
                     ai0: forkAngle,
                     ai1: 0f,

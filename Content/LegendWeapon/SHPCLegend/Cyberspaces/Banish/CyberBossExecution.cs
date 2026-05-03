@@ -30,9 +30,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Banish
         public const int RamCostPerCast = 12;
 
         /// <summary>
-        /// 每次执行的目标雷数（含主干，不含分叉）
+        /// 每次执行的目标主雷数，最多劈五下
         /// </summary>
-        private const int TargetBoltCount = 26;
+        private const int TargetBoltCount = 5;
 
         /// <summary>
         /// 伤害最终倍率（基于SHPC面板伤害*改件DamageMul后再放大）
