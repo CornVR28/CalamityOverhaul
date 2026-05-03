@@ -278,10 +278,8 @@ namespace CalamityOverhaul.Content.HackTimes
         private int[] frozenBuffTime;
         private int[] frozenBuffType;
         //飞行/翅膀时间快照，防止开启或关闭骇客时间时飞行时间被重置
-        private float frozenWingTime;
-        internal float FrozenWingTime;
-        private int frozenRocketTime;
-        internal int FrozenRocketTime;
+        internal float frozenWingTime;
+        internal int frozenRocketTime;
         //背包开启状态
         private bool snapshotInventoryOpen;
 
@@ -291,8 +289,8 @@ namespace CalamityOverhaul.Content.HackTimes
                     //还原背包
                     Main.playerInventory = snapshotInventoryOpen;
                     //还原飞行时间
-                    Player.wingTime = FrozenWingTime;
-                    Player.rocketTime = FrozenRocketTime;
+                    Player.wingTime = frozenWingTime;
+                    Player.rocketTime = frozenRocketTime;
                 }
                 positionCaptured = false;
                 return;

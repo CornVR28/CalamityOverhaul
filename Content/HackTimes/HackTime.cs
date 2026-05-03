@@ -502,8 +502,8 @@ namespace CalamityOverhaul.Content.HackTimes
             HackTimeFreeze.Activate();
             //记录飞行时间快照
             if (Main.LocalPlayer.Alives()) {
-                Main.LocalPlayer.GetModPlayer<HackTimeFreezePlayer>().FrozenWingTime = Main.LocalPlayer.wingTime;
-                Main.LocalPlayer.GetModPlayer<HackTimeFreezePlayer>().FrozenRocketTime = Main.LocalPlayer.rocketTime;
+                Main.LocalPlayer.GetModPlayer<HackTimeFreezePlayer>().frozenWingTime = Main.LocalPlayer.wingTime;
+                Main.LocalPlayer.GetModPlayer<HackTimeFreezePlayer>().frozenRocketTime = Main.LocalPlayer.rocketTime;
             }
             if (!VaultUtils.isServer) {
                 SoundEngine.PlaySound(CWRSound.Scanning, Main.LocalPlayer.Center);
