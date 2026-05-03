@@ -81,13 +81,7 @@ namespace CalamityOverhaul.Content.Cyberwares.Implementation.Sandevistans
         }
 
         //判断这个NPC是否应该被时缓影响
-        internal static bool ShouldAffectNPC(NPC npc) {
-            //友好NPC、城镇NPC、无敌NPC都不管
-            if (npc.friendly || npc.townNPC || npc.dontTakeDamage) {
-                return false;
-            }
-            return true;
-        }
+        internal static bool ShouldAffectNPC(NPC npc) => npc.active;
 
         //判断这个弹幕是否应该被时缓影响
         internal static bool ShouldAffectProjectile(Projectile proj) {
