@@ -277,6 +277,11 @@ namespace CalamityOverhaul.Content.HackTimes
         //buff持续时间快照，阻止药水病/闪避冷却等buff在冻结期间流逝
         private int[] frozenBuffTime;
         private int[] frozenBuffType;
+        //飞行/翅膀时间快照，防止开启或关闭骇客时间时飞行时间被重置
+        private float frozenWingTime;
+        private int frozenRocketTime;
+        //背包开启状态
+        private bool snapshotInventoryOpen;
 
         public override void PreUpdate() {
             if (!HackTimeFreeze.IsActive) {
@@ -310,7 +315,12 @@ namespace CalamityOverhaul.Content.HackTimes
                 frozenBuffType ??= new int[Player.MaxBuffs];
                 Array.Copy(Player.buffTime, frozenBuffTime, Player.MaxBuffs);
                 Array.Copy(Player.buffType, frozenBuffType, Player.MaxBuffs);
+                //快照飞行时间
+                frozenWingTime = Player.wingTime;
+                frozenRocketTime = Player.rocketTime;
                 positionCaptured = true;
+                //背包开启状态
+                snapshotInventoryOpen = Main.playerInventory;
             }
 
             //锁定位置和速度
@@ -334,6 +344,9 @@ namespace CalamityOverhaul.Content.HackTimes
             Player.controlThrow = false;
             Player.controlSmart = false;
             Player.controlTorch = false;
+
+            //关闭背包
+            Main.playerInventory = false;
         }
 
         public override void PostUpdate() {
@@ -366,6 +379,11 @@ namespace CalamityOverhaul.Content.HackTimes
                     Player.buffTime[i] = frozenBuffTime[i];
                 }
             }
+            //还原飞行时间，阻止翅膀耐久在冻结期间消耗或被系统归零
+            Player.wingTime = frozenWingTime;
+            Player.rocketTime = frozenRocketTime;
+            //还原背包
+            Main.playerInventory = snapshotInventoryOpen;
         }
 
         public override void FrameEffects() {
