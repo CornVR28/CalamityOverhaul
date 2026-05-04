@@ -12,7 +12,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.DomainFre
     /// <br/>在PreDraw中切换SpriteBatch到Immediate模式并应用冻结故障+六角覆盖着色器
     /// <br/>让原版绘制逻辑在着色器生效状态下执行，PostDraw中恢复
     /// </summary>
-    internal class CyberDomainFreezeNPCDraw : GlobalNPC
+    internal class CyberDomainFreezeGlobalNPC : GlobalNPC
     {
         private static bool _shaderActive;
 
@@ -102,8 +102,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.DomainFre
                 null, Main.GameViewMatrix.TransformationMatrix);
         }
 
-        public override bool PreAI(NPC npc) {
-            if (!CyberDomainFreeze.IsNPCFrozen(npc.whoAmI)) return true;
+        public static bool? PreAIByOverNPC(NPC npc) {
+            if (!CyberDomainFreeze.IsNPCFrozen(npc.whoAmI)) return null;
 
             // 获取冻结位置快照
             for (int i = 0; i < CyberDomainFreeze.FrozenNPCs.Count; i++) {
@@ -117,6 +117,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.DomainFre
             npc.frameCounter = 0;
             npc.timeLeft++;
             return false;
+        }
+
+        public override bool PreAI(NPC npc) {
+            //写在这里提醒自己，这个钩子的优先级不够高，导致可能无法很好的处理停滞效果等ai修改拦截，目前已经在PreAIByOverNPC函数中处理，由TimeFreezeEntities调用
+            return true;
         }
 
         private static bool ShouldApplyEffect(NPC npc) {

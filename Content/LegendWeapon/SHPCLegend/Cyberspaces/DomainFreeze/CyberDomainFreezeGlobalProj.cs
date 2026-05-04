@@ -8,7 +8,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.DomainFre
     /// 赛博领域冻结弹幕绘制拦截器
     /// <br/>冻结弹幕的AI并应用冻结着色器效果
     /// </summary>
-    internal class CyberDomainFreezeProjDraw : GlobalProjectile
+    internal class CyberDomainFreezeGlobalProj : GlobalProjectile
     {
         private static bool _shaderActive;
 
@@ -70,7 +70,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.DomainFre
                         break;
                     }
                 }
-                CyberDomainFreezeNPCDraw.DrawCageOverlay(Main.spriteBatch, proj.Center,
+                CyberDomainFreezeGlobalNPC.DrawCageOverlay(Main.spriteBatch, proj.Center,
                     Main.screenPosition, progress, seed, proj.width, proj.height);
             }
         }

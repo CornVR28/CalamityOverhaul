@@ -615,7 +615,13 @@ WeaverGrievances: {
 
 Starship: {
 	// DisplayName: Starship
-	// Tooltip: ""
+	/* Tooltip:
+		'''
+		Continuously firing builds heat, increasing fire rate over time
+		Right-click to consume ammo and load a comet shell; the next shot fires it for massive damage and inflicts Hyper-Disintegration
+		At peak heat, two escort wingmen fly alongside firing homing star bolts; planets are periodically hurled from behind you
+		Releasing the trigger unleashes the finale: 14 defense-ignoring homing meteors and a micro-galaxy rain down at the cursor
+		''' */
 }
 
 SandDagger: {
@@ -1571,7 +1577,20 @@ Thrower: {
 
 Elysium: {
 	// DisplayName: Elysium
-	// Tooltip: ""
+	/* Tooltip:
+		'''
+		Hold left-click to channel a holy serpent
+		Right-click to convert nearby town residents into one of the Twelve Disciples (up to 12)
+		When disciples are martyred they build Martyrdom energy; at 11 stacks, press [ElysiumQKey] to martyr John and invoke the Revelation
+		Using [ElysiumQKey] before reaching 11 stacks calls down a divine lightning strike instead
+		[c/AADDFF:More disciples grant increasing global damage, critical strike chance, and defense; 11 disciples restores life, 12 grants bonus move speed]
+		[c/FF6666:With all 12 gathered: if your health falls below 30%, Judas will betray and instantly kill you (10s cooldown)]
+		[c/FFD700:━━ Revelation Phase ━━]
+		[c/FFD700:[ElysiumQKey] Drop a Celestial Meteor (180% damage)]
+		[c/FFD700:[ElysiumRKey] Trigger the Last Three Seals Judgment (420% damage)]
+		[c/FFD700:Right-click to summon the Four Horsemen in order: Pestilence, War, Famine, Death]
+		[c/FFAA55:War boosts damage and crits; Famine grants massive armor penetration; Death amplifies all Meteor and War Horseman effects]
+		''' */
 	// DiscipleName_0: Simon Peter
 	// DiscipleName_1: Saint Andrew
 	// DiscipleName_2: James

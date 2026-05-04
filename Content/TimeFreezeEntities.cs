@@ -1,4 +1,5 @@
 ﻿using CalamityOverhaul.Content.HackTimes;
+using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.DomainFreeze;
 using InnoVault.GameSystem;
 using Terraria;
 using Terraria.ModLoader;
@@ -10,7 +11,7 @@ namespace CalamityOverhaul.Content
     /// </summary>
     internal class TimeFreezeOverNPC : NPCOverride
     {
-        public override int TargetID => -1;
+        public override int TargetID => -1;//设置为-1，这样可以修改所有NPC
         public override bool AI() {
             if (HackTimeFreeze.IsActive) {
                 if (!HackTimeFreeze.ShouldFreezeNPC(npc)) {
@@ -28,6 +29,16 @@ namespace CalamityOverhaul.Content
             if (CWRWorld.TimeFrozenTick > 0) {
                 CWRNpc.DoTimeFrozen(npc);
                 return false;
+            }
+            if (npc.Alives()) {
+                bool? result = npc.GetGlobalNPC<HackEffectNPC>().PreAIByOverNPC(npc);
+                if (result.HasValue) {
+                    return result.Value;
+                }
+                result = CyberDomainFreezeGlobalNPC.PreAIByOverNPC(npc);
+                if (result.HasValue) {
+                    return result.Value;
+                }
             }
             return true;
         }

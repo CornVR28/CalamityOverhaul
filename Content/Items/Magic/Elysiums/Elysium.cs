@@ -193,6 +193,8 @@ namespace CalamityOverhaul.Content.Items.Magic.Elysiums
         }
 
         public override void ModifyTooltips(List<TooltipLine> tooltips) {
+            tooltips.InsertHotkeyBinding(CWRKeySystem.WeponSkill_Q, "ElysiumQKey", CWRLocText.Instance.Notbound.Value);
+            tooltips.InsertHotkeyBinding(CWRKeySystem.WeponSkill_R, "ElysiumRKey", CWRLocText.Instance.Notbound.Value);
             //显示当前门徒数量和殉道能量
             if (Main.LocalPlayer.TryGetModPlayer<ElysiumPlayer>(out var ep)) {
                 int count = ep.GetDiscipleCount();

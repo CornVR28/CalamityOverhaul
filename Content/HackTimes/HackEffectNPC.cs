@@ -20,13 +20,13 @@ namespace CalamityOverhaul.Content.HackTimes
         //赛博精神病接触伤害冷却计时器
         private int _cyberDamageCooldown;
 
-        public override bool PreAI(NPC npc) {
+        public bool? PreAIByOverNPC(NPC npc) {
             //时停期间不执行任何骇入效果的AI干预
-            if (HackTimeFreeze.IsActive) return true;
+            if (HackTimeFreeze.IsActive) return null;
             HackEffectTracker.GetEffects(npc.whoAmI, effectsCache);
-            if (effectsCache.Count == 0) return true;
+            if (effectsCache.Count == 0) return null;
 
-            bool allowAI = true;
+            bool? allowAI = true;
             for (int i = 0; i < effectsCache.Count; i++) {
                 var eff = effectsCache[i];
                 switch (eff.Hack) {
@@ -53,7 +53,16 @@ namespace CalamityOverhaul.Content.HackTimes
                 }
             }
 
-            return allowAI;
+            if (allowAI.HasValue) {
+                return allowAI.Value;
+            }
+
+            return null;
+        }
+
+        public override bool PreAI(NPC npc) {
+            //写在这里提醒自己，这个钩子的优先级不够高，导致可能无法很好的处理停滞效果等ai修改拦截，目前已经在PreAIByOverNPC函数中处理，由TimeFreezeEntities调用
+            return true;
         }
 
         public override void ModifyHitPlayer(NPC npc, Player target, ref Player.HurtModifiers modifiers) {
