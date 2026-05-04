@@ -16,10 +16,21 @@ float mode;           // 0=Idle, 1=Warning, 2=Dashing
 float progress;       // 警告/冲刺过程 0~1
 float2 texelSize;     // 1/纹理宽高
 float seed;           // 实例化扰动种子（区分体节）
+float4 frameUV;       // 当前帧UV范围 (minU, minV, maxU, maxV)，越界采样视为透明
 
 float hash(float n)
 {
     return frac(sin(n) * 43758.5453);
+}
+
+// 越界安全采样——防止采到相邻帧的像素
+// 毁灭者贴图按4帧竖排，靠近边缘做邻域采样会侵入下一帧，
+// 导致出现"凭空多出来的描边"。这里限制采样必须在当前帧 UV 范围内。
+float sampleAlphaSafe(float2 uv)
+{
+    if (uv.x < frameUV.x || uv.x > frameUV.z || uv.y < frameUV.y || uv.y > frameUV.w)
+        return 0.0;
+    return tex2D(uImage0, uv).a;
 }
 
 // 8邻域 alpha 最大值——用于检测外轮廓
@@ -34,7 +45,7 @@ float edgeMax(float2 uv, float radius)
         {
             if (ox == 0 && oy == 0) continue;
             float2 offset = float2(ox, oy) * texelSize * radius;
-            maxA = max(maxA, tex2D(uImage0, uv + offset).a);
+            maxA = max(maxA, sampleAlphaSafe(uv + offset));
         }
     }
     return maxA;
@@ -117,11 +128,11 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0, float4 vertexColor : COLOR
     float4 color = texColor * vertexColor;
     float lum = dot(color.rgb / max(color.a, 0.0001), float3(0.299, 0.587, 0.114));
 
-    // 内边缘检测——加强机械装甲边缘的高光
-    float a_r = tex2D(uImage0, coords + float2( texelSize.x * 1.5, 0)).a;
-    float a_l = tex2D(uImage0, coords + float2(-texelSize.x * 1.5, 0)).a;
-    float a_u = tex2D(uImage0, coords + float2(0,  texelSize.y * 1.5)).a;
-    float a_d = tex2D(uImage0, coords + float2(0, -texelSize.y * 1.5)).a;
+    // 内边缘检测——加强机械装甲边缘的高光（同样使用安全采样避免跨帧）
+    float a_r = sampleAlphaSafe(coords + float2( texelSize.x * 1.5, 0));
+    float a_l = sampleAlphaSafe(coords + float2(-texelSize.x * 1.5, 0));
+    float a_u = sampleAlphaSafe(coords + float2(0,  texelSize.y * 1.5));
+    float a_d = sampleAlphaSafe(coords + float2(0, -texelSize.y * 1.5));
     float innerEdge = saturate(1.0 - (a_r + a_l + a_u + a_d) * 0.25);
     innerEdge = smoothstep(0.0, 0.6, innerEdge);
 

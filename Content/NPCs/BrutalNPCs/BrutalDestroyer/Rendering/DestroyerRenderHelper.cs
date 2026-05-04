@@ -93,18 +93,29 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalDestroyer.Rendering
         /// <summary>
         /// 切到 Immediate 模式并启用机械热感着色器，调用方需在绘制完后调用 EndThermalShader 还原
         /// </summary>
-        public static bool BeginThermalShader(SpriteBatch spriteBatch, Texture2D texture, float seed = 0f) {
+        public static bool BeginThermalShader(SpriteBatch spriteBatch, Texture2D texture, Rectangle sourceRect, float seed = 0f) {
             var (mode, intensity, progress) = DestroyerVisualState.Read();
             if (intensity <= 0.01f) return false;
 
             Effect shader = EffectLoader.DestroyerThermalOutline?.Value;
             if (shader == null) return false;
 
+            //把当前帧的UV范围告诉shader，避免邻域采样越界到其他帧
+            float invW = 1f / texture.Width;
+            float invH = 1f / texture.Height;
+            //内缩半像素：贴到帧边缘的采样仍属本帧，但不会触及相邻帧的首列/首行
+            Vector4 frameUV = new Vector4(
+                (sourceRect.X + 0.5f) * invW,
+                (sourceRect.Y + 0.5f) * invH,
+                (sourceRect.X + sourceRect.Width - 0.5f) * invW,
+                (sourceRect.Y + sourceRect.Height - 0.5f) * invH);
+
             shader.Parameters["uTime"]?.SetValue(Main.GlobalTimeWrappedHourly);
             shader.Parameters["intensity"]?.SetValue(intensity);
             shader.Parameters["mode"]?.SetValue((float)mode);
             shader.Parameters["progress"]?.SetValue(progress);
-            shader.Parameters["texelSize"]?.SetValue(new Vector2(1f / texture.Width, 1f / texture.Height));
+            shader.Parameters["texelSize"]?.SetValue(new Vector2(invW, invH));
+            shader.Parameters["frameUV"]?.SetValue(frameUV);
             shader.Parameters["seed"]?.SetValue(seed);
 
             spriteBatch.End();

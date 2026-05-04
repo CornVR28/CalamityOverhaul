@@ -37,7 +37,7 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalDestroyer
             DestroyerRenderHelper.DrawOutlineHalo(spriteBatch, value, drawPos, rectangle,
                 npc.rotation + MathHelper.Pi, origin, npc.scale, SpriteEffects.None);
 
-            bool shaderApplied = DestroyerRenderHelper.BeginThermalShader(spriteBatch, value, seed);
+            bool shaderApplied = DestroyerRenderHelper.BeginThermalShader(spriteBatch, value, rectangle, seed);
             spriteBatch.Draw(value, drawPos, rectangle, drawColor,
                 npc.rotation + MathHelper.Pi, origin, npc.scale, SpriteEffects.None, 0);
             if (shaderApplied) {

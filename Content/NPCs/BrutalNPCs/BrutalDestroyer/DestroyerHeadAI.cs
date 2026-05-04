@@ -298,8 +298,8 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalDestroyer
             DestroyerRenderHelper.DrawOutlineHalo(spriteBatch, texture, mainPos, frameRec,
                 npc.rotation + MathHelper.Pi, origin, npc.scale, SpriteEffects.None);
 
-            //本体绘制套上机械热感着色器
-            bool shaderApplied = DestroyerRenderHelper.BeginThermalShader(spriteBatch, texture, seed: 0f);
+            //本体绘制套上机械热感着色器（传入当前帧UV范围，避免4帧贴图邻域采样跨帧）
+            bool shaderApplied = DestroyerRenderHelper.BeginThermalShader(spriteBatch, texture, frameRec, seed: 0f);
 
             spriteBatch.Draw(texture, mainPos, frameRec, drawColor,
                 npc.rotation + MathHelper.Pi, origin, npc.scale, SpriteEffects.None, 0f);
