@@ -73,7 +73,7 @@ namespace CalamityOverhaul.Content.Items.Accessories
         }
 
         public override void ModifyTooltips(List<TooltipLine> tooltips) {
-            tooltips.InsertHotkeyBinding(CWRKeySystem.EmblemOfDread_Dash, "[KEY]", CWRLocText.Instance.Notbound.Value);
+            tooltips.InsertHotkeyBinding(CWRKeySystem.Accessory_Skills, "[KEY]", CWRLocText.Instance.Notbound.Value);
         }
     }
 
@@ -441,7 +441,7 @@ namespace CalamityOverhaul.Content.Items.Accessories
 
             if (!Player.mount.Active && !Player.setSolar
                 && DashDelay == 0 && Player.whoAmI == Main.myPlayer
-                && CWRKeySystem.EmblemOfDread_Dash.JustPressed) {
+                && CWRKeySystem.Accessory_Skills.JustPressed) {
                 Projectile.NewProjectile(Player.FromObjectGetParent(), Player.Center, Vector2.Zero
                     , ModContent.ProjectileType<EmblemOfDreadDashProj>(), 8000, 8, Player.whoAmI);
             }

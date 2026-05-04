@@ -1,26 +1,20 @@
 ﻿QuestLog_Key.DisplayName: Quest Log: Toggle Main Interface
-QuestManager_Key.DisplayName: Commission Manager: Toggle Control Panel
-HeavenfallLongbowSkillKey.DisplayName: Heavenfall Longbow: Judgment of Vientiane
-InfinitePickSkillKey.DisplayName: Infinite Pickaxe: Form Switch
-Murasama_TriggerKey.DisplayName: Murasama: Trigger Key
-Murasama_DownKey.DisplayName: Murasama: Downward Slam
+QuestManager_Key.DisplayName: Quest Manager: Toggle Management Panel
 Legend_UIControl.DisplayName: Toggle Legendary Weapon HUD
 Legend_Domain.DisplayName: Domain Expansion
 Legend_Teleport.DisplayName: Domain Teleport
 Legend_Restart.DisplayName: Self-Restart
-Halibut_Clone.DisplayName: Halibut: Past-Self Invasion
-Halibut_Superposition.DisplayName: Halibut: Superposition
-Halibut_Skill_L.DisplayName: Halibut: Switch Skill Left
-Halibut_Skill_R.DisplayName: Halibut: Switch Skill Right
-WeponSkill_Q.DisplayName: Weapon: Left Skill Key
-WeponSkill_R.DisplayName: Weapon: Right Skill Key
-AriaofTheCosmos_Q.DisplayName: Aria of the Cosmos: Star-Ring Guard
-AriaofTheCosmos_R.DisplayName: Aria of the Cosmos: Gamma-Ray Burst
-JusticeUnveiled.DisplayName: Justice Unveiled: Verdict Trigger
-EmblemOfDread_Dash.DisplayName: Emblem of Dread: Gravity Thrust
-EyeOfSingularity_QuantumLeap.DisplayName: Eye of Singularity: Quantum Leap
 HackTime_Toggle.DisplayName: Hack Time
 CyberBanish_Key.DisplayName: Cyberspace: Banish
 CyberFreeze_Key.DisplayName: Cyberspace: Freeze
 CyberwareSkill_Key.DisplayName: Cyberware Skill
 VoidTimeShift_Key.DisplayName: Void Time Shift
+Halibut_Clone.DisplayName: Halibut: Past Self Invasion
+Halibut_Superposition.DisplayName: Halibut: Superposition
+Halibut_Skill_L.DisplayName: Halibut: Switch Skill Left
+Halibut_Skill_R.DisplayName: Halibut: Switch Skill Right
+Murasama_TriggerKey.DisplayName: Murasama: Trigger Key
+Murasama_DownKey.DisplayName: Murasama: Downward Strike
+WeponSkill_Q.DisplayName: Weapon: Left Skill Key
+WeponSkill_R.DisplayName: Weapon: Right Skill Key
+Accessory_Skills.DisplayName: Accessory Skill
