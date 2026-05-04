@@ -1,4 +1,5 @@
 ﻿using CalamityOverhaul.Content.DamageModify;
+using CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalDestroyer.Rendering;
 using CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalSkeletronPrime;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
@@ -489,16 +490,37 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalDestroyer
                 rectangle = value.GetRectangle();
             }
 
+            //每节体节用一个稳定但不同的种子（whoAmI），让脉冲扫描带相位错开
+            float seed = (npc.whoAmI % 64) / 64f;
+
             if (time < DestroyerHeadAI.StretchTime || npc.ai[2] == 1) {
                 value = Body_Stingless.Value;
-                spriteBatch.Draw(value, npc.Center - Main.screenPosition
-                , null, drawColor, npc.rotation + MathHelper.Pi, value.Size() / 2, npc.scale, SpriteEffects.None, 0);
+                Vector2 stinglessPos = npc.Center - Main.screenPosition;
+                Vector2 stinglessOrigin = value.Size() / 2;
+
+                //出场期间不绘制halo和着色器，避免和缩进特效冲突
+                spriteBatch.Draw(value, stinglessPos, null, drawColor,
+                    npc.rotation + MathHelper.Pi, stinglessOrigin, npc.scale, SpriteEffects.None, 0);
             }
             else {
-                spriteBatch.Draw(value, npc.Center - Main.screenPosition
-                , rectangle, drawColor, npc.rotation + MathHelper.Pi, rectangle.Size() / 2, npc.scale, SpriteEffects.None, 0);
-                spriteBatch.Draw(value2, npc.Center - Main.screenPosition
-                , rectangle, Color.White, npc.rotation + MathHelper.Pi, rectangle.Size() / 2, npc.scale, SpriteEffects.None, 0);
+                Vector2 drawPos = npc.Center - Main.screenPosition;
+                Vector2 origin = rectangle.Size() / 2;
+
+                //外圈描边光环——夜晚时也能看清整条蠕虫的走向
+                DestroyerRenderHelper.DrawOutlineHalo(spriteBatch, value, drawPos, rectangle,
+                    npc.rotation + MathHelper.Pi, origin, npc.scale, SpriteEffects.None);
+
+                //本体套机械热感着色器
+                bool shaderApplied = DestroyerRenderHelper.BeginThermalShader(spriteBatch, value, seed);
+                spriteBatch.Draw(value, drawPos, rectangle, drawColor,
+                    npc.rotation + MathHelper.Pi, origin, npc.scale, SpriteEffects.None, 0);
+                if (shaderApplied) {
+                    DestroyerRenderHelper.EndThermalShader(spriteBatch);
+                }
+
+                //发光层独立绘制以保留原始自发光
+                spriteBatch.Draw(value2, drawPos, rectangle, Color.White,
+                    npc.rotation + MathHelper.Pi, origin, npc.scale, SpriteEffects.None, 0);
             }
 
             return false;

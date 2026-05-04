@@ -241,6 +241,36 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalDestroyer
 
         private void UpdateVisuals() {
             Lighting.AddLight(npc.Center, 0.8f, 0.2f, 0.2f);
+
+            //驱动机械热感着色器：根据当前状态机确定模式与强度，整条蠕虫共用
+            DestroyerVisualMode visMode = DestroyerVisualMode.Idle;
+            float visIntensity = 0.65f;//常态保持较明显的红橙描边以解决"夜晚看不清"问题
+            float visProgress = 0f;
+
+            //冲刺中——白热高速效果
+            if (stateMachine?.CurrentState is DestroyerDashingState) {
+                visMode = DestroyerVisualMode.Dashing;
+                visIntensity = 1f;
+                visProgress = 1f;
+            }
+            //蓄力（冲刺/包围）——红黄警告
+            else if (stateContext.IsCharging && (stateContext.ChargeType == 1 || stateContext.ChargeType == 3)) {
+                visMode = DestroyerVisualMode.Warning;
+                visIntensity = 0.85f;
+                visProgress = stateContext.ChargeProgress;
+            }
+            //其他蓄力（激光弹幕、探针阵列）——同样使用警告滤镜，进度更柔
+            else if (stateContext.IsCharging) {
+                visMode = DestroyerVisualMode.Warning;
+                visIntensity = 0.75f;
+                visProgress = stateContext.ChargeProgress * 0.7f;
+            }
+            //狂暴期常态描边稍强一点
+            else if (stateContext.IsEnraged) {
+                visIntensity = 0.8f;
+            }
+
+            DestroyerVisualState.Push(visMode, visIntensity, visProgress);
         }
 
         #endregion
@@ -264,11 +294,21 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalDestroyer
                 DestroyerRenderHelper.DrawDashTrail(spriteBatch, npc, texture, frameRec, origin, screenPos);
             }
 
-            //绘制本体
+            //外圈8方向描边光环——确保夜晚远距离也能看清Boss轮廓
+            DestroyerRenderHelper.DrawOutlineHalo(spriteBatch, texture, mainPos, frameRec,
+                npc.rotation + MathHelper.Pi, origin, npc.scale, SpriteEffects.None);
+
+            //本体绘制套上机械热感着色器
+            bool shaderApplied = DestroyerRenderHelper.BeginThermalShader(spriteBatch, texture, seed: 0f);
+
             spriteBatch.Draw(texture, mainPos, frameRec, drawColor,
                 npc.rotation + MathHelper.Pi, origin, npc.scale, SpriteEffects.None, 0f);
 
-            //绘制发光层
+            if (shaderApplied) {
+                DestroyerRenderHelper.EndThermalShader(spriteBatch);
+            }
+
+            //发光层独立绘制——保留原有自发光效果不被滤镜覆盖
             spriteBatch.Draw(Head_Glow.Value, mainPos, glowRec, Color.White,
                 npc.rotation + MathHelper.Pi, origin, npc.scale, SpriteEffects.None, 0f);
 
