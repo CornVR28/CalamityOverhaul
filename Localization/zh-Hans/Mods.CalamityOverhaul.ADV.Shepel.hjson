@@ -1,4 +1,4 @@
-ShepelCyberActiveDialogue: {
+﻿ShepelCyberActiveDialogue: {
 	RoleName: SHPC
 	Line_Intro: 领域已激活，主人。当前层级 {0}，外部信号已为您完全屏蔽。
 	Line_LayerReport: 领域越深，可干预的目标范围越广，但能耗也会成倍增加。请留意RAM余量，主人。
@@ -498,15 +498,15 @@ ShepelUnderworldDialogue: {
 }
 
 CybCourseKeyBindReminderPanel: {
-	Title: BIND ALERT
-	Subtitle: Unbound Core Hotkeys
+	Title: 绑定警报
+	Subtitle: 核心快捷键未绑定
 	Hint:
 		'''
-		The following hotkeys are currently unbound. You will be unable to use their corresponding features normally after leaving the Braindance.
-		Please assign keys to them in [Settings → Controls].
-		'''
-	UnboundLabel: Unbound
-	BtnConfirm: Acknowledged
-	BtnLater: Handle Later
-	Footer: Any option will disconnect the Braindance. Bindings can be adjusted at any time in settings in the main world.
+		以下快捷键当前未绑定。离开超梦后，您将无法正常使用其对应的功能。
+		请前往 [设置 → 控制] 中为它们分配按键。
+		'''s
+	UnboundLabel: 未绑定
+	BtnConfirm: 已知悉
+	BtnLater: 稍后处理
+	Footer: 选择任意选项都将断开超梦连接。您可以随时在主世界的设置中调整按键绑定。
 }
