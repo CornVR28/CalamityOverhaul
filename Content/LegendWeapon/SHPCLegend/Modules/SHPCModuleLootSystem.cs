@@ -1,4 +1,5 @@
-﻿using Terraria;
+﻿using System.Collections.Generic;
+using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
@@ -62,17 +63,51 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
                 ModContent.ItemType<VolatileFrameModule>(),
             ];
 
+            List<Chest> laboratoryChests = [];
             for (int i = 0; i < Main.maxChests; i++) {
                 Chest chest = Main.chest[i];
                 if (chest == null || !IsLaboratorySecurityChest(chest)) {
                     continue;
                 }
 
-                int moduleType = moduleTypes[WorldGen.genRand.Next(moduleTypes.Length)];
+                laboratoryChests.Add(chest);
+            }
+
+            Shuffle(laboratoryChests);
+
+            List<int> moduleBag = [];
+            int previousModuleType = ItemID.None;
+            foreach (Chest chest in laboratoryChests) {
+                if (moduleBag.Count == 0) {
+                    RefillModuleBag(moduleBag, moduleTypes, previousModuleType);
+                }
+
+                int moduleIndex = moduleBag.Count - 1;
+                int moduleType = moduleBag[moduleIndex];
+                moduleBag.RemoveAt(moduleIndex);
+                previousModuleType = moduleType;
+
                 AddChestItem(chest, moduleType);
             }
 
             injected = true;
+        }
+
+        private static void RefillModuleBag(List<int> moduleBag, int[] moduleTypes, int previousModuleType) {
+            moduleBag.AddRange(moduleTypes);
+            Shuffle(moduleBag);
+
+            if (moduleBag.Count > 1 && moduleBag[^1] == previousModuleType) {
+                int swapIndex = WorldGen.genRand.Next(moduleBag.Count - 1);
+                (moduleBag[^1], moduleBag[swapIndex]) = (moduleBag[swapIndex], moduleBag[^1]);
+            }
+        }
+
+        private static void Shuffle<T>(List<T> list) {
+            for (int i = list.Count - 1; i > 0; i--) {
+                int swapIndex = WorldGen.genRand.Next(i + 1);
+                (list[i], list[swapIndex]) = (list[swapIndex], list[i]);
+            }
         }
 
         private static bool IsLaboratorySecurityChest(Chest chest) {
