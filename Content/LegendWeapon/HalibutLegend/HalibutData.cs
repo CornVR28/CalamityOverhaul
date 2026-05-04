@@ -1,4 +1,7 @@
 ﻿using Terraria;
+using Terraria.ID;
+using Terraria.ModLoader;
+using Terraria.ModLoader.IO;
 
 namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend
 {
@@ -36,6 +39,31 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend
         /// </summary>
         /// <returns></returns>
         public static int GetDomainLayer() => GetDomainLayer(Main.LocalPlayer);
+
+        /// <summary>
+        /// 用于判断和标记历史物品
+        /// </summary>
+        /// <param name="item"></param>
+        /// <param name="tag"></param>
+        public static void IsLegacyItem(Item item, TagCompound tag) {
+            //需要是曾经的大比目鱼炮
+            if (item.type > ItemID.None && item.type == CWRID.Item_HalibutCannon) {
+                bool isOldSave = false;
+                if (tag.ContainsKey("LegendData:Level")) {
+                    isOldSave = true;
+                }
+                if (tag.ContainsKey("LegendData:UpgradeWorldName")) {
+                    isOldSave = true;
+                }
+                if (tag.ContainsKey("LegendData:UpgradeWorldFullName")) {
+                    isOldSave = true;
+                }
+                //标记为历史版本中存在过的传奇
+                if (isOldSave) {
+                    item.CWR().LegacyItemTranslationID = HalibutOverride.ID;
+                }
+            }
+        }
 
         /// <summary>
         /// 获得玩家的领域层数

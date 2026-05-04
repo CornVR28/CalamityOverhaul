@@ -2,6 +2,7 @@
 using CalamityOverhaul.Content.Industrials.Generator;
 using CalamityOverhaul.Content.Items.Modifys;
 using CalamityOverhaul.Content.LegendWeapon;
+using CalamityOverhaul.Content.LegendWeapon.HalibutLegend;
 using CalamityOverhaul.Content.LegendWeapon.HalibutLegend.UI;
 using InnoVault.GameSystem;
 using Microsoft.Xna.Framework.Graphics;
@@ -32,10 +33,6 @@ namespace CalamityOverhaul.Content
         /// 这个数组不会自动的网络同步，需要在合适的时机下调用同步指令
         /// </summary>
         public float[] ai = new float[MaxAISlot];
-        /// <summary>
-        /// 一般用于近战类武器的充能值
-        /// </summary>
-        public float MeleeCharge;
         /// <summary>
         /// 是否是一个手持物品，改判定与<see cref="heldProjType"/> >0 具有同样的功效，都会被系统认定为手持物品
         /// </summary>
@@ -118,6 +115,10 @@ namespace CalamityOverhaul.Content
         /// 使用的染色物品ID
         /// </summary>
         public int DyeItemID;
+        /// <summary>
+        /// 历史物品转化目标ID，如果大于0，则会试图转化
+        /// </summary>
+        public int LegacyItemTranslationID;
         #endregion
         public override void Load() {
             ItemRebuildLoader.PreSetDefaultsEvent += PreSetDefaults;
@@ -132,7 +133,6 @@ namespace CalamityOverhaul.Content
         public override GlobalItem Clone(Item from, Item to) => CloneCWRItem((CWRItem)base.Clone(from, to));
         public CWRItem CloneCWRItem(CWRItem cwr) {
             cwr.ai = ai;
-            cwr.MeleeCharge = MeleeCharge;
             cwr.isHeldItem = isHeldItem;
             cwr.IsHeldSwing = IsHeldSwing;
             cwr.heldProjType = heldProjType;
@@ -145,6 +145,7 @@ namespace CalamityOverhaul.Content
             cwr.IsShootCountCorlUse = IsShootCountCorlUse;
             cwr.LegendData = LegendData;
             cwr.DyeItemID = DyeItemID;
+            cwr.LegacyItemTranslationID = LegacyItemTranslationID;
             return cwr;
         }
 
@@ -262,14 +263,20 @@ namespace CalamityOverhaul.Content
             }
         }
 
+        public override bool CanUseItem(Item item, Player player) {
+            if (IsShootCountCorlUse) {
+                return player.ownedProjectileCounts[item.shoot] <= 0;
+            }
+            if (heldProjType > 0 && hasHeldNoCanUseBool) {
+                return false;
+            }
+            return true;
+        }
+
         //有意思的是，在数次令角色死亡死后，我确认当角色死亡时，该函数会被加载一次
         public override void SaveData(Item item, TagCompound tag) {
             if (DyeItemID > ItemID.None) {
                 tag.Add("_DyeItemID", DyeItemID);
-            }
-
-            if (MeleeCharge != 0f) {
-                tag.Add("_MeleeCharge", MeleeCharge);
             }
 
             try {
@@ -290,14 +297,16 @@ namespace CalamityOverhaul.Content
                 DyeItemID = 0;
             }
 
-            if (!tag.TryGet("_MeleeCharge", out MeleeCharge)) {
-                MeleeCharge = 0;
-            }
-
             try {
+                HalibutData.IsLegacyItem(item, tag);
+                //加载数据
                 LegendData?.LoadData(item, tag);
                 //加载操作使用StorageOperation上下文，静默升级不弹窗
                 LegendData?.DoUpdate(item, LegendUpdateContext.StorageOperation);
+                //转化历史物品
+                if (LegacyItemTranslationID > ItemID.None) {
+                    item.ChangeItemType(LegacyItemTranslationID);
+                }
             } catch (Exception ex) {
                 CWRMod.Instance.Logger.Error($"[LegendData:LoadData] an error has occurred:{ex.Message}");
             }
@@ -326,16 +335,10 @@ namespace CalamityOverhaul.Content
                     }
                 }
             }
-        }
-
-        public override bool CanUseItem(Item item, Player player) {
-            if (IsShootCountCorlUse) {
-                return player.ownedProjectileCounts[item.shoot] <= 0;
+            //转化历史物品
+            if (LegacyItemTranslationID > ItemID.None) {
+                item.ChangeItemType(LegacyItemTranslationID);
             }
-            if (heldProjType > 0 && hasHeldNoCanUseBool) {
-                return false;
-            }
-            return true;
         }
 
         public override void UpdateInventory(Item item, Player player) {
@@ -344,11 +347,18 @@ namespace CalamityOverhaul.Content
             RecoverUnloadedItem.UpdateInventory(item);
             if (InventoryTimer < int.MaxValue)
                 InventoryTimer++;
+            if (LegacyItemTranslationID > ItemID.None) {
+                item.ChangeItemType(LegacyItemTranslationID);
+            }
         }
 
         public override void Update(Item item, ref float gravity, ref float maxFallSpeed) {
             //世界掉落物，使用WorldItem上下文，静默升级不弹窗
             LegendData?.DoUpdate(item, LegendUpdateContext.WorldItem);
+            //转化历史物品
+            if (LegacyItemTranslationID > ItemID.None) {
+                item.ChangeItemType(LegacyItemTranslationID);
+            }
         }
 
         public static void OverModifyTooltip(Item item, List<TooltipLine> tooltips) {

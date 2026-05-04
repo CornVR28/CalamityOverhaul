@@ -107,7 +107,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend
             Item.height = 56;
             Item.useTime = 10;
             Item.useAnimation = 10;
-            Item.rare = CWRID.Rarity_HotPink;
+            Item.rare = CWRID.Rarity_HotPink > 0 ? CWRID.Rarity_HotPink : ItemRarityID.Purple;
             Item.useStyle = ItemUseStyleID.Shoot;
             Item.noMelee = true;
             Item.knockBack = 1f;
