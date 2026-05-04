@@ -527,10 +527,25 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalSkeletronPrime
                 drawOffset = Main.rand.NextVector2Circular(impactIntensity, impactIntensity);
             }
 
-            Main.EntitySpriteDraw(mainValue, npc.Center - Main.screenPosition + drawOffset, mainValue.GetRectangle(frame, 2),
-                drawColor, npc.rotation, VaultUtils.GetOrig(mainValue, 2), npc.scale, SpriteEffects.None, 0);
-            Main.EntitySpriteDraw(mainValue2, npc.Center - Main.screenPosition + drawOffset, mainValue.GetRectangle(frame, 2),
-                Color.White, npc.rotation, VaultUtils.GetOrig(mainValue, 2), npc.scale, SpriteEffects.None, 0);
+            Vector2 viceDrawPos = npc.Center - Main.screenPosition + drawOffset;
+            Rectangle viceRect = mainValue.GetRectangle(frame, 2);
+            Vector2 viceOrigin = VaultUtils.GetOrig(mainValue, 2);
+
+            //机械热感滤镜——和头部共用 head.whoAmI 状态
+            int controllerId = (int)npc.ai[1];
+            MechBossThermalRenderer.DrawOutlineHaloByController(spriteBatch, mainValue, viceDrawPos, viceRect,
+                npc.rotation, viceOrigin, npc.scale, SpriteEffects.None, controllerId);
+
+            bool shaderApplied = MechBossThermalRenderer.BeginThermalShaderByController(
+                spriteBatch, mainValue, viceRect, controllerId, seed: (npc.whoAmI % 64) / 64f);
+            spriteBatch.Draw(mainValue, viceDrawPos, viceRect,
+                drawColor, npc.rotation, viceOrigin, npc.scale, SpriteEffects.None, 0);
+            if (shaderApplied) {
+                MechBossThermalRenderer.EndThermalShader(spriteBatch);
+            }
+
+            Main.EntitySpriteDraw(mainValue2, viceDrawPos, viceRect,
+                Color.White, npc.rotation, viceOrigin, npc.scale, SpriteEffects.None, 0);
             return false;
         }
 
