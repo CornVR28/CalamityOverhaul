@@ -209,7 +209,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.MurasamaLegend.TrialQuests
             trialCompletedChecks[27] = () => InWorldBossPhase.Downed31.Invoke() || InWorldBossPhase.Downed32.Invoke();
         }
 
-        public override void PostUpdateWorld() {
+        public override void PostUpdateEverything() {
             if (Main.dedServ || Main.gameMenu) return;
 
             if (!Main.LocalPlayer.HasItem(CWRID.Item_Murasama)) {

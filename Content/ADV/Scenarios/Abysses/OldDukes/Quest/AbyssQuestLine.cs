@@ -69,7 +69,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Abysses.OldDukes.Quest
             FragmentHint = this.GetLocalization(nameof(FragmentHint), () => "钓鱼或者搜刮海洋区域的生物");
         }
 
-        public override void PostUpdateWorld() {
+        public override void PostUpdateEverything() {
             if (Main.dedServ || Main.gameMenu) return;
 
             var manager = QuestManagerUI.Instance;

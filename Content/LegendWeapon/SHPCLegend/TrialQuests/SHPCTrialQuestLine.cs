@@ -1,4 +1,4 @@
-using CalamityOverhaul.Content.ADV.EntrustManager;
+﻿using CalamityOverhaul.Content.ADV.EntrustManager;
 using CalamityOverhaul.Content.ADV.Scenarios.Shepel;
 using System;
 using Terraria;
@@ -170,7 +170,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.TrialQuests
             trialCompletedChecks[21] = InWorldBossPhase.Downed32;
         }
 
-        public override void PostUpdateWorld() {
+        public override void PostUpdateEverything() {
             if (Main.dedServ || Main.gameMenu) return;
 
             if (!FirstMetShepel.CanStartSHPCTrialQuests(Main.LocalPlayer)) {

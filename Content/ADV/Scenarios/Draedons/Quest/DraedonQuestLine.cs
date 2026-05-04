@@ -51,7 +51,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Draedons.Quest
             TrackerQuestComplete = this.GetLocalization(nameof(TrackerQuestComplete), () => "任务完成!");
         }
 
-        public override void PostUpdateWorld() {
+        public override void PostUpdateEverything() {
             if (Main.dedServ || Main.gameMenu) return;
 
             var manager = QuestManagerUI.Instance;

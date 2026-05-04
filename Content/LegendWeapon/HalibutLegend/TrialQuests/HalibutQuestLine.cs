@@ -123,7 +123,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend.TrialQuests
             trialCompletedChecks[13] = () => InWorldBossPhase.Downed31.Invoke() || InWorldBossPhase.Downed32.Invoke();
         }
 
-        public override void PostUpdateWorld() {
+        public override void PostUpdateEverything() {
             if (Main.dedServ || Main.gameMenu) return;
 
             if (!Main.LocalPlayer.TryGetADVSave(out var save)) {

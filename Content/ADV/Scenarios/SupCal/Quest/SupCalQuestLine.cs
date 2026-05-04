@@ -61,7 +61,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.SupCal.Quest
             TrackerRequired = this.GetLocalization(nameof(TrackerRequired), () => "需求: {0:0%}");
         }
 
-        public override void PostUpdateWorld() {
+        public override void PostUpdateEverything() {
             if (Main.dedServ || Main.gameMenu) return;
 
             var manager = QuestManagerUI.Instance;
