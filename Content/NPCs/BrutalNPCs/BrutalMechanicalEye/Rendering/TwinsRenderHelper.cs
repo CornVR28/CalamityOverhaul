@@ -1,4 +1,5 @@
-﻿using CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalMechanicalEye.Core;
+using CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalMechanicalEye.Core;
+using CalamityOverhaul.Content.NPCs.BrutalNPCs.Common;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 
@@ -905,6 +906,8 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalMechanicalEye.Rendering
 
         /// <summary>
         /// 绘制NPC本体和拖尾
+        /// <br/>本体外圈会根据 <see cref="MechBossVisualState"/> 当前状态自动叠加
+        /// 机械热感描边/警告/冲刺滤镜，与毁灭者、机械骷髅王共用一套视觉语言。
         /// </summary>
         public static void DrawNpcBody(
             SpriteBatch spriteBatch,
@@ -918,7 +921,7 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalMechanicalEye.Rendering
             SpriteEffects effects = npc.spriteDirection > 0 ? SpriteEffects.None : SpriteEffects.FlipVertically;
             float drawRotation = rotation + MathHelper.PiOver2;
 
-            //绘制拖尾残影
+            //绘制拖尾残影（不套滤镜，让残影保持柔和不抢主体）
             for (int i = 0; i < npc.oldPos.Length; i++) {
                 float trailOpacity = 0.2f * (1f - (float)i / npc.oldPos.Length);
                 Vector2 drawPos = npc.oldPos[i] + npc.Size / 2f - Main.screenPosition;
@@ -935,9 +938,19 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalMechanicalEye.Rendering
                 );
             }
 
-            //绘制本体
             Vector2 mainDrawPos = npc.Center - Main.screenPosition;
-            Main.EntitySpriteDraw(
+
+            //外圈描边光环——蓄力/冲刺时尤其显眼，常态下不打扰画面
+            MechBossThermalRenderer.DrawOutlineHaloByController(
+                spriteBatch, texture, mainDrawPos, frame,
+                drawRotation, origin, npc.scale, effects, npc.whoAmI);
+
+            //本体套机械热感着色器
+            float seed = (npc.whoAmI % 64) / 64f;
+            bool shaderApplied = MechBossThermalRenderer.BeginThermalShaderByController(
+                spriteBatch, texture, frame, npc.whoAmI, seed);
+
+            spriteBatch.Draw(
                 texture,
                 mainDrawPos,
                 frame,
@@ -946,8 +959,12 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalMechanicalEye.Rendering
                 origin,
                 npc.scale,
                 effects,
-                0
+                0f
             );
+
+            if (shaderApplied) {
+                MechBossThermalRenderer.EndThermalShader(spriteBatch);
+            }
         }
 
         #endregion

@@ -1,4 +1,5 @@
-﻿using CalamityOverhaul.Content.Projectiles.Boss.SkeletronPrime;
+using CalamityOverhaul.Content.NPCs.BrutalNPCs.Common;
+using CalamityOverhaul.Content.Projectiles.Boss.SkeletronPrime;
 using Terraria;
 using Terraria.Audio;
 using Terraria.ID;
@@ -107,8 +108,58 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalSkeletronPrime
                 npc.ai[0] = 3;
             }
 
+            //机械热感视觉状态——头部+四肢共用 npc.whoAmI 作为索引
+            UpdateMechThermalVisualState();
+
             ai9++;
             return false;
+        }
+
+        /// <summary>
+        /// 决定机械骷髅王的机械热感滤镜状态：
+        /// <list type="bullet">
+        /// <item>登场/传送（ai0==1 或 ai10>0）→ 不施加，避免和登场演出冲突</item>
+        /// <item>三阶段无肢体狂暴（ai0==3）+ 高速突进 → Dashing 白热高速</item>
+        /// <item>ai1==4（原版表示重点攻击/标识状态，已存在drawColor红化）→ Warning 红黄</item>
+        /// <item>三阶段常态 → Idle 但强度提高，体现暴怒</item>
+        /// <item>二阶段常态 → Idle 低强度作为夜间能见度兜底</item>
+        /// </list>
+        /// </summary>
+        private void UpdateMechThermalVisualState() {
+            //登场或传送期间不施加滤镜，保持原始演出
+            if (npc.ai[0] == 1f || ai10 > 0f) {
+                return;
+            }
+
+            float speedSq = npc.velocity.LengthSquared();
+
+            //三阶段（无手）+ 高速突进 → Dashing
+            if (npc.ai[0] == 3f && speedSq > 14f * 14f) {
+                MechBossVisualState.Push(npc.whoAmI, MechBossVisualMode.Dashing, 1f, 1f);
+                return;
+            }
+
+            //ai[1]==4 是原版的强攻击/标识状态（PostDraw 中也对它做了红化处理），
+            //同期叠加警告色更好地烘托危险氛围
+            if (npc.ai[1] == 4f) {
+                MechBossVisualState.Push(npc.whoAmI, MechBossVisualMode.Warning, 0.95f, 0.7f);
+                return;
+            }
+
+            //一阶段冲撞攻击（ai[1]==1，朝玩家高速突进）+ 高速 → Warning
+            if (npc.ai[1] == 1f && speedSq > 12f * 12f) {
+                MechBossVisualState.Push(npc.whoAmI, MechBossVisualMode.Warning, 0.85f, 0.6f);
+                return;
+            }
+
+            //三阶段常态——红橙描边稍强一点
+            if (npc.ai[0] == 3f) {
+                MechBossVisualState.Push(npc.whoAmI, MechBossVisualMode.Idle, 0.8f, 0f);
+                return;
+            }
+
+            //二阶段常态——保持低强度滤镜兜底夜晚能见度
+            MechBossVisualState.Push(npc.whoAmI, MechBossVisualMode.Idle, 0.55f, 0f);
         }
     }
 }

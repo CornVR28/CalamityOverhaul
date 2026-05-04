@@ -1,4 +1,3 @@
-﻿using CalamityOverhaul.Common;
 using CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalDestroyer.Core;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -7,134 +6,10 @@ using Terraria;
 namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalDestroyer.Rendering
 {
     /// <summary>
-    /// 毁灭者绘制辅助类
+    /// 毁灭者绘制辅助类（蓄力特效/残影专用；通用机械热感滤镜见 <see cref="Common.MechBossThermalRenderer"/>）
     /// </summary>
     internal static class DestroyerRenderHelper
     {
-        #region 机械热感着色器/外描边光环
-        /// <summary>
-        /// 8方向偏移描边色（头/体/尾共用调色盘）
-        /// </summary>
-        private static Color GetHaloColor(DestroyerVisualMode mode, float progress, float pulse) {
-            return mode switch {
-                DestroyerVisualMode.Dashing => Color.Lerp(new Color(255, 110, 30), new Color(255, 240, 170), 0.45f + 0.55f * pulse),
-                DestroyerVisualMode.Warning => Color.Lerp(new Color(220, 40, 10), new Color(255, 210, 60), 0.35f + 0.55f * pulse * progress),
-                _ => Color.Lerp(new Color(150, 30, 10), new Color(220, 80, 25), 0.40f + 0.30f * pulse),
-            };
-        }
-
-        /// <summary>
-        /// 各状态在外圈描边的力度系数（用于halo混合强度）
-        /// </summary>
-        private static float GetHaloStrength(DestroyerVisualMode mode, float progress, float intensity) {
-            float baseStrength = mode switch {
-                DestroyerVisualMode.Dashing => 1.0f,
-                DestroyerVisualMode.Warning => 0.55f + 0.45f * progress,
-                _ => 0.35f,
-            };
-            return baseStrength * intensity;
-        }
-
-        /// <summary>
-        /// 各状态在外圈描边的扩散半径（像素）
-        /// </summary>
-        private static float GetHaloRadius(DestroyerVisualMode mode, float progress) {
-            return mode switch {
-                DestroyerVisualMode.Dashing => 5.5f,
-                DestroyerVisualMode.Warning => 3.5f + 2.5f * progress,
-                _ => 2.0f,
-            };
-        }
-
-        /// <summary>
-        /// 8方向描边光环——将贴图沿圆周偏移多次叠加，形成颜色描边
-        /// 这一层主要解决远距离/夜晚的"看不清"问题（即使着色器对边缘范围有限，
-        /// 这层halo是真正"在贴图外"绘制的，不受单帧透明像素空间限制）
-        /// </summary>
-        public static void DrawOutlineHalo(SpriteBatch spriteBatch, Texture2D texture, Vector2 drawPos,
-            Rectangle? sourceRect, float rotation, Vector2 origin, float scale, SpriteEffects effects) {
-            var (mode, intensity, progress) = DestroyerVisualState.Read();
-            if (intensity <= 0.01f) return;
-
-            float pulse = 0.5f + 0.5f * (float)Math.Sin(Main.GlobalTimeWrappedHourly * (mode == DestroyerVisualMode.Idle ? 2.2f : 6.5f));
-            float radius = GetHaloRadius(mode, progress);
-            float strength = GetHaloStrength(mode, progress, intensity);
-            Color haloColor = GetHaloColor(mode, progress, pulse) * strength;
-
-            spriteBatch.End();
-            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive, Main.DefaultSamplerState,
-                DepthStencilState.None, RasterizerState.CullNone, null, Main.GameViewMatrix.TransformationMatrix);
-
-            //外圈8方向偏移
-            int steps = mode == DestroyerVisualMode.Idle ? 6 : 8;
-            for (int i = 0; i < steps; i++) {
-                float angle = MathHelper.TwoPi / steps * i;
-                Vector2 offset = angle.ToRotationVector2() * radius;
-                spriteBatch.Draw(texture, drawPos + offset, sourceRect, haloColor,
-                    rotation, origin, scale, effects, 0f);
-            }
-
-            //冲刺时再叠一圈更宽更浅的外晕，强化"高速过热"感
-            if (mode == DestroyerVisualMode.Dashing) {
-                Color softColor = haloColor * 0.45f;
-                for (int i = 0; i < 6; i++) {
-                    float angle = MathHelper.TwoPi / 6 * i + MathHelper.PiOver4;
-                    Vector2 offset = angle.ToRotationVector2() * (radius + 4f);
-                    spriteBatch.Draw(texture, drawPos + offset, sourceRect, softColor,
-                        rotation, origin, scale, effects, 0f);
-                }
-            }
-
-            spriteBatch.End();
-            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState,
-                DepthStencilState.None, RasterizerState.CullNone, null, Main.GameViewMatrix.TransformationMatrix);
-        }
-
-        /// <summary>
-        /// 切到 Immediate 模式并启用机械热感着色器，调用方需在绘制完后调用 EndThermalShader 还原
-        /// </summary>
-        public static bool BeginThermalShader(SpriteBatch spriteBatch, Texture2D texture, Rectangle sourceRect, float seed = 0f) {
-            var (mode, intensity, progress) = DestroyerVisualState.Read();
-            if (intensity <= 0.01f) return false;
-
-            Effect shader = EffectLoader.DestroyerThermalOutline?.Value;
-            if (shader == null) return false;
-
-            //把当前帧的UV范围告诉shader，避免邻域采样越界到其他帧
-            float invW = 1f / texture.Width;
-            float invH = 1f / texture.Height;
-            //内缩半像素：贴到帧边缘的采样仍属本帧，但不会触及相邻帧的首列/首行
-            Vector4 frameUV = new Vector4(
-                (sourceRect.X + 0.5f) * invW,
-                (sourceRect.Y + 0.5f) * invH,
-                (sourceRect.X + sourceRect.Width - 0.5f) * invW,
-                (sourceRect.Y + sourceRect.Height - 0.5f) * invH);
-
-            shader.Parameters["uTime"]?.SetValue(Main.GlobalTimeWrappedHourly);
-            shader.Parameters["intensity"]?.SetValue(intensity);
-            shader.Parameters["mode"]?.SetValue((float)mode);
-            shader.Parameters["progress"]?.SetValue(progress);
-            shader.Parameters["texelSize"]?.SetValue(new Vector2(invW, invH));
-            shader.Parameters["frameUV"]?.SetValue(frameUV);
-            shader.Parameters["seed"]?.SetValue(seed);
-
-            spriteBatch.End();
-            spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, Main.DefaultSamplerState,
-                DepthStencilState.None, RasterizerState.CullNone, null, Main.GameViewMatrix.TransformationMatrix);
-            shader.CurrentTechnique.Passes[0].Apply();
-            return true;
-        }
-
-        /// <summary>
-        /// 还原默认的 Deferred AlphaBlend SpriteBatch（与 Begin 配对使用）
-        /// </summary>
-        public static void EndThermalShader(SpriteBatch spriteBatch) {
-            spriteBatch.End();
-            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState,
-                DepthStencilState.None, RasterizerState.CullNone, null, Main.GameViewMatrix.TransformationMatrix);
-        }
-        #endregion
-
         private static void BeginAdditive(SpriteBatch spriteBatch) {
             spriteBatch.End();
             spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive, SamplerState.AnisotropicClamp,

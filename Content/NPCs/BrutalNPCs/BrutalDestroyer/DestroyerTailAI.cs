@@ -1,5 +1,5 @@
-﻿using CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalDestroyer.Rendering;
 using CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalSkeletronPrime;
+using CalamityOverhaul.Content.NPCs.BrutalNPCs.Common;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.ID;
@@ -33,15 +33,16 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalDestroyer
             Vector2 origin = rectangle.Size() / 2;
             float seed = (npc.whoAmI % 64) / 64f;
 
-            //尾巴halo——同体节体系，区分首尾才不会断
-            DestroyerRenderHelper.DrawOutlineHalo(spriteBatch, value, drawPos, rectangle,
-                npc.rotation + MathHelper.Pi, origin, npc.scale, SpriteEffects.None);
+            //尾巴halo/着色器——读取头部 (npc.realLife) 共享视觉状态，整条蠕虫保持一致
+            int controllerId = (int)npc.realLife;
+            MechBossThermalRenderer.DrawOutlineHaloByController(spriteBatch, value, drawPos, rectangle,
+                npc.rotation + MathHelper.Pi, origin, npc.scale, SpriteEffects.None, controllerId);
 
-            bool shaderApplied = DestroyerRenderHelper.BeginThermalShader(spriteBatch, value, rectangle, seed);
+            bool shaderApplied = MechBossThermalRenderer.BeginThermalShaderByController(spriteBatch, value, rectangle, controllerId, seed);
             spriteBatch.Draw(value, drawPos, rectangle, drawColor,
                 npc.rotation + MathHelper.Pi, origin, npc.scale, SpriteEffects.None, 0);
             if (shaderApplied) {
-                DestroyerRenderHelper.EndThermalShader(spriteBatch);
+                MechBossThermalRenderer.EndThermalShader(spriteBatch);
             }
 
             Texture2D value2 = Tail_Glow.Value;

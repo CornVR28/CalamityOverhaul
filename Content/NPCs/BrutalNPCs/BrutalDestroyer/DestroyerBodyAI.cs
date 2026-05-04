@@ -1,6 +1,6 @@
-﻿using CalamityOverhaul.Content.DamageModify;
-using CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalDestroyer.Rendering;
+using CalamityOverhaul.Content.DamageModify;
 using CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalSkeletronPrime;
+using CalamityOverhaul.Content.NPCs.BrutalNPCs.Common;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using System;
@@ -506,16 +506,17 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalDestroyer
                 Vector2 drawPos = npc.Center - Main.screenPosition;
                 Vector2 origin = rectangle.Size() / 2;
 
-                //外圈描边光环——夜晚时也能看清整条蠕虫的走向
-                DestroyerRenderHelper.DrawOutlineHalo(spriteBatch, value, drawPos, rectangle,
-                    npc.rotation + MathHelper.Pi, origin, npc.scale, SpriteEffects.None);
+                //外圈描边光环——夜晚时也能看清整条蠕虫的走向，读取头部 (npc.realLife) 共享状态
+                int controllerId = (int)npc.realLife;
+                MechBossThermalRenderer.DrawOutlineHaloByController(spriteBatch, value, drawPos, rectangle,
+                    npc.rotation + MathHelper.Pi, origin, npc.scale, SpriteEffects.None, controllerId);
 
                 //本体套机械热感着色器（传入当前帧UV范围，避免4帧贴图邻域采样跨帧）
-                bool shaderApplied = DestroyerRenderHelper.BeginThermalShader(spriteBatch, value, rectangle, seed);
+                bool shaderApplied = MechBossThermalRenderer.BeginThermalShaderByController(spriteBatch, value, rectangle, controllerId, seed);
                 spriteBatch.Draw(value, drawPos, rectangle, drawColor,
                     npc.rotation + MathHelper.Pi, origin, npc.scale, SpriteEffects.None, 0);
                 if (shaderApplied) {
-                    DestroyerRenderHelper.EndThermalShader(spriteBatch);
+                    MechBossThermalRenderer.EndThermalShader(spriteBatch);
                 }
 
                 //发光层独立绘制以保留原始自发光

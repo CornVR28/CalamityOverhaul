@@ -1,4 +1,5 @@
-﻿using InnoVault.GameSystem;
+using CalamityOverhaul.Content.NPCs.BrutalNPCs.Common;
+using InnoVault.GameSystem;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;
@@ -194,9 +195,22 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalSkeletronPrime
                 sengs *= 0.8f;
             }
 
-            Main.EntitySpriteDraw(mainValue, npc.Center - Main.screenPosition, rectangle
-                , drawColor, npc.rotation, orig, npc.scale, SpriteEffects.None, 0);
-            Main.EntitySpriteDraw(glowValue, npc.Center - Main.screenPosition, rectangle
+            //外圈8方向描边光环——夜晚远距离也能看清骷髅王轮廓
+            Vector2 mainPos = npc.Center - Main.screenPosition;
+            MechBossThermalRenderer.DrawOutlineHaloByController(spriteBatch, mainValue, mainPos, rectangle,
+                npc.rotation, orig, npc.scale, SpriteEffects.None, npc.whoAmI);
+
+            //本体套机械热感着色器
+            bool shaderApplied = MechBossThermalRenderer.BeginThermalShaderByController(
+                spriteBatch, mainValue, rectangle, npc.whoAmI, seed: 0f);
+            spriteBatch.Draw(mainValue, mainPos, rectangle, drawColor,
+                npc.rotation, orig, npc.scale, SpriteEffects.None, 0);
+            if (shaderApplied) {
+                MechBossThermalRenderer.EndThermalShader(spriteBatch);
+            }
+
+            //发光层独立绘制——保留原始自发光不被滤镜覆盖
+            Main.EntitySpriteDraw(glowValue, mainPos, rectangle
                 , Color.White, npc.rotation, orig, npc.scale, SpriteEffects.None, 0);
 
             if (player != null && noEye && npc.ai[0] == 3) {

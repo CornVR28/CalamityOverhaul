@@ -1,4 +1,5 @@
-﻿using CalamityOverhaul.Content.Projectiles.Boss.SkeletronPrime;
+using CalamityOverhaul.Content.NPCs.BrutalNPCs.Common;
+using CalamityOverhaul.Content.Projectiles.Boss.SkeletronPrime;
 using CalamityOverhaul.OtherMods.InfernumMode;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
@@ -376,9 +377,22 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalSkeletronPrime
 
             Vector2 drawPos = npc.Center - Main.screenPosition + recoilOffset;
 
-            Main.EntitySpriteDraw(mainValue, drawPos, null, drawColor,
-                npc.rotation, mainValue.Size() / 2, npc.scale,
-                dir ? SpriteEffects.None : SpriteEffects.FlipHorizontally, 0);
+            //机械热感滤镜——和头部共用 head.whoAmI 状态
+            int controllerId = (int)npc.ai[1];
+            Rectangle cannonRect = mainValue.Bounds;
+            Vector2 cannonOrigin = mainValue.Size() / 2;
+            SpriteEffects cannonFx = dir ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
+
+            MechBossThermalRenderer.DrawOutlineHaloByController(spriteBatch, mainValue, drawPos, cannonRect,
+                npc.rotation, cannonOrigin, npc.scale, cannonFx, controllerId);
+
+            bool shaderApplied = MechBossThermalRenderer.BeginThermalShaderByController(
+                spriteBatch, mainValue, cannonRect, controllerId, seed: (npc.whoAmI % 64) / 64f);
+            spriteBatch.Draw(mainValue, drawPos, null, drawColor,
+                npc.rotation, cannonOrigin, npc.scale, cannonFx, 0);
+            if (shaderApplied) {
+                MechBossThermalRenderer.EndThermalShader(spriteBatch);
+            }
 
             //发光效果（发射时增强）
             float glowIntensity = isFiring ? MathHelper.Clamp(1.0f + recoilIntensity * 0.1f, 1.0f, 1.5f) : 1.0f;

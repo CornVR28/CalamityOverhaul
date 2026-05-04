@@ -1,4 +1,5 @@
-﻿using CalamityOverhaul.Content.Projectiles.Boss.SkeletronPrime;
+using CalamityOverhaul.Content.NPCs.BrutalNPCs.Common;
+using CalamityOverhaul.Content.Projectiles.Boss.SkeletronPrime;
 using CalamityOverhaul.OtherMods.InfernumMode;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -464,10 +465,24 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalSkeletronPrime
             Texture2D mainValue = HeadPrimeAI.BSPlaser.Value;
             Texture2D mainValue2 = HeadPrimeAI.BSPlaserGlow.Value;
 
-            //绘制主体
-            Main.EntitySpriteDraw(mainValue, npc.Center - Main.screenPosition, null, drawColor,
-                npc.rotation, mainValue.Size() / 2, npc.scale,
-                dir ? SpriteEffects.None : SpriteEffects.FlipHorizontally, 0);
+            //机械热感滤镜——和头部共用 head.whoAmI 状态
+            int controllerId = (int)npc.ai[1];
+            Vector2 laserDrawPos = npc.Center - Main.screenPosition;
+            Rectangle laserRect = mainValue.Bounds;
+            Vector2 laserOrigin = mainValue.Size() / 2;
+            SpriteEffects laserFx = dir ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
+
+            MechBossThermalRenderer.DrawOutlineHaloByController(spriteBatch, mainValue, laserDrawPos, laserRect,
+                npc.rotation, laserOrigin, npc.scale, laserFx, controllerId);
+
+            //绘制主体（套着色器）
+            bool shaderApplied = MechBossThermalRenderer.BeginThermalShaderByController(
+                spriteBatch, mainValue, laserRect, controllerId, seed: (npc.whoAmI % 64) / 64f);
+            spriteBatch.Draw(mainValue, laserDrawPos, null, drawColor,
+                npc.rotation, laserOrigin, npc.scale, laserFx, 0);
+            if (shaderApplied) {
+                MechBossThermalRenderer.EndThermalShader(spriteBatch);
+            }
 
             //绘制发光层（根据充能强度）
             float glowIntensity = MathHelper.Clamp(0.8f + laserIntensity * 0.2f, 0.8f, 1.5f);

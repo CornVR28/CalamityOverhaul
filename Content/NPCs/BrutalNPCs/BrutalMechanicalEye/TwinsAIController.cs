@@ -1,4 +1,4 @@
-﻿using CalamityOverhaul.Common;
+using CalamityOverhaul.Common;
 using CalamityOverhaul.Content.Items.Magic;
 using CalamityOverhaul.Content.Items.Modifys.ModifyBag;
 using CalamityOverhaul.Content.Items.Ranged;
@@ -9,6 +9,7 @@ using CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalMechanicalEye.States.Common
 using CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalMechanicalEye.States.Retinazer;
 using CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalMechanicalEye.States.Spazmatism;
 using CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalSkeletronPrime;
+using CalamityOverhaul.Content.NPCs.BrutalNPCs.Common;
 using InnoVault.GameSystem;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
@@ -647,13 +648,17 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalMechanicalEye
                 return true;
             }
 
+            //在绘制前推送当前眼睛的机械热感视觉状态——
+            //每只眼睛独立维护，确保两只眼睛能呈现不同状态（一个冲刺另一个常态）
+            PushThermalVisualState();
+
             //获取纹理
             Texture2D mainTexture = GetCurrentTexture();
 
             //绘制蓄力特效
             TwinsRenderHelper.DrawChargeEffect(spriteBatch, stateContext);
 
-            //绘制本体
+            //绘制本体（内部会读取上面推送的状态自动叠加描边/警告/冲刺滤镜）
             TwinsRenderHelper.DrawNpcBody(
                 spriteBatch,
                 npc,
@@ -663,6 +668,55 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalMechanicalEye
             );
 
             return false;
+        }
+
+        /// <summary>
+        /// 根据当前状态机/蓄力状态推送机械热感视觉模式：
+        /// <list type="bullet">
+        /// <item>冲刺中（魔焰眼一/二阶段、影分身）→ Dashing 白热高速</item>
+        /// <item>蓄力中（任意攻击的预警阶段）→ Warning 红黄脉冲，强度跟随蓄力进度</item>
+        /// <item>独眼狂暴 → Idle 但强度提高，体现暴怒余温</item>
+        /// <item>常态 → 不推送，让画面保持干净，只在攻击瞬间发力</item>
+        /// </list>
+        /// </summary>
+        private void PushThermalVisualState() {
+            if (stateContext == null) {
+                return;
+            }
+
+            //冲刺态优先级最高
+            if (stateMachine?.CurrentState is SpazmatismDashingState
+                || stateMachine?.CurrentState is SpazmatismPhase2DashingState
+                || stateMachine?.CurrentState is SpazmatismShadowDashState) {
+                MechBossVisualState.Push(npc.whoAmI, MechBossVisualMode.Dashing, 1f, 1f);
+                return;
+            }
+
+            //蓄力态——所有蓄力类型都显示警告滤镜，进度跟随ChargeProgress
+            if (stateContext.IsCharging && stateContext.ChargeProgress > 0f) {
+                //冲刺蓄力（type 1, 8）的警告更强烈
+                bool isDashCharge = stateContext.ChargeType == 1
+                    || stateContext.ChargeType == 8
+                    || stateContext.ChargeType == 11;
+                float intensity = isDashCharge ? 0.95f : 0.8f;
+                float progress = stateContext.ChargeProgress;
+                MechBossVisualState.Push(npc.whoAmI, MechBossVisualMode.Warning, intensity, progress);
+                return;
+            }
+
+            //独眼狂暴模式——常态滤镜但强度提高，体现暴怒余温
+            if (stateContext.IsSoloRageMode) {
+                MechBossVisualState.Push(npc.whoAmI, MechBossVisualMode.Idle, 0.55f, 0f);
+                return;
+            }
+
+            //转阶段动画期间——保持警告色
+            if (stateContext.IsInPhaseTransition) {
+                MechBossVisualState.Push(npc.whoAmI, MechBossVisualMode.Warning, 0.7f, 0.5f);
+                return;
+            }
+
+            //其余常态——不推送（让 Read 返回零强度），双子默认贴图明亮，无需常态滤镜
         }
 
         /// <summary>

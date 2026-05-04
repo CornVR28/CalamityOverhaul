@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+using CalamityOverhaul.Content.NPCs.BrutalNPCs.Common;
+using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;
 using Terraria.Audio;
@@ -515,21 +516,36 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalSkeletronPrime
             Texture2D mainValue = HeadPrimeAI.BSPSAW.Value;
             Texture2D mainValue2 = HeadPrimeAI.BSPSAWGlow.Value;
             float drawRot = npc.rotation;
-            //添加旋转拖尾效果
+            Vector2 sawDrawPos = npc.Center - Main.screenPosition;
+            Rectangle sawRect = mainValue.GetRectangle(frame, 2);
+            Vector2 sawOrigin = VaultUtils.GetOrig(mainValue, 2);
+
+            //添加旋转拖尾效果（在滤镜之前——拖尾本身柔和，不需要套描边）
             if (spinSpeed > 0.4f) {
                 for (int i = 0; i < 3; i++) {
                     float trailRot = drawRot - (i + 1) * spinSpeed * 0.3f;
                     Color trailColor = drawColor * (0.3f - i * 0.1f);
 
-                    Main.EntitySpriteDraw(mainValue, npc.Center - Main.screenPosition, mainValue.GetRectangle(frame, 2),
-                        trailColor, trailRot, VaultUtils.GetOrig(mainValue, 2), npc.scale, SpriteEffects.None, 0);
+                    Main.EntitySpriteDraw(mainValue, sawDrawPos, sawRect,
+                        trailColor, trailRot, sawOrigin, npc.scale, SpriteEffects.None, 0);
                 }
             }
 
-            Main.EntitySpriteDraw(mainValue, npc.Center - Main.screenPosition, mainValue.GetRectangle(frame, 2),
-                drawColor, drawRot, VaultUtils.GetOrig(mainValue, 2), npc.scale, SpriteEffects.None, 0);
-            Main.EntitySpriteDraw(mainValue2, npc.Center - Main.screenPosition, mainValue.GetRectangle(frame, 2),
-                Color.White * (0.8f + spinSpeed * 0.2f), drawRot, VaultUtils.GetOrig(mainValue, 2), npc.scale, SpriteEffects.None, 0);
+            //机械热感滤镜——和头部共用 head.whoAmI 状态
+            int controllerId = (int)npc.ai[1];
+            MechBossThermalRenderer.DrawOutlineHaloByController(spriteBatch, mainValue, sawDrawPos, sawRect,
+                drawRot, sawOrigin, npc.scale, SpriteEffects.None, controllerId);
+
+            bool shaderApplied = MechBossThermalRenderer.BeginThermalShaderByController(
+                spriteBatch, mainValue, sawRect, controllerId, seed: (npc.whoAmI % 64) / 64f);
+            spriteBatch.Draw(mainValue, sawDrawPos, sawRect,
+                drawColor, drawRot, sawOrigin, npc.scale, SpriteEffects.None, 0);
+            if (shaderApplied) {
+                MechBossThermalRenderer.EndThermalShader(spriteBatch);
+            }
+
+            Main.EntitySpriteDraw(mainValue2, sawDrawPos, sawRect,
+                Color.White * (0.8f + spinSpeed * 0.2f), drawRot, sawOrigin, npc.scale, SpriteEffects.None, 0);
             return false;
         }
 
