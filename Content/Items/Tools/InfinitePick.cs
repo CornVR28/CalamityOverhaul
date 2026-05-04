@@ -86,7 +86,7 @@ namespace CalamityOverhaul.Content.Items.Tools
                 Item.useAnimation = 10;
             }
 
-            if (CWRKeySystem.InfinitePickSkillKey.JustPressed) {
+            if (CWRKeySystem.WeponSkill_Q.JustPressed) {
                 IsPick = !IsPick;
                 SoundEngine.PlaySound(!IsPick ? CWRSound.Pecharge : CWRSound.Peuncharge, player.Center);
                 TextureAssets.Item[Type] = IsPick ? Pickaxe : Hammer;
@@ -119,7 +119,7 @@ namespace CalamityOverhaul.Content.Items.Tools
                 }
             }
 
-            tooltips.InsertHotkeyBinding(CWRKeySystem.InfinitePickSkillKey, noneTip: CWRLocText.Instance.Notbound.Value);
+            tooltips.InsertHotkeyBinding(CWRKeySystem.WeponSkill_Q, noneTip: CWRLocText.Instance.Notbound.Value);
         }
 
         public override bool PreDrawTooltipLine(DrawableTooltipLine line, ref int yOffset) {

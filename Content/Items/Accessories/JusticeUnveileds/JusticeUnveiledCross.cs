@@ -94,7 +94,7 @@ namespace CalamityOverhaul.Content.Items.Accessories.JusticeUnveileds
             }
 
             //检测玩家按下Up键
-            if (Projectile.IsOwnedByLocalPlayer() && CWRKeySystem.JusticeUnveiled.JustPressed && player.CWR().JusticeUnveiledCooldown <= 0) {
+            if (Projectile.IsOwnedByLocalPlayer() && CWRKeySystem.Accessory_Skills.JustPressed && player.CWR().JusticeUnveiledCooldown <= 0) {
                 if (player.CWR().JusticeUnveiledCharges > 0 && crossIndex == player.CWR().JusticeUnveiledCharges) {
                     NPC target = player.Center.FindClosestNPC(1200, false);
                     if (target != null) {

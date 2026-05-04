@@ -86,7 +86,7 @@ namespace CalamityOverhaul.Content.Items.Ranged
 
             SpanInfiniteRune(player);
 
-            if (!CWRKeySystem.HeavenfallLongbowSkillKey.JustPressed) {
+            if (!CWRKeySystem.WeponSkill_Q.JustPressed) {
                 return;
             }
 
@@ -131,7 +131,7 @@ namespace CalamityOverhaul.Content.Items.Ranged
         }
 
         public override void ModifyTooltips(List<TooltipLine> tooltips) {
-            tooltips.InsertHotkeyBinding(CWRKeySystem.HeavenfallLongbowSkillKey, noneTip: CWRLocText.Instance.Notbound.Value);
+            tooltips.InsertHotkeyBinding(CWRKeySystem.WeponSkill_Q, noneTip: CWRLocText.Instance.Notbound.Value);
             CWRUtils.SetItemLegendContentTops(ref tooltips, Name);
         }
 

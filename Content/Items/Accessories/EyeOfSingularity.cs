@@ -55,7 +55,7 @@ namespace CalamityOverhaul.Content.Items.Accessories
         }
 
         public override void ModifyTooltips(List<TooltipLine> tooltips) {
-            tooltips.InsertHotkeyBinding(CWRKeySystem.EyeOfSingularity_QuantumLeap, "[KEY]", CWRLocText.Instance.Notbound.Value);
+            tooltips.InsertHotkeyBinding(CWRKeySystem.Accessory_Skills, "[KEY]", CWRLocText.Instance.Notbound.Value);
         }
     }
 
@@ -626,7 +626,7 @@ namespace CalamityOverhaul.Content.Items.Accessories
             }
 
             //量子迁跃，按下专属按键瞬移至光标位置
-            if (CWRKeySystem.EyeOfSingularity_QuantumLeap.JustPressed && QuantumLeapCooldown <= 0 && Player.whoAmI == Main.myPlayer) {
+            if (CWRKeySystem.Accessory_Skills.JustPressed && QuantumLeapCooldown <= 0 && Player.whoAmI == Main.myPlayer) {
                 Player.dashType = 0;
                 Player.SetPlayerDashID(string.Empty);
                 Projectile.NewProjectile(Player.FromObjectGetParent(), Player.Center, Vector2.Zero
