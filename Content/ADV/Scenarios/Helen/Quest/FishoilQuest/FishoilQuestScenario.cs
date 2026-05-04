@@ -95,8 +95,12 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Quest.FishoilQuest
             Complete();
         }
 
-        /// <summary>将鱼油任务注册到委托管理器，如已存在则跳过</summary>
-        internal static void RegisterQuestEntry(bool completed = false) {
+        /// <summary>
+        /// 将鱼油任务注册到委托管理器，如已存在则跳过。
+        /// notify 为 false 时以 Tracked 状态静默注册，适用于存档重载的恢复路径，
+        /// 避免每次进存档都触发"新委托"弹窗
+        /// </summary>
+        internal static void RegisterQuestEntry(bool completed = false, bool notify = true) {
             var manager = QuestManagerUI.Instance;
             if (manager == null) return;
             if (manager.GetEntry(FishoilQuestEntry.QuestKey) != null) return;
@@ -104,6 +108,11 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Quest.FishoilQuest
             if (completed) {
                 entry.Status = QuestEntryStatus.Completed;
                 entry.Progress = 1f;
+            }
+            else if (!notify) {
+                //恢复路径：直接置为 Tracked，RegisterQuest 不会触发任何通知
+                entry.Status = QuestEntryStatus.Tracked;
+                entry.IsNew = false;
             }
             manager.RegisterQuest(entry);
         }
@@ -124,15 +133,17 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Helen.Quest.FishoilQuest
                 return;
             }
 
-            //已接受 → 确保条目存在
+            //已接受 → 确保条目存在，notify: false 表示恢复路径，不弹"新委托"通知
             bool completed = save.Get<HalibutADVData>().FishoilQuestCompleted;
-            RegisterQuestEntry(completed);
+            RegisterQuestEntry(completed, notify: false);
             var entry = manager.GetEntry(FishoilQuestEntry.QuestKey);
             if (entry == null) return;
 
-            //已完成 → 标记完成
-            if (completed) {
-                manager.SetEntryStatus(FishoilQuestEntry.QuestKey, QuestEntryStatus.Completed, 1f);
+            //已完成 → 直接赋值恢复状态，避免 SetEntryStatus 触发"委托完成"通知
+            if (completed && entry.Status != QuestEntryStatus.Completed) {
+                entry.Status = QuestEntryStatus.Completed;
+                entry.Progress = 1f;
+                manager.MarkFilterDirty();
             }
         }
 

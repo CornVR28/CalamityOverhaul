@@ -227,7 +227,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend
 
             float swingPhase = (0.4f - progress) / 0.4f;
             float swingPower = (float)Math.Pow(swingPhase, 2);
-            return -0.16f * swingPower * playerDirection;
+            return -0.06f * swingPower * playerDirection;
         }
 
         /// <summary>
