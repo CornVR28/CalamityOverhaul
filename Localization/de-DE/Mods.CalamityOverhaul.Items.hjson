@@ -408,6 +408,11 @@ DragonBreathBox: {
 		'''
 }
 
+HalibutItem: {
+	// DisplayName: Halibut
+	// Tooltip: ""
+}
+
 AvalancheM60: {
 	DisplayName: Lawine M60
 	Tooltip:

@@ -423,6 +423,11 @@ DragonBreathBox: {
 		'''
 }
 
+HalibutItem: {
+	DisplayName: 大比目鱼
+	Tooltip: ""
+}
+
 AvalancheM60: {
 	DisplayName: 雪崩 M60
 	Tooltip:

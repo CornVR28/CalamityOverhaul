@@ -1,4 +1,4 @@
-ElementWhip: {
+﻿ElementWhip: {
 	DisplayName: Element Whip
 	Tooltip: A Whip infused with the energy of the Moon and the Elements.
 }
@@ -420,6 +420,11 @@ DragonBreathBox: {
 		A combination of magic and technology, bullets hit their targets and explode into a jet of metal, causing damage to a wide range of enemies
 		"This is the dragon's saliva. Do you want to believe it?"
 		'''
+}
+
+HalibutItem: {
+	DisplayName: Halibut
+	Tooltip: ""
 }
 
 AvalancheM60: {

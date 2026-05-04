@@ -15,7 +15,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend
         /// <summary>
         /// 目标ID
         /// </summary>
-        public static int ID => CWRID.Item_HalibutCannon;
+        public static int ID => ModContent.ItemType<HalibutItem>();
         /// <summary>
         /// 目标ID
         /// </summary>
@@ -107,6 +107,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend
             Item.height = 56;
             Item.useTime = 10;
             Item.useAnimation = 10;
+            Item.rare = CWRID.Rarity_HotPink;
             Item.useStyle = ItemUseStyleID.Shoot;
             Item.noMelee = true;
             Item.knockBack = 1f;
@@ -171,8 +172,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend
         /// <summary>
         /// 设置武器相对于精灵的原点偏移
         /// </summary>
-        private static Vector2 GetItemSpriteOrigin(int offsetX = -52, int offsetY = 4) {
-            return new Vector2(offsetX, offsetY);
+        private static Vector2 GetItemSpriteOrigin() {
+            return new Vector2(-46, 18);
         }
 
         /// <summary>
@@ -311,6 +312,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend
             , Vector2 position, Vector2 velocity, int type, int damage, float knockback) {
             bool isBullet = false;
             bool shouldSkipShoot = false;
+
+            position += velocity.UnitVector() * 62;
 
             if (type == ProjectileID.Bullet) {
                 isBullet = true;

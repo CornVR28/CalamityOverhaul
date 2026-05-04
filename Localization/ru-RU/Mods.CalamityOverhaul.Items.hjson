@@ -1,4 +1,4 @@
-﻿ElementWhip: {
+ElementWhip: {
 	DisplayName: Элементальный хлыст
 	Tooltip:
 		'''
@@ -428,6 +428,11 @@ DragonBreathBox: {
 		нанося урон широкому кругу врагов
 		"Это слюна того дракона, верите ли вы?"
 		'''
+}
+
+HalibutItem: {
+	// DisplayName: Halibut
+	// Tooltip: ""
 }
 
 AvalancheM60: {
