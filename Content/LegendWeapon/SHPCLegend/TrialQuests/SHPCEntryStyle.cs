@@ -1,6 +1,8 @@
+using CalamityOverhaul.Common;
 using CalamityOverhaul.Content.ADV.EntrustManager;
 using Microsoft.Xna.Framework.Graphics;
 using System;
+using Terraria;
 
 namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.TrialQuests
 {
@@ -34,6 +36,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.TrialQuests
         private float sweepTimer;
         private float dataFlowTimer;
 
+        private const int EdgePad = 6;
+
         public void Update() {
             pulseTimer += 0.025f;
             sweepTimer += 0.004f;
@@ -48,37 +52,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.TrialQuests
             var px = VaultAsset.placeholder2.Value;
             var uv = new Rectangle(0, 0, 1, 1);
 
-            //多段纵向渐变，模拟深暗紫底色的非均匀亮度
-            int segs = 8;
-            for (int i = 0; i < segs; i++) {
-                float t = i / (float)segs;
-                float t2 = (i + 1) / (float)segs;
-                int y1 = entryRect.Y + (int)(t * entryRect.Height);
-                int y2 = entryRect.Y + (int)(t2 * entryRect.Height);
-                if (y2 <= y1) continue;
-
-                Color baseC = isSelected ? BgSelected
-                    : isHovered ? BgHover
-                    : Color.Lerp(BgDeep, BgMid, t);
-
-                float shift = MathF.Sin(t * MathHelper.Pi * 2.5f) * 0.06f;
-                Color c = Color.Lerp(baseC, NeonBlueDim, Math.Max(0f, shift)) * (alpha * 0.95f);
-                sb.Draw(px, new Rectangle(entryRect.X, y1, entryRect.Width, y2 - y1), uv, c);
-            }
-
-            //CRT水平扫描线（每3px一条，极低透明度）
-            for (int y = entryRect.Y; y < entryRect.Bottom; y += 3)
-                sb.Draw(px, new Rectangle(entryRect.X, y, entryRect.Width, 1), uv, ScanBlue * (alpha * 0.04f));
-
-            //全息扫掠光带（从上到下循环）
-            float scanY = entryRect.Y + (sweepTimer * 0.1f % 1f) * entryRect.Height;
-            for (int dy = -2; dy <= 2; dy++) {
-                int py = (int)scanY + dy;
-                if (py < entryRect.Y || py >= entryRect.Bottom) continue;
-                float fade = 1f - MathF.Abs(dy) / 3f;
-                sb.Draw(px, new Rectangle(entryRect.X, py, entryRect.Width, 1),
-                    uv, NeonBlueDim * (alpha * 0.10f * fade * fade));
-            }
+            DrawEntryPanelBackground(sb, px, entryRect, isSelected, isHovered, alpha);
 
             //左侧状态竖条（双线，霓虹蓝脉冲）
             Color statusC = GetAccentColor(entry.Status, 1f);
@@ -114,6 +88,86 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.TrialQuests
             }
 
             return true;
+        }
+
+        private void DrawEntryPanelBackground(SpriteBatch sb, Texture2D px, Rectangle entryRect,
+            bool isSelected, bool isHovered, float alpha) {
+            if (EffectLoader.CyberPanel?.Value != null) {
+                Effect effect = EffectLoader.CyberPanel.Value;
+
+                Rectangle extRect = entryRect;
+                extRect.Inflate(EdgePad, EdgePad);
+
+                effect.Parameters["uTime"]?.SetValue(sweepTimer);
+                effect.Parameters["uAlpha"]?.SetValue(alpha * 0.95f);
+                effect.Parameters["uResolution"]?.SetValue(new Vector2(extRect.Width, extRect.Height));
+                effect.Parameters["uEdgePad"]?.SetValue((float)EdgePad);
+
+                sb.End();
+                sb.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend,
+                    SamplerState.AnisotropicClamp, DepthStencilState.None,
+                    RasterizerState.CullNone, effect, Main.UIScaleMatrix);
+
+                sb.Draw(px, extRect, Color.White);
+
+                sb.End();
+                sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                    SamplerState.AnisotropicClamp, DepthStencilState.None,
+                    RasterizerState.CullNone, null, Main.UIScaleMatrix);
+
+                DrawInteractionTint(sb, px, entryRect, isSelected, isHovered, alpha);
+            }
+            else {
+                DrawFallbackBackground(sb, px, entryRect, isSelected, isHovered, alpha);
+            }
+        }
+
+        private static void DrawInteractionTint(SpriteBatch sb, Texture2D px, Rectangle entryRect,
+            bool isSelected, bool isHovered, float alpha) {
+            Color tint = isSelected ? BgSelected : isHovered ? BgHover : Color.Transparent;
+            if (tint.A <= 0) {
+                return;
+            }
+
+            sb.Draw(px, entryRect, new Rectangle(0, 0, 1, 1), tint * (alpha * 0.28f));
+        }
+
+        /// <summary>降级背景：保留原 CPU 渐变、扫描线与全息扫掠光。</summary>
+        private void DrawFallbackBackground(SpriteBatch sb, Texture2D px, Rectangle entryRect,
+            bool isSelected, bool isHovered, float alpha) {
+            var uv = new Rectangle(0, 0, 1, 1);
+
+            //多段纵向渐变，模拟深暗紫底色的非均匀亮度
+            int segs = 8;
+            for (int i = 0; i < segs; i++) {
+                float t = i / (float)segs;
+                float t2 = (i + 1) / (float)segs;
+                int y1 = entryRect.Y + (int)(t * entryRect.Height);
+                int y2 = entryRect.Y + (int)(t2 * entryRect.Height);
+                if (y2 <= y1) continue;
+
+                Color baseC = isSelected ? BgSelected
+                    : isHovered ? BgHover
+                    : Color.Lerp(BgDeep, BgMid, t);
+
+                float shift = MathF.Sin(t * MathHelper.Pi * 2.5f) * 0.06f;
+                Color c = Color.Lerp(baseC, NeonBlueDim, Math.Max(0f, shift)) * (alpha * 0.95f);
+                sb.Draw(px, new Rectangle(entryRect.X, y1, entryRect.Width, y2 - y1), uv, c);
+            }
+
+            //CRT水平扫描线（每3px一条，极低透明度）
+            for (int y = entryRect.Y; y < entryRect.Bottom; y += 3)
+                sb.Draw(px, new Rectangle(entryRect.X, y, entryRect.Width, 1), uv, ScanBlue * (alpha * 0.04f));
+
+            //全息扫掠光带（从上到下循环）
+            float scanY = entryRect.Y + (sweepTimer * 0.1f % 1f) * entryRect.Height;
+            for (int dy = -2; dy <= 2; dy++) {
+                int py = (int)scanY + dy;
+                if (py < entryRect.Y || py >= entryRect.Bottom) continue;
+                float fade = 1f - MathF.Abs(dy) / 3f;
+                sb.Draw(px, new Rectangle(entryRect.X, py, entryRect.Width, 1),
+                    uv, NeonBlueDim * (alpha * 0.10f * fade * fade));
+            }
         }
 
         public float DrawEntryIcon(SpriteBatch sb, Vector2 titlePos, EntrustEntryData entry, float alpha) {
