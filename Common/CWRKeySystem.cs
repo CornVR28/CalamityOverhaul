@@ -4,26 +4,26 @@ namespace CalamityOverhaul.Common
 {
     internal class CWRKeySystem : ICWRLoader
     {
-        public static ModKeybind Murasama_TriggerKey { get; private set; }
-        public static ModKeybind Murasama_DownKey { get; private set; }
         public static ModKeybind QuestLog_Key { get; private set; }
         public static ModKeybind QuestManager_Key { get; private set; }
         public static ModKeybind Legend_UIControl { get; private set; }
         public static ModKeybind Legend_Domain { get; private set; }
         public static ModKeybind Legend_Restart { get; private set; }
         public static ModKeybind Legend_Teleport { get; private set; }
-        public static ModKeybind Halibut_Clone { get; private set; }
-        public static ModKeybind Halibut_Superposition { get; private set; }
-        public static ModKeybind Halibut_Skill_L { get; private set; }
-        public static ModKeybind Halibut_Skill_R { get; private set; }
-        public static ModKeybind WeponSkill_Q { get; private set; }
-        public static ModKeybind WeponSkill_R { get; private set; }
-        public static ModKeybind Accessory_Skills { get; private set; }
         public static ModKeybind HackTime_Toggle { get; private set; }
         public static ModKeybind CyberBanish_Key { get; private set; }
         public static ModKeybind CyberFreeze_Key { get; private set; }
         public static ModKeybind CyberwareSkill_Key { get; private set; }
         public static ModKeybind VoidTimeShift_Key { get; private set; }
+        public static ModKeybind Halibut_Clone { get; private set; }
+        public static ModKeybind Halibut_Superposition { get; private set; }
+        public static ModKeybind Halibut_Skill_L { get; private set; }
+        public static ModKeybind Halibut_Skill_R { get; private set; }
+        public static ModKeybind Murasama_TriggerKey { get; private set; }
+        public static ModKeybind Murasama_DownKey { get; private set; }
+        public static ModKeybind WeponSkill_Q { get; private set; }
+        public static ModKeybind WeponSkill_R { get; private set; }
+        public static ModKeybind Accessory_Skills { get; private set; }
 
         void ICWRLoader.LoadData() {
             Mod mod = CWRMod.Instance;
