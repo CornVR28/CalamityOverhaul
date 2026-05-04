@@ -15,7 +15,7 @@ namespace CalamityOverhaul
         public static int Item_SHPC => Get();
         public static int Item_HalibutCannon => Get();
         public static int Item_Murasama => Get();
-        public static int item_Starmada => Get();
+        public static int Item_Starmada => Get();
         public static int Item_DraedonPowerCell => Get();
         public static int Item_AquaticScourgeBag => Get();
         public static int Item_AerialiteBar => Get();
