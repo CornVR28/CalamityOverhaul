@@ -1,5 +1,5 @@
 ﻿HalibutOverride: {
-	DisplayName: "{$Mods.CalamityMod.Items.Weapons.Ranged.HalibutCannon.DisplayName}"
+	DisplayName: Halibut
 	Tooltip:
 		'''
 		Превращает мушкетные пули в глубоководные пули
