@@ -1,4 +1,4 @@
-namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
+﻿namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
 {
     internal sealed class EfficientGripModule : SHPCModuleItem
     {
@@ -9,7 +9,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
 
         public override void Apply(ref ShootContext ctx) {
             ctx.ManaCostMul += -0.15f;
-            ctx.AttackSpeedMul += 0.10f;
+            ctx.AttackSpeedMul += 0.08f;
         }
     }
 }

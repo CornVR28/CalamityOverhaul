@@ -1,4 +1,4 @@
-namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
+﻿namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
 {
     internal sealed class HoloOpticModule : SHPCModuleItem
     {
@@ -9,7 +9,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
 
         public override void Apply(ref ShootContext ctx) {
             ctx.SpreadMul += -0.55f;
-            ctx.AttackSpeedMul += 0.15f;
+            ctx.AttackSpeedMul += 0.12f;
             ctx.ManaCostMul += 0.15f;
         }
     }

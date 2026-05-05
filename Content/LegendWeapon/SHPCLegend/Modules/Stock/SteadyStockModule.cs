@@ -1,4 +1,4 @@
-namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
+﻿namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
 {
     internal sealed class SteadyStockModule : SHPCModuleItem
     {
@@ -8,8 +8,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
         public override Color TintColor => new(180, 200, 220);
 
         public override void Apply(ref ShootContext ctx) {
-            ctx.AttackSpeedMul += -0.15f;
-            ctx.DamageMul += 0.15f;
+            ctx.AttackSpeedMul += -0.2f;
+            ctx.DamageMul += 0.12f;
         }
     }
 }

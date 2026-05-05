@@ -1,4 +1,4 @@
-namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
+﻿namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
 {
     internal sealed class LightStockModule : SHPCModuleItem
     {
@@ -9,8 +9,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
 
         public override void Apply(ref ShootContext ctx) {
             ctx.AttackSpeedMul += 0.35f;
-            ctx.DamageMul += -0.15f;
-            ctx.SpreadMul += 0.2f;
+            ctx.DamageMul += -0.2f;
+            ctx.SpreadMul += 0.3f;
         }
     }
 }

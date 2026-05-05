@@ -1,4 +1,4 @@
-namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
+﻿namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
 {
     internal sealed class FocusBarrelModule : SHPCModuleItem
     {
@@ -12,6 +12,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
             ctx.BeamSpeedMul += 0.6f;
             ctx.HomingMul += -0.5f;
             ctx.MergedDamageBonus += 2f;
+            ctx.ManaCostMul += 0.20f;
         }
     }
 }

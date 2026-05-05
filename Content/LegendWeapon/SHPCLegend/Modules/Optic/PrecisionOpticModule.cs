@@ -1,4 +1,4 @@
-namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
+﻿namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
 {
     internal sealed class PrecisionOpticModule : SHPCModuleItem
     {
@@ -9,7 +9,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
 
         public override void Apply(ref ShootContext ctx) {
             ctx.SpreadMul += -1.0f;
-            ctx.CritAdd += 10;
+            ctx.CritAdd += 8;
         }
     }
 }

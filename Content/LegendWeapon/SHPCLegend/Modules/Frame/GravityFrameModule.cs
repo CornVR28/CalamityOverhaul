@@ -1,4 +1,4 @@
-namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
+﻿namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
 {
     /// <summary>机匣：能量球蓄力时持续吸引附近敌人，爆炸范围扩大</summary>
     internal sealed class GravityFrameModule : SHPCModuleItem
@@ -10,8 +10,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
 
         public override void Apply(ref ShootContext ctx) {
             ctx.OrbDrainAura = true;
-            ctx.OrbExplosionRadiusMul += 0.40f;
-            ctx.ChargeTimeMul += 0.15f;
+            ctx.OrbExplosionRadiusMul += 0.50f;
+            ctx.ChargeTimeMul += 0.2f;
         }
     }
 }
