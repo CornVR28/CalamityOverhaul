@@ -1,4 +1,4 @@
-namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
+﻿namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
 {
     /// <summary>
     /// 震荡激光枪管：每45帧在光束终点引爆一次脉冲爆炸
@@ -12,10 +12,10 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
 
         public override void Apply(ref ShootContext ctx) {
             ctx.LaserMode = true;
-            ctx.LaserPulseInterval = 45;
+            ctx.LaserPulseInterval = 30;
             ctx.LaserPulseRadius = 85f;
-            ctx.DamageMul += -0.15f;
-            ctx.ManaCostMul += 0.40f;
+            ctx.DamageMul += -0.3f;
+            ctx.ManaCostMul += 0.6f;
         }
     }
 }

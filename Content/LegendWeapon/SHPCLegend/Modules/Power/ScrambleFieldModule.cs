@@ -1,4 +1,4 @@
-using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
+﻿using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
 using System;
 using Terraria;
 using Terraria.ModLoader;
@@ -18,9 +18,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
         private int _scrambleTimer;
 
         public override void Apply(ref ShootContext ctx) {
-            ctx.ChargeTimeMul += 0.4f;
+            ctx.ChargeTimeMul += 0.25f;
             ctx.OrbExplosionRadiusMul += 0.5f;
-            ctx.ManaCostMul += 0.3f;
+            ctx.ManaCostMul += 0.4f;
         }
 
         public override void OnOrbCharging(CyberChargeOrbProj orb, Player owner) {

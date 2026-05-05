@@ -1,4 +1,4 @@
-using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
+﻿using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
 using System;
 using Terraria;
 using Terraria.ModLoader;
@@ -17,7 +17,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
 
         public override void Apply(ref ShootContext ctx) {
             ctx.OrbSpeedMul += 0.30f;
-            ctx.ManaCostMul += 0.35f;
+            ctx.ManaCostMul += 0.25f;
         }
 
         public override void OnOrbLaunched(CyberChargeOrbProj orb) {

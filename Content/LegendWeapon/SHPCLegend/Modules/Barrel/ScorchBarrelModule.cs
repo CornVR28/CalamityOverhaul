@@ -1,4 +1,4 @@
-namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
+﻿namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
 {
     /// <summary>
     /// 灼烧激光枪管：激光命中NPC时施加持续灼烧debuff
@@ -14,8 +14,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
             ctx.LaserMode = true;
             ctx.LaserScorchOnHit = true;
             ctx.LaserScorchDuration = 240;
-            ctx.DamageMul += -0.2f;
-            ctx.ManaCostMul += 0.25f;
+            ctx.DamageMul += -0.25f;
+            ctx.ManaCostMul += 0.65f;
         }
     }
 }

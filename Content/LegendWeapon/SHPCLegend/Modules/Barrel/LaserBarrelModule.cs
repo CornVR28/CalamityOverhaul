@@ -1,4 +1,4 @@
-namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
+﻿namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
 {
     /// <summary>
     /// 棱镜激光枪管，将左键攻击模式完全替换为持续跟随光标的激光光柱
@@ -12,8 +12,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
 
         public override void Apply(ref ShootContext ctx) {
             ctx.LaserMode = true;
-            ctx.DamageMul += 0.5f;
-            ctx.ManaCostMul += 0.5f;
+            ctx.DamageMul += -0.2f;
+            ctx.ManaCostMul += 0.75f;
         }
     }
 }

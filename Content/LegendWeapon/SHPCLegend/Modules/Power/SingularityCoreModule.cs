@@ -1,4 +1,4 @@
-namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
+﻿namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
 {
     /// <summary>
     /// 奇点核心：能量球飞行阶段持续向最近敌人偏转追踪
@@ -14,7 +14,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
             ctx.OrbFlyingAttract = true;
             ctx.OrbSpeedMul += 0.2f;
             ctx.OrbExplosionRadiusMul += 0.3f;
-            ctx.ManaCostMul += 0.25f;
+            ctx.ManaCostMul += 0.5f;
         }
     }
 }

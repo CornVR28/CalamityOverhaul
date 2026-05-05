@@ -1,4 +1,4 @@
-namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
+﻿namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
 {
     /// <summary>
     /// 支架枪托：彻底消除散布，延长光束飞行距离，牺牲一定攻速换取高度精准
@@ -12,8 +12,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
 
         public override void Apply(ref ShootContext ctx) {
             ctx.SpreadMul += -1f;
-            ctx.BeamSpeedMul += 0.30f;
-            ctx.BeamLifeMul += 0.40f;
+            ctx.BeamSpeedMul += 0.5f;
+            ctx.BeamLifeMul += 0.5f;
             ctx.AttackSpeedMul += -0.20f;
         }
     }

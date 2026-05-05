@@ -1,4 +1,4 @@
-SHPCModTooltipDraw: {
+﻿SHPCModTooltipDraw: {
 	InstalledHeader: 已安装模块
 	NoModules: 无
 	BonusHeader: 当前模块总加成
@@ -1843,15 +1843,18 @@ GravityFrameModule: {
 
 LaserBarrelModule: {
 	DisplayName: 棱镜激光枪管
-	Tooltip: 将左键攻击替换为跟随光标的持续棱镜激光光柱
+	Tooltip: 
+		'''
+		汇流光束转变为持续的棱镜激光光柱，代价是庞大的法力消耗和输出功率受限
+		'''
 }
 
 OscillatorBarrelModule: {
 	DisplayName: 震荡激光枪管
 	Tooltip:
 		'''
-		棱镜光柱内嵌脉冲电容，每45帧在光束终点引爆一次能量脉冲
-		单帧伤害略降，法力消耗加剧，但范围爆炸填补了持续照射的弱点
+		棱镜光柱内嵌脉冲电容，每30帧在光束终点引爆一次能量脉冲
+		单帧伤害略降，但范围爆炸与更低的法力消耗填补了持续照射的弱点
 		'''
 }
 
@@ -1860,7 +1863,7 @@ ScorchBarrelModule: {
 	Tooltip:
 		'''
 		高焓等离子改性膛口让激光在命中时点燃目标
-		光束本体伤害轻微削弱，但持续灼烧弥补了直接输出的缺口
+		光束本体伤害轻微削弱，但持续灼烧与更低的法力消耗弥补了直接输出的缺口
 		'''
 }
 
@@ -1928,7 +1931,7 @@ SentinelGripModule: {
 	Tooltip:
 		'''
 		智能传感握把在能量球飞行期间每20帧自动向最近敌人发射追踪光束
-		能量球初速略降，法力开销加剧，但持续的伴随火力弥补了损失
+		能量球初速降低，法力开销加剧，但持续的伴随火力弥补了损失
 		'''
 }
 

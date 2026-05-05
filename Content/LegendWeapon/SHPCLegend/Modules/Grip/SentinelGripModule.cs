@@ -1,4 +1,4 @@
-using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
+﻿using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
 using System;
 using Terraria;
 using Terraria.ModLoader;
@@ -18,8 +18,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
         private int _sentinelTimer;
 
         public override void Apply(ref ShootContext ctx) {
-            ctx.OrbSpeedMul += -0.15f;
-            ctx.ManaCostMul += 0.30f;
+            ctx.OrbSpeedMul += -0.3f;
+            ctx.ManaCostMul += 0.25f;
         }
 
         public override void OnOrbFlyingAI(CyberChargeOrbProj orb) {

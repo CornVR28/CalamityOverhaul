@@ -1,4 +1,4 @@
-using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
+﻿using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
 using System;
 using Terraria;
 using Terraria.ModLoader;
@@ -19,8 +19,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
 
         public override void Apply(ref ShootContext ctx) {
             ctx.LaserMode = true;
-            ctx.DamageMul += 0.2f;
-            ctx.ManaCostMul += 0.60f;
+            ctx.DamageMul += -0.1f;
+            ctx.ManaCostMul += 1f;
         }
 
         public override void OnLaserHitNPC(CyberPrismLaserProj laser, NPC target, NPC.HitInfo hit, int damageDone) {
