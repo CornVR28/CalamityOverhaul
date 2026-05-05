@@ -1,9 +1,27 @@
-﻿using Terraria.ModLoader;
+﻿using Terraria.ID;
+using Terraria.ModLoader;
 
 namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend
 {
     internal class HalibutItem : ModItem
     {
-        public override void SetDefaults() { }//留空，以HalibutOverride修改
+        //以HalibutOverride修改，这里写上属性是为了兼容性
+        public override void SetDefaults() {
+            Item.damage = 4;
+            Item.DamageType = DamageClass.Ranged;
+            Item.width = 118;
+            Item.height = 56;
+            Item.useTime = 10;
+            Item.useAnimation = 10;
+            Item.rare = CWRID.Rarity_HotPink > 0 ? CWRID.Rarity_HotPink : ItemRarityID.Purple;
+            Item.useStyle = ItemUseStyleID.Shoot;
+            Item.noMelee = true;
+            Item.knockBack = 1f;
+            Item.UseSound = SoundID.Item38 with { Volume = 0.6f };
+            Item.autoReuse = true;
+            Item.shoot = ProjectileID.Bullet;
+            Item.shootSpeed = 12f;
+            Item.useAmmo = AmmoID.Bullet;
+        }
     }
 }

@@ -73,19 +73,32 @@ namespace CalamityOverhaul.Content.HackTimes.Scannables
             }
 
             //THREAT
-            int threatScore = IsNonCombatNpc(npc)
-                ? 0
-                : (int)(npc.damage * 0.5f + npc.lifeMax * 0.01f + npc.defense);
+            //相对威胁分：结合玩家当前生命/防御/减伤动态计算，避免毕业玩家对低阶Boss的误判
+            float relThreat = 0f;
+            if (!IsNonCombatNpc(npc)) {
+                Player localPlayer = Main.LocalPlayer;
+                float playerDR = Math.Clamp(localPlayer.endurance, 0f, 0.99f);
+                //扣除玩家防御和减伤后NPC的有效单次伤害
+                float effectiveDmg = Math.Max(1f, npc.damage - localPlayer.statDefense * 0.5f) * (1f - playerDR);
+                //每次攻击消耗玩家HP的比例（越高越危险）
+                float hitImpact = effectiveDmg / Math.Max(localPlayer.statLifeMax, 1);
+                //NPC血量与玩家血量的比值取对数，压缩千万级Boss的数值
+                float hpRatio = (float)npc.lifeMax / Math.Max(localPlayer.statLifeMax, 1);
+                float durabilityIndex = MathF.Log2(1f + hpRatio);
+                //NPC自身防御系数
+                float defenseIndex = npc.defense / 50f;
+                relThreat = hitImpact * 50f + durabilityIndex * 5f + defenseIndex * 5f;
+            }
             labels[1] = HackTime.ThreatLabel.Value;
-            if (threatScore > 500) {
+            if (relThreat >= 40f) {
                 values[1] = HackTime.ThreatExtreme.Value;
                 colors[1] = HackTheme.Danger;
             }
-            else if (threatScore > 200) {
+            else if (relThreat >= 20f) {
                 values[1] = HackTime.ThreatHigh.Value;
                 colors[1] = HackTheme.Uploading;
             }
-            else if (threatScore > 80) {
+            else if (relThreat >= 8f) {
                 values[1] = HackTime.ThreatModerate.Value;
                 colors[1] = HackTheme.AccentAlt;
             }
