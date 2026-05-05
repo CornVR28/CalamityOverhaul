@@ -74,37 +74,37 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
         void ICWRLoader.LoadData() {
             var type = CWRRef.GetItem_SHPC_Type();
             if (type != null) {
-                // 屏蔽原版 ModifyTooltips
+                //屏蔽原版 ModifyTooltips
                 MethodInfo methodInfo = type.GetMethod("ModifyTooltips", BindingFlags.Public | BindingFlags.Instance);
                 if (methodInfo != null) {
                     VaultHook.Add(methodInfo, OnSHPCToolFunc);
                 }
-                // 屏蔽原版 FindSoulForAmmo
+                //屏蔽原版 FindSoulForAmmo
                 methodInfo = type.GetMethod("FindSoulForAmmo", BindingFlags.Public | BindingFlags.Static);
                 if (methodInfo != null) {
                     VaultHook.Add(methodInfo, OnFindSoulForAmmoFunc);
                 }
-                // 屏蔽原版 Shoot —— 阻止原始弹幕生成
+                //屏蔽原版 Shoot —— 阻止原始弹幕生成
                 methodInfo = type.GetMethod("Shoot", BindingFlags.Public | BindingFlags.Instance);
                 if (methodInfo != null) {
                     VaultHook.Add(methodInfo, OnSHPCShootFunc);
                 }
-                // 屏蔽原版 CanUseItem —— 移除灵魂弹药检测
+                //屏蔽原版 CanUseItem —— 移除灵魂弹药检测
                 methodInfo = type.GetMethod("CanUseItem", BindingFlags.Public | BindingFlags.Instance);
                 if (methodInfo != null) {
                     VaultHook.Add(methodInfo, OnSHPCCanUseItemFunc);
                 }
-                // 屏蔽原版 UseItem —— 移除灵魂消耗逻辑
+                //屏蔽原版 UseItem —— 移除灵魂消耗逻辑
                 methodInfo = type.GetMethod("UseItem", BindingFlags.Public | BindingFlags.Instance);
                 if (methodInfo != null) {
                     VaultHook.Add(methodInfo, OnSHPCUseItemFunc);
                 }
-                // 屏蔽原版 UseSpeedMultiplier
+                //屏蔽原版 UseSpeedMultiplier
                 methodInfo = type.GetMethod("UseSpeedMultiplier", BindingFlags.Public | BindingFlags.Instance);
                 if (methodInfo != null) {
                     VaultHook.Add(methodInfo, OnSHPCUseSpeedMultiplierFunc);
                 }
-                // 屏蔽原版 ModifyManaCost
+                //屏蔽原版 ModifyManaCost
                 methodInfo = type.GetMethod("ModifyManaCost", BindingFlags.Public | BindingFlags.Instance);
                 if (methodInfo != null) {
                     VaultHook.Add(methodInfo, OnSHPCModifyManaCostFunc);
@@ -207,7 +207,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
         public override bool? On_CanUseItem(Item item, Player player) {
             ShootContext ctx = SHPCModificationSystem.Resolve(player);
             if (player.altFunctionUse == 2) {
-                // 右键蓄力模式：channel + noUseGraphic，且场上没有同类蓄力弹幕
+                //右键蓄力模式：channel + noUseGraphic，且场上没有同类蓄力弹幕
                 item.channel = true;
                 item.noUseGraphic = true;
                 item.UseSound = null;
@@ -223,7 +223,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
                     item.useAnimation = item.useTime = 8;
                     return player.statMana > 0;
                 }
-                // 左键射击模式，按改件攻速倍率缩放 useTime
+                //左键射击模式，按改件攻速倍率缩放 useTime
                 item.channel = false;
                 int scaled = (int)(LeftClickUseTime / MathF.Max(ctx.AttackSpeedMul, 0.1f));
                 if (scaled < 1) scaled = 1;
@@ -259,12 +259,12 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
             Vector2 position, Vector2 velocity, int type, int damage, float knockback) {
             ShootContext ctx = SHPCModificationSystem.Resolve(player);
             if (player.altFunctionUse == 2) {
-                // 右键：先生成手持弹幕（绘制武器 + 控制手臂动画）
+                //右键：先生成手持弹幕（绘制武器 + 控制手臂动画）
                 int heldIdx = Projectile.NewProjectile(source, player.Center, Vector2.Zero,
                     ModContent.ProjectileType<SHPCChargeHeldProj>(),
                     0, 0f, player.whoAmI);
 
-                // 再生成蓄力能量球，ai[1] 传递手持弹幕索引以定位枪口
+                //再生成蓄力能量球，ai[1] 传递手持弹幕索引以定位枪口
                 Vector2 spawnPos = player.Center + velocity.SafeNormalize(Vector2.UnitX) * 70f;
                 int orbDamage = (int)(damage * 2 * ctx.DamageMul);
                 int orbIdx = Projectile.NewProjectile(source, spawnPos, Vector2.Zero,
@@ -351,7 +351,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
                 }
             }
 
-            return false; // 阻止原版射击行为
+            return false; //阻止原版射击行为
         }
 
         public static void SetDefaultsFunc(Item Item) {
