@@ -22,9 +22,12 @@ namespace CalamityOverhaul.Content.HackTimes.Protocols
             if (target is not NpcScannable s) return false;
             NPC npc = Main.npc[s.NpcIndex];
             EmitApplyParticles(npc);
-            //群组扩散，光学过载会令蠕虫所有体节同时失明
-            HackEffectTracker.PropagateNpcEffectToGroup(this, s.NpcIndex,
-                caster?.whoAmI ?? Main.myPlayer, EmitApplyParticles);
+            //群组扩散涉及向 HackEffectTracker 注册新效果，仅在施法端进行
+            if (!HackTimeNetSync.IsRemoteApply) {
+                //群组扩散，光学过载会令蠕虫所有体节同时失明
+                HackEffectTracker.PropagateNpcEffectToGroup(this, s.NpcIndex,
+                    caster?.whoAmI ?? Main.myPlayer, EmitApplyParticles);
+            }
             return true;
         }
 

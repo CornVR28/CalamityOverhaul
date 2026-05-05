@@ -21,7 +21,10 @@ namespace CalamityOverhaul.Content.HackTimes.Protocols
 
         public override bool OnApply(IHackTarget target, Player caster) {
             if (target is not GlitchWraithActor wraith) return false;
-            wraith.ApplySelfDismember();
+            //灵异 Actor 的权威状态变更只在施法端执行
+            if (!HackTimeNetSync.IsRemoteApply) {
+                wraith.ApplySelfDismember();
+            }
             SoundEngine.PlaySound(SoundID.NPCDeath10 with { Volume = 1f, Pitch = -0.9f }, wraith.Center);
             SoundEngine.PlaySound(SoundID.Item122 with { Volume = 1f, Pitch = -1f }, wraith.Center);
             for (int i = 0; i < 40; i++) {

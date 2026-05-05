@@ -22,7 +22,10 @@ namespace CalamityOverhaul.Content.HackTimes.Protocols
 
         public override bool OnApply(IHackTarget target, Player caster) {
             if (target is not IHackableTurret turret) return false;
-            turret.ApplyShortCircuit(DisableFrames, caster);
+            //炮台权威状态变更只在施法端执行，远端依靠 Actor 自身的同步链路还原
+            if (!HackTimeNetSync.IsRemoteApply) {
+                turret.ApplyShortCircuit(DisableFrames, caster);
+            }
             Vector2 center = turret.WorldCenter;
 
             if (!VaultUtils.isServer) {

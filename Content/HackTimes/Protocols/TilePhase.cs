@@ -58,16 +58,24 @@ namespace CalamityOverhaul.Content.HackTimes.Protocols
                 originY = tileY - offY;
             }
 
-            //致动整个物块对象
-            for (int dx = 0; dx < w; dx++) {
-                for (int dy = 0; dy < h; dy++) {
-                    int tx = originX + dx;
-                    int ty = originY + dy;
-                    if (tx < 0 || tx >= Main.maxTilesX || ty < 0 || ty >= Main.maxTilesY) continue;
-                    Tile tile = Main.tile[tx, ty];
-                    if (tile.HasTile && !tile.IsActuated) {
-                        tile.IsActuated = true;
+            //本端权威致动并广播；远端复刻仅做视觉表现，致动状态由 TileSquare 同步
+            if (!HackTimeNetSync.IsRemoteApply) {
+                //致动整个物块对象
+                for (int dx = 0; dx < w; dx++) {
+                    for (int dy = 0; dy < h; dy++) {
+                        int tx = originX + dx;
+                        int ty = originY + dy;
+                        if (tx < 0 || tx >= Main.maxTilesX || ty < 0 || ty >= Main.maxTilesY) continue;
+                        Tile tile = Main.tile[tx, ty];
+                        if (tile.HasTile && !tile.IsActuated) {
+                            tile.IsActuated = true;
+                        }
                     }
+                }
+
+                //网络同步
+                if (Main.netMode != NetmodeID.SinglePlayer) {
+                    NetMessage.SendTileSquare(-1, originX, originY, w, h);
                 }
             }
 
@@ -82,11 +90,6 @@ namespace CalamityOverhaul.Content.HackTimes.Protocols
 
             if (!VaultUtils.isServer) {
                 SoundEngine.PlaySound(CWRSound.Hacker with { Volume = 0.4f, Pitch = 0.6f }, center);
-            }
-
-            //网络同步
-            if (Main.netMode != NetmodeID.SinglePlayer) {
-                NetMessage.SendTileSquare(-1, originX, originY, w, h);
             }
 
             return true;

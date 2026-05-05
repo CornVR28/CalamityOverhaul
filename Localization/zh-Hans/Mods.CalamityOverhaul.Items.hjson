@@ -2117,3 +2117,165 @@ OverkillFrameModule: {
 		层数随时间衰减，节奏越快越强
 		'''
 }
+
+GraviticBarrelModule: {
+	DisplayName: 引力枪管
+	Tooltip:
+		'''
+		内嵌微型奇点的炮膛让光束在飞行时持续吸引附近敌人
+		散布与追踪小幅压低，光束飞行距离延长，弹速略减
+		'''
+}
+
+PrismaticBarrelModule: {
+	DisplayName: 棱光枪管
+	Tooltip:
+		'''
+		色散棱镜让每束光在飞行中持续抛出 RGB 三色尾迹，命中时溅出彩色光屑
+		额外发射一束并提供爆击补偿，单发威力略降，散布略升
+		'''
+}
+
+ConcussionBarrelModule: {
+	DisplayName: 震荡膛口
+	Tooltip:
+		'''
+		过载缓冲腔在每累计 5 次命中后于命中点引爆一次微型震荡环
+		单发威力上扬、散布收紧，但攻速代价显著
+		'''
+}
+
+CrosslinkOpticModule: {
+	DisplayName: 联机瞄具
+	Tooltip:
+		'''
+		神经联机模块在命中时把目标与最近的另一只敌人之间架起一道数据电弧
+		链跳次数与跳跃半径双重提升，蓝量消耗略增
+		'''
+}
+
+ZoomOpticModule: {
+	DisplayName: 焦距瞄具
+	Tooltip:
+		'''
+		长焦磁透镜让光束飞行更远更快，但牺牲攻速与追踪
+		命中距离 ≥ 600 像素时附加一次额外白热打击，距离越远加成越高
+		'''
+}
+
+PingOpticModule: {
+	DisplayName: 标记瞄具
+	Tooltip:
+		'''
+		信号标定系统命中时对目标施加死亡标记，使其后续承受的所有伤害放大
+		追踪与暴击同步提升，散布略减
+		'''
+}
+
+CapacitorPulseModule: {
+	DisplayName: 脉冲电容
+	Tooltip:
+		'''
+		高密度电容堆栈在蓄力中每隔约半秒于球体上释放一次微型脉冲爆破
+		爆炸范围与蓄力时长同步上扬，蓝量代价加剧
+		'''
+}
+
+EntropyCoreModule: {
+	DisplayName: 熵核
+	Tooltip:
+		'''
+		能量球飞行时持续从附近敌人吸取"熵蓄能"
+		引爆时按累积量额外释放一次余波爆破——目标群越密余波越凶
+		'''
+}
+
+ResonanceReactorModule: {
+	DisplayName: 共振反应堆
+	Tooltip:
+		'''
+		蓄力期间每隔约 0.75 秒释放一圈共振粒子环
+		引爆时玩家脚下额外触发一次共振冲击，弥补近战覆盖
+		'''
+}
+
+OverwatchStockModule: {
+	DisplayName: 守望枪托
+	Tooltip:
+		'''
+		静止时逐步累积"哨戒精度"层数（最多 5 层），移动后迅速衰减
+		每层 +2.5% 伤害与 +2% 暴击，散布与攻速因稳重姿态略减
+		'''
+}
+
+MomentumStockModule: {
+	DisplayName: 动量枪托
+	Tooltip:
+		'''
+		高速移动时逐步累积"动能"层数（最多 6 层），停下后迅速衰减
+		每层 +5% 攻速与 +8% 弹速，与守望枪托互为镜像
+		'''
+}
+
+BulwarkStockModule: {
+	DisplayName: 壁垒枪托
+	Tooltip:
+		'''
+		手持 SHPC 时为玩家提供少量减伤
+		稳重姿态略微拖慢蓄力并提升蓝量消耗
+		'''
+}
+
+CombatGripModule: {
+	DisplayName: 战斗握把
+	Tooltip:
+		'''
+		命中并击杀目标时累积"战意"（最多 5 层）
+		每层 +6% 攻速与 +2% 伤害，层数在停手后随时间衰减
+		'''
+}
+
+TempestGripModule: {
+	DisplayName: 风暴握把
+	Tooltip:
+		'''
+		每累计若干次命中触发一次"风暴爆发"，朝最近命中点四周喷射多道电弧
+		单发威力略减、蓝量消耗加剧，但提供节奏感清场
+		'''
+}
+
+AbsorberGripModule: {
+	DisplayName: 吸收握把
+	Tooltip:
+		'''
+		光束与激光命中时按伤害比例返还少量蓝量，自循环补给法力
+		单发威力略减、原始法力消耗略升作为代价
+		'''
+}
+
+HarmonicFrameModule: {
+	DisplayName: 谐振机匣
+	Tooltip:
+		'''
+		多束光束同时存在时彼此架起共振电弧，造成额外伤害
+		额外发射一束、单发威力降低、散布略升
+		'''
+}
+
+ReplicatorFrameModule: {
+	DisplayName: 数据复制机匣
+	Tooltip:
+		'''
+		追踪光束消亡时在原地生成一束极短命的回响副本沿原方向继续飞行
+		主光束伤害提升但寿命缩短，蓝量消耗加剧
+		'''
+}
+
+ArchiveFrameModule: {
+	DisplayName: 归档机匣
+	Tooltip:
+		'''
+		持续累积 SHPC 命中所造成的伤害，每达到阈值在玩家位置释放一次"数据归档"爆破
+		单发伤害提升，蓝量消耗轻微上扬
+		'''
+}

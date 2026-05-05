@@ -29,7 +29,10 @@ namespace CalamityOverhaul.Content.HackTimes.Protocols
 
         public override bool OnApply(IHackTarget target, Player caster) {
             if (target is not IHackableSignalTower tower) return false;
-            tower.BeginVirusBroadcast(BroadcastRadiusPx, TurretDisableFrames, caster);
+            //信号塔权威广播只在施法端发起，远端依靠 Actor 自身的同步链路还原
+            if (!HackTimeNetSync.IsRemoteApply) {
+                tower.BeginVirusBroadcast(BroadcastRadiusPx, TurretDisableFrames, caster);
+            }
             Vector2 center = tower.WorldCenter;
 
             if (!VaultUtils.isServer) {

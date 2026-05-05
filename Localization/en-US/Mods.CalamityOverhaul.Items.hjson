@@ -2132,3 +2132,165 @@ OverkillFrameModule: {
 		Stacks decay over time — the faster you slay, the stronger you become
 		'''
 }
+
+GraviticBarrelModule: {
+	DisplayName: Gravitic Barrel
+	Tooltip:
+		'''
+		An embedded micro-singularity tugs nearby enemies toward each beam in flight
+		Spread and homing tighten while range extends; muzzle velocity drops slightly
+		'''
+}
+
+PrismaticBarrelModule: {
+	DisplayName: Prismatic Barrel
+	Tooltip:
+		'''
+		Dispersion prisms shed RGB tracers from every beam, scattering color shards on hit
+		Adds one extra beam and a crit edge at the cost of a little damage and spread
+		'''
+}
+
+ConcussionBarrelModule: {
+	DisplayName: Concussion Muzzle
+	Tooltip:
+		'''
+		An overload buffer detonates a small concussion ring at the impact point every 5 stacked hits
+		Per-shot damage and spread tighten, but attack speed pays the toll
+		'''
+}
+
+CrosslinkOpticModule: {
+	DisplayName: Crosslink Optic
+	Tooltip:
+		'''
+		On hit, a neural-link unit arcs a data tether from the struck target to the nearest other foe
+		Chain count and chain range both extend, with a slight bump to mana cost
+		'''
+}
+
+ZoomOpticModule: {
+	DisplayName: Zoom Optic
+	Tooltip:
+		'''
+		A long-focus magnetic lens pushes beams faster and farther at the cost of homing and attack speed
+		Hits beyond 600 px trigger a bonus white-hot strike that scales with distance
+		'''
+}
+
+PingOpticModule: {
+	DisplayName: Ping Optic
+	Tooltip:
+		'''
+		Signal-painter system stamps Marked-for-Death on every target struck, amplifying all incoming damage
+		Bonus homing, crit, and tighter spread complete the targeting kit
+		'''
+}
+
+CapacitorPulseModule: {
+	DisplayName: Capacitor Pulse
+	Tooltip:
+		'''
+		Dense capacitor stacks vent a micro-pulse detonation roughly twice a second while charging
+		Explosion radius and charge time both rise, mana cost climbs
+		'''
+}
+
+EntropyCoreModule: {
+	DisplayName: Entropy Core
+	Tooltip:
+		'''
+		The orb siphons "entropy" from nearby enemies during flight
+		On detonation it releases a secondary aftershock scaled by accumulated entropy
+		'''
+}
+
+ResonanceReactorModule: {
+	DisplayName: Resonance Reactor
+	Tooltip:
+		'''
+		Emits a resonance ring every ~0.75 s while charging
+		Detonation triggers an extra resonance shock at the player's feet, covering melee gaps
+		'''
+}
+
+OverwatchStockModule: {
+	DisplayName: Overwatch Stock
+	Tooltip:
+		'''
+		Standing still ramps up "Overwatch" stacks (max 5) that decay rapidly once you move
+		Each stack grants +2.5% damage and +2% crit; a stoic posture trims attack speed and spread
+		'''
+}
+
+MomentumStockModule: {
+	DisplayName: Momentum Stock
+	Tooltip:
+		'''
+		Moving fast ramps up "Momentum" stacks (max 6) that decay rapidly once you stop
+		Each stack grants +5% attack speed and +8% beam speed — a mirror to Overwatch
+		'''
+}
+
+BulwarkStockModule: {
+	DisplayName: Bulwark Stock
+	Tooltip:
+		'''
+		Holding the SHPC grants modest damage reduction
+		The reinforced posture slightly slows charge time and bumps mana cost
+		'''
+}
+
+CombatGripModule: {
+	DisplayName: Combat Grip
+	Tooltip:
+		'''
+		Killing blows with beams or laser stack "Combat" charges (max 5)
+		Each stack grants +6% attack speed and +2% damage; charges decay between fights
+		'''
+}
+
+TempestGripModule: {
+	DisplayName: Tempest Grip
+	Tooltip:
+		'''
+		After every few stacked hits, fires a Tempest Burst — multiple data arcs around the latest impact
+		Per-shot damage trims and mana cost climbs in exchange for rhythmic clearing
+		'''
+}
+
+AbsorberGripModule: {
+	DisplayName: Absorber Grip
+	Tooltip:
+		'''
+		Beam and laser hits return a slice of the damage dealt as mana
+		Per-shot damage drops slightly and base mana cost rises in exchange
+		'''
+}
+
+HarmonicFrameModule: {
+	DisplayName: Harmonic Frame
+	Tooltip:
+		'''
+		Multiple coexisting beams arc resonance tethers between each other for bonus damage
+		Adds one extra beam at the cost of per-shot damage and a touch of spread
+		'''
+}
+
+ReplicatorFrameModule: {
+	DisplayName: Replicator Frame
+	Tooltip:
+		'''
+		On expiration, a beam spawns a brief echo in place that flies on along its original heading
+		Primary damage rises while range shortens; mana cost climbs
+		'''
+}
+
+ArchiveFrameModule: {
+	DisplayName: Archive Frame
+	Tooltip:
+		'''
+		Accumulates SHPC damage; each time the threshold is crossed, an Archive blast detonates at the player's feet
+		Per-shot damage rises slightly with a small mana surcharge
+		'''
+}

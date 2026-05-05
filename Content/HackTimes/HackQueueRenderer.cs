@@ -87,6 +87,8 @@ namespace CalamityOverhaul.Content.HackTimes
                 //上传完成且闪烁结束，由目标自身分派协议生效
                 if (entry.State == HackQueueState.Completed && entry.CompletedTimer <= 0f) {
                     entry.Target.ApplyHack(entry.Hack, Main.LocalPlayer);
+                    //多人模式下广播给其它客户端做视觉复刻；单人模式下方法内部会直接返回
+                    HackTimeNetSync.SendApplyPacket(entry.Hack, entry.Target, Main.myPlayer);
                     queue.RemoveAt(i);
                 }
             }
@@ -303,8 +305,10 @@ namespace CalamityOverhaul.Content.HackTimes
 
                     case HackQueueState.Uploading:
                         hasUploading = true;
-                        //骇客时间激活时冻结上传进度，必须退出后在实时战斗中推进
-                        if (!HackTime.Active) {
+                        //仅在世界真正冻结时暂停上传进度
+                        //单人模式下进入骇客时间会触发 HackTimeFreeze，对应进度暂停由 IsActive 决定
+                        //多人模式下不再冻结世界，上传与世界一同实时推进
+                        if (!HackTimeFreeze.IsActive) {
                             if (entry.Hack.UploadTime > 0)
                                 entry.UploadProgress += 1f / entry.Hack.UploadTime;
                             if (entry.UploadProgress >= 1f) {

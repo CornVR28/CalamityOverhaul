@@ -36,24 +36,34 @@ namespace CalamityOverhaul.Content.HackTimes.Protocols
             if (target is not TileScannable s) return false;
             if (!TryGetMachine(s.TileCoordX, s.TileCoordY, out MachineTP machine)) return false;
 
-            //清空电能
-            float drainedUE = machine.MachineData.UEvalue;
-            machine.MachineData.UEvalue = 0;
-
             Vector2 center = machine.CenterInWorld;
 
-            //电弧范围伤害
-            if (!VaultUtils.isClient) {
-                for (int i = 0; i < Main.maxNPCs; i++) {
-                    NPC npc = Main.npc[i];
-                    if (!npc.active) continue;
-                    if (Vector2.Distance(npc.Center, center) > ArcRadius) continue;
-                    npc.StrikeNPC(new NPC.HitInfo {
-                        Damage = ArcDamage,
-                        Knockback = 4f,
-                        HitDirection = npc.Center.X > center.X ? 1 : -1,
-                        Crit = false,
-                    });
+            //本端权威：清空电能、伤害、TileSquare 同步——远端复刻只播放视觉
+            //避免远端重复写零或重复广播 TileSquare
+            if (!HackTimeNetSync.IsRemoteApply) {
+                //清空电能
+                machine.MachineData.UEvalue = 0;
+
+                //电弧范围伤害
+                if (!VaultUtils.isClient) {
+                    for (int i = 0; i < Main.maxNPCs; i++) {
+                        NPC npc = Main.npc[i];
+                        if (!npc.active) continue;
+                        if (Vector2.Distance(npc.Center, center) > ArcRadius) continue;
+                        npc.StrikeNPC(new NPC.HitInfo {
+                            Damage = ArcDamage,
+                            Knockback = 4f,
+                            HitDirection = npc.Center.X > center.X ? 1 : -1,
+                            Crit = false,
+                        });
+                    }
+                }
+
+                //网络同步物块状态
+                if (Main.netMode != NetmodeID.SinglePlayer) {
+                    int tileW = machine.Width / 16;
+                    int tileH = machine.Height / 16;
+                    NetMessage.SendTileSquare(-1, machine.Position.X, machine.Position.Y, tileW, tileH);
                 }
             }
 
@@ -73,13 +83,6 @@ namespace CalamityOverhaul.Content.HackTimes.Protocols
                 }
 
                 SoundEngine.PlaySound(SoundID.Item93 with { Volume = 0.7f, Pitch = -0.3f }, center);
-            }
-
-            //网络同步物块状态
-            if (Main.netMode != NetmodeID.SinglePlayer) {
-                int tileW = machine.Width / 16;
-                int tileH = machine.Height / 16;
-                NetMessage.SendTileSquare(-1, machine.Position.X, machine.Position.Y, tileW, tileH);
             }
 
             return true;

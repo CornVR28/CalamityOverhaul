@@ -37,6 +37,7 @@ namespace CalamityOverhaul.Common
         public static Asset<Effect> CyberTraceBeam { get; set; }
         public static Asset<Effect> CyberEnergyOrb { get; set; }
         public static Asset<Effect> CyberDetonation { get; set; }
+        public static Asset<Effect> CyberDataArc { get; set; }
         public static Asset<Effect> CyberspaceField { get; set; }
         public static Asset<Effect> CyberPanel { get; set; }
         public static Asset<Effect> CyberDomainPanel { get; set; }
@@ -56,6 +57,8 @@ namespace CalamityOverhaul.Common
         public static Asset<Effect> CelestialStar { get; set; }
         public static Asset<Effect> BrimstoneDomain { get; set; }
         public static Asset<Effect> BrimstoneBlastWave { get; set; }
+        public static Asset<Effect> KingSlimeRoyalAura { get; set; }
+        public static Asset<Effect> KingSlimeShockwave { get; set; }
         public static Asset<Effect> WitchBrimstoneDomain { get; set; }
         public static Asset<Effect> CelestialDomain { get; set; }
         public static Asset<Effect> ProverbsGhostDomain { get; set; }

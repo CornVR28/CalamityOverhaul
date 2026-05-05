@@ -4,6 +4,7 @@ using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
 using CalamityOverhaul.Content.RAMSystems;
 using Terraria;
 using Terraria.Audio;
+using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
 
@@ -469,6 +470,12 @@ namespace CalamityOverhaul.Content.HackTimes
         private const float FadeOutSpeed = 0.07f;
 
         /// <summary>
+        /// 多人模式下不允许像单机那样冻结世界
+        /// <br/>开启骇客时间后世界正常运行，仅保留扫描、运镜、协议上传等本地视觉与流程
+        /// </summary>
+        public static bool AllowFreeze => Main.netMode == NetmodeID.SinglePlayer;
+
+        /// <summary>
         /// 切换骇客时间的开关状态
         /// </summary>
         public static void Toggle() {
@@ -479,7 +486,9 @@ namespace CalamityOverhaul.Content.HackTimes
                 //正在淡出中，直接反转回来，无需重置状态
                 Active = true;
                 targetIntensity = 1f;
-                HackTimeFreeze.Activate();
+                if (AllowFreeze) {
+                    HackTimeFreeze.Activate();
+                }
             }
             else {
                 Activate();
@@ -499,11 +508,14 @@ namespace CalamityOverhaul.Content.HackTimes
             ReticleTimer = 0f;
             CameraOffset = Vector2.Zero;
             cameraTo = Vector2.Zero;
-            HackTimeFreeze.Activate();
-            //记录飞行时间快照
-            if (Main.LocalPlayer.Alives()) {
-                Main.LocalPlayer.GetModPlayer<HackTimeFreezePlayer>().frozenWingTime = Main.LocalPlayer.wingTime;
-                Main.LocalPlayer.GetModPlayer<HackTimeFreezePlayer>().frozenRocketTime = Main.LocalPlayer.rocketTime;
+            //仅单人模式下冻结世界；多人模式保留扫描功能但战斗与时间持续推进
+            if (AllowFreeze) {
+                HackTimeFreeze.Activate();
+                //记录飞行时间快照
+                if (Main.LocalPlayer.Alives()) {
+                    Main.LocalPlayer.GetModPlayer<HackTimeFreezePlayer>().frozenWingTime = Main.LocalPlayer.wingTime;
+                    Main.LocalPlayer.GetModPlayer<HackTimeFreezePlayer>().frozenRocketTime = Main.LocalPlayer.rocketTime;
+                }
             }
             if (!VaultUtils.isServer) {
                 SoundEngine.PlaySound(CWRSound.Scanning, Main.LocalPlayer.Center);

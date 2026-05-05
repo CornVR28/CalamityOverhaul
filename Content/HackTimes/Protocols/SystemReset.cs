@@ -23,9 +23,12 @@ namespace CalamityOverhaul.Content.HackTimes.Protocols
             NPC npc = Main.npc[s.NpcIndex];
             EmitApplyParticles(npc);
             CombatText.NewText(npc.Hitbox, new Color(40, 150, 255), HackTime.Rebooting.Value, true);
-            //群组扩散，蠕虫各体节、月总各实体一并被强制重启
-            HackEffectTracker.PropagateNpcEffectToGroup(this, s.NpcIndex,
-                caster?.whoAmI ?? Main.myPlayer, EmitApplyParticles);
+            //群组扩散涉及向 HackEffectTracker 注册新效果，仅在施法端进行
+            if (!HackTimeNetSync.IsRemoteApply) {
+                //群组扩散，蠕虫各体节、月总各实体一并被强制重启
+                HackEffectTracker.PropagateNpcEffectToGroup(this, s.NpcIndex,
+                    caster?.whoAmI ?? Main.myPlayer, EmitApplyParticles);
+            }
             return true;
         }
 

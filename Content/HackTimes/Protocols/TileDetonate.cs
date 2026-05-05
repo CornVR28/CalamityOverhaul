@@ -112,16 +112,25 @@ namespace CalamityOverhaul.Content.HackTimes.Protocols
             int tileY = s.TileCoordY;
             Vector2 center = new(tileX * 16f + 8f, tileY * 16f + 8f);
 
-            int pickPower = GetEffectivePickPower(caster);
+            //本端权威破坏并广播 SendTileSquare；远端复刻只播放视觉与音效，避免重复破坏与重复广播
+            if (!HackTimeNetSync.IsRemoteApply) {
+                int pickPower = GetEffectivePickPower(caster);
 
-            //范围破坏
-            for (int dx = -BlastRadius; dx <= BlastRadius; dx++) {
-                for (int dy = -BlastRadius; dy <= BlastRadius; dy++) {
-                    if (dx * dx + dy * dy > BlastRadius * BlastRadius) continue;
-                    int tx = tileX + dx;
-                    int ty = tileY + dy;
-                    if (!CanBreakTileWithPickPower(tx, ty, pickPower)) continue;
-                    WorldGen.KillTile(tx, ty, false, false, false);
+                //范围破坏
+                for (int dx = -BlastRadius; dx <= BlastRadius; dx++) {
+                    for (int dy = -BlastRadius; dy <= BlastRadius; dy++) {
+                        if (dx * dx + dy * dy > BlastRadius * BlastRadius) continue;
+                        int tx = tileX + dx;
+                        int ty = tileY + dy;
+                        if (!CanBreakTileWithPickPower(tx, ty, pickPower)) continue;
+                        WorldGen.KillTile(tx, ty, false, false, false);
+                    }
+                }
+
+                //同步网络
+                if (Main.netMode != NetmodeID.SinglePlayer) {
+                    NetMessage.SendTileSquare(-1, tileX - BlastRadius, tileY - BlastRadius,
+                        BlastRadius * 2 + 1);
                 }
             }
 
@@ -142,12 +151,6 @@ namespace CalamityOverhaul.Content.HackTimes.Protocols
 
             if (!VaultUtils.isServer) {
                 SoundEngine.PlaySound(SoundID.Item14 with { Volume = 0.6f, Pitch = -0.2f }, center);
-            }
-
-            //同步网络
-            if (Main.netMode != NetmodeID.SinglePlayer) {
-                NetMessage.SendTileSquare(-1, tileX - BlastRadius, tileY - BlastRadius,
-                    BlastRadius * 2 + 1);
             }
 
             return true;

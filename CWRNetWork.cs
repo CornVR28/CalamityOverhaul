@@ -5,6 +5,7 @@ using CalamityOverhaul.Content.ADV.Scenarios.Draedons;
 using CalamityOverhaul.Content.ADV.Scenarios.Draedons.Quest.DeploySignaltowers.SignalTower;
 using CalamityOverhaul.Content.ADV.Scenarios.Draedons.Tzeentch;
 using CalamityOverhaul.Content.ADV.Scenarios.SupCal.End.EternalBlazingNows;
+using CalamityOverhaul.Content.HackTimes;
 using CalamityOverhaul.Content.Items.Tools;
 using CalamityOverhaul.Content.LegendWeapon.HalibutLegend;
 using CalamityOverhaul.Content.LegendWeapon.HalibutLegend.Resurrections;
@@ -45,6 +46,7 @@ namespace CalamityOverhaul
         MachineEffect,
         SirenMusicalBoxToggle,
         CyberspaceStateSync,
+        HackProtocolApply,
     }
 
     public static class CWRNetWork
@@ -99,6 +101,9 @@ namespace CalamityOverhaul
             }
             else if (type == CWRMessageType.CyberspaceStateSync) {
                 CyberspacePlayer.HandleNetSync(reader, whoAmI);
+            }
+            else if (type == CWRMessageType.HackProtocolApply) {
+                HackTimeNetSync.HandleApplyPacket(reader, whoAmI);
             }
 
             ModifyCrabulon.NetHandle(type, reader, whoAmI);

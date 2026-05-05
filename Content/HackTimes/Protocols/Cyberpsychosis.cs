@@ -25,9 +25,12 @@ namespace CalamityOverhaul.Content.HackTimes.Protocols
             //红色精神崩溃爆发
             EmitBurstParticles(npc);
             CombatText.NewText(npc.Hitbox, new Color(255, 0, 50), HackTime.Cyberpsychosis.Value, true);
-            //扩散到群组其他成员，HasEffect 短路保证不会无限传播
-            HackEffectTracker.PropagateNpcEffectToGroup(this, s.NpcIndex,
-                caster?.whoAmI ?? Main.myPlayer, EmitBurstParticles);
+            //群组扩散会向 HackEffectTracker 注册新效果，必须只在施法端跑，否则远端会重复触发 OnTick 伤害
+            if (!HackTimeNetSync.IsRemoteApply) {
+                //扩散到群组其他成员，HasEffect 短路保证不会无限传播
+                HackEffectTracker.PropagateNpcEffectToGroup(this, s.NpcIndex,
+                    caster?.whoAmI ?? Main.myPlayer, EmitBurstParticles);
+            }
             return true;
         }
 
