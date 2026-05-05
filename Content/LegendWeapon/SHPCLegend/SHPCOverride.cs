@@ -353,22 +353,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
         }
 
         private static void AppendModuleTooltips(List<TooltipLine> tooltips) {
-            Player player = Main.LocalPlayer;
-
-            tooltips.Add(new TooltipLine(CWRMod.Instance, "SHPCModuleRow",
-                SHPCModTooltipDraw.InstalledHeader.Value) {
-                OverrideColor = new Color(0, 220, 255)
-            });
-
-            ShootContext ctx = SHPCModificationSystem.Resolve(player);
-            int idx = 0;
-            foreach (string line in SHPCModuleItem.BuildStatLines(ctx)) {
-                if (string.IsNullOrEmpty(line)) continue;
-                bool isNeg = line.StartsWith("-");
-                tooltips.Add(new TooltipLine(CWRMod.Instance, $"SHPCStat_{idx++}", line) {
-                    OverrideColor = isNeg ? new Color(255, 120, 110) : new Color(120, 255, 170)
-                });
-            }
+            //模块信息已改为右侧浮动面板绘制
         }
     }
 }
