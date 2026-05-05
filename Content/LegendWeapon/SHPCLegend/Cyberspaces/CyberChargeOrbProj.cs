@@ -114,6 +114,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         public int DetonationMinions;
         /// <summary>爆炸时是否将玩家反推弹射</summary>
         public bool ExplosionPropels;
+        /// <summary>飞行阶段是否持续向最近敌人偏转追踪</summary>
+        public bool FlyingAttract;
 
         private OrbState State {
             get => (OrbState)Projectile.ai[0];
@@ -404,6 +406,18 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             //根据变速齿轮缩放飞行速度，方向从flyAngle恢复避免冻结后丢失
             float timeScale = TimeGear.TimeScale;
             float effectiveSpeed = FlySpeed * flySpeedMul * timeScale;
+
+            //FlyingAttract：持续向最近敌人偏转，增加飞行追踪性
+            if (FlyingAttract && Projectile.owner == Main.myPlayer) {
+                NPC nearest = Projectile.Center.FindClosestNPC(480f, false, true);
+                if (nearest != null) {
+                    float toAngle = (nearest.Center - Projectile.Center).ToRotation();
+                    float diff = MathHelper.WrapAngle(toAngle - flyAngle);
+                    flyAngle += MathHelper.Clamp(diff, -0.08f, 0.08f);
+                    Projectile.netUpdate = true;
+                }
+            }
+
             Projectile.velocity = flyAngle.ToRotationVector2() * effectiveSpeed;
 
             Projectile.rotation = flyAngle;
@@ -425,6 +439,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
                     SpawnTrailParticles();
                 }
             }
+            SHPCModificationSystem.ForEachModule(Owner, mod => mod.OnOrbFlyingAI(this));
         }
 
         private void SpawnTrailParticles() {

@@ -1,4 +1,5 @@
 ﻿using CalamityOverhaul.Common;
+using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules;
 using CalamityOverhaul.Content.PRTTypes;
 using InnoVault.GameContent.BaseEntity;
 using InnoVault.PRT;
@@ -47,6 +48,20 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         private float age;
         private int particleTimer;
         private float overdriveAmount;
+
+        //═════════════ 改件行为注入字段 ═════════════
+        //由 SHPCOverride.On_Shoot 在 NewProjectile 之后直接写入
+
+        /// <summary>脑冲爆炸帧间隔（0=关闭）</summary>
+        public int PulseInterval;
+        /// <summary>脑冲爆炸半径（像素）</summary>
+        public float PulseRadius = 80f;
+        /// <summary>命中时是否施加炉灼类 debuff</summary>
+        public bool ScorchOnHit;
+        /// <summary>炉灼持续帧数</summary>
+        public int ScorchDuration;
+
+        private int pulseTimer;
 
         public override void SetStaticDefaults() {
             CWRLoad.ProjValue.ImmuneFrozen[Type] = true;
@@ -123,6 +138,31 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
                     particleTimer = 0;
                     SpawnLaserParticles(aimDir);
                 }
+            }
+
+            //脑冲定时器：每隔 PulseInterval 帧在终点引爆一次小爆炸
+            if (PulseInterval > 0 && beamEnd != Vector2.Zero) {
+                pulseTimer++;
+                if (pulseTimer >= PulseInterval) {
+                    pulseTimer = 0;
+                    if (Projectile.owner == Main.myPlayer) {
+                        SpawnPulseExplosion();
+                    }
+                }
+            }
+
+            SHPCModificationSystem.ForEachModule(Owner, mod => mod.OnLaserAI(this));
+        }
+
+        private void SpawnPulseExplosion() {
+            int dmg = Math.Max(Projectile.damage, 1);
+            int idx = Projectile.NewProjectile(Projectile.GetSource_FromThis(),
+                beamEnd, Vector2.Zero,
+                ModContent.ProjectileType<CyberDetonationProj>(),
+                dmg, 0f, Projectile.owner,
+                ai0: 0.5f, ai1: overdriveAmount);
+            if (idx >= 0 && idx < Main.maxProjectiles) {
+                Main.projectile[idx].localAI[2] = PulseRadius;
             }
         }
 
@@ -237,9 +277,14 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
                     target.Center + vel, vel, mainCol, edgeCol,
                     Main.rand.NextFloat(0.6f, 1.6f), Main.rand.Next(12, 28)));
             }
+            if (ScorchOnHit && ScorchDuration > 0 && Projectile.owner == Main.myPlayer) {
+                target.AddBuff(BuffID.OnFire, ScorchDuration);
+            }
+            SHPCModificationSystem.ForEachModule(Owner, mod => mod.OnLaserHitNPC(this, target, hit, damageDone));
         }
 
         public override void OnKill(int timeLeft) {
+            SHPCModificationSystem.ForEachModule(Owner, mod => mod.OnLaserKill(this));
             if (Main.netMode == NetmodeID.Server || beamEnd == Vector2.Zero) return;
             float od = overdriveAmount;
             Color mainCol = Color.Lerp(LaserParticleMain, OdParticleMain, od);

@@ -68,6 +68,22 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
         /// <summary>激光枪管模式，左键变为发射持续跟随光标的棱镜光柱</summary>
         public bool LaserMode;
 
+        //═════ 激光行为钩子（CyberPrismLaserProj 消费） ═════
+
+        /// <summary>激光脉冲爆炸帧间隔，0=关闭；每隔此帧数在光束终点引爆一次脉冲</summary>
+        public int LaserPulseInterval;
+        /// <summary>激光脉冲爆炸半径（像素）</summary>
+        public float LaserPulseRadius;
+        /// <summary>激光命中NPC时是否施加灼烧类debuff</summary>
+        public bool LaserScorchOnHit;
+        /// <summary>灼烧持续帧数</summary>
+        public int LaserScorchDuration;
+
+        //═════ 能量球飞行行为（CyberChargeOrbProj 消费） ═════
+
+        /// <summary>能量球飞行阶段是否持续向最近敌人偏转追踪</summary>
+        public bool OrbFlyingAttract;
+
         /// <summary>
         /// 中性默认值
         /// </summary>
@@ -99,6 +115,12 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
             OrbExplosionPropels = false,
 
             LaserMode = false,
+            LaserPulseInterval = 0,
+            LaserPulseRadius = 80f,
+            LaserScorchOnHit = false,
+            LaserScorchDuration = 0,
+
+            OrbFlyingAttract = false,
         };
     }
 }

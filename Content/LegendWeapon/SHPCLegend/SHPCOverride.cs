@@ -280,6 +280,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
                         orb.ExplosionRadiusMul = ctx.OrbExplosionRadiusMul;
                         orb.DetonationMinions = ctx.OrbDetonationMinions;
                         orb.ExplosionPropels = ctx.OrbExplosionPropels;
+                        orb.FlyingAttract = ctx.OrbFlyingAttract;
                     }
                 }
             }
@@ -292,9 +293,16 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
                         Vector2 spawnPos = player.Center + laserDir * 60f;
                         int laserDamage = (int)(damage * ctx.DamageMul);
                         if (laserDamage < 1) laserDamage = 1;
-                        Projectile.NewProjectile(source, spawnPos, laserDir,
+                        int laserIdx = Projectile.NewProjectile(source, spawnPos, laserDir,
                             ModContent.ProjectileType<CyberPrismLaserProj>(),
                             laserDamage, knockback, player.whoAmI);
+                        if (laserIdx >= 0 && laserIdx < Main.maxProjectiles
+                            && Main.projectile[laserIdx].ModProjectile is CyberPrismLaserProj laserProj) {
+                            laserProj.PulseInterval = ctx.LaserPulseInterval;
+                            laserProj.PulseRadius = ctx.LaserPulseRadius;
+                            laserProj.ScorchOnHit = ctx.LaserScorchOnHit;
+                            laserProj.ScorchDuration = ctx.LaserScorchDuration;
+                        }
                     }
                     return false;
                 }

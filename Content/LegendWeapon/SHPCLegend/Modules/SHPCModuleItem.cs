@@ -66,6 +66,32 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
         /// </summary>
         public virtual void OnOrbKill(CyberChargeOrbProj orb, int timeLeft) { }
 
+        /// <summary>
+        /// 能量球飞行阶段每帧 AI 结束时调用，可在飞行轨迹上做持续行为
+        /// 仅弹幕拥有者侧触发，产生弹幕需自行判断 Projectile.owner == Main.myPlayer
+        /// </summary>
+        public virtual void OnOrbFlyingAI(CyberChargeOrbProj orb) { }
+
+        //═════════════ 激光生命周期钩子 ═════════════
+
+        /// <summary>
+        /// 激光每帧 AI 结束时调用，可在光束上叠加持续效果
+        /// 持有时循环触发，松键即停
+        /// </summary>
+        public virtual void OnLaserAI(CyberPrismLaserProj laser) { }
+
+        /// <summary>
+        /// 激光命中 NPC 后调用，仅在非服务端执行
+        /// 每次命中间隔由 localNPCHitCooldown 控制
+        /// </summary>
+        public virtual void OnLaserHitNPC(CyberPrismLaserProj laser, NPC target, NPC.HitInfo hit, int damageDone) { }
+
+        /// <summary>
+        /// 激光熄灭时调用（玩家松键或切换武器），服务端与客户端均触发
+        /// 纯视觉操作需自行判断 Main.netMode != NetmodeID.Server
+        /// </summary>
+        public virtual void OnLaserKill(CyberPrismLaserProj laser) { }
+
         #endregion
         /// <summary>
         /// 改件属性差值文字列表，自动对 <see cref="Apply"/> 前后的 <see cref="ShootContext"/> 做 diff
@@ -106,6 +132,12 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
                 yield return Language.GetTextValue("Mods.CalamityOverhaul.Legend.SHPCModuleStat.OrbDrainAura");
             if (ctx.OrbExplosionPropels)
                 yield return Language.GetTextValue("Mods.CalamityOverhaul.Legend.SHPCModuleStat.OrbExplosionPropels");
+            if (ctx.LaserScorchOnHit)
+                yield return Language.GetTextValue("Mods.CalamityOverhaul.Legend.SHPCModuleStat.LaserScorchOnHit");
+            if (ctx.LaserPulseInterval > 0)
+                yield return Language.GetTextValue("Mods.CalamityOverhaul.Legend.SHPCModuleStat.LaserPulse");
+            if (ctx.OrbFlyingAttract)
+                yield return Language.GetTextValue("Mods.CalamityOverhaul.Legend.SHPCModuleStat.OrbFlyingAttract");
         }
 
         private static IEnumerable<string> FloatStat(string key, float mulValue) {

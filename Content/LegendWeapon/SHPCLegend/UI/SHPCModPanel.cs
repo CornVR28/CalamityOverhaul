@@ -98,8 +98,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             Vector2 panelPos = anchor + outDir * (SHPCTheme.InfoPanelGap + slide);
             panelPos.Y -= PanelH * 0.5f;
             Rectangle panel = new((int)panelPos.X, (int)panelPos.Y, (int)PanelW, (int)PanelH);
-            //枪体中心固定在枪体内容区（不含预设栏）的中央，防止预设栏扩展后位置偏移
-            Vector2 gunCenter = new(panel.X + PanelW * 0.5f, panel.Y + (PanelH - PresetBarH) * 0.5f);
+            //枪体中心在内容区中心基础上下移16px，使上方槽位不贴边、下方机匣槽靠近预设栏
+            Vector2 gunCenter = new(panel.X + PanelW * 0.5f, panel.Y + (PanelH - PresetBarH) * 0.5f + 16f);
             return new Layout { Panel = panel, GunCenter = gunCenter };
         }
 

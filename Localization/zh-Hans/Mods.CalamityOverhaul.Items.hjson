@@ -1845,3 +1845,116 @@ LaserBarrelModule: {
 	DisplayName: 棱镜激光枪管
 	Tooltip: 将左键攻击替换为跟随光标的持续棱镜激光光柱
 }
+
+OscillatorBarrelModule: {
+	DisplayName: 震荡激光枪管
+	Tooltip:
+		'''
+		棱镜光柱内嵌脉冲电容，每45帧在光束终点引爆一次能量脉冲
+		单帧伤害略降，法力消耗加剧，但范围爆炸填补了持续照射的弱点
+		'''
+}
+
+ScorchBarrelModule: {
+	DisplayName: 灼烧激光枪管
+	Tooltip:
+		'''
+		高焓等离子改性膛口让激光在命中时点燃目标
+		光束本体伤害轻微削弱，但持续灼烧弥补了直接输出的缺口
+		'''
+}
+
+ReflectionBarrelModule: {
+	DisplayName: 折射激光枪管
+	Tooltip:
+		'''
+		菱形棱镜在命中点将一部分能量折射出两道副光束
+		主光束伤害提升，但极高的法力消耗让持续照射代价不菲
+		'''
+}
+
+EchoOpticModule: {
+	DisplayName: 回响瞄具
+	Tooltip:
+		'''
+		光路末端的残响元件捕获光束消亡时的能量余波
+		每束光消亡时释放三道扇射追踪副光束，弥补飞行距离缩短的损失
+		'''
+}
+
+FrostOpticModule: {
+	DisplayName: 冰霜瞄具
+	Tooltip:
+		'''
+		制冷聚焦系统在命中时将目标冻入冰霜灼烧状态
+		光束速度略降但追踪更稳定，并附带额外穿透与暴击加成
+		'''
+}
+
+SingularityCoreModule: {
+	DisplayName: 奇点核心
+	Tooltip:
+		'''
+		微型引力场发生器在能量球飞行途中持续偏转轨道朝向最近敌人
+		爆炸范围显著扩大，但高密度磁场让法力消耗同步攀升
+		'''
+}
+
+ScrambleFieldModule: {
+	DisplayName: 扰场核心
+	Tooltip:
+		'''
+		高频扰场线圈在蓄力期间每40帧在球体周围触发一次微型冲击波
+		爆炸规模放大，代价是蓄力节奏变慢与更高的法力开销
+		'''
+}
+
+BraceStockModule: {
+	DisplayName: 支架枪托
+	Tooltip: 重型稳定支架彻底消除散布并延长光束射程，以一定射速换取极高精准度
+}
+
+LaunchStockModule: {
+	DisplayName: 弹射枪托
+	Tooltip:
+		'''
+		过载弹簧机构在能量球发射瞬间额外释放三束扇形追踪光束
+		能量球速度提升，法力消耗同步加剧
+		'''
+}
+
+SentinelGripModule: {
+	DisplayName: 哨戒握把
+	Tooltip:
+		'''
+		智能传感握把在能量球飞行期间每20帧自动向最近敌人发射追踪光束
+		能量球初速略降，法力开销加剧，但持续的伴随火力弥补了损失
+		'''
+}
+
+ConductorGripModule: {
+	DisplayName: 导体握把
+	Tooltip:
+		'''
+		超导材质将链式电弧强化为更远距离、更多次的跳跃
+		每次命中都伴随电弧粒子爆发，单发伤害与法力消耗轻微上扬
+		'''
+}
+
+PhantomFrameModule: {
+	DisplayName: 相位机匣
+	Tooltip:
+		'''
+		量子相位腔每30帧将飞行中的光束传送到距最近敌人80像素处
+		彻底规避遮挡障碍，光束射程与伤害轻微提升，代价是法力消耗加剧
+		'''
+}
+
+RecursiveFrameModule: {
+	DisplayName: 递归机匣
+	Tooltip:
+		'''
+		拓扑回路机匣在每束光消亡时从玩家位置沿原方向重发一束副本
+		主光束伤害提升但射程缩短，副本伤害削弱且不再递归，法力消耗加剧
+		'''
+}
