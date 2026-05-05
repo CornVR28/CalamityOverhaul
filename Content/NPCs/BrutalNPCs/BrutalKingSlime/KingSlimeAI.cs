@@ -199,7 +199,7 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalKingSlime
                 Texture2D npcTex = TextureAssets.Npc[npc.type].Value;
                 Rectangle frame = npc.frame;
                 Vector2 origin = new Vector2(frame.Width / 2f, frame.Height / 2f);
-                Vector2 drawPos = npc.Center - screenPos + new Vector2(0, npc.gfxOffY + 30);
+                Vector2 drawPos = npc.Center - screenPos + new Vector2(0, npc.gfxOffY + 40);
                 SpriteEffects effects = npc.spriteDirection == -1 ? SpriteEffects.FlipHorizontally : SpriteEffects.None;
 
                 var (mode, intensity, progress) = GetAuraVisuals();
