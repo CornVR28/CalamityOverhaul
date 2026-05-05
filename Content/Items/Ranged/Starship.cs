@@ -31,7 +31,7 @@ namespace CalamityOverhaul.Content.Items.Ranged
 
         public override void AddRecipes() {
             if (CWRRef.Has && CWRID.Item_Starmada > 0 && CWRID.Item_ShadowspecBar > 0) {
-                CreateRecipe().AddIngredient(CWRID.Item_Starmada).AddIngredient(CWRID.Item_ShadowspecBar, 5).Register();
+                CreateRecipe().AddIngredient(CWRID.Item_Starmada).AddIngredient(CWRID.Item_ShadowspecBar, 5).AddIngredient(CWRID.Item_Rock).AddTile(CWRID.Tile_DraedonsForge).Register();
             }
         }
     }
