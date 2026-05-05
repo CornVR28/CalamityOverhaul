@@ -1,4 +1,4 @@
-﻿SHPCModTooltipDraw: {
+SHPCModTooltipDraw: {
 	InstalledHeader: 已安装模块
 	NoModules: 无
 	BonusHeader: 当前模块总加成
@@ -1843,10 +1843,7 @@ GravityFrameModule: {
 
 LaserBarrelModule: {
 	DisplayName: 棱镜激光枪管
-	Tooltip: 
-		'''
-		汇流光束转变为持续的棱镜激光光柱，代价是庞大的法力消耗和输出功率受限
-		'''
+	Tooltip: 汇流光束转变为持续的棱镜激光光柱，代价是庞大的法力消耗和输出功率受限
 }
 
 OscillatorBarrelModule: {
