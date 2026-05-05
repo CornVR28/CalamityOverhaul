@@ -1,4 +1,4 @@
-namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
+﻿namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
 {
     internal sealed class HeavyBarrelModule : SHPCModuleItem
     {
@@ -10,6 +10,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
         public override void Apply(ref ShootContext ctx) {
             ctx.DamageMul += 0.6f;
             ctx.AttackSpeedMul += -0.35f;
+            ctx.ChargeTimeMul += 0.35f;
             ctx.SpreadMul += -0.5f;
         }
     }
