@@ -1835,3 +1835,116 @@ LaserBarrelModule: {
 	// DisplayName: Prism Laser Barrel
 	// Tooltip: Replaces left-click with a continuous prism laser column that tracks the cursor
 }
+
+OscillatorBarrelModule: {
+	// DisplayName: Oscillator Laser Barrel
+	/* Tooltip:
+		'''
+		An embedded pulse capacitor detonates a micro-explosion at the beam tip every 45 frames
+		Direct damage is slightly reduced and mana cost increases, but area bursts cover the continuous-fire gap
+		''' */
+}
+
+ScorchBarrelModule: {
+	// DisplayName: Scorch Laser Barrel
+	/* Tooltip:
+		'''
+		A high-enthalpy plasma nozzle sets struck enemies ablaze on laser contact
+		Direct beam damage is slightly lower, but sustained burning offsets the direct output loss
+		''' */
+}
+
+ReflectionBarrelModule: {
+	// DisplayName: Reflection Laser Barrel
+	/* Tooltip:
+		'''
+		A diamond prism at the impact point deflects part of the energy into two flanking beams
+		Main beam damage increases, but the extreme mana draw makes sustained fire costly
+		''' */
+}
+
+EchoOpticModule: {
+	// DisplayName: Echo Optic
+	/* Tooltip:
+		'''
+		A resonance element at the path end captures the energy echo when a beam expires
+		Each beam death spawns three fan-spread homing sub-beams, offsetting the shortened range
+		''' */
+}
+
+FrostOpticModule: {
+	// DisplayName: Frost Optic
+	/* Tooltip:
+		'''
+		A cryo-focusing lens inflicts Frostburn on struck targets
+		Beam velocity is reduced but homing is more stable, with bonus pierce and crit
+		''' */
+}
+
+SingularityCoreModule: {
+	// DisplayName: Singularity Core
+	/* Tooltip:
+		'''
+		A micro-gravity generator continuously steers the orb toward the nearest enemy in flight
+		Explosion radius is greatly expanded, but the dense field drives up mana cost
+		''' */
+}
+
+ScrambleFieldModule: {
+	// DisplayName: Scramble Field Module
+	/* Tooltip:
+		'''
+		A high-frequency coil fires a micro-shockwave around the orb every 40 frames while charging
+		Blast scale is amplified at the cost of slower charge time and higher mana usage
+		''' */
+}
+
+BraceStockModule: {
+	// DisplayName: Brace Stock
+	// Tooltip: A heavy stabilizer brace eliminates all spread and extends beam range, trading a little fire rate for pinpoint accuracy
+}
+
+LaunchStockModule: {
+	// DisplayName: Launch Stock
+	/* Tooltip:
+		'''
+		An overloaded spring mechanism fires three fan-spread homing beams the instant the orb launches
+		Orb velocity increases while mana cost rises in tandem
+		''' */
+}
+
+SentinelGripModule: {
+	// DisplayName: Sentinel Grip
+	/* Tooltip:
+		'''
+		A smart-sensor grip auto-fires a homing beam at the nearest enemy every 20 frames while the orb is airborne
+		Orb speed is slightly reduced and mana cost rises, but the continuous side-fire compensates
+		''' */
+}
+
+ConductorGripModule: {
+	// DisplayName: Conductor Grip
+	/* Tooltip:
+		'''
+		Superconducting material boosts chain-arc hops to longer range and more jumps
+		Each hit is accompanied by an arc-particle burst; slight damage and mana cost increase
+		''' */
+}
+
+PhantomFrameModule: {
+	// DisplayName: Phantom Frame
+	/* Tooltip:
+		'''
+		A quantum-phase cavity teleports the beam to 80px from the nearest enemy every 30 frames
+		Bypasses obstacles entirely; slight beam range and damage boost at increased mana cost
+		''' */
+}
+
+RecursiveFrameModule: {
+	// DisplayName: Recursive Frame
+	/* Tooltip:
+		'''
+		A topological-loop chassis respawns each beam from the player position in its original direction on death
+		Main beam damage rises but range is shortened; the echo has reduced damage and does not recurse
+		''' */
+}

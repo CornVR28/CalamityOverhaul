@@ -505,6 +505,9 @@ SHPCModuleStat: {
 	OrbDrainAura: +При зарядке непрерывно притягивает ближайших врагов
 	OrbExplosionPropels: +Взрыв энергосферы отталкивает игрока
 	LaserMode: +РЕЖИМ ПРИЗМ-ЛАЗЕРА: ЛКМ стреляет лазерным столбом, следящим за курсором
+	// LaserScorchOnHit: +LASER IGNITES ENEMIES ON HIT
+	// LaserPulse: +LASER DETONATES A PULSE AT BEAM END
+	// OrbFlyingAttract: +ORB STEERS TOWARD NEAREST FOE IN FLIGHT
 }
 
 SHPCSlotTag: Модуль SHPC · {0}
