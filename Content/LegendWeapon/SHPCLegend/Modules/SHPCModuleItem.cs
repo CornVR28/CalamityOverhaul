@@ -92,6 +92,12 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
         /// </summary>
         public virtual void OnLaserKill(CyberPrismLaserProj laser) { }
 
+        /// <summary>
+        /// 每游戏帧玩家更新时调用，由 SHPCPlayer.PostUpdate 分发
+        /// 用于需要逐帧衰减或持续效果的改件逻辑
+        /// </summary>
+        public virtual void OnPlayerUpdate(Player player) { }
+
         #endregion
         /// <summary>
         /// 改件属性差值文字列表，自动对 <see cref="Apply"/> 前后的 <see cref="ShootContext"/> 做 diff

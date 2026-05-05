@@ -1,4 +1,5 @@
-﻿using Terraria;
+﻿using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules;
+using Terraria;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 
@@ -15,6 +16,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
 
         //三套预设，每套包含 SlotCount 个槽位
         public Item[][] Presets;
+
+        //超杀层数（0-10），每次击杀叠加，随时间衰减
+        public int OverkillStacks;
+        //层数衰减计时器（每120帧 -1 层）
+        public int OverkillTimer;
 
         public static SHPCPlayer Get(Player player) => player.GetModPlayer<SHPCPlayer>();
 
@@ -102,6 +108,10 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
                 }
             }
             return n;
+        }
+
+        public override void PostUpdate() {
+            SHPCModificationSystem.ForEachModule(Player, mod => mod.OnPlayerUpdate(Player));
         }
 
         public override void SaveData(TagCompound tag) {

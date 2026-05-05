@@ -8,6 +8,7 @@ using CalamityOverhaul.Content.ADV.Scenarios.SupCal.End.EternalBlazingNows;
 using CalamityOverhaul.Content.Items.Tools;
 using CalamityOverhaul.Content.LegendWeapon.HalibutLegend;
 using CalamityOverhaul.Content.LegendWeapon.HalibutLegend.Resurrections;
+using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
 using CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalDestroyer;
 using CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalSkeletronPrime;
 using CalamityOverhaul.Content.NPCs.Modifys;
@@ -43,6 +44,7 @@ namespace CalamityOverhaul
         DespawnDestroyer,
         MachineEffect,
         SirenMusicalBoxToggle,
+        CyberspaceStateSync,
     }
 
     public static class CWRNetWork
@@ -94,6 +96,9 @@ namespace CalamityOverhaul
             }
             else if (type == CWRMessageType.EbnTag) {
                 EbnPlayer.HandleNetSync(reader, whoAmI);
+            }
+            else if (type == CWRMessageType.CyberspaceStateSync) {
+                CyberspacePlayer.HandleNetSync(reader, whoAmI);
             }
 
             ModifyCrabulon.NetHandle(type, reader, whoAmI);

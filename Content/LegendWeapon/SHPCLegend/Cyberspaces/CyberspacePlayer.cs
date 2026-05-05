@@ -2,6 +2,7 @@ using CalamityOverhaul.Common;
 using CalamityOverhaul.Content.HackTimes;
 using CalamityOverhaul.Content.RAMSystems;
 using System;
+using System.IO;
 using Terraria;
 using Terraria.Audio;
 using Terraria.DataStructures;
@@ -117,7 +118,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         /// </summary>
         public float MotionFade { get; private set; }
 
-        private float targetIntensity;
+        internal float targetIntensity;
 
         //环境故障闪电计时器
         private int ambientBoltTimer;
@@ -298,6 +299,12 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         /// 主更新逻辑
         /// </summary>
         public void Update() {
+            //远端玩家只跑视觉插值，状态机（RAM消耗/崩溃/切枪检测）由其本机负责
+            if (Player.whoAmI != Main.myPlayer) {
+                UpdateRemoteVisuals();
+                return;
+            }
+
             //SHPC 上下文校验：切出武器自动挂起、切回武器自动恢复，避免给玩家制造"卡手重开"的感觉
             bool holdingShpc = Player.HeldItem.type == CWRID.Item_SHPC;
             if (Active && !holdingShpc) {
@@ -537,6 +544,118 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
                 Projectile.NewProjectile(source, spawnPos, Vector2.Zero,
                     ModContent.ProjectileType<CyberGlitchBoltProj>(), 0, 0, Player.whoAmI,
                     ai0: angle, ai1: delay);
+            }
+        }
+
+        //仅跑远端玩家的视觉插值，不触碰状态机
+        private void UpdateRemoteVisuals() {
+            if (crashLockoutTimer > 0) crashLockoutTimer--;
+
+            DomainCenter = Player.Center;
+
+            float dt = 1f / 60f;
+            float timeSpeed = TimeGear.IsTimeSlowed ? MathHelper.Max(TimeGear.TimeScale, 0.1f) : 1f;
+            EffectTime += dt * timeSpeed;
+
+            float intensityLerp = Active && CurrentLayer > 0 ? 0.045f : 0.015f;
+            intensityRaw = MathHelper.Lerp(intensityRaw, targetIntensity, intensityLerp);
+
+            for (int i = 0; i < Cyberspace.MaxLayerCount; i++) {
+                float target = i < CurrentLayer ? 1f : 0f;
+                int burstDur = Cyberspace.BurstDurations[i];
+                if (layerBurstTimer[i] > 0) {
+                    layerBurstTimer[i]--;
+                    float burstFactor = (float)layerBurstTimer[i] / burstDur;
+                    float bMin = MathHelper.Lerp(0.06f, 0.025f, (float)i / (Cyberspace.MaxLayerCount - 1));
+                    float bMax = MathHelper.Lerp(0.22f, 0.10f, (float)i / (Cyberspace.MaxLayerCount - 1));
+                    layerExpand[i] = MathHelper.Lerp(layerExpand[i], target, MathHelper.Lerp(bMin, bMax, burstFactor));
+                }
+                else {
+                    float expandLerp = target > 0f ? Cyberspace.ExpandLerps[i] : Cyberspace.ContractLerps[i];
+                    layerExpand[i] = MathHelper.Lerp(layerExpand[i], target, expandLerp);
+                }
+                if (target <= 0f && layerExpand[i] < 0.005f) layerExpand[i] = 0f;
+            }
+
+            float motionTarget = 0f;
+            if (Intensity > 0.001f && Player != null && Player.active && !Player.dead) {
+                float speed = Player.velocity.Length();
+                motionTarget = MathHelper.Clamp(speed / Cyberspace.MotionFadeFullSpeed, 0f, 1f);
+            }
+            float motionLerp = motionTarget > MotionFade ? 0.18f : 0.06f;
+            MotionFade = MathHelper.Lerp(MotionFade, motionTarget, motionLerp);
+            if (MotionFade < 0.001f) MotionFade = 0f;
+        }
+
+        //原子写入从网络包收到的远端权威状态
+        internal void ApplyRemoteState(bool active, int currentLayer, float restartCollapse) {
+            int prevLayer = CurrentLayer;
+            Active = active;
+            //层数增加时在远端侧触发爆发动画，让视觉效果与本机一致
+            if (currentLayer > prevLayer) {
+                for (int i = prevLayer; i < currentLayer && i < Cyberspace.MaxLayerCount; i++) {
+                    layerBurstTimer[i] = Cyberspace.BurstDurations[i];
+                }
+            }
+            CurrentLayer = currentLayer;
+            RestartCollapse = restartCollapse;
+            targetIntensity = active && currentLayer > 0 ? 1f : 0f;
+        }
+
+        //快照字段，供 CopyClientState/SendClientChanges 对比用
+        private bool _snapActive;
+        private int _snapCurrentLayer;
+        private float _snapRestartCollapse;
+
+        public override void CopyClientState(ModPlayer targetCopy) {
+            CyberspacePlayer copy = (CyberspacePlayer)targetCopy;
+            copy._snapActive = Active;
+            copy._snapCurrentLayer = CurrentLayer;
+            copy._snapRestartCollapse = RestartCollapse;
+        }
+
+        public override void SendClientChanges(ModPlayer clientPlayer) {
+            if (VaultUtils.isSinglePlayer) return;
+
+            CyberspacePlayer snap = (CyberspacePlayer)clientPlayer;
+
+            bool changed = snap._snapActive != Active
+                || snap._snapCurrentLayer != CurrentLayer
+                || MathF.Abs(snap._snapRestartCollapse - RestartCollapse) > 0.04f;
+
+            if (!changed) return;
+
+            ModPacket packet = CWRMod.Instance.GetPacket();
+            packet.Write((byte)CWRMessageType.CyberspaceStateSync);
+            packet.Write((byte)Player.whoAmI);
+            packet.Write(Active);
+            packet.Write((byte)CurrentLayer);
+            packet.Write(RestartCollapse);
+            packet.Send();
+        }
+
+        internal static void HandleNetSync(BinaryReader reader, int whoAmI) {
+            int playerIndex = reader.ReadByte();
+            bool active = reader.ReadBoolean();
+            int currentLayer = reader.ReadByte();
+            float restartCollapse = reader.ReadSingle();
+
+            if (playerIndex >= 0 && playerIndex < Main.maxPlayers) {
+                Player p = Main.player[playerIndex];
+                if (p != null && p.active) {
+                    p.GetModPlayer<CyberspacePlayer>().ApplyRemoteState(active, currentLayer, restartCollapse);
+                }
+            }
+
+            //服务端转发给其他所有客户端
+            if (VaultUtils.isServer) {
+                ModPacket packet = CWRMod.Instance.GetPacket();
+                packet.Write((byte)CWRMessageType.CyberspaceStateSync);
+                packet.Write((byte)playerIndex);
+                packet.Write(active);
+                packet.Write((byte)currentLayer);
+                packet.Write(restartCollapse);
+                packet.Send(-1, whoAmI);
             }
         }
     }

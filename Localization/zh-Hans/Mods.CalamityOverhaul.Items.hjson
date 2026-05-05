@@ -1958,3 +1958,162 @@ RecursiveFrameModule: {
 		主光束伤害提升但射程缩短，副本伤害削弱且不再递归，法力消耗加剧
 		'''
 }
+
+ForkBarrelModule: {
+	DisplayName: 叉形枪管
+	Tooltip:
+		'''
+		腔内分路棱镜每50帧触发一次分叉，向两侧各派生一束子光束
+		单发伤害与法力消耗有所下降
+		'''
+}
+
+NullBarrelModule: {
+	DisplayName: 归零枪管
+	Tooltip:
+		'''
+		数据抹除器将单发威力压至极低，但穿透理论上无限
+		命中时注入剧毒数据流持续侵蚀目标
+		'''
+}
+
+HelixBarrelModule: {
+	DisplayName: 螺旋枪管
+	Tooltip:
+		'''
+		双通道腔体强制两束光束绕共同轴螺旋缠绕飞行
+		精准归零，单发略有折损，配合多段穿透效果出众
+		'''
+}
+
+TargetPainterOpticModule: {
+	DisplayName: 锁定瞄具
+	Tooltip:
+		'''
+		激光目标系统命中时对目标施加腐化感染，大幅削减其防御
+		追踪能力与暴击率同步提升
+		'''
+}
+
+StrobeOpticModule: {
+	DisplayName: 频闪瞄具
+	Tooltip:
+		'''
+		高频相位调制器让光束在穿墙与非穿墙状态间持续切换
+		有概率使命中目标陷入混乱，额外穿透与攻速小幅提升
+		'''
+}
+
+SniperOpticModule: {
+	DisplayName: 狙击瞄具
+	Tooltip:
+		'''
+		磁场准直器大幅提升弹速与射程并增强单发伤害
+		代价是攻速减缓、追踪能力几乎归零
+		配合聚束枪管可实现超远程极限打击
+		'''
+}
+
+StormCellModule: {
+	DisplayName: 风暴细胞
+	Tooltip:
+		'''
+		蓄力期间每25帧对周围最近敌人释放一束追踪电击
+		法力消耗加剧，但蓄力更快且爆炸范围扩大
+		'''
+}
+
+CryoCoreModule: {
+	DisplayName: 低温核心
+	Tooltip:
+		'''
+		超低温蓄能室在能量球爆炸时对范围内所有敌人施加冰冻
+		爆炸半径扩大，蓄力节奏略慢
+		'''
+}
+
+DarkMatterCoreModule: {
+	DisplayName: 暗物质核心
+	Tooltip:
+		'''
+		暗物质场在能量球飞行阶段持续将附近敌人向球心牵引聚拢
+		球体同时追踪目标，爆炸范围显著扩大，法力消耗加剧
+		'''
+}
+
+ErgonomicStockModule: {
+	DisplayName: 人体工学枪托
+	Tooltip: 精密人体工学设计大幅降低法力消耗，并带来轻微的攻速与精准提升
+}
+
+ExtenderStockModule: {
+	DisplayName: 延伸枪托
+	Tooltip:
+		'''
+		加长导轨延长光束射程与飞行速度，代价是极轻微的单发折损
+		与狙击瞄具叠加可实现极限远程覆盖
+		'''
+}
+
+StormStockModule: {
+	DisplayName: 风暴枪托
+	Tooltip:
+		'''
+		高密度复进弹簧将射速与弹数大幅拉满，单发伤害因此受损
+		配合霰射枪管可实现密集弹幕地毯覆盖
+		'''
+}
+
+VampireGripModule: {
+	DisplayName: 虬血握把
+	Tooltip:
+		'''
+		生物电导握把将击中伤害的一部分反哺为生命回复
+		激光命中频率更高但单次回复量更小，持久战场景下有效续航
+		'''
+}
+
+ChronalGripModule: {
+	DisplayName: 时相握把
+	Tooltip:
+		'''
+		相位延迟线圈令命中目标陷入减速状态
+		配合追踪能力提升，密集弹幕可形成持续控制压制
+		'''
+}
+
+CascadeGripModule: {
+	DisplayName: 级联握把
+	Tooltip:
+		'''
+		拓扑触发器累计5次命中后在命中点向8方向辐射一轮爆发光束
+		爆发光束伤害适中，打出节奏感并清场，单发略有折损
+		'''
+}
+
+MirrorFrameModule: {
+	DisplayName: 镜像机匣
+	Tooltip:
+		'''
+		对称反射腔在每束光束生成瞬间派生一束180°对称镜像
+		镜像伤害削弱，双向覆盖大幅提升弹幕密度
+		'''
+}
+
+NullspaceFrameModule: {
+	DisplayName: 虚空机匣
+	Tooltip:
+		'''
+		虚空缝隙发生器在光束飞行轨迹上每20帧留下一个微型爆炸残影
+		射程轻微延长，单发折损极小
+		'''
+}
+
+OverkillFrameModule: {
+	DisplayName: 超杀机匣
+	Tooltip:
+		'''
+		超杀感知回路每次击杀叠加一层超杀（上限10层），每层+3%伤害
+		层数随时间衰减，节奏越快越强
+		'''
+}
