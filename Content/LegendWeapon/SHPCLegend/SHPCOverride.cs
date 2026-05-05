@@ -349,11 +349,6 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
             }
             string text = LegendData.GetLevelTrialPreText(item.CWR(), "Murasama_Text_Lang_0", num);
             tooltips.ReplacePlaceholder("[Lang4]", text, "");
-            AppendModuleTooltips(tooltips);
-        }
-
-        private static void AppendModuleTooltips(List<TooltipLine> tooltips) {
-            //模块信息已改为右侧浮动面板绘制
         }
     }
 }
