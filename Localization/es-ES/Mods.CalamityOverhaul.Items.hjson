@@ -1,3 +1,9 @@
+SHPCModTooltipDraw: {
+	// InstalledHeader: INSTALLED MODULES
+	// NoModules: NONE
+	// BonusHeader: TOTAL MODULE BONUSES
+}
+
 ElementWhip: {
 	DisplayName: Latigo Elemental
 	Tooltip:

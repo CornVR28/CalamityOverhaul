@@ -1,4 +1,10 @@
-﻿ElementWhip: {
+﻿SHPCModTooltipDraw: {
+	InstalledHeader: INSTALLED MODULES
+	NoModules: NONE
+	BonusHeader: TOTAL MODULE BONUSES
+}
+
+ElementWhip: {
 	DisplayName: Element Whip
 	Tooltip: A Whip infused with the energy of the Moon and the Elements.
 }

@@ -1,5 +1,6 @@
 ﻿using CalamityOverhaul.Common;
 using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Banish;
+using System;
 using System.Collections.Generic;
 using Terraria;
 using Terraria.Audio;
@@ -98,27 +99,34 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.DomainFre
             float effectiveRadius = Cyberspace.Radius * Cyberspace.ExpandProgress;
             float radiusSq = effectiveRadius * effectiveRadius;
 
-            // 冻结域内所有敌对NPC
+            // 冻结域内所有敌对NPC，同组（蠕虫等多节实体）视为整体一并冻结
+            HashSet<int> processedGroups = new HashSet<int>();
             for (int i = 0; i < Main.maxNPCs; i++) {
                 NPC npc = Main.npc[i];
                 if (!npc.active || npc.friendly || npc.townNPC) continue;
                 if (IsNPCFrozen(i)) continue;
-                // 正在被放逐的NPC不冻结
                 if (CyberBanish.IsBanishing(i)) continue;
 
                 float dx = npc.Center.X - domainCenter.X;
                 float dy = npc.Center.Y - domainCenter.Y;
                 if (dx * dx + dy * dy > radiusSq) continue;
 
-                FrozenNPCs.Add(new FreezeEntry {
-                    EntityIndex = i,
-                    Timer = 0,
-                    Duration = DefaultFreezeDuration,
-                    FreezePosition = npc.Center,
-                    Seed = Main.rand.NextFloat(),
-                    FreezeVelocity = npc.velocity
+                int anchor = NpcGroupHelper.GetAnchorIndex(npc);
+                if (!processedGroups.Add(anchor)) continue;
+
+                NpcGroupHelper.ForEachGroupMember(npc, member => {
+                    int idx = member.whoAmI;
+                    if (IsNPCFrozen(idx) || CyberBanish.IsBanishing(idx)) return;
+                    FrozenNPCs.Add(new FreezeEntry {
+                        EntityIndex = idx,
+                        Timer = 0,
+                        Duration = DefaultFreezeDuration,
+                        FreezePosition = member.Center,
+                        Seed = Main.rand.NextFloat(),
+                        FreezeVelocity = member.velocity
+                    });
+                    member.velocity = Vector2.Zero;
                 });
-                npc.velocity = Vector2.Zero;
             }
 
             // 冻结域内所有敌对弹幕
@@ -171,6 +179,12 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.DomainFre
                     continue;
                 }
 
+                // 如果整个群组都已离开领域，快速推进到解冻演出阶段
+                int thawStart = Math.Max(0, entry.Duration - 90);
+                if (entry.Timer < thawStart && !Cyberspace.IsInsideDomain(npc.Center) && !AnyGroupMemberInDomain(npc)) {
+                    entry.Timer = thawStart;
+                }
+
                 // 生成冻结粒子（仅客户端）
                 if (!Main.dedServ) {
                     CyberDomainFreezeParticles.SpawnFreezeParticles(npc, entry.Progress, entry.Seed);
@@ -187,7 +201,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.DomainFre
                         Main.rand.NextFloat(-jitter, jitter));
                 }
 
-                if (entry.Timer == MathHelper.Max(0, entry.Duration - 90)) {
+                // 音效只由锚点节段（头部或单体）播放，避免蠕虫群组同帧触发N次
+                if (entry.Timer == thawStart && NpcGroupHelper.GetAnchorIndex(npc) == npc.whoAmI) {
                     if (!VaultUtils.isServer) {
                         SoundEngine.PlaySound(CWRSound.FaultTransition, npc.Center);
                     }
@@ -203,6 +218,18 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.DomainFre
                     FrozenNPCs.RemoveAt(i);
                 }
             }
+        }
+
+        private static bool AnyGroupMemberInDomain(NPC npc) {
+            int anchor = NpcGroupHelper.GetAnchorIndex(npc);
+            for (int i = 0; i < Main.maxNPCs; i++) {
+                if (i == npc.whoAmI) continue;
+                NPC other = Main.npc[i];
+                if (!other.active) continue;
+                if (NpcGroupHelper.GetAnchorIndex(other) != anchor) continue;
+                if (Cyberspace.IsInsideDomain(other.Center)) return true;
+            }
+            return false;
         }
 
         private static void UpdateFrozenProjectiles() {

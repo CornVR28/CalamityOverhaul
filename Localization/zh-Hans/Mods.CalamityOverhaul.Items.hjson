@@ -1,4 +1,10 @@
-﻿ElementWhip: {
+﻿SHPCModTooltipDraw: {
+	InstalledHeader: 已安装模块
+	NoModules: 无
+	BonusHeader: 当前模块总加成
+}
+
+ElementWhip: {
 	DisplayName: 元素长鞭
 	Tooltip:
 		'''

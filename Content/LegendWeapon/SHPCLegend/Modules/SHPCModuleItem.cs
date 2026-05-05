@@ -35,7 +35,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
             return BuildStatLines(ctx);
         }
 
-        private static IEnumerable<string> BuildStatLines(ShootContext ctx) {
+        internal static IEnumerable<string> BuildStatLines(ShootContext ctx) {
             if (ctx.MergeBeams)
                 yield return Language.GetTextValue("Mods.CalamityOverhaul.Legend.SHPCModuleStat.MergeBeams");
             foreach (string s in FloatStat("AttackSpeed", ctx.AttackSpeedMul)) yield return s;

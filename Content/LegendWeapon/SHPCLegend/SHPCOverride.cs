@@ -5,12 +5,16 @@ using InnoVault.GameSystem;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Reflection;
 using Terraria;
 using Terraria.Audio;
 using Terraria.DataStructures;
+using Terraria.GameContent;
 using Terraria.ID;
+using Terraria.Localization;
 using Terraria.ModLoader;
+using Terraria.UI.Chat;
 using static CalamityOverhaul.Content.InWorldBossPhase;
 using static InnoVault.GameSystem.ItemRebuildLoader;
 
@@ -345,6 +349,26 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
             }
             string text = LegendData.GetLevelTrialPreText(item.CWR(), "Murasama_Text_Lang_0", num);
             tooltips.ReplacePlaceholder("[Lang4]", text, "");
+            AppendModuleTooltips(tooltips);
+        }
+
+        private static void AppendModuleTooltips(List<TooltipLine> tooltips) {
+            Player player = Main.LocalPlayer;
+
+            tooltips.Add(new TooltipLine(CWRMod.Instance, "SHPCModuleRow",
+                SHPCModTooltipDraw.InstalledHeader.Value) {
+                OverrideColor = new Color(0, 220, 255)
+            });
+
+            ShootContext ctx = SHPCModificationSystem.Resolve(player);
+            int idx = 0;
+            foreach (string line in SHPCModuleItem.BuildStatLines(ctx)) {
+                if (string.IsNullOrEmpty(line)) continue;
+                bool isNeg = line.StartsWith("-");
+                tooltips.Add(new TooltipLine(CWRMod.Instance, $"SHPCStat_{idx++}", line) {
+                    OverrideColor = isNeg ? new Color(255, 120, 110) : new Color(120, 255, 170)
+                });
+            }
         }
     }
 }
