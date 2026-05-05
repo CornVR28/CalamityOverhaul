@@ -1949,3 +1949,163 @@ RecursiveFrameModule: {
 		Main beam damage rises but range is shortened; the echo has reduced damage and does not recurse
 		''' */
 }
+
+ForkBarrelModule: {
+	// DisplayName: Fork Barrel
+	/* Tooltip:
+		'''
+		An internal splitting prism forks each beam into two angled sub-beams every 50 frames
+		Slight damage and mana cost penalty
+		''' */
+}
+
+NullBarrelModule: {
+	// DisplayName: Null Barrel
+	/* Tooltip:
+		'''
+		A data-erasure chamber drops damage to near-zero but grants virtually unlimited pierce
+		Hits inject a virulent toxin that corrodes the target over time
+		''' */
+}
+
+HelixBarrelModule: {
+	// DisplayName: Helix Barrel
+	/* Tooltip:
+		'''
+		Dual-channel optics force two beams to spiral around a shared axis
+		Spread is zeroed; slight damage and speed penalty; great synergy with high-pierce setups
+		''' */
+}
+
+TargetPainterOpticModule: {
+	// DisplayName: Target Painter
+	/* Tooltip:
+		'''
+		A laser designation system marks struck targets with corrosive ichor, reducing their defense
+		Also boosts homing strength and critical strike chance
+		''' */
+}
+
+StrobeOpticModule: {
+	// DisplayName: Strobe Optic
+	/* Tooltip:
+		'''
+		A phase-shift modulator rapidly cycles the beam between wall-piercing and solid states
+		Has a 30% chance to confuse struck enemies; minor pierce and speed bonus
+		''' */
+}
+
+SniperOpticModule: {
+	// DisplayName: Sniper Optic
+	/* Tooltip:
+		'''
+		Magnetic collimators dramatically increase projectile speed, range, and single-hit damage
+		At the cost of greatly reduced fire rate and near-zero homing
+		Best paired with the Focus Barrel for extreme long-range strikes
+		''' */
+}
+
+StormCellModule: {
+	// DisplayName: Storm Cell
+	/* Tooltip:
+		'''
+		During charge, releases a homing electric bolt toward the nearest enemy every 25 frames
+		Faster charge and larger blast radius, but higher mana cost
+		''' */
+}
+
+CryoCoreModule: {
+	// DisplayName: Cryo Core
+	/* Tooltip:
+		'''
+		A supercooled energy cell freezes all enemies caught in the orb's blast radius
+		Slightly larger explosion, slightly slower charge
+		''' */
+}
+
+DarkMatterCoreModule: {
+	// DisplayName: Dark Matter Core
+	/* Tooltip:
+		'''
+		A dark-matter field pulls nearby enemies toward the orb during its flight phase
+		The orb simultaneously tracks targets; explosion radius significantly increased
+		High mana cost
+		''' */
+}
+
+ErgonomicStockModule: {
+	// DisplayName: Ergonomic Stock
+	// Tooltip: Precision ergonomic design substantially lowers mana cost with minor gains to fire rate and accuracy
+}
+
+ExtenderStockModule: {
+	// DisplayName: Extender Stock
+	/* Tooltip:
+		'''
+		An extended rail grants beams greater range and flight speed at minimal damage cost
+		Stack with the Sniper Optic for extreme long-range coverage
+		''' */
+}
+
+StormStockModule: {
+	// DisplayName: Storm Stock
+	/* Tooltip:
+		'''
+		High-density recoil springs push fire rate and beam count to the limit at the cost of per-hit damage
+		Pair with the Scattershot Barrel for carpet-coverage saturation
+		''' */
+}
+
+VampireGripModule: {
+	// DisplayName: Vampire Grip
+	/* Tooltip:
+		'''
+		A bio-electric grip converts a portion of beam damage into health recovery
+		Laser hits are more frequent but restore less per tick; effective for sustained fights
+		''' */
+}
+
+ChronalGripModule: {
+	// DisplayName: Chronal Grip
+	/* Tooltip:
+		'''
+		A phase-delay coil slows enemies on each hit
+		Combined with improved homing, dense fire can maintain persistent crowd control
+		''' */
+}
+
+CascadeGripModule: {
+	// DisplayName: Cascade Grip
+	/* Tooltip:
+		'''
+		A topological trigger fires a radial burst of 8 beams at the point of impact every 5 hits
+		Burst beams deal moderate damage; creates rhythmic high-density output
+		''' */
+}
+
+MirrorFrameModule: {
+	// DisplayName: Mirror Frame
+	/* Tooltip:
+		'''
+		A symmetric reflection cavity spawns a 180-degree mirror beam for every beam fired
+		Mirror beams deal reduced damage; dual-directional coverage dramatically increases hit density
+		''' */
+}
+
+NullspaceFrameModule: {
+	// DisplayName: Nullspace Frame
+	/* Tooltip:
+		'''
+		A void-rift generator leaves a micro-explosion echo along the beam's path every 20 frames
+		Slightly extended range; minimal damage penalty
+		''' */
+}
+
+OverkillFrameModule: {
+	// DisplayName: Overkill Frame
+	/* Tooltip:
+		'''
+		An overkill-sensing circuit stacks one Overkill charge per kill, up to 10; each stack adds 3% damage
+		Stacks decay over time — the faster you slay, the stronger you become
+		''' */
+}
