@@ -22,11 +22,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
 
         public override void OnLaserAI(CyberPrismLaserProj laser) {
             //将光束颜色主题替换为灼烧橙红配色
-            laser.ThemeCore         = new Color(255, 160,  30);
-            laser.ThemeGlow         = new Color(220,  80,   5);
-            laser.ThemeAura         = new Color(140,  30,   0);
-            laser.ThemeParticleMain = new Color(255, 140,  20);
-            laser.ThemeParticleEdge = new Color(200,  50,   5);
+            laser.ThemeCore = new Color(255, 160, 30);
+            laser.ThemeGlow = new Color(220, 80, 5);
+            laser.ThemeAura = new Color(140, 30, 0);
+            laser.ThemeParticleMain = new Color(255, 140, 20);
+            laser.ThemeParticleEdge = new Color(200, 50, 5);
         }
     }
 }

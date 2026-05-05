@@ -64,11 +64,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         private int pulseTimer;
 
         //每帧由改件 OnLaserAI 写入，绘制时消费；每帧 AI 开始时重置为默认紫罗兰配色
-        public Color ThemeCore         = new(220, 160, 255);
-        public Color ThemeGlow         = new(140,  60, 220);
-        public Color ThemeAura         = new( 60,  20, 120);
+        public Color ThemeCore = new(220, 160, 255);
+        public Color ThemeGlow = new(140, 60, 220);
+        public Color ThemeAura = new(60, 20, 120);
         public Color ThemeParticleMain = new(200, 140, 255);
-        public Color ThemeParticleEdge = new(120,  40, 220);
+        public Color ThemeParticleEdge = new(120, 40, 220);
 
         public override void SetStaticDefaults() {
             CWRLoad.ProjValue.ImmuneFrozen[Type] = true;
@@ -133,11 +133,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             if (overdriveAmount < 0.005f) overdriveAmount = 0f;
 
             //每帧重置颜色主题，允许 OnLaserAI 钩子按需覆写
-            ThemeCore         = new Color(220, 160, 255);
-            ThemeGlow         = new Color(140,  60, 220);
-            ThemeAura         = new Color( 60,  20, 120);
+            ThemeCore = new Color(220, 160, 255);
+            ThemeGlow = new Color(140, 60, 220);
+            ThemeAura = new Color(60, 20, 120);
             ThemeParticleMain = new Color(200, 140, 255);
-            ThemeParticleEdge = new Color(120,  40, 220);
+            ThemeParticleEdge = new Color(120, 40, 220);
 
             //动态光照
             float intensity = fadeAlpha * (0.7f + overdriveAmount * 0.6f);

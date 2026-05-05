@@ -156,11 +156,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
 
         private static Color SlotCategoryColor(SHPCSlotCategory cat) => cat switch {
             SHPCSlotCategory.Barrel => new Color(255, 160, 60),
-            SHPCSlotCategory.Optic  => new Color(0, 200, 255),
-            SHPCSlotCategory.Power  => new Color(255, 220, 0),
-            SHPCSlotCategory.Stock  => new Color(80, 220, 120),
-            SHPCSlotCategory.Grip   => new Color(200, 100, 255),
-            SHPCSlotCategory.Frame  => new Color(255, 140, 200),
+            SHPCSlotCategory.Optic => new Color(0, 200, 255),
+            SHPCSlotCategory.Power => new Color(255, 220, 0),
+            SHPCSlotCategory.Stock => new Color(80, 220, 120),
+            SHPCSlotCategory.Grip => new Color(200, 100, 255),
+            SHPCSlotCategory.Frame => new Color(255, 140, 200),
             _ => Color.White,
         };
 

@@ -1,7 +1,7 @@
-﻿using System;
-using CalamityOverhaul.Content.HackTimes.Scannables;
+﻿using CalamityOverhaul.Content.HackTimes.Scannables;
 using CalamityOverhaul.Content.PRTTypes;
 using InnoVault.PRT;
+using System;
 using Terraria;
 
 namespace CalamityOverhaul.Content.HackTimes.Protocols

@@ -1,8 +1,8 @@
-﻿using System;
-using CalamityOverhaul.Common;
+﻿using CalamityOverhaul.Common;
 using CalamityOverhaul.Content.HackTimes.Scannables;
 using CalamityOverhaul.Content.PRTTypes;
 using InnoVault.PRT;
+using System;
 using Terraria;
 using Terraria.Audio;
 

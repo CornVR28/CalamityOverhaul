@@ -534,7 +534,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             //改件钩子：爆炸时撒出迷你追踪光球（复用 CyberTraceBeamProj 的强追踪形态）
             if (DetonationMinions > 0) {
                 SpawnDetonationMinions(damage);
-            }            SHPCModificationSystem.ForEachModule(Owner, mod => mod.OnOrbDetonation(this));        }
+            }
+            SHPCModificationSystem.ForEachModule(Owner, mod => mod.OnOrbDetonation(this));
+        }
 
         /// <summary>
         /// 在爆炸位置撒出若干强追踪迷你光束，伤害削弱、速度略降

@@ -6,7 +6,6 @@ using Terraria;
 using Terraria.GameContent;
 using Terraria.Localization;
 using Terraria.ModLoader;
-using Terraria.UI.Chat;
 
 namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
 {
