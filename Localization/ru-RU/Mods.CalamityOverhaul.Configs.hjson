@@ -29,9 +29,9 @@ CWRServerConfig: {
 			'''
 	}
 
-	HalibutDomainConciseDisplay: {
-		Label: Упрощенное отображение Океанического домена Палтуса
-		Tooltip: По умолчанию отключено. При включении скрывает большинство визуальных эффектов внутри домена.
+	DomainConciseDisplay: {
+		// Label: Domain Minimal Display
+		// Tooltip: Off by default. When enabled, most visual effects within the domain will be hidden.
 	}
 
 	Headers: {

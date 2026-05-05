@@ -1,4 +1,4 @@
-CWRServerConfig: {
+﻿CWRServerConfig: {
 	DisplayName: Content Config
 
 	WeaponOverhaul: {
@@ -24,8 +24,8 @@ CWRServerConfig: {
 			'''
 	}
 
-	HalibutDomainConciseDisplay: {
-		Label: Halibut Ocean Domain Minimal Display
+	DomainConciseDisplay: {
+		Label: Domain Minimal Display
 		Tooltip: Off by default. When enabled, most visual effects within the domain will be hidden.
 	}
 

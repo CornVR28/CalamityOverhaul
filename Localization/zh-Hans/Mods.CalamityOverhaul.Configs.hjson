@@ -1,4 +1,4 @@
-CWRServerConfig: {
+﻿CWRServerConfig: {
 	DisplayName: 内容设置
 
 	WeaponOverhaul: {
@@ -24,8 +24,8 @@ CWRServerConfig: {
 			'''
 	}
 
-	HalibutDomainConciseDisplay: {
-		Label: 比目鱼海洋领域简约显示
+	DomainConciseDisplay: {
+		Label: 领域简约显示
 		Tooltip: 默认关闭，开启后会屏蔽掉领域内大多数的视觉效果
 	}
 

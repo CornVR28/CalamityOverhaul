@@ -30,7 +30,7 @@ namespace CalamityOverhaul.Common
         ];
 
         public static bool NeedsScreenTargetFallback() {
-            if (Lighting.Mode == LightMode.Retro || Lighting.Mode == LightMode.Trippy) {
+            if (Lighting.Mode == LightMode.Retro || Lighting.Mode == LightMode.Trippy || CWRServerConfig.Instance.DomainConciseDisplay) {
                 return true;
             }
 

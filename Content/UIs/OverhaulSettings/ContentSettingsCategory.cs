@@ -44,7 +44,7 @@ namespace CalamityOverhaul.Content.UIs.OverhaulSettings
             AddToggle("WeaponLazyRotationAngle", () => config.WeaponLazyRotationAngle, v => config.WeaponLazyRotationAngle = v, false);
             AddToggle("ScreenVibration", () => config.ScreenVibration, v => config.ScreenVibration = v, false);
             AddToggle("MurasamaSpaceFragmentationBool", () => config.MurasamaSpaceFragmentationBool, v => config.MurasamaSpaceFragmentationBool = v, false);
-            AddToggle("HalibutDomainConciseDisplay", () => config.HalibutDomainConciseDisplay, v => config.HalibutDomainConciseDisplay = v, false);
+            AddToggle("HalibutDomainConciseDisplay", () => config.DomainConciseDisplay, v => config.DomainConciseDisplay = v, false);
             AddToggle("LensEasing", () => config.LensEasing, v => config.LensEasing = v, false);
 
             //CWRUI组
@@ -72,7 +72,7 @@ namespace CalamityOverhaul.Content.UIs.OverhaulSettings
             config.WeaponLazyRotationAngle = false;
             config.ScreenVibration = true;
             config.MurasamaSpaceFragmentationBool = true;
-            config.HalibutDomainConciseDisplay = false;
+            config.DomainConciseDisplay = false;
             config.LensEasing = true;
 
             //CWRUI组

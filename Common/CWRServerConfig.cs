@@ -74,7 +74,7 @@ namespace CalamityOverhaul.Common
 
         [BackgroundColor(192, 54, 94, 255)]
         [DefaultValue(false)]
-        public bool HalibutDomainConciseDisplay { get; set; }//大比目鱼领域简洁显示
+        public bool DomainConciseDisplay { get; set; }//领域简洁显示
 
         [BackgroundColor(192, 54, 94, 255)]
         [DefaultValue(true)]
