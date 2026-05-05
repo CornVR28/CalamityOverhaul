@@ -50,6 +50,14 @@ namespace CalamityOverhaul.Content.ADV.Common
         protected abstract bool IsGiftCompleted(ADVSave save);
         protected abstract void MarkGiftCompleted(ADVSave save);
         protected abstract bool StartScenarioInternal();
+
+        /// <summary>
+        /// 检查触发礼物场景所需的玩家持有条件，子类可重写以支持不同的角色体系
+        /// </summary>
+        protected virtual bool CheckHolderCondition(ADVSave save, Player player) {
+            var halibutPlayer = player.GetOverride<HalibutPlayer>();
+            return halibutPlayer.HeldHalibut && save.Get<HalibutADVData>().FirstMet;
+        }
         public override void VaultSetup() {
             LoadThis();
             base.VaultSetup();
@@ -85,12 +93,8 @@ namespace CalamityOverhaul.Content.ADV.Common
         }
 
         public override void Update(ADVSave save, Player player) {
-            var halibutPlayer = player.GetOverride<HalibutPlayer>();
-            if (!halibutPlayer.HeldHalibut) {
+            if (!CheckHolderCondition(save, player)) {
                 return;
-            }
-            if (!save.Get<HalibutADVData>().FirstMet) {
-                return;//必须先触发过初次见面
             }
             if (IsGiftCompleted(save)) {
                 return;

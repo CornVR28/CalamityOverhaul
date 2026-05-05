@@ -63,6 +63,13 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
 
         private int pulseTimer;
 
+        //每帧由改件 OnLaserAI 写入，绘制时消费；每帧 AI 开始时重置为默认紫罗兰配色
+        public Color ThemeCore         = new(220, 160, 255);
+        public Color ThemeGlow         = new(140,  60, 220);
+        public Color ThemeAura         = new( 60,  20, 120);
+        public Color ThemeParticleMain = new(200, 140, 255);
+        public Color ThemeParticleEdge = new(120,  40, 220);
+
         public override void SetStaticDefaults() {
             CWRLoad.ProjValue.ImmuneFrozen[Type] = true;
         }
@@ -125,6 +132,13 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             overdriveAmount = MathHelper.Lerp(overdriveAmount, inDomain ? 1f : 0f, 0.06f);
             if (overdriveAmount < 0.005f) overdriveAmount = 0f;
 
+            //每帧重置颜色主题，允许 OnLaserAI 钩子按需覆写
+            ThemeCore         = new Color(220, 160, 255);
+            ThemeGlow         = new Color(140,  60, 220);
+            ThemeAura         = new Color( 60,  20, 120);
+            ThemeParticleMain = new Color(200, 140, 255);
+            ThemeParticleEdge = new Color(120,  40, 220);
+
             //动态光照
             float intensity = fadeAlpha * (0.7f + overdriveAmount * 0.6f);
             Color lightCol = Color.Lerp(new Color(180, 100, 255), new Color(255, 180, 100), overdriveAmount);
@@ -169,8 +183,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         private void SpawnLaserParticles(Vector2 aimDir) {
             Vector2 perp = aimDir.RotatedBy(MathHelper.PiOver2);
             float od = overdriveAmount;
-            Color mainCol = Color.Lerp(LaserParticleMain, OdParticleMain, od);
-            Color edgeCol = Color.Lerp(LaserParticleEdge, OdParticleEdge, od);
+            Color mainCol = Color.Lerp(ThemeParticleMain, OdParticleMain, od);
+            Color edgeCol = Color.Lerp(ThemeParticleEdge, OdParticleEdge, od);
 
             //沿光束随机位置散出少量粒子
             for (int i = 0; i < 2; i++) {
@@ -220,9 +234,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             shader.Parameters["transformMatrix"]?.SetValue(VaultUtils.GetTransfromMatrix());
             shader.Parameters["uTime"]?.SetValue(timeVal);
             shader.Parameters["fadeAlpha"]?.SetValue(MathHelper.Clamp(fadeAlpha, 0f, 1f));
-            shader.Parameters["coreColor"]?.SetValue(Vector3.Lerp(LaserCoreVec, OdCoreVec, od));
-            shader.Parameters["glowColor"]?.SetValue(Vector3.Lerp(LaserGlowVec, OdGlowVec, od));
-            shader.Parameters["auraColor"]?.SetValue(Vector3.Lerp(LaserAuraVec, OdAuraVec, od));
+            shader.Parameters["coreColor"]?.SetValue(Vector3.Lerp(ThemeCore.ToVector3(), OdCoreVec, od));
+            shader.Parameters["glowColor"]?.SetValue(Vector3.Lerp(ThemeGlow.ToVector3(), OdGlowVec, od));
+            shader.Parameters["auraColor"]?.SetValue(Vector3.Lerp(ThemeAura.ToVector3(), OdAuraVec, od));
             shader.Parameters["uNoiseTex"]?.SetValue(noise);
             shader.Parameters["overdriveAmount"]?.SetValue(od);
             shader.Parameters["glitchBurst"]?.SetValue(0f);
@@ -247,8 +261,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             float alpha = fadeAlpha * pulse;
             Vector2 glowOrigin = glow.Size() * 0.5f;
 
-            Color auraCol = Color.Lerp(new Color(80, 20, 180), new Color(200, 10, 0), od);
-            Color coreCol = Color.Lerp(new Color(200, 140, 255), new Color(255, 255, 200), od);
+            Color auraCol = Color.Lerp(ThemeAura, new Color(200, 10, 0), od);
+            Color coreCol = Color.Lerp(ThemeCore, new Color(255, 255, 200), od);
 
             //终端聚焦光晕（两层：外层柔和光晕+内层核心亮点）
             Vector2 endScreen = beamEnd - Main.screenPosition;
@@ -268,8 +282,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone) {
             if (Main.netMode == NetmodeID.Server) return;
             float od = overdriveAmount;
-            Color mainCol = Color.Lerp(LaserParticleMain, OdParticleMain, od);
-            Color edgeCol = Color.Lerp(LaserParticleEdge, OdParticleEdge, od);
+            Color mainCol = Color.Lerp(ThemeParticleMain, OdParticleMain, od);
+            Color edgeCol = Color.Lerp(ThemeParticleEdge, OdParticleEdge, od);
             SoundEngine.PlaySound(SoundID.Item62 with { Volume = 0.3f, Pitch = 0.5f }, target.Center);
             for (int i = 0; i < 5; i++) {
                 Vector2 vel = Main.rand.NextVector2CircularEdge(4f + od * 4f, 4f + od * 4f);
@@ -287,8 +301,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             SHPCModificationSystem.ForEachModule(Owner, mod => mod.OnLaserKill(this));
             if (Main.netMode == NetmodeID.Server || beamEnd == Vector2.Zero) return;
             float od = overdriveAmount;
-            Color mainCol = Color.Lerp(LaserParticleMain, OdParticleMain, od);
-            Color edgeCol = Color.Lerp(LaserParticleEdge, OdParticleEdge, od);
+            Color mainCol = Color.Lerp(ThemeParticleMain, OdParticleMain, od);
+            Color edgeCol = Color.Lerp(ThemeParticleEdge, OdParticleEdge, od);
             for (int i = 0; i < 12; i++) {
                 Vector2 vel = Main.rand.NextVector2CircularEdge(4f + od * 4f, 4f + od * 4f);
                 PRTLoader.AddParticle(new PRT_CyberSquare(
