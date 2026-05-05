@@ -11,9 +11,9 @@
             ctx.BeamExplodeOnHit = true;
             ctx.BeamExplodeRadius = 90f;
             //爆裂枪管自带较高的散布与法力开销
-            ctx.SpreadMul += 0.25f;
-            ctx.DamageMul += -0.20f;
-            ctx.ManaCostMul += 0.20f;
+            ctx.SpreadMul += 0.5f;
+            ctx.DamageMul += -0.3f;
+            ctx.ManaCostMul += 0.5f;
         }
     }
 }

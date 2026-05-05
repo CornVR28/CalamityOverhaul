@@ -8,9 +8,9 @@
         public override Color TintColor => new(255, 80, 180);
 
         public override void Apply(ref ShootContext ctx) {
-            ctx.OrbDetonationMinions += 4;
-            ctx.ManaCostMul += 0.20f;
-            ctx.OrbSpeedMul += -0.10f;
+            ctx.OrbDetonationMinions += 3;
+            ctx.ManaCostMul += 0.40f;
+            ctx.OrbSpeedMul += -0.25f;
         }
     }
 }

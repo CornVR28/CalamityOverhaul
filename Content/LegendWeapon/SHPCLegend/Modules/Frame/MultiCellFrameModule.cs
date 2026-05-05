@@ -8,8 +8,8 @@
 
         public override void Apply(ref ShootContext ctx) {
             ctx.BeamCountAdd += 2;
-            ctx.DamageMul += -0.15f;
-            ctx.SpreadMul += 0.3f;
+            ctx.DamageMul += -0.2f;
+            ctx.SpreadMul += 0.4f;
         }
     }
 }

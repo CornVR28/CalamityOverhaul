@@ -8,8 +8,8 @@
 
         public override void Apply(ref ShootContext ctx) {
             ctx.SpreadMul += -0.2f;
-            ctx.AttackSpeedMul += 0.08f;
-            ctx.DamageMul += 0.06f;
+            ctx.AttackSpeedMul += 0.05f;
+            ctx.DamageMul += 0.03f;
         }
     }
 }
