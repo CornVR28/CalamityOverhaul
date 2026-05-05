@@ -1953,6 +1953,6 @@ MimicPerchedAuxBrain: {
 }
 
 LaserBarrelModule: {
-	// DisplayName: Laser Barrel Module
-	// Tooltip: ""
+	DisplayName: Призм-лазерный ствол
+	Tooltip: Заменяет левую кнопку мыши непрерывным лазерным столбом, следящим за курсором
 }

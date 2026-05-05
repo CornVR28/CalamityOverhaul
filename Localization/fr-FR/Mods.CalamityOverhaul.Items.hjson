@@ -1939,6 +1939,6 @@ MimicPerchedAuxBrain: {
 }
 
 LaserBarrelModule: {
-	// DisplayName: Laser Barrel Module
-	// Tooltip: ""
+	// DisplayName: Canon laser prisme
+	// Tooltip: Remplace le clic gauche par une colonne laser prismatique continue qui suit le curseur
 }

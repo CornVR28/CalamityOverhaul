@@ -1953,6 +1953,6 @@ MimicPerchedAuxBrain: {
 }
 
 LaserBarrelModule: {
-	// DisplayName: Laser Barrel Module
-	// Tooltip: ""
+	// DisplayName: Cañón láser prisma
+	// Tooltip: Reemplaza el clic izquierdo con una columna láser continua que sigue el cursor
 }

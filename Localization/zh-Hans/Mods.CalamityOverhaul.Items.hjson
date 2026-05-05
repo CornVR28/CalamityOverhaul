@@ -1635,6 +1635,17 @@ SandevistansItem: {
 	Tooltip: 减缓感知时间流速70%，持续5秒。冷却15秒。
 }
 
+MimicPerchedAuxBrain: {
+	DisplayName: 拟态栖置副脑
+	Tooltip:
+		'''
+		将佩戴者拆解为四个幻象环绕主体游荡
+		被击中时隐藏在幻象中的真身将引发混乱并免疫此次攻击不受伤
+		同时幻象将冲向袭击者引爆，伤害取决于敌怪原始攻击力
+		"混沌，狰狞，狞目......但就在你的后脑勺"
+		'''
+}
+
 RamCapacityUpgradeChip: {
 	DisplayName: RAM容量提升芯片
 	Tooltip: 使用后永久增加1点基础RAM上限
@@ -1936,18 +1947,11 @@ GravityFrameModule: {
 		'''
 }
 
-MimicPerchedAuxBrain: {
-	DisplayName: 拟态栖置副脑
+LaserBarrelModule: {
+	DisplayName: 棱镜激光枪管
 	Tooltip:
 		'''
-		将佩戴者拆解为四个幻象环绕主体游荡
-		被击中时隐藏在幻象中的真身将引发混乱并免疫此次攻击不受伤
-		同时幻象将冲向袭击者引爆，伤害取决于敌怪原始攻击力
-		"混沌，狰狞，狞目......但就在你的后脑勺"
+		SHPC 改件 · 枪管插槽
+		将左键攻击替换为跟随光标的持续棱镜激光光柱
 		'''
-}
-
-LaserBarrelModule: {
-	// DisplayName: Laser Barrel Module
-	// Tooltip: ""
 }

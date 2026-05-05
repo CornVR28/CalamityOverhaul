@@ -1,4 +1,4 @@
-SHPCModTooltipDraw: {
+﻿SHPCModTooltipDraw: {
 	InstalledHeader: INSTALLED MODULES
 	NoModules: NONE
 	BonusHeader: TOTAL MODULE BONUSES
@@ -1655,6 +1655,11 @@ SandevistansItem: {
 	Tooltip: Militech Sandevistan Mk.5 — Slows perceived time by 70% for 3.5 seconds. Cooldown 15s.
 }
 
+MimicPerchedAuxBrain: {
+	DisplayName: Mimic Perched Aux Brain
+	Tooltip: ""
+}
+
 RamCapacityUpgradeChip: {
 	DisplayName: RAM Capacity Upgrade Chip
 	Tooltip: Permanently increases base maximum RAM by 1
@@ -1956,12 +1961,11 @@ GravityFrameModule: {
 		'''
 }
 
-MimicPerchedAuxBrain: {
-	DisplayName: Mimic Perched Aux Brain
-	Tooltip: ""
-}
-
 LaserBarrelModule: {
-	DisplayName: Laser Barrel Module
-	Tooltip: ""
+	DisplayName: Prism Laser Barrel
+	Tooltip:
+		'''
+		SHPC Module · Barrel Slot
+		Replaces left-click with a continuous prism laser column that tracks the cursor
+		'''
 }
