@@ -22,7 +22,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.Gifts
             RoleName = this.GetLocalization(nameof(RoleName), () => "SHPC");
             L0 = this.GetLocalization(nameof(L0), () => "主人，我在战斗过程中记录了克苏鲁之眼的光学追踪数据。");
             L1 = this.GetLocalization(nameof(L1), () => "它用于锁定目标的晶体结构很有参考价值，我花了点时间将其转化成了SHPC的射击优化方案。");
-            L2 = this.GetLocalization(nameof(L2), () => "拿着，这是专注枪管模组。它会让光束在命中目标前维持更高的聚焦精度。");
+            L2 = this.GetLocalization(nameof(L2), () => "拿着，这是激光枪管模组。它会让光束在命中目标前维持更高的聚焦精度。");
             L3 = this.GetLocalization(nameof(L3), () => "算是初期试炼的一点纪念物。");
         }
 
@@ -38,7 +38,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.Gifts
 
         public override void PreProcessSegment(DialoguePreProcessArgs args) {
             if (args.Index == 2) {
-                ADVRewardPopup.ShowReward(ModContent.ItemType<FocusBarrelModule>(), 1, null,
+                ADVRewardPopup.ShowReward(ModContent.ItemType<LaserBarrelModule>(), 1, null,
                     appearDuration: 24, holdDuration: -1, giveDuration: 16, requireClick: true,
                     anchorProvider: () => {
                         var rect = DialogueUIRegistry.Current?.GetPanelRect() ?? Rectangle.Empty;
