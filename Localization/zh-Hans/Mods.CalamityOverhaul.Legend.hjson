@@ -219,8 +219,8 @@ MurasamaTrialQuestLine: {
 	QuestCategory: 鬼妖村正·试炼
 	TrackerWaiting: 目标不在场，等待召唤...
 	TrackerFighting: "{0}: {1:0%}"
-	Trial_0: 沙地幽影
-	Trial_1: 沙海猎杀
+	Trial_0: 黏淤初斩
+	Trial_1: 沙地幽影
 	Trial_2: 入侵之者
 	Trial_3: 腐化清除
 	Trial_4: 寄生威胁
