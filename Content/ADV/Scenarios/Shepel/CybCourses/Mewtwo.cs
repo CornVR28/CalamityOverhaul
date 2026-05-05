@@ -21,7 +21,12 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
 
         public override bool? UseItem(Player player) {
             if (player.whoAmI == Main.myPlayer) {
-                CybCourse.Enter();
+                if (CybCourse.IsActive) {
+                    CybCourseCompletePanel.Show();
+                }
+                else {
+                    CybCourse.Enter();
+                }
             }
             return true;
         }
