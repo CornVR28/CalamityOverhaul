@@ -26,8 +26,6 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         private const int TrailCacheLen = 40;
         private const int MaxLife = 180;
         private const float Speed = 14f;
-        private const float HomingStrength = 0.025f;
-        private const float HomingRange = 900f;
         private const int ParticleInterval = 3;
         private const int ExtraUpdates = 2;
         private const int TotalAICalls = MaxLife * (1 + ExtraUpdates);
