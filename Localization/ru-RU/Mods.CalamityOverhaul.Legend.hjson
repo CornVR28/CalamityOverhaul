@@ -1,4 +1,4 @@
-HalibutText: {
+﻿HalibutText: {
 	FishByStudied:
 		'''
 		[i:CalamityMod/HalibutCannon]:
@@ -505,9 +505,9 @@ SHPCModuleStat: {
 	OrbDrainAura: +При зарядке непрерывно притягивает ближайших врагов
 	OrbExplosionPropels: +Взрыв энергосферы отталкивает игрока
 	LaserMode: +РЕЖИМ ПРИЗМ-ЛАЗЕРА: ЛКМ стреляет лазерным столбом, следящим за курсором
-	// LaserScorchOnHit: +LASER IGNITES ENEMIES ON HIT
-	// LaserPulse: +LASER DETONATES A PULSE AT BEAM END
-	// OrbFlyingAttract: +ORB STEERS TOWARD NEAREST FOE IN FLIGHT
+	LaserScorchOnHit: +Лучи накладывают эффект горения при попадании
+	LaserPulse: +Периодический импульсный взрыв в конечной точке луча
+	OrbFlyingAttract: +Энергосфера преследует ближайшего врага во время полета
 }
 
 SHPCSlotTag: Модуль SHPC · {0}

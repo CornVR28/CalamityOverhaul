@@ -1,4 +1,4 @@
-SHPCModTooltipDraw: {
+﻿SHPCModTooltipDraw: {
 	// InstalledHeader: INSTALLED MODULES
 	// NoModules: NONE
 	// BonusHeader: TOTAL MODULE BONUSES
@@ -1852,114 +1852,114 @@ LaserBarrelModule: {
 }
 
 OscillatorBarrelModule: {
-	// DisplayName: Oscillator Laser Barrel
-	/* Tooltip:
+	DisplayName: Осциллирующий лазерный ствол
+	Tooltip:
 		'''
-		An embedded pulse capacitor detonates a micro-explosion at the beam tip every 45 frames
-		Direct damage is slightly reduced and mana cost increases, but area bursts cover the continuous-fire gap
-		''' */
+		Призматический канал со встроенными импульсными конденсаторами вызывает энергетический импульс в конечной точке луча каждые 30 кадров.
+		Урон за кадр слегка снижен, но урон по области и меньший расход маны компенсируют недостатки непрерывного облучения.
+		'''
 }
 
 ScorchBarrelModule: {
-	// DisplayName: Scorch Laser Barrel
-	/* Tooltip:
+	DisplayName: Обжигающий лазерный ствол
+	Tooltip:
 		'''
-		A high-enthalpy plasma nozzle sets struck enemies ablaze on laser contact
-		Direct beam damage is slightly lower, but sustained burning offsets the direct output loss
-		''' */
+		Модифицированное дуло с высокоэнтальпийной плазмой позволяет лазеру поджигать цель при попадании.
+		Собственный урон луча незначительно ослаблен, но длительное горение и меньший расход маны восполняют нехватку прямого урона.
+		'''
 }
 
 ReflectionBarrelModule: {
-	// DisplayName: Reflection Laser Barrel
-	/* Tooltip:
+	DisplayName: Преломляющий лазерный ствол
+	Tooltip:
 		'''
-		A diamond prism at the impact point deflects part of the energy into two flanking beams
-		Main beam damage increases, but the extreme mana draw makes sustained fire costly
-		''' */
+		Ромбовидная призма преломляет часть энергии в две побочные струи в точке попадания.
+		Урон основного луча увеличен, но крайне высокий расход маны делает непрерывное ведение огня дорогостоящим.
+		'''
 }
 
 EchoOpticModule: {
-	// DisplayName: Echo Optic
-	/* Tooltip:
+	DisplayName: Резонансный прицел
+	Tooltip:
 		'''
-		A resonance element at the path end captures the energy echo when a beam expires
-		Each beam death spawns three fan-spread homing sub-beams, offsetting the shortened range
-		''' */
+		Компоненты на конце оптического пути улавливают остаточное эхо энергии при затухании луча.
+		При исчезновении каждого луча высвобождаются три веерных самонаводящихся луча, компенсируя сокращенную дальность полета.
+		'''
 }
 
 FrostOpticModule: {
-	// DisplayName: Frost Optic
-	/* Tooltip:
+	DisplayName: Морозный прицел
+	Tooltip:
 		'''
-		A cryo-focusing lens inflicts Frostburn on struck targets
-		Beam velocity is reduced but homing is more stable, with bonus pierce and crit
-		''' */
+		Система охлаждающей фокусировки при попадании погружает цель в состояние обморожения.
+		Скорость луча слегка снижена, но самонаведение более стабильно; добавлены бонусы к пробиванию и критическому шансу.
+		'''
 }
 
 SingularityCoreModule: {
-	// DisplayName: Singularity Core
-	/* Tooltip:
+	DisplayName: Ядро сингулярности
+	Tooltip:
 		'''
-		A micro-gravity generator continuously steers the orb toward the nearest enemy in flight
-		Explosion radius is greatly expanded, but the dense field drives up mana cost
-		''' */
+		Миниатюрный генератор гравитационного поля постоянно отклоняет траекторию летящей энергосферы в сторону ближайшего врага.
+		Радиус взрыва значительно увеличен, но из-за высокой плотности магнитного поля расход маны возрастает пропорционально.
+		'''
 }
 
 ScrambleFieldModule: {
-	// DisplayName: Scramble Field Module
-	/* Tooltip:
+	DisplayName: Ядро помехового поля
+	Tooltip:
 		'''
-		A high-frequency coil fires a micro-shockwave around the orb every 40 frames while charging
-		Blast scale is amplified at the cost of slower charge time and higher mana usage
-		''' */
+		Катушки высокочастотного поля создают микро-ударную волну вокруг сферы каждые 40 кадров во время зарядки.
+		Масштаб взрыва увеличен ценой замедления ритма зарядки и повышенных затрат маны.
+		'''
 }
 
 BraceStockModule: {
-	// DisplayName: Brace Stock
-	// Tooltip: A heavy stabilizer brace eliminates all spread and extends beam range, trading a little fire rate for pinpoint accuracy
+	DisplayName: Упорный приклад
+	Tooltip: Тяжелый стабилизирующий упор полностью устраняет разброс и увеличивает дальность луча, обменивая часть скорострельности на высочайшую точность.
 }
 
 LaunchStockModule: {
-	// DisplayName: Launch Stock
-	/* Tooltip:
+	DisplayName: Пусковой приклад
+	Tooltip:
 		'''
-		An overloaded spring mechanism fires three fan-spread homing beams the instant the orb launches
-		Orb velocity increases while mana cost rises in tandem
-		''' */
+		Перегруженный пружинный механизм выпускает три дополнительных веерных самонаводящихся луча в момент выстрела энергосферы.
+		Скорость энергосферы увеличена, расход маны также возрастает.
+		'''
 }
 
 SentinelGripModule: {
-	// DisplayName: Sentinel Grip
-	/* Tooltip:
+	DisplayName: Сторожевая рукоять
+	Tooltip:
 		'''
-		A smart-sensor grip auto-fires a homing beam at the nearest enemy every 20 frames while the orb is airborne
-		Orb speed is slightly reduced and mana cost rises, but the continuous side-fire compensates
-		''' */
+		Интеллектуальная сенсорная рукоять автоматически выпускает самонаводящийся луч в ближайшего врага каждые 20 кадров полета энергосферы.
+		Начальная скорость сферы снижена, расход маны увеличен, но постоянная огневая поддержка компенсирует эти потери.
+		'''
 }
 
 ConductorGripModule: {
-	// DisplayName: Conductor Grip
-	/* Tooltip:
+	DisplayName: Рукоять-проводник
+	Tooltip:
 		'''
-		Superconducting material boosts chain-arc hops to longer range and more jumps
-		Each hit is accompanied by an arc-particle burst; slight damage and mana cost increase
-		''' */
+		Сверхпроводящий материал усиливает цепную дугу, увеличивая дальность и количество прыжков.
+		Каждое попадание сопровождается вспышкой электрических частиц; разовый урон и расход маны незначительно повышены.
+		'''
 }
 
 PhantomFrameModule: {
-	// DisplayName: Phantom Frame
-	/* Tooltip:
+	DisplayName: Фазовая ствольная коробка
+	Tooltip:
 		'''
-		A quantum-phase cavity teleports the beam to 80px from the nearest enemy every 30 frames
-		Bypasses obstacles entirely; slight beam range and damage boost at increased mana cost
-		''' */
+		Квантовая фазовая камера каждые 30 кадров телепортирует летящий луч в точку в 80 пикселях от ближайшего врага.
+		Полностью игнорирует препятствия; дальность и урон луча слегка увеличены ценой повышенного расхода маны.
+		'''
 }
 
 RecursiveFrameModule: {
-	// DisplayName: Recursive Frame
-	/* Tooltip:
+	DisplayName: Рекурсивная ствольная коробка
+	Tooltip:
 		'''
-		A topological-loop chassis respawns each beam from the player position in its original direction on death
-		Main beam damage rises but range is shortened; the echo has reduced damage and does not recurse
-		''' */
+		Топологический контур перевыпускает копию луча в исходном направлении от позиции игрока при исчезновении оригинала.
+		Урон основного луча увеличен, но дальность сокращена; копия наносит меньше урона, не создает рекурсии и потребляет больше маны.
+		'''
 }
