@@ -1,4 +1,5 @@
-﻿using CalamityOverhaul.Content.HackTimes.Scannables;
+﻿using System;
+using CalamityOverhaul.Content.HackTimes.Scannables;
 using CalamityOverhaul.Content.PRTTypes;
 using InnoVault.PRT;
 using Terraria;
@@ -33,9 +34,10 @@ namespace CalamityOverhaul.Content.HackTimes.Protocols
         public override bool OnTick(IHackTarget target, int elapsed) {
             if (target is not NpcScannable s) return true;
             NPC npc = Main.npc[s.NpcIndex];
-            //每15帧造成一次伤害（4次/秒，每次25，5秒共500）
+            //每15帧造成一次伤害，保底5点加0.1%最大血量（5秒共20次）
             if (elapsed % 15 == 0) {
-                npc.SimpleStrikeNPC(25, 0, false, 0f, null, false, 0f, true);
+                int dmg = Math.Max(5, (int)(npc.lifeMax * 0.001f));
+                npc.SimpleStrikeNPC(dmg, 0, false, 0f, null, false, 0f, true);
             }
             //持续焚烧粒子
             if (elapsed % 3 == 0) {
