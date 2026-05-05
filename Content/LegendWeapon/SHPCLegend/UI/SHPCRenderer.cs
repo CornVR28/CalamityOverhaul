@@ -357,6 +357,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
         /// <summary>
         /// 绘制二级信息面板，作为tooltip依附于光标位置
         /// <br/>cursor为当前鼠标位置，面板会自动避免越过屏幕边缘
+        /// <br/>description过长时自动换行，面板高度随行数动态增长
         /// </summary>
         public static void DrawInfoPanel(SpriteBatch sb, Texture2D px,
             Vector2 cursor, float panelAlpha, float globalAlpha,
@@ -365,11 +366,30 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                 return;
             }
             float a = panelAlpha * globalAlpha;
-
             float textSize = 1.25f;
+            float pad = 6f;
+            float descScale = 0.52f * textSize;
+            float minPanelW = 168f * textSize;
+            float minPanelH = 60f * textSize;
+            float descStartY = 40f;
+            float bottomPad = 8f;
 
-            float panelW = 168f * textSize;
-            float panelH = 60f * textSize;
+            DynamicSpriteFont font = FontAssets.MouseText.Value;
+            float panelW = minPanelW;
+            int maxTextW = (int)(panelW - pad * 2f);
+
+            //提前换行以确定实际行数，驱动面板高度
+            string[] descLines = string.IsNullOrEmpty(description)
+                ? []
+                : Utils.WordwrapString(description, font, maxTextW + 112, 99, out _);
+            float lineH = font.MeasureString("A").Y * descScale;
+            int validLineCount = 0;
+            foreach (string l in descLines) {
+                if (!string.IsNullOrEmpty(l)) validLineCount++;
+            }
+            float panelH = validLineCount > 0
+                ? Math.Max(minPanelH, descStartY + validLineCount * lineH + bottomPad)
+                : minPanelH;
 
             //入场偏移，沿光标右下方向滑入
             float slide = (1f - panelAlpha) * 8f;
@@ -382,7 +402,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             if (panelPos.Y + panelH > Main.screenHeight - 8f) {
                 panelPos.Y = cursor.Y - panelH - 14f;
             }
-            //最终再做一次硬限位防止极端情况下越界
+            //硬限位防止极端情况越界
             panelPos.X = MathHelper.Clamp(panelPos.X, 4f, Main.screenWidth - panelW - 4f);
             panelPos.Y = MathHelper.Clamp(panelPos.Y, 4f, Main.screenHeight - panelH - 4f);
             Rectangle rect = new((int)panelPos.X, (int)panelPos.Y, (int)panelW, (int)panelH);
@@ -394,23 +414,20 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             //背景
             DrawFilledRect(sb, px, rect, SHPCTheme.SlotBg * (0.92f * a));
 
-            //顶部色带，强化"模块化"科技感
+            //顶部色带
             DrawFilledRect(sb, px,
                 new Rectangle(rect.X, rect.Y, rect.Width, 3), SHPCTheme.Cyan * (0.85f * a));
 
-            //描边，四边
+            //描边
             DrawRectStroke(sb, px, rect, 1.2f, SHPCTheme.Border * (0.85f * a));
 
-            //左下连接小角标，与扇区方向呼应
+            //左侧竖线装饰
             DrawLine(sb, px,
                 new Vector2(rect.X, rect.Y + 6), new Vector2(rect.X, rect.Y + rect.Height - 6),
                 1.6f, SHPCTheme.Cyan * (0.55f * a));
             //四角L形装饰
             DrawCornerBrackets(sb, px, rect, 6f, 1.4f, SHPCTheme.BorderHi * (0.85f * a));
-            
-            //文字
-            DynamicSpriteFont font = FontAssets.MouseText.Value;
-            float pad = 6f;
+
             //标题
             if (!string.IsNullOrEmpty(title)) {
                 Utils.DrawBorderString(sb, title,
@@ -421,17 +438,21 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                 Utils.DrawBorderString(sb, subtitle,
                     new Vector2(rect.X + pad, rect.Y + 22f), SHPCTheme.TextDim * a, 0.5f * textSize);
             }
-            //状态值，绘制于右上
+            //状态值，绘制于右上角
             if (!string.IsNullOrEmpty(statusText)) {
                 Vector2 size = font.MeasureString(statusText) * 0.5f * textSize;
                 Utils.DrawBorderString(sb, statusText,
                     new Vector2(rect.Right - pad - size.X, rect.Y + 6f),
                     SHPCTheme.CyanHi * a, 0.5f * textSize);
             }
-            //说明，靠下两行内
-            if (!string.IsNullOrEmpty(description)) {
-                Utils.DrawBorderString(sb, description,
-                    new Vector2(rect.X + pad, rect.Y + 40f), SHPCTheme.TextDim * a, 0.52f * textSize);
+            //说明，逐行绘制
+            float descY = rect.Y + descStartY;
+            foreach (string line in descLines) {
+                if (string.IsNullOrEmpty(line)) continue;
+                Utils.DrawBorderString(sb, line.TrimEnd('-', ' '),
+                    new Vector2(rect.X + pad, descY),
+                    SHPCTheme.TextDim * a, descScale);
+                descY += lineH;
             }
         }
 
