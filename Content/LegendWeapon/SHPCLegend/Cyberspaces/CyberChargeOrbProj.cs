@@ -250,8 +250,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             if (canCharge) {
                 chargeTime++;
             }
-            //蓄力进度同时受ChargeTimeMul和AttackSpeedMul影响
-            float effectiveFrames = MaxChargeFrames * MathF.Max(chargeTimeMul, 0.1f) / MathF.Max(AttackSpeedMul, 0.1f);
+            //蓄力进度受ChargeTimeMul和AttackSpeedMul加算影响，避免乘算叠加导致蓄力过慢
+            float effectiveFrames = MaxChargeFrames * MathF.Max(chargeTimeMul - AttackSpeedMul + 1f, 0.1f);
             chargeRatio = MathHelper.Clamp((float)chargeTime / effectiveFrames, 0f, 1f);
 
             //蓄力音效：从开始蓄力即播放，pitch 随蓄力比例递增，超驱时额外升调+抖动
