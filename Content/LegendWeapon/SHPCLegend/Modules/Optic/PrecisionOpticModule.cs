@@ -1,0 +1,15 @@
+namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
+{
+    internal sealed class PrecisionOpticModule : SHPCModuleItem
+    {
+        public override string Texture => CWRConstant.Item_Tools + "Mewtwo";
+        public override SHPCSlotCategory SlotCategory => SHPCSlotCategory.Optic;
+        //精确蓝绿色
+        public override Color TintColor => new(80, 255, 200);
+
+        public override void Apply(ref ShootContext ctx) {
+            ctx.SpreadMul += -1.0f;
+            ctx.CritAdd += 10;
+        }
+    }
+}
