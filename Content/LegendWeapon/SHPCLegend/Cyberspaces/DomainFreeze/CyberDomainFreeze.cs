@@ -1,5 +1,7 @@
 ﻿using CalamityOverhaul.Common;
+using CalamityOverhaul.Content.HackTimes;
 using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Banish;
+using CalamityOverhaul.Content.RAMSystems;
 using System;
 using System.Collections.Generic;
 using Terraria;
@@ -23,6 +25,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.DomainFre
         /// 默认冻结时长（帧，10秒 = 600帧）
         /// </summary>
         public const int DefaultFreezeDuration = 600;
+
+        /// <summary>
+        /// 触发领域冻结的RAM消耗量
+        /// </summary>
+        public const int RamCost = 2;
 
         /// <summary>
         /// 当前正在被冻结的NPC列表
@@ -94,6 +101,19 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.DomainFre
         /// </summary>
         public static void TriggerFreeze(Player owner) {
             if (!Cyberspace.Active || Cyberspace.Intensity < 0.5f || Cyberspace.CurrentLayer < Cyberspace.MaxLayerCount) return;
+
+            //RAM检查：消耗极高，不足时触发HUD故障闪烁并拦截
+            if (!HackTime.InfiniteHack && (RamSystem.IsLocked || !RamSystem.CanAfford(RamCost))) {
+                if (!VaultUtils.isServer) {
+                    SoundEngine.PlaySound(CWRSound.FailureCurrent with { Volume = 0.4f, Pitch = -0.3f }, owner.Center);
+                    RamSystem.NotifyInsufficient();
+                    Terraria.CombatText.NewText(owner.Hitbox, new Microsoft.Xna.Framework.Color(255, 90, 80), "// LOW RAM", true);
+                }
+                return;
+            }
+            if (!HackTime.InfiniteHack) {
+                RamSystem.TryConsume(RamCost);
+            }
 
             Vector2 domainCenter = owner.Center;
             float effectiveRadius = Cyberspace.Radius * Cyberspace.ExpandProgress;
