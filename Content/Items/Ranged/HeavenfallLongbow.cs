@@ -131,7 +131,7 @@ namespace CalamityOverhaul.Content.Items.Ranged
         }
 
         public override void ModifyTooltips(List<TooltipLine> tooltips) {
-            tooltips.InsertHotkeyBinding(CWRKeySystem.WeponSkill_Q, noneTip: CWRLocText.Instance.Notbound.Value);
+            tooltips.InsertHotkeyBinding(CWRKeySystem.WeponSkill_Q, noneTip: CWRLocText.Instance.Notbound.Value + $"[{CWRKeySystem.WeponSkill_Q.DisplayName}]");
             CWRUtils.SetItemLegendContentTops(ref tooltips, Name);
         }
 
