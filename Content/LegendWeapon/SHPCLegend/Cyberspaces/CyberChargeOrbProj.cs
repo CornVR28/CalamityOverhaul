@@ -94,6 +94,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
 
         /// <summary>蓄力循环音效跟踪</summary>
         private SlotId chargeSoundSlot;
+        /// <summary>满蓄提示音是否已播放</summary>
+        private bool fullChargeSoundPlayed;
 
         /// <summary>蹄力时间倍率，由 localAI[1] 注入；默认 1f</summary>
         private float chargeTimeMul = 1f;
@@ -272,6 +274,12 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             if (particleTimer >= interval && Main.netMode != NetmodeID.Server) {
                 particleTimer = 0;
                 SpawnConvergeParticles();
+            }
+
+            //满蓄首次提示音
+            if (chargeRatio >= 1f && !fullChargeSoundPlayed && Main.netMode != NetmodeID.Server) {
+                fullChargeSoundPlayed = true;
+                SoundEngine.PlaySound(SoundID.MaxMana with { Volume = 0.9f, Pitch = 0.3f }, Projectile.Center);
             }
 
             //满蓄脉冲提示
