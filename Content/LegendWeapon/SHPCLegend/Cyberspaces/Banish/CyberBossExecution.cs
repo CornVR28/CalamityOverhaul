@@ -1,4 +1,4 @@
-using CalamityOverhaul.Common;
+﻿using CalamityOverhaul.Common;
 using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules;
 using System;
 using System.Collections.Generic;
@@ -150,6 +150,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Banish
         /// 按时间计划在Boss附近召唤天雷，雷间隔大致均匀但带轻微随机抖动以避免节奏机械
         /// </summary>
         private static void TickSpawnBolts(ExecutionEntry entry, NPC npc) {
+            if (npc.realLife > 0) {
+                return;//排除子实体
+            }
             //根据剩余进度决定本帧应已生成数量，弥补到该数量为止（每帧最多生成2发）
             float progress = (float)entry.Timer / ExecutionDuration;
             //0.95是为了把所有雷压到前95%生命周期内打完，最后一截留作收尾
