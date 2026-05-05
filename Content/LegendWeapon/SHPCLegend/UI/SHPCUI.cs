@@ -205,6 +205,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                 return;
             }
             pinnedModuleSlot = slotIdx;
+            SHPCModuleSelectPanel.ScrollReset();
         }
 
         public void CloseModuleSelect() {
@@ -548,6 +549,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                             SHPCModuleSelectPanel.CurrentCandidates.Count);
                         if (moduleLayout.Panel.Contains((int)MousePosition.X, (int)MousePosition.Y)) {
                             cyberPanelHit = true;
+                            if (moduleLayout.ListArea.Contains((int)MousePosition.X, (int)MousePosition.Y)) {
+                                SHPCModuleSelectPanel.HandleScroll();
+                            }
                         }
                         //三级面板存在时屏蔽二级插槽点击，仅保留 hover 插槽索引同步提示（可点击同一插槽关闭）
                     }

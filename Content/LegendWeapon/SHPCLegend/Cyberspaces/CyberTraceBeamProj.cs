@@ -1,4 +1,5 @@
 ﻿using CalamityOverhaul.Common;
+using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules;
 using CalamityOverhaul.Content.PRTTypes;
 using InnoVault.PRT;
 using InnoVault.Trails;
@@ -261,6 +262,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
                     SpawnCyberParticles();
                 }
             }
+            SHPCModificationSystem.ForEachModule(Main.player[Projectile.owner], mod => mod.OnBeamAI(this));
         }
 
         private void UpdateTrailHistory() {
@@ -495,6 +497,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
                     SpawnChainBeam(target);
                 }
             }
+            SHPCModificationSystem.ForEachModule(Main.player[Projectile.owner], mod => mod.OnBeamHitNPC(this, target, hit, damageDone));
         }
 
         /// <summary>
@@ -565,6 +568,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             if (Projectile.owner == Main.myPlayer && !IsDerived && SplitOnDeath > 0) {
                 SpawnSplitBeams();
             }
+            SHPCModificationSystem.ForEachModule(Main.player[Projectile.owner], mod => mod.OnBeamKill(this, timeLeft));
         }
 
         /// <summary>

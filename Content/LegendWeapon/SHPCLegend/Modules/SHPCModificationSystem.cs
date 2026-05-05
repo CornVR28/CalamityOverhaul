@@ -1,4 +1,5 @@
-﻿using Terraria;
+﻿using System;
+using Terraria;
 
 namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
 {
@@ -35,6 +36,23 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
                 return null;
             }
             return player.GetModPlayer<SHPCPlayer>().GetModule(slotIdx)?.ModItem as SHPCModuleItem;
+        }
+
+        /// <summary>
+        /// 遍历玩家当前所有已装备改件，对每个改件实例执行指定操作
+        /// </summary>
+        public static void ForEachModule(Player player, Action<SHPCModuleItem> action) {
+            if (player == null) {
+                return;
+            }
+            SHPCPlayer sp = player.GetModPlayer<SHPCPlayer>();
+            for (int i = 0; i < SHPCData.SlotCount; i++) {
+                Item m = sp.GetModule(i);
+                if (m == null || m.ModItem is not SHPCModuleItem mod) {
+                    continue;
+                }
+                action(mod);
+            }
         }
     }
 }

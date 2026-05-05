@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
+using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using Terraria;
@@ -23,7 +24,47 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
         /// 改件作用：修改传入的 <see cref="ShootContext"/>，对浮点倍率字段使用加算叠加（增量 += delta）
         /// </summary>
         public abstract void Apply(ref ShootContext ctx);
+        #region 弹幕生命周期钩子
 
+        /// <summary>
+        /// 每帧追踪光束 AI 结束时调用，可附加持续视觉效果或状态修改
+        /// extraUpdates=2，每游戏刻被调用 3 次
+        /// </summary>
+        public virtual void OnBeamAI(CyberTraceBeamProj beam) { }
+
+        /// <summary>
+        /// 追踪光束命中NPC后调用，仅在非服务端执行
+        /// 产生派生弹幕时需配合 beam.IsDerived 与 Projectile.owner == Main.myPlayer 判断
+        /// </summary>
+        public virtual void OnBeamHitNPC(CyberTraceBeamProj beam, NPC target, NPC.HitInfo hit, int damageDone) { }
+
+        /// <summary>
+        /// 追踪光束消亡时调用，仅在非服务端执行
+        /// </summary>
+        public virtual void OnBeamKill(CyberTraceBeamProj beam, int timeLeft) { }
+
+        /// <summary>
+        /// 蓄力球每帧蓄力 AI 结束时调用
+        /// </summary>
+        public virtual void OnOrbCharging(CyberChargeOrbProj orb, Player owner) { }
+
+        /// <summary>
+        /// 蓄力球发射瞬间调用（状态切换为飞行前）
+        /// </summary>
+        public virtual void OnOrbLaunched(CyberChargeOrbProj orb) { }
+
+        /// <summary>
+        /// 蓄力球引爆时调用，仅在弹幕拥有者客户端执行
+        /// </summary>
+        public virtual void OnOrbDetonation(CyberChargeOrbProj orb) { }
+
+        /// <summary>
+        /// 蓄力球消亡时调用，服务端与客户端均触发
+        /// 纯视觉操作需自行判断 Main.netMode != NetmodeID.Server
+        /// </summary>
+        public virtual void OnOrbKill(CyberChargeOrbProj orb, int timeLeft) { }
+
+        #endregion
         /// <summary>
         /// 改件属性差值文字列表，自动对 <see cref="Apply"/> 前后的 <see cref="ShootContext"/> 做 diff
         /// 数值来自代码，本地化只提供字段名模板（含 {0} 占位符）

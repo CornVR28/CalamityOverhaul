@@ -4,7 +4,10 @@ using ReLogic.Graphics;
 using System;
 using System.Collections.Generic;
 using Terraria;
+using Terraria.Audio;
 using Terraria.GameContent;
+using Terraria.GameInput;
+using Terraria.ID;
 
 namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
 {
@@ -55,7 +58,34 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
         /// </summary>
         private static readonly List<Item> _candidates = new();
 
+        //列表滚动偏移（候选物品索引）
+        private static int _scrollOffset;
+
+        //列表区可显示的最大行数
+        private static int MaxVisibleRows => (int)((PanelH - HeaderH - FooterH - 6) / RowH);
+
         public static IReadOnlyList<Item> CurrentCandidates => _candidates;
+
+        //打开新插槽时重置滚动位置
+        public static void ScrollReset() => _scrollOffset = 0;
+
+        //处理鼠标滚轮，需在面板列表区悬停时调用
+        public static void HandleScroll() {
+            int delta = PlayerInput.ScrollWheelDeltaForUI;
+            if (delta == 0) {
+                return;
+            }
+            int maxVisible = MaxVisibleRows;
+            int maxScroll = Math.Max(0, _candidates.Count - maxVisible);
+            if (maxScroll == 0) {
+                return;
+            }
+            int old = _scrollOffset;
+            _scrollOffset = Math.Clamp(_scrollOffset - Math.Sign(delta), 0, maxScroll);
+            if (_scrollOffset != old) {
+                SoundEngine.PlaySound(SoundID.MenuTick with { Pitch = _scrollOffset > old ? 0.15f : -0.15f });
+            }
+        }
 
         public static void RefreshCandidates(SHPCSlotCategory category) {
             _candidates.Clear();
@@ -108,9 +138,10 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             }
             if (layout.ListArea.Contains((int)mouse.X, (int)mouse.Y)) {
                 int rel = (int)mouse.Y - layout.ListArea.Y;
-                int idx = rel / (int)RowH;
-                if (idx >= 0 && idx < rowCount) {
-                    layout.HoveredRow = idx;
+                int visualIdx = rel / (int)RowH;
+                int candidateIdx = visualIdx + _scrollOffset;
+                if (visualIdx >= 0 && visualIdx < MaxVisibleRows && candidateIdx < rowCount) {
+                    layout.HoveredRow = candidateIdx;
                     return HitKind.Row;
                 }
             }
@@ -161,6 +192,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
 
             //列表行
             int count = _candidates.Count;
+            int maxVisible = MaxVisibleRows;
+            bool needScrollbar = count > maxVisible;
+            int sbReserve = needScrollbar ? (int)(7 * Scale) : 0;
             if (count == 0) {
                 string empty = SHPCUI.Modify_NoMatch.Value;
                 Vector2 sz = font.MeasureString(empty) * (0.58f * FontScale);
@@ -170,11 +204,13 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                     SHPCTheme.TextDim * a, 0.58f * FontScale);
             }
             else {
-                for (int i = 0; i < count; i++) {
+                int start = _scrollOffset;
+                int end = Math.Min(count, start + maxVisible);
+                for (int i = start; i < end; i++) {
+                    int visRow = i - start;
                     Rectangle row = new(layout.ListArea.X + 2,
-                        layout.ListArea.Y + 2 + i * (int)RowH,
-                        layout.ListArea.Width - 4, (int)RowH - 2);
-                    if (row.Bottom > layout.ListArea.Bottom) break;
+                        layout.ListArea.Y + 2 + visRow * (int)RowH,
+                        layout.ListArea.Width - 4 - sbReserve, (int)RowH - 2);
 
                     bool isHover = hover == HitKind.Row && layout.HoveredRow == i;
                     bool isEquipped = equipped != null && _candidates[i].type == equipped.type;
@@ -213,6 +249,10 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                             SHPCTheme.Accent * a, 0.54f * FontScale);
                     }
                 }
+
+                if (needScrollbar) {
+                    DrawListScrollbar(sb, px, layout.ListArea, count, maxVisible, _scrollOffset, a);
+                }
             }
 
             //底部按钮
@@ -225,6 +265,21 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             if (hover == HitKind.Row && layout.HoveredRow >= 0 && layout.HoveredRow < count) {
                 DrawCustomTooltip(sb, px, font, _candidates[layout.HoveredRow], a);
             }
+        }
+
+        private static void DrawListScrollbar(SpriteBatch sb, Texture2D px,
+            Rectangle listArea, int totalCount, int maxVisible, int offset, float a) {
+            const float sbW = 4f;
+            const float sbGap = 2f;
+            float trackH = listArea.Height - 4f;
+            float thumbRatio = MathF.Min(1f, (float)maxVisible / totalCount);
+            float thumbH = MathF.Max(14f, trackH * thumbRatio);
+            float maxScroll = totalCount - maxVisible;
+            float thumbY = maxScroll > 0 ? (offset / maxScroll) * (trackH - thumbH) : 0f;
+            Rectangle track = new(listArea.Right - (int)(sbW + sbGap), listArea.Y + 2, (int)sbW, (int)trackH);
+            Rectangle thumb = new(track.X, track.Y + (int)thumbY, track.Width, (int)thumbH);
+            SHPCRenderer.DrawFilledRect(sb, px, track, SHPCTheme.Border * (0.25f * a));
+            SHPCRenderer.DrawFilledRect(sb, px, thumb, SHPCTheme.Cyan * (0.70f * a));
         }
 
         private static void DrawSmallButton(SpriteBatch sb, Texture2D px, DynamicSpriteFont font,

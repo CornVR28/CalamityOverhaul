@@ -1,4 +1,5 @@
 ﻿using CalamityOverhaul.Common;
+using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules;
 using CalamityOverhaul.Content.PRTTypes;
 using InnoVault.GameContent.BaseEntity;
 using InnoVault.PRT;
@@ -304,6 +305,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
                 ApplyDrainAura();
             }
 
+            SHPCModificationSystem.ForEachModule(Owner, mod => mod.OnOrbCharging(this, owner));
             //检测右键释放 → 发射
             if (!DownRight) {
                 if (chargeTime >= MinChargeFrames) {
@@ -391,6 +393,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             }
 
             Projectile.netUpdate = true;
+            SHPCModificationSystem.ForEachModule(Owner, mod => mod.OnOrbLaunched(this));
         }
 
         #endregion
@@ -462,6 +465,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
 
         public override void OnKill(int timeLeft) {
             StopChargeSound();
+            SHPCModificationSystem.ForEachModule(Owner, mod => mod.OnOrbKill(this, timeLeft));
             //消散粒子（超驱时更多更亮）
             if (Main.netMode == NetmodeID.Server) return;
             float od = overdriveAmount;
@@ -515,8 +519,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             //改件钩子：爆炸时撒出迷你追踪光球（复用 CyberTraceBeamProj 的强追踪形态）
             if (DetonationMinions > 0) {
                 SpawnDetonationMinions(damage);
-            }
-        }
+            }            SHPCModificationSystem.ForEachModule(Owner, mod => mod.OnOrbDetonation(this));        }
 
         /// <summary>
         /// 在爆炸位置撒出若干强追踪迷你光束，伤害削弱、速度略降
