@@ -1,8 +1,7 @@
-namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
+﻿namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
 {
     internal sealed class CrystalGripModule : SHPCModuleItem
     {
-        public override string Texture => CWRConstant.Item_Tools + "Mewtwo";
         public override SHPCSlotCategory SlotCategory => SHPCSlotCategory.Grip;
         //水晶幻紫
         public override Color TintColor => new(200, 130, 255);

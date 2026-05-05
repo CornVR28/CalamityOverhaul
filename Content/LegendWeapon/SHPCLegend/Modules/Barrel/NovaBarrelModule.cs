@@ -1,9 +1,8 @@
-namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
+﻿namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
 {
     /// <summary>枪管：光束命中时引爆微型脉冲爆炸</summary>
     internal sealed class NovaBarrelModule : SHPCModuleItem
     {
-        public override string Texture => CWRConstant.Item_Tools + "Mewtwo";
         public override SHPCSlotCategory SlotCategory => SHPCSlotCategory.Barrel;
         //新星橘红
         public override Color TintColor => new(255, 110, 50);

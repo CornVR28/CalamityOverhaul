@@ -15,6 +15,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
     /// </summary>
     internal abstract class SHPCModuleItem : ModItem
     {
+        public override string Texture => CWRConstant.Item_Tools + "Mewtwo";
+
         /// <summary>
         /// 该改件能装入的槽位类别
         /// </summary>

@@ -1,8 +1,7 @@
-namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
+﻿namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
 {
     internal sealed class ScattershotBarrelModule : SHPCModuleItem
     {
-        public override string Texture => CWRConstant.Item_Tools + "Mewtwo";
         public override SHPCSlotCategory SlotCategory => SHPCSlotCategory.Barrel;
         //霰射狂暴的橙色调
         public override Color TintColor => new(255, 130, 30);

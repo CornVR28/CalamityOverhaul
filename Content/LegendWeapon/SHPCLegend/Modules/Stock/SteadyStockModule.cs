@@ -1,8 +1,7 @@
-namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
+﻿namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
 {
     internal sealed class SteadyStockModule : SHPCModuleItem
     {
-        public override string Texture => CWRConstant.Item_Tools + "Mewtwo";
         public override SHPCSlotCategory SlotCategory => SHPCSlotCategory.Stock;
         //沉稳金属灰
         public override Color TintColor => new(180, 200, 220);

@@ -1,8 +1,7 @@
-namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
+﻿namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
 {
     internal sealed class KineticDamperModule : SHPCModuleItem
     {
-        public override string Texture => CWRConstant.Item_Tools + "Mewtwo";
         public override SHPCSlotCategory SlotCategory => SHPCSlotCategory.Stock;
         //减震橄榄绿
         public override Color TintColor => new(140, 180, 90);

@@ -1,9 +1,8 @@
-namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
+﻿namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
 {
     /// <summary>握把：能量球爆炸时撒出迷你追踪光束</summary>
     internal sealed class SwarmGripModule : SHPCModuleItem
     {
-        public override string Texture => CWRConstant.Item_Tools + "Mewtwo";
         public override SHPCSlotCategory SlotCategory => SHPCSlotCategory.Grip;
         //蜂群霓虹粉
         public override Color TintColor => new(255, 80, 180);

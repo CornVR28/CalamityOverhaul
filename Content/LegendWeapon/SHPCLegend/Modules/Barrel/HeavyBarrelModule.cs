@@ -2,7 +2,6 @@
 {
     internal sealed class HeavyBarrelModule : SHPCModuleItem
     {
-        public override string Texture => CWRConstant.Item_Tools + "Mewtwo";
         public override SHPCSlotCategory SlotCategory => SHPCSlotCategory.Barrel;
         //重型炮管赤红
         public override Color TintColor => new(220, 40, 60);
