@@ -136,14 +136,14 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
 
             Projectile.rotation = rotation;
             Projectile.velocity = Vector2.Zero;
-            Projectile.Center = Owner.Center;
+            Projectile.Center = Owner.GetPlayerStabilityCenter();
 
             // 玩家手臂与朝向
             Owner.ChangeDir(Math.Sign(aimDir.X));
             // 手臂方向需要考虑后坐力偏移：手臂跟随枪身后退
-            Vector2 armTarget = Owner.Center + aimDir * (40f - backOffset);
+            Vector2 armTarget = Owner.GetPlayerStabilityCenter() + aimDir * (40f - backOffset);
             Owner.SetCompositeArmFront(true, Player.CompositeArmStretchAmount.Full,
-                (Owner.Center - armTarget).ToRotation() * Owner.gravDir + MathHelper.PiOver2);
+                (Owner.GetPlayerStabilityCenter() - armTarget).ToRotation() * Owner.gravDir + MathHelper.PiOver2);
             Owner.heldProj = Projectile.whoAmI;
             Owner.itemTime = 2;
             Owner.itemAnimation = 2;

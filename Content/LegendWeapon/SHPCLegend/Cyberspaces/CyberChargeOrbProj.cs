@@ -212,7 +212,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             }
             else {
                 //后备：直接用玩家前方偏移
-                targetPos = owner.Center + UnitToMouseV * ChargeOffsetDist;
+                targetPos = owner.GetPlayerStabilityCenter() + UnitToMouseV * ChargeOffsetDist;
             }
 
             Projectile.Center = targetPos;
