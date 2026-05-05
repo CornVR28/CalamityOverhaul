@@ -1,4 +1,5 @@
 ﻿using CalamityOverhaul.Common;
+using CalamityOverhaul.Content.Buffs;
 using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules;
 using CalamityOverhaul.Content.PRTTypes;
 using InnoVault.GameContent.BaseEntity;
@@ -292,7 +293,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
                     Main.rand.NextFloat(0.6f, 1.6f), Main.rand.Next(12, 28)));
             }
             if (ScorchOnHit && ScorchDuration > 0 && Projectile.owner == Main.myPlayer) {
-                target.AddBuff(BuffID.OnFire, ScorchDuration);
+                target.AddBuff(ModContent.BuffType<HellburnBuff>(), ScorchDuration);
             }
             SHPCModificationSystem.ForEachModule(Owner, mod => mod.OnLaserHitNPC(this, target, hit, damageDone));
         }

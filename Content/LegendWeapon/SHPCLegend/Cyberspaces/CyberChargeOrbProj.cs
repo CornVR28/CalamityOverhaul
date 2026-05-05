@@ -116,6 +116,10 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         public bool ExplosionPropels;
         /// <summary>飞行阶段是否持续向最近敌人偏转追踪</summary>
         public bool FlyingAttract;
+        /// <summary>蓄力期间每次消耗蓝量的倍率，仅受模块设置影响</summary>
+        public float ManaCostMul = 1f;
+        /// <summary>攻速倍率，影响蓄力进度推进速度</summary>
+        public float AttackSpeedMul = 1f;
 
         private OrbState State {
             get => (OrbState)Projectile.ai[0];
@@ -193,7 +197,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
 
             switch (State) {
                 case OrbState.Charging:
-                    AI_Charging(Owner);
+                    AI_Charging();
                     break;
                 case OrbState.Flying:
                     AI_Flying();
@@ -203,7 +207,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
 
         #region 蓄力阶段
 
-        private void AI_Charging(Player owner) {
+        private void AI_Charging() {
             //尝试从手持弹幕获取枪口位置
             Vector2 targetPos;
             int heldIdx = HeldProjIndex;
@@ -214,7 +218,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             }
             else {
                 //后备：直接用玩家前方偏移
-                targetPos = owner.GetPlayerStabilityCenter() + UnitToMouseV * ChargeOffsetDist;
+                targetPos = Owner.GetPlayerStabilityCenter() + UnitToMouseV * ChargeOffsetDist;
             }
 
             Projectile.Center = targetPos;
@@ -222,26 +226,33 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             Projectile.rotation = aimDir.ToRotation();
 
             //玩家面向光球方向
-            owner.ChangeDir(aimDir.X > 0f ? 1 : -1);
-            Owner.manaRegenDelay = 6;//只要在右键就不要恢复魔力
+            Owner.ChangeDir(aimDir.X > 0f ? 1 : -1);
+            base.Owner.manaRegenDelay = 16;//只要在右键就不要恢复魔力
 
-            //持续蓄力，魔力充足才推进进度
-            if (chargeRatio < 1f && Projectile.IsOwnedByLocalPlayer()) {
-                if (owner.CheckMana(Item)) {
-                    chargeTime++;
-                }
-                //魔力不足时暂停蓄力，保持当前进度
+            //蓄力耗蓝：绕过原版CheckMana路径，仅受模块ManaCostMul影响
+            //只有本地玩家才执行消耗与蓄力门控，避免多端逻辑冲突
+            bool canCharge = true;
+            if (Projectile.IsOwnedByLocalPlayer() && chargeRatio < 1f) {
+                int cost = Math.Max((int)(ManaDrainCost * ManaCostMul), 1);
                 if (chargeTime % ManaDrainInterval == 0) {
-                    Owner.statMana -= ManaDrainCost;
+                    if (Owner.statMana >= cost) {
+                        Owner.statMana -= cost;
+                    }
+                    else {
+                        //蓝量不足时暂停蓄力推进
+                        canCharge = false;
+                    }
                 }
-                if (Owner.statMana < 0) {
-                    Owner.statMana = 0;
+                if (Owner.statMana <= 0) {
+                    canCharge = false;
                 }
             }
-            else {
+            if (canCharge) {
                 chargeTime++;
             }
-            chargeRatio = MathHelper.Clamp((float)chargeTime / (MaxChargeFrames * MathF.Max(chargeTimeMul, 0.1f)), 0f, 1f);
+            //蓄力进度同时受ChargeTimeMul和AttackSpeedMul影响
+            float effectiveFrames = MaxChargeFrames * MathF.Max(chargeTimeMul, 0.1f) / MathF.Max(AttackSpeedMul, 0.1f);
+            chargeRatio = MathHelper.Clamp((float)chargeTime / effectiveFrames, 0f, 1f);
 
             //蓄力音效：从开始蓄力即播放，pitch 随蓄力比例递增，超驱时额外升调+抖动
             if (chargeTime == 1 && Main.netMode != NetmodeID.Server) {
@@ -307,11 +318,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
                 ApplyDrainAura();
             }
 
-            SHPCModificationSystem.ForEachModule(Owner, mod => mod.OnOrbCharging(this, owner));
+            SHPCModificationSystem.ForEachModule(base.Owner, mod => mod.OnOrbCharging(this, Owner));
             //检测右键释放 → 发射
             if (!DownRight) {
                 if (chargeTime >= MinChargeFrames) {
-                    LaunchOrb(owner);
+                    LaunchOrb(Owner);
                 }
                 else {
                     //蓄力不足，取消
@@ -543,8 +554,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         /// </summary>
         private void SpawnDetonationMinions(int detonationDamage) {
             int n = DetonationMinions;
-            int dmg = (int)(detonationDamage * 0.35f);
-            if (dmg < 1) dmg = 1;
+            //衍生弹幕直接使用能量球原始伤害，不从爆炸伤害再次打折
+            int dmg = Math.Max(Projectile.damage, 1);
             for (int i = 0; i < n; i++) {
                 float ang = MathHelper.TwoPi * i / n + Main.rand.NextFloat(-0.15f, 0.15f);
                 Vector2 vel = ang.ToRotationVector2() * Main.rand.NextFloat(8f, 12f);

@@ -23,8 +23,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
         public override void OnOrbLaunched(CyberChargeOrbProj orb) {
             if (orb.Projectile.owner != Main.myPlayer) return;
             int dmg = Math.Max(orb.Projectile.damage / 3, 1);
+            //以能量球飞行方向为中轴，左偏60°/正向/右偏60°形成Y字
+            float baseAngle = orb.Projectile.rotation;
+            float[] offsets = { -MathHelper.Pi / 3f, 0f, MathHelper.Pi / 3f };
             for (int i = 0; i < 3; i++) {
-                float ang = MathHelper.TwoPi * i / 3f + orb.Projectile.rotation;
+                float ang = baseAngle + offsets[i];
                 Vector2 vel = ang.ToRotationVector2() * 12f;
                 int idx = Projectile.NewProjectile(orb.Projectile.GetSource_FromThis(),
                     orb.Projectile.Center, vel,

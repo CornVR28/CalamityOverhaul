@@ -130,34 +130,22 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend.TrialQuests
                 return;
             }
 
-            if (!Main.LocalPlayer.HasHalibut()) {
-                return;//未获得比目鱼前不显示任何试炼
-            }
-
-            if (!save.Get<HalibutADVData>().FirstMet) {
-                return;//未获得比目鱼前不显示任何试炼
-            }
-
-            if (!save.Get<HalibutADVData>().PostFirstMetIsComplete) {
-                return;//未获得比目鱼前不显示任何试炼
+            if (!save.Get<HalibutADVData>().FirstMet || !save.Get<HalibutADVData>().PostFirstMetIsComplete) {
+                return;
             }
 
             var manager = QuestManagerUI.Instance;
             if (manager == null) return;
 
+            bool hasWeapon = Main.LocalPlayer.HasHalibut();
             int level = InWorldBossPhase.Halibut_Level();
 
             for (int i = 0; i < TRIAL_COUNT; i++) {
-                SyncTrial(manager, i, level);
+                SyncTrial(manager, i, level, hasWeapon);
             }
         }
 
-        /// <summary>
-        /// 同步单条试炼的注册与状态<br/>
-        /// 优先看独立完成判定：一旦命中直接Completed（防止乱序击败后试炼锁死在本地等级上）<br/>
-        /// 否则仅在 trialIndex == currentLevel 时作为Active显示，未来试炼从管理器移除
-        /// </summary>
-        private void SyncTrial(QuestManagerUI manager, int trialIndex, int currentLevel) {
+        private void SyncTrial(QuestManagerUI manager, int trialIndex, int currentLevel, bool allowCreate = true) {
             string key = KEY_PREFIX + trialIndex;
 
             //两个条件取OR：独立判定命中，或等级系统已推进过该关
@@ -170,14 +158,14 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend.TrialQuests
             }
             else if (isDone) {
                 //已完成的试炼（保留显示）
-                var entry = EnsureTrialEntry(manager, trialIndex, completed: true);
+                var entry = EnsureTrialEntry(manager, trialIndex, completed: true, allowCreate: allowCreate);
                 if (entry != null && entry.Status != QuestEntryStatus.Completed) {
                     manager.SetEntryStatus(key, QuestEntryStatus.Completed, 1f);
                 }
             }
             else {
                 //trialIndex == currentLevel 且未完成，当前进行中的试炼
-                var entry = EnsureTrialEntry(manager, trialIndex);
+                var entry = EnsureTrialEntry(manager, trialIndex, allowCreate: allowCreate);
                 if (entry == null) {
                     return;
                 }
@@ -187,10 +175,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend.TrialQuests
             }
         }
 
-        private HalibutTrialQuestEntry EnsureTrialEntry(QuestManagerUI manager, int trialIndex, bool completed = false) {
+        private HalibutTrialQuestEntry EnsureTrialEntry(QuestManagerUI manager, int trialIndex, bool completed = false, bool allowCreate = true) {
             string key = KEY_PREFIX + trialIndex;
             var entry = manager.GetEntry(key) as HalibutTrialQuestEntry;
             if (entry != null) return entry;
+            if (!allowCreate) return null;
 
             entry = CreateTrialEntry(trialIndex);
             if (completed) {

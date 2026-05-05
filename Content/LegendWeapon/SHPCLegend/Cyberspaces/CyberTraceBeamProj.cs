@@ -138,6 +138,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         public int SplitOnDeath;
         /// <summary>是否为子代光束（避免分裂/链跳无限递归）</summary>
         public bool IsDerived;
+        /// <summary>爆炸伤害倍率（新星枪管特判注入，默认1f）</summary>
+        public float ExplodeDamageMul = 1f;
 
         /// <summary>实际生命预算（按 LifeMul 缩放）</summary>
         private float lifeBudget = TotalAICalls;
@@ -507,7 +509,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         /// 复用 <see cref="CyberDetonationProj"/> 并通过 localAI[2] 强制覆盖半径
         /// </summary>
         private void SpawnMicroExplosion(Vector2 center) {
-            int dmg = Math.Max(Projectile.damage, 1);
+            int dmg = Math.Max((int)(Projectile.damage * ExplodeDamageMul), 1);
             int idx = Projectile.NewProjectile(Projectile.GetSource_FromThis(),
                 center, Vector2.Zero,
                 ModContent.ProjectileType<CyberDetonationProj>(),

@@ -203,7 +203,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
         /// 拦截原版 CanUseItem，移除灵魂弹药需求
         /// <br/>右键时：场上不能有已存在的蓄力球
         /// <br/>左键时：正常使用
-        /// </summary>
+        /// </summary>/*  */
         public override bool? On_CanUseItem(Item item, Player player) {
             ShootContext ctx = SHPCModificationSystem.Resolve(player);
             if (player.altFunctionUse == 2) {
@@ -238,11 +238,12 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
         public override bool? On_UseItem(Item item, Player player) => true;
 
         /// <summary>
-        /// 右键蓄力不消耗法力
+        /// 右键蓄力耗蓝由弹幕AI自行管理，触发帧本身不走原版扣蓝路径
         /// </summary>
         public override void ModifyManaCost(Item item, Player player, ref float reduce, ref float mult) {
             if (player.altFunctionUse == 2) {
-                mult *= 0f;
+                mult = 0f;
+                reduce = 0f;
                 return;
             }
             ShootContext ctx = SHPCModificationSystem.Resolve(player);
@@ -281,6 +282,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
                         orb.DetonationMinions = ctx.OrbDetonationMinions;
                         orb.ExplosionPropels = ctx.OrbExplosionPropels;
                         orb.FlyingAttract = ctx.OrbFlyingAttract;
+                        orb.ManaCostMul = ctx.ManaCostMul;
+                        orb.AttackSpeedMul = ctx.AttackSpeedMul;
                     }
                 }
             }
@@ -339,6 +342,10 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
                             beam.ChainCount = ctx.BeamChainCount;
                             beam.ChainRange = ctx.BeamChainRange;
                             beam.SplitOnDeath = ctx.BeamSplitOnDeath;
+                            //新星枪管特判：第i发弹幕的爆炸伤害按索引递减
+                            if (ctx.BeamExplodeDecayPerBeam > 0f) {
+                                beam.ExplodeDamageMul = MathF.Max(1f - ctx.BeamExplodeDecayPerBeam * i, 0.1f);
+                            }
                         }
                     }
                 }

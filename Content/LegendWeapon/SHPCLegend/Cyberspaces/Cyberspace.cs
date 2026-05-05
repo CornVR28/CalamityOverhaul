@@ -45,7 +45,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         /// <summary>
         /// 各层维持领域时每秒消耗的 RAM 量
         /// </summary>
-        public static readonly float[] LayerRamDrainPerSecond = { 0.2f, 1.6f, 6f };
+        public static readonly float[] LayerRamDrainPerSecond = { 0.4f, 1.6f, 6f };
 
         //爆发阶段每层持续帧数
         internal static readonly int[] BurstDurations = { 14, 24, 36 };

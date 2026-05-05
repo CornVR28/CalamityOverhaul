@@ -51,6 +51,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
         public float BeamChainRange;
         /// <summary>消亡时分裂出的副光束数量，向四周散射</summary>
         public int BeamSplitOnDeath;
+        /// <summary>新星枪管特判：每多一发弹幕，后续爆炸伤害的衰减乘数；0表示无衰减</summary>
+        public float BeamExplodeDecayPerBeam;
 
         //═════ 能量球行为钩子（CyberChargeOrbProj 消费） ═════
 
@@ -108,6 +110,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
             BeamChainCount = 0,
             BeamChainRange = 240f,
             BeamSplitOnDeath = 0,
+            BeamExplodeDecayPerBeam = 0f,
 
             OrbDrainAura = false,
             OrbExplosionRadiusMul = 1f,

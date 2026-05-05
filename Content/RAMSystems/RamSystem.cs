@@ -32,9 +32,9 @@ namespace CalamityOverhaul.Content.RAMSystems
         /// </summary>
         public const int DefaultBaseMaxRam = 8;
         /// <summary>
-        /// 默认基础每秒恢复量（约 5 秒恢复 1 格）
+        /// 默认基础每秒恢复量（億1格需生0秒）
         /// </summary>
-        public const float DefaultBaseRecoveryRate = 0.2f;
+        public const float DefaultBaseRecoveryRate = 0.1f;
         /// <summary>
         /// 基础上限的最小值（防极端配置）
         /// </summary>

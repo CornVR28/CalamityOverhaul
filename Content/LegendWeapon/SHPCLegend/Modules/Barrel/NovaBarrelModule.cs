@@ -14,6 +14,8 @@
             ctx.SpreadMul += 0.5f;
             ctx.DamageMul += -0.3f;
             ctx.ManaCostMul += 0.5f;
+            //弹幕越多爆炸伤害越低：每多一发弹幕额外衰减25%
+            ctx.BeamExplodeDecayPerBeam = 0.15f;
         }
     }
 }

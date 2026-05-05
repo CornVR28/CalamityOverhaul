@@ -173,21 +173,18 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.TrialQuests
         public override void PostUpdateEverything() {
             if (Main.dedServ || Main.gameMenu) return;
 
-            if (!FirstMetShepel.CanStartSHPCTrialQuests(Main.LocalPlayer)) {
-                return;
-            }
-
             var manager = QuestManagerUI.Instance;
             if (manager == null) return;
 
+            bool canStart = FirstMetShepel.CanStartSHPCTrialQuests(Main.LocalPlayer);
             int level = InWorldBossPhase.SHPC_Level();
 
             for (int i = 0; i < TRIAL_COUNT; i++) {
-                SyncTrial(manager, i, level);
+                SyncTrial(manager, i, level, canStart);
             }
         }
 
-        private void SyncTrial(QuestManagerUI manager, int trialIndex, int currentLevel) {
+        private void SyncTrial(QuestManagerUI manager, int trialIndex, int currentLevel, bool allowCreate = true) {
             string key = KEY_PREFIX + trialIndex;
 
             bool isDone = (trialCompletedChecks[trialIndex]?.Invoke() == true) || (trialIndex < currentLevel);
@@ -196,13 +193,13 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.TrialQuests
                 manager.UnregisterQuest(key);
             }
             else if (isDone) {
-                var entry = EnsureTrialEntry(manager, trialIndex, completed: true);
+                var entry = EnsureTrialEntry(manager, trialIndex, completed: true, allowCreate: allowCreate);
                 if (entry != null && entry.Status != QuestEntryStatus.Completed) {
                     manager.SetEntryStatus(key, QuestEntryStatus.Completed, 1f);
                 }
             }
             else {
-                var entry = EnsureTrialEntry(manager, trialIndex);
+                var entry = EnsureTrialEntry(manager, trialIndex, allowCreate: allowCreate);
                 if (entry == null) {
                     return;
                 }
@@ -212,10 +209,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.TrialQuests
             }
         }
 
-        private SHPCTrialQuestEntry EnsureTrialEntry(QuestManagerUI manager, int trialIndex, bool completed = false) {
+        private SHPCTrialQuestEntry EnsureTrialEntry(QuestManagerUI manager, int trialIndex, bool completed = false, bool allowCreate = true) {
             string key = KEY_PREFIX + trialIndex;
             var entry = manager.GetEntry(key) as SHPCTrialQuestEntry;
             if (entry != null) return entry;
+            if (!allowCreate) return null;
 
             entry = CreateTrialEntry(trialIndex);
             if (completed) {

@@ -212,28 +212,18 @@ namespace CalamityOverhaul.Content.LegendWeapon.MurasamaLegend.TrialQuests
         public override void PostUpdateEverything() {
             if (Main.dedServ || Main.gameMenu) return;
 
-            if (!Main.LocalPlayer.HasItem(CWRID.Item_Murasama)) {
-                //未持有村正时不显示试炼
-                return;
-            }
-
-            //村正试炼基于世界Boss击杀进度，无需武器持有检查
             var manager = QuestManagerUI.Instance;
             if (manager == null) return;
 
+            bool hasWeapon = Main.LocalPlayer.HasItem(CWRID.Item_Murasama);
             int level = InWorldBossPhase.Mura_Level();
 
             for (int i = 0; i < TRIAL_COUNT; i++) {
-                SyncTrial(manager, i, level);
+                SyncTrial(manager, i, level, hasWeapon);
             }
         }
 
-        /// <summary>
-        /// 同步单条试炼的注册与状态<br/>
-        /// 优先看独立完成判定：一旦命中直接Completed（防止乱序击败后试炼锁死在本地等级上）<br/>
-        /// 否则仅在 trialIndex == currentLevel 时作为Active显示，未来试炼从管理器移除
-        /// </summary>
-        private void SyncTrial(QuestManagerUI manager, int trialIndex, int currentLevel) {
+        private void SyncTrial(QuestManagerUI manager, int trialIndex, int currentLevel, bool allowCreate = true) {
             string key = KEY_PREFIX + trialIndex;
 
             bool isDone = (trialCompletedChecks[trialIndex]?.Invoke() == true) || (trialIndex < currentLevel);
@@ -244,14 +234,14 @@ namespace CalamityOverhaul.Content.LegendWeapon.MurasamaLegend.TrialQuests
             }
             else if (isDone) {
                 //已完成的试炼（保留显示）
-                var entry = EnsureTrialEntry(manager, trialIndex, completed: true);
+                var entry = EnsureTrialEntry(manager, trialIndex, completed: true, allowCreate: allowCreate);
                 if (entry != null && entry.Status != QuestEntryStatus.Completed) {
                     manager.SetEntryStatus(key, QuestEntryStatus.Completed, 1f);
                 }
             }
             else {
                 //trialIndex == currentLevel 且未完成，当前进行中的试炼
-                var entry = EnsureTrialEntry(manager, trialIndex);
+                var entry = EnsureTrialEntry(manager, trialIndex, allowCreate: allowCreate);
                 if (entry == null) {
                     return;
                 }
@@ -261,10 +251,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.MurasamaLegend.TrialQuests
             }
         }
 
-        private MurasamaTrialQuestEntry EnsureTrialEntry(QuestManagerUI manager, int trialIndex, bool completed = false) {
+        private MurasamaTrialQuestEntry EnsureTrialEntry(QuestManagerUI manager, int trialIndex, bool completed = false, bool allowCreate = true) {
             string key = KEY_PREFIX + trialIndex;
             var entry = manager.GetEntry(key) as MurasamaTrialQuestEntry;
             if (entry != null) return entry;
+            if (!allowCreate) return null;
 
             entry = CreateTrialEntry(trialIndex);
             if (completed) {
