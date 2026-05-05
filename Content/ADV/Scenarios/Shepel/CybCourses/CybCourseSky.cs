@@ -46,6 +46,9 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
         }
 
         public override void Draw(SpriteBatch spriteBatch, float minDepth, float maxDepth) {
+            if (!CybCourse.IsActive) {
+                return;
+            }
             //只绘制一次，图层最底层（minDepth<0且maxDepth>=0覆盖所有背景层）
             if (maxDepth < 0f || minDepth >= 0f) {
                 return;
