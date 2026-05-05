@@ -221,7 +221,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
                     //激光模式：通道按住持续照射，每 useTime 帧消耗一次法力模拟持续消耗
                     item.channel = true;
                     item.useAnimation = item.useTime = 8;
-                    return true;
+                    return player.statMana > 0;
                 }
                 // 左键射击模式，按改件攻速倍率缩放 useTime
                 item.channel = false;

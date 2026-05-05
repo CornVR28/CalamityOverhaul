@@ -489,10 +489,12 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             Projectile.damage = (int)(Projectile.damage * 0.7f);
 
             //改件钩子：仅本地玩家发射方处理派生弹幕，避免重复生成
-            if (Projectile.owner == Main.myPlayer && !IsDerived) {
-                if (ExplodeOnHit && ExplodeRadius > 1f) {
+            if (Projectile.owner == Main.myPlayer) {
+                //爆炸只在原始光束触发，避免链跳每节都引爆
+                if (!IsDerived && ExplodeOnHit && ExplodeRadius > 1f) {
                     SpawnMicroExplosion(target.Center);
                 }
+                //链跳由ChainCount计数控制递减，IsDerived不拦截，保证多段传递
                 if (ChainCount > 0) {
                     SpawnChainBeam(target);
                 }
