@@ -298,7 +298,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
                     }
                     return false;
                 }
-                // 左键：根据改件决定单发或散射
+                //左键：根据改件决定单发或散射
                 SoundEngine.PlaySound(SoundID.Item92, player.Center);
                 Vector2 baseVel = velocity.SafeNormalize(Vector2.UnitX) * 14f;
                 Vector2 dir = velocity.UnitVector();
