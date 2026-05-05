@@ -63,6 +63,11 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
         /// <summary>爆炸时是否将玩家反推弹射</summary>
         public bool OrbExplosionPropels;
 
+        //═════ 攻击模式覆写 ═════
+
+        /// <summary>激光枪管模式，左键变为发射持续跟随光标的棱镜光柱</summary>
+        public bool LaserMode;
+
         /// <summary>
         /// 中性默认值
         /// </summary>
@@ -92,6 +97,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
             OrbExplosionRadiusMul = 1f,
             OrbDetonationMinions = 0,
             OrbExplosionPropels = false,
+
+            LaserMode = false,
         };
     }
 }

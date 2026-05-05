@@ -1936,3 +1936,8 @@ MimicPerchedAuxBrain: {
 	// DisplayName: Mimic Perched Aux Brain
 	// Tooltip: ""
 }
+
+LaserBarrelModule: {
+	// DisplayName: Laser Barrel Module
+	// Tooltip: ""
+}

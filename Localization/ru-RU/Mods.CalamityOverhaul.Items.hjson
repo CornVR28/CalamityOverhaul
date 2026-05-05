@@ -1951,3 +1951,8 @@ MimicPerchedAuxBrain: {
 		"Хаос, свирепость, злобные взгляды... но всё это прямо у тебя на затылке."
 		'''
 }
+
+LaserBarrelModule: {
+	// DisplayName: Laser Barrel Module
+	// Tooltip: ""
+}

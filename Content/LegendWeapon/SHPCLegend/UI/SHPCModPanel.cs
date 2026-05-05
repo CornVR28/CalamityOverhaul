@@ -22,12 +22,15 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
         private const float FontScale = 1.2f;
 
         public const float PanelW = 300f * Scale;
+        private const float PresetBarH = 38f * Scale;
         public const float PanelH = 260f * Scale;
         private const float EdgePad = 12f * Scale;
 
         private const int SlotCount = 6;
         private const float SlotW = 56f * Scale;
         private const float SlotH = 22f * Scale;
+
+        private const int PresetCount = SHPCPlayer.PresetCount;
 
         //六个插槽中心相对于枪体中心的偏移
         private static readonly Vector2[] SlotOffsets = {
@@ -72,6 +75,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
         {
             None,
             Slot0, Slot1, Slot2, Slot3, Slot4, Slot5,
+            Preset0, Preset1, Preset2,
         }
 
         public ref struct Layout
@@ -94,8 +98,20 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             Vector2 panelPos = anchor + outDir * (SHPCTheme.InfoPanelGap + slide);
             panelPos.Y -= PanelH * 0.5f;
             Rectangle panel = new((int)panelPos.X, (int)panelPos.Y, (int)PanelW, (int)PanelH);
-            Vector2 gunCenter = new(panel.X + PanelW * 0.5f, panel.Y + PanelH * 0.50f);
+            //枪体中心固定在枪体内容区（不含预设栏）的中央，防止预设栏扩展后位置偏移
+            Vector2 gunCenter = new(panel.X + PanelW * 0.5f, panel.Y + (PanelH - PresetBarH) * 0.5f);
             return new Layout { Panel = panel, GunCenter = gunCenter };
+        }
+
+        private static Rectangle GetPresetBtnRect(in Layout layout, int idx) {
+            float barTop = layout.Panel.Y + PanelH - PresetBarH;
+            float btnH = 22f * Scale;
+            float btnY = barTop + (PresetBarH - btnH) * 0.5f;
+            float totalW = PanelW - EdgePad * 2f;
+            float gap = 5f * Scale;
+            float btnW = (totalW - gap * (PresetCount - 1)) / PresetCount;
+            float btnX = layout.Panel.X + EdgePad + idx * (btnW + gap);
+            return new Rectangle((int)btnX, (int)btnY, (int)btnW, (int)btnH);
         }
 
         public static HitKind HitTest(in Layout layout, Vector2 mouse) {
@@ -104,24 +120,35 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                     return (HitKind)(i + 1);
                 }
             }
+            for (int i = 0; i < PresetCount; i++) {
+                if (GetPresetBtnRect(layout, i).Contains((int)mouse.X, (int)mouse.Y)) {
+                    return HitKind.Preset0 + i;
+                }
+            }
             return HitKind.None;
         }
 
         public static void HandleClick(HitKind hit, Player owner) {
-            if (hit < HitKind.Slot0 || hit > HitKind.Slot5) {
+            if (hit >= HitKind.Slot0 && hit <= HitKind.Slot5) {
+                int slotIdx = (int)hit - 1;
+                SHPCUI ui = SHPCUI.Instance;
+                if (ui == null) {
+                    return;
+                }
+                if (ui.PinnedModuleSlot == slotIdx) {
+                    ui.CloseModuleSelect();
+                }
+                else {
+                    ui.OpenModuleSelect(slotIdx);
+                }
                 return;
             }
-            int slotIdx = (int)hit - 1;
-            //点击同一插槽可关闭（但这里包含在 SHPCUI 使用位于后面的逻辑）
-            SHPCUI ui = SHPCUI.Instance;
-            if (ui == null) {
-                return;
-            }
-            if (ui.PinnedModuleSlot == slotIdx) {
-                ui.CloseModuleSelect();
-            }
-            else {
-                ui.OpenModuleSelect(slotIdx);
+            if (hit >= HitKind.Preset0 && hit <= HitKind.Preset2) {
+                int presetIdx = hit - HitKind.Preset0;
+                SHPCPlayer sp = SHPCPlayer.Get(owner);
+                sp.SwitchPreset(presetIdx);
+                //切换预设时关闭模块选择面板避免错位显示
+                SHPCUI.Instance?.CloseModuleSelect();
             }
         }
 
@@ -192,6 +219,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                     DrawEquippedTooltip(sb, px, font, slotRect, equipped, a);
                 }
             }
+
+            //底部预设切换栏
+            DrawPresetBar(sb, px, font, layout, hover, a);
         }
 
         private static void DrawShaderBackground(SpriteBatch sb, Texture2D px,
@@ -483,6 +513,76 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             Color tint = Color.Lerp(Color.White, SHPCTheme.CyanHi, 0.15f * pulse) * a;
             sb.Draw(gunTex, drawPos, null, tint,
                 0f, gunTex.Size() * 0.5f, GunScale, SpriteEffects.None, 0f);
+        }
+
+        private static void DrawPresetBar(SpriteBatch sb, Texture2D px,
+            DynamicSpriteFont font, in Layout layout, HitKind hover, float a) {
+            Rectangle panel = layout.Panel;
+            float barTop = panel.Y + PanelH - PresetBarH;
+
+            //分隔线
+            SHPCRenderer.DrawLine(sb, px,
+                new Vector2(panel.X + EdgePad, barTop + 1f),
+                new Vector2(panel.X + PanelW - EdgePad, barTop + 1f),
+                1f, SHPCTheme.Border * (0.5f * a));
+
+            SHPCPlayer sp = Main.LocalPlayer != null ? SHPCPlayer.Get(Main.LocalPlayer) : null;
+            int activePreset = sp?.ActivePreset ?? 0;
+
+            string[] labels = {
+                SHPCUI.Modify_Preset_A.Value,
+                SHPCUI.Modify_Preset_B.Value,
+                SHPCUI.Modify_Preset_C.Value,
+            };
+
+            for (int i = 0; i < PresetCount; i++) {
+                Rectangle r = GetPresetBtnRect(layout, i);
+                bool isActive = i == activePreset;
+                bool isHover = hover == HitKind.Preset0 + i;
+
+                //投影
+                SHPCRenderer.DrawFilledRect(sb, px,
+                    new Rectangle(r.X + 2, r.Y + 2, r.Width, r.Height),
+                    new Color(0, 0, 0) * (0.35f * a));
+
+                //背景
+                Color bg = isActive
+                    ? new Color(10, 45, 62) * (0.95f * a)
+                    : isHover
+                        ? new Color(8, 30, 44) * (0.90f * a)
+                        : new Color(4, 14, 22) * (0.80f * a);
+                SHPCRenderer.DrawFilledRect(sb, px, r, bg);
+
+                //顶部激活指示条
+                if (isActive) {
+                    SHPCRenderer.DrawFilledRect(sb, px,
+                        new Rectangle(r.X, r.Y, r.Width, (int)(2f * Scale)),
+                        SHPCTheme.Cyan * (0.95f * a));
+                }
+
+                //边框
+                Color border = isActive
+                    ? SHPCTheme.CyanHi * (0.90f * a)
+                    : isHover
+                        ? SHPCTheme.Border * (0.85f * a)
+                        : SHPCTheme.Border * (0.45f * a);
+                SHPCRenderer.DrawRectStroke(sb, px, r, 1.1f, border);
+
+                //悬停四角装饰
+                if (isHover && !isActive) {
+                    SHPCRenderer.DrawCornerBrackets(sb, px, r, 3f * Scale, 1.1f, SHPCTheme.CyanHi * a);
+                }
+
+                //标签文字
+                float labelScale = 0.48f * FontScale;
+                Color textColor = isActive
+                    ? SHPCTheme.CyanHi * a
+                    : SHPCTheme.TextDim * (0.85f * a);
+                Vector2 labelSz = font.MeasureString(labels[i]) * labelScale;
+                Utils.DrawBorderString(sb, labels[i],
+                    new Vector2(r.X + (r.Width - labelSz.X) * 0.5f, r.Y + (r.Height - labelSz.Y) * 0.5f),
+                    textColor, labelScale);
+            }
         }
     }
 }

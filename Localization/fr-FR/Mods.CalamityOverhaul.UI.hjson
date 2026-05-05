@@ -775,6 +775,9 @@ SHPCUI: {
 	// Talk_Status_Ready: READY
 	// Cyber_Skill_Restart_Name: SYSTEM REBOOT
 	// Cyber_Skill_Restart_Desc: Collapse the domain into a singularity and burst back fully restored.
+	// Modify_Preset_A: PRESET-A
+	// Modify_Preset_B: PRESET-B
+	// Modify_Preset_C: PRESET-C
 }
 
 EntrustManagerLead: {

@@ -1946,3 +1946,8 @@ MimicPerchedAuxBrain: {
 		"混沌，狰狞，狞目......但就在你的后脑勺"
 		'''
 }
+
+LaserBarrelModule: {
+	// DisplayName: Laser Barrel Module
+	// Tooltip: ""
+}

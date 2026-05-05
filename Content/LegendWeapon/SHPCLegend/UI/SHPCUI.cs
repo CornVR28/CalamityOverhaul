@@ -70,6 +70,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
         public static LocalizedText Modify_Slot_Stock { get; private set; }
         public static LocalizedText Modify_Slot_Grip { get; private set; }
         public static LocalizedText Modify_Slot_Frame { get; private set; }
+        public static LocalizedText Modify_Preset_A { get; private set; }
+        public static LocalizedText Modify_Preset_B { get; private set; }
+        public static LocalizedText Modify_Preset_C { get; private set; }
         public static LocalizedText State_On { get; private set; }
         public static LocalizedText State_Off { get; private set; }
         public static LocalizedText State_Layer { get; private set; }
@@ -137,6 +140,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             Modify_Slot_Stock = this.GetLocalization(nameof(Modify_Slot_Stock), () => "STOCK");
             Modify_Slot_Grip = this.GetLocalization(nameof(Modify_Slot_Grip), () => "GRIP");
             Modify_Slot_Frame = this.GetLocalization(nameof(Modify_Slot_Frame), () => "FRAME");
+            Modify_Preset_A = this.GetLocalization(nameof(Modify_Preset_A), () => "PRESET-A");
+            Modify_Preset_B = this.GetLocalization(nameof(Modify_Preset_B), () => "PRESET-B");
+            Modify_Preset_C = this.GetLocalization(nameof(Modify_Preset_C), () => "PRESET-C");
             State_On = this.GetLocalization(nameof(State_On), () => "ON");
             State_Off = this.GetLocalization(nameof(State_Off), () => "OFF");
             State_Layer = this.GetLocalization(nameof(State_Layer), () => "L");

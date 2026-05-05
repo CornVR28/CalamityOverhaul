@@ -775,6 +775,9 @@ SHPCUI: {
 	Talk_Status_Ready: Готово
 	Cyber_Skill_Restart_Name: Самоперезагрузка
 	Cyber_Skill_Restart_Desc: Разорвать домен, сжаться в разлом пространственного ядра, а затем взорваться, полностью восстановив свое состояние.
+	// Modify_Preset_A: PRESET-A
+	// Modify_Preset_B: PRESET-B
+	// Modify_Preset_C: PRESET-C
 }
 
 EntrustManagerLead: {

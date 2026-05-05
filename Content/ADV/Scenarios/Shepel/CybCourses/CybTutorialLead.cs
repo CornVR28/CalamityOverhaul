@@ -89,6 +89,8 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
         private static Rectangle _cardRect = Rectangle.Empty;
         //手动步骤实际推进时记录上一次pinnedSector，避免重复推进
         private static int _lastPinned = -1;
+        //卡片Y轴平滑插值，用于规避展开的三级面板
+        private static float _smoothCardY = 0f;
         //本地化：卡死提示
         private static LocalizedText _textHintStuck;
 
@@ -108,6 +110,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
             _nextBtnRect = Rectangle.Empty;
             _cardRect = Rectangle.Empty;
             _lastPinned = -1;
+            _smoothCardY = 0f;
         }
 
         //由CybCourseIntroDialogue.OnScenarioComplete()在对话结束后调用
@@ -118,6 +121,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
             _stepTimer = 0f;
             _stuckTimer = 0f;
             _lastPinned = -1;
+            _smoothCardY = SHPCHUDTargets.CorePos.Y - CardH + 8;
         }
 
         public override void UpdateUI(GameTime gameTime) {
@@ -129,6 +133,10 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
             if (_shaderTimer > 100f) _shaderTimer -= 100f;
 
             AutoTriggerIntro();
+
+            //平滑插值卡片Y轴，规避已展开的三级面板
+            float targetCardY = ComputeTargetCardY();
+            _smoothCardY = MathHelper.Lerp(_smoothCardY, targetCardY, 0.15f);
 
             bool mouseDown = Main.mouseLeft;
             bool mouseClicked = mouseDown && !_prevMouseLeft;
@@ -223,6 +231,20 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
             _introAttempted = true;
         }
 
+        //计算卡片目标Y坐标，若有固定面板展开则将卡片移至面板顶部以上
+        private static float ComputeTargetCardY() {
+            Vector2 corePos = SHPCHUDTargets.CorePos;
+            float defaultY = corePos.Y - CardH + 8;
+            var ui = SHPCUI.Instance;
+            if (ui == null || !ui.Active) return defaultY;
+            int pinned = ui.PinnedSector;
+            if (pinned != SHPCUI.CyberDomainSectorIndex && pinned != SHPCUI.ModifySectorIndex)
+                return defaultY;
+            float panelH = pinned == SHPCUI.ModifySectorIndex ? SHPCModPanel.PanelH : SHPCCyberPanel.PanelH;
+            float panelTop = corePos.Y - panelH + 6f;
+            return panelTop - CardH - 12f;
+        }
+
         //各自动推进步骤的完成条件（仅IsAuto=true的步骤会调用此方法）
         private static bool CheckAutoAdvance() {
             if (_currentStep == StepMeta.Length - 1)
@@ -300,7 +322,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.CybCourses
             int finalX = cx + (int)slideX;
             //屏幕边界 clamp，防止低分辨率被推出屏幕
             finalX = (int)MathHelper.Clamp(finalX, 8, Math.Max(8, Main.screenWidth - CardW - 8));
-            int finalY = (int)MathHelper.Clamp(cy, 8, Math.Max(8, Main.screenHeight - CardH - 8));
+            int finalY = (int)MathHelper.Clamp(_smoothCardY, 8, Math.Max(8, Main.screenHeight - CardH - 8));
             var card = new Rectangle(finalX, finalY, CardW, CardH);
 
             _cardRect = card;

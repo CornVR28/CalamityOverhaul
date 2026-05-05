@@ -215,10 +215,16 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
                 return player.ownedProjectileCounts[ModContent.ProjectileType<SHPCChargeHeldProj>()] <= 0;
             }
             else {
-                // 左键射击模式，按改件攻速倍率缩放 useTime
-                item.channel = false;
                 item.noUseGraphic = false;
                 item.UseSound = null;
+                if (ctx.LaserMode) {
+                    //激光模式：通道按住持续照射，每 useTime 帧消耗一次法力模拟持续消耗
+                    item.channel = true;
+                    item.useAnimation = item.useTime = 8;
+                    return true;
+                }
+                // 左键射击模式，按改件攻速倍率缩放 useTime
+                item.channel = false;
                 int scaled = (int)(LeftClickUseTime / MathF.Max(ctx.AttackSpeedMul, 0.1f));
                 if (scaled < 1) scaled = 1;
                 item.useAnimation = item.useTime = scaled;
@@ -278,6 +284,20 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
                 }
             }
             else {
+                if (ctx.LaserMode) {
+                    //激光模式：仅在没有活跃激光时生成一束，后续由弹幕自管理生命周期
+                    if (player.ownedProjectileCounts[ModContent.ProjectileType<CyberPrismLaserProj>()] <= 0) {
+                        SoundEngine.PlaySound(SoundID.Item92, player.Center);
+                        Vector2 laserDir = velocity.SafeNormalize(Vector2.UnitX);
+                        Vector2 spawnPos = player.Center + laserDir * 60f;
+                        int laserDamage = (int)(damage * ctx.DamageMul);
+                        if (laserDamage < 1) laserDamage = 1;
+                        Projectile.NewProjectile(source, spawnPos, laserDir,
+                            ModContent.ProjectileType<CyberPrismLaserProj>(),
+                            laserDamage, knockback, player.whoAmI);
+                    }
+                    return false;
+                }
                 // 左键：根据改件决定单发或散射
                 SoundEngine.PlaySound(SoundID.Item92, player.Center);
                 Vector2 baseVel = velocity.SafeNormalize(Vector2.UnitX) * 14f;
