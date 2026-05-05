@@ -1,4 +1,5 @@
-﻿using CalamityOverhaul.Common;
+﻿using System;
+using CalamityOverhaul.Common;
 using CalamityOverhaul.Content.HackTimes.Scannables;
 using CalamityOverhaul.Content.PRTTypes;
 using InnoVault.PRT;
@@ -21,8 +22,9 @@ namespace CalamityOverhaul.Content.HackTimes.Protocols
         public override bool OnApply(IHackTarget target, Player caster) {
             if (target is not NpcScannable s) return false;
             NPC npc = Main.npc[s.NpcIndex];
-            //即时重击
-            npc.SimpleStrikeNPC(300, 0, false, 0f, null, false, 0f, true);
+            //即时重击，保底10点加0.6%最大血量
+            int dmg = Math.Max(10, (int)(npc.lifeMax * 0.006f));
+            npc.SimpleStrikeNPC(dmg, 0, false, 0f, null, false, 0f, true);
             //电弧爆发粒子
             for (int i = 0; i < 15; i++) {
                 Vector2 vel = Main.rand.NextVector2CircularEdge(6f, 6f);
