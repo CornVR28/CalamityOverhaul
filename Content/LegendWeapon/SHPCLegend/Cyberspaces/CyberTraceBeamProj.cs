@@ -125,6 +125,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         public int ExtraPierce;
         /// <summary>生命周期倍率（>1 飞得更远）</summary>
         public float LifeMul = 1f;
+        /// <summary>飞行速度倍率，由改件注入</summary>
+        public float SpeedMul = 1f;
         /// <summary>命中时引爆微型脉冲爆炸</summary>
         public bool ExplodeOnHit;
         /// <summary>微型爆炸半径（像素）</summary>
@@ -182,7 +184,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             }
 
             float timeScale = TimeGear.TimeScale;
-            float effectiveSpeed = Speed * timeScale;
+            float effectiveSpeed = Speed * MathF.Max(SpeedMul, 0.1f) * timeScale;
 
             //微追踪：仅在有运动时执行，方向存入flyAngle，冻结时保留原方向
             if (effectiveSpeed > 0.01f) {

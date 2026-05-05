@@ -284,8 +284,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
             else {
                 // 左键：根据改件决定单发或散射
                 SoundEngine.PlaySound(SoundID.Item92, player.Center);
-                float speedMul = MathF.Max(ctx.BeamSpeedMul, 0.1f);
-                Vector2 baseVel = velocity.SafeNormalize(Vector2.UnitX) * (14f * speedMul);
+                Vector2 baseVel = velocity.SafeNormalize(Vector2.UnitX) * 14f;
                 Vector2 dir = velocity.UnitVector();
                 position += new Vector2(dir.X * 20, -12);
 
@@ -299,7 +298,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
                     float randomOffset = spreadAngle > 0f ? Main.rand.NextFloat(-0.03f, 0.03f) : 0f;
                     Vector2 shotVel = baseVel.RotatedBy(spreadOffset + randomOffset);
 
-                    int beamIdx = Projectile.NewProjectile(source, position + shotVel * 2f, shotVel,
+                    int beamIdx = Projectile.NewProjectile(source, position + shotVel.SafeNormalize(Vector2.UnitX) * 28f, shotVel,
                         ModContent.ProjectileType<CyberTraceBeamProj>(),
                         finalDamage, knockback, player.whoAmI,
                         ai0: Main.rand.Next(3));
@@ -310,6 +309,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
                         if (Main.projectile[beamIdx].ModProjectile is CyberTraceBeamProj beam) {
                             beam.ExtraPierce = ctx.BeamExtraPierce;
                             beam.LifeMul = ctx.BeamLifeMul;
+                            beam.SpeedMul = ctx.BeamSpeedMul;
                             beam.ExplodeOnHit = ctx.BeamExplodeOnHit;
                             beam.ExplodeRadius = ctx.BeamExplodeRadius;
                             beam.ChainCount = ctx.BeamChainCount;
