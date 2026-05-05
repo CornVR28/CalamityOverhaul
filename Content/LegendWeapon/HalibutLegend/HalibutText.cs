@@ -38,7 +38,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend
             tooltips.ReplacePlaceholder("legend_Text", CWRLocText.GetTextValue("Legend_QuestManager_Hint").Replace("{KEY}", keyDisplay), "");
             int index = InWorldBossPhase.Halibut_Level();
             string num = (index + 1).ToString();
-            if (index == 15) {
+            if (index == 14) {
                 num = CWRLocText.GetTextValue("Murasama_Text_Lang_End");
             }
             string text = LegendData.GetLevelTrialPreText(item.CWR(), "Murasama_Text_Lang_0", num);
