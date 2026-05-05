@@ -2,7 +2,6 @@
 {
     internal sealed class ThermalOpticModule : SHPCModuleItem
     {
-        public override string Texture => CWRConstant.Item_Tools + "Mewtwo";
         public override SHPCSlotCategory SlotCategory => SHPCSlotCategory.Optic;
         //热成像火粉
         public override Color TintColor => new(255, 90, 110);

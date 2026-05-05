@@ -2,7 +2,6 @@
 {
     internal sealed class FocusBarrelModule : SHPCModuleItem
     {
-        public override string Texture => CWRConstant.Item_Tools + "Mewtwo";
         public override SHPCSlotCategory SlotCategory => SHPCSlotCategory.Barrel;
         //聚束高能调用电蓝
         public override Color TintColor => new(60, 130, 255);

@@ -2,7 +2,6 @@
 {
     internal sealed class HoloOpticModule : SHPCModuleItem
     {
-        public override string Texture => CWRConstant.Item_Tools + "Mewtwo";
         public override SHPCSlotCategory SlotCategory => SHPCSlotCategory.Optic;
         //全息投影湖蓝
         public override Color TintColor => new(50, 200, 255);

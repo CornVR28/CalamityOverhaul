@@ -3,7 +3,6 @@
     /// <summary>瞄具：光束消亡时分裂出 2 道副光束</summary>
     internal sealed class PrismOpticModule : SHPCModuleItem
     {
-        public override string Texture => CWRConstant.Item_Tools + "Mewtwo";
         public override SHPCSlotCategory SlotCategory => SHPCSlotCategory.Optic;
         //棱镜彩光
         public override Color TintColor => new(190, 110, 255);

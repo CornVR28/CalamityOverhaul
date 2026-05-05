@@ -2,7 +2,6 @@
 {
     internal sealed class HighVoltageCoreModule : SHPCModuleItem
     {
-        public override string Texture => CWRConstant.Item_Tools + "Mewtwo";
         public override SHPCSlotCategory SlotCategory => SHPCSlotCategory.Power;
         //高压电蓝
         public override Color TintColor => new(80, 180, 255);

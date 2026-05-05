@@ -2,7 +2,6 @@
 {
     internal sealed class VolatileFrameModule : SHPCModuleItem
     {
-        public override string Texture => CWRConstant.Item_Tools + "Mewtwo";
         public override SHPCSlotCategory SlotCategory => SHPCSlotCategory.Frame;
         //不稳定毒黄
         public override Color TintColor => new(220, 255, 40);
