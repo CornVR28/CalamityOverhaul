@@ -94,7 +94,6 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Banish
                 for (int i = 0; i < banishGroupBuffer.Count; i++) {
                     int memberIdx = banishGroupBuffer[i];
                     if (memberIdx == hitIndex) continue;//排除主实体
-                    if (memberIdx.TryGetNPC(out NPC npc) && npc.realLife > 0) continue;//不要攻击子实体
                     if (IsBanishing(memberIdx)) continue;
                     //群组成员同样进入Boss版演出，由主体负责触发雷击
                     StartBanish(memberIdx, isBoss: true);

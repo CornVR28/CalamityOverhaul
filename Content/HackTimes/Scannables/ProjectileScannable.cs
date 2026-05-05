@@ -1,6 +1,7 @@
 ﻿using CalamityOverhaul.Content.HackTimes.Targets;
 using System;
 using Terraria;
+using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
 
@@ -54,7 +55,10 @@ namespace CalamityOverhaul.Content.HackTimes.Scannables
             colors[2] = projectile.damage > 0 ? HackTheme.Uploading : HackTheme.TextDim;
 
             labels[3] = HackTime.ProjectileScanSpeed.Value;
-            values[3] = $"{projectile.velocity.Length():F1} px/f";
+            Vector2 displayVel = HackTimeFreeze.IsActive && HackTimeFreeze.ProjSnapshotCaptured[ProjectileIndex]
+                ? HackTimeFreeze.ProjFrozenVelocities[ProjectileIndex]
+                : projectile.velocity;
+            values[3] = $"{displayVel.Length():F1} px/f";
             colors[3] = HackTheme.Accent;
 
             labels[4] = HackTime.ProjectileScanKnockback.Value;
@@ -139,6 +143,29 @@ namespace CalamityOverhaul.Content.HackTimes.Scannables
         }
 
         private static string GetOwnerName(Projectile projectile) {
+            if (projectile.Alives()) {
+                IEntitySource source = projectile.CWR().Source;
+                if (source != null) {
+                    if (source is EntitySource_ItemUse itemUseSource && itemUseSource.Item != null) {
+                        string itemName = Lang.GetItemNameValue(itemUseSource.Item.type);
+                        string playerName = itemUseSource.Player?.name ?? "?";
+                        return $"{playerName} [{itemName}]";
+                    }
+                    if (source is EntitySource_Parent parentSource) {
+                        switch (parentSource.Entity) {
+                            case Player p when p.active:
+                                return p.name;
+                            case NPC n when n.active:
+                                return n.TypeName;
+                            case Projectile proj when proj.active:
+                                return GetProjectileName(proj);
+                        }
+                    }
+                    if (source is EntitySource_Misc miscSource && !string.IsNullOrEmpty(miscSource.Context)) {
+                        return miscSource.Context;
+                    }
+                }
+            }
             if (projectile.owner >= 0 && projectile.owner < Main.maxPlayers) {
                 Player owner = Main.player[projectile.owner];
                 if (owner != null && owner.active && !string.IsNullOrEmpty(owner.name)) return owner.name;

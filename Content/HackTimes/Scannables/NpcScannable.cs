@@ -119,7 +119,7 @@ namespace CalamityOverhaul.Content.HackTimes.Scannables
         }
 
         private static bool IsNonCombatNpc(NPC npc) {
-            return npc.townNPC || npc.friendly || npc.CountsAsACritter || npc.damage <= 0;
+            return npc.townNPC || npc.friendly || npc.CountsAsACritter;
         }
 
         #endregion
