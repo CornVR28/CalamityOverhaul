@@ -71,10 +71,10 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
                 maxW = MathF.Max(maxW, font.MeasureString(s).X * TextScale);
 
             int lineCount = 1 + modules.Count + (bonusLines.Count > 0 ? 1 + bonusLines.Count : 0);
-            int panelW = (int)maxW + Padding * 2;
-            int panelH = Padding * 2 + lineCount * LineH;
+            int panelW = (int)(maxW * 1.2f) + Padding * 2;
+            int panelH = Padding * 2 + lineCount * LineH + 10;
 
-            int panelX = tipRight + PanelGap;
+            int panelX = tipRight + PanelGap + 10;
             int panelY = tipTop;
             if (panelX + panelW > Main.screenWidth - 4)
                 panelX = tipLeft - PanelGap - panelW;
@@ -88,8 +88,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
             float tx = panelX + Padding;
             float ty = panelY + Padding;
 
-            Utils.DrawBorderString(sb, InstalledHeader.Value, new Vector2(tx, ty), new Color(0, 220, 255), TextScale);
-            ty += LineH;
+            Utils.DrawBorderString(sb, InstalledHeader.Value, new Vector2(tx, ty), new Color(0, 220, 255), TextScale * 1.2f);
+            ty += LineH * 1.2f;
 
             foreach (var (m, mod) in modules) {
                 Vector2 iconCenter = new(tx + IconSize * 0.5f, ty + LineH * 0.5f);
@@ -98,9 +98,10 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
                 ty += LineH;
             }
 
+            ty += 10;
             if (bonusLines.Count > 0) {
-                Utils.DrawBorderString(sb, BonusHeader.Value, new Vector2(tx, ty), new Color(0, 220, 255), TextScale);
-                ty += LineH;
+                Utils.DrawBorderString(sb, BonusHeader.Value, new Vector2(tx, ty), new Color(0, 220, 255), TextScale * 1.2f);
+                ty += LineH * 1.2f;
                 foreach (var (s, isNeg) in bonusLines) {
                     Color c = isNeg ? new Color(255, 120, 110) : new Color(120, 255, 170);
                     Utils.DrawBorderString(sb, s, new Vector2(tx, ty), c, TextScale);
