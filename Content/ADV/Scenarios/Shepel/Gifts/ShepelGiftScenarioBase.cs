@@ -11,7 +11,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.Gifts
     /// </summary>
     internal abstract class ShepelGiftScenarioBase : GiftScenarioBase
     {
-        public new string LocalizationCategory => "ADV.Shepel";
+        public override string LocalizationCategory => "ADV.Shepel";
 
         protected override Func<DialogueBoxBase> DefaultDialogueStyle => () => SHPCDialogueBox.Instance;
 
