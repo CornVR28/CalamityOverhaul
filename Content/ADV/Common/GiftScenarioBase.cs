@@ -12,8 +12,10 @@ namespace CalamityOverhaul.Content.ADV.Common
     internal class GiftScenarioNPC : DeathTrackingNPC, IWorldInfo
     {
         void IWorldInfo.OnWorldLoad() {
-            foreach (var giftScenario in GiftScenarioBase.BossIDToInds.Values) {
-                GiftScenarioBase.SpawnedDic[giftScenario] = false;
+            foreach (var scenarios in GiftScenarioBase.BossIDToInds.Values) {
+                foreach (var scenario in scenarios) {
+                    GiftScenarioBase.SpawnedDic[scenario] = false;
+                }
             }
         }
 
@@ -21,9 +23,12 @@ namespace CalamityOverhaul.Content.ADV.Common
 
         public override void OnNPCDeath(NPC npc) {
             if (!CWRRef.GetBossRushActive()//Boss Rush时不触发礼物场景
-                && GiftScenarioBase.BossIDToInds.TryGetValue(npc.type, out var giftScenarioBase)
-                && giftScenarioBase.CanSpawned()) {
-                GiftScenarioBase.SpawnedDic[giftScenarioBase] = true;
+                && GiftScenarioBase.BossIDToInds.TryGetValue(npc.type, out var scenarios)) {
+                foreach (var scenario in scenarios) {
+                    if (scenario.CanSpawned()) {
+                        GiftScenarioBase.SpawnedDic[scenario] = true;
+                    }
+                }
             }
         }
     }
@@ -35,9 +40,9 @@ namespace CalamityOverhaul.Content.ADV.Common
         /// </summary>
         public readonly static Dictionary<GiftScenarioBase, bool> SpawnedDic = [];
         /// <summary>
-        /// BossID到礼物场景实例的映射
+        /// BossID到礼物场景实例列表的映射，支持多个场景共享同一Boss触发
         /// </summary>
-        public readonly static Dictionary<int, GiftScenarioBase> BossIDToInds = [];
+        public readonly static Dictionary<int, List<GiftScenarioBase>> BossIDToInds = [];
         /// <summary>
         /// 随机延迟计时器(单位:tick)
         /// </summary>
@@ -65,7 +70,11 @@ namespace CalamityOverhaul.Content.ADV.Common
         public void LoadThis() {
             SpawnedDic[this] = false;
             if (TargetBossID > NPCID.None) {
-                BossIDToInds[TargetBossID] = this;
+                if (!BossIDToInds.TryGetValue(TargetBossID, out var list)) {
+                    list = [];
+                    BossIDToInds[TargetBossID] = list;
+                }
+                list.Add(this);
             }
         }
         public static void Clear() {
