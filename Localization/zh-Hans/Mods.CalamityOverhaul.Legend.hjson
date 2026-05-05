@@ -1,4 +1,4 @@
-﻿HalibutText: {
+HalibutText: {
 	FishByStudied:
 		'''
 		[i:CalamityMod/HalibutCannon]:
@@ -468,4 +468,15 @@ SHPCModuleStat: {
 	OrbDrainAura: +蓄力时持续吸引附近敌人
 	OrbExplosionPropels: +能量球爆炸反推玩家弹射
 	LaserMode: +棱镜激光枪管：左键变为跟随光标的持续激光光柱
+}
+
+SHPCSlotTag: SHPC改件 · {0}
+
+SHPCSlotName: {
+	Barrel: 枪管插槽
+	Optic: 瞄具插槽
+	Power: 能源插槽
+	Stock: 枪托插槽
+	Grip: 握把插槽
+	Frame: 机匣插槽
 }

@@ -1,4 +1,4 @@
-﻿HalibutText: {
+HalibutText: {
 	FishByStudied:
 		'''
 		[i:CalamityMod/HalibutCannon]:
@@ -505,4 +505,15 @@ SHPCModuleStat: {
 	OrbDrainAura: +При зарядке непрерывно притягивает ближайших врагов
 	OrbExplosionPropels: +Взрыв энергосферы отталкивает игрока
 	LaserMode: +РЕЖИМ ПРИЗМ-ЛАЗЕРА: ЛКМ стреляет лазерным столбом, следящим за курсором
+}
+
+SHPCSlotTag: Модуль SHPC · {0}
+
+SHPCSlotName: {
+	Barrel: Слот ствола
+	Optic: Слот оптики
+	Power: Слот питания
+	Stock: Слот приклада
+	Grip: Слот рукоятки
+	Frame: Слот рамы
 }

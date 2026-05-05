@@ -122,7 +122,25 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
             return Language.GetTextValue($"Mods.CalamityOverhaul.Legend.SHPCModuleStat.{key}", $"{sign}{value}");
         }
 
+        private static Color SlotCategoryColor(SHPCSlotCategory cat) => cat switch {
+            SHPCSlotCategory.Barrel => new Color(255, 160, 60),
+            SHPCSlotCategory.Optic  => new Color(0, 200, 255),
+            SHPCSlotCategory.Power  => new Color(255, 220, 0),
+            SHPCSlotCategory.Stock  => new Color(80, 220, 120),
+            SHPCSlotCategory.Grip   => new Color(200, 100, 255),
+            SHPCSlotCategory.Frame  => new Color(255, 140, 200),
+            _ => Color.White,
+        };
+
         public override void ModifyTooltips(List<TooltipLine> tooltips) {
+            string slotName = Language.GetTextValue("Mods.CalamityOverhaul.Legend.SHPCSlotName." + SlotCategory.ToString());
+            string slotTag = Language.GetTextValue("Mods.CalamityOverhaul.Legend.SHPCSlotTag", slotName);
+            int index = tooltips.FindIndex(line => line.Name == "ItemName");
+            if (index != -1) {
+                tooltips.Insert(index + 1, new TooltipLine(Mod, "SHPCSlotTag", slotTag) {
+                    OverrideColor = SlotCategoryColor(SlotCategory)
+                });
+            }
             int idx = 0;
             foreach (string line in GetStatLines()) {
                 if (string.IsNullOrEmpty(line)) continue;

@@ -1632,6 +1632,11 @@ SandevistansItem: {
 	// Tooltip: Militech Sandevistan Mk.5 — Slows perceived time by 70% for 3.5 seconds. Cooldown 15s.
 }
 
+MimicPerchedAuxBrain: {
+	// DisplayName: Mimic Perched Aux Brain
+	// Tooltip: ""
+}
+
 RamCapacityUpgradeChip: {
 	// DisplayName: RAM Capacity Upgrade Chip
 	// Tooltip: Permanently increases base maximum RAM by 1
@@ -1649,234 +1654,133 @@ Mewtwo: {
 
 RapidBarrelModule: {
 	// DisplayName: Rapid Barrel
-	/* Tooltip:
-		'''
-		SHPC Module · Barrel Slot
-		Hyper-extended recoil spring delivers searing pulses at the cost of stability and per-shot power
-		''' */
+	// Tooltip: Hyper-extended recoil spring delivers searing pulses at the cost of stability and per-shot power
 }
 
 FocusBarrelModule: {
 	// DisplayName: Focus Barrel
-	/* Tooltip:
-		'''
-		SHPC Module · Barrel Slot
-		Forces the three tracking beams to converge into one catastrophic concentrated strike
-		''' */
+	// Tooltip: Forces the three tracking beams to converge into one catastrophic concentrated strike
 }
 
 PrecisionOpticModule: {
 	// DisplayName: Precision Optic
-	/* Tooltip:
-		'''
-		SHPC Module · Optic Slot
-		Laser-assisted aiming eliminates all spread and grants additional crit chance
-		''' */
+	// Tooltip: Laser-assisted aiming eliminates all spread and grants additional crit chance
 }
 
 OverloadCoreModule: {
 	// DisplayName: Overload Core
-	/* Tooltip:
-		'''
-		SHPC Module · Power Slot
-		Replaces the buffer with a faster cycling logic, charging the orb faster and launching it harder
-		''' */
+	// Tooltip: Replaces the buffer with a faster cycling logic, charging the orb faster and launching it harder
 }
 
 SteadyStockModule: {
 	// DisplayName: Steady Stock
-	/* Tooltip:
-		'''
-		SHPC Module · Stock Slot
-		Composite heavy stock absorbs recoil, trading some fire rate for extra damage per shot
-		''' */
+	// Tooltip: Composite heavy stock absorbs recoil, trading some fire rate for extra damage per shot
 }
 
 HarmonyGripModule: {
 	// DisplayName: Harmony Grip
-	/* Tooltip:
-		'''
-		SHPC Module · Grip Slot
-		Bio-conductive grip channels mana through the body, drastically reducing mana cost
-		''' */
+	// Tooltip: Bio-conductive grip channels mana through the body, drastically reducing mana cost
 }
 
 ResonanceFrameModule: {
 	// DisplayName: Resonance Frame
-	/* Tooltip:
-		'''
-		SHPC Module · Frame Slot
-		Harmonic-stacked frame leaks an extra beam, intensifying the volley
-		''' */
+	// Tooltip: Harmonic-stacked frame leaks an extra beam, intensifying the volley
 }
 
 AdaptiveOpticModule: {
 	// DisplayName: Adaptive Optic
-	/* Tooltip:
-		'''
-		SHPC Module · Optic Slot
-		Neural-link algorithms continuously correct trajectory, locking each beam tighter onto its target
-		''' */
+	// Tooltip: Neural-link algorithms continuously correct trajectory, locking each beam tighter onto its target
 }
 
 AssaultStockModule: {
 	// DisplayName: Assault Stock
-	/* Tooltip:
-		'''
-		SHPC Module · Stock Slot
-		Adrenaline-assisted bracing cycles the weapon more aggressively, raising firepower at higher mana cost
-		''' */
+	// Tooltip: Adrenaline-assisted bracing cycles the weapon more aggressively, raising firepower at higher mana cost
 }
 
 BalancedGripModule: {
 	// DisplayName: Balanced Grip
-	/* Tooltip:
-		'''
-		SHPC Module · Grip Slot
-		Re-tuned weight distribution gives a small all-around boost to fire rate, damage and stability
-		''' */
+	// Tooltip: Re-tuned weight distribution gives a small all-around boost to fire rate, damage and stability
 }
 
 CapacitorBankModule: {
 	// DisplayName: Capacitor Bank
-	/* Tooltip:
-		'''
-		SHPC Module · Power Slot
-		Dense capacitor stack tops the orb off in a much shorter cycle, but dampens its launch energy
-		''' */
+	// Tooltip: Dense capacitor stack tops the orb off in a much shorter cycle, but dampens its launch energy
 }
 
 CrystalGripModule: {
 	// DisplayName: Crystal Grip
-	/* Tooltip:
-		'''
-		SHPC Module · Grip Slot
-		Synthetic crystal dielectric resonates with the user, trimming mana cost and boosting crit, but slowing charge
-		''' */
+	// Tooltip: Synthetic crystal dielectric resonates with the user, trimming mana cost and boosting crit, but slowing charge
 }
 
 EfficientGripModule: {
 	// DisplayName: Efficient Grip
-	/* Tooltip:
-		'''
-		SHPC Module · Grip Slot
-		Engineering-grade ergonomic grip refines both energy draw and trigger cadence
-		''' */
+	// Tooltip: Engineering-grade ergonomic grip refines both energy draw and trigger cadence
 }
 
 HeavyBarrelModule: {
 	// DisplayName: Heavy Barrel
-	/* Tooltip:
-		'''
-		SHPC Module · Barrel Slot
-		Reinforced rifling crushes spread and cadence, turning every shot into a heavy strike
-		''' */
+	// Tooltip: Reinforced rifling crushes spread and cadence, turning every shot into a heavy strike
 }
 
 HighVoltageCoreModule: {
 	// DisplayName: High Voltage Core
-	/* Tooltip:
-		'''
-		SHPC Module · Power Slot
-		Output voltage is pushed up the scale, amplifying both raw and merged-beam damage at extra mana cost
-		''' */
+	// Tooltip: Output voltage is pushed up the scale, amplifying both raw and merged-beam damage at extra mana cost
 }
 
 HoloOpticModule: {
 	// DisplayName: Holo Optic
-	/* Tooltip:
-		'''
-		SHPC Module · Optic Slot
-		Holographic reticle locks the impact point, slashing spread and accelerating the trigger at slight mana overhead
-		''' */
+	// Tooltip: Holographic reticle locks the impact point, slashing spread and accelerating the trigger at slight mana overhead
 }
 
 HypersonicBarrelModule: {
 	// DisplayName: Hypersonic Barrel
-	/* Tooltip:
-		'''
-		SHPC Module · Barrel Slot
-		Sonic-shock chamber pushes beams to extreme velocity, but fine homing can no longer keep up
-		''' */
+	// Tooltip: Sonic-shock chamber pushes beams to extreme velocity, but fine homing can no longer keep up
 }
 
 KineticDamperModule: {
 	// DisplayName: Kinetic Damper Stock
-	/* Tooltip:
-		'''
-		SHPC Module · Stock Slot
-		Liquid damper swallows recoil, all but eliminating spread and granting a small crit edge
-		''' */
+	// Tooltip: Liquid damper swallows recoil, all but eliminating spread and granting a small crit edge
 }
 
 LightStockModule: {
 	// DisplayName: Light Stock
-	/* Tooltip:
-		'''
-		SHPC Module · Stock Slot
-		Carbon-composite frame greatly increases fire rate at a mild cost to stability and per-shot power
-		''' */
+	// Tooltip: Carbon-composite frame greatly increases fire rate at a mild cost to stability and per-shot power
 }
 
 MultiCellFrameModule: {
 	// DisplayName: Multi-Cell Frame
-	/* Tooltip:
-		'''
-		SHPC Module · Frame Slot
-		Parallel cooling cells discharge two beams at once, widening coverage at the cost of per-beam damage
-		''' */
+	// Tooltip: Parallel cooling cells discharge two beams at once, widening coverage at the cost of per-beam damage
 }
 
 PlasmaInjectorModule: {
 	// DisplayName: Plasma Injector
-	/* Tooltip:
-		'''
-		SHPC Module · Power Slot
-		High-enthalpy plasma injection vastly amplifies orb velocity and merged-beam damage, charging slightly slower
-		''' */
+	// Tooltip: High-enthalpy plasma injection vastly amplifies orb velocity and merged-beam damage, charging slightly slower
 }
 
 QuantumFrameModule: {
 	// DisplayName: Quantum Frame
-	/* Tooltip:
-		'''
-		SHPC Module · Frame Slot
-		Quantum steering circuits make beams turn smarter and orbs fly faster at slightly elevated mana cost
-		''' */
+	// Tooltip: Quantum steering circuits make beams turn smarter and orbs fly faster at slightly elevated mana cost
 }
 
 ScattershotBarrelModule: {
 	// DisplayName: Scattershot Barrel
-	/* Tooltip:
-		'''
-		SHPC Module · Barrel Slot
-		Fractured muzzle splits each shot into a spray of beams, drastically expanding coverage but tanking per-beam damage
-		''' */
+	// Tooltip: Fractured muzzle splits each shot into a spray of beams, drastically expanding coverage but tanking per-beam damage
 }
 
 ThermalOpticModule: {
 	// DisplayName: Thermal Optic
-	/* Tooltip:
-		'''
-		SHPC Module · Optic Slot
-		Infrared lock makes beams cling to their target, doubling down with both precision and crit gains
-		''' */
+	// Tooltip: Infrared lock makes beams cling to their target, doubling down with both precision and crit gains
 }
 
 VolatileFrameModule: {
 	// DisplayName: Volatile Frame
-	/* Tooltip:
-		'''
-		SHPC Module · Frame Slot
-		Overclocked cooling lattice squeezes out an extra beam and crit chance, while mana draw and spread spike
-		''' */
+	// Tooltip: Overclocked cooling lattice squeezes out an extra beam and crit chance, while mana draw and spread spike
 }
 
 NovaBarrelModule: {
 	// DisplayName: Nova Barrel
 	/* Tooltip:
 		'''
-		SHPC Module · Barrel Slot
 		An overcharged plasma muzzle detonates a micro-pulse where each beam lands
 		The price is wider spread, weaker per-shot impact and heavier mana draw
 		''' */
@@ -1886,7 +1790,6 @@ PrismOpticModule: {
 	// DisplayName: Prism Optic
 	/* Tooltip:
 		'''
-		SHPC Module · Optic Slot
 		A phase prism at the end of the optical path forks each beam into two splinters on expiration
 		Primary beams travel a touch shorter in exchange for a sharper crit window
 		''' */
@@ -1896,7 +1799,6 @@ TeslaCoreModule: {
 	// DisplayName: Tesla Core
 	/* Tooltip:
 		'''
-		SHPC Module · Power Slot
 		High-voltage arcing lets struck beams leap to the nearest foe
 		Each chained node inherits the on-hit behaviors, at a steeper mana cost
 		''' */
@@ -1906,7 +1808,6 @@ RecoilStockModule: {
 	// DisplayName: Recoil Stock
 	/* Tooltip:
 		'''
-		SHPC Module · Stock Slot
 		An overload buffer converts orb detonations into kinetic propellant for the wielder
 		Beam range is extended in tandem; the trigger feels a touch sluggish
 		''' */
@@ -1916,7 +1817,6 @@ SwarmGripModule: {
 	// DisplayName: Swarm Grip
 	/* Tooltip:
 		'''
-		SHPC Module · Grip Slot
 		A neural-mesh grip releases a swarm of strongly homing micro-orbs the moment the orb detonates
 		Orb velocity dips and mana draw climbs as compensation
 		''' */
@@ -1926,19 +1826,13 @@ GravityFrameModule: {
 	// DisplayName: Gravity Frame
 	/* Tooltip:
 		'''
-		SHPC Module · Frame Slot
 		A miniature singularity ring turns the energy orb into a gravitic well
 		It pulls nearby foes toward its core while charging and the detonation radius is greatly enlarged
 		The precision chamber makes charging feel slightly heavier
 		''' */
 }
 
-MimicPerchedAuxBrain: {
-	// DisplayName: Mimic Perched Aux Brain
-	// Tooltip: ""
-}
-
 LaserBarrelModule: {
-	// DisplayName: Canon laser prisme
-	// Tooltip: Remplace le clic gauche par une colonne laser prismatique continue qui suit le curseur
+	// DisplayName: Prism Laser Barrel
+	// Tooltip: Replaces left-click with a continuous prism laser column that tracks the cursor
 }

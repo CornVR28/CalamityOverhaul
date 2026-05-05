@@ -1,4 +1,4 @@
-﻿SHPCModTooltipDraw: {
+SHPCModTooltipDraw: {
 	InstalledHeader: 已安装模块
 	NoModules: 无
 	BonusHeader: 当前模块总加成
@@ -1663,234 +1663,133 @@ Mewtwo: {
 
 RapidBarrelModule: {
 	DisplayName: 速射枪管
-	Tooltip:
-		'''
-		SHPC 改件 · 枪管插槽
-		超长复进簧带来灼热脉冲，但代价是稳定性与单发威力
-		'''
+	Tooltip: 超长复进簧带来灼热脉冲，但代价是稳定性与单发威力
 }
 
 FocusBarrelModule: {
 	DisplayName: 聚束枪管
-	Tooltip:
-		'''
-		SHPC 改件 · 枪管插槽
-		三束追踪光束被强制汇拢为一束，造成灾难性的集中打击
-		'''
+	Tooltip: 三束追踪光束被强制汇拢为一束，造成灾难性的集中打击
 }
 
 PrecisionOpticModule: {
 	DisplayName: 精密瞄具
-	Tooltip:
-		'''
-		SHPC 改件 · 瞄具插槽
-		激光辅助瞄准消除全部弹道散布，并提供额外暴击机率
-		'''
+	Tooltip: 激光辅助瞄准消除全部弹道散布，并提供额外暴击机率
 }
 
 OverloadCoreModule: {
 	DisplayName: 超载核心
-	Tooltip:
-		'''
-		SHPC 改件 · 能源插槽
-		以更快的循环逻辑取代缓冲，使能量球蓄力更快、飞行更迅猛
-		'''
+	Tooltip: 以更快的循环逻辑取代缓冲，使能量球蓄力更快、飞行更迅猛
 }
 
 SteadyStockModule: {
 	DisplayName: 稳压枪托
-	Tooltip:
-		'''
-		SHPC 改件 · 枪托插槽
-		复合式重型枪托吸纳冲击，以一定射速换取每发额外伤害
-		'''
+	Tooltip: 复合式重型枪托吸纳冲击，以一定射速换取每发额外伤害
 }
 
 HarmonyGripModule: {
 	DisplayName: 谐振握把
-	Tooltip:
-		'''
-		SHPC 改件 · 握把插槽
-		生物电感传导握把以人体导通法力，大幅压低魔力消耗
-		'''
+	Tooltip: 生物电感传导握把以人体导通法力，大幅压低魔力消耗
 }
 
 ResonanceFrameModule: {
 	DisplayName: 共振机匣
-	Tooltip:
-		'''
-		SHPC 改件 · 机匣插槽
-		谐波叠加机匣额外溢出一束光束，火力倾泻更加密集
-		'''
+	Tooltip: 谐波叠加机匣额外溢出一束光束，火力倾泻更加密集
 }
 
 AdaptiveOpticModule: {
 	DisplayName: 自适应瞄具
-	Tooltip:
-		'''
-		SHPC 改件 · 瞄具插槽
-		神经联动算法持续修正弹道，使每束光能快速而精准的命中目标
-		'''
+	Tooltip: 神经联动算法持续修正弹道，使每束光能快速而精准的命中目标
 }
 
 AssaultStockModule: {
 	DisplayName: 突击枪托
-	Tooltip:
-		'''
-		SHPC 改件 · 枪托插槽
-		肾上腺素辅助应力支架以更激进的姿态触发，火力上扬但耗能加剧
-		'''
+	Tooltip: 肾上腺素辅助应力支架以更激进的姿态触发，火力上扬但耗能加剧
 }
 
 BalancedGripModule: {
 	DisplayName: 平衡握把
-	Tooltip:
-		'''
-		SHPC 改件 · 握把插槽
-		配重重新分布，全方位小幅强化射速、伤害与稳定性
-		'''
+	Tooltip: 配重重新分布，全方位小幅强化射速、伤害与稳定性
 }
 
 CapacitorBankModule: {
 	DisplayName: 储能阵列
-	Tooltip:
-		'''
-		SHPC 改件 · 能源插槽
-		高密度电容堆栈以更短的循环填满能量球，但抑制了出口动能
-		'''
+	Tooltip: 高密度电容堆栈以更短的循环填满能量球，但抑制了出口动能
 }
 
 CrystalGripModule: {
 	DisplayName: 水晶握把
-	Tooltip:
-		'''
-		SHPC 改件 · 握把插槽
-		合成水晶介质共振手感，节流法力消耗并提升暴击，但拖慢蓄力节奏
-		'''
+	Tooltip: 合成水晶介质共振手感，节流法力消耗并提升暴击，但拖慢蓄力节奏
 }
 
 EfficientGripModule: {
 	DisplayName: 高效握把
-	Tooltip:
-		'''
-		SHPC 改件 · 握把插槽
-		工程级人体工学握把同时优化能耗与扣动节奏
-		'''
+	Tooltip: 工程级人体工学握把同时优化能耗与扣动节奏
 }
 
 HeavyBarrelModule: {
 	DisplayName: 重型枪管
-	Tooltip:
-		'''
-		SHPC 改件 · 枪管插槽
-		加厚膛线压制散布与节奏，每发都化作沉重打击
-		'''
+	Tooltip: 加厚膛线压制散布与节奏，每发都化作沉重打击
 }
 
 HighVoltageCoreModule: {
 	DisplayName: 高压核心
-	Tooltip:
-		'''
-		SHPC 改件 · 能源插槽
-		跃升输出电压，所有伤害与聚束打击都被显著推高，代价是法力开销
-		'''
+	Tooltip: 跃升输出电压，所有伤害与聚束打击都被显著推高，代价是法力开销
 }
 
 HoloOpticModule: {
 	DisplayName: 全息瞄具
-	Tooltip:
-		'''
-		SHPC 改件 · 瞄具插槽
-		全息标线锁定弹着点，散布大幅压低、扣动节奏更快，能耗略微上扬
-		'''
+	Tooltip: 全息标线锁定弹着点，散布大幅压低、扣动节奏更快，能耗略微上扬
 }
 
 HypersonicBarrelModule: {
 	DisplayName: 超音速枪管
-	Tooltip:
-		'''
-		SHPC 改件 · 枪管插槽
-		声爆膛压将光束加速到极限速度，但难以再做精细追踪
-		'''
+	Tooltip: 声爆膛压将光束加速到极限速度，但难以再做精细追踪
 }
 
 KineticDamperModule: {
 	DisplayName: 动能阻尼托
-	Tooltip:
-		'''
-		SHPC 改件 · 枪托插槽
-		液态阻尼器吞食后坐力，散布几近归零并提供少量暴击
-		'''
+	Tooltip: 液态阻尼器吞食后坐力，散布几近归零并提供少量暴击
 }
 
 LightStockModule: {
 	DisplayName: 轻量枪托
-	Tooltip:
-		'''
-		SHPC 改件 · 枪托插槽
-		碳纤复合骨架显著加快射速，但稳定性与单发威力轻度下滑
-		'''
+	Tooltip: 碳纤复合骨架显著加快射速，但稳定性与单发威力轻度下滑
 }
 
 MultiCellFrameModule: {
 	DisplayName: 多格机匣
-	Tooltip:
-		'''
-		SHPC 改件 · 机匣插槽
-		并列冷却腔同时吐出两束光，覆盖范围扩大，单发伤害下降
-		'''
+	Tooltip: 并列冷却腔同时吐出两束光，覆盖范围扩大，单发伤害下降
 }
 
 PlasmaInjectorModule: {
 	DisplayName: 等离子注入器
-	Tooltip:
-		'''
-		SHPC 改件 · 能源插槽
-		高焓等离子注入显著放大能量球速度与聚束伤害，蓄力略慢
-		'''
+	Tooltip: 高焓等离子注入显著放大能量球速度与聚束伤害，蓄力略慢
 }
 
 QuantumFrameModule: {
 	DisplayName: 量子机匣
-	Tooltip:
-		'''
-		SHPC 改件 · 机匣插槽
-		量子定向回路让光束更聪明地拐弯，能量球也更快，魔力小幅升高
-		'''
+	Tooltip: 量子定向回路让光束更聪明地拐弯，能量球也更快，魔力小幅升高
 }
 
 ScattershotBarrelModule: {
 	DisplayName: 霰射枪管
-	Tooltip:
-		'''
-		SHPC 改件 · 枪管插槽
-		破裂膛口将一发拆为多束散弹，覆盖面剧增但单发威力骤降
-		'''
+	Tooltip: 破裂膛口将一发拆为多束散弹，覆盖面剧增但单发威力骤降
 }
 
 ThermalOpticModule: {
 	DisplayName: 热成像瞄具
-	Tooltip:
-		'''
-		SHPC 改件 · 瞄具插槽
-		红外锁定让光束如猎犬般紧咬目标，并伴随精度与暴击的双重提升
-		'''
+	Tooltip: 红外锁定让光束如猎犬般紧咬目标，并伴随精度与暴击的双重提升
 }
 
 VolatileFrameModule: {
 	DisplayName: 不稳定机匣
-	Tooltip:
-		'''
-		SHPC 改件 · 机匣插槽
-		过载冷却结构压榨出额外光束与暴击，但能耗与散布同步飙升
-		'''
+	Tooltip: 过载冷却结构压榨出额外光束与暴击，但能耗与散布同步飙升
 }
 
 NovaBarrelModule: {
 	DisplayName: 新星枪管
 	Tooltip:
 		'''
-		SHPC 改件 · 枪管插槽
 		过载电浆膛口让每束光在命中时引爆一团微型脉冲炸裂
 		代价是膛口稳定性下滑、单发威力削弱与法力消耗加剧
 		'''
@@ -1900,7 +1799,6 @@ PrismOpticModule: {
 	DisplayName: 棱镜瞄具
 	Tooltip:
 		'''
-		SHPC 改件 · 瞄具插槽
 		光路终末处的相位棱镜分裂出两道副光束
 		主光束飞行距离略微缩短，但额外捕捉到精准的暴击窗口
 		'''
@@ -1910,7 +1808,6 @@ TeslaCoreModule: {
 	DisplayName: 特斯拉核心
 	Tooltip:
 		'''
-		SHPC 改件 · 能源插槽
 		高压电弧让命中后的光束跳跃至最近的敌人
 		链上每个节点都能继承命中行为，但魔力开销同步上扬
 		'''
@@ -1920,7 +1817,6 @@ RecoilStockModule: {
 	DisplayName: 反推枪托
 	Tooltip:
 		'''
-		SHPC 改件 · 枪托插槽
 		过载缓冲器将能量球的爆炸冲击转化为玩家的弹射动能
 		光束的射程也被同步延长，代价是扣动节奏轻微变迟
 		'''
@@ -1930,7 +1826,6 @@ SwarmGripModule: {
 	DisplayName: 蜂群握把
 	Tooltip:
 		'''
-		SHPC 改件 · 握把插槽
 		神经网络握把在能量球爆炸瞬间释放数颗强追踪迷你光球
 		能量球的初速与法力开销随之付出代价
 		'''
@@ -1940,7 +1835,6 @@ GravityFrameModule: {
 	DisplayName: 引力机匣
 	Tooltip:
 		'''
-		SHPC 改件 · 机匣插槽
 		微型奇点环将能量球转化为吸引装置
 		蓄力时持续把附近敌人拉向球心，爆炸范围显著放大
 		但精密腔体让蓄力节奏变得稍慢
@@ -1949,9 +1843,5 @@ GravityFrameModule: {
 
 LaserBarrelModule: {
 	DisplayName: 棱镜激光枪管
-	Tooltip:
-		'''
-		SHPC 改件 · 枪管插槽
-		将左键攻击替换为跟随光标的持续棱镜激光光柱
-		'''
+	Tooltip: 将左键攻击替换为跟随光标的持续棱镜激光光柱
 }

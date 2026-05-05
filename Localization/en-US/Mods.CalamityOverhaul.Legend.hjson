@@ -469,3 +469,14 @@ SHPCModuleStat: {
 	OrbExplosionPropels: +ORB DETONATION ROCKETS THE WIELDER AWAY
 	LaserMode: +PRISM LASER MODE: LMB fires a cursor-tracking laser column
 }
+
+SHPCSlotTag: SHPC Module · {0}
+
+SHPCSlotName: {
+	Barrel: Barrel Slot
+	Optic: Optic Slot
+	Power: Power Slot
+	Stock: Stock Slot
+	Grip: Grip Slot
+	Frame: Frame Slot
+}
