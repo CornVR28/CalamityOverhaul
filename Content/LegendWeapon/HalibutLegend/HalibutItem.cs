@@ -1,4 +1,5 @@
-﻿using Terraria.ID;
+﻿using Terraria;
+using Terraria.ID;
 using Terraria.ModLoader;
 
 namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend
@@ -14,6 +15,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend
             Item.useTime = 10;
             Item.useAnimation = 10;
             Item.rare = CWRID.Rarity_HotPink > 0 ? CWRID.Rarity_HotPink : ItemRarityID.Purple;
+            Item.value = Item.buyPrice(0, 2, 50, 0);
             Item.useStyle = ItemUseStyleID.Shoot;
             Item.noMelee = true;
             Item.knockBack = 1f;
