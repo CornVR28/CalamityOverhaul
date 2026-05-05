@@ -366,8 +366,10 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
             }
             float a = panelAlpha * globalAlpha;
 
-            const float panelW = 168f;
-            const float panelH = 70f;
+            float textSize = 1.25f;
+
+            float panelW = 168f * textSize;
+            float panelH = 60f * textSize;
 
             //入场偏移，沿光标右下方向滑入
             float slide = (1f - panelAlpha) * 8f;
@@ -405,31 +407,31 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.UI
                 1.6f, SHPCTheme.Cyan * (0.55f * a));
             //四角L形装饰
             DrawCornerBrackets(sb, px, rect, 6f, 1.4f, SHPCTheme.BorderHi * (0.85f * a));
-
+            
             //文字
             DynamicSpriteFont font = FontAssets.MouseText.Value;
             float pad = 6f;
             //标题
             if (!string.IsNullOrEmpty(title)) {
                 Utils.DrawBorderString(sb, title,
-                    new Vector2(rect.X + pad, rect.Y + 6f), SHPCTheme.Text * a, 0.6f);
+                    new Vector2(rect.X + pad, rect.Y + 6f), SHPCTheme.Text * a, 0.6f * textSize);
             }
             //副标题
             if (!string.IsNullOrEmpty(subtitle)) {
                 Utils.DrawBorderString(sb, subtitle,
-                    new Vector2(rect.X + pad, rect.Y + 22f), SHPCTheme.TextDim * a, 0.4f);
+                    new Vector2(rect.X + pad, rect.Y + 22f), SHPCTheme.TextDim * a, 0.5f * textSize);
             }
             //状态值，绘制于右上
             if (!string.IsNullOrEmpty(statusText)) {
-                Vector2 size = font.MeasureString(statusText) * 0.5f;
+                Vector2 size = font.MeasureString(statusText) * 0.5f * textSize;
                 Utils.DrawBorderString(sb, statusText,
                     new Vector2(rect.Right - pad - size.X, rect.Y + 6f),
-                    SHPCTheme.CyanHi * a, 0.5f);
+                    SHPCTheme.CyanHi * a, 0.5f * textSize);
             }
             //说明，靠下两行内
             if (!string.IsNullOrEmpty(description)) {
                 Utils.DrawBorderString(sb, description,
-                    new Vector2(rect.X + pad, rect.Y + 40f), SHPCTheme.TextDim * a, 0.42f);
+                    new Vector2(rect.X + pad, rect.Y + 40f), SHPCTheme.TextDim * a, 0.52f * textSize);
             }
         }
 
