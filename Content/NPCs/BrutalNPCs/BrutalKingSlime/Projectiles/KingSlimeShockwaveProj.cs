@@ -42,7 +42,7 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalKingSlime.Projectiles
             Projectile.width = Projectile.height = (int)(radius * 2f);
             //保持 Center 不变（用 Hitbox 中心）
             Projectile.position = Projectile.Center - new Vector2(Projectile.width, Projectile.height) * 0.5f;
-            Projectile.position.X -= 2;
+            Projectile.position.X -= 6;
 
             Lighting.AddLight(Projectile.Center,
                 1.0f * ScaleMul * (1f - t01),
