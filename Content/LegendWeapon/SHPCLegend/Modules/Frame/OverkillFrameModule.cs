@@ -1,4 +1,4 @@
-using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
+﻿using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
 using Terraria;
 
 namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
@@ -19,8 +19,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
             if (beam.Projectile.owner != Main.myPlayer) return;
             if (target.life > 0) return;
             SHPCPlayer sp = SHPCPlayer.Get(Main.player[beam.Projectile.owner]);
-            sp.OverkillStacks = System.Math.Min(sp.OverkillStacks + 1, 10);
-            sp.OverkillTimer = 300;
+            sp.OverkillStacks = System.Math.Min(sp.OverkillStacks + 1, 15);
+            sp.OverkillTimer = 240;
         }
 
         public override void OnPlayerUpdate(Player player) {

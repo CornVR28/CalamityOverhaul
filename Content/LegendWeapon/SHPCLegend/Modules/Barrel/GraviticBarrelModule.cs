@@ -17,7 +17,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
         public override Color TintColor => new(110, 90, 220);
 
         public override void Apply(ref ShootContext ctx) {
-            ctx.SpreadMul += -0.4f;
+            ctx.SpreadMul += -0.2f;
             ctx.BeamLifeMul += 0.25f;
             ctx.BeamSpeedMul += -0.1f;
             ctx.HomingMul += -0.2f;

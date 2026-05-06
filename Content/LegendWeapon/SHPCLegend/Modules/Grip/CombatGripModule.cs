@@ -1,4 +1,4 @@
-using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
+﻿using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
 using CalamityOverhaul.Content.PRTTypes;
 using InnoVault.PRT;
 using Terraria;
@@ -17,7 +17,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
         public override Color TintColor => new(255, 80, 80);
 
         private const int MaxStacks = 5;
-        private const float AttackSpeedPerStack = 0.06f;
+        private const float AttackSpeedPerStack = 0.04f;
         private const float DamagePerStack = 0.02f;
         private const int FreshTime = 240;
         private const int DecayInterval = 120;
@@ -28,7 +28,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
 
         public override void Apply(ref ShootContext ctx) {
             ctx.SpreadMul += -0.10f;
-            ctx.ManaCostMul += 0.05f;
+            ctx.ManaCostMul += 0.15f;
             //层数动态注入
             ctx.AttackSpeedMul += _stacks * AttackSpeedPerStack;
             ctx.DamageMul += _stacks * DamagePerStack;

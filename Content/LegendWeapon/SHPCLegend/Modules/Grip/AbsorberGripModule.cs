@@ -1,4 +1,4 @@
-using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
+﻿using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
 using Terraria;
 
 namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
@@ -14,18 +14,18 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
         public override Color TintColor => new(80, 140, 220);
 
         public override void Apply(ref ShootContext ctx) {
-            //稍微抬高蓝量消耗：本身回蓝是补偿
-            ctx.ManaCostMul += 0.10f;
-            ctx.DamageMul += -0.05f;
+            //抬高蓝量消耗：本身回蓝是补偿
+            ctx.ManaCostMul += 0.4f;
+            ctx.DamageMul += -0.1f;
         }
 
         public override void OnBeamHitNPC(CyberTraceBeamProj beam, NPC target, NPC.HitInfo hit, int damageDone) {
-            Refund(beam.Projectile.owner, damageDone, 14, 6, 1);
+            Refund(beam.Projectile.owner, damageDone, 20, 4, 1);
         }
 
         public override void OnLaserHitNPC(CyberPrismLaserProj laser, NPC target, NPC.HitInfo hit, int damageDone) {
             //激光每次命中给少一点
-            Refund(laser.Projectile.owner, damageDone, 30, 3, 1);
+            Refund(laser.Projectile.owner, damageDone, 20, 2, 1);
         }
 
         private static void Refund(int owner, int damageDone, int divisor, int cap, int min) {

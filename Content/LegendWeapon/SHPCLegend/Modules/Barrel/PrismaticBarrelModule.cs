@@ -19,7 +19,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
         public override void Apply(ref ShootContext ctx) {
             ctx.BeamCountAdd += 1;
             ctx.SpreadMul += 0.15f;
-            ctx.DamageMul += -0.10f;
+            ctx.DamageMul += -0.15f;
             ctx.CritAdd += 6;
         }
 

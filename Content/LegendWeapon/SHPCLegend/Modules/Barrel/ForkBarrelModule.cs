@@ -1,4 +1,4 @@
-using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
+﻿using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
 using System;
 using System.Collections.Generic;
 using Terraria;
@@ -19,8 +19,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
         private readonly Dictionary<int, int> _timers = new();
 
         public override void Apply(ref ShootContext ctx) {
-            ctx.DamageMul += -0.1f;
-            ctx.ManaCostMul += 0.15f;
+            ctx.DamageMul += -0.15f;
+            ctx.ManaCostMul += 0.25f;
         }
 
         public override void OnBeamAI(CyberTraceBeamProj beam) {

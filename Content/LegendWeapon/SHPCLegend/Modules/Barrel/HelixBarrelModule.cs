@@ -1,4 +1,4 @@
-using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
+﻿using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
 using System;
 using System.Collections.Generic;
 using Terraria;
@@ -18,9 +18,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
         private readonly Dictionary<int, float> _angles = new();
 
         public override void Apply(ref ShootContext ctx) {
-            ctx.BeamCountAdd += 1;
-            ctx.SpreadMul += -0.95f;
-            ctx.DamageMul += -0.08f;
+            ctx.SpreadMul += -1f;
+            ctx.DamageMul += -0.1f;
             ctx.BeamSpeedMul += -0.1f;
         }
 

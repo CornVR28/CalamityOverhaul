@@ -15,9 +15,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
         public override Color TintColor => new(255, 100, 200);
 
         public override void Apply(ref ShootContext ctx) {
-            ctx.HomingMul += 0.35f;
             ctx.CritAdd += 5;
-            ctx.SpreadMul += -0.15f;
         }
 
         public override void OnBeamHitNPC(CyberTraceBeamProj beam, NPC target, NPC.HitInfo hit, int damageDone) {

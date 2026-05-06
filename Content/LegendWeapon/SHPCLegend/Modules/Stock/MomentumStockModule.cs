@@ -1,4 +1,4 @@
-using CalamityOverhaul.Content.PRTTypes;
+﻿using CalamityOverhaul.Content.PRTTypes;
 using InnoVault.PRT;
 using Terraria;
 
@@ -17,15 +17,15 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
         private const int MaxStacks = 6;
         private const float MoveThreshold = 4.5f;
         private const int StackUpInterval = 14;
-        private const float AttackSpeedPerStack = 0.05f;
-        private const float BeamSpeedPerStack = 0.08f;
+        private const float AttackSpeedPerStack = 0.04f;
+        private const float BeamSpeedPerStack = 0.06f;
 
         private int _stacks;
         private int _stackUpTimer;
 
         public override void Apply(ref ShootContext ctx) {
             ctx.DamageMul += -0.05f;
-            ctx.SpreadMul += 0.10f;
+            ctx.SpreadMul += 0.25f;
             //层数动态注入
             ctx.AttackSpeedMul += _stacks * AttackSpeedPerStack;
             ctx.BeamSpeedMul += _stacks * BeamSpeedPerStack;

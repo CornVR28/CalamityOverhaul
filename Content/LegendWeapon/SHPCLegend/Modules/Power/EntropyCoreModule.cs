@@ -1,4 +1,4 @@
-using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
+﻿using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
 using CalamityOverhaul.Content.PRTTypes;
 using InnoVault.PRT;
 using System;
@@ -23,9 +23,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
         private readonly Dictionary<int, float> _entropy = new();
 
         public override void Apply(ref ShootContext ctx) {
-            ctx.OrbSpeedMul += -0.15f;
-            ctx.DamageMul += 0.05f;
-            ctx.ManaCostMul += 0.30f;
+            ctx.OrbSpeedMul += -0.2f;
+            ctx.ManaCostMul += 0.5f;
         }
 
         public override void OnOrbFlyingAI(CyberChargeOrbProj orb) {
@@ -72,8 +71,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
                     ModContent.ProjectileType<CyberDetonationProj>(),
                     dmg, 0f, orb.Projectile.owner, ai0: 0.4f + ratio * 0.4f);
                 if (idx >= 0 && idx < Main.maxProjectiles) {
-                    //余波半径 120-220 像素
-                    Main.projectile[idx].localAI[2] = MathHelper.Lerp(120f, 220f, ratio);
+                    //余波半径 120-640 像素
+                    Main.projectile[idx].localAI[2] = MathHelper.Lerp(120f, 640f, ratio);
                 }
             }
         }

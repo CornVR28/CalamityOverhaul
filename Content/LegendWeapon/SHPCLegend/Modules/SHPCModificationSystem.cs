@@ -26,7 +26,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
                 mod.Apply(ref ctx);
             }
             if (sp.OverkillStacks > 0) {
-                ctx.DamageMul += sp.OverkillStacks * 0.03f;
+                ctx.DamageMul += sp.OverkillStacks * 0.02f;
             }
             return ctx;
         }

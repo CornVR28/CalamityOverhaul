@@ -1,4 +1,4 @@
-using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
+﻿using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
 using System.Collections.Generic;
 using Terraria;
 using Terraria.ModLoader;
@@ -24,8 +24,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
 
         public override void Apply(ref ShootContext ctx) {
             ctx.BeamCountAdd += 1;
-            ctx.DamageMul += -0.10f;
-            ctx.SpreadMul += 0.10f;
+            ctx.DamageMul += -0.05f;
+            ctx.SpreadMul += 0.15f;
         }
 
         public override void OnBeamAI(CyberTraceBeamProj beam) {

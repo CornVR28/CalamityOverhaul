@@ -1,4 +1,4 @@
-using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
+﻿using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
 using System;
 using Terraria;
 using Terraria.ModLoader;
@@ -22,7 +22,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
         private int _hitCount;
 
         public override void Apply(ref ShootContext ctx) {
-            ctx.DamageMul += -0.05f;
+            ctx.DamageMul += -0.1f;
             ctx.ManaCostMul += 0.20f;
         }
 

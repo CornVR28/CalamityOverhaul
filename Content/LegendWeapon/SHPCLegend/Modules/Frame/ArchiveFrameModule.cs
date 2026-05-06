@@ -1,4 +1,4 @@
-using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
+﻿using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
 using System;
 using Terraria;
 using Terraria.ModLoader;
@@ -23,7 +23,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
 
         public override void Apply(ref ShootContext ctx) {
             ctx.DamageMul += 0.08f;
-            ctx.ManaCostMul += 0.10f;
+            ctx.ManaCostMul += 0.15f;
         }
 
         public override void OnBeamHitNPC(CyberTraceBeamProj beam, NPC target, NPC.HitInfo hit, int damageDone) {
@@ -47,13 +47,13 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
             Player owner = Main.player[source.owner];
             if (owner == null || !owner.active) return;
 
-            int dmg = Math.Max((int)(Threshold * 0.10f), 1);
+            int dmg = Math.Max((int)(Threshold * 0.25f), 1);
             int idx = Projectile.NewProjectile(source.GetSource_FromThis(),
                 owner.Center, Vector2.Zero,
                 ModContent.ProjectileType<CyberDetonationProj>(),
                 dmg, 0f, source.owner, ai0: 0.7f);
             if (idx >= 0 && idx < Main.maxProjectiles) {
-                Main.projectile[idx].localAI[2] = 220f;
+                Main.projectile[idx].localAI[2] = 300f;
             }
             if (source.owner == Main.myPlayer) {
                 CombatText.NewText(owner.getRect(), new Color(255, 200, 60),

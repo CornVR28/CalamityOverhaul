@@ -1,4 +1,4 @@
-namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
+﻿namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
 {
     /// <summary>
     /// 人体工学枪托：大幅降低法力消耗，提升攻速与精准，持久输出的核心托架
@@ -11,7 +11,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
 
         public override void Apply(ref ShootContext ctx) {
             ctx.ManaCostMul += -0.3f;
-            ctx.AttackSpeedMul += 0.12f;
+            ctx.AttackSpeedMul += 0.06f;
             ctx.SpreadMul += -0.1f;
         }
     }

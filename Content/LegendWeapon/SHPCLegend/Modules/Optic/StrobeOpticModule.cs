@@ -1,4 +1,4 @@
-using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
+﻿using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
 using Terraria;
 using Terraria.ID;
 
@@ -15,8 +15,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
         public override Color TintColor => new(180, 220, 255);
 
         public override void Apply(ref ShootContext ctx) {
-            ctx.BeamExtraPierce += 2;
-            ctx.AttackSpeedMul += 0.1f;
+            ctx.BeamExtraPierce += 1;
+            ctx.AttackSpeedMul += 0.08f;
         }
 
         public override void OnBeamAI(CyberTraceBeamProj beam) {

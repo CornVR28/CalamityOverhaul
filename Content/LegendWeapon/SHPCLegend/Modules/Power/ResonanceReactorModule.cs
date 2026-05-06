@@ -1,4 +1,4 @@
-using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
+﻿using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
 using CalamityOverhaul.Content.PRTTypes;
 using InnoVault.PRT;
 using System;
@@ -22,8 +22,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
         private int _ringTimer;
 
         public override void Apply(ref ShootContext ctx) {
-            ctx.ChargeTimeMul += 0.10f;
-            ctx.OrbExplosionRadiusMul += 0.30f;
+            ctx.ChargeTimeMul += 0.15f;
+            ctx.OrbExplosionRadiusMul += 0.25f;
             ctx.ManaCostMul += 0.20f;
         }
 
@@ -50,13 +50,13 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
             if (orb.Projectile.owner != Main.myPlayer) return;
             Player owner = Main.player[orb.Projectile.owner];
             if (owner == null || !owner.active) return;
-            int dmg = Math.Max(orb.Projectile.damage / 4, 1);
+            int dmg = Math.Max(orb.Projectile.damage / 2, 1);
             int idx = Projectile.NewProjectile(orb.Projectile.GetSource_FromThis(),
                 owner.Center, Vector2.Zero,
                 ModContent.ProjectileType<CyberDetonationProj>(),
                 dmg, 0f, orb.Projectile.owner, ai0: 0.3f);
             if (idx >= 0 && idx < Main.maxProjectiles) {
-                Main.projectile[idx].localAI[2] = 140f;
+                Main.projectile[idx].localAI[2] = 200f;
             }
         }
     }

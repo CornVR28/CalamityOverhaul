@@ -1,4 +1,4 @@
-using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
+﻿using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
 using Terraria;
 
 namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
@@ -16,7 +16,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
         public override void Apply(ref ShootContext ctx) {
             ctx.OrbFlyingAttract = true;
             ctx.OrbExplosionRadiusMul += 0.4f;
-            ctx.ManaCostMul += 0.45f;
+            ctx.ManaCostMul += 0.6f;
         }
 
         public override void OnOrbFlyingAI(CyberChargeOrbProj orb) {

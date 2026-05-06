@@ -1,4 +1,4 @@
-using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
+﻿using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
 using CalamityOverhaul.Content.PRTTypes;
 using InnoVault.PRT;
 using System;
@@ -21,9 +21,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
         private int _timer;
 
         public override void Apply(ref ShootContext ctx) {
-            ctx.ChargeTimeMul += 0.15f;
+            ctx.ChargeTimeMul += 0.1f;
             ctx.OrbExplosionRadiusMul += 0.20f;
-            ctx.ManaCostMul += 0.25f;
+            ctx.ManaCostMul += 0.3f;
         }
 
         public override void OnOrbCharging(CyberChargeOrbProj orb, Player owner) {
@@ -46,14 +46,13 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
             }
 
             if (orb.Projectile.owner != Main.myPlayer) return;
-            int dmg = Math.Max(orb.Projectile.damage / 6, 1);
+            int dmg = Math.Max(orb.Projectile.damage / 4, 1);
             int idx = Projectile.NewProjectile(orb.Projectile.GetSource_FromThis(),
                 orb.Projectile.Center, Vector2.Zero,
                 ModContent.ProjectileType<CyberDetonationProj>(),
                 dmg, 0f, orb.Projectile.owner, ai0: 0.1f);
             if (idx >= 0 && idx < Main.maxProjectiles) {
-                //蓄力期间不能太大，固定为 55px 范围
-                Main.projectile[idx].localAI[2] = 55f;
+                Main.projectile[idx].localAI[2] = 90f;
             }
         }
     }

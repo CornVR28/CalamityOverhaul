@@ -1,4 +1,4 @@
-namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
+﻿namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
 {
     /// <summary>
     /// 风暴枪托：高攻速多弹幕全屏覆盖，单发伤害大幅折损，量取胜
@@ -11,7 +11,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
         public override Color TintColor => new(255, 120, 50);
 
         public override void Apply(ref ShootContext ctx) {
-            ctx.AttackSpeedMul += 0.5f;
+            ctx.AttackSpeedMul += 0.4f;
             ctx.BeamCountAdd += 1;
             ctx.DamageMul += -0.22f;
             ctx.SpreadMul += 0.5f;

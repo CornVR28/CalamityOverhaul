@@ -1,4 +1,4 @@
-using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
+﻿using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
 using System;
 using System.Collections.Generic;
 using Terraria;
@@ -19,8 +19,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
         private readonly HashSet<int> _mirrored = new();
 
         public override void Apply(ref ShootContext ctx) {
-            ctx.DamageMul += -0.1f;
-            ctx.ManaCostMul += 0.2f;
+            ctx.DamageMul += -0.2f;
+            ctx.ManaCostMul += 0.5f;
         }
 
         public override void OnBeamAI(CyberTraceBeamProj beam) {

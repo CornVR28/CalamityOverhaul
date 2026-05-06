@@ -1,4 +1,4 @@
-using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
+﻿using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
 using System;
 using Terraria;
 using Terraria.ModLoader;
@@ -20,8 +20,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
         public override void Apply(ref ShootContext ctx) {
             ctx.BeamChainCount += 1;
             ctx.BeamChainRange = MathF.Max(ctx.BeamChainRange, 240f) + 40f;
-            ctx.DamageMul += -0.05f;
-            ctx.ManaCostMul += 0.15f;
+            ctx.DamageMul += -0.1f;
+            ctx.ManaCostMul += 0.2f;
         }
 
         public override void OnBeamHitNPC(CyberTraceBeamProj beam, NPC target, NPC.HitInfo hit, int damageDone) {

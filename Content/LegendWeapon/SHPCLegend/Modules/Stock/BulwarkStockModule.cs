@@ -1,4 +1,4 @@
-using Terraria;
+﻿using Terraria;
 
 namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
 {
@@ -15,9 +15,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
         private const float EnduranceBoost = 0.06f;
 
         public override void Apply(ref ShootContext ctx) {
-            ctx.ChargeTimeMul += 0.10f;
-            ctx.DamageMul += -0.04f;
-            ctx.ManaCostMul += 0.10f;
+            ctx.ChargeTimeMul += 0.15f;
+            ctx.DamageMul += -0.05f;
+            ctx.ManaCostMul += -0.10f;
         }
 
         public override void OnPlayerUpdate(Player player) {

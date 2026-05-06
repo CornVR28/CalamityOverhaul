@@ -1,4 +1,4 @@
-namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
+﻿namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
 {
     /// <summary>
     /// 狙击瞄具：大幅提升弹速与射程，牺牲追踪能力与攻速
@@ -14,9 +14,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
             ctx.BeamSpeedMul += 1.5f;
             ctx.BeamLifeMul += 0.8f;
             ctx.DamageMul += 0.3f;
-            ctx.AttackSpeedMul += -0.35f;
-            ctx.HomingMul += -0.7f;
-            ctx.SpreadMul += -0.5f;
+            ctx.AttackSpeedMul += -0.45f;
+            ctx.HomingMul += -0.99f;
+            ctx.SpreadMul += -1f;
         }
     }
 }

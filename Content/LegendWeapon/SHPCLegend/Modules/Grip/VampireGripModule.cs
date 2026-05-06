@@ -1,4 +1,4 @@
-using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
+﻿using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
 using Terraria;
 
 namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
@@ -14,24 +14,26 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
         public override Color TintColor => new(200, 40, 60);
 
         public override void Apply(ref ShootContext ctx) {
-            ctx.DamageMul += -0.05f;
+            ctx.DamageMul += -0.5f;
         }
 
         public override void OnBeamHitNPC(CyberTraceBeamProj beam, NPC target, NPC.HitInfo hit, int damageDone) {
+
             Player owner = Main.player[beam.Projectile.owner];
             if (owner == null || !owner.active) return;
-            int heal = System.Math.Min(damageDone / 12, 10);
+            int heal = System.Math.Min(damageDone / 100, 3);
             if (heal <= 0) return;
             owner.statLife = System.Math.Min(owner.statLife + heal, owner.statLifeMax2);
-            CombatText.NewText(owner.getRect(), new Color(220, 60, 80), heal, dramatic: false, dot: true);
+            CombatText.NewText(owner.getRect(), new Color(80, 230, 80), heal, dramatic: false, dot: true);
         }
 
         public override void OnLaserHitNPC(CyberPrismLaserProj laser, NPC target, NPC.HitInfo hit, int damageDone) {
             Player owner = Main.player[laser.Projectile.owner];
             if (owner == null || !owner.active) return;
-            int heal = System.Math.Min(damageDone / 20, 4);
+            int heal = System.Math.Min(damageDone / 100, 2);
             if (heal <= 0) return;
             owner.statLife = System.Math.Min(owner.statLife + heal, owner.statLifeMax2);
+            CombatText.NewText(owner.getRect(), new Color(80, 230, 80), heal, dramatic: false, dot: true);
         }
     }
 }
