@@ -198,7 +198,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend.TrialQuests
                 TrialTitles[trialIndex], summaryText, QuestCategory) {
                 Priority = TRIAL_COUNT - trialIndex,
                 EntryStyle = new OceanEntryStyle(),
-                TrackerStyle = new OceanTrackerWidgetStyle(),
+                TrackerStyle = new HalibutTrackerWidgetStyle(),
                 TargetNpcTypes = trialTargetNpcs[trialIndex],
                 IsCompletedCheck = trialCompletedChecks[trialIndex],
                 WaitingHint = TrackerWaiting,
