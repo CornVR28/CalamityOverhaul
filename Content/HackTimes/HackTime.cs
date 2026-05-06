@@ -19,7 +19,11 @@ namespace CalamityOverhaul.Content.HackTimes
     {
         public string LocalizationCategory => "UI";
 
-        public override void Unload() => Reset();
+        public override void Unload() {
+            Reset();
+            //模组卸载时也要专门卸载条件注册，写在这里提醒自己
+            HackTimeAccess.Reset();
+        }
 
         public override void OnWorldUnload() => Reset();
 
@@ -702,7 +706,6 @@ namespace CalamityOverhaul.Content.HackTimes
             HackTimeUI.Instance?.Queue?.Clear();
             HackEffectTracker.Reset();
             RamSystem.Reset();
-            HackTimeAccess.Reset();
         }
     }
 }
