@@ -25,6 +25,10 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalKingSlime
         private int origLifeMax = -1;
         private int origDamage = -1;
 
+        //原版史莱姆王基础碰撞箱尺寸（width=98, height=92），用于按 scale 动态缩放命中盒
+        private const int BaseHitboxWidth = 98;
+        private const int BaseHitboxHeight = 92;
+
         #region 初始化
 
         public override void SetProperty() {
@@ -121,6 +125,8 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalKingSlime
 
         /// <summary>
         /// 模拟原版"血量越低体型越小"的缩放，再叠加 SquishY 提供蹲伏 / 拉伸视觉。
+        /// <br/>同时同步调整 <see cref="NPC.width"/> / <see cref="NPC.height"/>，
+        /// 让碰撞箱实时跟随贴图缩放，避免出现"看起来很大却打不到"或"很小但仍占大格子"的问题。
         /// </summary>
         private void UpdateScale() {
             float lifePct = MathHelper.Clamp(npc.life / (float)MathHelper.Max(npc.lifeMax, 1), 0f, 1f);
@@ -131,6 +137,33 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalKingSlime
             //把纵向压扁简单转换为整体缩放变化（uniform scale）
             float visualScale = baseScale * (1f - squish * 0.30f);
             npc.scale = MathHelper.Clamp(visualScale, 0.45f, 2.0f);
+
+            SyncHitboxWithScale();
+        }
+
+        /// <summary>
+        /// 根据 <see cref="NPC.scale"/> 重新计算碰撞箱尺寸。
+        /// <br/>以"底部居中"为锚点（脚底贴地），通过先减后加 <see cref="NPC.position"/>
+        /// 抵消尺寸变化导致的瞬移，与原版史莱姆王逻辑一致。
+        /// </summary>
+        private void SyncHitboxWithScale() {
+            int newWidth = (int)(BaseHitboxWidth * npc.scale);
+            int newHeight = (int)(BaseHitboxHeight * npc.scale);
+            //至少保留 2 像素，避免极端缩放导致碰撞箱归零
+            if (newWidth < 2) newWidth = 2;
+            if (newHeight < 2) newHeight = 2;
+
+            if (newWidth == npc.width && newHeight == npc.height) {
+                return;
+            }
+
+            //以底部中心为锚：先把锚点位移补回去，改完尺寸再减回来
+            npc.position.X += npc.width / 2f;
+            npc.position.Y += npc.height;
+            npc.width = newWidth;
+            npc.height = newHeight;
+            npc.position.X -= npc.width / 2f;
+            npc.position.Y -= npc.height;
         }
 
         #endregion
