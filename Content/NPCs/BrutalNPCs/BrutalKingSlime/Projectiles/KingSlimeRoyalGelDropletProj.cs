@@ -1,4 +1,4 @@
-using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;
 using Terraria.GameContent;
@@ -96,8 +96,8 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalKingSlime.Projectiles
 
             float scaleMul;
             float coreAlpha;
-            Color royal = new Color(160, 110, 255);
-            Color core = new Color(255, 230, 140);
+            Color royal = Color.GreenYellow;
+            Color core = Color.Red;
 
             if (Splashing) {
                 float t = MathHelper.Clamp(SplashTimer / 14f, 0f, 1f);
