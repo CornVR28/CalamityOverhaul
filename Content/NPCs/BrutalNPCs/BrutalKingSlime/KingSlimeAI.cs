@@ -26,8 +26,8 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalKingSlime
         private int origDamage = -1;
 
         //基础碰撞箱尺寸，用于按 scale 动态缩放命中盒
-        private const int BaseHitboxWidth = 120;
-        private const int BaseHitboxHeight = 110;
+        private static int BaseHitboxWidth => 120;
+        private static int BaseHitboxHeight => 110;
 
         #region 初始化
 
