@@ -49,6 +49,9 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
         /// <summary>缓存的被关注条目引用</summary>
         private readonly List<EntrustEntryData> trackedEntries = [];
 
+        /// <summary><see cref="Active"/> 中查询可见性时复用的临时缓冲，避免每帧分配</summary>
+        private static readonly List<EntrustEntryData> sharedVisibilityQueryBuffer = [];
+
         /// <summary>窗口纵向偏移（可拖拽），-1 表示尚未初始化</summary>
         private float widgetYOffset = -1f;
 
@@ -71,10 +74,27 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
                 //动画尚未结束时保持激活
                 if (slideProgress > 0.005f) return true;
                 if (ShouldTemporarilyHide()) return false;
-                //直接查询管理器源数据，避免缓存列表导致的首帧不活跃问题
+                //直接查询管理器源数据，避免缓存列表导致的首帧不活跃问题，
+                //同时叠加条目自身的 IsTrackerVisible() 过滤——保证"全部条目都被自身条件隐藏"时不再激活
                 var manager = QuestManagerUI.Instance;
-                return manager != null && manager.HasTrackedEntries();
+                return manager != null && HasVisibleTrackedEntry(manager);
             }
+        }
+
+        /// <summary>是否存在至少一条同时满足"被关注 + 自身可见性条件"的条目</summary>
+        private static bool HasVisibleTrackedEntry(QuestManagerUI manager) {
+            var buffer = sharedVisibilityQueryBuffer;
+            buffer.Clear();
+            manager.GetTrackedEntries(buffer);
+            bool any = false;
+            for (int i = 0; i < buffer.Count; i++) {
+                if (buffer[i].IsTrackerVisible()) {
+                    any = true;
+                    break;
+                }
+            }
+            buffer.Clear();
+            return any;
         }
 
         /// <summary>追踪栏当前是否已基本完全展示</summary>
@@ -200,6 +220,14 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
             if (manager == null) return;
 
             manager.GetTrackedEntries(trackedEntries);
+
+            //叠加条目自身的可见性过滤（如"必须手持对应武器"），
+            //过滤后的条目即使处于 Tracked 状态也不会出现在左侧追踪栏
+            for (int i = trackedEntries.Count - 1; i >= 0; i--) {
+                if (!trackedEntries[i].IsTrackerVisible()) {
+                    trackedEntries.RemoveAt(i);
+                }
+            }
         }
 
         private static bool ShouldTemporarilyHide() {

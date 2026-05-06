@@ -94,6 +94,20 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
         #region 追踪面板内容
 
         /// <summary>
+        /// 左侧追踪窗口的可见性检查委托——返回 false 时，
+        /// 即使本条目处于 <see cref="QuestEntryStatus.Tracked"/> 也不会显示在屏幕左侧的追踪栏里，
+        /// 但管理器主面板上的"已关注"状态仍然保留。<br/>
+        /// 典型用途：要求玩家手持指定武器/位于指定区域时才把追踪信息显露给玩家
+        /// </summary>
+        public Func<bool> TrackerVisibilityCheck { get; set; }
+
+        /// <summary>
+        /// 是否在左侧追踪窗口中显示，默认转发到 <see cref="TrackerVisibilityCheck"/>，
+        /// 子类可重写以实现更复杂的显示策略
+        /// </summary>
+        public virtual bool IsTrackerVisible() => TrackerVisibilityCheck?.Invoke() ?? true;
+
+        /// <summary>
         /// 获取追踪面板中显示的详细内容行，
         /// 默认返回Summary单行，子类可重写以提供多行内容
         /// </summary>
