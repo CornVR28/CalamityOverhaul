@@ -242,10 +242,10 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalKingSlime
                 _ => 0.40f,
             };
             Color haloColor = mode switch {
-                KingSlimeAuraMode.Slamming => Color.Lerp(new Color(255, 245, 200), new Color(255, 220, 100), 0.4f + 0.55f * pulse),
-                KingSlimeAuraMode.Charging => Color.Lerp(new Color(110, 80, 230), new Color(255, 220, 110), 0.35f + 0.55f * pulse * progress),
-                KingSlimeAuraMode.Enraged => Color.Lerp(new Color(80, 50, 180), new Color(160, 120, 255), 0.4f + 0.5f * pulse),
-                _ => Color.Lerp(new Color(60, 30, 140), new Color(120, 90, 220), 0.40f + 0.30f * pulse),
+                KingSlimeAuraMode.Slamming => Color.Lerp(new Color(255, 100, 0), new Color(255, 215, 0), 0.4f + 0.55f * pulse),
+                KingSlimeAuraMode.Charging => Color.Lerp(new Color(138, 3, 3), new Color(220, 20, 60), 0.35f + 0.55f * pulse * progress),
+                KingSlimeAuraMode.Enraged => Color.Lerp(new Color(60, 0, 0), new Color(180, 0, 0), 0.4f + 0.5f * pulse),
+                _ => Color.Lerp(new Color(100, 10, 10), new Color(196, 156, 72), 0.40f + 0.30f * pulse),
             };
             haloColor *= baseStrength * intensity;
 
