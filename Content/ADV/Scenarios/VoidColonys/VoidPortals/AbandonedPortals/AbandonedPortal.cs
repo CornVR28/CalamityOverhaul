@@ -59,7 +59,6 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.VoidPortals.Abandon
             hoverSeed = Main.rand.NextFloat() * 100f;
             Width = 416;
             Height = 300;
-            DrawExtendMode = Math.Max(Width, Height) + 80;
             RepairStateByte = AbandonedPortalSystem.SavedStateByte;
             RepairTimer = Math.Clamp(AbandonedPortalSystem.SavedRepairTimer, 0, AbandonedPortalSession.RepairDurationFrames);
             if (RepairTimer >= AbandonedPortalSession.RepairDurationFrames) {

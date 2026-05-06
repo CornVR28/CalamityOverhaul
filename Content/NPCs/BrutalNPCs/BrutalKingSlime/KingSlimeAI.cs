@@ -2,7 +2,6 @@
 using CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalKingSlime.States;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
-using Terraria.GameContent;
 using Terraria.ID;
 
 namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalKingSlime
@@ -14,6 +13,8 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalKingSlime
     /// </summary>
     internal class KingSlimeAI : CWRNPCOverride
     {
+        [VaultLoaden("Content/NPCs/BrutalNPCs/BrutalKingSlime/")]
+        public static Texture2D KingSlime;
         public override int TargetID => NPCID.KingSlime;
 
         private KingSlimeStateMachine stateMachine;
@@ -188,54 +189,76 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalKingSlime
 
         #region 绘制
 
+        /// <summary>
+        /// 自定义贴图尺寸（单帧 170 x 150），如果未来更换贴图，仅改这里即可。
+        /// </summary>
+        private const int BodyTexWidth = 170;
+        private const int BodyTexHeight = 150;
+
+        /// <summary>
+        /// 计算本体绘制所需的贴图、源矩形、原点和位置等参数。
+        /// <br/>原点采用"底部居中"——这样无论 <c>npc.scale</c> 如何变化，
+        /// 史莱姆视觉脚底始终贴合 <c>npc.Bottom</c>，避免血量低时整体悬浮在空中。
+        /// </summary>
+        private bool TryGetBodyDrawParams(out Texture2D texture, out Rectangle frame,
+            out Vector2 origin, out Vector2 drawPos, out SpriteEffects effects, Vector2 screenPos) {
+            texture = KingSlime;
+            if (texture == null) {
+                frame = default;
+                origin = default;
+                drawPos = default;
+                effects = SpriteEffects.None;
+                return false;
+            }
+
+            frame = new Rectangle(0, 0, BodyTexWidth, BodyTexHeight);
+            origin = new Vector2(BodyTexWidth / 2f, BodyTexHeight);
+            drawPos = new Vector2(npc.Center.X, npc.position.Y + npc.height) - screenPos
+                + new Vector2(0, npc.gfxOffY);
+            effects = npc.spriteDirection == -1 ? SpriteEffects.FlipHorizontally : SpriteEffects.None;
+            return true;
+        }
+
         public override bool? Draw(SpriteBatch spriteBatch, Vector2 screenPos, Color drawColor) {
             //蓄力 / 演出附加特效（蓄力光圈、瞄准线）画在身体之前
             if (stateContext != null) {
                 KingSlimeRenderHelper.DrawChargeEffect(spriteBatch, stateContext);
             }
 
+            if (!TryGetBodyDrawParams(out Texture2D bodyTex, out Rectangle frame,
+                out Vector2 origin, out Vector2 drawPos, out SpriteEffects effects, screenPos)) {
+                //贴图尚未加载完成时，回退到原版绘制
+                return null;
+            }
+
+            var (mode, intensity, progress) = GetAuraVisuals();
+
             //外圈描边光晕——确保夜晚远距离也能看清史莱姆王轮廓
             if (npc.alpha < 240) {
-                Texture2D npcTex = TextureAssets.Npc[npc.type].Value;
-                Rectangle frame = npc.frame;
-                Vector2 origin = new Vector2(frame.Width / 2f, frame.Height / 2f);
-                Vector2 drawPos = npc.Center - screenPos + new Vector2(0, npc.gfxOffY + 40);
-                SpriteEffects effects = npc.spriteDirection == -1 ? SpriteEffects.FlipHorizontally : SpriteEffects.None;
-
-                var (mode, intensity, progress) = GetAuraVisuals();
-                KingSlimeRenderHelper.DrawRoyalHalo(spriteBatch, npcTex, drawPos, frame,
+                KingSlimeRenderHelper.DrawRoyalHalo(spriteBatch, bodyTex, drawPos, frame,
                     npc.rotation, origin, new Vector2(npc.scale), effects, mode, intensity, progress);
             }
 
-            //返回 null 让原版正常绘制本体（保留皇冠、眼睛、HP 缩放等原版细节）
+            //本体套上皇室光环着色器；alpha 极高时跳过着色器，直接淡出
+            bool shaderApplied = false;
+            if (npc.alpha < 240) {
+                shaderApplied = KingSlimeRenderHelper.BeginRoyalAuraShader(
+                    spriteBatch, bodyTex, frame, mode, intensity, progress, seed: 0f);
+            }
+
+            spriteBatch.Draw(bodyTex, drawPos, frame, drawColor,
+                npc.rotation, origin, npc.scale, effects, 0f);
+
+            if (shaderApplied) {
+                //KingSlimeRenderHelper.EndRoyalAuraShader(spriteBatch);
+            }
+
             return false;
         }
 
         public override bool PostDraw(SpriteBatch spriteBatch, Vector2 screenPos, Color drawColor) {
-            //在原版本体绘制后，叠加一层应用了皇室光环着色器的"虚像"
-            //着色器中的边描和内部光纹保持原本贴图细节不变，只增强视觉冲击。
-            if (npc.alpha >= 240) return true;
-
-            Texture2D npcTex = TextureAssets.Npc[npc.type].Value;
-            Rectangle frame = npc.frame;
-            Vector2 origin = new Vector2(frame.Width / 2f, frame.Height / 2f);
-            Vector2 drawPos = npc.Center - screenPos + new Vector2(0, npc.gfxOffY + 40);
-            SpriteEffects effects = npc.spriteDirection == -1 ? SpriteEffects.FlipHorizontally : SpriteEffects.None;
-
-            var (mode, intensity, progress) = GetAuraVisuals();
-
-            bool shaderApplied = KingSlimeRenderHelper.BeginRoyalAuraShader(
-                spriteBatch, npcTex, frame, mode, intensity, progress, seed: 0f);
-
-            //半透明叠加，避免破坏原版皇冠细节
-            Color overlay = Color.White * 0.85f;
-            spriteBatch.Draw(npcTex, drawPos, frame, overlay,
-                npc.rotation, origin, npc.scale, effects, 0f);
-
-            if (shaderApplied) {
-                KingSlimeRenderHelper.EndRoyalAuraShader(spriteBatch);
-            }
-
+            //本体绘制已经在 Draw 中完成，PostDraw 不再做任何叠加，
+            //返回 false 跳过原版残留的皇冠 / 眼睛 / 凝胶贴图，避免与自定义贴图错位。
             return false;
         }
 

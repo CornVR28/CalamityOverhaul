@@ -1,4 +1,4 @@
-using CalamityOverhaul.Common;
+﻿using CalamityOverhaul.Common;
 using CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalKingSlime.Core;
 using CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalKingSlime.Projectiles;
 using Microsoft.Xna.Framework.Graphics;
@@ -16,10 +16,10 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalKingSlime
     internal static class KingSlimeRenderHelper
     {
         /// <summary>
-        /// 皇室主色板：核心金 + 皇室紫蓝
+        /// 皇室主色板
         /// </summary>
-        public static readonly Vector3 RoyalCore = new Color(255, 220, 110).ToVector3();
-        public static readonly Vector3 RoyalEdge = new Color(110, 80, 230).ToVector3();
+        public static Vector3 RoyalCore => Color.Red.ToVector3();
+        public static Vector3 RoyalEdge => Color.GreenYellow.ToVector3();
 
         private static void BeginAdditive(SpriteBatch spriteBatch) {
             spriteBatch.End();
