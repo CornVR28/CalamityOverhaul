@@ -28,6 +28,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend.TrialQuests
         public static LocalizedText QuestCategory { get; private set; }
         public static LocalizedText TrackerWaiting { get; private set; }
         public static LocalizedText TrackerFighting { get; private set; }
+        public static LocalizedText TrackerBrief { get; private set; }
 
         /// <summary>每条试炼的标题</summary>
         public static LocalizedText[] TrialTitles { get; private set; }
@@ -44,6 +45,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend.TrialQuests
             QuestCategory = this.GetLocalization(nameof(QuestCategory), () => "比目鱼传说");
             TrackerWaiting = this.GetLocalization(nameof(TrackerWaiting), () => "目标不在场，等待召唤...");
             TrackerFighting = this.GetLocalization(nameof(TrackerFighting), () => "{0}: {1:0%}");
+            TrackerBrief = this.GetLocalization(nameof(TrackerBrief), () => "目标：{0}");
 
             TrialTitles = new LocalizedText[TRIAL_COUNT];
 
@@ -203,6 +205,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend.TrialQuests
                 IsCompletedCheck = trialCompletedChecks[trialIndex],
                 WaitingHint = TrackerWaiting,
                 FightingFormat = TrackerFighting,
+                BriefFormat = TrackerBrief,
                 //左侧追踪窗口仅在玩家手持比目鱼炮时显示，避免常驻打扰
                 TrackerVisibilityCheck = static () => Main.LocalPlayer.GetItem().type == HalibutOverride.ID,
             };

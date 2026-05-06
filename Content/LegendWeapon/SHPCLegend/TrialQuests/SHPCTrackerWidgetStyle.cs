@@ -1,4 +1,4 @@
-using CalamityOverhaul.Content.ADV.EntrustManager;
+﻿using CalamityOverhaul.Content.ADV.EntrustManager;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using Terraria;
@@ -52,18 +52,19 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.TrialQuests
             int symY = headerRect.Y + headerRect.Height / 2;
             DrawChevron(sb, px, uv, symX, symY, alpha);
 
-            //标题文字——细微深色投影 + 主体高光蓝
-            const float titleScale = 0.85f;
+            //标题文字——细微深色投影 + 主体高光蓝（字号略大于默认正文）
+            const float titleScale = 0.95f;
             int textX = headerRect.X + 20;
-            float textY = headerRect.Y + (headerRect.Height - 14f) / 2f;
+            //大字号下需略微下移基线，让顶部不贴顶
+            float textY = headerRect.Y + (headerRect.Height - 16f) / 2f;
             Vector2 titlePos = new(textX, textY);
 
             Utils.DrawBorderString(sb, title, titlePos + new Vector2(0, 1), ShadowInk * (alpha * 0.55f), titleScale);
             Utils.DrawBorderString(sb, title, titlePos, TitleSky * alpha, titleScale);
 
-            //下划线：紧贴文字宽度的实线 + 向右延伸的点阵
+            //下划线：紧贴文字宽度的实线 + 向右延伸的点阵（下移避开放大后的标题底部）
             int titlePixelW = (int)(font.MeasureString(title).X * titleScale);
-            int underY = headerRect.Bottom - 2;
+            int underY = headerRect.Bottom + 1;
             int solidLen = Math.Clamp(titlePixelW + 4, 18, headerRect.Width - 28);
             float p = MathF.Sin(pulse * 2f) * 0.18f + 0.82f;
             sb.Draw(px, new Rectangle(textX, underY, solidLen, 1), uv, NeonBlue * (alpha * 0.85f * p));
@@ -157,11 +158,12 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.TrialQuests
         public Color GetWidgetTextColor(float alpha) => TextSky * (alpha * 0.95f);
         public Color GetWidgetAccentColor(float alpha) => NeonBlue * alpha;
 
-        public int? GetPreferredWidth() => 230;
-        public int? GetMinHeight() => 50;
+        public int? GetPreferredWidth() => 240;
+        public int? GetMinHeight() => 62;
         public int? GetIdleCompactHeight(EntrustEntryData entry) {
+            //待机时折叠成"标题 + 下划线 + 描述 + 等待提示"的双行紧凑布局
             if (entry.Progress <= 0f && entry.Status != QuestEntryStatus.Completed)
-                return 44;
+                return 70;
             return null;
         }
     }

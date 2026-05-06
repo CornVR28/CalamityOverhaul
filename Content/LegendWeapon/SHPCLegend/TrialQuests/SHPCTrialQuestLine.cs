@@ -20,6 +20,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.TrialQuests
         public static LocalizedText QuestCategory { get; private set; }
         public static LocalizedText TrackerWaiting { get; private set; }
         public static LocalizedText TrackerFighting { get; private set; }
+        public static LocalizedText TrackerBrief { get; private set; }
         public static LocalizedText[] TrialTitles { get; private set; }
         public static LocalizedText[] TrialSummaries { get; private set; }
 
@@ -34,6 +35,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.TrialQuests
             QuestCategory = this.GetLocalization(nameof(QuestCategory), () => "SHPC·试炼");
             TrackerWaiting = this.GetLocalization(nameof(TrackerWaiting), () => "目标不在场，等待召唤...");
             TrackerFighting = this.GetLocalization(nameof(TrackerFighting), () => "{0}: {1:0%}");
+            TrackerBrief = this.GetLocalization(nameof(TrackerBrief), () => "采集目标：{0}");
 
             TrialTitles = new LocalizedText[TRIAL_COUNT];
             string[] defaultTitles = [
@@ -234,6 +236,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.TrialQuests
                 IsCompletedCheck = trialCompletedChecks[trialIndex],
                 WaitingHint = TrackerWaiting,
                 FightingFormat = TrackerFighting,
+                BriefFormat = TrackerBrief,
                 //左侧追踪窗口仅在玩家手持SHPC时显示，避免常驻打扰
                 TrackerVisibilityCheck = static () => Main.LocalPlayer.GetItem().type == CWRID.Item_SHPC,
             };

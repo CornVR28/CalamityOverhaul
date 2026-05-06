@@ -49,19 +49,20 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend.TrialQuests
             //头部记号——发光菱形珠粒（带柔和的生物荧光halo）
             DrawPearlSigil(sb, px, uv, headerRect.X + 9, headerRect.Y + headerRect.Height / 2, alpha);
 
-            //标题文字——水下散射投影 + 主体冰青
-            const float titleScale = 0.85f;
+            //标题文字——水下散射投影 + 主体冰青（字号略大于默认正文）
+            const float titleScale = 0.95f;
             int textX = headerRect.X + 20;
-            float textY = headerRect.Y + (headerRect.Height - 14f) / 2f;
+            //大字号下需略微下移基线，让顶部不贴顶
+            float textY = headerRect.Y + (headerRect.Height - 16f) / 2f;
             Vector2 titlePos = new(textX, textY);
 
             Utils.DrawBorderString(sb, title, titlePos + new Vector2(0, 1),
                 ShadowInk * (alpha * 0.55f), titleScale);
             Utils.DrawBorderString(sb, title, titlePos, TitleIce * alpha, titleScale);
 
-            //下划线——实线 + 三段水波点 ~
+            //下划线——实线 + 三段水波点 ~（下移避开放大后的标题底部）
             int titlePixelW = (int)(font.MeasureString(title).X * titleScale);
-            int underY = headerRect.Bottom - 2;
+            int underY = headerRect.Bottom + 1;
             int solidLen = Math.Clamp(titlePixelW + 4, 18, headerRect.Width - 40);
             float p = MathF.Sin(pulse * 1.6f) * 0.18f + 0.82f;
 
@@ -168,11 +169,12 @@ namespace CalamityOverhaul.Content.LegendWeapon.HalibutLegend.TrialQuests
         public Color GetWidgetTextColor(float alpha) => TextSea * (alpha * 0.95f);
         public Color GetWidgetAccentColor(float alpha) => SeaCyan * alpha;
 
-        public int? GetPreferredWidth() => 230;
-        public int? GetMinHeight() => 50;
+        public int? GetPreferredWidth() => 240;
+        public int? GetMinHeight() => 62;
         public int? GetIdleCompactHeight(EntrustEntryData entry) {
+            //待机时折叠成"标题 + 下划线 + 描述 + 等待提示"的双行紧凑布局
             if (entry.Progress <= 0f && entry.Status != QuestEntryStatus.Completed)
-                return 44;
+                return 70;
             return null;
         }
     }
