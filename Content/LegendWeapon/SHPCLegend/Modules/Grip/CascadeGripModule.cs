@@ -23,6 +23,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
 
         public override void OnBeamHitNPC(CyberTraceBeamProj beam, NPC target, NPC.HitInfo hit, int damageDone) {
             if (beam.Projectile.owner != Main.myPlayer) return;
+            if (beam.IsDerived) return;
             _hitCount++;
             if (_hitCount < 5) return;
             _hitCount = 0;
