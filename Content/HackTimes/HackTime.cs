@@ -702,6 +702,7 @@ namespace CalamityOverhaul.Content.HackTimes
             HackTimeUI.Instance?.Queue?.Clear();
             HackEffectTracker.Reset();
             RamSystem.Reset();
+            HackTimeAccess.Reset();
         }
     }
 }

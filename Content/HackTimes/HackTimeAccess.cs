@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Terraria;
 using Terraria.ModLoader;
@@ -82,6 +82,7 @@ namespace CalamityOverhaul.Content.HackTimes
             if (player == null || !player.active || player.dead) {
                 return false;
             }
+
             for (int i = 0; i < conditions.Count; i++) {
                 var c = conditions[i];
                 if (c == null) {
@@ -116,30 +117,6 @@ namespace CalamityOverhaul.Content.HackTimes
             public bool IsSatisfied(Player player) => predicate.Invoke(player);
 
             public override string ToString() => Description ?? base.ToString();
-        }
-    }
-
-    /// <summary>
-    /// 默认的骇客时间使用条件注册器
-    /// <br/>在加载阶段挂入"持有 SHPC（智能武器）"的判定，并在卸载时清理全部条件
-    /// </summary>
-    internal class HackTimeAccessDefaults : ModSystem
-    {
-        public override void PostSetupContent() {
-            //默认条件：玩家身上持有 SHPC 智能武器
-            HackTimeAccess.Register(SHPCInInventory, "Default: SHPC in inventory");
-        }
-
-        public override void Unload() {
-            HackTimeAccess.Reset();
-        }
-
-        private static bool SHPCInInventory(Player player) {
-            int targetType = CWRID.Item_SHPC;
-            if (targetType <= 0) {
-                return false;
-            }
-            return player.HasItem(targetType);
         }
     }
 }
