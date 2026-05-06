@@ -46,37 +46,38 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.VoidPortals.Abandon
         }
 
         public override void PostUpdateWorld() {
-            AbandonedPortalSession.Update();
+            //--------没做完，关闭生成--------
+            //AbandonedPortalSession.Update();
 
-            if (Main.gameMenu || VoidColony.Active || VaultUtils.isClient || SubWorldRef.AnyActiveSubWorld()) {
-                return;
-            }
+            //if (Main.gameMenu || VoidColony.Active || VaultUtils.isClient || SubWorldRef.AnyActiveSubWorld()) {
+            //    return;
+            //}
 
-            if (!spawnPending) return;
+            //if (!spawnPending) return;
 
-            //世界已经开放绘制后才执行：避免在 worldgen 早期 / 数据未稳定时介入
-            if (ActorLoader.GetActiveActors<AbandonedPortal>().Count > 0) {
-                spawnPending = false;
-                return;
-            }
+            ////世界已经开放绘制后才执行：避免在 worldgen 早期 / 数据未稳定时介入
+            //if (ActorLoader.GetActiveActors<AbandonedPortal>().Count > 0) {
+            //    spawnPending = false;
+            //    return;
+            //}
 
-            //尚未持久化的世界，先决策位置并准备生成位（仅首次）
-            bool firstTimeResolved = false;
-            if (!PositionResolved) {
-                Point spawnTile = AbandonedPortalSiteFinder.Resolve();
-                SavedTileX = spawnTile.X;
-                SavedTileY = spawnTile.Y;
-                PositionResolved = true;
-                firstTimeResolved = true;
-            }
+            ////尚未持久化的世界，先决策位置并准备生成位（仅首次）
+            //bool firstTimeResolved = false;
+            //if (!PositionResolved) {
+            //    Point spawnTile = AbandonedPortalSiteFinder.Resolve();
+            //    SavedTileX = spawnTile.X;
+            //    SavedTileY = spawnTile.Y;
+            //    PositionResolved = true;
+            //    firstTimeResolved = true;
+            //}
 
-            Vector2 worldPos = new(SavedTileX * 16f, SavedTileY * 16f);
-            //只在首次决策位置时执行地形整理，保留玩家后续对周边的改动
-            if (firstTimeResolved) {
-                AbandonedPortalSiteFinder.PreparePortalSite(SavedTileX, SavedTileY);
-            }
-            ActorLoader.NewActor<AbandonedPortal>(worldPos, Vector2.Zero);
-            spawnPending = false;
+            //Vector2 worldPos = new(SavedTileX * 16f, SavedTileY * 16f);
+            ////只在首次决策位置时执行地形整理，保留玩家后续对周边的改动
+            //if (firstTimeResolved) {
+            //    AbandonedPortalSiteFinder.PreparePortalSite(SavedTileX, SavedTileY);
+            //}
+            //ActorLoader.NewActor<AbandonedPortal>(worldPos, Vector2.Zero);
+            //spawnPending = false;
         }
 
         public override void SaveWorldData(TagCompound tag) {

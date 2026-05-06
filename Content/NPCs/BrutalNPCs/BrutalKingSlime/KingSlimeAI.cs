@@ -52,7 +52,7 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalKingSlime
             InitializeStateContext();
         }
 
-        public override bool? CanCWROverride() => null;
+        public override bool? CanCWROverride() => false;//没做完，暂时隐藏
 
         private void InitializeStateContext() {
             stateContext = new KingSlimeStateContext {
