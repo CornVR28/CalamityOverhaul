@@ -198,6 +198,20 @@ CybCourseCompletePanel: {
 	Footer: 选择以继续 — RETRY 重启训练，EXIT 离开超梦
 }
 
+CybCourseKeyBindReminderPanel: {
+	Title: 绑定警报
+	Subtitle: 核心快捷键未绑定
+	Hint:
+		'''
+		以下快捷键当前未绑定。离开超梦后，您将无法正常使用其对应的功能。
+		请前往 [设置 → 控制] 中为它们分配按键。
+		'''
+	UnboundLabel: 未绑定
+	BtnConfirm: 已知悉
+	BtnLater: 稍后处理
+	Footer: 选择任意选项都将断开超梦连接。您可以随时在主世界的设置中调整按键绑定。
+}
+
 ShepelCyberActiveDialogue: {
 	RoleName: SHPC
 	Line_Intro: 主人，赛博空间已展开，当前层级 {0}。外部信号已被完全隔绝，这里现在是只属于我们的安全领域。
@@ -495,20 +509,6 @@ ShepelUnderworldDialogue: {
 	V2_Line2: 用的是什么材料？存档一下，以后有机会研究。
 	VBloodMoon_Line1: 血月加地狱，两套警报系统同时运行，有点忙。
 	VBloodMoon_Line2: 不过数据倒是很丰富。主人请多注意安全。
-}
-
-CybCourseKeyBindReminderPanel: {
-	Title: 绑定警报
-	Subtitle: 核心快捷键未绑定
-	Hint:
-		'''
-		以下快捷键当前未绑定。离开超梦后，您将无法正常使用其对应的功能。
-		请前往 [设置 → 控制] 中为它们分配按键。
-		'''
-	UnboundLabel: 未绑定
-	BtnConfirm: 已知悉
-	BtnLater: 稍后处理
-	Footer: 选择任意选项都将断开超梦连接。您可以随时在主世界的设置中调整按键绑定。
 }
 
 ShepelAquaticScourgeGift: {
