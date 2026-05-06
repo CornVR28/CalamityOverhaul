@@ -302,7 +302,7 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
             //紧凑模式：由样式自行判定是否启用并返回紧凑高度
             int? compactH = entry.TrackerStyle?.GetIdleCompactHeight(entry);
             if (compactH.HasValue) {
-                return compactH.Value;
+                return compactH.Value + (int)entry.GetTrackerContentTopPadding();
             }
 
             //根据内容行数动态调整高度（考虑换行）
