@@ -570,7 +570,7 @@ ShepelDevourerofGodsGift: {
 ShepelEoCGift: {
 	// RoleName: SHPC
 	// L0: The night wind is a bit biting, Master. That giant eye has been completely shattered by you.
-	// L1: Facing this kind of monster for the first time, you must be exhausted, right? I've prepared hot tea and clean towels for you.
+	// L1: I've prepared hot tea and clean towels for you.
 	// L2: I've made some improvements to your weapon, so your beams will converge more tightly.
 	// L3: This is only the first step of our long journey... I will always be right here.
 }
