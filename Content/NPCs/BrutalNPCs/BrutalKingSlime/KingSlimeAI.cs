@@ -25,9 +25,9 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalKingSlime
         private int origLifeMax = -1;
         private int origDamage = -1;
 
-        //原版史莱姆王基础碰撞箱尺寸（width=98, height=92），用于按 scale 动态缩放命中盒
-        private const int BaseHitboxWidth = 98;
-        private const int BaseHitboxHeight = 92;
+        //基础碰撞箱尺寸，用于按 scale 动态缩放命中盒
+        private const int BaseHitboxWidth = 120;
+        private const int BaseHitboxHeight = 110;
 
         #region 初始化
 
