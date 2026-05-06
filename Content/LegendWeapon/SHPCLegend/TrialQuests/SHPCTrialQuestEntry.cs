@@ -1,4 +1,4 @@
-using CalamityOverhaul.Content.ADV.EntrustManager;
+﻿using CalamityOverhaul.Content.ADV.EntrustManager;
 using System;
 using System.Collections.Generic;
 using System.Linq;
