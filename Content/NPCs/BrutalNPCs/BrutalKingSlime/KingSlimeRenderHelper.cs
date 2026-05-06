@@ -19,7 +19,7 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalKingSlime
         /// 皇室主色板
         /// </summary>
         public static Vector3 RoyalCore => Color.Red.ToVector3();
-        public static Vector3 RoyalEdge => Color.GreenYellow.ToVector3();
+        public static Vector3 RoyalEdge => new Color(220, 60, 30).ToVector3();
 
         private static void BeginAdditive(SpriteBatch spriteBatch) {
             spriteBatch.End();
@@ -49,7 +49,7 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalKingSlime
                 for (int i = 0; i < (int)(8 * scale); i++) {
                     Vector2 vel = new Vector2(Main.rand.NextFloat(-5f, 5f), Main.rand.NextFloat(-5f, -1f));
                     Dust dust = Dust.NewDustDirect(npc.Bottom - new Vector2(8, 12),
-                        16, 12, DustID.PinkCrystalShard, vel.X, vel.Y, 100, default, 1.4f * scale);
+                        16, 12, DustID.RedTorch, vel.X, vel.Y, 100, default, 1.4f * scale);
                     dust.noGravity = true;
                 }
             }
@@ -75,7 +75,7 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalKingSlime
             Texture2D circleTex = CWRAsset.DiffusionCircle.Value;
             Texture2D lineTex = CWRAsset.LightShot.Value;
             float progress = context.ChargeProgress;
-            Color royalColor = Color.Lerp(new Color(110, 80, 230), new Color(255, 220, 110), progress);
+            Color royalColor = Color.Lerp(new Color(180, 10, 10), new Color(255, 220, 110), progress);
 
             BeginAdditive(sb);
 
@@ -157,7 +157,7 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalKingSlime
             Texture2D glowTex = CWRAsset.SoftGlow.Value;
             Texture2D circleTex = CWRAsset.DiffusionCircle.Value;
             float progress = context.ChargeProgress;
-            Color royalColor = Color.Lerp(new Color(120, 200, 255), new Color(150, 110, 255), progress);
+            Color royalColor = Color.Lerp(new Color(220, 15, 15), new Color(255, 60, 0), progress);
 
             BeginAdditive(sb);
 
@@ -182,7 +182,7 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalKingSlime
             Texture2D glowTex = CWRAsset.SoftGlow.Value;
             Texture2D lineTex = CWRAsset.LightShot.Value;
             float progress = context.ChargeProgress;
-            Color royalColor = Color.Lerp(new Color(140, 100, 255), new Color(255, 220, 110), progress);
+            Color royalColor = Color.Lerp(new Color(160, 10, 10), new Color(255, 220, 110), progress);
 
             BeginAdditive(sb);
 

@@ -204,17 +204,17 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalKingSlime
                 return (KingSlimeAuraMode.Slamming, 1f, 1f);
             }
 
-            //蓄力中——皇冠琥珀光
+            //蓄力中——皇冠血焰光
             if (stateContext.IsCharging) {
                 return (KingSlimeAuraMode.Charging, 0.85f, stateContext.ChargeProgress);
             }
 
-            //暴怒（二阶段）——深紫宝石光
+            //暴怒（二阶段）——深血晶光
             if (stateContext.IsEnraged) {
                 return (KingSlimeAuraMode.Enraged, 0.70f, 0f);
             }
 
-            //常态——温和宝石蓝紫
+            //常态——暗红皇室光
             return (KingSlimeAuraMode.Idle, 0.45f, 0f);
         }
 

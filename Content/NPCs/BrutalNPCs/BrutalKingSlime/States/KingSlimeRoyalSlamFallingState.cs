@@ -48,7 +48,7 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalKingSlime.States
                 //尾部留迹
                 if (!VaultUtils.isServer) {
                     Dust trail = Dust.NewDustDirect(npc.Center - new Vector2(8, 8) + Main.rand.NextVector2Circular(20, 4),
-                        16, 16, DustID.PinkCrystalShard, 0, 0, 100, default, 1.6f);
+                        16, 16, DustID.RedTorch, 0, 0, 100, default, 1.6f);
                     trail.noGravity = true;
                     trail.velocity = -npc.velocity * 0.2f;
                 }

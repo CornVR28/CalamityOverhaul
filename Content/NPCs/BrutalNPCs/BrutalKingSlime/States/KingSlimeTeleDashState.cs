@@ -105,7 +105,7 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalKingSlime.States
 
             if (!VaultUtils.isServer && phaseTimer % 3 == 0) {
                 Dust dust = Dust.NewDustDirect(npc.Center + Main.rand.NextVector2Circular(40, 40) - new Vector2(8, 8),
-                    16, 16, DustID.PinkCrystalShard, 0, 0, 100, default, 1.6f);
+                    16, 16, DustID.RedTorch, 0, 0, 100, default, 1.6f);
                 dust.noGravity = true;
                 dust.velocity = -dir * 4f;
             }

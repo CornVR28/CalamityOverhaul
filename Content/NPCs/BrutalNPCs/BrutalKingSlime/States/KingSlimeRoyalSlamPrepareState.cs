@@ -90,7 +90,7 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalKingSlime.States
                 Vector2 dir = Main.rand.NextVector2CircularEdge(1f, 0.7f);
                 Vector2 spawn = npc.Center + dir * Main.rand.NextFloat(110f, 160f);
                 Dust dust = Dust.NewDustDirect(spawn - new Vector2(8, 8), 16, 16,
-                    DustID.PinkCrystalShard, 0, 0, 100, default, 1.4f);
+                    DustID.RedTorch, 0, 0, 100, default, 1.4f);
                 dust.noGravity = true;
                 dust.velocity = (npc.Center - spawn).SafeNormalize(Vector2.Zero) * 6f;
             }
@@ -130,7 +130,7 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalKingSlime.States
                     float ang = -MathHelper.PiOver2 + Main.rand.NextFloat(-1.05f, 1.05f);
                     Vector2 dir = ang.ToRotationVector2();
                     Dust dust = Dust.NewDustDirect(npc.Bottom - new Vector2(8, 12), 16, 12,
-                        DustID.PinkCrystalShard, dir.X * Main.rand.NextFloat(3f, 6.5f),
+                        DustID.RedTorch, dir.X * Main.rand.NextFloat(3f, 6.5f),
                         dir.Y * Main.rand.NextFloat(2.5f, 5.5f), 100, default, 1.6f);
                     dust.noGravity = true;
                 }
@@ -165,7 +165,7 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalKingSlime.States
             if (!VaultUtils.isServer && phaseTimer % 2 == 0) {
                 Vector2 spawn = npc.Center + Main.rand.NextVector2Circular(20f, 24f);
                 Dust trail = Dust.NewDustDirect(spawn - new Vector2(8, 8), 16, 16,
-                    DustID.PinkCrystalShard, 0, 0, 100, default, 1.5f);
+                    DustID.RedTorch, 0, 0, 100, default, 1.5f);
                 trail.noGravity = true;
                 trail.velocity = -npc.velocity * 0.30f;
             }
@@ -212,7 +212,7 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalKingSlime.States
                     Vector2 dir = Main.rand.NextVector2CircularEdge(1f, 1f);
                     Vector2 spawn = npc.Center + dir * Main.rand.NextFloat(70f, 130f);
                     Dust dust = Dust.NewDustDirect(spawn - new Vector2(8, 8), 16, 16,
-                        DustID.PinkCrystalShard, 0, 0, 100, default, 1.6f);
+                        DustID.RedTorch, 0, 0, 100, default, 1.6f);
                     dust.noGravity = true;
                     dust.velocity = -dir * Main.rand.NextFloat(7f, 10f);
                     dust.fadeIn = 0.5f;
@@ -255,7 +255,7 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalKingSlime.States
                     float ang = MathHelper.TwoPi / rays * i;
                     Vector2 dir = ang.ToRotationVector2();
                     Dust dust = Dust.NewDustDirect(dest - new Vector2(8, 8), 16, 16,
-                        DustID.PinkCrystalShard,
+                        DustID.RedTorch,
                         dir.X * Main.rand.NextFloat(7f, 11f),
                         dir.Y * Main.rand.NextFloat(7f, 11f),
                         100, default, 1.8f);
@@ -305,7 +305,7 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalKingSlime.States
                 Vector2 dir = Main.rand.NextVector2CircularEdge(1f, 1f);
                 Vector2 spawn = npc.Center + dir * Main.rand.NextFloat(45f, 90f);
                 Dust dust = Dust.NewDustDirect(spawn - new Vector2(8, 8), 16, 16,
-                    DustID.PinkCrystalShard, 0, 0, 100, default, 1.4f);
+                    DustID.RedTorch, 0, 0, 100, default, 1.4f);
                 dust.noGravity = true;
                 dust.velocity = (npc.Center - spawn).SafeNormalize(Vector2.Zero) * 4.5f;
             }
@@ -350,11 +350,11 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalKingSlime.States
             context.SquishY = MathHelper.SmoothStep(0.10f, 0.45f, prog);
             context.SetChargeState(1, MathHelper.Lerp(0.50f, 1f, prog));
 
-            //蓄力中喷发蓝紫光屑
+            //蓄力中喷发暗红光屑
             if (!VaultUtils.isServer && phaseTimer % 4 == 0) {
                 Vector2 dustOffset = Main.rand.NextVector2Circular(60, 60);
                 Dust dust = Dust.NewDustDirect(npc.Center + dustOffset - new Vector2(8, 8),
-                    16, 16, DustID.PinkCrystalShard, 0, 0, 100, default, 1.4f);
+                    16, 16, DustID.RedTorch, 0, 0, 100, default, 1.4f);
                 dust.noGravity = true;
                 dust.velocity = (npc.Center - dust.position).SafeNormalize(Vector2.Zero) * 4f;
             }
@@ -379,7 +379,7 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalKingSlime.States
                 float ang = MathHelper.TwoPi / ringCount * i + Main.GlobalTimeWrappedHourly * 4f;
                 Vector2 markerPos = markerCenter + ang.ToRotationVector2() * radius;
                 Dust marker = Dust.NewDustDirect(markerPos - new Vector2(4, 4), 8, 8,
-                    DustID.PinkCrystalShard, 0, 0, 80, default, 0.9f + 0.4f * intensity);
+                    DustID.RedTorch, 0, 0, 80, default, 0.9f + 0.4f * intensity);
                 marker.noGravity = true;
                 //粒子向中心汇聚，强度越高汇聚越快
                 marker.velocity = (markerCenter - markerPos).SafeNormalize(Vector2.Zero)

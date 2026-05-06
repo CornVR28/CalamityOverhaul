@@ -1,4 +1,4 @@
-using CalamityOverhaul.Common;
+﻿using CalamityOverhaul.Common;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
 using Terraria.ID;
@@ -42,11 +42,12 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalKingSlime.Projectiles
             Projectile.width = Projectile.height = (int)(radius * 2f);
             //保持 Center 不变（用 Hitbox 中心）
             Projectile.position = Projectile.Center - new Vector2(Projectile.width, Projectile.height) * 0.5f;
+            Projectile.position.X -= 2;
 
             Lighting.AddLight(Projectile.Center,
-                0.7f * ScaleMul * (1f - t01),
-                0.55f * ScaleMul * (1f - t01),
-                1.0f * ScaleMul * (1f - t01));
+                1.0f * ScaleMul * (1f - t01),
+                0.25f * ScaleMul * (1f - t01),
+                0.05f * ScaleMul * (1f - t01));
 
             //扩散粒子点缀
             if (!VaultUtils.isServer && Projectile.timeLeft % 4 == 0) {
@@ -55,7 +56,7 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalKingSlime.Projectiles
                     float angle = Main.rand.NextFloat(MathHelper.TwoPi);
                     Vector2 dir = angle.ToRotationVector2();
                     Vector2 spawn = Projectile.Center + dir * radius * 0.85f;
-                    Dust dust = Dust.NewDustPerfect(spawn, DustID.PinkCrystalShard,
+                    Dust dust = Dust.NewDustPerfect(spawn, DustID.RedTorch,
                         dir * 3f, 100, default, 1.4f * ScaleMul);
                     dust.noGravity = true;
                 }
@@ -98,7 +99,7 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalKingSlime.Projectiles
             shader.Parameters["fadeAlpha"]?.SetValue(fade);
             shader.Parameters["pulseIntensity"]?.SetValue(0.55f);
             shader.Parameters["coreColor"]?.SetValue(KingSlimeRenderHelper.RoyalCore);
-            shader.Parameters["midColor"]?.SetValue(new Vector3(0.65f, 0.45f, 1.0f));
+            shader.Parameters["midColor"]?.SetValue(new Vector3(0.85f, 0.25f, 0.08f));
             shader.Parameters["edgeColor"]?.SetValue(KingSlimeRenderHelper.RoyalEdge);
             shader.Parameters["uNoiseTex"]?.SetValue(noise);
 

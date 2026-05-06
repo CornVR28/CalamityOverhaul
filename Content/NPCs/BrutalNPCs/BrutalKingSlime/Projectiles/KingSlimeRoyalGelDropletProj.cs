@@ -52,12 +52,12 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalKingSlime.Projectiles
             //下落粒子尾迹
             if (!VaultUtils.isServer && Main.rand.NextBool(2)) {
                 Vector2 spawn = Projectile.Center + Main.rand.NextVector2Circular(4, 4);
-                Dust dust = Dust.NewDustPerfect(spawn, DustID.PinkCrystalShard,
+                Dust dust = Dust.NewDustPerfect(spawn, DustID.Blood,
                     Projectile.velocity * 0.2f, 100, default, 1.0f);
                 dust.noGravity = true;
             }
 
-            Lighting.AddLight(Projectile.Center, 0.30f, 0.18f, 0.55f);
+            Lighting.AddLight(Projectile.Center, 0.90f, 0.12f, 0.05f);
         }
 
         public override bool OnTileCollide(Vector2 oldVelocity) {
@@ -72,7 +72,7 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalKingSlime.Projectiles
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.NPCHit1, Projectile.Center);
                 for (int i = 0; i < 8; i++) {
                     Vector2 vel = new Vector2(Main.rand.NextFloat(-3f, 3f), Main.rand.NextFloat(-4f, -1f));
-                    Dust dust = Dust.NewDustPerfect(Projectile.Center, DustID.PinkCrystalShard,
+                    Dust dust = Dust.NewDustPerfect(Projectile.Center, DustID.Blood,
                         vel, 100, default, 1.3f);
                     dust.noGravity = true;
                 }
@@ -96,7 +96,7 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalKingSlime.Projectiles
 
             float scaleMul;
             float coreAlpha;
-            Color royal = Color.GreenYellow;
+            Color royal = new Color(200, 30, 30);
             Color core = Color.Red;
 
             if (Splashing) {
