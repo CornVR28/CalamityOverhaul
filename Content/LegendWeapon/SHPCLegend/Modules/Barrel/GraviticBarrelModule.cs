@@ -31,7 +31,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules
             float rangeSq = pullRange * pullRange;
             for (int i = 0; i < Main.maxNPCs; i++) {
                 NPC npc = Main.npc[i];
-                if (!npc.active || npc.friendly || npc.dontTakeDamage || npc.boss || npc.noGravity) continue;
+                if (!npc.active || npc.friendly || npc.dontTakeDamage || npc.boss) continue;
                 Vector2 toBeam = beam.Projectile.Center - npc.Center;
                 if (toBeam.LengthSquared() > rangeSq) continue;
                 if (toBeam.LengthSquared() < 16f) continue;
