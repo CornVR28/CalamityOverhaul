@@ -1,4 +1,4 @@
-using CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalKingSlime.Core;
+﻿using CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalKingSlime.Core;
 using CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalKingSlime.Projectiles;
 using Terraria;
 using Terraria.Audio;
@@ -87,9 +87,9 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalKingSlime.States
             if (dmg < 22) dmg = 22;
 
             //预测玩家位置：抬高一些，让光束偏向玩家头顶
-            Vector2 predict = player.Center + player.velocity * 12f;
+            Vector2 predict = player.Center + player.velocity * 2f;
             //光束目标位置 = 预测点正上方天空
-            Vector2 strikePos = new Vector2(predict.X, predict.Y - 50);
+            Vector2 strikePos = new Vector2(predict.X, predict.Y);
 
             //ai0/ai1 编码光束起点（皇冠位置）相对落点的偏移，让 PreDraw 绘制连线
             Vector2 offset = crownPos - strikePos;
