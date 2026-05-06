@@ -139,6 +139,12 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
         /// </summary>
         public virtual int GetTrackerExtraHeight() => 0;
 
+        /// <summary>
+        /// 内容区顶部与分隔线之间的额外间距，默认为0，
+        /// 子类可重写以让描述文本与分隔线保持一定距离
+        /// </summary>
+        public virtual float GetTrackerContentTopPadding() => 0f;
+
         #endregion
 
         #region 生命周期

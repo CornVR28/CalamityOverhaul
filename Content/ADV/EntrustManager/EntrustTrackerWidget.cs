@@ -322,6 +322,7 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
                 contentH += 20; //进度条
             }
             contentH += 16; //底部边距
+            contentH += (int)entry.GetTrackerContentTopPadding(); //顶部间距
             //条目自定义额外高度（用于容纳按钮等元素）
             contentH += Math.Max(0, entry.GetTrackerExtraHeight());
 
@@ -444,7 +445,7 @@ namespace CalamityOverhaul.Content.ADV.EntrustManager
             Color textC = style?.GetWidgetTextColor(alpha) ?? new Color(160, 190, 210) * (alpha * 0.8f);
             Color accentC = style?.GetWidgetAccentColor(alpha) ?? new Color(80, 255, 220) * alpha;
 
-            float y = contentRect.Y;
+            float y = contentRect.Y + entry.GetTrackerContentTopPadding();
 
             //详细信息行——逐行换行处理
             var details = entry.GetTrackerDetails();

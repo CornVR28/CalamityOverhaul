@@ -24,6 +24,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.TrialQuests
         public SHPCTrialQuestEntry(string key, LocalizedText title, LocalizedText summary, LocalizedText category)
             : base(key, title, summary, category) { }
 
+        public override float GetTrackerContentTopPadding() => 5f;
+
         public override void OnUpdate() {
             if (Status == QuestEntryStatus.Completed || Status == QuestEntryStatus.Failed
                 || Status == QuestEntryStatus.Suspended) return;
