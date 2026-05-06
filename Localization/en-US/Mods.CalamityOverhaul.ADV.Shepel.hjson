@@ -1,3 +1,203 @@
+﻿CybCourseIntroDialogue: {
+	SpeakerName: SHPC
+	Line1: Welcome to the neural training node.
+	Line2: This is a Braindance training scenario, an immersive instructional space prepared for you.
+	Line3: SHPC is a highly customized neural direct-link weapon capable of resonating with cyberspace. You will learn how to operate its HUD interface.
+	Line4: Are you ready? Please follow me.
+}
+
+CybTutorialLead: {
+	Step0_Title: Connect SHPC
+	Step0_Body: Equip the SHPC in your weapon slot and hold it. The HUD core node will appear in the bottom-left corner of the screen.
+	Step1_Title: Core Node
+	Step1_Body: Click the core node in the bottom left to expand or collapse the control panel.
+	Step2_Title: CYBER DOMAIN
+	Step2_Body:
+		'''
+		Network — Deploy and manage the multi-layered cascading structure of cyberspace.
+		Click the highlighted sector to lock this panel.
+		'''
+	Step3_Title: MODIFY
+	Step3_Body:
+		'''
+		Modification — Install or remove modification parts for the SHPC.
+		Click the highlighted sector to lock this panel.
+		'''
+	Step4_Title: CYBERWARE
+	Step4_Body:
+		'''
+		Cyberware — View and manage your body enhancement modules.
+		Click the highlighted sector to open the cyberware interface.
+		'''
+	Step5_Title: TALK
+	Step5_Body:
+		'''
+		Neural Link — Establish direct communication with SHPC and open dialogue.
+		Click the highlighted sector to lock this panel.
+		'''
+	Step6_Title: ENGRAM CALIBRATED
+	Step6_Body:
+		'''
+		All interfaces parsed.
+		Neural link stable, SHPC is ready.
+		'''
+	AwaitingEquip: AWAITING EQUIP...
+	Calibrating: CALIBRATING...
+	NextBtn: NEXT  >
+	HintStuck: HINT: Try clicking the highlighted target area.
+}
+
+CybCourseHackIntroDialogue: {
+	SpeakerName: SHPC
+	Line1: Interfaces parsed. Next training: Hack Time.
+	Line2: Hack Time is SHPC's exclusive neural intervention protocol. Once activated, the external time flow will freeze, allowing you to calmly select targets and upload custom hack programs. The default key is {0}.
+	Line3: The test unit ahead is fixed in position. Press {0} to enter Hack Time, then click to lock onto it.
+}
+
+HackTimeTutorialLead: {
+	HT_Step0_Title: Activate Hack Mode
+	HT_Step1_Title: Lock Target
+	HT_Step2_Title: Hack Protocol Panel
+	HT_Step3_Title: Upload Protocol
+	HT_Step4_Title: HACK SEQUENCE COMPLETE
+	HT_Step0_Body:
+		'''
+		Press the {0} key to enter Hack Time mode.
+		Time will freeze, and a cyber filter will overlay the screen.
+		'''
+	HT_Step1_Body:
+		'''
+		Hover your cursor over the highlighted Everscream.
+		Left-click to lock it as the hack target.
+		'''
+	HT_Step2_Body:
+		'''
+		The right panel displays the available hack protocols for the target.
+		Different protocols consume different amounts of RAM and produce different effects.
+		'''
+	HT_Step3_Body:
+		'''
+		Click a protocol to add it to the upload queue on the left.
+		The queue will execute hack operations sequentially.
+		'''
+	HT_Step4_Body:
+		'''
+		Neural link disconnected.
+		Hack Time protocol training complete. System ready.
+		'''
+	HT_Waiting: AWAITING INPUT...
+	HT_Calibrating: DISCONNECTING...
+	HT_NextBtn: NEXT  >
+	HT_Step5_Title: Tile Scan
+	HT_Step6_Title: Lock Tile Target
+	HT_Step7_Title: TILE SCAN COMPLETE
+	HT_Step5_Body:
+		'''
+		There is a Thermal Generator MK2 ahead.
+		Press {0} again to reactivate Hack Time.
+		'''
+	HT_Step6_Body:
+		'''
+		Hover your cursor over the generator.
+		Left-click to lock it as the scan target.
+		'''
+	HT_Step7_Body: Tile scanning interface parsed. The right panel displays available hack protocols for the current tile.
+	HT_HintStuck: HINT: Click the NEXT button to forcefully skip.
+	HT_KeyUnbound: N (Temporary Toggle)
+	HT_KeyHintUnbound: HINT: When the Hack Time hotkey is unbound, you can use [N] to temporarily toggle it during this tutorial; binding it in Settings > Controls is recommended.
+	HT_S00_Title: Activate Hack Mode
+	HT_S01_Title: Lock NPC Target
+	HT_S02_Title: Hack Protocol Panel
+	HT_S03_Title: Add to Upload Queue
+	HT_S04_Title: Exit Hack Time Execution
+	HT_S05_Title: Protocol Executing
+	HT_S06_Title: Re-enter Hack Mode
+	HT_S07_Title: Lock Tile Target
+	HT_S08_Title: Add Tile Protocol
+	HT_S09_Title: Exit Hack Time Execution
+	HT_S10_Title: Tile Protocol Executing
+	HT_S11_Title: Training Complete
+	HT_S00_Body:
+		'''
+		Press the {0} key to enter Hack Time mode.
+		Time will freeze, and a cyber filter will overlay the screen.
+		'''
+	HT_S01_Body:
+		'''
+		Hover your cursor over the highlighted Everscream.
+		Left-click to lock it as the hack target.
+		'''
+	HT_S02_Body:
+		'''
+		The right panel displays the available hack protocols for the target.
+		Different protocols consume different amounts of RAM and produce different effects.
+		'''
+	HT_S03_Body:
+		'''
+		Click any protocol on the right to add it to the upload queue on the left.
+		The queue only stacks during Hack Time and will not advance.
+		'''
+	HT_S04_Body:
+		'''
+		Press {0} again to exit Hack Time.
+		The protocols will begin uploading and take effect in the real-time world.
+		'''
+	HT_S05_Body:
+		'''
+		Uploading... Observe the target suffering the protocol effects.
+		The next stage will begin once the queue is cleared.
+		'''
+	HT_S06_Body:
+		'''
+		There is a Thermal Generator MK2 in the corridor ahead.
+		Press {0} again to enter Hack Time and scan the tile.
+		'''
+	HT_S07_Body:
+		'''
+		Hover your cursor over the highlighted generator.
+		Left-click to lock it as the scan target.
+		'''
+	HT_S08_Body:
+		'''
+		The right panel displays tile-exclusive protocols.
+		Click any protocol to add it to the upload queue.
+		'''
+	HT_S09_Body:
+		'''
+		Press {0} again to exit Hack Time.
+		Tile protocols will execute in the real-time world.
+		'''
+	HT_S10_Body:
+		'''
+		Uploading... Observe the generator suffering the protocol effects.
+		Training will conclude once the queue is cleared.
+		'''
+	HT_S11_Body:
+		'''
+		Hack protocol training fully complete.
+		You have mastered the complete flow of scanning, protocol selection, uploading, and execution.
+		'''
+	HT_Observing: UPLOADING...
+}
+
+CybCourseOutroDialogue: {
+	SpeakerName: SHPC
+	Line1: Training complete. All interfaces have been calibrated.
+	Line2: You have mastered the neural direct-link protocols. The Braindance node is detaching.
+	Line3: You can reset the training at any time or exit the Braindance.
+}
+
+CybCourseCompletePanel: {
+	Title: TRAINING COMPLETE
+	Subtitle: SUPERDREAM PROTOCOL
+	Stat1: "[#] SHPC HUD Calibration Complete"
+	Stat2: "[#] Hack Time Calibration Complete"
+	Stat3: "[#] Tile Scan Interface Calibration Complete"
+	BtnRetry: RETRY
+	BtnExit: EXIT
+	Footer: Select to continue — RETRY to restart training, EXIT to leave Braindance
+}
+
 ShepelCyberActiveDialogue: {
 	RoleName: SHPC
 	Line_Intro: Domain activated, Master. Current tier is {0}. External signals have been completely blocked for you.
@@ -200,206 +400,6 @@ ShepelYharonDialogue: {
 	RoleName: SHPC
 	Line1: Yharim's final guardian, Yharon, has fallen. I sense an unknown connection breaking.
 	Line2: Wherever that legendary tyrant is now, he surely knows of this. Master, please make your final preparations.
-}
-
-CybCourseIntroDialogue: {
-	SpeakerName: SHPC
-	Line1: Welcome to the neural training node.
-	Line2: This is a Braindance training scenario, an immersive instructional space prepared for you.
-	Line3: SHPC is a highly customized neural direct-link weapon capable of resonating with cyberspace. You will learn how to operate its HUD interface.
-	Line4: Are you ready? Please follow me.
-}
-
-CybTutorialLead: {
-	Step0_Title: Connect SHPC
-	Step0_Body: Equip the SHPC in your weapon slot and hold it. The HUD core node will appear in the bottom-left corner of the screen.
-	Step1_Title: Core Node
-	Step1_Body: Click the core node in the bottom left to expand or collapse the control panel.
-	Step2_Title: CYBER DOMAIN
-	Step2_Body:
-		'''
-		Network — Deploy and manage the multi-layered cascading structure of cyberspace.
-		Click the highlighted sector to lock this panel.
-		'''
-	Step3_Title: MODIFY
-	Step3_Body:
-		'''
-		Modification — Install or remove modification parts for the SHPC.
-		Click the highlighted sector to lock this panel.
-		'''
-	Step4_Title: CYBERWARE
-	Step4_Body:
-		'''
-		Cyberware — View and manage your body enhancement modules.
-		Click the highlighted sector to open the cyberware interface.
-		'''
-	Step5_Title: TALK
-	Step5_Body:
-		'''
-		Neural Link — Establish direct communication with SHPC and open dialogue.
-		Click the highlighted sector to lock this panel.
-		'''
-	Step6_Title: ENGRAM CALIBRATED
-	Step6_Body:
-		'''
-		All interfaces parsed.
-		Neural link stable, SHPC is ready.
-		'''
-	AwaitingEquip: AWAITING EQUIP...
-	Calibrating: CALIBRATING...
-	NextBtn: NEXT  >
-	HintStuck: HINT: Try clicking the highlighted target area.
-}
-
-CybCourseHackIntroDialogue: {
-	SpeakerName: SHPC
-	Line1: Interfaces parsed. Next training: Hack Time.
-	Line2: Hack Time is SHPC's exclusive neural intervention protocol. Once activated, the external time flow will freeze, allowing you to calmly select targets and upload custom hack programs. The default key is {0}.
-	Line3: The test unit ahead is fixed in position. Press {0} to enter Hack Time, then click to lock onto it.
-}
-
-HackTimeTutorialLead: {
-	HT_Step0_Title: Activate Hack Mode
-	HT_Step1_Title: Lock Target
-	HT_Step2_Title: Hack Protocol Panel
-	HT_Step3_Title: Upload Protocol
-	HT_Step4_Title: HACK SEQUENCE COMPLETE
-	HT_Step0_Body:
-		'''
-		Press the {0} key to enter Hack Time mode.
-		Time will freeze, and a cyber filter will overlay the screen.
-		'''
-	HT_Step1_Body:
-		'''
-		Hover your cursor over the highlighted Everscream.
-		Left-click to lock it as the hack target.
-		'''
-	HT_Step2_Body:
-		'''
-		The right panel displays the available hack protocols for the target.
-		Different protocols consume different amounts of RAM and produce different effects.
-		'''
-	HT_Step3_Body:
-		'''
-		Click a protocol to add it to the upload queue on the left.
-		The queue will execute hack operations sequentially.
-		'''
-	HT_Step4_Body:
-		'''
-		Neural link disconnected.
-		Hack Time protocol training complete. System ready.
-		'''
-	HT_Waiting: AWAITING INPUT...
-	HT_Calibrating: DISCONNECTING...
-	HT_NextBtn: NEXT  >
-	HT_Step5_Title: Tile Scan
-	HT_Step6_Title: Lock Tile Target
-	HT_Step7_Title: TILE SCAN COMPLETE
-	HT_Step5_Body:
-		'''
-		There is a Thermal Generator MK2 ahead.
-		Press {0} again to reactivate Hack Time.
-		'''
-	HT_Step6_Body:
-		'''
-		Hover your cursor over the generator.
-		Left-click to lock it as the scan target.
-		'''
-	HT_Step7_Body: Tile scanning interface parsed. The right panel displays available hack protocols for the current tile.
-	HT_HintStuck: HINT: Click the NEXT button to forcefully skip.
-	HT_KeyUnbound: N (Temporary Toggle)
-	HT_KeyHintUnbound: HINT: When the Hack Time hotkey is unbound, you can use [N] to temporarily toggle it during this tutorial; binding it in Settings > Controls is recommended.
-	HT_S00_Title: Activate Hack Mode
-	HT_S01_Title: Lock NPC Target
-	HT_S02_Title: Hack Protocol Panel
-	HT_S03_Title: Add to Upload Queue
-	HT_S04_Title: Exit Hack Time Execution
-	HT_S05_Title: Protocol Executing
-	HT_S06_Title: Re-enter Hack Mode
-	HT_S07_Title: Lock Tile Target
-	HT_S08_Title: Add Tile Protocol
-	HT_S09_Title: Exit Hack Time Execution
-	HT_S10_Title: Tile Protocol Executing
-	HT_S11_Title: Training Complete
-	HT_S00_Body:
-		'''
-		Press the {0} key to enter Hack Time mode.
-		Time will freeze, and a cyber filter will overlay the screen.
-		'''
-	HT_S01_Body:
-		'''
-		Hover your cursor over the highlighted Everscream.
-		Left-click to lock it as the hack target.
-		'''
-	HT_S02_Body:
-		'''
-		The right panel displays the available hack protocols for the target.
-		Different protocols consume different amounts of RAM and produce different effects.
-		'''
-	HT_S03_Body:
-		'''
-		Click any protocol on the right to add it to the upload queue on the left.
-		The queue only stacks during Hack Time and will not advance.
-		'''
-	HT_S04_Body:
-		'''
-		Press {0} again to exit Hack Time.
-		The protocols will begin uploading and take effect in the real-time world.
-		'''
-	HT_S05_Body:
-		'''
-		Uploading... Observe the target suffering the protocol effects.
-		The next stage will begin once the queue is cleared.
-		'''
-	HT_S06_Body:
-		'''
-		There is a Thermal Generator MK2 in the corridor ahead.
-		Press {0} again to enter Hack Time and scan the tile.
-		'''
-	HT_S07_Body:
-		'''
-		Hover your cursor over the highlighted generator.
-		Left-click to lock it as the scan target.
-		'''
-	HT_S08_Body:
-		'''
-		The right panel displays tile-exclusive protocols.
-		Click any protocol to add it to the upload queue.
-		'''
-	HT_S09_Body:
-		'''
-		Press {0} again to exit Hack Time.
-		Tile protocols will execute in the real-time world.
-		'''
-	HT_S10_Body:
-		'''
-		Uploading... Observe the generator suffering the protocol effects.
-		Training will conclude once the queue is cleared.
-		'''
-	HT_S11_Body:
-		'''
-		Hack protocol training fully complete.
-		You have mastered the complete flow of scanning, protocol selection, uploading, and execution.
-		'''
-	HT_Observing: UPLOADING...
-}
-
-CybCourseOutroDialogue: {
-	SpeakerName: SHPC
-	Line1: Training complete. All interfaces have been calibrated.
-	Line2: You have mastered the neural direct-link protocols. The Braindance node is detaching.
-	Line3: You can reset the training at any time or exit the Braindance.
-}
-
-CybCourseCompletePanel: {
-	Title: TRAINING COMPLETE
-	Subtitle: SUPERDREAM PROTOCOL
-	Stat1: "[#] SHPC HUD Calibration Complete"
-	Stat2: "[#] Hack Time Calibration Complete"
-	Stat3: "[#] Tile Scan Interface Calibration Complete"
-	BtnRetry: RETRY
-	BtnExit: EXIT
-	Footer: Select to continue — RETRY to restart training, EXIT to leave Braindance
 }
 
 ShepelBloodMoonDialogue: {

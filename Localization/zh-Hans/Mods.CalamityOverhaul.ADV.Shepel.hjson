@@ -1,4 +1,204 @@
-﻿ShepelCyberActiveDialogue: {
+﻿CybCourseIntroDialogue: {
+	SpeakerName: SHPC
+	Line1: 主人，欢迎进入神经训练节点。
+	Line2: 这里是超梦训练场景，为您准备的沉浸式教学空间。
+	Line3: SHPC是一种高度定制化的神经直连武器，能与赛博空间产生共振。您将学习如何操作它的HUD界面。
+	Line4: 准备好将意识与我连接了吗？请握紧我的手，我们开始吧。
+}
+
+CybTutorialLead: {
+	Step0_Title: 连接 SHPC
+	Step0_Body: 将SHPC装备至武器栏并持握，HUD核心节点即会出现在屏幕左下角。
+	Step1_Title: 核心节点
+	Step1_Body: 点击左下角的核心节点可展开或收起操作面板。
+	Step2_Title: CYBER DOMAIN
+	Step2_Body:
+		'''
+		网域 — 部署并管理多层赛博空间层叠结构。
+		点击高亮的扇区即可打开该面板。
+		'''
+	Step3_Title: MODIFY
+	Step3_Body:
+		'''
+		改造 — 为SHPC安装或拆卸改造零件。
+		点击高亮的扇区即可打开该面板。
+		'''
+	Step4_Title: CYBERWARE
+	Step4_Body:
+		'''
+		赛博改装 — 查看并管理你的身体增强模块。
+		点击高亮的扇区即可打开该界面。
+		'''
+	Step5_Title: TALK
+	Step5_Body:
+		'''
+		神经链路 — 与SHPC建立直连通讯，开启对话。
+		点击高亮的扇区即可与其对话。
+		'''
+	Step6_Title: ENGRAM CALIBRATED
+	Step6_Body:
+		'''
+		所有接口已解析完毕。
+		神经链路稳定，SHPC已就绪。
+		'''
+	AwaitingEquip: AWAITING EQUIP...
+	Calibrating: CALIBRATING...
+	NextBtn: NEXT  >
+	HintStuck: HINT: 试着点击高亮的目标区域
+}
+
+CybCourseHackIntroDialogue: {
+	SpeakerName: SHPC
+	Line1: 接口解析完毕。下一项训练：骇客时间。
+	Line2: 骇客时间是SHPC专属的神经干预协议。激活后，外部时间流将冻结，您可以从容选择目标并上传定制骇入程序。默认按键是 {0}。
+	Line3: 前方的测试单元已固定就位。按下 {0} 进入骇客时间，然后点击锁定它。
+}
+
+HackTimeTutorialLead: {
+	HT_Step0_Title: 激活骇客模式
+	HT_Step1_Title: 锁定目标
+	HT_Step2_Title: 骇入协议面板
+	HT_Step3_Title: 上传协议
+	HT_Step4_Title: HACK SEQUENCE COMPLETE
+	HT_Step0_Body:
+		'''
+		按下 {0} 键进入骇客时间模式。
+		时间将冻结，赛博滤镜叠加于画面。
+		'''
+	HT_Step1_Body:
+		'''
+		将光标悬停到高亮的圣诞坦克上，
+		点击左键将其锁定为骇入目标。
+		'''
+	HT_Step2_Body:
+		'''
+		右侧面板展示目标的可用骇入协议。
+		不同协议消耗不同RAM并产生不同效果。
+		'''
+	HT_Step3_Body:
+		'''
+		点击协议将其加入左侧上传队列，
+		队列将依次执行骇入操作。
+		'''
+	HT_Step4_Body:
+		'''
+		神经链路已断开。
+		骇客时间协议训练完成，系统就绪。
+		'''
+	HT_Waiting: AWAITING INPUT...
+	HT_Calibrating: DISCONNECTING...
+	HT_NextBtn: NEXT  >
+	HT_Step5_Title: 物块扫描
+	HT_Step6_Title: 锁定物块目标
+	HT_Step7_Title: TILE SCAN COMPLETE
+	HT_Step5_Body:
+		'''
+		前方有一台热能发电机MK2。
+		再次按下 {0} 重新激活骇客时间。
+		'''
+	HT_Step6_Body:
+		'''
+		将光标悬停在发电机上，
+		点击左键将其锁定为扫描目标。
+		'''
+	HT_Step7_Body: 物块扫描接口已解析。右侧面板展示当前物块的可用骇入协议。
+	HT_HintStuck: HINT: 点击 NEXT 按钮可强制跳过
+	HT_KeyUnbound: N（临时开关）
+	HT_KeyHintUnbound: 提示：未绑定骇客时间快捷键时，本教程内可用 [N] 临时开关；建议在 设置 > 控制 中绑定。
+	HT_S00_Title: 激活骇客模式
+	HT_S01_Title: 锁定NPC目标
+	HT_S02_Title: 骇入协议面板
+	HT_S03_Title: 加入上传队列
+	HT_S04_Title: 退出骇客时间执行
+	HT_S05_Title: 协议执行中
+	HT_S06_Title: 再次进入骇客模式
+	HT_S07_Title: 锁定物块目标
+	HT_S08_Title: 加入物块协议
+	HT_S09_Title: 退出骇客时间执行
+	HT_S10_Title: 物块协议执行中
+	HT_S11_Title: 训练完成
+	HT_S00_Body:
+		'''
+		按下 {0} 键进入骇客时间模式。
+		时间将冻结，赛博滤镜叠加于画面。
+		'''
+	HT_S01_Body:
+		'''
+		将光标悬停到高亮的圣诞坦克上，
+		点击左键将其锁定为骇入目标。
+		'''
+	HT_S02_Body:
+		'''
+		右侧面板展示目标的可用骇入协议。
+		不同协议消耗不同RAM并产生不同效果。
+		'''
+	HT_S03_Body:
+		'''
+		点击右侧任一协议将其加入左侧上传队列，
+		队列在骇客时间内仅排队不会推进。
+		'''
+	HT_S04_Body:
+		'''
+		再次按下 {0} 退出骇客时间，
+		协议将在实时世界中开始上传并生效。
+		'''
+	HT_S05_Body:
+		'''
+		上传中... 观察目标遭受协议效果。
+		队列清空后将进入下一阶段。
+		'''
+	HT_S06_Body:
+		'''
+		前方走廊有一台热能发电机MK2。
+		再次按下 {0} 进入骇客时间扫描物块。
+		'''
+	HT_S07_Body:
+		'''
+		将光标悬停在高亮的发电机上，
+		点击左键将其锁定为扫描目标。
+		'''
+	HT_S08_Body:
+		'''
+		右侧面板展示物块专属协议。
+		点击任一协议将其加入上传队列。
+		'''
+	HT_S09_Body:
+		'''
+		再次按下 {0} 退出骇客时间，
+		物块协议将在实时世界中执行。
+		'''
+	HT_S10_Body:
+		'''
+		上传中... 观察发电机遭受协议效果。
+		队列清空后训练即告完成。
+		'''
+	HT_S11_Body:
+		'''
+		骇客协议训练全部完成。
+		你已掌握扫描、协议、上传、生效的完整流程。
+		'''
+	HT_Observing: UPLOADING...
+}
+
+CybCourseOutroDialogue: {
+	SpeakerName: SHPC
+	Line1: 训练完成。所有接口均已完成校准。
+	Line2: 您已掌握神经直连协议，超梦节点正在脱钩。
+	Line3: 随时可重置训练，或退出超梦。
+}
+
+CybCourseCompletePanel: {
+	Title: TRAINING COMPLETE
+	Subtitle: SUPERDREAM PROTOCOL
+	Stat1: "[#] SHPC HUD 校准完毕"
+	Stat2: "[#] 骇客时间校准完毕"
+	Stat3: "[#] 物块扫描接口校准完毕"
+	BtnRetry: RETRY
+	BtnExit: EXIT
+	Footer: 选择以继续 — RETRY 重启训练，EXIT 离开超梦
+}
+
+ShepelCyberActiveDialogue: {
 	RoleName: SHPC
 	Line_Intro: 主人，赛博空间已展开，当前层级 {0}。外部信号已被完全隔绝，这里现在是只属于我们的安全领域。
 	Line_LayerReport: 领域越深，我能为您清除的阻碍就越多。但请留意RAM的消耗。
@@ -202,206 +402,6 @@ ShepelYharonDialogue: {
 	Line2: 最后的目标就在前方了。主人，请允许我为您整理一下装备……我们一起去迎接最后的决战。
 }
 
-CybCourseIntroDialogue: {
-	SpeakerName: SHPC
-	Line1: 主人，欢迎进入神经训练节点。
-	Line2: 这里是超梦训练场景，为您准备的沉浸式教学空间。
-	Line3: SHPC是一种高度定制化的神经直连武器，能与赛博空间产生共振。您将学习如何操作它的HUD界面。
-	Line4: 准备好将意识与我连接了吗？请握紧我的手，我们开始吧。
-}
-
-CybTutorialLead: {
-	Step0_Title: 连接 SHPC
-	Step0_Body: 将SHPC装备至武器栏并持握，HUD核心节点即会出现在屏幕左下角。
-	Step1_Title: 核心节点
-	Step1_Body: 点击左下角的核心节点可展开或收起操作面板。
-	Step2_Title: CYBER DOMAIN
-	Step2_Body:
-		'''
-		网域 — 部署并管理多层赛博空间层叠结构。
-		点击高亮的扇区即可打开该面板。
-		'''
-	Step3_Title: MODIFY
-	Step3_Body:
-		'''
-		改造 — 为SHPC安装或拆卸改造零件。
-		点击高亮的扇区即可打开该面板。
-		'''
-	Step4_Title: CYBERWARE
-	Step4_Body:
-		'''
-		赛博改装 — 查看并管理你的身体增强模块。
-		点击高亮的扇区即可打开该界面。
-		'''
-	Step5_Title: TALK
-	Step5_Body:
-		'''
-		神经链路 — 与SHPC建立直连通讯，开启对话。
-		点击高亮的扇区即可与其对话。
-		'''
-	Step6_Title: ENGRAM CALIBRATED
-	Step6_Body:
-		'''
-		所有接口已解析完毕。
-		神经链路稳定，SHPC已就绪。
-		'''
-	AwaitingEquip: AWAITING EQUIP...
-	Calibrating: CALIBRATING...
-	NextBtn: NEXT  >
-	HintStuck: HINT: 试着点击高亮的目标区域
-}
-
-CybCourseHackIntroDialogue: {
-	SpeakerName: SHPC
-	Line1: 接口解析完毕。下一项训练：骇客时间。
-	Line2: 骇客时间是SHPC专属的神经干预协议。激活后，外部时间流将冻结，您可以从容选择目标并上传定制骇入程序。默认按键是 {0}。
-	Line3: 前方的测试单元已固定就位。按下 {0} 进入骇客时间，然后点击锁定它。
-}
-
-HackTimeTutorialLead: {
-	HT_Step0_Title: 激活骇客模式
-	HT_Step1_Title: 锁定目标
-	HT_Step2_Title: 骇入协议面板
-	HT_Step3_Title: 上传协议
-	HT_Step4_Title: HACK SEQUENCE COMPLETE
-	HT_Step0_Body:
-		'''
-		按下 {0} 键进入骇客时间模式。
-		时间将冻结，赛博滤镜叠加于画面。
-		'''
-	HT_Step1_Body:
-		'''
-		将光标悬停到高亮的圣诞坦克上，
-		点击左键将其锁定为骇入目标。
-		'''
-	HT_Step2_Body:
-		'''
-		右侧面板展示目标的可用骇入协议。
-		不同协议消耗不同RAM并产生不同效果。
-		'''
-	HT_Step3_Body:
-		'''
-		点击协议将其加入左侧上传队列，
-		队列将依次执行骇入操作。
-		'''
-	HT_Step4_Body:
-		'''
-		神经链路已断开。
-		骇客时间协议训练完成，系统就绪。
-		'''
-	HT_Waiting: AWAITING INPUT...
-	HT_Calibrating: DISCONNECTING...
-	HT_NextBtn: NEXT  >
-	HT_Step5_Title: 物块扫描
-	HT_Step6_Title: 锁定物块目标
-	HT_Step7_Title: TILE SCAN COMPLETE
-	HT_Step5_Body:
-		'''
-		前方有一台热能发电机MK2。
-		再次按下 {0} 重新激活骇客时间。
-		'''
-	HT_Step6_Body:
-		'''
-		将光标悬停在发电机上，
-		点击左键将其锁定为扫描目标。
-		'''
-	HT_Step7_Body: 物块扫描接口已解析。右侧面板展示当前物块的可用骇入协议。
-	HT_HintStuck: HINT: 点击 NEXT 按钮可强制跳过
-	HT_KeyUnbound: N（临时开关）
-	HT_KeyHintUnbound: 提示：未绑定骇客时间快捷键时，本教程内可用 [N] 临时开关；建议在 设置 > 控制 中绑定。
-	HT_S00_Title: 激活骇客模式
-	HT_S01_Title: 锁定NPC目标
-	HT_S02_Title: 骇入协议面板
-	HT_S03_Title: 加入上传队列
-	HT_S04_Title: 退出骇客时间执行
-	HT_S05_Title: 协议执行中
-	HT_S06_Title: 再次进入骇客模式
-	HT_S07_Title: 锁定物块目标
-	HT_S08_Title: 加入物块协议
-	HT_S09_Title: 退出骇客时间执行
-	HT_S10_Title: 物块协议执行中
-	HT_S11_Title: 训练完成
-	HT_S00_Body:
-		'''
-		按下 {0} 键进入骇客时间模式。
-		时间将冻结，赛博滤镜叠加于画面。
-		'''
-	HT_S01_Body:
-		'''
-		将光标悬停到高亮的圣诞坦克上，
-		点击左键将其锁定为骇入目标。
-		'''
-	HT_S02_Body:
-		'''
-		右侧面板展示目标的可用骇入协议。
-		不同协议消耗不同RAM并产生不同效果。
-		'''
-	HT_S03_Body:
-		'''
-		点击右侧任一协议将其加入左侧上传队列，
-		队列在骇客时间内仅排队不会推进。
-		'''
-	HT_S04_Body:
-		'''
-		再次按下 {0} 退出骇客时间，
-		协议将在实时世界中开始上传并生效。
-		'''
-	HT_S05_Body:
-		'''
-		上传中... 观察目标遭受协议效果。
-		队列清空后将进入下一阶段。
-		'''
-	HT_S06_Body:
-		'''
-		前方走廊有一台热能发电机MK2。
-		再次按下 {0} 进入骇客时间扫描物块。
-		'''
-	HT_S07_Body:
-		'''
-		将光标悬停在高亮的发电机上，
-		点击左键将其锁定为扫描目标。
-		'''
-	HT_S08_Body:
-		'''
-		右侧面板展示物块专属协议。
-		点击任一协议将其加入上传队列。
-		'''
-	HT_S09_Body:
-		'''
-		再次按下 {0} 退出骇客时间，
-		物块协议将在实时世界中执行。
-		'''
-	HT_S10_Body:
-		'''
-		上传中... 观察发电机遭受协议效果。
-		队列清空后训练即告完成。
-		'''
-	HT_S11_Body:
-		'''
-		骇客协议训练全部完成。
-		你已掌握扫描、协议、上传、生效的完整流程。
-		'''
-	HT_Observing: UPLOADING...
-}
-
-CybCourseOutroDialogue: {
-	SpeakerName: SHPC
-	Line1: 训练完成。所有接口均已完成校准。
-	Line2: 您已掌握神经直连协议，超梦节点正在脱钩。
-	Line3: 随时可重置训练，或退出超梦。
-}
-
-CybCourseCompletePanel: {
-	Title: TRAINING COMPLETE
-	Subtitle: SUPERDREAM PROTOCOL
-	Stat1: "[#] SHPC HUD 校准完毕"
-	Stat2: "[#] 骇客时间校准完毕"
-	Stat3: "[#] 物块扫描接口校准完毕"
-	BtnRetry: RETRY
-	BtnExit: EXIT
-	Footer: 选择以继续 — RETRY 重启训练，EXIT 离开超梦
-}
-
 ShepelBloodMoonDialogue: {
 	RoleName: SHPC
 	Line1: 月球引力数据异常，夜间敌对生物密度急剧攀升。已确认为血月。
@@ -532,29 +532,29 @@ ShepelBrimstoneElementalGift: {
 	L0: 呼……主人，硫磺火元素的核心温度极高，但我还是成功捕捉到了它的热量分布。
 	L1: 我将这些极限数据为您打磨出了一套全新的枪管参数包。这是灼烧激光枪管。
 	L2: 现在光束命中时会附带持续的灼烧效果，火力覆盖得到了有效提升。
-	L3: 不过请小心操作，我不希望看到您被这股危险的力量烫伤。
+	L3: 不过请小心操作，我不希望看到您被烫伤。
 }
 
 ShepelCalamitasCloneGift: {
 	RoleName: SHPC
-	L0: 尽管只是克隆体，但她那种反射弹射物的特性确有极高的战术参考价值。
-	L1: 我将她的反射场数据写进了光束导向配置里，这样主人的攻击就不会轻易落空了。
-	L2: 您看，这是折射激光枪管，光束命中后会发生奇妙的能量折射。
-	L3: 无论是怎样的敌人，只要能转化为您的力量，这份数据就有了真正的归宿。
+	L0: 尽管只是克隆体，但她那种来自灵异力量的确有极高的参考价值。
+	L1: 我将她的数据写进了光束导向配置里，这样主人的攻击就不会轻易落空了。
+	L2: 您看，这是折射激光枪管，光束命中后会发生折射。
+	L3: 只要这些能帮到您，这份数据就有了意义。
 }
 
 ShepelCultistGift: {
 	RoleName: SHPC
-	L0: 那些邪教徒的虚空信号试图干扰我们的连接协议，我已将它们全部捕获并拆解。
-	L1: 我将这些信号重新编码成了一个完全听从指令的机匣扩展接口。
+	L0: 那些邪教徒的虚空信号试图干扰我们的连接协议，我已将它们全部捕获。
+	L1: 不过解析暂时无法完成...或者说没人看得懂它们想干什么。
 	L2: 这是相位机匣，它可以让您借助相位的力量进行辅助瞄准。
-	L3: 任何试图干扰您的存在，都会被我转化为您手中的利刃。
+	L3: 任何试图干扰您的存在，都会转化为您手中的利刃。
 }
 
 ShepelDestroyerGift: {
 	RoleName: SHPC
-	L0: 毁灭者爆炸时的物理冲击过于粗暴，这对主人的身体承受力是一场考验。
-	L1: 为了保护您的安全，我解析了冲击波的周期规律，将它转化为可控的能量反馈。
+	L0: 毁灭者爆炸时的冲击太粗暴了，这对主人的身体承受力是一种考验。
+	L1: 我解析了冲击波的周期规律，将它转化为可控的能量反馈。
 	L2: 为您改装了这套反推枪托，能量球爆炸后的冲击波将帮助主人规避攻击。
 	L3: 有我在，后坐力与震动都会被控制在最安全的范围内。
 }
