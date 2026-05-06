@@ -34,7 +34,7 @@ namespace CalamityOverhaul.Content.ADV.Scenarios.Shepel.Gifts
             DialogueBoxBase.RegisterPortrait(RoleName.Value, texture: null);
             DialogueBoxBase.SetPortraitStyle(RoleName.Value, silhouette: false);
             Add(RoleName.Value, L0.Value,
-                onStart: () => ShowPortraitWithFace(ShepelFullBodyPortrait.Face.Serious));
+                onStart: () => ShowPortraitWithFace(ShepelFullBodyPortrait.Face.None));
             Add(RoleName.Value, L1.Value);
             Add(RoleName.Value, L2.Value);
             Add(RoleName.Value, L3.Value, onComplete: Complete);
