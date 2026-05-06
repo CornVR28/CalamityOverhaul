@@ -637,6 +637,8 @@ HackTime: {
 	SignalTowerScanStatusElectrified: 过电残留
 	SignalTowerScanProtocol: 可用协议
 	RightClickHint: 右键取消选中目标
+	AccessDeniedTitle: 骇客时间不可用
+	AccessDeniedDesc: 需要连接智能武器或者植入网络义体后才能使用骇客技能
 }
 
 DecryptionStrings: {

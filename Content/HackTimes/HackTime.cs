@@ -219,6 +219,10 @@ namespace CalamityOverhaul.Content.HackTimes
 
         public static LocalizedText RightClickHint { get; private set; }
 
+        //权限校验失败弹窗本地化字段
+        public static LocalizedText AccessDeniedTitle { get; private set; }
+        public static LocalizedText AccessDeniedDesc { get; private set; }
+
         public override void SetStaticDefaults() {
             Locked = this.GetLocalization(nameof(Locked));
             Done = this.GetLocalization(nameof(Done));
@@ -406,6 +410,9 @@ namespace CalamityOverhaul.Content.HackTimes
             SignalTowerScanProtocol = this.GetLocalization(nameof(SignalTowerScanProtocol));
 
             RightClickHint = this.GetLocalization(nameof(RightClickHint));
+
+            AccessDeniedTitle = this.GetLocalization(nameof(AccessDeniedTitle));
+            AccessDeniedDesc = this.GetLocalization(nameof(AccessDeniedDesc));
         }
 
         #endregion

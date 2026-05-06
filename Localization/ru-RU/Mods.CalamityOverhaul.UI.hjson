@@ -637,6 +637,8 @@ HackTime: {
 	SignalTowerScanStatusElectrified: Остаточный заряд
 	SignalTowerScanProtocol: Доступные протоколы
 	RightClickHint: ПКМ для снятия выделения с цели
+	// AccessDeniedTitle: HACK TIME UNAVAILABLE
+	// AccessDeniedDesc: Connect a smart weapon or install a netrunner cyberware to access hacking abilities.
 }
 
 DecryptionStrings: {

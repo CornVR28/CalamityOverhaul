@@ -1,6 +1,7 @@
 ﻿using CalamityOverhaul.Common;
 using CalamityOverhaul.Content.ADV.Scenarios.VoidColonys.GlitchWraith;
 using CalamityOverhaul.Content.HackTimes.Scannables;
+using CalamityOverhaul.Content.UIs.NotificationPopup;
 using Terraria;
 using Terraria.ModLoader;
 
@@ -38,11 +39,41 @@ namespace CalamityOverhaul.Content.HackTimes
         /// <summary>当前悬停的可骇入信号塔，无悬停信号塔时返回 null</summary>
         public static IHackableSignalTower HoveredSignalTower => HoveredTarget as IHackableSignalTower;
 
+        //避免按键连按时弹窗刷屏，按"约 0.6 秒"节流
+        private static int accessDeniedCooldown;
+
         public override void ProcessTriggers(Terraria.GameInput.TriggersSet triggersSet) {
             if (Player.whoAmI != Main.myPlayer) return;
             if (Player.dead) return;
+
+            if (accessDeniedCooldown > 0) accessDeniedCooldown--;
+
             if (CWRKeySystem.HackTime_Toggle != null && CWRKeySystem.HackTime_Toggle.JustPressed) {
+                TryToggleHackTime(Player);
+            }
+        }
+
+        /// <summary>
+        /// 统一的"按键尝试切换骇客时间"入口
+        /// <br/>已激活时允许直接关闭，未激活时校验<see cref="HackTimeAccess"/>注册的条件
+        /// <br/>不满足条件时通过<see cref="NotificationPopupSystem"/>抛出警告弹窗，并按短冷却节流
+        /// </summary>
+        public static void TryToggleHackTime(Player player) {
+            //已激活的退出动作放行，避免玩家因为掉装备等原因被锁死在骇客时间内
+            if (HackTime.Active) {
                 HackTime.Toggle();
+                return;
+            }
+
+            if (HackTimeAccess.CanUse(player)) {
+                HackTime.Toggle();
+                return;
+            }
+
+            //权限不足时显示警告弹窗（按短冷却节流，避免重复按键造成弹窗堆积）
+            if (accessDeniedCooldown <= 0) {
+                NotificationPopupSystem.Add(new HackTimeAccessDeniedEntry());
+                accessDeniedCooldown = 36;
             }
         }
 

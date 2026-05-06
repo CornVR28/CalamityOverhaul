@@ -640,6 +640,8 @@ HackTime: {
 	SignalTowerScanStatusElectrified: Residual Charge
 	SignalTowerScanProtocol: Available Protocols
 	RightClickHint: "// RIGHT CLICK TO DESELECT"
+	AccessDeniedTitle: HACK TIME UNAVAILABLE
+	AccessDeniedDesc: Connect a smart weapon or install a netrunner cyberware to access hacking abilities.
 }
 
 DecryptionStrings: {

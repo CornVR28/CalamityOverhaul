@@ -1,4 +1,5 @@
 ﻿using CalamityOverhaul.Common;
+using CalamityOverhaul.Content.HackTimes;
 using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
 using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules;
 using InnoVault.GameSystem;
@@ -172,7 +173,10 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
             };
         }
 
-        public override void SetStaticDefaults() => ItemID.Sets.ShimmerTransformToItem[TargetID] = CWRID.Item_PlasmaDriveCore;
+        public override void SetStaticDefaults() {
+            ItemID.Sets.ShimmerTransformToItem[TargetID] = CWRID.Item_PlasmaDriveCore;
+            HackTimeAccess.Register(player => player.GetItem().type == CWRID.Item_SHPC, "SmartWeapon:SHPC");
+        }
 
         public override void SetDefaults(Item item) => SetDefaultsFunc(item);
 
