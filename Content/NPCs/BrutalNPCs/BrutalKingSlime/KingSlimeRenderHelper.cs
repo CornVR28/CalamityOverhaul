@@ -263,7 +263,7 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalKingSlime
             float wingAngle = baseAngle + flapSin * flapAmp;
 
             //翅膀整体缩放：跟随 NPC.scale；展开度小时整体缩小（看上去贴背）
-            float scale = npc.scale * MathHelper.Lerp(0.55f, 1.0f, ctx.WingExtension);
+            float scale = npc.scale * MathHelper.Lerp(0.85f, 1.4f, ctx.WingExtension);
             //每次扑翅触发一个轻微"果冻拉伸"——能量越高横向越拉
             float flapStretchX = 1f + ctx.WingFlapEnergy * 0.18f * (1f + flapCos * 0.3f);
             float flapStretchY = 1f - ctx.WingFlapEnergy * 0.10f;

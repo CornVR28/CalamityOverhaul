@@ -90,14 +90,10 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalKingSlime.Projectiles
             Vector2 drawPos = Projectile.Center - Main.screenPosition;
 
             SpriteBatch sb = Main.spriteBatch;
-            sb.End();
-            sb.Begin(SpriteSortMode.Deferred, BlendState.Additive, SamplerState.AnisotropicClamp,
-                DepthStencilState.None, RasterizerState.CullNone, null, Main.GameViewMatrix.TransformationMatrix);
-
             float scaleMul;
             float coreAlpha;
-            Color royal = new Color(200, 30, 30);
-            Color core = Color.Red;
+            Color royal = new Color(200, 30, 30, 0);
+            Color core = Color.Red with { A = 0 };
 
             if (Splashing) {
                 float t = MathHelper.Clamp(SplashTimer / 14f, 0f, 1f);
@@ -117,9 +113,10 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalKingSlime.Projectiles
                     0f, glow.Size() / 2f, 0.5f * pulse, SpriteEffects.None, 0);
             }
 
-            sb.End();
-            sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState,
-                DepthStencilState.None, RasterizerState.CullNone, null, Main.GameViewMatrix.TransformationMatrix);
+            Main.instance.LoadNPC(NPCID.BlueSlime);
+            glow = TextureAssets.Npc[NPCID.BlueSlime].Value;
+            Main.EntitySpriteDraw(glow, drawPos, glow.GetRectangle(0, 2), core,
+                    0f, glow.Size() / 2f, 0.75f, SpriteEffects.None, 0);
             return false;
         }
     }
