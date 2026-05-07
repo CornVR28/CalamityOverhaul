@@ -100,6 +100,8 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalKingSlime
             UpdateScale();
             UpdateWings();
 
+            Lighting.AddLight(npc.Center, Color.White.ToVector3());
+
             stateMachine?.Update();
 
             //每 10 帧强制网络同步
