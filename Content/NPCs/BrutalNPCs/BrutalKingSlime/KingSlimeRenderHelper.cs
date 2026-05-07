@@ -244,26 +244,37 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalKingSlime
             Vector2 shoulder = npc.Center + ShoulderOffset(npc) - screenPos
                 + new Vector2(0, npc.gfxOffY);
 
-            //扑翅相位换算：sin 决定振幅，cos 用于附加旋转抖动
-            float phase = ctx.WingFlapPhase;
-            float flapAmp = MathHelper.Lerp(0.15f, 0.65f, ctx.WingExtension);
-            //暴怒/砸地时幅度更大
-            if (ctx.IsEnraged) flapAmp += 0.18f;
-            if (ctx.WingFalling) flapAmp = 0.05f;//砸地下落不扑翅
+            //=========================================
+            // 取连续控制量——所有"模式"都已转为 0~1 浮点，渲染层禁用 if-else
+            //=========================================
+            float ext = MathHelper.Clamp(ctx.WingExtension, 0f, 1f);
+            float strength = MathHelper.Clamp(ctx.WingFlapStrength, 0f, 1f);
+            float fallingMix = MathHelper.Clamp(ctx.WingFallingMix, 0f, 1f);
 
+            float phase = ctx.WingFlapPhase;
             float flapSin = (float)Math.Sin(phase);
             float flapCos = (float)Math.Cos(phase * 2f);
 
-            //翅膀基础后倾 + 上翘——"皇家展翼"姿态
-            float baseAngle = MathHelper.Lerp(0.95f, 0.30f, ctx.WingExtension);//收拢时往后贴
-            //砸地下落让翅膀向后绷紧
-            if (ctx.WingFalling) baseAngle = 1.15f;
+            //=========================================
+            // 1) 扑翅振幅 = "展开 × 用力"，没用力时几乎无振
+            //   暴怒附加项也乘 strength，避免暴怒地面静止时还在乱抖
+            //=========================================
+            float flapAmp = MathHelper.Lerp(0.05f, 0.55f, ext) * MathHelper.Lerp(0.20f, 1f, strength);
+            if (ctx.IsEnraged) flapAmp += 0.10f * strength;
 
-            //最终翅膀角度：基础角度 + 扑翅振幅 sin
+            //=========================================
+            // 2) baseAngle —— 通过 fallingMix 在"展翼"和"绷紧后掠"两个姿态之间 lerp
+            //   收拢时贴背 0.95rad，展开时上翘 0.30rad，砸地下落时绷紧 1.15rad
+            //=========================================
+            float restingAngle = MathHelper.Lerp(0.95f, 0.30f, ext);
+            const float fallingAngle = 1.15f;
+            float baseAngle = MathHelper.Lerp(restingAngle, fallingAngle, fallingMix);
+
+            //最终翅膀角度——核心扑翅角度
             float wingAngle = baseAngle + flapSin * flapAmp;
 
             //翅膀整体缩放：跟随 NPC.scale；展开度小时整体缩小（看上去贴背）
-            float scale = npc.scale * MathHelper.Lerp(0.85f, 1.4f, ctx.WingExtension);
+            float scale = npc.scale * MathHelper.Lerp(0.85f, 1.4f, ext);
             //每次扑翅触发一个轻微"果冻拉伸"——能量越高横向越拉
             float flapStretchX = 1f + ctx.WingFlapEnergy * 0.18f * (1f + flapCos * 0.3f);
             float flapStretchY = 1f - ctx.WingFlapEnergy * 0.10f;
@@ -277,11 +288,13 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalKingSlime
 
             shader.Parameters["uTime"]?.SetValue(Main.GlobalTimeWrappedHourly);
             shader.Parameters["intensity"]?.SetValue(alpha);
-            shader.Parameters["extension"]?.SetValue(MathHelper.Clamp(ctx.WingExtension, 0f, 1f));
+            shader.Parameters["extension"]?.SetValue(ext);
+            shader.Parameters["flapStrength"]?.SetValue(strength);
             shader.Parameters["flapPhase"]?.SetValue(phase);
             shader.Parameters["flapEnergy"]?.SetValue(MathHelper.Clamp(ctx.WingFlapEnergy, 0f, 1f));
             shader.Parameters["enragedMix"]?.SetValue(ctx.IsEnraged ? 1f : 0f);
-            shader.Parameters["isFalling"]?.SetValue(ctx.WingFalling ? 1f : 0f);
+            //isFalling 现在是 0~1 连续混入度，shader 内 lerp 血流方向，避免硬翻转
+            shader.Parameters["isFalling"]?.SetValue(fallingMix);
             shader.Parameters["texelSize"]?.SetValue(new Vector2(1f / wingTex.Width, 1f / wingTex.Height));
             shader.Parameters["bloodCore"]?.SetValue(BloodCore);
             shader.Parameters["bloodEdge"]?.SetValue(BloodEdge);

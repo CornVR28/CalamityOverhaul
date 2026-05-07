@@ -150,54 +150,99 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalKingSlime
         }
 
         /// <summary>
-        /// 更新血光凝胶翅膀视觉状态：
-        /// <br/>落地收拢、空中展开扑翅、砸地下落收紧绷直，且暴怒/砸地阶段会刷出额外扑翅冲量。
+        /// 更新血光凝胶翅膀视觉状态。
+        /// <br/>设计核心——把所有"模式"都表达为 0~1 的连续混入度（Extension / FlapStrength / FallingMix /
+        ///       Alpha），AI 只设置目标值并以不同速率 lerp，渲染端禁用 if-else 分支。
+        /// <br/>这样状态机在"飞行→落地"等切换时不会产生 baseAngle、phaseSpeed 等关键参数的瞬时跳变。
         /// <br/>所有字段均为视觉量，无需网络同步——多端各自从 npc.velocity / collideY 推导。
         /// </summary>
         private void UpdateWings() {
-            //是否处于地面（碰到下方地块且基本静止）
+            //=======================================================
+            // 1) 状态推导——bool 仅用于"目标值选择"，不直接驱动渲染
+            //=======================================================
+            //是否处于地面（碰到下方地块且基本静止）——加宽容度避免 collideY 抖动反复触发
             bool onGround = npc.collideY && npc.velocity.Y >= 0f && Math.Abs(npc.velocity.Y) < 1.5f;
             bool airborne = !onGround;
             bool fallingFast = npc.velocity.Y > 4f && !npc.collideY;
             bool slamming = stateMachine?.CurrentState is KingSlimeRoyalSlamFallingState;
 
-            //目标展开度：地面 0、空中 1（落地后逐渐收拢）
-            float targetExtension = airborne ? 1f : 0f;
-            //砸地下落保持完全展开（向后飞绷）
-            if (slamming) targetExtension = 1f;
-            stateContext.WingExtension = MathHelper.Lerp(stateContext.WingExtension,
-                targetExtension, airborne ? 0.18f : 0.10f);
+            //=======================================================
+            // 2) 计算每个连续控制量的"目标值"
+            //=======================================================
+            //展开度：空中或砸地展开；地面收拢
+            float targetExtension = (airborne || slamming) ? 1f : 0f;
 
-            //目标 alpha：地面收拢时残留 0.20 表示半敛贴背
-            float targetAlpha = airborne ? 1f : 0.22f;
-            //蓄力中或暴怒时即便地面也亮起一些
-            if (stateContext.IsCharging || stateContext.IsEnraged) {
-                targetAlpha = MathHelper.Max(targetAlpha, 0.55f);
-            }
-            stateContext.WingAlpha = MathHelper.Lerp(stateContext.WingAlpha, targetAlpha, 0.12f);
-
-            //扑翅相位推进——空中越用力上升相位越快
-            float baseSpeed = airborne ? 0.18f : 0.05f;
-            float speedFromVy = MathHelper.Clamp(-npc.velocity.Y, 0f, 18f) * 0.022f;
-            float phaseSpeed = baseSpeed + speedFromVy + (stateContext.IsEnraged ? 0.05f : 0f);
-            //砸地下落不扑翅（向后绷直）
+            //"用力扑翅程度"——核心连续量
+            //  地面：0（自然垂落，仅靠 idle 慢相位维持微振）
+            //  空中正常：1
+            //  砸地下落 / 高速下坠：~0.10（翼会随风轻颤但不扑翅）
+            //  IsEnraged 提供 +0.10 上限
+            float targetStrength;
             if (slamming || fallingFast) {
-                phaseSpeed *= 0.25f;
+                targetStrength = 0.10f;
             }
+            else if (airborne) {
+                targetStrength = 1f;
+            }
+            else {
+                targetStrength = 0f;
+            }
+            if (stateContext.IsEnraged && targetStrength > 0.05f) {
+                targetStrength = MathHelper.Min(1f, targetStrength + 0.10f);
+            }
+            //蓄力中也微振翅，让"地面蓄技"姿态不死板
+            if (stateContext.IsCharging && !slamming) {
+                targetStrength = MathHelper.Max(targetStrength, 0.30f);
+            }
+
+            //砸地下落"姿态"混入度——0=正常展翼姿势, 1=完全后掠绷紧
+            float targetFalling = (slamming || fallingFast) ? 1f : 0f;
+
+            //可见 alpha
+            float targetAlpha = airborne ? 1f : 0.30f;
+            if (stateContext.IsCharging || stateContext.IsEnraged) {
+                targetAlpha = MathHelper.Max(targetAlpha, 0.65f);
+            }
+
+            //=======================================================
+            // 3) 平滑接近——不同字段用不同速率，匹配各自语义
+            //   速率越大越急；速率为 r 时 90% 达成约需 ln(0.1)/ln(1-r) 帧
+            //   r=0.08 → ~28 帧（~0.47s）；r=0.12 → ~18 帧（~0.30s）；r=0.18 → ~11 帧（~0.18s）
+            //=======================================================
+            stateContext.WingExtension = MathHelper.Lerp(stateContext.WingExtension, targetExtension, 0.10f);
+            stateContext.WingFlapStrength = MathHelper.Lerp(stateContext.WingFlapStrength, targetStrength, 0.09f);
+            stateContext.WingFallingMix = MathHelper.Lerp(stateContext.WingFallingMix, targetFalling, 0.12f);
+            stateContext.WingAlpha = MathHelper.Lerp(stateContext.WingAlpha, targetAlpha, 0.10f);
+
+            //=======================================================
+            // 4) 相位推进——idle 慢呼吸恒定 + active 受 strength 驱动
+            //   关键：phase 永远以 idle 速率前进，不再受 airborne 硬分支控制
+            //   ——避免空中→地面瞬间扑翅"冻结成纸板"
+            //=======================================================
+            const float idlePhaseSpeed = 0.045f;
+            float speedFromVy = MathHelper.Clamp(-npc.velocity.Y, 0f, 18f) * 0.022f;
+            float activeBoost = (0.16f + speedFromVy) * stateContext.WingFlapStrength;
+            //砸地下落时再额外抑制（FallingMix 越大越压低）
+            float fallingDamp = MathHelper.Lerp(1f, 0.30f, stateContext.WingFallingMix);
+            float phaseSpeed = (idlePhaseSpeed + activeBoost) * fallingDamp;
             stateContext.WingFlapPhase = MathHelper.WrapAngle(stateContext.WingFlapPhase + phaseSpeed);
 
-            //扑翅能量衰减（每帧）
+            //=======================================================
+            // 5) 扑翅"能量"——事件型脉冲（非过渡量），衰减保留
+            //=======================================================
             stateContext.WingFlapEnergy = MathHelper.Max(0f, stateContext.WingFlapEnergy - 0.045f);
 
-            //刚离开地面（起跳瞬间）：刷一次扑翅冲量
+            //刚离开地面（起跳瞬间）：刷一次最大扑翅冲量
             if (prevAirborne == false && airborne && npc.velocity.Y < -2f) {
                 stateContext.WingFlapEnergy = 1f;
+                //同步把 strength 抢拉到高位，下面的 lerp 再继续锁定
+                stateContext.WingFlapStrength = MathHelper.Max(stateContext.WingFlapStrength, 0.85f);
             }
-            //砸地起跳"皇家爆翅"——速度突变向上时也刷扑翅
+            //大跳冲量
             if (npc.velocity.Y < -8f && prevVelY > -2f) {
                 stateContext.WingFlapEnergy = MathHelper.Max(stateContext.WingFlapEnergy, 0.85f);
             }
-            //空中达到顶点——临界点小爆翅以营造"二段扇"感
+            //空中顶点——临界点小爆翅以营造"二段扇"感
             if (airborne && prevVelY < 0f && npc.velocity.Y >= 0f) {
                 stateContext.WingFlapEnergy = MathHelper.Max(stateContext.WingFlapEnergy, 0.55f);
             }

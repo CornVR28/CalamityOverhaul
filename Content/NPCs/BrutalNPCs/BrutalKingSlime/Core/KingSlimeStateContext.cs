@@ -49,7 +49,13 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalKingSlime.Core
         /// </summary>
         public float WingExtension { get; set; }
         /// <summary>
-        /// 当前扑翅相位，逐帧累加；空中时随 |velocity.Y| 加快
+        /// 扑翅"用力程度"（0=不动/微振, 1=猛烈鼓翅）。
+        /// <br/>替代之前"airborne ? 高速 : 低速"的硬分支——所有相位推进、扑翅振幅都乘此值，
+        /// <br/>从而让起跳/落地切换时，扑翅强度沿一个连续曲线松懈或加力，而不是瞬间冻结。
+        /// </summary>
+        public float WingFlapStrength { get; set; }
+        /// <summary>
+        /// 当前扑翅相位，逐帧累加；推进速度 = idle + active * <see cref="WingFlapStrength"/>
         /// </summary>
         public float WingFlapPhase { get; set; }
         /// <summary>
@@ -57,9 +63,14 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalKingSlime.Core
         /// </summary>
         public float WingFlapEnergy { get; set; }
         /// <summary>
-        /// 是否处于砸地下落（用于让翅膀向后绷紧、改变血浆流向）
+        /// 是否处于砸地下落（语义层面用，事件源头）
         /// </summary>
         public bool WingFalling { get; set; }
+        /// <summary>
+        /// 砸地下落"姿态混入度"（0=正常展翼, 1=完全后掠绷紧）。
+        /// <br/>以 lerp 方式过渡，避免进入/退出砸地状态时 baseAngle 硬跳 ~50°。
+        /// </summary>
+        public float WingFallingMix { get; set; }
         /// <summary>
         /// 翅膀整体可见 alpha（0~1），淡入淡出仅由 AI 端控制
         /// </summary>

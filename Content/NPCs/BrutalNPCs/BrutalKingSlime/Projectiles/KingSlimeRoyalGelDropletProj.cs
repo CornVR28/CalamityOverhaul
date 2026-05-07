@@ -88,8 +88,6 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalKingSlime.Projectiles
         public override bool PreDraw(ref Color lightColor) {
             Texture2D glow = CWRAsset.SoftGlow.Value;
             Vector2 drawPos = Projectile.Center - Main.screenPosition;
-
-            SpriteBatch sb = Main.spriteBatch;
             float scaleMul;
             float coreAlpha;
             Color royal = new Color(200, 30, 30, 0);
