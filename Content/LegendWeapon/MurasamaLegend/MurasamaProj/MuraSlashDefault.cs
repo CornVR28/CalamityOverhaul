@@ -1,8 +1,11 @@
-﻿using CalamityOverhaul.Content.PRTTypes;
+﻿using CalamityMod.NPCs;
+using CalamityOverhaul.Content.PRTTypes;
 using InnoVault.GameContent.BaseEntity;
 using InnoVault.PRT;
 using Microsoft.Xna.Framework.Graphics;
+using MonoMod;
 using System;
+using System.Linq;
 using Terraria;
 using Terraria.Audio;
 using Terraria.GameContent;
@@ -34,6 +37,10 @@ namespace CalamityOverhaul.Content.LegendWeapon.MurasamaLegend.MurasamaProj
         public bool Slash1 => Projectile.frame == 10;
         public bool Slash2 => Projectile.frame == 0;
         public bool Slash3 => Projectile.frame == 6;
+        // DR 穿透相关缓存
+        private static bool _calamityInitialized = false;
+        private static bool _calamityDRSupported = false;
+        private static Func<NPC, float> _getDR = null;
         #endregion
 
         #region 初始化
@@ -271,6 +278,42 @@ namespace CalamityOverhaul.Content.LegendWeapon.MurasamaLegend.MurasamaProj
 
             //无视防御
             modifiers.DefenseEffectiveness *= 0f;
+            TryApplyDRPenetration(target, ref modifiers);
+        }
+
+        /// <summary>
+        /// 尝试应用 DR 穿透效果
+        /// </summary>
+        private void TryApplyDRPenetration(NPC target, ref NPC.HitModifiers modifiers) {
+            // 初始化
+            if (!_calamityInitialized) {
+                _calamityInitialized = true;
+                if (ModLoader.TryGetMod("CalamityMod", out Mod calamityMod)) {
+                    try {
+                        var calType = calamityMod.Code.GetType("CalamityMod.NPCs.CalamityGlobalNPC");
+                        var drProperty = calType?.GetProperty("DR");
+                        if (drProperty != null) {
+                            _getDR = (npc) => {
+                                var method = typeof(NPC).GetMethods().FirstOrDefault(m => m.Name == "GetGlobalNPC" && m.IsGenericMethod);
+                                if (method == null) return 0f;
+                                var calNPC = method.MakeGenericMethod(calType).Invoke(npc, null);
+                                return calNPC == null ? 0f : (float)drProperty.GetValue(calNPC);
+                            };
+                            _calamityDRSupported = true;
+                        }
+                    } catch { }
+                }
+            }
+
+            if (!_calamityDRSupported || _getDR == null) return;
+
+            try {
+                float dr = _getDR(target);
+                if (dr > 0f && dr <= 0.9f) {
+                    float correctionFactor = (1f - dr * 0.5f) / (1f - dr);
+                    modifiers.FinalDamage *= correctionFactor;
+                }
+            } catch { }
         }
 
         internal static void ApplyBaseDamageModifiers(NPC target, ref NPC.HitModifiers modifiers) {
@@ -409,7 +452,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.MurasamaLegend.MurasamaProj
                 modifiers.FinalDamage *= 1.33f;
             }
         }
-        #endregion
+#endregion
 
         #region 打击效果
         public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone) {
