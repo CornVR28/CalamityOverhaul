@@ -169,7 +169,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend
                 {19, 800 },
                 {20, 900 },
                 {21, 2077 },
-                {22, 6666 },
+                {22, 4096 },
             };
         }
 

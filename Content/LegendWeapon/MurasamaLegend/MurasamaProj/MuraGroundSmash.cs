@@ -70,6 +70,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.MurasamaLegend.MurasamaProj
             Projectile.penetrate = -1;
             Projectile.usesLocalNPCImmunity = true;
             Projectile.localNPCHitCooldown = -1;
+            Projectile.DamageType = CWRRef.GetTrueMeleeDamageClass();
         }
 
         public override bool? CanDamage() {
@@ -508,6 +509,18 @@ namespace CalamityOverhaul.Content.LegendWeapon.MurasamaLegend.MurasamaProj
             }
 
             TriggerImpact();
+        }
+        public override void ModifyHitNPC(NPC target, ref NPC.HitModifiers modifiers) {
+            //无视防御
+            modifiers.DefenseEffectiveness *= 0f;
+            TryApplyDRPenetration(target, ref modifiers);
+        }
+
+        private void TryApplyDRPenetration(NPC target, ref NPC.HitModifiers modifiers) {
+            float dr = CWRRef.GetNPCDR(target);
+            if (dr > 0f && dr <= 0.9f) {
+                modifiers.FinalDamage *= (1f - dr * 0.5f) / (1f - dr);
+            }
         }
 
         public override bool OnTileCollide(Vector2 oldVelocity) {

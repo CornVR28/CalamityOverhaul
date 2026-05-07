@@ -582,7 +582,16 @@ namespace CalamityOverhaul.Content.Items.Ranged
             }
             SpawnHitEffect(target);
         }
+        public override void ModifyHitNPC(NPC target, ref NPC.HitModifiers modifiers) {
+            TryApplyDRPenetration(target, ref modifiers);
+        }
 
+        private void TryApplyDRPenetration(NPC target, ref NPC.HitModifiers modifiers) {
+            float dr = CWRRef.GetNPCDR(target);
+            if (dr > 0f && dr <= 0.9f) {
+                modifiers.FinalDamage *= (1f - dr * 0.5f) / (1f - dr);
+            }
+        }
         private void SpawnHitEffect(NPC target) {
             if (Main.dedServ)
                 return;
@@ -774,6 +783,16 @@ namespace CalamityOverhaul.Content.Items.Ranged
             //满蓄力时有几率生成追踪箭矢
             if (ChargeLevel >= 0.9f && Main.rand.NextBool(3) && Projectile.IsOwnedByLocalPlayer()) {
                 SpawnHomingArrow(target);
+            }
+        }
+        public override void ModifyHitNPC(NPC target, ref NPC.HitModifiers modifiers) {
+            TryApplyDRPenetration(target, ref modifiers);
+        }
+
+        private void TryApplyDRPenetration(NPC target, ref NPC.HitModifiers modifiers) {
+            float dr = CWRRef.GetNPCDR(target);
+            if (dr > 0f && dr <= 0.9f) {
+                modifiers.FinalDamage *= (1f - dr * 0.5f) / (1f - dr);
             }
         }
 
