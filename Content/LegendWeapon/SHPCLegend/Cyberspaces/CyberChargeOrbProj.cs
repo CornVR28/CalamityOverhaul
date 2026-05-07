@@ -172,8 +172,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
                 Projectile.localAI[0] = 1f;
             }
 
-            //超驱检测与过渡
-            bool insideDomain = Cyberspace.IsInsideDomain(Projectile.Center);
+            //超驱检测与过渡：只取"主人玩家"自己领域内才进入超驱
+            bool insideDomain = Cyberspace.IsInsideDomainOf(Projectile.owner, Projectile.Center);
             float targetOD = insideDomain ? 1f : 0f;
             float prevOD = overdriveAmount;
             overdriveAmount = MathHelper.Lerp(overdriveAmount, targetOD, 0.055f);
@@ -622,8 +622,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             Effect orbShader = EffectLoader.CyberEnergyOrb?.Value;
             Texture2D noise = CWRAsset.Extra_193?.Value;
             if (orbShader != null && noise != null) {
-                float timeVal = Cyberspace.Active
-                    ? Cyberspace.EffectTime
+                CyberspacePlayer ownerCp = Cyberspace.For(Projectile.owner);
+                float timeVal = ownerCp != null && ownerCp.Active
+                    ? ownerCp.EffectTime
                     : (float)Main.timeForVisualEffects * 0.04f;
 
                 orbShader.Parameters["uTime"]?.SetValue(timeVal);

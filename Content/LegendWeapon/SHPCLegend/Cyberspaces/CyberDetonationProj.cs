@@ -190,9 +190,12 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             Vector3 ringCol = Vector3.Lerp(baseRingCol, new Vector3(1f, 0.12f, 0.03f), od);
             Vector3 fragCol = Vector3.Lerp(baseFragCol, new Vector3(0.75f, 0.04f, 0f), od);
 
-            // 设置着色器参数
-            shader.Parameters["uTime"]?.SetValue(
-                Cyberspace.Active ? Cyberspace.EffectTime : (float)Main.timeForVisualEffects * 0.04f);
+            // 设置着色器参数（取主人玩家的领域时间，远端客户端不能读 Local）
+            CyberspacePlayer ownerCp = Cyberspace.For(Projectile.owner);
+            float effectTime = ownerCp != null && ownerCp.Active
+                ? ownerCp.EffectTime
+                : (float)Main.timeForVisualEffects * 0.04f;
+            shader.Parameters["uTime"]?.SetValue(effectTime);
             shader.Parameters["ringProgress"]?.SetValue(ringProgress);
             shader.Parameters["fadeAlpha"]?.SetValue(fadeAlpha);
             shader.Parameters["coreColor"]?.SetValue(coreCol);

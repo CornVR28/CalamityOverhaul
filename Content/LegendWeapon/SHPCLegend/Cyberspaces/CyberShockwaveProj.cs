@@ -8,7 +8,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
 {
     /// <summary>
     /// 赛博空间领域展开冲击波弹幕
-    /// <br/>在领域激活瞬间生成，以领域中心为原点向外扩散的深红色数字冲击环
+    /// <br/>在领域激活瞬间生成，以"弹幕主人"的领域中心为原点向外扩散的深红色数字冲击环
+    /// <br/>多人语义：必须按 <see cref="Projectile.owner"/> 取该玩家的 <see cref="CyberspacePlayer"/>，
+    /// 否则远端客户端会错把本地玩家当成中心，让冲击波跑错位置
     /// </summary>
     internal class CyberShockwaveProj : ModProjectile
     {
@@ -29,10 +31,18 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         }
 
         public override void AI() {
-            //跟随领域中心(支持瞬移期间领域缓动)，避免冲击波在玩家瞬间位移时跳到新位置
-            Projectile.Center = Cyberspace.DomainCenter;
-            if (Projectile.localAI[0] == 0f) {
-                maxDrawRadius = Cyberspace.Radius * 1.1f;
+            //跟随主人玩家的领域中心(支持瞬移期间领域缓动)，避免冲击波在玩家瞬间位移时跳到新位置
+            CyberspacePlayer cp = Cyberspace.For(Projectile.owner);
+            if (cp != null) {
+                Projectile.Center = cp.DomainCenter;
+                if (Projectile.localAI[0] == 0f) {
+                    maxDrawRadius = cp.Radius * 1.1f;
+                    Projectile.localAI[0] = 1f;
+                }
+            }
+            else if (Projectile.localAI[0] == 0f) {
+                //极端兜底：拿不到主人时退到 BaseRadius，至少保证视觉不闪
+                maxDrawRadius = Cyberspace.BaseRadius * 1.1f;
                 Projectile.localAI[0] = 1f;
             }
         }
@@ -56,8 +66,10 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
                 fadeAlpha = MathHelper.SmoothStep(1f, 0f, (t - 0.55f) / 0.45f);
             fadeAlpha = MathHelper.Clamp(fadeAlpha, 0f, 1f);
 
-            //设置着色器参数
-            shader.Parameters["uTime"]?.SetValue(Cyberspace.EffectTime);
+            //设置着色器参数：用主人玩家的领域时间，避免远端客户端拿成本地时间
+            CyberspacePlayer cp = Cyberspace.For(Projectile.owner);
+            float effectTime = cp?.EffectTime ?? Cyberspace.EffectTime;
+            shader.Parameters["uTime"]?.SetValue(effectTime);
             shader.Parameters["ringProgress"]?.SetValue(ringProgress);
             shader.Parameters["ringThickness"]?.SetValue(0.065f + (1f - t) * 0.04f);
             shader.Parameters["fadeAlpha"]?.SetValue(fadeAlpha);

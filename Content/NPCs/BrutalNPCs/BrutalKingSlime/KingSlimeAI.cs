@@ -1,6 +1,7 @@
 ﻿using CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalKingSlime.Core;
 using CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalKingSlime.States;
 using Microsoft.Xna.Framework.Graphics;
+using System;
 using Terraria;
 using Terraria.ID;
 
@@ -15,6 +16,8 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalKingSlime
     {
         [VaultLoaden("Content/NPCs/BrutalNPCs/BrutalKingSlime/")]
         public static Texture2D KingSlime;
+        [VaultLoaden(CWRConstant.Masking + "Wing")]
+        public static Texture2D WingMask;
         public override int TargetID => NPCID.KingSlime;
 
         private KingSlimeStateMachine stateMachine;
@@ -24,6 +27,10 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalKingSlime
         //保存初始 HP/伤害以便基于其放大
         private int origLifeMax = -1;
         private int origDamage = -1;
+
+        //翅膀视觉本地状态——上一帧 velocity.Y，用于侦测"刚起跳"与"换向"
+        private float prevVelY;
+        private bool prevAirborne;
 
         //基础碰撞箱尺寸，用于按 scale 动态缩放命中盒
         private static int BaseHitboxWidth => 120;
@@ -52,7 +59,7 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalKingSlime
             InitializeStateContext();
         }
 
-        public override bool? CanCWROverride() => false;//没做完，暂时隐藏
+        public override bool? CanCWROverride() => null;//没做完，暂时隐藏
 
         private void InitializeStateContext() {
             stateContext = new KingSlimeStateContext {
@@ -91,6 +98,7 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalKingSlime
             FindTarget();
             UpdateStateContext();
             UpdateScale();
+            UpdateWings();
 
             stateMachine?.Update();
 
@@ -139,6 +147,64 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalKingSlime
             npc.scale = MathHelper.Clamp(visualScale, 0.45f, 2.0f);
 
             SyncHitboxWithScale();
+        }
+
+        /// <summary>
+        /// 更新血光凝胶翅膀视觉状态：
+        /// <br/>落地收拢、空中展开扑翅、砸地下落收紧绷直，且暴怒/砸地阶段会刷出额外扑翅冲量。
+        /// <br/>所有字段均为视觉量，无需网络同步——多端各自从 npc.velocity / collideY 推导。
+        /// </summary>
+        private void UpdateWings() {
+            //是否处于地面（碰到下方地块且基本静止）
+            bool onGround = npc.collideY && npc.velocity.Y >= 0f && Math.Abs(npc.velocity.Y) < 1.5f;
+            bool airborne = !onGround;
+            bool fallingFast = npc.velocity.Y > 4f && !npc.collideY;
+            bool slamming = stateMachine?.CurrentState is KingSlimeRoyalSlamFallingState;
+
+            //目标展开度：地面 0、空中 1（落地后逐渐收拢）
+            float targetExtension = airborne ? 1f : 0f;
+            //砸地下落保持完全展开（向后飞绷）
+            if (slamming) targetExtension = 1f;
+            stateContext.WingExtension = MathHelper.Lerp(stateContext.WingExtension,
+                targetExtension, airborne ? 0.18f : 0.10f);
+
+            //目标 alpha：地面收拢时残留 0.20 表示半敛贴背
+            float targetAlpha = airborne ? 1f : 0.22f;
+            //蓄力中或暴怒时即便地面也亮起一些
+            if (stateContext.IsCharging || stateContext.IsEnraged) {
+                targetAlpha = MathHelper.Max(targetAlpha, 0.55f);
+            }
+            stateContext.WingAlpha = MathHelper.Lerp(stateContext.WingAlpha, targetAlpha, 0.12f);
+
+            //扑翅相位推进——空中越用力上升相位越快
+            float baseSpeed = airborne ? 0.18f : 0.05f;
+            float speedFromVy = MathHelper.Clamp(-npc.velocity.Y, 0f, 18f) * 0.022f;
+            float phaseSpeed = baseSpeed + speedFromVy + (stateContext.IsEnraged ? 0.05f : 0f);
+            //砸地下落不扑翅（向后绷直）
+            if (slamming || fallingFast) {
+                phaseSpeed *= 0.25f;
+            }
+            stateContext.WingFlapPhase = MathHelper.WrapAngle(stateContext.WingFlapPhase + phaseSpeed);
+
+            //扑翅能量衰减（每帧）
+            stateContext.WingFlapEnergy = MathHelper.Max(0f, stateContext.WingFlapEnergy - 0.045f);
+
+            //刚离开地面（起跳瞬间）：刷一次扑翅冲量
+            if (prevAirborne == false && airborne && npc.velocity.Y < -2f) {
+                stateContext.WingFlapEnergy = 1f;
+            }
+            //砸地起跳"皇家爆翅"——速度突变向上时也刷扑翅
+            if (npc.velocity.Y < -8f && prevVelY > -2f) {
+                stateContext.WingFlapEnergy = MathHelper.Max(stateContext.WingFlapEnergy, 0.85f);
+            }
+            //空中达到顶点——临界点小爆翅以营造"二段扇"感
+            if (airborne && prevVelY < 0f && npc.velocity.Y >= 0f) {
+                stateContext.WingFlapEnergy = MathHelper.Max(stateContext.WingFlapEnergy, 0.55f);
+            }
+
+            stateContext.WingFalling = slamming || fallingFast;
+            prevVelY = npc.velocity.Y;
+            prevAirborne = airborne;
         }
 
         /// <summary>
@@ -262,6 +328,11 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalKingSlime
                 out Vector2 origin, out Vector2 drawPos, out SpriteEffects effects, screenPos)) {
                 //贴图尚未加载完成时，回退到原版绘制
                 return null;
+            }
+
+            //血光凝胶翅膀——画在本体后面（先于身体绘制 + 描边光晕）
+            if (stateContext != null && WingMask != null && stateContext.WingAlpha > 0.01f) {
+                KingSlimeRenderHelper.DrawBloodWings(spriteBatch, WingMask, npc, stateContext, screenPos);
             }
 
             var (mode, intensity, progress) = GetAuraVisuals();

@@ -68,8 +68,12 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Teleport
             else if (t > 0.75f) fadeAlpha = MathHelper.SmoothStep(1f, 0f, (t - 0.75f) / 0.25f);
             else fadeAlpha = 1f;
 
-            shader.Parameters["uTime"]?.SetValue(
-                Cyberspace.Active ? Cyberspace.EffectTime : (float)Main.timeForVisualEffects * 0.04f);
+            //时间基于"主人玩家"的领域状态：远端客户端不能拿本地时间，否则瞬移演出在不同客户端节奏不一致
+            CyberspacePlayer ownerCp = Cyberspace.For(Projectile.owner);
+            float effectTime = ownerCp != null && ownerCp.Active
+                ? ownerCp.EffectTime
+                : (float)Main.timeForVisualEffects * 0.04f;
+            shader.Parameters["uTime"]?.SetValue(effectTime);
             shader.Parameters["fadeAlpha"]?.SetValue(MathHelper.Clamp(fadeAlpha, 0f, 1f));
             shader.Parameters["reformProgress"]?.SetValue(progress);
             shader.Parameters["snapPulse"]?.SetValue(MathHelper.Clamp(snap, 0f, 1f));

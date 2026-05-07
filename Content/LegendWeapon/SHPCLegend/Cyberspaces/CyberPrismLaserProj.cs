@@ -128,8 +128,8 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             age++;
             fadeAlpha = MathHelper.Clamp(age / 8f, 0f, 1f);
 
-            //超驱检测
-            bool inDomain = Cyberspace.IsInsideDomain(Projectile.Center);
+            //超驱检测：仅看"主人玩家自己的领域"，避免你的激光在别人领域里也触发超驱
+            bool inDomain = Cyberspace.IsInsideDomainOf(Projectile.owner, Projectile.Center);
             overdriveAmount = MathHelper.Lerp(overdriveAmount, inDomain ? 1f : 0f, 0.06f);
             if (overdriveAmount < 0.005f) overdriveAmount = 0f;
 
@@ -230,7 +230,10 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             trail.TrailPositions = laserPoints;
 
             float od = overdriveAmount;
-            float timeVal = Cyberspace.Active ? Cyberspace.EffectTime : (float)Main.timeForVisualEffects * 0.04f;
+            CyberspacePlayer ownerCp = Cyberspace.For(Projectile.owner);
+            float timeVal = ownerCp != null && ownerCp.Active
+                ? ownerCp.EffectTime
+                : (float)Main.timeForVisualEffects * 0.04f;
 
             shader.Parameters["transformMatrix"]?.SetValue(VaultUtils.GetTransfromMatrix());
             shader.Parameters["uTime"]?.SetValue(timeVal);

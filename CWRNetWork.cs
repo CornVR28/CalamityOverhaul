@@ -10,6 +10,8 @@ using CalamityOverhaul.Content.Items.Tools;
 using CalamityOverhaul.Content.LegendWeapon.HalibutLegend;
 using CalamityOverhaul.Content.LegendWeapon.HalibutLegend.Resurrections;
 using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces;
+using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Banish;
+using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.DomainFreeze;
 using CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalDestroyer;
 using CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalSkeletronPrime;
 using CalamityOverhaul.Content.NPCs.Modifys;
@@ -46,6 +48,9 @@ namespace CalamityOverhaul
         MachineEffect,
         SirenMusicalBoxToggle,
         CyberspaceStateSync,
+        CyberDomainFreezeStart,
+        CyberBanishStart,
+        CyberBossExecutionStart,
         HackProtocolApply,
     }
 
@@ -101,6 +106,15 @@ namespace CalamityOverhaul
             }
             else if (type == CWRMessageType.CyberspaceStateSync) {
                 CyberspacePlayer.HandleNetSync(reader, whoAmI);
+            }
+            else if (type == CWRMessageType.CyberDomainFreezeStart) {
+                CyberDomainFreeze.HandleNetStart(reader, whoAmI);
+            }
+            else if (type == CWRMessageType.CyberBanishStart) {
+                CyberBanish.HandleNetStart(reader, whoAmI);
+            }
+            else if (type == CWRMessageType.CyberBossExecutionStart) {
+                CyberBossExecution.HandleNetStart(reader, whoAmI);
             }
             else if (type == CWRMessageType.HackProtocolApply) {
                 HackTimeNetSync.HandleApplyPacket(reader, whoAmI);

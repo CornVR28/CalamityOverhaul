@@ -30,13 +30,17 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.DomainFre
         }
 
         public override void AI() {
-            Projectile.Center = Cyberspace.DomainCenter;
+            //贴附"弹幕主人"的领域中心；多人时必须按 owner 取数据，否则远端会错位
+            CyberspacePlayer cp = Cyberspace.For(Projectile.owner);
+            if (cp != null) {
+                Projectile.Center = cp.DomainCenter;
+            }
             if (Projectile.localAI[0] == 0f) {
                 if (!VaultUtils.isServer) {
                     SoundEngine.PlaySound(CWRSound.FaultOccurred, Projectile.Center);
                     SoundEngine.PlaySound(CWRSound.Faultrelease, Projectile.Center);
                 }
-                maxDrawRadius = Cyberspace.Radius * 1.15f;
+                maxDrawRadius = (cp?.Radius ?? Cyberspace.BaseRadius) * 1.15f;
                 Projectile.localAI[0] = 1f;
             }
         }
@@ -67,8 +71,10 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.DomainFre
             // 环厚度：开始时较厚，展开后变薄
             float thickness = 0.08f + (1f - t) * 0.05f;
 
-            // 设置着色器参数
-            shader.Parameters["uTime"]?.SetValue(Cyberspace.EffectTime);
+            // 设置着色器参数：取主人玩家的领域时间
+            CyberspacePlayer cpForShader = Cyberspace.For(Projectile.owner);
+            float effectTime = cpForShader?.EffectTime ?? Cyberspace.EffectTime;
+            shader.Parameters["uTime"]?.SetValue(effectTime);
             shader.Parameters["ringProgress"]?.SetValue(ringProgress);
             shader.Parameters["ringThickness"]?.SetValue(thickness);
             shader.Parameters["fadeAlpha"]?.SetValue(fadeAlpha);

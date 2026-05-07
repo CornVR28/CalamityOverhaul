@@ -7,14 +7,17 @@ using InnoVault.RenderHandles;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using System;
+using System.Collections.Generic;
 using Terraria;
 
 namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
 {
     /// <summary>
-    /// 赛博空间渲染器。
-    /// <br/>在 DrawAfterTiles 时机执行世界层后处理（压暗+去饱和+红染+加法赛博特效），
-    /// <br/>位于物块图层之上、玩家和其他实体图层之下，随后叠加边缘光晕环
+    /// 赛博空间渲染器
+    /// <br/>多人场景：每个玩家持有独立的赛博空间状态，本渲染器枚举所有活跃领域分别绘制边界环 / 边缘光晕 /
+    /// 低质量回退栅格，让每个玩家的领域在本地客户端正确出现在各自的领域中心。
+    /// <br/>整屏后处理（压暗+去饱和+红染+加法赛博特效）由"主导域"驱动：优先取本地玩家自己的领域，
+    /// 若本地未开启则取离屏幕中心最近的活跃领域，避免多个领域同时整屏后处理造成画面冲突
     /// </summary>
     internal class CyberspaceRender : RenderHandle
     {
@@ -50,23 +53,77 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
                 return;
             }
 
-            //仅按视觉强度判定，确保Active翻转后收缩动画仍能完整播完
-            if (Cyberspace.Intensity < 0.001f) {
+            //聚集本帧所有需要绘制的领域；空集合直接退出，避免无谓的 RT 切换
+            List<CyberspacePlayer> domains = CollectVisibleDomains();
+            if (domains.Count == 0) {
                 return;
             }
 
-            ApplyFullScreenShader(spriteBatch, graphicsDevice, screenSwap);
+            //整屏后处理只对一个"主导域"做：本地玩家自己的领域优先；其次取与摄像机中心最近的远端域
+            CyberspacePlayer primary = SelectPrimaryDomain(domains);
+            if (primary != null) {
+                ApplyFullScreenShader(spriteBatch, graphicsDevice, screenSwap, primary);
+            }
 
-            DrawBoundaryShockwaveRing(spriteBatch);
+            //逐个领域分别绘制边界环——每个玩家的领域有各自的中心 / 半径 / 阶段进度
+            foreach (CyberspacePlayer cp in domains) {
+                DrawBoundaryShockwaveRing(spriteBatch, cp);
+            }
 
             spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive, SamplerState.PointWrap,
                 DepthStencilState.None, RasterizerState.CullNone, null,
                 Main.GameViewMatrix.TransformationMatrix);
-            DrawEdgeGlowRing(spriteBatch);
+            foreach (CyberspacePlayer cp in domains) {
+                DrawEdgeGlowRing(spriteBatch, cp);
+            }
             spriteBatch.End();
         }
 
-        private static void ApplyFullScreenShader(SpriteBatch spriteBatch, GraphicsDevice graphicsDevice, RenderTarget2D screenSwap) {
+        /// <summary>
+        /// 遍历所有玩家，收集仍需绘制的领域（含正在收缩动画中的关闭态）
+        /// </summary>
+        private static List<CyberspacePlayer> CollectVisibleDomains() {
+            List<CyberspacePlayer> list = new();
+            foreach (CyberspacePlayer cp in Cyberspace.EnumerateRenderable()) {
+                list.Add(cp);
+            }
+            return list;
+        }
+
+        /// <summary>
+        /// 选取整屏后处理的主导域：本地玩家自己有领域则用自己，否则取距离摄像机中心最近的远端域
+        /// </summary>
+        private static CyberspacePlayer SelectPrimaryDomain(List<CyberspacePlayer> domains) {
+            int localWho = Main.myPlayer;
+
+            CyberspacePlayer localOwn = null;
+            for (int i = 0; i < domains.Count; i++) {
+                if (domains[i].Player.whoAmI == localWho) {
+                    localOwn = domains[i];
+                    break;
+                }
+            }
+            if (localOwn != null) return localOwn;
+
+            //摄像机中心（世界坐标）
+            Vector2 cameraCenter = Main.screenPosition + new Vector2(Main.screenWidth, Main.screenHeight) * 0.5f;
+            CyberspacePlayer best = null;
+            float bestDistSq = float.MaxValue;
+            for (int i = 0; i < domains.Count; i++) {
+                Vector2 c = domains[i].DomainCenter;
+                float dx = c.X - cameraCenter.X;
+                float dy = c.Y - cameraCenter.Y;
+                float d = dx * dx + dy * dy;
+                if (d < bestDistSq) {
+                    bestDistSq = d;
+                    best = domains[i];
+                }
+            }
+            return best;
+        }
+
+        private static void ApplyFullScreenShader(SpriteBatch spriteBatch, GraphicsDevice graphicsDevice,
+            RenderTarget2D screenSwap, CyberspacePlayer primary) {
             if (RenderQualitySafety.NeedsScreenTargetFallback()) {
                 DrawLowQualityFieldFallback(spriteBatch);
                 return;
@@ -103,14 +160,14 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             Vector2 worldViewOrigin = Main.screenPosition
                 + screenPixels * (Vector2.One - Vector2.One / zoom) * 0.5f;
 
-            shader.Parameters["uTime"]?.SetValue(Cyberspace.EffectTime);
-            shader.Parameters["radius"]?.SetValue(Cyberspace.Radius);
-            shader.Parameters["intensity"]?.SetValue(Cyberspace.Intensity);
-            shader.Parameters["expandProgress"]?.SetValue(Cyberspace.ExpandProgress);
+            shader.Parameters["uTime"]?.SetValue(primary.EffectTime);
+            shader.Parameters["radius"]?.SetValue(primary.Radius);
+            shader.Parameters["intensity"]?.SetValue(primary.Intensity);
+            shader.Parameters["expandProgress"]?.SetValue(primary.ExpandProgress);
             shader.Parameters["dimStrength"]?.SetValue(Cyberspace.DimStrength);
-            shader.Parameters["motionFade"]?.SetValue(Cyberspace.MotionFade);
-            Vector2 domainCenter = Cyberspace.DomainCenter;
-            float effectiveRadius = Cyberspace.Radius * Cyberspace.ExpandProgress;
+            shader.Parameters["motionFade"]?.SetValue(primary.MotionFade);
+            Vector2 domainCenter = primary.DomainCenter;
+            float effectiveRadius = primary.Radius * primary.ExpandProgress;
             shader.Parameters["setPoint"]?.SetValue(domainCenter);
             shader.Parameters["screenPosition"]?.SetValue(worldViewOrigin);
             shader.Parameters["worldViewSize"]?.SetValue(worldViewSize);
@@ -141,18 +198,28 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
 
         /// <summary>
         /// 低水波/低级光照下不触碰 screenTarget，避免原版 RT 链路变化导致玩家或 UI 被清掉。
+        /// 多人场景下逐域绘制各自的栅格，让每个玩家的领域都体现存在感。
         /// </summary>
         private static void DrawLowQualityFieldFallback(SpriteBatch spriteBatch) {
             Texture2D pixel = CWRAsset.Placeholder_White?.Value;
             if (pixel == null) return;
 
-            //运动淡化：移动时降低低质量回退的整体存在感，与高质量分支观感对齐
-            float motion = MathHelper.Clamp(Cyberspace.MotionFade, 0f, 1f);
-            float baseMul = 1f - motion * 0.50f;
-            float detailMul = 1f - motion * 0.65f;
+            //先用一层"压暗罩"——取所有领域中最强的 intensity 来拍板压暗强度，避免在多个领域叠加时画面被压死
+            float maxAlpha = 0f;
+            float maxMotion = 0f;
+            foreach (CyberspacePlayer cp in Cyberspace.EnumerateRenderable()) {
+                float a = MathHelper.Clamp(cp.Intensity, 0f, 1f);
+                if (a > maxAlpha) {
+                    maxAlpha = a;
+                    maxMotion = MathHelper.Clamp(cp.MotionFade, 0f, 1f);
+                }
+            }
+            if (maxAlpha <= 0f) return;
 
-            float alpha = MathHelper.Clamp(Cyberspace.Intensity, 0f, 1f);
-            Color dimColor = new Color(22, 0, 0) * (alpha * Cyberspace.DimStrength * 0.55f * baseMul);
+            float baseMul = 1f - maxMotion * 0.50f;
+            float detailMul = 1f - maxMotion * 0.65f;
+
+            Color dimColor = new Color(22, 0, 0) * (maxAlpha * Cyberspace.DimStrength * 0.55f * baseMul);
 
             spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
                 SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone);
@@ -163,25 +230,31 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
                 SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone,
                 null, Main.GameViewMatrix.TransformationMatrix);
 
-            for (int layer = 0; layer < Cyberspace.RenderLayerCount; layer++) {
-                float expand = Cyberspace.GetLayerExpand(layer);
-                if (expand < 0.08f) continue;
-
-                DrawLowQualityLayerGrid(spriteBatch, pixel, layer, expand, alpha, baseMul, detailMul);
+            foreach (CyberspacePlayer cp in Cyberspace.EnumerateRenderable()) {
+                float alpha = MathHelper.Clamp(cp.Intensity, 0f, 1f);
+                if (alpha <= 0.001f) continue;
+                float motion = MathHelper.Clamp(cp.MotionFade, 0f, 1f);
+                float perBaseMul = 1f - motion * 0.50f;
+                float perDetailMul = 1f - motion * 0.65f;
+                for (int layer = 0; layer < cp.RenderLayerCount; layer++) {
+                    float expand = cp.GetLayerExpand(layer);
+                    if (expand < 0.08f) continue;
+                    DrawLowQualityLayerGrid(spriteBatch, pixel, cp, layer, expand, alpha, perBaseMul, perDetailMul);
+                }
             }
 
             spriteBatch.End();
         }
 
         private static void DrawLowQualityLayerGrid(SpriteBatch spriteBatch, Texture2D pixel,
-            int layer, float expand, float alpha, float baseMul, float detailMul) {
+            CyberspacePlayer cp, int layer, float expand, float alpha, float baseMul, float detailMul) {
 
-            Vector2 center = Cyberspace.DomainCenter;
+            Vector2 center = cp.DomainCenter;
             float radius = Cyberspace.GetLayerRadius(layer) * expand;
             float gridSize = Cyberspace.GridSize;
             if (radius < gridSize * 2f) return;
 
-            float time = Cyberspace.EffectTime;
+            float time = cp.EffectTime;
             float layerMult = 0.65f + layer * 0.18f;
             //网格骨架按 baseMul 中度淡化，节点闪烁属花纹按 detailMul 强淡化
             Color lineColor = new Color(220, 35, 22) * (alpha * 0.13f * layerMult * baseMul);
@@ -226,27 +299,27 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             }
         }
 
-        private static void DrawEdgeGlowRing(SpriteBatch spriteBatch) {
+        private static void DrawEdgeGlowRing(SpriteBatch spriteBatch, CyberspacePlayer cp) {
             Texture2D glowTex = softGlow?.Value;
-            if (glowTex == null || Cyberspace.Intensity < 0.01f) return;
+            if (glowTex == null || cp.Intensity < 0.01f) return;
 
             //逐层绘制边缘光晕（包含收缩中的层）
-            for (int layer = 0; layer < Cyberspace.RenderLayerCount; layer++) {
-                float expand = Cyberspace.GetLayerExpand(layer);
+            for (int layer = 0; layer < cp.RenderLayerCount; layer++) {
+                float expand = cp.GetLayerExpand(layer);
                 if (expand < 0.1f) continue;
-                DrawSingleEdgeGlowRing(spriteBatch, glowTex, layer, expand);
+                DrawSingleEdgeGlowRing(spriteBatch, glowTex, cp, layer, expand);
             }
         }
 
         private static void DrawSingleEdgeGlowRing(SpriteBatch spriteBatch, Texture2D glowTex,
-            int layer, float expand) {
-            Vector2 center = Cyberspace.DomainCenter;
+            CyberspacePlayer cp, int layer, float expand) {
+            Vector2 center = cp.DomainCenter;
             float r = Cyberspace.GetLayerRadius(layer) * expand;
             float gs = Cyberspace.GridSize;
-            float time = Cyberspace.EffectTime;
-            float effectIntensity = Cyberspace.Intensity;
+            float time = cp.EffectTime;
+            float effectIntensity = cp.Intensity;
             //边缘光晕属花纹层，移动时强淡化
-            float glowMotionMul = 1f - MathHelper.Clamp(Cyberspace.MotionFade, 0f, 1f) * 0.60f;
+            float glowMotionMul = 1f - MathHelper.Clamp(cp.MotionFade, 0f, 1f) * 0.60f;
 
             if (r < gs * 2) return;
 
@@ -307,22 +380,22 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         }
 
         /// <summary>
-        /// 在每层领域边界绘制常驻边界环——使用专用CyberBoundaryRing着色器
+        /// 在指定领域的每层边界绘制常驻边界环——使用专用 CyberBoundaryRing 着色器
         /// <br/>逐层绘制，呼吸脉动带层间时间偏移，颜色随层数递升
         /// </summary>
-        private static void DrawBoundaryShockwaveRing(SpriteBatch spriteBatch) {
+        private static void DrawBoundaryShockwaveRing(SpriteBatch spriteBatch, CyberspacePlayer cp) {
             Effect shader = EffectLoader.CyberBoundaryRing?.Value;
             if (shader == null) return;
             if (CWRAsset.Placeholder_White?.Value == null) return;
             if (CWRAsset.Extra_193?.Value == null) return;
-            if (Cyberspace.Intensity < 0.02f) return;
+            if (cp.Intensity < 0.02f) return;
 
             Texture2D canvas = CWRAsset.Placeholder_White.Value;
             Texture2D noise = CWRAsset.Extra_193.Value;
-            Vector2 center = Cyberspace.DomainCenter;
+            Vector2 center = cp.DomainCenter;
             Vector2 drawPos = center - Main.screenPosition;
             //边界环属于骨架级显示，移动时中度淡化以削弱晃眼感
-            float ringMotionMul = 1f - MathHelper.Clamp(Cyberspace.MotionFade, 0f, 1f) * 0.38f;
+            float ringMotionMul = 1f - MathHelper.Clamp(cp.MotionFade, 0f, 1f) * 0.38f;
 
             spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
                 SamplerState.LinearWrap, DepthStencilState.None, RasterizerState.CullNone,
@@ -330,22 +403,23 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             Main.graphics.GraphicsDevice.Textures[1] = noise;
             Main.graphics.GraphicsDevice.SamplerStates[1] = SamplerState.LinearWrap;
 
-            for (int layer = 0; layer < Cyberspace.RenderLayerCount; layer++) {
-                float expand = Cyberspace.GetLayerExpand(layer);
+            for (int layer = 0; layer < cp.RenderLayerCount; layer++) {
+                float expand = cp.GetLayerExpand(layer);
                 if (expand < 0.3f) continue;
 
-                float time = Cyberspace.EffectTime * 0.75f;
+                float time = cp.EffectTime * 0.75f;
                 float layerRadius = Cyberspace.GetLayerRadius(layer);
                 float effectiveRadius = layerRadius * expand;
                 float quadHalf = effectiveRadius * 1.1f;
                 float ringPos = effectiveRadius / quadHalf;
                 float thickness = 0.15f + 0.012f * MathF.Sin(time * 0.8f + 1.2f + layer * 2.1f);
 
-                //每层用不同的时间偏移，避免同步呼吸
-                shader.Parameters["uTime"]?.SetValue(time + layer * 7.3f);
+                //每层用不同的时间偏移，避免同步呼吸；附加 owner 偏移，让多个玩家的领域呼吸相位也错开
+                float ownerPhase = cp.Player.whoAmI * 1.37f;
+                shader.Parameters["uTime"]?.SetValue(time + layer * 7.3f + ownerPhase);
                 shader.Parameters["ringProgress"]?.SetValue(ringPos);
                 shader.Parameters["ringThickness"]?.SetValue(thickness);
-                shader.Parameters["fadeAlpha"]?.SetValue(Cyberspace.Intensity * ringMotionMul);
+                shader.Parameters["fadeAlpha"]?.SetValue(cp.Intensity * ringMotionMul);
                 shader.CurrentTechnique.Passes[0].Apply();
 
                 float drawDiameter = quadHalf * 2f * 0.8f;

@@ -9,7 +9,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Restart
 {
     /// <summary>
     /// 赛博重启演出弹幕
-    /// <br/>由 <see cref="CyberRestart"/> 触发后于本地玩家位置生成，全部演出帧均贴附于 <see cref="Cyberspace.DomainCenter"/>
+    /// <br/>由 <see cref="CyberRestart"/> 触发后于发起玩家位置生成，全部演出帧均贴附于"弹幕主人"的领域中心
+    /// <br/>多人语义：必须按 <see cref="Projectile.owner"/> 取该玩家的 <see cref="CyberspacePlayer"/>，
+    /// 否则远端客户端会以本地玩家为中心，让重启演出全跑错位置
     /// <br/>四阶段：撕裂(黑墙裂缝外放)→收缩(向心粒带挤压)→奇点(红黑核心裂缝)→炸裂(横竖闪带+尘埃外散)
     /// <br/>额外通过 <see cref="IWarpDrawable"/> 在奇点/炸裂阶段把屏幕本身拽进核心，制造引力透镜与冲击挤压感
     /// </summary>
@@ -57,13 +59,21 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Restart
         }
 
         public override void AI() {
-            //每帧贴附领域中心，保持与玩家/领域同步
-            Projectile.Center = Cyberspace.DomainCenter;
+            //每帧贴附"弹幕主人"的领域中心，保持与玩家/领域同步；多人时不能用 Local
+            CyberspacePlayer cp = Cyberspace.For(Projectile.owner);
+            if (cp != null) {
+                Projectile.Center = cp.DomainCenter;
+            }
             if (Projectile.localAI[0] == 0f) {
                 Projectile.localAI[0] = 1f;
                 Init();
             }
         }
+
+        /// <summary>
+        /// 取主人玩家的领域状态；找不到时返回 null（极端情况：主人下线/重连）
+        /// </summary>
+        private CyberspacePlayer OwnerCp() => Cyberspace.For(Projectile.owner);
 
         private void Init() {
             crackAngles = new float[CrackCount];
@@ -191,7 +201,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Restart
                 globalAlpha = MathHelper.Clamp((CyberRestart.TotalFrames - t) / 6f, 0f, 1f);
             }
 
-            shader.Parameters["uTime"]?.SetValue(Cyberspace.EffectTime * 1.4f);
+            CyberspacePlayer ownerCp = OwnerCp();
+            float ownerTime = ownerCp?.EffectTime ?? Cyberspace.EffectTime;
+            shader.Parameters["uTime"]?.SetValue(ownerTime * 1.4f);
             shader.Parameters["tearK"]?.SetValue(tearK);
             shader.Parameters["collapseK"]?.SetValue(collapseK);
             shader.Parameters["singularityK"]?.SetValue(singularityK);
@@ -199,8 +211,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Restart
             shader.Parameters["crackSeed"]?.SetValue(coreSeed);
             shader.Parameters["globalAlpha"]?.SetValue(globalAlpha);
 
-            //演出基准半径：领域峰值半径 * 1.15，避免被 RestartCollapse 拽小
-            float baseRadius = MathF.Max(Cyberspace.Radius, Cyberspace.BaseRadius);
+            //演出基准半径：取主人玩家领域峰值半径 * 1.15，避免被 RestartCollapse 拽小
+            float ownerRadius = ownerCp?.Radius ?? Cyberspace.BaseRadius;
+            float baseRadius = MathF.Max(ownerRadius, Cyberspace.BaseRadius);
             float drawDiameter = baseRadius * 2.3f;
 
             Main.spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Additive,
@@ -223,11 +236,13 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Restart
             if (t > CyberRestart.PhaseSingularityEnd) return;
 
             Vector2 origin = pixel.Size() * 0.5f;
-            //当前可视外径基准——基于领域当前 EffectiveOuterRadius 取一段适中的长度
-            float baseLen = MathHelper.Clamp(Cyberspace.EffectiveOuterRadius * 0.85f, 240f, 720f);
+            //当前可视外径基准——基于"主人玩家"领域当前 EffectiveOuterRadius 取一段适中的长度
+            CyberspacePlayer ownerCp = OwnerCp();
+            float ownerEffR = ownerCp?.EffectiveOuterRadius ?? Cyberspace.BaseRadius;
+            float baseLen = MathHelper.Clamp(ownerEffR * 0.85f, 240f, 720f);
             //演出未触发收缩前用领域原半径，避免被 RestartCollapse 拽小
             if (t <= CyberRestart.PhaseTearEnd) {
-                float rawR = Cyberspace.Radius;
+                float rawR = ownerCp?.Radius ?? Cyberspace.BaseRadius;
                 if (rawR > baseLen) baseLen = rawR * 0.85f;
             }
 
@@ -310,8 +325,10 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Restart
             float k = (float)(t - CyberRestart.PhaseTearEnd)
                 / MathF.Max(1f, CyberRestart.PhaseSingularityEnd - CyberRestart.PhaseTearEnd);
 
-            //初始外径：取领域峰值半径，避免被 RestartCollapse 拉小
-            float startR = MathHelper.Clamp(Cyberspace.Radius, 320f, 760f);
+            //初始外径：取"主人玩家"领域峰值半径，避免被 RestartCollapse 拉小
+            CyberspacePlayer ownerCp = OwnerCp();
+            float ownerRadius = ownerCp?.Radius ?? Cyberspace.BaseRadius;
+            float startR = MathHelper.Clamp(ownerRadius, 320f, 760f);
             Vector2 origin = pixel.Size() * 0.5f;
 
             for (int i = 0; i < StreamCount; i++) {
@@ -577,7 +594,10 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Restart
             if (warpTex == null) return;
 
             Vector2 origin = warpTex.Size() * 0.5f;
-            Vector2 drawPos = Cyberspace.DomainCenter - Main.screenPosition;
+            //取"主人玩家"领域中心；远端客户端必须避免读 Local，否则扭曲透镜会跑到本地玩家身上
+            CyberspacePlayer ownerCp = OwnerCp();
+            Vector2 ownerCenter = ownerCp?.DomainCenter ?? Projectile.Center;
+            Vector2 drawPos = ownerCenter - Main.screenPosition;
 
             //奇点向心扭曲：强度从收缩末段缓升、奇点段持续高位、炸裂瞬间归零
             float singWarp;
@@ -598,8 +618,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Restart
                 //深紫蓝偏向心：UV 通过 DiffusionCircle 整体收缩
                 Color warpColor = new Color(40, 12, 60) * singWarp;
                 float scale = MathHelper.Lerp(1.4f, 0.55f, singWarp);
+                float ownerWarpTime = ownerCp?.EffectTime ?? Cyberspace.EffectTime;
                 for (int i = 0; i < 3; i++) {
-                    float rot = i * MathHelper.PiOver2 * 0.5f + Cyberspace.EffectTime * (0.4f + 0.2f * i);
+                    float rot = i * MathHelper.PiOver2 * 0.5f + ownerWarpTime * (0.4f + 0.2f * i);
                     Main.spriteBatch.Draw(warpTex, drawPos, null, warpColor, rot,
                         origin, scale, SpriteEffects.None, 0f);
                 }
@@ -627,8 +648,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Restart
                     //外扩冲击波：透镜随阶段进度变大、染色色偏暖红
                     Color shockColor = new Color(80, 20, 30) * burstAmp;
                     float scale = MathHelper.Lerp(0.6f, 2.6f, burstK);
+                    float ownerBurstTime = ownerCp?.EffectTime ?? Cyberspace.EffectTime;
                     for (int i = 0; i < 4; i++) {
-                        float rot = i * MathHelper.PiOver2 + Cyberspace.EffectTime * 0.7f;
+                        float rot = i * MathHelper.PiOver2 + ownerBurstTime * 0.7f;
                         Main.spriteBatch.Draw(warpTex, drawPos, null, shockColor, rot,
                             origin, scale, SpriteEffects.None, 0f);
                     }

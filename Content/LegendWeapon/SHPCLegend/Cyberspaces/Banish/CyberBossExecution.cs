@@ -2,6 +2,7 @@
 using CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Modules;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using Terraria;
 using Terraria.Audio;
 using Terraria.DataStructures;
@@ -137,13 +138,41 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Banish
                     continue;
                 }
 
-                TickSpawnBolts(entry, npc);
+                //多人语义：仅由"发起者"客户端真正生成执行雷弹幕，避免每个客户端都各自再 spawn 一遍
+                //其它端只推进 Timer 和 IsExecuting 状态，让放逐结束判定在所有端一致
+                bool authoritative = Main.netMode == NetmodeID.SinglePlayer
+                    || entry.OwnerWho == Main.myPlayer;
+                if (authoritative) {
+                    TickSpawnBolts(entry, npc);
+                }
 
                 entry.Timer++;
                 if (entry.Timer >= ExecutionDuration) {
                     ActiveExecutions.RemoveAt(i);
                 }
             }
+        }
+
+        /// <summary>
+        /// 收到远端 Boss 执行启动广播：在本机也加入对应 ActiveExecutions 记录，
+        /// 让 IsExecuting 判定与放逐 / 冻结的过滤一致；仅发起者客户端会真正 spawn 雷击
+        /// <br/>当前 <see cref="CyberBanish.Update"/> 在所有端都会触发 <see cref="StartExecution"/>，
+        /// 因此该接口暂时不被实际使用，保留是为了对齐其它子系统的同步形态以备扩展
+        /// </summary>
+        internal static void HandleNetStart(BinaryReader reader, int whoAmI) {
+            int npcIdx = reader.ReadUInt16();
+            int ownerWho = reader.ReadByte();
+            int damage = reader.ReadInt32();
+            float seed = reader.ReadSingle();
+            if (npcIdx < 0 || npcIdx >= Main.maxNPCs) return;
+            if (IsExecuting(npcIdx)) return;
+            ActiveExecutions.Add(new ExecutionEntry {
+                NpcIndex = npcIdx,
+                Timer = 0,
+                Damage = damage,
+                OwnerWho = ownerWho,
+                Seed = seed,
+            });
         }
 
         /// <summary>

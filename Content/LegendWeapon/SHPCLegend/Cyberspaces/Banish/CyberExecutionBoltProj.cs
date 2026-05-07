@@ -366,7 +366,12 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces.Banish
             trail.TrailPositions = points;
 
             shader.Parameters["transformMatrix"]?.SetValue(VaultUtils.GetTransfromMatrix());
-            shader.Parameters["uTime"]?.SetValue(Cyberspace.Active ? Cyberspace.EffectTime : (float)Main.timeForVisualEffects * 0.04f);
+            //取主人玩家的领域时间；远端客户端不能读 Local，否则雷击节奏与主人不一致
+            CyberspacePlayer ownerCp = Cyberspace.For(Projectile.owner);
+            float effectTime = ownerCp != null && ownerCp.Active
+                ? ownerCp.EffectTime
+                : (float)Main.timeForVisualEffects * 0.04f;
+            shader.Parameters["uTime"]?.SetValue(effectTime);
             shader.Parameters["fadeAlpha"]?.SetValue(MathHelper.Clamp(fadeAlpha, 0f, 1f));
             shader.Parameters["visibleStart"]?.SetValue(visibleStart);
             shader.Parameters["visibleEnd"]?.SetValue(visibleEnd);

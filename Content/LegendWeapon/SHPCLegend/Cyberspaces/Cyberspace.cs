@@ -1,12 +1,16 @@
 ﻿using System;
+using System.Collections.Generic;
 using Terraria;
 
 namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
 {
     /// <summary>
     /// 赛博空间领域系统的静态门面，所有运行时状态实际承载在 <see cref="CyberspacePlayer"/> 上
-    /// <br/>本类仅保留：常量配置、跨玩家共享的视觉参数，以及对本地玩家的便捷读写转发
-    /// <br/>这样既保持原有调用点零修改，又把数据真正下沉到玩家实例
+    /// <br/>本类保留：常量配置、跨玩家共享的视觉参数，以及对本地玩家的便捷读写转发
+    /// <br/>多人语义：每个玩家持有独立的领域状态，渲染层会枚举所有活跃领域分别绘制；
+    /// 静态属性（<see cref="Active"/> / <see cref="DomainCenter"/> 等）默认指向本地玩家，
+    /// 仅供 UI、按键、HUD 等"明确只服务于本地玩家"的调用点；视觉弹幕等需要按弹幕 owner
+    /// 取数据的位置必须改用 <see cref="For(Player)"/> / <see cref="For(int)"/>
     /// </summary>
     internal class Cyberspace : ICWRLoader
     {
@@ -71,22 +75,50 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
         /// </summary>
         public static float DimStrength = 0.85f;
 
-        // ====== 本地玩家访问 ======
+        // ====== 玩家访问器 ======
+
+        /// <summary>
+        /// 取指定玩家的领域状态实例；玩家未就绪时返回 null
+        /// </summary>
+        internal static CyberspacePlayer For(Player p) {
+            if (p == null || !p.active) {
+                return null;
+            }
+            return p.GetModPlayer<CyberspacePlayer>();
+        }
+
+        /// <summary>
+        /// 取指定玩家索引的领域状态实例；越界或玩家未就绪时返回 null
+        /// </summary>
+        internal static CyberspacePlayer For(int whoAmI) {
+            if (whoAmI < 0 || whoAmI >= Main.maxPlayers) {
+                return null;
+            }
+            return For(Main.player[whoAmI]);
+        }
 
         /// <summary>
         /// 本地玩家的领域状态实例；玩家未就绪时返回 null
         /// </summary>
-        internal static CyberspacePlayer Local {
-            get {
-                Player p = Main.LocalPlayer;
-                if (p == null || !p.active) {
-                    return null;
-                }
-                return p.GetModPlayer<CyberspacePlayer>();
+        internal static CyberspacePlayer Local => For(Main.LocalPlayer);
+
+        /// <summary>
+        /// 枚举当前所有"视觉上仍需绘制"的领域：包括激活中以及处于收缩动画末尾的玩家。
+        /// <br/>渲染层据此遍历每个玩家分别绘制各自的领域；同样适用于 NPC 影响判断
+        /// （任意领域内即视为"在赛博空间中"）。
+        /// </summary>
+        internal static IEnumerable<CyberspacePlayer> EnumerateRenderable() {
+            for (int i = 0; i < Main.maxPlayers; i++) {
+                Player p = Main.player[i];
+                if (p == null || !p.active) continue;
+                CyberspacePlayer cp = p.GetModPlayer<CyberspacePlayer>();
+                //仅按视觉强度判定，覆盖关闭后还未收缩完毕的尾段
+                if (cp.Intensity < 0.001f) continue;
+                yield return cp;
             }
         }
 
-        // ====== 转发到本地玩家的属性 ======
+        // ====== 转发到本地玩家的属性（仅供 UI / 按键 / HUD 等明确为本地语义的调用点） ======
 
         public static bool Active => Local?.Active ?? false;
 
@@ -155,6 +187,24 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
 
         public static bool IsInsideDomain(Vector2 worldPos) => Local?.IsInsideDomain(worldPos) ?? false;
 
+        /// <summary>
+        /// 指定玩家(owner)的领域是否覆盖到 worldPos；用于"弹幕主人自己的领域内才进入超驱"的判定
+        /// </summary>
+        public static bool IsInsideDomainOf(int ownerWho, Vector2 worldPos) {
+            CyberspacePlayer cp = For(ownerWho);
+            return cp != null && cp.IsInsideDomain(worldPos);
+        }
+
+        /// <summary>
+        /// 任意玩家的领域覆盖到 worldPos 即返回 true；用于"NPC在任一玩家领域内"等场景
+        /// </summary>
+        public static bool IsInsideAnyDomain(Vector2 worldPos) {
+            foreach (CyberspacePlayer cp in EnumerateRenderable()) {
+                if (cp.IsInsideDomain(worldPos)) return true;
+            }
+            return false;
+        }
+
         // ====== 操作方法 ======
 
         /// <summary>
@@ -199,8 +249,6 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
 
         /// <summary>
         /// 主更新入口；遍历所有在线玩家更新各自的赛博空间状态
-        /// <br/>视觉渲染目前仍只读本地玩家，遍历是为了让多玩家各自维护自己的状态机，
-        /// 便于以后扩展为联机同步显示
         /// </summary>
         public static void Update() {
             for (int i = 0; i < Main.maxPlayers; i++) {

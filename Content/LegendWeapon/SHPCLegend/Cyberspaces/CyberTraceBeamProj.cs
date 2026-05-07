@@ -226,7 +226,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             UpdateTrailHistory();
 
             // ---- 超驱检测与过渡
-            bool insideDomain = Cyberspace.IsInsideDomain(Projectile.Center);
+            bool insideDomain = Cyberspace.IsInsideDomainOf(Projectile.owner, Projectile.Center);
             float targetOD = insideDomain ? 1f : 0f;
             float prevOD = overdriveAmount;
             overdriveAmount = MathHelper.Lerp(overdriveAmount, targetOD, 0.055f); // ~0.4s过渡
@@ -372,7 +372,12 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             theme = Themes[themeIndex];
 
             shader.Parameters["transformMatrix"]?.SetValue(VaultUtils.GetTransfromMatrix());
-            shader.Parameters["uTime"]?.SetValue(Cyberspace.Active ? Cyberspace.EffectTime : (float)Main.timeForVisualEffects * 0.04f);
+            //取主人玩家的领域时间，避免远端拿成本地节奏
+            CyberspacePlayer ownerCp = Cyberspace.For(Projectile.owner);
+            float beamTime = ownerCp != null && ownerCp.Active
+                ? ownerCp.EffectTime
+                : (float)Main.timeForVisualEffects * 0.04f;
+            shader.Parameters["uTime"]?.SetValue(beamTime);
             shader.Parameters["fadeAlpha"]?.SetValue(MathHelper.Clamp(fadeAlpha, 0f, 1f));
             shader.Parameters["coreColor"]?.SetValue(theme.CoreVec);
             shader.Parameters["glowColor"]?.SetValue(theme.GlowVec);
@@ -429,8 +434,9 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             Effect orbShader = EffectLoader.CyberEnergyOrb?.Value;
             Texture2D noise = CWRAsset.Extra_193?.Value;
             if (orbShader != null && noise != null) {
-                float timeVal = Cyberspace.Active
-                    ? Cyberspace.EffectTime
+                CyberspacePlayer ownerOrbCp = Cyberspace.For(Projectile.owner);
+                float timeVal = ownerOrbCp != null && ownerOrbCp.Active
+                    ? ownerOrbCp.EffectTime
                     : (float)Main.timeForVisualEffects * 0.04f;
 
                 orbShader.Parameters["uTime"]?.SetValue(timeVal);

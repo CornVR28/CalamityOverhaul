@@ -211,6 +211,144 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalKingSlime
             EndAdditive(sb);
         }
 
+        #region 血光凝胶翅膀
+
+        //血色三段——核心鲜血、暗紫红边缘、亮金高光
+        private static readonly Vector3 BloodCore = new Color(220, 25, 35).ToVector3();
+        private static readonly Vector3 BloodEdge = new Color(60, 0, 18).ToVector3();
+        private static readonly Vector3 BloodHighlight = new Color(255, 200, 160).ToVector3();
+
+        //翅膀关节相对图片左上的像素位置（人工标定，对齐 Wing.png 中羽根接合点）
+        private const float WingPivotX = 80f;
+        private const float WingPivotY = 160f;
+        //翅膀挂在史莱姆王本体上的"肩膀"偏移——本体中心向上向后侧
+        private static Vector2 ShoulderOffset(NPC npc) => new Vector2(0f, -npc.height * 0.30f);
+
+        /// <summary>
+        /// 翅膀整体绘制——左右镜像 + 着色器叠层。
+        /// <br/>使用 Immediate + AlphaBlend，配合 KingSlimeBloodWing.fx 输出预乘 alpha。
+        /// </summary>
+        public static void DrawBloodWings(SpriteBatch spriteBatch, Texture2D wingTex,
+            NPC npc, KingSlimeStateContext ctx, Vector2 screenPos) {
+            if (wingTex == null || ctx == null) return;
+            float alpha = MathHelper.Clamp(ctx.WingAlpha, 0f, 1f);
+            if (alpha <= 0.01f) return;
+
+            //着色器没加载完前，跳过绘制（不回退到普通贴图，避免出现纯白翅膀错位）
+            Effect shader = EffectLoader.KingSlimeBloodWing?.Value;
+            if (shader == null) return;
+
+            //肩膀位置——以本体中心为基准、向上偏移
+            Vector2 shoulder = npc.Center + ShoulderOffset(npc) - screenPos
+                + new Vector2(0, npc.gfxOffY);
+
+            //扑翅相位换算：sin 决定振幅，cos 用于附加旋转抖动
+            float phase = ctx.WingFlapPhase;
+            float flapAmp = MathHelper.Lerp(0.15f, 0.65f, ctx.WingExtension);
+            //暴怒/砸地时幅度更大
+            if (ctx.IsEnraged) flapAmp += 0.18f;
+            if (ctx.WingFalling) flapAmp = 0.05f;//砸地下落不扑翅
+
+            float flapSin = (float)Math.Sin(phase);
+            float flapCos = (float)Math.Cos(phase * 2f);
+
+            //翅膀基础后倾 + 上翘——"皇家展翼"姿态
+            float baseAngle = MathHelper.Lerp(0.95f, 0.30f, ctx.WingExtension);//收拢时往后贴
+            //砸地下落让翅膀向后绷紧
+            if (ctx.WingFalling) baseAngle = 1.15f;
+
+            //最终翅膀角度：基础角度 + 扑翅振幅 sin
+            float wingAngle = baseAngle + flapSin * flapAmp;
+
+            //翅膀整体缩放：跟随 NPC.scale；展开度小时整体缩小（看上去贴背）
+            float scale = npc.scale * MathHelper.Lerp(0.55f, 1.0f, ctx.WingExtension);
+            //每次扑翅触发一个轻微"果冻拉伸"——能量越高横向越拉
+            float flapStretchX = 1f + ctx.WingFlapEnergy * 0.18f * (1f + flapCos * 0.3f);
+            float flapStretchY = 1f - ctx.WingFlapEnergy * 0.10f;
+
+            //=========================================
+            // 切到 Immediate + 启用着色器
+            //=========================================
+            spriteBatch.End();
+            spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, Main.DefaultSamplerState,
+                DepthStencilState.None, RasterizerState.CullNone, null, Main.GameViewMatrix.TransformationMatrix);
+
+            shader.Parameters["uTime"]?.SetValue(Main.GlobalTimeWrappedHourly);
+            shader.Parameters["intensity"]?.SetValue(alpha);
+            shader.Parameters["extension"]?.SetValue(MathHelper.Clamp(ctx.WingExtension, 0f, 1f));
+            shader.Parameters["flapPhase"]?.SetValue(phase);
+            shader.Parameters["flapEnergy"]?.SetValue(MathHelper.Clamp(ctx.WingFlapEnergy, 0f, 1f));
+            shader.Parameters["enragedMix"]?.SetValue(ctx.IsEnraged ? 1f : 0f);
+            shader.Parameters["isFalling"]?.SetValue(ctx.WingFalling ? 1f : 0f);
+            shader.Parameters["texelSize"]?.SetValue(new Vector2(1f / wingTex.Width, 1f / wingTex.Height));
+            shader.Parameters["bloodCore"]?.SetValue(BloodCore);
+            shader.Parameters["bloodEdge"]?.SetValue(BloodEdge);
+            shader.Parameters["bloodHighlight"]?.SetValue(BloodHighlight);
+
+            Vector2 origin = new Vector2(WingPivotX, WingPivotY);
+            //配合羽尖金光，整体颜色乘子（vertexColor 进 shader 做调温）
+            Color tint = Color.White * alpha;
+            //暴怒模式略微偏冷血紫
+            if (ctx.IsEnraged) tint = new Color(245, 220, 240) * alpha;
+
+            //=========================================
+            // 右翼（不翻转）—— shader 在右翼实例上 seed=0
+            //=========================================
+            shader.Parameters["seed"]?.SetValue(0f);
+            shader.CurrentTechnique.Passes[0].Apply();
+            DrawSingleWing(spriteBatch, wingTex, shoulder, origin, scale,
+                flapStretchX, flapStretchY, wingAngle, false, tint);
+
+            //=========================================
+            // 左翼（水平翻转）—— seed=0.7 让左右两翼血流相位错开
+            //=========================================
+            shader.Parameters["seed"]?.SetValue(0.73f);
+            shader.CurrentTechnique.Passes[0].Apply();
+            DrawSingleWing(spriteBatch, wingTex, shoulder, origin, scale,
+                flapStretchX, flapStretchY, wingAngle, true, tint);
+
+            //=========================================
+            // 关节处血色光晕——两翼之间的"皇家光球"
+            //=========================================
+            spriteBatch.End();
+            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive, Main.DefaultSamplerState,
+                DepthStencilState.None, RasterizerState.CullNone, null, Main.GameViewMatrix.TransformationMatrix);
+
+            Texture2D glowTex = CWRAsset.SoftGlow.Value;
+            if (glowTex != null) {
+                float glowPulse = 0.55f + 0.45f * (float)Math.Sin(Main.GlobalTimeWrappedHourly * 2.5f);
+                float glowScale = (0.35f + 0.20f * glowPulse) * scale * (1f + ctx.WingFlapEnergy * 1.5f);
+                Color glowColor = new Color(BloodCore) * (alpha * (0.55f + ctx.WingFlapEnergy * 0.65f));
+                Main.EntitySpriteDraw(glowTex, shoulder, null, glowColor, 0f,
+                    glowTex.Size() / 2f, glowScale, SpriteEffects.None, 0);
+                //内层亮核
+                Color innerColor = new Color(BloodHighlight) * (alpha * 0.55f * (0.4f + ctx.WingFlapEnergy));
+                Main.EntitySpriteDraw(glowTex, shoulder, null, innerColor, 0f,
+                    glowTex.Size() / 2f, glowScale * 0.55f, SpriteEffects.None, 0);
+            }
+
+            //还原成默认 sprite batch 状态
+            spriteBatch.End();
+            spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, Main.DefaultSamplerState,
+                DepthStencilState.None, RasterizerState.CullNone, null, Main.GameViewMatrix.TransformationMatrix);
+        }
+
+        /// <summary>
+        /// 绘制单只翅膀——左翼通过 mirror=true 翻转 effects 与 X 缩放符号。
+        /// </summary>
+        private static void DrawSingleWing(SpriteBatch spriteBatch, Texture2D tex, Vector2 anchorPos,
+            Vector2 origin, float scale, float stretchX, float stretchY, float angle, bool mirror, Color tint) {
+            //镜像左翼：旋转角符号反向 + 水平翻转
+            float realAngle = mirror ? -angle : angle;
+            SpriteEffects effects = mirror ? SpriteEffects.FlipHorizontally : SpriteEffects.None;
+
+            //翅膀绘制——使用矢量缩放支持果冻拉伸
+            spriteBatch.Draw(tex, anchorPos, null, tint, realAngle, origin,
+                new Vector2(stretchX, stretchY) * scale, effects, 0f);
+        }
+
+        #endregion
+
         #region 皇家描边光环 + 着色器
 
         /// <summary>

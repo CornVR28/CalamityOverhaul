@@ -43,6 +43,29 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalKingSlime.Core
         public float SquishY { get; set; }
         #endregion
 
+        #region 血光凝胶翅膀视觉
+        /// <summary>
+        /// 翅膀展开度（0=完全收拢, 1=完全展开），落地→0、空中→1，由 AI 端平滑插值
+        /// </summary>
+        public float WingExtension { get; set; }
+        /// <summary>
+        /// 当前扑翅相位，逐帧累加；空中时随 |velocity.Y| 加快
+        /// </summary>
+        public float WingFlapPhase { get; set; }
+        /// <summary>
+        /// 当前扑翅能量峰值（每次起跳/扑翅冲量时刷新到 1，逐帧衰减）
+        /// </summary>
+        public float WingFlapEnergy { get; set; }
+        /// <summary>
+        /// 是否处于砸地下落（用于让翅膀向后绷紧、改变血浆流向）
+        /// </summary>
+        public bool WingFalling { get; set; }
+        /// <summary>
+        /// 翅膀整体可见 alpha（0~1），淡入淡出仅由 AI 端控制
+        /// </summary>
+        public float WingAlpha { get; set; }
+        #endregion
+
         #region 跨状态记忆
         /// <summary>
         /// 上一次主动攻击是什么类型，避免连续重复
