@@ -22,24 +22,16 @@ float3 bloodCore;
 float3 bloodEdge;
 float3 bloodHighlight;
 
-// UV 形变：纯 sin 波，无任何 hash/noise，彻底杜绝形变本身带来的边缘闪烁
+// UV 形变：幅度严格限制在 ±0.015 以内，绝不让 UV 越出纹理 alpha 边界
 float2 DeformUV(float2 uv)
 {
     float r = uv.x;
 
-    // 鞭梢波：羽尖滞后羽根，扑翅时拖出弧线
-    float whipAmp = (flapStrength * r * r * 0.06 + flapEnergy * r * r * 0.03);
-    float whipY   = sin(flapPhase * 1.3 - r * 3.5 + seed * 0.7) * whipAmp;
+    // 鞭梢波：幅度极小，仅产生微弱弯曲感，不会越边
+    float whipAmp = flapStrength * r * r * 0.014;
+    float whipY   = sin(flapPhase * 1.2 - r * 2.8 + seed * 0.7) * whipAmp;
 
-    // 重力垂：strength 低时下沿向下偏移
-    float sag  = ((1.0 - flapStrength) * 0.035 + (1.0 - extension) * 0.012)
-                 * smoothstep(0.15, 0.90, r)
-                 * smoothstep(-0.1, 0.5, uv.y - 0.5);
-
-    // 砸地后掠：整翼向尖端方向拉伸
-    float fallingX = isFalling * 0.018 * smoothstep(0.10, 0.90, r);
-
-    return uv + float2(fallingX, whipY + sag);
+    return uv + float2(0, whipY);
 }
 
 float4 PixelShaderFunction(float2 coords : TEXCOORD0, float4 vertexColor : COLOR0) : COLOR0
@@ -56,10 +48,9 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0, float4 vertexColor : COLOR
     float radial = coords.x;
     float along  = coords.y;
 
-    // 流速：enragedMix 和 flapEnergy 影响幅度小，避免速度突变引起跳帧感
-    float flowSpeed = 0.50 + enragedMix * 0.25;
-    float flowDir   = lerp(1.0, -1.0, saturate(isFalling));
-    float t         = uTime * flowSpeed * flowDir;
+    // 流速：始终向同一方向流动，不随 isFalling 反向（反向会导致相位跳变闪烁）
+    float flowSpeed = 0.50 + enragedMix * 0.20;
+    float t         = uTime * flowSpeed;
 
     // 1) 血浆底色：两层低频 sin 叠加，沿翼展方向缓慢流动
     //    频率均 ≤ 3，在任何缩放下都不会产生混叠
@@ -92,9 +83,8 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0, float4 vertexColor : COLOR
         pulseRing = smoothstep(0.18, 0.0, abs(radial - ringCenter)) * flapEnergy;
     }
 
-    // 6) 收拢可见性
-    float visibility = saturate(extension * 1.15);
-    visibility *= lerp(smoothstep(0.0, 0.55, radial), 1.0, saturate(extension));
+    // 6) 收拢可见性：只用 extension 线性淡出，不做径向裁切，避免边界位置随 extension 抖动
+    float visibility = saturate(extension);
 
     // 颜色合成
     float3 baseColor   = lerp(bloodEdge, bloodCore, saturate(plasma * 1.1));
