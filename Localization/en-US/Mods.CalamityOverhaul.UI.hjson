@@ -153,7 +153,7 @@ QuestLog: {
 	ResetViewText: Reset View
 	SunModeText: Daytime Mode
 	LauncherHoverText: Left-Click Toggle, Right-Click Drag
-	QuestManagerText: 委托任务
+	QuestManagerText: Delegated Task
 }
 
 QuestNotificationSystem.Text1: Quest Complete
@@ -366,66 +366,66 @@ GalacticCrisisRender: {
 }
 
 TransitionScene: {
-	LoadingText: 数据链接中
-	InitializingText: 正在初始化协议
-	Hint0: 不要问为什么杀异形，而是要问为何不杀
-	Hint1: 阿切隆协议是嘉登最高级别的应急方案之一
-	Hint2: 战术人形无所畏惧，因为恐惧本身就是他们的武器
-	Hint3: 嘉登的机械造物已经超越了现实的极限
-	Hint4: 没有大到无法接受的牺牲，没有小到可以原谅的背叛
-	Hint5: 任何足够先进的技术，皆与魔法无异
-	Hint6: 灾厄之中蕴藏着超越一切的可能性
-	Hint7: 嘉登从不做无意义的事，每一步都是精密计算的结果
-	Hint8: 数据即是力量，知识即是武装
-	Hint9: 机械不会背叛，但操控机械的人或许会
+	LoadingText: In the Data Link
+	InitializingText: Initializing Protocol
+	Hint0: Don't ask why we kill aliens, but rather why we don't kill them.
+	Hint1: The Acheron Protocol is one of Gaden's highest-level contingency plans.
+	Hint2: Tactical dolls are fearless, because fear itself is their weapon.
+	Hint3: Gaden's mechanical creations have surpassed the limits of reality.
+	Hint4: There were no sacrifices too great to accept, and no betrayals too small to forgive.
+	Hint5: Any sufficiently advanced technology is no different from magic.
+	Hint6: Calamity contains the possibility of transcending everything.
+	Hint7: Gaden never does anything meaningless; every step is the result of meticulous calculation.
+	Hint8: Data is power, knowledge is weaponry.
+	Hint9: Machines don't betray you, but those who operate them might.
 }
 
 StarStreamDialogueBox: {
-	ContinueHint: 继续
-	FastHint: 加速
+	ContinueHint: Continue
+	FastHint: Accelerate
 }
 
 ApolliaHeroPanelUI: {
-	TitleText: 阿波利娅
-	HPLabel: 生命值
-	DamageLabel: 伤害
-	DefenseLabel: 防御
-	CommandLabel: 作战指令
-	CmdFollow: 跟随
-	CmdHold: 驻守
-	CmdAggressive: 进攻
-	CmdDefensive: 防御
+	TitleText: Apollia
+	HPLabel: Health
+	DamageLabel: Harm
+	DefenseLabel: Defense
+	CommandLabel: Operational Orders
+	CmdFollow: Follow
+	CmdHold: Guard
+	CmdAggressive: Attack
+	CmdDefensive: Defend
 }
 
 DraedonIncomingCall: {
-	IncomingLabel: 来电通讯
-	AnswerHint: 点击接听
-	ConnectingLabel: 连接中
-	EndLabel: 结束
-	NextLabel: 继续
-	TimerLabel: 时长
-	UnknownCaller: 未知
+	IncomingLabel: Incoming call
+	AnswerHint: Click to answer
+	ConnectingLabel: Connecting
+	EndLabel: Finish
+	NextLabel: Continue
+	TimerLabel: Duration
+	UnknownCaller: Unknown
 	ChannelPrefix: CH
 }
 
 QuestManagerUI: {
-	TitleText: 任务管理
-	CategoryAll: 全部
-	CategoryActive: 进行中
-	CategoryCompleted: 已完成
-	CategorySuspended: 挂起
-	EmptyHintText: 暂无任务...
-	TrackHintText: "[右键] 关注/取消关注"
-	SuspendHintText: "[中键] 挂起/恢复"
-	OpenHintText: 按 [L] 打开任务管理
+	TitleText: Task Management
+	CategoryAll: All
+	CategoryActive: Active
+	CategoryCompleted: Completed
+	CategorySuspended: Suspended
+	EmptyHintText: No tasks available...
+	TrackHintText: "[Right-click] to follow/unfollow"
+	SuspendHintText: "[Middle Click] Suspend/Resume"
+	OpenHintText: According to [L] open Task Manager
 	HeaderStatusTag: ◈ ACTIVE
 	FooterStatsFormat: TOTAL: {0}  |  ACTIVE: {1}
-	ExpandHintText: "[左键] 展开/收起详情"
-	EntryStatusActive: 进行中
-	EntryStatusTracked: 已关注
-	EntryStatusSuspended: 已挂起
-	EntryStatusCompleted: 已完成
-	EntryStatusFailed: 已失败
+	ExpandHintText: "[Left Click] Expand/Collapse Details"
+	EntryStatusActive: In Progress
+	EntryStatusTracked: Followed
+	EntryStatusSuspended: Already hung
+	EntryStatusCompleted: Completed
+	EntryStatusFailed: Failed
 }
 
 CyberwareUI: {
@@ -448,17 +448,17 @@ CyberwareUI: {
 }
 
 SHPCDialogueBox: {
-	ContinueHint: 继续
-	FastHint: 加速
+	ContinueHint: Continue
+	FastHint: Accelerate
 }
 
 EntrustManagerNotification: {
-	LabelNewQuest: 新委托
-	LabelTracked: 已关注
-	LabelUntracked: 取消关注
-	LabelSuspended: 已挂起
-	LabelUnsuspended: 已恢复
-	LabelCompleted: 委托完成
+	LabelNewQuest: New Commission
+	LabelTracked: Followed
+	LabelUntracked: Unfollow
+	LabelSuspended: Already Hung
+	LabelUnsuspended: Restored
+	LabelCompleted: Commissioned to Complete
 }
 
 HackTime: {
