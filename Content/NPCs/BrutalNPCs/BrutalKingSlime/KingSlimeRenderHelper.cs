@@ -223,8 +223,12 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalKingSlime
         //取稍稍偏内偏下的 (95,165) 落到羽毛会聚的"球关节"中心。
         private const float WingPivotX = 95f;
         private const float WingPivotY = 165f;
-        //翅膀挂在史莱姆王本体上的"肩膀"偏移——本体中心向上向后侧
-        private static Vector2 ShoulderOffset(NPC npc) => new Vector2(0f, -npc.height * 0.30f);
+
+        //肩膀离脚底的高度（基于 BaseHitboxHeight=110 的 0.80 倍，scale=1 时 ≈ 88 像素）。
+        //不再使用 npc.height —— 它在 SyncHitboxWithScale 里被强制 (int) 截断，
+        //npc.scale 平滑变化时会以 1 像素的离散步跳，导致翅膀肩膀相对身体闪动。
+        //改成 BaseHitboxHeight × npc.scale × 0.80 后，纵向偏移连续，移动 / 跳跃时不再闪烁。
+        private const float ShoulderHeightFromBottom = 88f;
 
         /// <summary>
         /// 翅膀整体绘制——左右镜像 + 着色器叠层。
@@ -240,9 +244,12 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalKingSlime
             Effect shader = EffectLoader.KingSlimeBloodWing?.Value;
             if (shader == null) return;
 
-            //肩膀位置——以本体中心为基准、向上偏移
-            Vector2 shoulder = npc.Center + ShoulderOffset(npc) - screenPos
+            //肩膀位置——锚定到与本体绘制相同的"底部中心"（npc.position.Y + npc.height 在 SyncHitboxWithScale 里被显式锁住，
+            //是稳定值），再用 npc.scale × 常量做向上的纵向偏移。
+            //这样肩膀完全不依赖被整数截断的 npc.height，scale 连续变化时翅膀也不会再相对身体跳动。
+            Vector2 bodyBottom = new Vector2(npc.Center.X, npc.position.Y + npc.height) - screenPos
                 + new Vector2(0, npc.gfxOffY);
+            Vector2 shoulder = bodyBottom + new Vector2(0f, -ShoulderHeightFromBottom * npc.scale);
 
             //=========================================
             // 取连续控制量——所有"模式"都已转为 0~1 浮点，渲染层禁用 if-else
