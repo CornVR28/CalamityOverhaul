@@ -687,6 +687,10 @@ namespace CalamityOverhaul
         [CWRJITEnabled]
         private static bool GetEarlyHardmodeProgressionReworkBoolInner() => CalamityServerConfig.Instance.EarlyHardmodeProgressionRework;
 
+        public static float GetNPCDR(NPC npc) => Has ? GetNPCDRInner(npc) : 0f;
+        [CWRJITEnabled]
+        private static float GetNPCDRInner(NPC npc) => npc.Calamity().DR;
+
         public static int GetProjectileDamage(NPC npc, int projType) {
             int num = npc.defDamage / 2;//暂时使用这个，原来的方法在某些情况下会返回1或者0
             if (Main.expertMode) {

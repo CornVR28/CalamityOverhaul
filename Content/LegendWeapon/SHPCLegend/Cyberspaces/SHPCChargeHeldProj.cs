@@ -100,7 +100,7 @@ namespace CalamityOverhaul.Content.LegendWeapon.SHPCLegend.Cyberspaces
             Projectile.timeLeft = 60;
 
             //瞄准方向
-            Vector2 aimDir = (Main.MouseWorld - Owner.Center).SafeNormalize(Vector2.UnitX);
+            Vector2 aimDir = UnitToMouseV;
             UpdateGunState(aimDir, 0f);
         }
 
