@@ -115,8 +115,9 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalKingSlime.Projectiles
 
             Main.instance.LoadNPC(NPCID.BlueSlime);
             glow = TextureAssets.Npc[NPCID.BlueSlime].Value;
-            Main.EntitySpriteDraw(glow, drawPos, glow.GetRectangle(0, 2), core,
-                    0f, glow.Size() / 2f, 0.75f, SpriteEffects.None, 0);
+            Rectangle rectangle = glow.GetRectangle(0, 2);
+            Main.EntitySpriteDraw(glow, drawPos, rectangle, core,
+                    0f, rectangle.Size() / 2f, 0.75f, SpriteEffects.None, 0);
             return false;
         }
     }
