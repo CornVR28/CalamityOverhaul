@@ -52,7 +52,7 @@ float fbm(float2 p)
     float v = 0.0;
     float amp = 0.55;
     [unroll]
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < 3; i++)
     {
         v += amp * noise(p);
         p *= 2.05;
@@ -137,29 +137,29 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0, float4 vertexColor : COLOR
     // 1) 血液流动渐变——fbm 染色
     //    flowDir 以 isFalling 在 [+1, -1] lerp，过渡平滑（中点速度趋零，自然反向）
     //========================================
-    float flowSpeed = 0.85 + enragedMix * 0.7 + flapEnergy * 1.5;
+    float flowSpeed = 0.85 + enragedMix * 0.45 + flapEnergy * 0.55;
     float flowDir = lerp(1.0, -1.0, saturate(isFalling));
     float flowOffset = uTime * flowSpeed * flowDir + seed * 1.7;
 
-    float2 flowUV = float2(radial * 3.6 - flowOffset, along * 2.4 + uTime * 0.25);
+    float2 flowUV = float2(radial * 2.6 - flowOffset, along * 1.8 + uTime * 0.20);
     float plasma = saturate(fbm(flowUV) * 1.25 - 0.15);
 
     //========================================
     // 2) 凝胶湿润反光——fbm 双层叠加阈值化的"湿润斑块"，无周期带状
     //========================================
-    float sheenScroll = uTime * (0.45 + flapEnergy * 0.7);
-    float2 sheenUV1 = float2(radial * 3.5 - sheenScroll * 1.1,
-                             along  * 5.5 + sheenScroll * 0.40 + seed * 1.3);
+    float sheenScroll = uTime * (0.40 + flapEnergy * 0.30);
+    float2 sheenUV1 = float2(radial * 2.4 - sheenScroll * 1.1,
+                             along  * 3.0 + sheenScroll * 0.40 + seed * 1.3);
     float sheen1 = fbm(sheenUV1);
-    float2 sheenUV2 = float2(radial * 6.2 + sheenScroll * 0.8,
-                             along  * 3.5 - sheenScroll * 0.55 + seed * 2.1);
+    float2 sheenUV2 = float2(radial * 3.8 + sheenScroll * 0.8,
+                             along  * 2.2 - sheenScroll * 0.55 + seed * 2.1);
     float sheen2 = fbm(sheenUV2);
     float wetSheen = saturate((sheen1 * 0.62 + sheen2 * 0.38) * 1.65 - 0.62) * skeleton;
 
     //========================================
     // 3) 暗血静脉
     //========================================
-    float vein = fbm(float2(radial * 8.0 + seed * 3.7, along * 14.0));
+    float vein = fbm(float2(radial * 4.0 + seed * 3.7, along * 5.5));
     vein = saturate(vein * 1.15 - 0.35);
     float veinMask = smoothstep(0.55, 0.85, vein);
 
@@ -167,8 +167,8 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0, float4 vertexColor : COLOR
     // 4) 翼下血液汇集
     //========================================
     float poolMask = smoothstep(0.55, 0.95, along);
-    poolMask *= 0.55 + 0.45 * fbm(float2(radial * 7.0 + seed * 4.3,
-                                         along  * 4.0 + uTime * 0.30));
+    poolMask *= 0.55 + 0.45 * fbm(float2(radial * 3.5 + seed * 4.3,
+                                         along  * 2.8 + uTime * 0.22));
     poolMask *= smoothstep(0.45, 0.95, radial);
 
     //========================================

@@ -127,9 +127,10 @@ float4 PixelShaderFunction(float2 coords : TEXCOORD0, float4 vertexColor : COLOR
     float innerEdge = saturate(1.0 - (a_r + a_l + a_u + a_d) * 0.25);
     innerEdge = smoothstep(0.0, 0.6, innerEdge);
 
-    // 沿身体竖向流动的"皇家纹路"——模拟果冻内部能量带
-    float band = frac(coords.y * 6.0 - uTime * 1.2 + seed);
-    float bandMask = smoothstep(0.42, 0.50, band) * smoothstep(0.58, 0.50, band);
+    // 果冻内部散射光——两组斜向波叠加产生干涉纹，避免扫描线
+    float wave1 = sin(coords.y * 5.0 + coords.x * 2.5 - uTime * 0.9 + seed);
+    float wave2 = sin(coords.y * 3.5 - coords.x * 3.0 + uTime * 0.6 + seed * 2.1);
+    float bandMask = smoothstep(0.0, 0.45, saturate(wave1 * wave2 * 0.5 + 0.15));
 
     float3 result = color.rgb;
 
