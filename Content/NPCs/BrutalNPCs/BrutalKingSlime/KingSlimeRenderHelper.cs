@@ -218,9 +218,11 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalKingSlime
         private static readonly Vector3 BloodEdge = new Color(60, 0, 18).ToVector3();
         private static readonly Vector3 BloodHighlight = new Color(255, 200, 160).ToVector3();
 
-        //翅膀关节相对图片左上的像素位置（人工标定，对齐 Wing.png 中羽根接合点）
-        private const float WingPivotX = 80f;
-        private const float WingPivotY = 160f;
+        //翅膀关节相对图片左上的像素位置——基于 Wing.png(383x363) 实际像素扫描标定：
+        //最左实心像素在 (89,148)，关节核心区域 x=80~130 的最稠密行在 y=149，
+        //取稍稍偏内偏下的 (95,165) 落到羽毛会聚的"球关节"中心。
+        private const float WingPivotX = 95f;
+        private const float WingPivotY = 165f;
         //翅膀挂在史莱姆王本体上的"肩膀"偏移——本体中心向上向后侧
         private static Vector2 ShoulderOffset(NPC npc) => new Vector2(0f, -npc.height * 0.30f);
 
@@ -285,7 +287,12 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalKingSlime
             shader.Parameters["bloodEdge"]?.SetValue(BloodEdge);
             shader.Parameters["bloodHighlight"]?.SetValue(BloodHighlight);
 
-            Vector2 origin = new Vector2(WingPivotX, WingPivotY);
+            //右翼用关节锚点；左翼水平翻转后关节像素被映射到 (W - PivotX, PivotY)，
+            //因此左翼必须把 origin.X 换成 (tex.Width - PivotX)，否则锚点会跑到原图右侧（翼尖），
+            //导致左右两翼"重叠在一起"。
+            Vector2 originRight = new Vector2(WingPivotX, WingPivotY);
+            Vector2 originLeft = new Vector2(wingTex.Width - WingPivotX, WingPivotY);
+
             //配合羽尖金光，整体颜色乘子（vertexColor 进 shader 做调温）
             Color tint = Color.White * alpha;
             //暴怒模式略微偏冷血紫
@@ -296,15 +303,15 @@ namespace CalamityOverhaul.Content.NPCs.BrutalNPCs.BrutalKingSlime
             //=========================================
             shader.Parameters["seed"]?.SetValue(0f);
             shader.CurrentTechnique.Passes[0].Apply();
-            DrawSingleWing(spriteBatch, wingTex, shoulder, origin, scale,
+            DrawSingleWing(spriteBatch, wingTex, shoulder, originRight, scale,
                 flapStretchX, flapStretchY, wingAngle, false, tint);
 
             //=========================================
-            // 左翼（水平翻转）—— seed=0.7 让左右两翼血流相位错开
+            // 左翼（水平翻转 + 镜像 origin）—— seed=0.73 让左右两翼血流相位错开
             //=========================================
             shader.Parameters["seed"]?.SetValue(0.73f);
             shader.CurrentTechnique.Passes[0].Apply();
-            DrawSingleWing(spriteBatch, wingTex, shoulder, origin, scale,
+            DrawSingleWing(spriteBatch, wingTex, shoulder, originLeft, scale,
                 flapStretchX, flapStretchY, wingAngle, true, tint);
 
             //=========================================
